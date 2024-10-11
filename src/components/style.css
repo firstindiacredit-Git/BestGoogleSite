@@ -1,0 +1,95 @@
+#___gcse_0 {
+  /* background-color: !important; */
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  -webkit-backdrop-filter: blur(5px) !important;
+  backdrop-filter: blur(5px) !important;
+  padding: 0.5rem 0.8rem !important;
+  transition: all 300ms !important;
+  border: 1px solid gray !important;
+  border-radius: 5rem !important;
+  width: 40% !important;
+
+  &:focus {
+    background-color: #272728 !important;
+  }
+}
+
+.dark .gsc-control-cse {
+  background-color: transparent !important;
+  color: black !important;
+  border: 1px solid white !important;
+}
+
+.dark .gsc-completion-container {
+  background-color: #161d2c !important;
+  color: white !important;
+  border-radius: 0.5rem !important;
+  border: none !important;
+  padding: 1rem 1rem !important;
+
+  &:hover {
+    background-color: #161d2c !important;
+    color: white !important;
+  }
+}
+
+.gsc-input-box {
+  border-radius: 50px 0 0 50px !important;
+  background-color: rgb(252, 250, 250) !important;
+  padding: 4px 1rem !important;
+  border: none !important;
+}
+
+.dark .gsc-input-box {
+  background-color: #060d1c !important;
+}
+
+.dark #gs_tti50 input {
+  background-color: #060d1c !important;
+  color: white !important;
+}
+
+#gs_tti50 input {
+  background-color: rgb(252, 250, 250) !important;
+  color: black !important;
+}
+
+.gsc-search-button .gsc-search-button-v2 {
+  background-color: rgb(252, 250, 250) !important;
+  padding: 14px 1.8rem !important;
+  border-radius: 0 50px 50px 0 !important;
+  border: none !important;
+  transition: all 300ms !important;
+
+  &:hover {
+    background-color: #ffffff !important;
+  }
+}
+
+.gsc-search-button .gsc-search-button-v2 svg {
+  fill: black !important;
+}
+
+.dark .gsc-search-button .gsc-search-button-v2 svg {
+  fill: rgb(255, 255, 255) !important;
+}
+
+.dark .gsc-search-button .gsc-search-button-v2 {
+  background-color: #060d1c !important;
+
+  &:hover {
+    background-color: #464d5c !important;
+  }
+}
+
+.table.gsc-search-box td.gsc-input {
+  padding-right: 0px !important;
+}
+
+.gsc-control-searchbox-only {
+  margin-top: 3px !important;
+}
+
+.gsc-search-button {
+  margin-left: -12px !important;
+}
