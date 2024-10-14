@@ -78,11 +78,7 @@ function SearchPage() {
         <div className="flex flex-col items-center">
           {/* Google Logo */}
           <img
-            src={
-              isDarkMode
-                ? "../src/assets/GoogleBlack.png"
-                : "../src/assets/GoogleWhite.png"
-            }
+            src={isDarkMode ? "GoogleBlack.png" : "GoogleWhite.png"}
             alt="Google Logo"
             className="m-auto mb-4 h-8"
           />
@@ -91,7 +87,7 @@ function SearchPage() {
         </div>
 
         {/* Search Filters */}
-        <div className="flex justify-center space-x-6 mt-2 mb-2">
+        {/* <div className="flex justify-center space-x-6 mt-2 mb-2">
           {["All", "Images", "Videos", "News", "Maps"].map((filter) => (
             <button
               key={filter}
@@ -100,7 +96,7 @@ function SearchPage() {
               {filter}
             </button>
           ))}
-        </div>
+        </div> */}
 
         <div>
           <AnimatedTooltipPreview />

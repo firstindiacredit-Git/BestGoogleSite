@@ -115,7 +115,7 @@ function Notepad() {
 
   return (
     <div className="bg-transparent p-8 mb-4 flex">
-      <div className="bg-transparent border shadow-2xl my-4 rounded-lg p-6 w-[35%] h-[8%]">
+      <div className="bg-white/30 backdrop-blur-lg border shadow-2xl my-4 rounded-lg p-6 w-[35%] h-[8%]">
         <h2 className="text-xl font-semibold mb-4">Notepad</h2>
         {error && <p className="text-red-500">{error}</p>}{" "}
         {/* Display error messages */}
