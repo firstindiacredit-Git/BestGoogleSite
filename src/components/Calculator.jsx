@@ -32,7 +32,7 @@ function Calculator() {
       {/* Calculator */}
       <div className="mb-2">
         <h2 className="text-xl font-semibold mb-2">Calculator</h2>
-        <div className="bg-transparent border shadow-xl my-4 rounded-lg p-6 w-[35%] ml-[10px] h-[8%] dark:text-white">
+        <div className="bg-white/10 backdrop-blur-lg border shadow-xl my-4 rounded-lg p-6 w-[35%] ml-[10px] h-[8%] dark:text-white">
           <div className="mb-4 text-right text-gray-700 dark:text-gray-300">
             <div className="text-xl">{calcInput || "0"}</div>
             <div className="text-3xl font-bold">{calcResult || "0"}</div>

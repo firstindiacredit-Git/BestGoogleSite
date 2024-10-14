@@ -12,6 +12,8 @@ function DraggableDropdown({
   toggleDropdown,
   isOpen,
   fetchLinks,
+  cachedLinks, // Accept cachedLinks as a prop
+  setCachedLinks, // Accept setCachedLinks to update the cached links
 }) {
   const [links, setLinks] = useState([]);
   const [loadingLinks, setLoadingLinks] = useState(false);
@@ -39,23 +41,33 @@ function DraggableDropdown({
   // Fetch links when the dropdown is open
   useEffect(() => {
     if (isOpen) {
-      setLoadingLinks(true);
-      setError(null);
-      fetchLinks(category)
-        .then((fetchedLinks) => {
-          setLinks(fetchedLinks);
-        })
-        .catch((error) => {
-          console.error("Error fetching links: ", error);
-          setError("Failed to load links.");
-        })
-        .finally(() => {
-          setLoadingLinks(false);
-        });
+      // Check if links are already cached
+      if (cachedLinks[category]) {
+        setLinks(cachedLinks[category]);
+      } else {
+        setLoadingLinks(true);
+        setError(null);
+        fetchLinks(category)
+          .then((fetchedLinks) => {
+            setLinks(fetchedLinks);
+            // Cache the fetched links
+            setCachedLinks((prev) => ({
+              ...prev,
+              [category]: fetchedLinks,
+            }));
+          })
+          .catch((error) => {
+            console.error("Error fetching links: ", error);
+            setError("Failed to load links.");
+          })
+          .finally(() => {
+            setLoadingLinks(false);
+          });
+      }
     } else {
       setLinks([]); // Clear links when dropdown is closed
     }
-  }, [isOpen, fetchLinks, category]);
+  }, [isOpen, fetchLinks, category, cachedLinks, setCachedLinks]);
 
   return (
     <div className="relative">
@@ -83,7 +95,7 @@ function DraggableDropdown({
                 style={{ zIndex: 999, width: "50rem" }}
               >
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-lg text-black  font-semibold">
+                  <h2 className="text-lg text-black font-semibold">
                     Related Links
                   </h2>
                   <button
@@ -98,7 +110,7 @@ function DraggableDropdown({
                 ) : error ? (
                   <p className="text-sm text-red-500">{error}</p>
                 ) : links.length > 0 ? (
-                  <div className="pl-4 w-48 ">
+                  <div className="pl-4 w-48">
                     {links.map((link) => (
                       <div
                         key={link.id}
@@ -142,6 +154,8 @@ DraggableDropdown.propTypes = {
   toggleDropdown: PropTypes.func.isRequired,
   isOpen: PropTypes.bool.isRequired,
   fetchLinks: PropTypes.func.isRequired,
+  cachedLinks: PropTypes.object.isRequired, // Prop type for cachedLinks
+  setCachedLinks: PropTypes.func.isRequired, // Prop type for setCachedLinks
 };
 
 // Main Component
@@ -151,6 +165,7 @@ function ShowLinks() {
   const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [error, setError] = useState(null);
+  const [cachedLinks, setCachedLinks] = useState({}); // State for cached links
 
   // Fetch categories from Firestore
   const fetchCategories = async () => {
@@ -163,7 +178,6 @@ function ShowLinks() {
         ...doc.data(),
       }));
 
-      // Debugging log to see the fetched categories
       console.log("Fetched categories: ", fetchedCategories);
       if (fetchedCategories.length === 0) {
         console.warn("No categories found in Firestore.");
@@ -264,6 +278,8 @@ function ShowLinks() {
               toggleDropdown={() => toggleDropdown(index)}
               isOpen={isOpen === index}
               fetchLinks={fetchLinks}
+              cachedLinks={cachedLinks} // Pass cachedLinks to DraggableDropdown
+              setCachedLinks={setCachedLinks} // Pass setCachedLinks to DraggableDropdown
             />
           );
         })
