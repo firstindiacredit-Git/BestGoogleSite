@@ -55,7 +55,7 @@ function AnimatedTooltip({ items }) {
           className="text-center bg-transparent rounded-lg transition-transform transform hover:scale-105 group"
         >
           <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <h3 className="text-md font-semibold text-slate-500  mb-2 w-16  transition-all duration-300 transform group-hover:translate-y-1 group-hover:translate-x-1">
+            <h3 className="text-md font-semibold   mb-2 w-16  transition-all duration-300 transform group-hover:translate-y-1 group-hover:translate-x-1">
               {person.name}
             </h3>
             {/* <p className="text-sm text-gray-500 group-hover:text-gray-100 group-hover:shadow-lg group-hover:shadow-gray-500 transition-all duration-300">

@@ -200,6 +200,7 @@ function AddLinks() {
       <Sidebar />
       <div className="flex-1">
         <Header />
+        <h1 className="text-4xl text-center  font-bold">ADD LINKS</h1>
         <div className="p-4 w-[70%] m-auto">
           {/* Add Bookmark Card */}
           <div className="bg-white shadow-md rounded-lg p-4 mb-4">

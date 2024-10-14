@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { LuLayoutDashboard } from "react-icons/lu";
 import { MdOutlineAddLink } from "react-icons/md";
+import { LuUser2 } from "react-icons/lu";
 import { IoSettingsOutline } from "react-icons/io5";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth, db } from "../../firebase"; // Adjust the import path according to your project structure
+import { auth, db } from "../../firebase";
 import { doc, getDoc } from "firebase/firestore";
 
 export default function Sidebar() {
@@ -59,10 +60,10 @@ export default function Sidebar() {
       </div>
       <nav className="mt-4">
         <ul>
-          <li className="p-4 mx-10">
+          <li className="p-4  mx-10">
             <Link
               to="/admin/dashboard"
-              className="hover:bg-gray-700 p-2 flex rounded"
+              className="hover:bg-gray-700 p-2  flex rounded"
             >
               <LuLayoutDashboard className="mt-1 mr-1" />
               Dashboard
@@ -73,6 +74,7 @@ export default function Sidebar() {
               to="/admin/users"
               className="hover:bg-gray-700 p-2 flex rounded"
             >
+              <LuUser2 className="mt-1 mr-1" />
               Users
             </Link>
           </li>
