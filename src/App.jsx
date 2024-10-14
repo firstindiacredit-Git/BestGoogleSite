@@ -1,6 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-// import Header from "./components/Header";
+
 import SearchPage from "./components/SearchPage.jsx";
 import AddList from "./components/Calculator.jsx";
 import Signin from "./components/Signup/signin.jsx";
@@ -14,7 +14,6 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* <Route path="/" element={<Header />} /> */}
         <Route path="/" element={<SearchPage />} />
         <Route path="/AddList" element={<AddList />} />
         <Route path="/Signin" element={<Signin />} />
@@ -23,8 +22,6 @@ function App() {
         <Route path="/admin/login" element={<Login />} />
         <Route path="/admin/users" element={<Users />} />
         <Route path="/admin/dashboard" element={<Dashboard />} />
-
-        {/* Additional routes for search filters like Images, News, etc. */}
       </Routes>
     </Router>
   );
