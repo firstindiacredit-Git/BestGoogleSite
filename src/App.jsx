@@ -1,14 +1,14 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 // import Header from "./components/Header";
-import SearchPage from "./components/SearchPage";
-import AddList from "./components/Calculator";
-import Signin from "./components/Signup/signin";
-import Signup from "./components/Signup/signup";
-import AddLinks from "./components/Admin/AddLinks";
-// import Header from "./components/Admin/Header";
-import Dashboard from "./components/Admin/Dashboard";
-import Login from "./components/Admin/Login";
+import SearchPage from "./components/SearchPage.jsx";
+import AddList from "./components/Calculator.jsx";
+import Signin from "./components/Signup/signin.jsx";
+import Signup from "./components/Signup/signup.jsx";
+import AddLinks from "./components/Admin/AddLinks.jsx";
+import Dashboard from "./components/Admin/Dashboard.jsx";
+import Login from "./components/Admin/Login.jsx";
+import Users from "./components/Admin/Users.jsx";
 
 function App() {
   return (
@@ -21,7 +21,7 @@ function App() {
         <Route path="/Signup" element={<Signup />} />
         <Route path="/admin/addlinks" element={<AddLinks />} />
         <Route path="/admin/login" element={<Login />} />
-
+        <Route path="/admin/users" element={<Users />} />
         <Route path="/admin/dashboard" element={<Dashboard />} />
 
         {/* Additional routes for search filters like Images, News, etc. */}

@@ -69,7 +69,10 @@ export default function Sidebar() {
             </Link>
           </li>
           <li className="p-4 mx-10">
-            <Link to="/users" className="hover:bg-gray-700 p-2 flex rounded">
+            <Link
+              to="/admin/users"
+              className="hover:bg-gray-700 p-2 flex rounded"
+            >
               Users
             </Link>
           </li>

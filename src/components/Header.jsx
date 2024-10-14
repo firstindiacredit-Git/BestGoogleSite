@@ -59,14 +59,12 @@ const Header = ({ isDarkMode, toggleTheme }) => {
           )}
         </button>
 
-        {/* If user is logged in, show avatar, otherwise show Sign In/Sign Up */}
         {user ? (
           <div className="relative">
             <div
               onClick={panelClicker}
               className="flex items-center cursor-pointer"
             >
-              {/* User Avatar */}
               <img
                 src={user.photoURL || "/default-avatar.png"}
                 alt="User Avatar"
@@ -74,7 +72,6 @@ const Header = ({ isDarkMode, toggleTheme }) => {
               />
             </div>
 
-            {/* Dropdown Menu for user actions */}
             {panel && (
               <div className="absolute right-0 mt-2 min-w-48 py-2 bg-transparent shadow-md rounded-lg text-sm transition-colors duration-200 ">
                 <div className="px-4 py-2 text-center">
