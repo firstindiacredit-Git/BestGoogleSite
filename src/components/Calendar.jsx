@@ -45,7 +45,7 @@ const Calendar = () => {
       daysArray.push(
         <div
           key={day}
-          className={`day w-9 h-9 gap-1 flex items-center rounded-[50%] justify-center border border-gray-200 ${
+          className={`day w-11 h-11 gap-2 flex items-center rounded-[50%] justify-center border border-gray-200 ${
             isToday ? "bg-blue-300" : ""
           } ${isSunday ? "text-red-500 font-bold" : " "}`}
         >
@@ -58,7 +58,7 @@ const Calendar = () => {
   };
 
   return (
-    <div className="w-[35%] ml-[500px] h-[450px] bg-white/10 backdrop-blur-lg mt-20 p-4 border border-gray-300 rounded-lg shadow-lg">
+    <div className="max-w-sm m-auto w-full justify-between  h-[460px] bg-white/10 backdrop-blur-lg mt-12 p-4 border border-gray-300 rounded-lg shadow-lg">
       <div className="header flex justify-between items-center mb-4">
         <button
           className="bg-gray-200 font-bold dark:bg-transparent border p-2 rounded"
@@ -76,9 +76,9 @@ const Calendar = () => {
           Next
         </button>
       </div>
-      <div className="days grid grid-cols-7 gap-2">
+      <div className="days grid grid-cols-7 gap-1 md:gap-2">
         {days.map((day) => (
-          <div key={day} className="day text-center font-semibold ">
+          <div key={day} className="day text-center font-semibold">
             {day}
           </div>
         ))}

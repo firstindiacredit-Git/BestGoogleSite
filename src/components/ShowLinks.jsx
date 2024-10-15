@@ -82,25 +82,25 @@ function DraggableDropdown({
         >
           <button
             onClick={toggleDropdown}
-            className="bg-blue-500 text-white w-52 px-10 py-2 rounded focus:outline-none"
+            className="bg-blue-500 text-white md:w-56 px-10 py-2 rounded focus:outline-none"
           >
             {category}
           </button>
 
           {isOpen && (
-            <div className="fixed inset-0 bg-black bg-opacity-40 z-40 flex items-center justify-center">
+            <div className="fixed inset-0 bg-black bg-opacity-40 w-full z-40 flex items-center justify-center">
               <div
                 ref={modalRef}
                 className="relative backdrop-blur-lg bg-white/30 text-black dark:text-white rounded-lg shadow-lg p-6 transform transition-transform duration-300 scale-90"
-                style={{ zIndex: 999, width: "50rem" }}
+                style={{ zIndex: 999, width: "90%", maxWidth: "50rem" }}
               >
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-lg text-black font-semibold">
+                <div className="flex justify-between  items-center mb-4">
+                  <h2 className="text-lg text-black w-full font-semibold">
                     Related Links
                   </h2>
                   <button
                     onClick={toggleDropdown}
-                    className="bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-black px-3 py-1 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 transition"
+                    className="text-black border bg-transparent px-3 py-1 rounded-lg transition"
                   >
                     Close
                   </button>
@@ -110,7 +110,7 @@ function DraggableDropdown({
                 ) : error ? (
                   <p className="text-sm text-red-500">{error}</p>
                 ) : links.length > 0 ? (
-                  <div className="pl-4 w-48">
+                  <div className=" sm:grid-cols-2 gap-4">
                     {links.map((link) => (
                       <div
                         key={link.id}
@@ -178,14 +178,8 @@ function ShowLinks() {
         ...doc.data(),
       }));
 
-      console.log("Fetched categories: ", fetchedCategories);
-      if (fetchedCategories.length === 0) {
-        console.warn("No categories found in Firestore.");
-      }
-
       setCategories(fetchedCategories);
     } catch (error) {
-      console.error("Error fetching categories: ", error);
       setError(error.message || "Failed to load categories.");
     } finally {
       setLoadingCategories(false);
@@ -198,39 +192,20 @@ function ShowLinks() {
 
   // Fetch links for a specific category
   const fetchLinks = async (newCategory) => {
-    console.log("Fetching links for category: ", newCategory);
-
-    // Validate newCategory
-    if (
-      !newCategory ||
-      typeof newCategory !== "string" ||
-      newCategory.trim() === ""
-    ) {
-      console.error("Invalid category name provided:", newCategory);
-      return []; // Return an empty array if categoryName is not valid
-    }
-
     try {
       const linksQuery = query(
         collection(db, "links"),
         where("category", "==", newCategory)
       );
       const querySnapshot = await getDocs(linksQuery);
-
-      console.log("Query Snapshot: ", querySnapshot); // Check the snapshot
-
-      const fetchedLinks = querySnapshot.docs.map((doc) => ({
+      return querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
         logoUrl: `https://logo.clearbit.com/${
           new URL(doc.data().link).hostname
         }`, // Adjusted syntax for logoUrl to use the correct field
       }));
-
-      console.log("Fetched links for category: ", newCategory, fetchedLinks);
-      return fetchedLinks;
     } catch (error) {
-      console.error("Error fetching links: ", error);
       setError("Failed to load links.");
       return [];
     }
@@ -245,14 +220,7 @@ function ShowLinks() {
   };
 
   return (
-    <div className="flex flex-wrap items-center bg-transparent justify-center space-x-4">
-      <button
-        onClick={toggleDraggable}
-        className="flex left-44 bg-transparent p-2 rounded-full shadow-lg"
-      >
-        {isDraggable ? <FaLockOpen size={20} /> : <FaLock size={20} />}
-      </button>
-
+    <div className="flex flex-wrap items-center justify-center space-x-4">
       {loadingCategories ? (
         <p>Loading categories...</p>
       ) : error ? (
@@ -261,14 +229,7 @@ function ShowLinks() {
         categories.map((categoryItem, index) => {
           const newCategory = categoryItem.newCategory || ""; // Ensure this matches your Firestore document structure
 
-          // Validate the category name
-          if (!newCategory || newCategory.trim() === "") {
-            console.warn(
-              "Category name is empty or whitespace for item:",
-              categoryItem
-            );
-            return null;
-          }
+          if (!newCategory || newCategory.trim() === "") return null;
 
           return (
             <DraggableDropdown
@@ -278,12 +239,18 @@ function ShowLinks() {
               toggleDropdown={() => toggleDropdown(index)}
               isOpen={isOpen === index}
               fetchLinks={fetchLinks}
-              cachedLinks={cachedLinks} // Pass cachedLinks to DraggableDropdown
-              setCachedLinks={setCachedLinks} // Pass setCachedLinks to DraggableDropdown
+              cachedLinks={cachedLinks}
+              setCachedLinks={setCachedLinks}
             />
           );
         })
       )}
+      <button
+        onClick={toggleDraggable}
+        className="flex left-44 bg-transparent p-2 rounded-full shadow-lg"
+      >
+        {isDraggable ? <FaLockOpen size={20} /> : <FaLock size={20} />}
+      </button>
     </div>
   );
 }

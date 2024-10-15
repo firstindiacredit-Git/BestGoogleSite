@@ -107,7 +107,7 @@ const SignIn = () => {
           >
             <div className="text-center justify-center gap-2 flex">
               <img
-                src="./src/assets/google.png"
+                src="/google.png"
                 className="w-5 h-5 mt-1"
                 alt="Google logo"
               />

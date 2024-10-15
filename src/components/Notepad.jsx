@@ -114,8 +114,8 @@ function Notepad() {
   };
 
   return (
-    <div className="bg-transparent p-8 mb-4 flex">
-      <div className="bg-white/10 backdrop-blur-lg border shadow-2xl my-4 rounded-lg p-6 w-[35%] h-[8%]">
+    <div className="bg-transparent m-auto mb-4 flex justify-start">
+      <div className="bg-white/10 backdrop-blur-lg border shadow-2xl m-auto my-4 rounded-lg p-6 w-full h-auto">
         <h2 className="text-xl font-semibold mb-4">Notepad</h2>
         {error && <p className="text-red-500">{error}</p>}{" "}
         {/* Display error messages */}
@@ -129,7 +129,7 @@ function Notepad() {
         <div className="flex justify-between mb-4">
           <button
             onClick={saveNote}
-            className="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600 transition duration-200"
+            className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-200"
           >
             {editingIndex !== null ? "Update Note" : "Save Note"}
           </button>
@@ -137,8 +137,11 @@ function Notepad() {
         <h3 className="text-lg font-semibold mb-2">Notes List</h3>
         <ul>
           {notes.map((note, index) => (
-            <li key={note.id} className="flex justify-between mb-2">
-              <span>{note.text}</span>
+            <li
+              key={note.id}
+              className="flex justify-between mb-2 items-center"
+            >
+              <span className="flex-1">{note.text}</span>
               <div>
                 <button
                   onClick={() => editNote(index)}

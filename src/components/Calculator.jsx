@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 function Calculator() {
   // State for Calculator
@@ -22,22 +22,16 @@ function Calculator() {
     }
   };
 
-  // Handle dropdown selection
-  const handleDropdownChange = (e) => {
-    setSelectedLink(e.target.value);
-  };
-
   return (
-    <div className="min-h-[77vh] bg-transparent p-8">
+    <div className="min-h w-full m-auto mt-12 bg-transparent ">
       {/* Calculator */}
-      <div className="mb-2">
-        <h2 className="text-xl font-semibold mb-2">Calculator</h2>
-        <div className="bg-white/10 backdrop-blur-lg border shadow-xl my-4 rounded-lg p-6 w-[35%] ml-[10px] h-[8%] dark:text-white">
-          <div className="mb-4 text-right text-gray-700 dark:text-gray-300">
+      <div className="mb-4 w-full">
+        <div className="bg-white/10 backdrop-blur-lg border shadow-xl my-4 rounded-lg p-4 sm:p-6 w-full max-w-full">
+          <div className="mb-4 text-right ">
             <div className="text-xl">{calcInput || "0"}</div>
             <div className="text-3xl font-bold">{calcResult || "0"}</div>
           </div>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-4 text-white gap-2">
             {["7", "8", "9", "/"].map((val) => (
               <button
                 key={val}
