@@ -247,7 +247,7 @@ function ShowLinks() {
       )}
       <button
         onClick={toggleDraggable}
-        className="flex left-44 bg-transparent p-2 rounded-full shadow-lg"
+        className="bg-transparent rounded-full shadow-lg"
       >
         {isDraggable ? <FaLockOpen size={20} /> : <FaLock size={20} />}
       </button>

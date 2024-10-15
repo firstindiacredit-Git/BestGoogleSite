@@ -8,8 +8,7 @@ import Calendar from "./Calendar";
 import ImageUploader from "./ImageUploader";
 import PopularBookmarks from "./PopularBookmarks";
 
-import { PiDotsThreeOutlineVerticalBold } from "react-icons/pi";
-
+import { TbGridDots } from "react-icons/tb";
 import "./style.css";
 
 function SearchPage() {
@@ -77,6 +76,42 @@ function SearchPage() {
     >
       <Header isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
       <div className="mt-4">
+        {/* Icon to show options */}
+        <div
+          onClick={handleIconClick}
+          className="cursor-pointer flex m-2 mr-3 justify-end"
+        >
+          <TbGridDots className="w-8 h-8 hover:border border-slate-400 p-1 m-2 shadow-lg rounded-[50%]" />
+        </div>
+
+        {/* Conditionally show buttons */}
+        {showButtons && (
+          <div className="absolute right-10 top-20 bg-white/10 p-4 shadow-lg rounded-md">
+            <div className="flex flex-col space-y-2">
+              <label
+                className="cursor-pointer bg-blue-500 text-white p-2 rounded text-center"
+                htmlFor="image-upload"
+              >
+                Change Image
+              </label>
+              <input
+                id="image-upload"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
+              />
+
+              <button
+                onClick={removeBackground}
+                className="bg-red-500 text-white p-2 rounded text-center"
+              >
+                Remove Image
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="flex flex-col items-center">
           <img
             src={isDarkMode ? "GoogleBlack.png" : "GoogleWhite.png"}
@@ -86,40 +121,8 @@ function SearchPage() {
           <div className="gcse-searchbox-only" />
         </div>
 
-        <div>
+        <div className="mt-4">
           <AnimatedTooltipPreview />
-          <div
-            onClick={handleIconClick}
-            className="cursor-pointer m-auto w-10 flex justify-center"
-          >
-            <PiDotsThreeOutlineVerticalBold />
-          </div>
-
-          {showButtons && (
-            <div className="flex flex-col items-center rounded-lg border p-3 mt-2 gap-2 w-full max-w-xs mx-auto">
-              <button
-                className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 w-full"
-                onClick={() =>
-                  document.getElementById("backgroundInput").click()
-                }
-              >
-                Change Background
-              </button>
-              <input
-                type="file"
-                id="backgroundInput"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="hidden"
-              />
-              <button
-                onClick={removeBackground}
-                className="bg-red-500 text-white p-2 rounded hover:bg-red-600 w-full"
-              >
-                Remove Background
-              </button>
-            </div>
-          )}
 
           <h1 className="text-2xl py-3 font-bold text-center">COMPONENTS</h1>
           <ShowLinks />
@@ -130,8 +133,9 @@ function SearchPage() {
               <AddList />
               <Notepad />
             </div>
-            <div className="w-full flex p-2">
+            <div className="w-full md-w-1/flex p-2">
               <PopularBookmarks />
+              
             </div>
             <div className="w-full md:w-1/2 lg:w-1/2 p-2">
               <ImageUploader />

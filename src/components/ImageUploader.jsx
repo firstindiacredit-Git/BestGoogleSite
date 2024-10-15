@@ -75,7 +75,7 @@ function ImageUploader() {
           <img
             src={imageUrl}
             alt="Uploaded"
-            className="w-[70%] h-80 ml-20 object-cover border border-gray-300 rounded-lg cursor-pointer"
+            className="w-full h-96 object-cover border border-gray-300 rounded-lg cursor-pointer"
             onClick={handleImageClick} // Open options on image click
           />
         </div>

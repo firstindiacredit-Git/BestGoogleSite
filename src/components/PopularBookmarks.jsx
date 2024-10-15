@@ -9,6 +9,7 @@ import {
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { MdAdd, MdDelete } from "react-icons/md";
+import Weather from "./Weather";
 
 // Pre-defined static bookmarks
 const initialBookmarks = {
@@ -163,7 +164,7 @@ const Bookmarks = () => {
         {/* Travel Bookmarks Section */}
         <section className="bg-white/10 p-4 rounded-lg shadow">
           <h3 className="text-xl font-semibold mb-4">Travel</h3>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             {renderBookmarks("Travel")}
           </div>
         </section>
@@ -171,8 +172,13 @@ const Bookmarks = () => {
         {/* Shopping Bookmarks Section */}
         <section className="bg-white/10 p-4 rounded-lg shadow">
           <h3 className="text-xl font-semibold mb-4">Shopping</h3>
-          <div className="grid grid-row-2 gap-2">
+          <div className="grid grid-row-2 gap-2 justify-start">
             {renderBookmarks("Shopping")}
+          </div>
+        </section>
+        <section className="bg-white/10 p-4 rounded-lg shadow">
+                    <div className="grid  gap-2 justify-start">
+            <Weather />
           </div>
         </section>
       </div>

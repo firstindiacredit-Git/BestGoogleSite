@@ -115,7 +115,7 @@ function Notepad() {
 
   return (
     <div className="bg-transparent m-auto mb-4 flex justify-start">
-      <div className="bg-white/10 backdrop-blur-lg border shadow-2xl m-auto my-4 rounded-lg p-6 w-full h-auto">
+      <div className="bg-white/10 backdrop-blur-lg border shadow-2xl m-auto my-4 rounded-lg p-6 w-full h-96">
         <h2 className="text-xl font-semibold mb-4">Notepad</h2>
         {error && <p className="text-red-500">{error}</p>}{" "}
         {/* Display error messages */}
@@ -124,7 +124,7 @@ function Notepad() {
           onChange={handleNoteChange}
           placeholder="Write your notes here..."
           rows="4"
-          className="border border-gray-300 p-2 rounded-xl bg-transparent w-full mb-4 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border border-gray-300 p-2 h-auto rounded-xl bg-transparent w-full mb-4 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <div className="flex justify-between mb-4">
           <button

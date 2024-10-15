@@ -58,7 +58,7 @@ const Calendar = () => {
   };
 
   return (
-    <div className="max-w-sm m-auto w-full justify-between  h-[460px] bg-white/10 backdrop-blur-lg mt-12 p-4 border border-gray-300 rounded-lg shadow-lg">
+    <div className="max-w-sm m-auto w-full justify-between  h-[460px] bg-white/10 backdrop-blur-lg mt-1 p-4 border border-gray-300 rounded-lg shadow-lg">
       <div className="header flex justify-between items-center mb-4">
         <button
           className="bg-gray-200 font-bold dark:bg-transparent border p-2 rounded"
