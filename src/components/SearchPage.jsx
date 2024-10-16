@@ -122,7 +122,7 @@ function SearchPage() {
           <AnimatedTooltipPreview />
         </div>
 
-        <div className="mt-[13vh]">
+        <div className="mt-[11vh]">
           <h1 className="text-2xl py-3 font-bold text-center">COMPONENTS</h1>
           <ShowLinks />
 
