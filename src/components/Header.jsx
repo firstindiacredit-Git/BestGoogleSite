@@ -17,7 +17,7 @@ const Header = ({ isDarkMode, toggleTheme }) => {
           displayName: currentUser.displayName,
           email: currentUser.email,
           photoURL: currentUser.photoURL,
-          uid: currentUser.uid,
+          // uid: currentUser.uid,
         };
         setUser(userProfile); 
       } else {
@@ -89,7 +89,7 @@ const Header = ({ isDarkMode, toggleTheme }) => {
                 <div className="px-4 py-2 text-center">
                   <p className="font-bold">{user.displayName || "User"}</p>
                   <p>{user.email}</p>
-                  <p className="text-xs text-gray-500">UID: {user.uid}</p>
+                  {/* <p className="text-xs text-gray-500">UID: {user.uid}</p> */}
                 </div>
                 <hr className="my-2 border-gray-200 dark:border-gray-700" />
                 <button
