@@ -112,17 +112,17 @@ function SearchPage() {
           </div>
         )}
 
-        <div className="flex flex-col mt-[14vh] items-center">
+        <div className="flex flex-col mt-[1vh] items-center">
           <img
             src={isDarkMode ? "GoogleBlack.png" : "GoogleWhite.png"}
             alt="Google Logo"
-            className="mb-4 h-20"
+            className="mb-4 h-16"
           />
           <div className="gcse-searchbox-only" />
           <AnimatedTooltipPreview />
         </div>
 
-        <div className="mt-[9vh]">
+        <div className="mt-[13vh]">
           <h1 className="text-2xl py-3 font-bold text-center">COMPONENTS</h1>
           <ShowLinks />
 

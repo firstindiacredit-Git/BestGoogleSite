@@ -66,7 +66,7 @@ function AnimatedTooltip({ items }) {
             <img
               src={person.image}
               alt={person.name}
-              className="w-10 h-10 mx-auto mt-0 mb-2"
+              className="w-8 h-8 mx-auto mt-0 mb-2"
             />
           </a>
         </div>

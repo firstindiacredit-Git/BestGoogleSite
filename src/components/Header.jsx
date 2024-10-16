@@ -1,19 +1,31 @@
+// src/components/Header.js
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { signOut, onAuthStateChanged } from "firebase/auth";
-import { auth } from "../firebase";
+import { auth } from "../firebase"; 
 
 const Header = ({ isDarkMode, toggleTheme }) => {
   const [panel, setPanel] = useState(false);
-  const [user, setUser] = useState(null); // Ensure user state is declared here
+  const [user, setUser] = useState(null);
 
-  // Listen for authentication state changes
+ 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser); // Update the user state
+      if (currentUser) {
+       
+        const userProfile = {
+          displayName: currentUser.displayName,
+          email: currentUser.email,
+          photoURL: currentUser.photoURL,
+          uid: currentUser.uid,
+        };
+        setUser(userProfile); 
+      } else {
+        setUser(null); 
+      }
     });
 
-    return () => unsubscribe(); // Cleanup on unmount
+    return () => unsubscribe(); 
   }, []);
 
   const panelClicker = () => {
@@ -31,19 +43,19 @@ const Header = ({ isDarkMode, toggleTheme }) => {
 
   return (
     <header
-      className={`flex items-center justify-between p-3 transition-colors duration-300 backdrop-blur-lg ${
+      className={`flex items-center justify-between p-2 transition-colors duration-300 backdrop-blur-lg ${
         isDarkMode ? "bg-gray-700 text-white" : "bg-white/30 text-black"
       }`}
     >
       <div className="flex items-center space-x-2">
-        {/* Logo Area */}
+       
         <span className="text-green-500 dark:text-green-300">Best</span>
         <span className="text-red-500 dark:text-red-300">Google</span>
         <span className="text-yellow-500 dark:text-yellow-300">Sites</span>
       </div>
 
       <div className="flex items-center space-x-4">
-        {/* Theme Toggle Button */}
+       
         <button
           onClick={toggleTheme}
           className="mr-1 text-sm flex items-center space-x-1 transition-colors duration-200"
@@ -63,7 +75,7 @@ const Header = ({ isDarkMode, toggleTheme }) => {
           <div className="relative">
             <div
               onClick={panelClicker}
-              className="flex items-center cursor-pointer"
+              className="flex items-center mr-1 cursor-pointer"
             >
               <img
                 src={user.photoURL || "/default-avatar.png"}
@@ -73,17 +85,16 @@ const Header = ({ isDarkMode, toggleTheme }) => {
             </div>
 
             {panel && (
-              <div className="absolute right-0 mt-2 min-w-48 py-2 bg-transparent shadow-md rounded-lg text-sm transition-colors duration-200 ">
+              <div className="absolute right-0 mt-2 min-w-48 mr-10 py-2 bg-white/30 backdrop-blur-md shadow-md rounded-lg text-sm transition-colors duration-200">
                 <div className="px-4 py-2 text-center">
-                  <p className="font-bold text-gray-800 dark:text-white">
-                    {user.displayName || "User"}
-                  </p>
-                  <p className="text-white dark:text-gray-300">{user.email}</p>
+                  <p className="font-bold">{user.displayName || "User"}</p>
+                  <p>{user.email}</p>
+                  <p className="text-xs text-gray-500">UID: {user.uid}</p>
                 </div>
                 <hr className="my-2 border-gray-200 dark:border-gray-700" />
                 <button
                   onClick={handleSignOut}
-                  className="w-full text-left flex justify-center text-black px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
+                  className="w-full text-left flex justify-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
                 >
                   Sign Out
                 </button>
@@ -92,14 +103,14 @@ const Header = ({ isDarkMode, toggleTheme }) => {
           </div>
         ) : (
           <div className="flex space-x-2">
-            {/* Sign In Button */}
-            <Link to="./signin">
+           
+            <Link to="/signin">
               <button className="px-4 py-2 border border-blue-500 text-blue-500 rounded hover:bg-blue-500 hover:text-white transition-colors duration-200">
                 Sign In
               </button>
             </Link>
-            {/* Sign Up Button */}
-            <Link to="./signup">
+           
+            <Link to="/signup">
               <button className="px-4 py-2 border border-green-500 text-green-500 rounded hover:bg-green-500 hover:text-white transition-colors duration-200">
                 Sign Up
               </button>

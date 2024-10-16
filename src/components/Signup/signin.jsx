@@ -1,13 +1,14 @@
-// SignIn.js
+ 
 import React, { useState } from "react";
-import { auth, provider } from "../../firebase"; // Import Firebase config
-import { useAuth } from "../../hooks/useAuth"; // Custom hook for login
-import { signInWithPopup } from "firebase/auth"; // Firebase sign-in method
-import { useNavigate } from "react-router-dom"; // Navigation hook
-import Header from "../Header"; // Assume this is your custom Header component
+import { auth, provider } from "../../firebase";  
+import { useAuth } from "../../hooks/useAuth"; 
+import { signInWithPopup } from "firebase/auth";  
+import { useNavigate } from "react-router-dom";  
+import Header from "../Header";
+
 
 const SignIn = () => {
-  const { login } = useAuth(); // Assuming you have a login function in the hook
+  const { login } = useAuth();  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -16,21 +17,21 @@ const SignIn = () => {
 
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // Function to toggle between dark and light mode
+  
   const toggleTheme = () => {
     setIsDarkMode((prev) => !prev);
   };
 
-  // Email and password sign-in
+   
   const handleEmailSignIn = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError(""); // Clear any previous error
+    setError("");  
 
     try {
       await login(email, password);
       console.log("Sign-in successful!");
-      navigate("/"); // Redirect to homepage
+      navigate("/"); 
     } catch (err) {
       if (err.code === "auth/user-not-found") {
         setError("No user found with this email.");
@@ -39,7 +40,7 @@ const SignIn = () => {
       } else {
         setError("Failed to sign in: " + err.message);
       }
-      console.error(err); // Log the error for debugging
+      console.error(err); 
     } finally {
       setLoading(false);
     }

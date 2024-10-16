@@ -113,7 +113,6 @@ const Signup = () => {
           Sign up
         </p>
 
-        {/* Error message */}
         {error && (
           <div role="alert" aria-live="assertive">
             <p className="text-red-500">{error}</p>
@@ -209,7 +208,7 @@ const Signup = () => {
           // OTP Verification section
           <div>
             <p className="text-green-500 mb-2 text-sm max-w-sm mt-2 ">
-              Enter the OTP sent to your email.
+              Verification Link and OTP sent to your email.
             </p>
             <input
               type="text"

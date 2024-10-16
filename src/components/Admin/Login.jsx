@@ -47,7 +47,7 @@ const SignInPage = () => {
   }
 
   return (
-    <div className="flex items-center justify-center h-[80vh]">
+    <div className="flex items-center mt-11 justify-center h-[80vh]">
       <div className="max-w-md w-full mt-4 shadow-xl rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-neutral-50">
         <h2 className="font-bold text-xl text-neutral-800">Admin Sign In</h2>
         <p className="text-neutral-600 text-sm max-w-sm mt-2">
