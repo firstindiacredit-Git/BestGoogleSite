@@ -12,27 +12,36 @@ export default function Sidebar() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [dispName, setDispName] = useState("");
-  const [link, setLink] = useState("");
+  const [link, setLink] = useState("/default-avatar.png"); // Default avatar
   const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         const userDocRef = doc(db, "users", user.uid);
-        const userDocSnap = await getDoc(userDocRef);
+        try {
+          const userDocSnap = await getDoc(userDocRef);
 
-        if (userDocSnap.exists()) {
-          const userData = userDocSnap.data();
-          if (userData.role === "admin") {
-            setIsAdmin(true);
-            setLink(userData.photoURL || "/default-avatar.png");
-            setDispName(userData.displayName);
+          if (userDocSnap.exists()) {
+            const userData = userDocSnap.data();
+            if (userData.role === "admin") {
+              setIsAdmin(true);
+              setLink(userData.photoURL || "/default-avatar.png"); // Use default avatar if photoURL is not provided
+              setDispName(userData.displayName || "User"); // Default display name
+            } else {
+              navigate("../Admin/login"); // Redirect if user is not an admin
+            }
           } else {
-            navigate("../Admin/login");
+            console.error("User document does not exist");
+            setLoading(false); // Stop loading if document doesn't exist
           }
+        } catch (error) {
+          console.error("Error fetching user data: ", error);
         }
+      } else {
+        navigate("../Admin/login"); // Redirect if user is not logged in
       }
-      setLoading(false); // Set loading to false if user is not logged in or data is fetched
+      setLoading(false); // Set loading to false when done
     });
 
     return () => unsubscribe();
@@ -54,16 +63,14 @@ export default function Sidebar() {
         />
       </div>
       <div className="flex items-center p-2 bg-gray-700 rounded">
-        <span className=" m-auto justify-center w-auto flex">
-          {dispName || "User"}
-        </span>
+        <span className="m-auto justify-center w-auto flex">{dispName}</span>
       </div>
       <nav className="mt-4">
         <ul>
-          <li className="p-4  mx-10">
+          <li className="p-4 mx-10">
             <Link
               to="/admin/dashboard"
-              className="hover:bg-gray-700 p-2  flex rounded"
+              className="hover:bg-gray-700 p-2 flex rounded"
             >
               <LuLayoutDashboard className="mt-1 mr-1" />
               Dashboard

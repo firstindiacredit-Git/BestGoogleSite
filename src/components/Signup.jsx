@@ -71,6 +71,7 @@ const Signup = () => {
 
     try {
       await signInWithPopup(auth, provider);
+      navigate("/");
       alert("Successfully signed in with Google.");
     } catch (error) {
       setError(getErrorMessage(error.code));
