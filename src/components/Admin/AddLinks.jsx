@@ -196,7 +196,7 @@ function AddLinks() {
   }
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-FULL">
       <Sidebar />
       <div className="flex-1">
         <Header />
@@ -328,7 +328,7 @@ function AddLinks() {
             {newCategories.map((category) => (
               <div key={category.id} className="mb-2">
                 <button
-                  className="w-[79%] text-left bg-gray-200 p-2 rounded"
+                  className="w-[75%] text-left bg-gray-200 p-2 rounded"
                   onClick={() => toggleDropdown(category.newCategory)}
                 >
                   {category.newCategory}

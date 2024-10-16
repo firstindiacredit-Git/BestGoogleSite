@@ -53,15 +53,15 @@ export default function Users() {
       <div className="flex-1">
         <Header />
         <div className="p-6">
-          <h1 className="text-3xl font-bold mb-6 text-center">All Users</h1>
+          <h1 className="text-2xl font-bold mb-6 text-center">All Users</h1>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {users.map(({ id, avatarUrl, photoURL, displayName, email }) => (
-              <div key={id} className="bg-white shadow-md rounded-lg p-6">
+              <div key={id} className="bg-white shadow-md rounded-lg p-5">
                 <div className="text-center ">
                   <img
                     src={photoURL || "/default-avatar.png"}
                     alt="User Avatar"
-                    className="h-[70px] w-[70px] m-auto rounded-full border border-gray-300 dark:border-gray-600 transition"
+                    className="h-[60px] w-[60px] m-auto rounded-full border border-gray-300 dark:border-gray-600 transition"
                   />
                   <div className="text-xl font-semibold">
                     {displayName || "No Name"}
