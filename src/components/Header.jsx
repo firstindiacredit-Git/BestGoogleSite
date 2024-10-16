@@ -105,13 +105,13 @@ const Header = ({ isDarkMode, toggleTheme }) => {
           <div className="flex space-x-2">
            
             <Link to="/signin">
-              <button className="px-4 py-2 border border-blue-500 text-blue-500 rounded hover:bg-blue-500 hover:text-white transition-colors duration-200">
+              <button className="px-4 py-1 border border-blue-500 text-blue-500 rounded hover:bg-blue-500 hover:text-white transition-colors duration-200">
                 Sign In
               </button>
             </Link>
            
             <Link to="/signup">
-              <button className="px-4 py-2 border border-green-500 text-green-500 rounded hover:bg-green-500 hover:text-white transition-colors duration-200">
+              <button className="px-4 py-1 border border-green-500 text-green-500 rounded hover:bg-green-500 hover:text-white transition-colors duration-200">
                 Sign Up
               </button>
             </Link>
