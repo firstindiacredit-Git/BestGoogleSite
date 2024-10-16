@@ -32,7 +32,7 @@ const Header = ({ isDarkMode, toggleTheme }) => {
   return (
     <header
       className={`flex items-center justify-between p-3 transition-colors duration-300 backdrop-blur-lg ${
-        isDarkMode ? "bg-gray-700 text-white" : "bg-transparent text-black"
+        isDarkMode ? "bg-gray-700 text-white" : "bg-white/30 text-black"
       }`}
     >
       <div className="flex items-center space-x-2">

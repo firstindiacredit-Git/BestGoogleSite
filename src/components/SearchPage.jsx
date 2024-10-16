@@ -7,7 +7,7 @@ import AnimatedTooltipPreview from "./AnimatedTooltipPreview";
 import Calendar from "./Calendar";
 import ImageUploader from "./ImageUploader";
 import PopularBookmarks from "./PopularBookmarks";
-
+import Weather from "./Weather";
 import { TbGridDots } from "react-icons/tb";
 import "./style.css";
 
@@ -66,7 +66,7 @@ function SearchPage() {
   return (
     <div
       className={`${
-        isDarkMode ? "bg-gray-900 text-white" : "bg-white text-black"
+        isDarkMode ? "bg-gray-900 text-white" : "bg-zinc-100 text-black"
       } min-h-screen`}
       style={{
         backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",
@@ -86,10 +86,10 @@ function SearchPage() {
 
         {/* Conditionally show buttons */}
         {showButtons && (
-          <div className="absolute right-10 top-20 bg-white/10 p-4 shadow-lg rounded-md">
-            <div className="flex flex-col space-y-2">
+          <div className="absolute right-10 top-20 bg-white/10 p-4 w-80 mr-2 shadow-lg rounded-md">
+            <div className="flex flex-row  space-x-2">
               <label
-                className="cursor-pointer bg-blue-500 text-white p-2 rounded text-center"
+                className="cursor-pointer bg-blue-500 text-white p-1 w-28 rounded text-center"
                 htmlFor="image-upload"
               >
                 Change Image
@@ -104,7 +104,7 @@ function SearchPage() {
 
               <button
                 onClick={removeBackground}
-                className="bg-red-500 text-white p-2 rounded text-center"
+                className="bg-red-500 text-white p-1 w-32 rounded text-center"
               >
                 Remove Image
               </button>
@@ -112,18 +112,17 @@ function SearchPage() {
           </div>
         )}
 
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col mt-[14vh] items-center">
           <img
             src={isDarkMode ? "GoogleBlack.png" : "GoogleWhite.png"}
             alt="Google Logo"
-            className="mb-4 h-8"
+            className="mb-4 h-20"
           />
           <div className="gcse-searchbox-only" />
+          <AnimatedTooltipPreview />
         </div>
 
-        <div className="mt-4">
-          <AnimatedTooltipPreview />
-
+        <div className="mt-[13vh]">
           <h1 className="text-2xl py-3 font-bold text-center">COMPONENTS</h1>
           <ShowLinks />
 
@@ -135,10 +134,10 @@ function SearchPage() {
             </div>
             <div className="w-full md-w-1/flex p-2">
               <PopularBookmarks />
-              
             </div>
             <div className="w-full md:w-1/2 lg:w-1/2 p-2">
               <ImageUploader />
+              <Weather />
               <Calendar />
             </div>
           </div>

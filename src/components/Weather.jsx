@@ -4,10 +4,9 @@ import React, { useState } from "react";
 const staticWeatherData = {
   city: "London",
   country: "GB",
-  temperature: 45,
+  temperature: 35,
   feels_like: 17,
   humidity: 65,
-  pressure: 1015,
   description: "clear sky",
   icon: "02d", // Use an icon code from OpenWeatherMap or other sources
 };
@@ -30,27 +29,24 @@ const WeatherPage = () => {
     temperature,
     feels_like,
     humidity,
-    pressure,
     description,
     icon,
   } = weatherData;
 
   return (
-    <div className="weather-page   h-96 flex flex-col items-center justify-center">
-      <h1 className="text-3xl font-bold mb-4">
-        Weather in {city}, {country}
-      </h1>
-      <div className="bg-white/10 p-5 flex rounded-lg m-auto shadow-lg text-center">
+    <div>
+     
+      <div className="bg-white/10 p-5 mb-6 w-[98%] flex rounded-lg m-auto shadow-lg text-center">
         <img
           src={weatherIcons[icon]} // Static icon from the weatherIcons object
           alt={description}
-          className=" mb-4"
+          className=" mb-4 shadow-2xl rounded-[50%]"
         />
-        <h2 className="text-2xl font-semibold flex mt-16">{temperature}°C</h2>
+        <h2 className="text-2xl ml-2 font-semibold flex mt-16">{temperature}°C</h2>
         <p className="text-lg flex capitalize">{description}</p>
         <p className="text-sm  flex mt-9">Feels like: {feels_like}°C</p>
         <p className="text-sm flex">Humidity: {humidity}%</p>
-        <p className="text-sm flex mt-9">Pressure: {pressure} hPa</p>
+       
       </div>
     </div>
   );

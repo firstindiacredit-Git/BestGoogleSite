@@ -154,7 +154,7 @@ const Bookmarks = () => {
 
       <div className="grid grid-cols-1  md:grid-cols-2  lg:grid-cols-2 gap-6">
         {/* Popular Bookmarks Section */}
-        <section className="bg-white/10  p-4 rounded-lg shadow">
+        <section className="bg-white/20  p-4 rounded-lg shadow">
           <h3 className="text-xl font-semibold mb-4">Popular</h3>
           <div className="grid grid-cols-4 gap-2">
             {renderBookmarks("Popular")}
@@ -162,7 +162,7 @@ const Bookmarks = () => {
         </section>
 
         {/* Travel Bookmarks Section */}
-        <section className="bg-white/10 p-4 rounded-lg shadow">
+        <section className="bg-white/20 p-4 rounded-lg shadow">
           <h3 className="text-xl font-semibold mb-4">Travel</h3>
           <div className="grid grid-cols-3 gap-2">
             {renderBookmarks("Travel")}
@@ -170,15 +170,10 @@ const Bookmarks = () => {
         </section>
 
         {/* Shopping Bookmarks Section */}
-        <section className="bg-white/10 p-4 rounded-lg shadow">
+        <section className="bg-white/20 p-4 rounded-lg shadow">
           <h3 className="text-xl font-semibold mb-4">Shopping</h3>
           <div className="grid grid-row-2 gap-2 justify-start">
             {renderBookmarks("Shopping")}
-          </div>
-        </section>
-        <section className="bg-white/10 p-4 rounded-lg shadow">
-                    <div className="grid  gap-2 justify-start">
-            <Weather />
           </div>
         </section>
       </div>
