@@ -1,12 +1,13 @@
+// SignIn.js
 import React, { useState } from "react";
-import { auth, provider } from "../../firebase";
-import { useAuth } from "../../hooks/useAuth";
-import { signInWithPopup } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
-import Header from "../Header";
+import { auth, provider } from "../../firebase"; // Import Firebase config
+import { useAuth } from "../../hooks/useAuth"; // Custom hook for login
+import { signInWithPopup } from "firebase/auth"; // Firebase sign-in method
+import { useNavigate } from "react-router-dom"; // Navigation hook
+import Header from "../Header"; // Assume this is your custom Header component
 
 const SignIn = () => {
-  const { login } = useAuth();
+  const { login } = useAuth(); // Assuming you have a login function in the hook
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -20,6 +21,7 @@ const SignIn = () => {
     setIsDarkMode((prev) => !prev);
   };
 
+  // Email and password sign-in
   const handleEmailSignIn = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -30,19 +32,32 @@ const SignIn = () => {
       console.log("Sign-in successful!");
       navigate("/"); // Redirect to homepage
     } catch (err) {
-      setError("Failed to sign in: " + err.message);
+      if (err.code === "auth/user-not-found") {
+        setError("No user found with this email.");
+      } else if (err.code === "auth/wrong-password") {
+        setError("Incorrect password. Please try again.");
+      } else {
+        setError("Failed to sign in: " + err.message);
+      }
       console.error(err); // Log the error for debugging
     } finally {
       setLoading(false);
     }
   };
 
+  // Google sign-in
   const handleGoogleSignIn = async () => {
     try {
       await signInWithPopup(auth, provider);
       navigate("/"); // Redirect to homepage
     } catch (err) {
-      setError("Google sign-in failed: " + err.message);
+      if (err.code === "auth/invalid-credential") {
+        setError("Invalid credentials. Please try again.");
+      } else if (err.code === "auth/popup-closed-by-user") {
+        setError("The sign-in popup was closed before completing.");
+      } else {
+        setError("Google sign-in failed: " + err.message);
+      }
       console.error(err);
     }
   };
@@ -55,7 +70,7 @@ const SignIn = () => {
     >
       <Header isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
 
-      <div className="max-w-md w-full mx-auto mt-8 rounded-none md:rounded-2xl p-4 md:p-8 border shadow-2xl shadow-input bg-white">
+      <div className="max-w-md w-full mx-auto mt-8 rounded-none md:rounded-2xl p-4 md:p-8 border shadow-2xl bg-white">
         <h2 className="font-bold text-xl dark:text-neutral-800 text-black">
           Welcome Back
         </h2>
@@ -101,7 +116,7 @@ const SignIn = () => {
           </button>
           <div className="bg-gradient-to-r from-transparent via-neutral-300 dark:via-neutral-700 to-transparent my-8 h-[1px] w-full" />
           <button
-            className="border shadow-sm text-mt-1 dark:text-green-500 text-lg text-center px-4 w-full h-10 font-medium border-green-500 text-green-500 rounded hover:bg-green-500 hover:text-white"
+            className="border shadow-sm dark:text-green-500 text-lg text-center px-4 w-full h-10 font-medium border-green-500 text-green-500 rounded hover:bg-green-500 hover:text-white"
             type="button"
             onClick={handleGoogleSignIn}
           >
