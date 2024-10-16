@@ -49,10 +49,10 @@ const SignIn = () => {
   const handleGoogleSignIn = async () => {
     try {
       await signInWithPopup(auth, provider);
-      navigate("/"); // Redirect to homepage
+      navigate("/"); 
     } catch (err) {
-      if (err.code === "auth/invalid-credential") {
-        setError("Invalid credentials. Please try again.");
+      if (err.code === "User have already exist") {
+        setError("Use another. Please try again.");
       } else if (err.code === "auth/popup-closed-by-user") {
         setError("The sign-in popup was closed before completing.");
       } else {

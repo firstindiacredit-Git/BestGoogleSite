@@ -9,7 +9,7 @@ import {
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { MdAdd, MdDelete } from "react-icons/md";
-import Weather from "./Weather";
+
 
 // Pre-defined static bookmarks
 const initialBookmarks = {
@@ -110,6 +110,16 @@ const Bookmarks = () => {
     }
   };
 
+  // Check if URL is valid
+  const isValidUrl = (url) => {
+    try {
+      new URL(url); // Try creating a URL object
+      return true;
+    } catch (error) {
+      return false;
+    }
+  };
+
   // Render bookmarks for a given category
   const renderBookmarks = (category) => {
     const combinedBookmarks = [
@@ -122,19 +132,39 @@ const Bookmarks = () => {
         key={bookmark.id || index}
         className="flex flex-col w-full items-center gap-2 p-2 rounded transition"
       >
-        <a
-          href={bookmark.link}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex flex-col w-full items-center text-center"
-        >
-          <img
-            src={`https://logo.clearbit.com/${new URL(bookmark.link).hostname}`}
-            alt={`${bookmark.name} favicon`}
-            className="w-10 h-10 mb-1" // Added margin-bottom for spacing
-          />
-          <span className="block w-2 mr-12">{bookmark.name}</span>
-        </a>
+        {isValidUrl(bookmark.link) ? (
+          <a
+            href={bookmark.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex flex-col w-full items-center text-center"
+          >
+            <img
+              src={`https://logo.clearbit.com/${
+                new URL(bookmark.link).hostname
+              }`}
+              alt={`${bookmark.name} favicon`}
+              onError={(e) => {
+                e.target.src = "/path/to/default-icon.png"; // Fallback to a default icon
+              }}
+              className="w-10 h-10 mb-1" // Added margin-bottom for spacing
+            />
+            <span className="block w-2 mr-12">{bookmark.name}</span>
+          </a>
+        ) : (
+          // If the URL is invalid, alert the user
+          <div
+            onClick={() => alert("Invalid URL")}
+            className="cursor-pointer flex flex-col w-full items-center text-center text-red-500"
+          >
+            <img
+              src="/path/to/default-icon.png" // Use default icon for invalid URL
+              alt="default favicon"
+              className="w-10 h-10 mb-1"
+            />
+            <span className="block w-2 mr-12">{bookmark.name}</span>
+          </div>
+        )}
         {/* Only allow deletion for Firebase bookmarks */}
         {bookmark.id && (
           <button
@@ -152,9 +182,9 @@ const Bookmarks = () => {
     <div className="container mx-auto py-10">
       <h2 className="text-3xl font-semibold mb-6 text-center">My Bookmarks</h2>
 
-      <div className="grid grid-cols-1  md:grid-cols-2  lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
         {/* Popular Bookmarks Section */}
-        <section className="bg-white/20  p-4 rounded-lg shadow">
+        <section className="bg-white/20 p-4 rounded-lg shadow">
           <h3 className="text-xl font-semibold mb-4">Popular</h3>
           <div className="grid grid-cols-4 gap-2">
             {renderBookmarks("Popular")}
@@ -200,7 +230,7 @@ const Bookmarks = () => {
             onChange={(e) =>
               setNewBookmark({ ...newBookmark, name: e.target.value })
             }
-            className=" border p-1 text-black border-gray-300 rounded-lg"
+            className="border p-1 text-black border-gray-300 rounded-lg"
           />
           <input
             type="text"
@@ -216,7 +246,7 @@ const Bookmarks = () => {
             onChange={(e) =>
               setNewBookmark({ ...newBookmark, category: e.target.value })
             }
-            className=" border p-1 text-black border-gray-300 rounded-lg"
+            className="border p-1 text-black border-gray-300 rounded-lg"
           >
             <option value="Popular">Popular</option>
             <option value="Travel">Travel</option>
