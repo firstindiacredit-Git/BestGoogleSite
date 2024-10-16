@@ -6,8 +6,8 @@ import {
   sendEmailVerification,
   onAuthStateChanged,
 } from "firebase/auth";
-import { auth, provider } from "../../firebase";
-import Header from "../Header";
+import { auth, provider } from "../firebase";
+import Header from "./Header";
 
 const Signup = () => {
   const [email, setEmail] = useState("");

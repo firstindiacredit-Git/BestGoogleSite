@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import SearchPage from "./components/SearchPage.jsx";
 import AddList from "./components/Calculator.jsx";
 import Signin from "./components/Signup/signin.jsx";
-import Signup from "./components/Signup/signup.jsx";
+import Signup from "./components/Signup.jsx";
 import AddLinks from "./components/Admin/AddLinks.jsx";
 import Dashboard from "./components/Admin/Dashboard.jsx";
 import Login from "./components/Admin/Login.jsx";
