@@ -50,7 +50,7 @@ function ImageUploader() {
   };
 
   return (
-    <div className="container w-full mt-2 mx-auto py-10">
+    <div className="container w-full mx-auto py-10">
       {/* Hidden file input */}
       <input
         type="file"

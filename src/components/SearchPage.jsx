@@ -1,31 +1,35 @@
 import React, { useEffect, useState } from "react";
 import Header from "../components/Header";
-import AddList from "./Calculator";
-import Notepad from "./Notepad";
-import ShowLinks from "./ShowLinks";
 import AnimatedTooltipPreview from "./AnimatedTooltipPreview";
-import Calendar from "./Calendar";
-import ImageUploader from "./ImageUploader";
-import PopularBookmarks from "./PopularBookmarks";
-import Weather from "./Weather";
+import Anotherpage from "../components/Anotherpage";
 import { TbGridDots } from "react-icons/tb";
+import galleryupload from "/galleryupload.png";
+import remove from "/remove.png";
 import "./style.css";
 
 function SearchPage() {
-  const [panel, setPanel] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [backgroundImage, setBackgroundImage] = useState("");
   const [showButtons, setShowButtons] = useState(false);
 
+  
   useEffect(() => {
     const storedBackgroundImage = localStorage.getItem("backgroundImage");
+    const storedTheme = localStorage.getItem("themeMode");
+
     if (storedBackgroundImage) {
       setBackgroundImage(storedBackgroundImage);
     }
-  }, []);
-
+    if (storedTheme === "dark") {
+      setIsDarkMode(true);
+    }
+  }, []); 
   const toggleTheme = () => {
-    setIsDarkMode((prev) => !prev);
+    setIsDarkMode((prev) => {
+      const newMode = !prev;
+      localStorage.setItem("themeMode", newMode ? "dark" : "light");
+      return newMode;
+    });
   };
 
   const handleImageChange = (e) => {
@@ -35,7 +39,7 @@ function SearchPage() {
       reader.onloadend = () => {
         const imageData = reader.result;
         setBackgroundImage(imageData);
-        localStorage.setItem("backgroundImage", imageData);
+        localStorage.setItem("backgroundImage", imageData); // Store background image in localStorage
       };
       reader.readAsDataURL(file);
     }
@@ -43,17 +47,18 @@ function SearchPage() {
 
   const removeBackground = () => {
     setBackgroundImage("");
-    localStorage.removeItem("backgroundImage");
+    localStorage.removeItem("backgroundImage"); 
   };
 
   const handleIconClick = () => {
     setShowButtons(!showButtons);
   };
 
+  // Google search script
   useEffect(() => {
     const script = document.createElement("script");
     script.id = "google-cse";
-    script.src = "https://cse.google.com/cse.js?cx=80904074a37154829"; // Replace with your CSE ID
+    script.src = "https://cse.google.com/cse.js?cx=80904074a37154829";
     script.async = true;
     script.defer = true;
     document.body.appendChild(script);
@@ -67,32 +72,42 @@ function SearchPage() {
     <div
       className={`${
         isDarkMode ? "bg-gray-900 text-white" : "bg-zinc-100 text-black"
-      } min-h-screen`}
+      } min-h-screen h-full`}
       style={{
         backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",
         backgroundSize: "cover",
         backgroundPosition: "center",
+        backgroundAttachment: "fixed",
       }}
     >
+      {/* Header */}
       <Header isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
+
       <div className="mt-4">
-        {/* Icon to show options */}
+      
         <div
           onClick={handleIconClick}
           className="cursor-pointer flex m-2 mr-3 justify-end"
         >
-          <TbGridDots className="w-8 h-8 hover:border border-slate-400 p-1 m-2 shadow-lg rounded-[50%]" />
+          <TbGridDots className="w-8 h-8 hover:border border-slate-400 p-1 m-2 shadow-lg rounded-full" />
         </div>
 
-        {/* Conditionally show buttons */}
+        
         {showButtons && (
           <div className="absolute right-10 top-20 bg-white/10 p-4 w-80 mr-2 shadow-lg rounded-md">
-            <div className="flex flex-row  space-x-2">
+            <div className="flex flex-row">
+              
+       
               <label
-                className="cursor-pointer bg-blue-500 text-white p-1 w-28 rounded text-center"
+                className="cursor-pointer text-xs p-1 rounded  grid items-center justify-center"
                 htmlFor="image-upload"
               >
-                Change Image
+                <img
+                  src={galleryupload}
+                  alt="Upload"
+                  className="h-9 w-9 m-auto " 
+                />
+                <span>Change Image</span>
               </label>
               <input
                 id="image-upload"
@@ -101,18 +116,21 @@ function SearchPage() {
                 onChange={handleImageChange}
                 className="hidden"
               />
-
               <button
                 onClick={removeBackground}
-                className="bg-red-500 text-white p-1 w-32 rounded text-center"
+                className="text-xs p-1 w-32 rounded  grid items-center justify-center "
+                style={{ textAlign: "center" }}
               >
-                Remove Image
+                <img src={remove} alt="Remove" className="h-9 w-9 m-auto" />{" "}
+     
+                <span>Remove Image</span>
               </button>
             </div>
           </div>
         )}
 
-        <div className="flex flex-col mt-[1vh] items-center">
+  
+        <div className="flex flex-col items-center mt-[1vh]">
           <img
             src={isDarkMode ? "GoogleBlack.png" : "GoogleWhite.png"}
             alt="Google Logo"
@@ -122,40 +140,12 @@ function SearchPage() {
           <AnimatedTooltipPreview />
         </div>
 
-        <div className="mt-[13vh]">
-          <h1 className="text-2xl py-3 font-bold text-center">COMPONENTS</h1>
-          <ShowLinks />
-
-          {/* Main content responsive layout */}
-          <div className="flex flex-col md:flex-row justify-between w-full gap-4">
-            <div className="w-full md:w-1/2 lg:w-1/2 p-2">
-              <AddList />
-              <Notepad />
-            </div>
-            <div className="w-full md-w-1/flex p-2">
-              <PopularBookmarks />
-            </div>
-            <div className="w-full md:w-1/2 lg:w-1/2 p-2">
-              <ImageUploader />
-              <Weather />
-              <Calendar />
-            </div>
-          </div>
-        </div>
-
-        {panel && (
-          <div className="fixed bottom-4 right-4 bg-white dark:bg-gray-800 shadow-lg p-4 rounded-md">
-            <h3 className="text-lg">Toggle Theme</h3>
-            <button
-              onClick={toggleTheme}
-              className={`mt-2 p-2 rounded ${
-                isDarkMode ? "bg-gray-700 text-white" : "bg-gray-200 text-black"
-              }`}
-            >
-              Switch to {isDarkMode ? "Light Mode" : "Dark Mode"}
-            </button>
-          </div>
-        )}
+        
+        <Anotherpage
+          isDarkMode={isDarkMode}
+          toggleTheme={toggleTheme}
+          backgroundImage={backgroundImage}
+        />
       </div>
     </div>
   );

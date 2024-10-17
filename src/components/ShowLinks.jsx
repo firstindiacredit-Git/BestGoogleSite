@@ -3,7 +3,14 @@ import PropTypes from "prop-types";
 import Draggable from "react-draggable";
 import { FaLock, FaLockOpen } from "react-icons/fa";
 import { db } from "../firebase";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  doc,
+  setDoc,
+} from "firebase/firestore";
 
 // Draggable Dropdown Component
 function DraggableDropdown({
@@ -12,16 +19,17 @@ function DraggableDropdown({
   toggleDropdown,
   isOpen,
   fetchLinks,
-  cachedLinks, // Accept cachedLinks as a prop
-  setCachedLinks, // Accept setCachedLinks to update the cached links
+  cachedLinks,
+  setCachedLinks,
+  onDragEnd,
+  index, // Pass index to identify position
 }) {
   const [links, setLinks] = useState([]);
   const [loadingLinks, setLoadingLinks] = useState(false);
   const [error, setError] = useState(null);
   const modalRef = useRef(null);
-  const draggableRef = useRef(null); // Ref for the draggable element
+  const draggableRef = useRef(null);
 
-  // Close the dropdown when clicking outside the modal
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (modalRef.current && !modalRef.current.contains(event.target)) {
@@ -38,10 +46,8 @@ function DraggableDropdown({
     };
   }, [isOpen, toggleDropdown]);
 
-  // Fetch links when the dropdown is open
   useEffect(() => {
     if (isOpen) {
-      // Check if links are already cached
       if (cachedLinks[category]) {
         setLinks(cachedLinks[category]);
       } else {
@@ -50,7 +56,6 @@ function DraggableDropdown({
         fetchLinks(category)
           .then((fetchedLinks) => {
             setLinks(fetchedLinks);
-            // Cache the fetched links
             setCachedLinks((prev) => ({
               ...prev,
               [category]: fetchedLinks,
@@ -65,16 +70,21 @@ function DraggableDropdown({
           });
       }
     } else {
-      setLinks([]); // Clear links when dropdown is closed
+      setLinks([]);
     }
   }, [isOpen, fetchLinks, category, cachedLinks, setCachedLinks]);
+
+  const handleDragStop = (e, data) => {
+    // Notify parent of drag end
+    onDragEnd(index, data.y);
+  };
 
   return (
     <div className="relative">
       <Draggable
         disabled={!isDraggable}
         nodeRef={draggableRef}
-        defaultPosition={{ x: 0, y: 0 }}
+        onStop={handleDragStop}
       >
         <div
           ref={draggableRef}
@@ -94,7 +104,7 @@ function DraggableDropdown({
                 className="relative backdrop-blur-lg bg-white/30 text-black dark:text-white rounded-lg shadow-lg p-6 transform transition-transform duration-300 scale-90"
                 style={{ zIndex: 999, width: "90%", maxWidth: "50rem" }}
               >
-                <div className="flex justify-between  items-center mb-4">
+                <div className="flex justify-between items-center mb-4">
                   <h2 className="text-lg text-black w-full font-semibold">
                     Related Links
                   </h2>
@@ -110,7 +120,7 @@ function DraggableDropdown({
                 ) : error ? (
                   <p className="text-sm text-red-500">{error}</p>
                 ) : links.length > 0 ? (
-                  <div className=" sm:grid-cols-2 gap-4">
+                  <div className="sm:grid-cols-2 gap-4">
                     {links.map((link) => (
                       <div
                         key={link.id}
@@ -154,8 +164,10 @@ DraggableDropdown.propTypes = {
   toggleDropdown: PropTypes.func.isRequired,
   isOpen: PropTypes.bool.isRequired,
   fetchLinks: PropTypes.func.isRequired,
-  cachedLinks: PropTypes.object.isRequired, // Prop type for cachedLinks
-  setCachedLinks: PropTypes.func.isRequired, // Prop type for setCachedLinks
+  cachedLinks: PropTypes.object.isRequired,
+  setCachedLinks: PropTypes.func.isRequired,
+  onDragEnd: PropTypes.func.isRequired, // New prop
+  index: PropTypes.number.isRequired, // New prop
 };
 
 // Main Component
@@ -165,7 +177,7 @@ function ShowLinks() {
   const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [error, setError] = useState(null);
-  const [cachedLinks, setCachedLinks] = useState({}); // State for cached links
+  const [cachedLinks, setCachedLinks] = useState({});
 
   // Fetch categories from Firestore
   const fetchCategories = async () => {
@@ -190,7 +202,6 @@ function ShowLinks() {
     fetchCategories();
   }, []);
 
-  // Fetch links for a specific category
   const fetchLinks = async (newCategory) => {
     try {
       const linksQuery = query(
@@ -203,7 +214,7 @@ function ShowLinks() {
         ...doc.data(),
         logoUrl: `https://logo.clearbit.com/${
           new URL(doc.data().link).hostname
-        }`, // Adjusted syntax for logoUrl to use the correct field
+        }`,
       }));
     } catch (error) {
       setError("Failed to load links.");
@@ -219,6 +230,30 @@ function ShowLinks() {
     setIsDraggable((prev) => !prev);
   };
 
+  const handleDragEnd = (index, yPosition) => {
+    const draggedCategory = categories[index];
+
+    // Calculate the new index based on the yPosition
+    const newIndex = Math.round(yPosition / 50); // Adjust the divisor based on your item height
+    if (newIndex < 0 || newIndex >= categories.length || newIndex === index)
+      return;
+
+    // Create a new array with the dragged category in its new position
+    const newCategories = [...categories];
+    newCategories.splice(index, 1);
+    newCategories.splice(newIndex, 0, draggedCategory);
+
+    // Update the state and Firebase
+    setCategories(newCategories);
+    saveCategoriesToFirebase(newCategories);
+  };
+
+  const saveCategoriesToFirebase = async (newCategories) => {
+    // Save the new order to Firestore (you may want to set a specific document for this)
+    const categoryRef = doc(db, "yourCategoriesDoc", "categories"); // Replace with your doc path
+    await setDoc(categoryRef, { categories: newCategories });
+  };
+
   return (
     <div className="flex flex-wrap items-center justify-center space-x-4">
       {loadingCategories ? (
@@ -227,7 +262,7 @@ function ShowLinks() {
         <p className="text-sm text-red-500">{error}</p>
       ) : (
         categories.map((categoryItem, index) => {
-          const newCategory = categoryItem.newCategory || ""; // Ensure this matches your Firestore document structure
+          const newCategory = categoryItem.newCategory || "";
 
           if (!newCategory || newCategory.trim() === "") return null;
 
@@ -241,13 +276,15 @@ function ShowLinks() {
               fetchLinks={fetchLinks}
               cachedLinks={cachedLinks}
               setCachedLinks={setCachedLinks}
+              onDragEnd={handleDragEnd} // Pass down the drag end handler
+              index={index} // Pass down the index
             />
           );
         })
       )}
       <button
         onClick={toggleDraggable}
-        className=" bg-transparent rounded-full shadow-lg"
+        className="bg-transparent rounded-full shadow-lg"
       >
         {isDraggable ? <FaLockOpen size={20} /> : <FaLock size={20} />}
       </button>

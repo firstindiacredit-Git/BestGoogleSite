@@ -23,7 +23,7 @@ function Calculator() {
   };
 
   return (
-    <div className="min-h w-full m-auto mt-1 bg-transparent ">
+    <div className="min-h w-full m-auto mt-10 bg-transparent ">
       {/* Calculator */}
       <div className="mb-4 w-full">
         <div className="bg-white/10 backdrop-blur-lg border shadow-xl my-4 rounded-lg p-4 sm:p-6 w-full max-w-full">

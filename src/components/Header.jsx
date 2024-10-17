@@ -2,30 +2,28 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { signOut, onAuthStateChanged } from "firebase/auth";
-import { auth } from "../firebase"; 
+import { auth } from "../firebase";
 
 const Header = ({ isDarkMode, toggleTheme }) => {
   const [panel, setPanel] = useState(false);
   const [user, setUser] = useState(null);
 
- 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
-       
         const userProfile = {
           displayName: currentUser.displayName,
           email: currentUser.email,
           photoURL: currentUser.photoURL,
           // uid: currentUser.uid,
         };
-        setUser(userProfile); 
+        setUser(userProfile);
       } else {
-        setUser(null); 
+        setUser(null);
       }
     });
 
-    return () => unsubscribe(); 
+    return () => unsubscribe();
   }, []);
 
   const panelClicker = () => {
@@ -44,18 +42,22 @@ const Header = ({ isDarkMode, toggleTheme }) => {
   return (
     <header
       className={`flex items-center justify-between p-2 transition-colors duration-300 backdrop-blur-lg ${
-        isDarkMode ? "bg-gray-700 text-white" : "bg-white/30 text-black"
+        isDarkMode ? "bg-black/20 text-white" : "bg-white/10 text-black"
       }`}
     >
       <div className="flex items-center space-x-2">
-       
         <span className="text-green-500 dark:text-green-300">Best</span>
         <span className="text-red-500 dark:text-red-300">Google</span>
         <span className="text-yellow-500 dark:text-yellow-300">Sites</span>
+
+        <Link to="/PremiumPage">
+          <button className="border ml-5 border-blue-500 text-blue-500 px-2 rounded">
+            Premium
+          </button>
+        </Link>
       </div>
 
       <div className="flex items-center space-x-4">
-       
         <button
           onClick={toggleTheme}
           className="mr-1 text-sm flex items-center space-x-1 transition-colors duration-200"
@@ -103,13 +105,12 @@ const Header = ({ isDarkMode, toggleTheme }) => {
           </div>
         ) : (
           <div className="flex space-x-2">
-           
             <Link to="/signin">
               <button className="px-4 py-1 border border-blue-500 text-blue-500 rounded hover:bg-blue-500 hover:text-white transition-colors duration-200">
                 Sign In
               </button>
             </Link>
-           
+
             <Link to="/signup">
               <button className="px-4 py-1 border border-green-500 text-green-500 rounded hover:bg-green-500 hover:text-white transition-colors duration-200">
                 Sign Up

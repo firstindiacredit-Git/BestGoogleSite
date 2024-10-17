@@ -38,6 +38,7 @@
   background-color: rgb(252, 250, 250) !important;
   padding: 4px 1rem !important;
   border: none !important;
+  /* color: black; */
 }
 
 .dark .gsc-input-box {

@@ -5,9 +5,12 @@ import {
   signInWithEmailAndPassword,
   sendEmailVerification,
   onAuthStateChanged,
+  signOut,
 } from "firebase/auth";
 import { auth, provider } from "../firebase";
+import { useNavigate } from "react-router-dom"; 
 import Header from "./Header";
+  
 
 const Signup = () => {
   const [email, setEmail] = useState("");
@@ -20,6 +23,7 @@ const Signup = () => {
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [user, setUser] = useState(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const navigate = useNavigate(); 
 
   const toggleTheme = () => {
     setIsDarkMode((prev) => !prev);
@@ -56,6 +60,7 @@ const Signup = () => {
       const currentUser = auth.currentUser;
       if (currentUser.emailVerified) {
         alert("Email verified. You are logged in.");
+        navigate("/"); 
       } else {
         setError("Email not verified. Please check your inbox.");
       }
@@ -70,21 +75,31 @@ const Signup = () => {
     setError("");
 
     try {
-      await signInWithPopup(auth, provider);
-      navigate("/");
+      const userCredential = await signInWithPopup(auth, provider);
+      const user = userCredential.user;
       alert("Successfully signed in with Google.");
+      navigate("/");  
     } catch (error) {
       setError(getErrorMessage(error.code));
     }
   };
 
+  const handleLogout = async () => {
+    await signOut(auth);
+    localStorage.setItem("loggedOut", "true"); 
+    window.location.reload();  
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      if (currentUser) {
+        navigate("/"); 
+      }
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [navigate]);
 
   const getErrorMessage = (errorCode) => {
     switch (errorCode) {
@@ -105,7 +120,13 @@ const Signup = () => {
         isDarkMode ? "bg-gray-900 text-white" : "bg-transparent text-black"
       }`}
     >
-      <Header isDarkMode={isDarkMode} toggleTheme={toggleTheme} user={user} />
+      <Header
+        isDarkMode={isDarkMode}
+        toggleTheme={toggleTheme}
+        user={user}
+        onLogout={handleLogout}
+      />
+      
       <div className="max-w-md w-full mx-auto mt-10 rounded-none md:rounded-2xl border shadow-2xl p-4 md:p-8 shadow-input bg-transparent ">
         <h2 className="font-bold text-xl text-center ">
           Welcome to BESTGOOGLESITES
@@ -125,11 +146,7 @@ const Signup = () => {
           <form className="my-8" onSubmit={handleEmailSignUp}>
             <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 mb-4">
               <div className="flex flex-col space-y-2 w-[48.5%]">
-                <label
-                  htmlFor="firstname"
-                  className="font-medium 
-                  "
-                >
+                <label htmlFor="firstname" className="font-medium ">
                   First name
                 </label>
                 <input
