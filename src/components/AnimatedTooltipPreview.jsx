@@ -101,6 +101,7 @@ export default function AnimatedTooltipPreview() {
   const [editingBookmarkId, setEditingBookmarkId] = useState(null);
   const [userId, setUserId] = useState(null);
   const [errorMessage, setErrorMessage] = useState(""); // State for error messages
+  const [successMessage, setSuccessMessage] = useState(""); // State for success messages
 
   // Cache to avoid multiple calls to Firebase
   const [cachedBookmarks, setCachedBookmarks] = useState([]);
@@ -145,7 +146,8 @@ export default function AnimatedTooltipPreview() {
     return pattern.test(url);
   };
 
-  const saveBookmark = async () => {
+  const saveBookmark = async (e) => {
+    e.preventDefault(); // Prevent form reload
     if (!userId || !newBookmark.name || !newBookmark.link) {
       setErrorMessage("Please fill in both fields."); // Alert if any field is empty
       return; // Prevent adding bookmark
@@ -157,6 +159,7 @@ export default function AnimatedTooltipPreview() {
     }
 
     setErrorMessage(""); // Clear error message if all validations pass
+    setSuccessMessage(""); // Clear any previous success message
 
     try {
       if (editMode) {
@@ -175,6 +178,7 @@ export default function AnimatedTooltipPreview() {
               : bookmark
           )
         );
+        setSuccessMessage("Bookmark updated successfully!");
       } else {
         const newBookmarkRef = await addDoc(
           collection(db, "users", userId, "bookmarks"),
@@ -192,11 +196,18 @@ export default function AnimatedTooltipPreview() {
         };
         setPeople((prevPeople) => [...prevPeople, addedBookmark]);
         setCachedBookmarks((prev) => [...prev, addedBookmark]); // Update cache
+        setSuccessMessage("Bookmark added successfully!");
       }
+
       setNewBookmark({ name: "", link: "" });
       setShowModal(false);
       setEditMode(false);
       setEditingBookmarkId(null);
+
+      // Automatically clear success message after 3 seconds
+      setTimeout(() => {
+        setSuccessMessage("");
+      }, 3000);
     } catch (error) {
       console.error("Error saving bookmark:", error);
       setErrorMessage("Failed to save bookmark. Please try again.");
@@ -210,6 +221,10 @@ export default function AnimatedTooltipPreview() {
         prevPeople.filter((person) => person.id !== id)
       );
       setCachedBookmarks((prev) => prev.filter((person) => person.id !== id)); // Update cache
+      setSuccessMessage("Bookmark deleted successfully!");
+      setTimeout(() => {
+        setSuccessMessage("");
+      }, 3000);
     } catch (error) {
       console.error("Error deleting bookmark:", error);
       setErrorMessage("Failed to delete bookmark. Please try again.");
@@ -263,6 +278,9 @@ export default function AnimatedTooltipPreview() {
             />
             {errorMessage && (
               <p className="text-red-500 text-sm mb-2">{errorMessage}</p>
+            )}
+            {successMessage && (
+              <p className="text-green-500 text-sm mb-2">{successMessage}</p>
             )}
             <button
               onClick={saveBookmark}
