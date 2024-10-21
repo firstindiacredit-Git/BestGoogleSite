@@ -56,7 +56,7 @@ export default function Users() {
   const totalPages = Math.ceil(users.length / usersPerPage);
 
   return (
-    <div className="flex h-screen">
+    <div className="flex min-h-screen">
       <Sidebar />
       <div className="flex-1 flex flex-col">
         <Header />

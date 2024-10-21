@@ -7,8 +7,8 @@ import {
   updateDoc,
   deleteDoc,
 } from "firebase/firestore";
-import { db } from "../firebase"; // Adjust import to your firebase setup
-import { getAuth } from "firebase/auth"; // Import Firebase Auth
+import { db } from "../firebase"; 
+import { getAuth } from "firebase/auth";  
 
 function Notepad() {
   const [note, setNote] = useState("");
@@ -17,10 +17,10 @@ function Notepad() {
   const [history, setHistory] = useState([]);
   const [error, setError] = useState(null);
 
-  const auth = getAuth(); // Get Firebase Auth
-  const user = auth.currentUser; // Get the current user
+  const auth = getAuth();  
+  const user = auth.currentUser;  
 
-  // Load notes from Firestore when component mounts or user changes
+  
   useEffect(() => {
     const fetchNotes = async () => {
       if (user) {
@@ -36,12 +36,12 @@ function Notepad() {
           setError("Error fetching notes: " + err.message);
         }
       } else {
-        setNotes([]); // Clear notes if user is not logged in
+        setNotes([]);  
       }
     };
 
     fetchNotes();
-  }, [user]); // Depend on user to fetch notes when it changes
+  }, [user]); 
 
   // Handle note input change
   const handleNoteChange = (e) => {
@@ -115,7 +115,7 @@ function Notepad() {
 
   return (
     <div className="bg-transparent m-auto mb-4 flex justify-start">
-      <div className="bg-white/10 backdrop-blur-lg border shadow-2xl m-auto my-4 rounded-lg p-6 w-full h-96">
+      <div className="bg-white/10 backdrop-blur-lg border shadow-2xl m-auto my-4 rounded-lg p-6 w-full">
         <h2 className="text-xl font-semibold mb-4">Notepad</h2>
         {error && <p className="text-red-500">{error}</p>}{" "}
         {/* Display error messages */}

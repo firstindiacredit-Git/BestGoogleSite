@@ -1,7 +1,139 @@
+import { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
+import { db } from "../../firebase";  
+import { collection, getDocs, onSnapshot } from "firebase/firestore";
+import { Bar, Doughnut } from "react-chartjs-2"; 
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js"; 
+
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 export default function Dashboard() {
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [totalCategories, setTotalCategories] = useState(0);
+  const [totalLinks, setTotalLinks] = useState(0);
+  const [recentActivity, setRecentActivity] = useState([]);
+
+  useEffect(() => {
+    const fetchTotals = async () => {
+      try {
+        const usersCollection = collection(db, "users");
+        const usersSnapshot = await getDocs(usersCollection);
+        setTotalUsers(usersSnapshot.size);
+
+        const categoriesCollection = collection(db, "category");
+        const categoriesSnapshot = await getDocs(categoriesCollection);
+        setTotalCategories(categoriesSnapshot.size);
+
+        const linksCollection = collection(db, "links");
+        const linksSnapshot = await getDocs(linksCollection);
+        setTotalLinks(linksSnapshot.size);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchTotals();
+  }, []);
+
+  // Real-time recent activity listener
+  useEffect(() => {
+    const unsubscribeUsers = onSnapshot(collection(db, "users"), (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === "added") {
+          setRecentActivity((prev) => [
+            ...prev,
+            `User ${change.doc.data().name} registered`,
+          ]);
+        }
+      });
+    });
+
+    const unsubscribeCategories = onSnapshot(
+      collection(db, "category"),
+      (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+          if (change.type === "added") {
+            setRecentActivity((prev) => [
+              ...prev,
+              `Category ${change.doc.data().name} added`,
+            ]);
+          }
+        });
+      }
+    );
+
+    const unsubscribeLinks = onSnapshot(collection(db, "links"), (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === "added") {
+          setRecentActivity((prev) => [
+            ...prev,
+            `Link "${change.doc.data().title}" added`,
+          ]);
+        }
+      });
+    });
+
+    return () => {
+      unsubscribeUsers();
+      unsubscribeCategories();
+      unsubscribeLinks();
+    };
+  }, []);
+
+  // Prepare data for the Bar chart
+  const barChartData = {
+    labels: ["Users", "Categories", "Links"],
+    datasets: [
+      {
+        label: "Total Count",
+        data: [totalUsers, totalCategories, totalLinks],
+        backgroundColor: "rgba(75, 192, 192, 0.2)",
+        borderColor: "rgba(75, 192, 192, 1)",
+        borderWidth: 1,
+        fill: true,
+      },
+    ],
+  };
+
+  const doughnutChartData = {
+    labels: ["Users", "Categories", "Links"],
+    datasets: [
+      {
+        data: [totalUsers, totalCategories, totalLinks],
+        backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"],
+        hoverBackgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"],
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: { beginAtZero: true },
+      y: { beginAtZero: true },
+    },
+  };
+
   return (
     <div className="flex">
       <Sidebar />
@@ -14,7 +146,7 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="bg-white shadow rounded-lg p-4">
               <h3 className="text-xl font-semibold">Total Users</h3>
-              <p className="mt-2 text-3xl font-bold">1,234</p>
+              <p className="mt-2 text-3xl font-bold">{totalUsers}</p>
             </div>
 
             <div className="bg-white shadow rounded-lg p-4">
@@ -23,13 +155,36 @@ export default function Dashboard() {
             </div>
 
             <div className="bg-white shadow rounded-lg p-4">
-              <h3 className="text-xl font-semibold">New Orders</h3>
-              <p className="mt-2 text-3xl font-bold">567</p>
+              <h3 className="text-xl font-semibold">Category</h3>
+              <p className="mt-2 text-3xl font-bold">{totalCategories}</p>
             </div>
 
             <div className="bg-white shadow rounded-lg p-4">
-              <h3 className="text-xl font-semibold">Pending Tasks</h3>
-              <p className="mt-2 text-3xl font-bold">89</p>
+              <h3 className="text-xl font-semibold">Total Links</h3>
+              <p className="mt-2 text-3xl font-bold">{totalLinks}</p>
+            </div>
+          </div>
+
+          {/* Charts Section */}
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Bar Chart */}
+            <div className="bg-white shadow rounded-lg p-6">
+              <h3 className="text-xl font-semibold mb-4">
+                Analytics Overview (Bar Chart)
+              </h3>
+              <div style={{ height: "300px", width: "100%" }}>
+                <Bar data={barChartData} options={chartOptions} />
+              </div>
+            </div>
+
+            {/* Doughnut Chart */}
+            <div className="bg-white shadow rounded-lg p-6">
+              <h3 className="text-xl font-semibold mb-4">
+                Analytics Overview (Doughnut Chart)
+              </h3>
+              <div style={{ height: "300px", width: "100%" }}>
+                <Doughnut data={doughnutChartData} />
+              </div>
             </div>
           </div>
 
@@ -37,13 +192,15 @@ export default function Dashboard() {
           <div className="mt-8 bg-white shadow rounded-lg p-6">
             <h3 className="text-xl font-semibold mb-4">Recent Activity</h3>
             <ul>
-              <li className="mb-2">
-                User <strong>John Doe</strong> registered
-              </li>
-              <li className="mb-2">Order #12345 was placed</li>
-              <li className="mb-2">
-                Admin <strong>Jane Smith</strong> updated the pricing
-              </li>
+              {recentActivity.length > 0 ? (
+                recentActivity.map((activity, index) => (
+                  <li key={index} className="mb-2">
+                    {activity}
+                  </li>
+                ))
+              ) : (
+                <li className="mb-2">No recent activity.</li>
+              )}
             </ul>
           </div>
         </div>

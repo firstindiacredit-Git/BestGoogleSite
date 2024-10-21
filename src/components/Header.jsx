@@ -96,7 +96,7 @@ const Header = ({ isDarkMode, toggleTheme }) => {
                 <hr className="my-2 border-gray-200 dark:border-gray-700" />
                 <button
                   onClick={handleSignOut}
-                  className="w-full text-left flex justify-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
+                  className="w-full flex justify-center px-4 py-2 hover:bg-zinc-400 hover:w-[50%] hover:m-auto hover:rounded-3xl"
                 >
                   Sign Out
                 </button>

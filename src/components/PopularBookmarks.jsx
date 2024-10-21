@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { db, auth } from "../firebase"; // Firebase imports
+import { db, auth } from "../firebase";  
 import {
   collection,
   addDoc,
@@ -34,20 +34,20 @@ const initialBookmarks = {
 };
 
 const Bookmarks = () => {
-  const [user, setUser] = useState(null); // User state
+  const [user, setUser] = useState(null);  
   const [firebaseBookmarks, setFirebaseBookmarks] = useState({
     Popular: [],
     Travel: [],
     Shopping: [],
-  }); // Bookmarks from Firebase
+  });  
   const [newBookmark, setNewBookmark] = useState({
     name: "",
     link: "",
     category: "Popular",
-  }); // New bookmark
-  const [showForm, setShowForm] = useState(false); // Form visibility
+  });  
+  const [showForm, setShowForm] = useState(false);  
 
-  // Fetch authenticated user
+  
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -55,7 +55,7 @@ const Bookmarks = () => {
     return () => unsubscribe();
   }, []);
 
-  // Fetch bookmarks by category from Firebase
+  
   useEffect(() => {
     if (user) {
       const categories = ["Popular", "Travel", "Shopping"];
@@ -67,7 +67,7 @@ const Bookmarks = () => {
               id: doc.id,
               ...doc.data(),
             }))
-            .filter((bookmark) => bookmark.category === category); // Filter by category
+            .filter((bookmark) => bookmark.category === category);  
 
           setFirebaseBookmarks((prev) => ({
             ...prev,
@@ -88,15 +88,15 @@ const Bookmarks = () => {
 
     try {
       await addDoc(collection(db, "users", user.uid, "bookmarks"), newBookmark);
-      setNewBookmark({ name: "", link: "", category: "Popular" }); // Reset input fields
-      setShowForm(false); // Hide the form after submission
+      setNewBookmark({ name: "", link: "", category: "Popular" });  
+      setShowForm(false); 
     } catch (error) {
       console.error("Error adding bookmark: ", error);
       alert(`Error adding bookmark: ${error.message}`);
     }
   };
 
-  // Delete a bookmark
+  
   const deleteBookmark = async (category, id) => {
     try {
       await deleteDoc(doc(db, "users", user.uid, "bookmarks", id));
@@ -110,17 +110,17 @@ const Bookmarks = () => {
     }
   };
 
-  // Check if URL is valid
+  
   const isValidUrl = (url) => {
     try {
-      new URL(url); // Try creating a URL object
+      new URL(url);  
       return true;
     } catch (error) {
       return false;
     }
   };
 
-  // Render bookmarks for a given category
+  
   const renderBookmarks = (category) => {
     const combinedBookmarks = [
       ...initialBookmarks[category],
@@ -145,27 +145,27 @@ const Bookmarks = () => {
               }`}
               alt={`${bookmark.name} favicon`}
               onError={(e) => {
-                e.target.src = "/path/to/default-icon.png"; // Fallback to a default icon
+                e.target.src = "/path/to/default-icon.png";  
               }}
-              className="w-10 h-10 mb-1" // Added margin-bottom for spacing
+              className="w-10 h-10 mb-1" 
             />
             <span className="block w-2 mr-12">{bookmark.name}</span>
           </a>
         ) : (
-          // If the URL is invalid, alert the user
+           
           <div
             onClick={() => alert("Invalid URL")}
             className="cursor-pointer flex flex-col w-full items-center text-center text-red-500"
           >
             <img
-              src="/path/to/default-icon.png" // Use default icon for invalid URL
+              src="/path/to/default-icon.png" 
               alt="default favicon"
               className="w-10 h-10 mb-1"
             />
             <span className="block w-2 mr-12">{bookmark.name}</span>
           </div>
         )}
-        {/* Only allow deletion for Firebase bookmarks */}
+         
         {bookmark.id && (
           <button
             onClick={() => deleteBookmark(category, bookmark.id)}

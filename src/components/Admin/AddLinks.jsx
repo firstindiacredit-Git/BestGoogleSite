@@ -196,7 +196,7 @@ function AddLinks() {
   }
 
   return (
-    <div className="flex h-FULL">
+    <div className="flex h-full">
       <Sidebar />
       <div className="flex-1">
         <Header />
