@@ -140,7 +140,7 @@ export default function Dashboard() {
       <div className="flex-1">
         <Header />
         <div className="p-6 bg-gray-100 min-h-screen">
-          <h2 className="text-3xl font-bold mb-6">Admin Dashboard</h2>
+         
 
           {/* Card Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -180,7 +180,7 @@ export default function Dashboard() {
             {/* Doughnut Chart */}
             <div className="bg-white shadow rounded-lg p-6">
               <h3 className="text-xl font-semibold mb-4">
-                Analytics Overview (Doughnut Chart)
+                Analytics Overview
               </h3>
               <div style={{ height: "300px", width: "100%" }}>
                 <Doughnut data={doughnutChartData} />

@@ -52,7 +52,7 @@ function AnimatedTooltip({ items, handleEdit, handleDelete }) {
             <img
               src={`https://logo.clearbit.com/${new URL(person.link).hostname}`}
               alt={person.name}
-              className="w-7 h-7 mx-auto rounded-[50%] transition-transform duration-300 transform hover:scale-110 hover:shadow-lg"
+              className="w-7 h-7 mx-auto rounded-[50%] transition-transform duration-300  transform hover:scale-110 hover:shadow-lg"
             />
           </a>
           <h3 className="text-md font-semibold mb-2 w-16 mt-2 transition-all duration-300 transform group-hover:translate-y-1 group-hover:translate-x-1">
@@ -239,22 +239,23 @@ export default function AnimatedTooltipPreview() {
   };
 
   return (
-    <div className="flex items-center mt-2 justify-center mb-10 w-full">
+    <div className="flex items-center mt-2  dark:text-white justify-center mb-10 w-full">
       <AnimatedTooltip
         items={people}
         handleEdit={handleEdit}
         handleDelete={handleDelete}
       />
+
       <button
         onClick={() => setShowModal(true)}
-        className="bg-white/20 border border-gray-400 mb-10 ml-3 rounded-full w-10 h-10 flex items-center justify-center mt-4"
+        className="bg-white/20 border dark:text-white border-gray-400 mb-10 ml-3 rounded-full w-10 h-10 flex items-center justify-center mt-4"
       >
         +
       </button>
 
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white text-black p-4 rounded shadow-md w-80">
+          <div className="bg-white dark:bg-gray-900 dark:text-white   p-4 rounded shadow-md w-80">
             <h2 className="text-lg font-bold mb-2">
               {editMode ? "Edit Bookmark" : "Add Bookmark"}
             </h2>

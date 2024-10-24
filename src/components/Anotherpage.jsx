@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { getAuth, onAuthStateChanged } from "firebase/auth"; // Corrected import
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { DndContext } from "@dnd-kit/core";
-import { arrayMove } from "@dnd-kit/sortable"; // Ensure this is installed
-import AddList from "./Calculator";
+import { DndContext, closestCenter } from "@dnd-kit/core";
+import { SortableContext, arrayMove, rectSortingStrategy } from "@dnd-kit/sortable";
+import Calculator from "./Calculator";
 import Notepad from "./Notepad";
 import ShowLinks from "./ShowLinks";
 import Calendar from "./Calendar";
@@ -11,44 +11,42 @@ import ImageUploader from "./ImageUploader";
 import PopularBookmarks from "./PopularBookmarks";
 import Weather from "./Weather";
 import { auth, db } from "../firebase";
+import { IoIosCloseCircleOutline } from "react-icons/io";
 
-const Anotherpage = ({ isDarkMode, toggleTheme, backgroundImage }) => {
-  const [user, setUser] = useState(null); // State to hold authenticated user
-  const [items, setItems] = useState([]); // State to hold draggable items
+const Anotherpage = ({ backgroundImage }) => {
+  const [user, setUser] = useState(null);
+  const [items, setItems] = useState([]);
+  const [viewMode, setViewMode] = useState("grid");
+  const [visibleItem, setVisibleItem] = useState(null);
 
-  // Effect to listen to auth state and set the user
   useEffect(() => {
     const authInstance = getAuth();
     const unsubscribe = onAuthStateChanged(authInstance, (currentUser) => {
       if (currentUser) {
-        setUser(currentUser); // Set the authenticated user
+        setUser(currentUser);
       } else {
-        setUser(null); // No user, reset state
+        setUser(null);
       }
     });
-
-    // Cleanup the listener on unmount
     return () => unsubscribe();
   }, []);
 
-  // Function to save item positions in Firestore
   const saveItems = async (newItems) => {
     setItems(newItems);
     if (user) {
       const positions = newItems.map((item, index) => ({
         id: item.id,
         position: index,
-      })); // Save item ID and its position
+      }));
       const docRef = doc(db, "Widgets", user.uid);
       try {
-        await setDoc(docRef, { items: positions }, { merge: true }); // Save positions in Firestore, using merge to keep existing data
+        await setDoc(docRef, { items: positions }, { merge: true });
       } catch (error) {
         console.error("Error saving items:", error);
       }
     }
   };
 
-  // Effect to fetch widgets from Firestore when user is authenticated
   useEffect(() => {
     const fetchWidgets = async () => {
       if (user) {
@@ -59,21 +57,19 @@ const Anotherpage = ({ isDarkMode, toggleTheme, backgroundImage }) => {
             const savedItems = docSnap.data().items || [];
             const sortedItems = savedItems.sort(
               (a, b) => a.position - b.position
-            ); // Sort by saved position
-            setItems(sortedItems.map((item) => ({ id: item.id }))); // Map back to items with only id
+            );
+            setItems(sortedItems.map((item) => ({ id: item.id })));
           } else {
             console.log("No such document!");
           }
         } catch (error) {
-          console.error("Error fetching widgets:", error);
+          console.error("Error fetching Widgets:", error);
         }
       }
     };
-
     fetchWidgets();
-  }, [user]); // Only re-run when user changes
+  }, [user]);
 
-  // Handle drag-and-drop event
   const handleDragEnd = (event) => {
     const { active, over } = event;
     if (active.id !== over.id) {
@@ -81,18 +77,26 @@ const Anotherpage = ({ isDarkMode, toggleTheme, backgroundImage }) => {
         const oldIndex = prevItems.findIndex((item) => item.id === active.id);
         const newIndex = prevItems.findIndex((item) => item.id === over.id);
         const newItems = arrayMove(prevItems, oldIndex, newIndex);
-        saveItems(newItems); // Save new positions
-        return newItems; // Update state with new order
+        saveItems(newItems);
+        return newItems;
       });
     }
   };
 
+  const handleClose = (id) => {
+    setVisibleItem(null);
+  };
+
+  const handleToggleVisibility = (itemId) => {
+    setVisibleItem((prevVisibleItem) =>
+      prevVisibleItem === itemId ? null : itemId
+    );
+  };
+
   return (
-    <DndContext onDragEnd={handleDragEnd}>
+    <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <div
-        className={`mt-[13vh] ${
-          isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
-        }`}
+        className={`bg-white dark:bg-gray-900 mt-[13vh]`}
         style={{
           backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",
           backgroundSize: "cover",
@@ -100,39 +104,191 @@ const Anotherpage = ({ isDarkMode, toggleTheme, backgroundImage }) => {
           backgroundAttachment: "fixed",
         }}
       >
-        <h1 className="text-2xl py-3 font-bold text-center">COMPONENTS</h1>
+        <h1 className="text-2xl dark:text-white py-3 font-bold text-center">
+          COMPONENTS
+        </h1>
 
         <div>
-          {/* ShowLinks can be implemented to render draggable items */}
           <ShowLinks items={items} />
         </div>
 
-        <div className="flex flex-col md:flex-row justify-between w-full gap-4">
-          <div className="w-full md:w-1/2 lg:w-1/2 p-2">
-            <AddList />
-            <Notepad />
-          </div>
-
-          <div className="w-full p-2">
-            <PopularBookmarks />
-          </div>
-
-          <div className="w-full md:w-1/2 lg:w-1/2 p-2">
-            <ImageUploader />
-            <Weather />
-            <Calendar />
-          </div>
-        </div>
-
-        <div className="flex justify-center mt-4">
+        <div className="flex justify-center gap-1 mt-6 mb-4">
           <button
-            onClick={toggleTheme}
+            onClick={() => setViewMode("grid")}
             className={`p-2 rounded ${
-              isDarkMode ? "bg-gray-700 text-white" : "bg-gray-200 text-black"
+              viewMode === "grid"
+                ? "bg-gray-200 text-black"
+                : "bg-transparent border text-black dark:text-white"
             }`}
           >
-            Switch to {isDarkMode ? "Light Mode" : "Dark Mode"}
+            Grid View
           </button>
+          <button
+            onClick={() => setViewMode("list")}
+            className={`p-2 rounded ${
+              viewMode === "list"
+                ? "bg-gray-200 text-black border"
+                : "bg-transparent border text-black dark:text-white"
+            }`}
+          >
+            List View
+          </button>
+        </div>
+
+        <div
+          className={`flex ${
+            viewMode === "list" ? "flex-col" : "flex-row"
+          } justify-between w-full gap-4`}
+        >
+          {viewMode === "grid" ? (
+            <>
+              <div className="w-full md:w-1/2 lg:w-1/2 p-2">
+                <Calculator />
+                <Notepad />
+              </div>
+              <div className="w-full p-2">
+                <PopularBookmarks />
+              </div>
+              <div className="w-full md:w-1/2 lg:w-1/2 p-2">
+                <ImageUploader />
+                <Weather />
+                <Calendar />
+              </div>
+            </>
+          ) : (
+            <SortableContext
+              items={items.map((item) => item.id)}
+              strategy={rectSortingStrategy}
+            >
+              <div className="w-full flex gap-2">
+                <div className="w-full md:w-1/2 lg:w-1/2 gap-1">
+                  <div className="relative flex items-center justify-between p-2 mb-2 border w-full rounded ">
+                    <button
+                      className="w-full dark:text-white text-left"
+                      onClick={() => handleToggleVisibility("Calculator")}
+                    >
+                      Calculator
+                    </button>
+                    {visibleItem === "Calculator" && (
+                      <>
+                        <div className="fixed inset-0 bg-transparent bg-opacity-70 backdrop-blur-sm z-40"></div>
+                        <div className="fixed top-1/2 left-1/2 z-50 w-[30%] h-[100%] p-4 shadow-lg transform -translate-x-1/2 -translate-y-1/2 bg-[#f3e9ff] dark:bg-[#4a454e] rounded-lg">
+                          <Calculator />
+                          <button
+                            className="absolute top-3 right-3 text-gray-500"
+                            onClick={() => handleClose("Calculator")}
+                          >
+                            <IoIosCloseCircleOutline size={30} />
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="relative flex items-center justify-between p-2 mb-2 border rounded w-full">
+                    <button
+                      className="w-full dark:text-white text-left"
+                      onClick={() => handleToggleVisibility("Notepad")}
+                    >
+                      Notepad
+                    </button>
+                    {visibleItem === "Notepad" && (
+                      <>
+                        <div className="fixed inset-0 bg-transparent bg-opacity-50 backdrop-blur-sm z-40"></div>
+                        <div className="fixed top-1/2 left-1/2 z-50 w-[50%] p-6 shadow-lg transform -translate-x-1/2 -translate-y-1/2 bg-[#f3e9ff] dark:bg-[#4a454e] rounded-lg">
+                          <Notepad />
+                          <button
+                            className="absolute top-1 right-2 mb-5 text-gray-500"
+                            onClick={() => handleClose("Notepad")}
+                          >
+                            <IoIosCloseCircleOutline size={30} />
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+                <div className="md:w-1/2 justify-between ">
+                  <div className="relative flex items-center justify-between p-2 mb-2 border rounded w-full">
+                    <button
+                      className="w-full dark:text-white text-left"
+                      onClick={() => handleToggleVisibility("PopularBookmarks")}
+                    >
+                      Popular Bookmarks
+                    </button>
+                    {visibleItem === "PopularBookmarks" && (
+                      <>
+                        {/* Transparent backdrop */}
+                        <div className="fixed inset-0 bg-transparent bg-opacity-50 backdrop-blur-sm z-40"></div>
+
+                        {/* Modal box */}
+                        <div className="fixed top-1/2 left-1/2 z-50 w-[90%] max-w-2xl max-h-[90vh] p-6 shadow-lg transform -translate-x-1/2 -translate-y-1/2 bg-[#f3e9ff] dark:bg-[#4a454e] rounded-lg overflow-y-auto">
+                          <PopularBookmarks />
+
+                          {/* Close button */}
+                          <button
+                            className="absolute top-1 right-2 mb-5 text-gray-500"
+                            onClick={() => handleClose("PopularBookmarks")}
+                          >
+                            <IoIosCloseCircleOutline size={30} />
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="relative flex items-center justify-between p-2 mb-2 border rounded w-full">
+                    <button
+                      className="w-full dark:text-white text-left"
+                      onClick={() => handleToggleVisibility("Weather")}
+                    >
+                      Weather
+                    </button>
+                    {visibleItem === "Weather" && (
+                      <>
+                        <div className="fixed inset-0 bg-transparent bg-opacity-50 backdrop-blur-sm z-40"></div>
+                        <div className="fixed top-1/2 left-1/2 z-50 w-[50%] p-6 shadow-lg transform -translate-x-1/2 -translate-y-1/2 bg-[#f3e9ff] dark:bg-[#4a454e] rounded-lg">
+                          <Weather />
+                          <button
+                            className="absolute top-1 right-2 mb-5 text-gray-500 "
+                            onClick={() => handleClose("Weather")}
+                          >
+                            <IoIosCloseCircleOutline size={30} />
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+                <div className="w-full md:w-1/2 lg:w-1/2">
+                  <div className="relative flex items-center justify-between p-2 mb-2 border rounded w-full">
+                    <button
+                      className="w-full dark:text-white text-left"
+                      onClick={() => handleToggleVisibility("Calendar")}
+                    >
+                      Calendar
+                    </button>
+                    {visibleItem === "Calendar" && (
+                      <>
+                        <div className="fixed inset-0 bg-transparent bg-opacity-50 backdrop-blur-sm z-40"></div>
+                        <div className="fixed top-1/2 left-1/2 z-50 w-[50%] p-6 shadow-lg transform -translate-x-1/2 -translate-y-1/2 bg-[#f3e9ff] dark:bg-[#4a454e] rounded-lg">
+                          <Calendar />
+                          <button
+                            className="absolute top-1 right-2 mb-5  dark:text-white"
+                            onClick={() => handleClose("Calendar")}
+                          >
+                            <IoIosCloseCircleOutline size={30} />
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Add similar logic for Weather, PopularBookmarks, and Calendar */}
+              </div>
+            </SortableContext>
+          )}
         </div>
       </div>
     </DndContext>

@@ -61,22 +61,22 @@ const Calendar = () => {
     <div className="max-w-sm m-auto w-full justify-between  h-[460px] bg-white/10 backdrop-blur-lg mt-1 p-4 border border-gray-300 rounded-lg shadow-lg">
       <div className="header flex justify-between items-center mb-4">
         <button
-          className="bg-gray-200 font-bold dark:bg-transparent border p-2 rounded"
+          className="bg-gray-200 font-bold dark:text-white dark:bg-transparent border p-2 rounded"
           onClick={handlePreviousMonth}
         >
           Prev
         </button>
-        <h2 className="text-lg font-bold">
+        <h2 className="text-lg dark:text-white font-bold">
           {currentDate.toLocaleString("default", { month: "long" })} {year}
         </h2>
         <button
-          className="bg-gray-200 p-2 font-bold dark:bg-transparent border rounded"
+          className="bg-gray-200 dark:text-white p-2 font-bold dark:bg-transparent border rounded"
           onClick={handleNextMonth}
         >
           Next
         </button>
       </div>
-      <div className="days grid grid-cols-7 gap-1 md:gap-2">
+      <div className="days grid grid-cols-7 dark:text-white gap-1 md:gap-2">
         {days.map((day) => (
           <div key={day} className="day text-center font-semibold">
             {day}

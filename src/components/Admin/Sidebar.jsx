@@ -12,7 +12,7 @@ export default function Sidebar() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [dispName, setDispName] = useState("");
-  const [link, setLink] = useState("/default-avatar.png"); // Default avatar
+  const [link, setLink] = useState("/default-avatar.png"); 
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,22 +26,22 @@ export default function Sidebar() {
             const userData = userDocSnap.data();
             if (userData.role === "admin") {
               setIsAdmin(true);
-              setLink(userData.photoURL || "/default-avatar.png"); // Use default avatar if photoURL is not provided
-              setDispName(userData.displayName || "User"); // Default display name
+              setLink(userData.photoURL || "/default-avatar.png");  
+              setDispName(userData.displayName || "User");  
             } else {
-              navigate("../Admin/login"); // Redirect if user is not an admin
+              navigate("../Admin/login");  
             }
           } else {
             console.error("User document does not exist");
-            setLoading(false); // Stop loading if document doesn't exist
+            setLoading(false);  
           }
         } catch (error) {
           console.error("Error fetching user data: ", error);
         }
       } else {
-        navigate("../Admin/login"); // Redirect if user is not logged in
+        navigate("../Admin/login");  
       }
-      setLoading(false); // Set loading to false when done
+      setLoading(false); 
     });
 
     return () => unsubscribe();

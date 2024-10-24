@@ -4,26 +4,27 @@ import AnimatedTooltipPreview from "./AnimatedTooltipPreview";
 import Anotherpage from "../components/Anotherpage";
 import { TbGridDots } from "react-icons/tb";
 import galleryupload from "/galleryupload.png";
+import layers from "/layers.png";
 import remove from "/remove.png";
+import { Link, useNavigate } from "react-router-dom";
 import "./style.css";
 
 function SearchPage() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [backgroundImage, setBackgroundImage] = useState("");
   const [showButtons, setShowButtons] = useState(false);
+  const navigate = useNavigate();
 
-  
   useEffect(() => {
     const storedBackgroundImage = localStorage.getItem("backgroundImage");
-    const storedTheme = localStorage.getItem("themeMode");
+    
 
     if (storedBackgroundImage) {
       setBackgroundImage(storedBackgroundImage);
     }
-    if (storedTheme === "dark") {
-      setIsDarkMode(true);
-    }
-  }, []); 
+  
+  }, []);
+
   const toggleTheme = () => {
     setIsDarkMode((prev) => {
       const newMode = !prev;
@@ -39,7 +40,7 @@ function SearchPage() {
       reader.onloadend = () => {
         const imageData = reader.result;
         setBackgroundImage(imageData);
-        localStorage.setItem("backgroundImage", imageData); // Store background image in localStorage
+        localStorage.setItem("backgroundImage", imageData);
       };
       reader.readAsDataURL(file);
     }
@@ -47,7 +48,7 @@ function SearchPage() {
 
   const removeBackground = () => {
     setBackgroundImage("");
-    localStorage.removeItem("backgroundImage"); 
+    localStorage.removeItem("backgroundImage");
   };
 
   const handleIconClick = () => {
@@ -66,13 +67,11 @@ function SearchPage() {
     return () => {
       document.body.removeChild(script);
     };
-  }, []);
+  }, [navigate]);
 
   return (
     <div
-      className={`${
-        isDarkMode ? "bg-gray-900 text-white" : "bg-zinc-100 text-black"
-      } min-h-screen h-full`}
+      className="bg-zinc-100 dark:bg-[#060d1c] min-h-screen h-full"
       style={{
         backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",
         backgroundSize: "cover",
@@ -83,31 +82,28 @@ function SearchPage() {
       {/* Header */}
       <Header isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
 
-      <div className="mt-4">
-      
+      <div className="mt-6">
         <div
           onClick={handleIconClick}
-          className="cursor-pointer flex m-2 mr-3 justify-end"
+          className="cursor-pointer flex m-1 mr-3 justify-end"
         >
-          <TbGridDots className="w-8 h-8 hover:border border-slate-400 p-1 m-2 shadow-lg rounded-full" />
+          <TbGridDots className="w-8 h-8 hover:border dark:text-white border-slate-400 p-1 m-2 shadow-lg rounded-full" />
         </div>
-
-        
         {showButtons && (
-          <div className="absolute right-10 top-20 bg-white/10 p-4 w-80 mr-2 shadow-lg rounded-md">
-            <div className="flex flex-row">
-              
-       
+          <div className="absolute right-10 top-20 bg-white/10 p-4 w-70 mr-2 shadow-lg rounded-2xl">
+            <div className="grid grid-cols-2 gap-1">
               <label
-                className="cursor-pointer text-xs p-1 rounded  grid items-center justify-center"
+                className="cursor-pointer text-xs p-1 rounded items-center justify-center"
                 htmlFor="image-upload"
               >
                 <img
                   src={galleryupload}
                   alt="Upload"
-                  className="h-9 w-9 m-auto " 
+                  className="h-9 w-9 m-auto "
                 />
-                <span>Change Image</span>
+                <span className="text-xs dark:text-white p-1 w-28 rounded grid items-center justify-center">
+                  Change Image
+                </span>
               </label>
               <input
                 id="image-upload"
@@ -118,21 +114,24 @@ function SearchPage() {
               />
               <button
                 onClick={removeBackground}
-                className="text-xs p-1 w-32 rounded  grid items-center justify-center "
+                className="text-xs p-1 w-32 rounded grid items-center justify-center "
                 style={{ textAlign: "center" }}
               >
-                <img src={remove} alt="Remove" className="h-9 w-9 m-auto" />{" "}
-     
-                <span>Remove Image</span>
+                <img src={remove} alt="Remove" className="h-9 w-9 m-auto" />
+                <span className="dark:text-white">Remove Image</span>
               </button>
+              <Link to="/NewSearchPage">
+                <img src={layers} alt="Upload" className="h-9 w-9 m-auto " />
+                <span className="text-xs p-1 dark:text-white w-28 rounded m-auto grid items-center justify-center ">
+                  Customize Widgets
+                </span>
+              </Link>
             </div>
           </div>
         )}
-
-  
         <div className="flex flex-col items-center mt-[1vh]">
           <img
-            src={isDarkMode ? "GoogleBlack.png" : "GoogleWhite.png"}
+            src={isDarkMode ? "GoogleBlack.png" : "GoogleWhite.png"} // Adjusted for dark mode condition
             alt="Google Logo"
             className="mb-4 h-16"
           />
@@ -140,11 +139,9 @@ function SearchPage() {
           <AnimatedTooltipPreview />
         </div>
 
-        
         <Anotherpage
-          isDarkMode={isDarkMode}
-          toggleTheme={toggleTheme}
           backgroundImage={backgroundImage}
+          isDarkMode={isDarkMode}
         />
       </div>
     </div>

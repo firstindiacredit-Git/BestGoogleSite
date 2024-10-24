@@ -35,18 +35,20 @@ const WeatherPage = () => {
 
   return (
     <div>
-     
       <div className="bg-white/10 p-5 mb-6 w-[98%] flex rounded-lg m-auto shadow-lg text-center">
         <img
           src={weatherIcons[icon]} // Static icon from the weatherIcons object
           alt={description}
           className=" mb-4 shadow-2xl rounded-[50%]"
         />
-        <h2 className="text-2xl ml-2 font-semibold flex mt-16">{temperature}°C</h2>
-        <p className="text-lg flex capitalize">{description}</p>
-        <p className="text-sm  flex mt-9">Feels like: {feels_like}°C</p>
-        <p className="text-sm flex">Humidity: {humidity}%</p>
-       
+        <h2 className="text-2xl dark:text-white ml-2 font-semibold flex mt-16">
+          {temperature}°C
+        </h2>
+        <p className="text-lg dark:text-white flex capitalize">{description}</p>
+        <p className="text-sm dark:text-white flex mt-9">
+          Feels like: {feels_like}°C
+        </p>
+        <p className="text-sm dark:text-white flex">Humidity: {humidity}%</p>
       </div>
     </div>
   );

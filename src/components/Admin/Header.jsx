@@ -17,7 +17,7 @@ export default function Header() {
 
   return (
     <header className="bg-white shadow p-4 flex justify-between items-center">
-      <div className="text-2xl font-semibold">Dashboard</div>
+      <div className="text-2xl font-semibold">Admin Dashboard</div>
       <div className="flex items-center">
         <span className="mr-4">Admin</span>
         <button
