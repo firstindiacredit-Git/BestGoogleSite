@@ -9,16 +9,23 @@ function Calculator() {
   const handleCalcInput = (value) => {
     if (value === "=") {
       try {
-        setCalcResult(eval(calcInput)); // Consider using a safer method to evaluate expressions.
-        setCalcInput("");
+        const result = eval(calcInput); // Caution: eval can be risky; consider safer alternatives
+        setCalcResult(result);
+        setCalcInput(result.toString());
       } catch (error) {
         setCalcResult("Error");
+        setCalcInput("");
       }
     } else if (value === "C") {
       setCalcInput("");
       setCalcResult("");
     } else {
-      setCalcInput(calcInput + value);
+      if (calcResult && !calcInput) {
+        setCalcInput(calcResult.toString() + value);
+        setCalcResult("");
+      } else {
+        setCalcInput(calcInput + value);
+      }
     }
   };
 
@@ -79,7 +86,6 @@ function Calculator() {
             >
               +
             </button>
-
             <button
               className="col-span-1 bg-blue-500 flex justify-center items-center dark:bg-blue-600 hover:bg-yellow-400 dark:hover:bg-yellow-700 rounded-md"
               onClick={() => handleCalcInput("C")}
