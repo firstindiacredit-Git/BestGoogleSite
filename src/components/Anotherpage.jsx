@@ -142,14 +142,14 @@ const Anotherpage = ({ backgroundImage }) => {
         >
           {viewMode === "grid" ? (
             <>
-              <div className="w-full md:w-1/2 lg:w-1/2 p-2">
+              <div className="w-full md:w-1/4 lg:w-1/4 p-2">
                 <Calculator />
                 <Notepad />
               </div>
-              <div className="w-full p-2">
+              <div className="w-full md:w-1/2 lg:w-1/2 ">
                 <PopularBookmarks />
               </div>
-              <div className="w-full md:w-1/2 lg:w-1/2 p-2">
+              <div className="w-full md:w-1/4 lg:w-1/4 p-2">
                 <ImageUploader />
                 <Weather />
                 <Calendar />
@@ -175,7 +175,7 @@ const Anotherpage = ({ backgroundImage }) => {
                         <div className="fixed top-1/2 left-1/2 z-50 w-[30%] h-[100%] p-4 shadow-lg transform -translate-x-1/2 -translate-y-1/2 bg-[#f3e9ff] dark:bg-[#4a454e] rounded-lg">
                           <Calculator />
                           <button
-                            className="absolute top-3 right-3 text-gray-500"
+                            className="absolute top-3 right-3 dark:text-white"
                             onClick={() => handleClose("Calculator")}
                           >
                             <IoIosCloseCircleOutline size={30} />
@@ -198,7 +198,7 @@ const Anotherpage = ({ backgroundImage }) => {
                         <div className="fixed top-1/2 left-1/2 z-50 w-[50%] p-6 shadow-lg transform -translate-x-1/2 -translate-y-1/2 bg-[#f3e9ff] dark:bg-[#4a454e] rounded-lg">
                           <Notepad />
                           <button
-                            className="absolute top-1 right-2 mb-5 text-gray-500"
+                            className="absolute  top-1 right-2 mb-5 dark:text-white"
                             onClick={() => handleClose("Notepad")}
                           >
                             <IoIosCloseCircleOutline size={30} />
@@ -227,7 +227,7 @@ const Anotherpage = ({ backgroundImage }) => {
 
                           {/* Close button */}
                           <button
-                            className="absolute top-1 right-2 mb-5 text-gray-500"
+                            className="absolute top-1 right-2 mb-5 dark:text-white"
                             onClick={() => handleClose("PopularBookmarks")}
                           >
                             <IoIosCloseCircleOutline size={30} />
@@ -250,7 +250,7 @@ const Anotherpage = ({ backgroundImage }) => {
                         <div className="fixed top-1/2 left-1/2 z-50 w-[50%] p-6 shadow-lg transform -translate-x-1/2 -translate-y-1/2 bg-[#f3e9ff] dark:bg-[#4a454e] rounded-lg">
                           <Weather />
                           <button
-                            className="absolute top-1 right-2 mb-5 text-gray-500 "
+                            className="absolute top-1 right-2 mb-5 dark:text-white "
                             onClick={() => handleClose("Weather")}
                           >
                             <IoIosCloseCircleOutline size={30} />

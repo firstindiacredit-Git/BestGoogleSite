@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { db, auth } from "../firebase";  
+import { db, auth } from "../firebase";
 import {
   collection,
   addDoc,
@@ -9,7 +9,6 @@ import {
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { MdAdd, MdDelete } from "react-icons/md";
-
 
 // Pre-defined static bookmarks
 const initialBookmarks = {
@@ -34,20 +33,19 @@ const initialBookmarks = {
 };
 
 const Bookmarks = () => {
-  const [user, setUser] = useState(null);  
+  const [user, setUser] = useState(null);
   const [firebaseBookmarks, setFirebaseBookmarks] = useState({
     Popular: [],
     Travel: [],
     Shopping: [],
-  });  
+  });
   const [newBookmark, setNewBookmark] = useState({
     name: "",
     link: "",
     category: "Popular",
-  });  
-  const [showForm, setShowForm] = useState(false);  
+  });
+  const [showForm, setShowForm] = useState(false);
 
-  
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -55,7 +53,6 @@ const Bookmarks = () => {
     return () => unsubscribe();
   }, []);
 
-  
   useEffect(() => {
     if (user) {
       const categories = ["Popular", "Travel", "Shopping"];
@@ -67,7 +64,7 @@ const Bookmarks = () => {
               id: doc.id,
               ...doc.data(),
             }))
-            .filter((bookmark) => bookmark.category === category);  
+            .filter((bookmark) => bookmark.category === category);
 
           setFirebaseBookmarks((prev) => ({
             ...prev,
@@ -85,18 +82,18 @@ const Bookmarks = () => {
     e.preventDefault();
     if (!newBookmark.name || !newBookmark.link) return;
     if (!user) return alert("Please log in to save bookmarks.");
+    if (!isValidUrl(newBookmark.link)) return alert("Invalid URL.");
 
     try {
       await addDoc(collection(db, "users", user.uid, "bookmarks"), newBookmark);
-      setNewBookmark({ name: "", link: "", category: "Popular" });  
-      setShowForm(false); 
+      setNewBookmark({ name: "", link: "", category: "Popular" });
+      setShowForm(false);
     } catch (error) {
       console.error("Error adding bookmark: ", error);
       alert(`Error adding bookmark: ${error.message}`);
     }
   };
 
-  
   const deleteBookmark = async (category, id) => {
     try {
       await deleteDoc(doc(db, "users", user.uid, "bookmarks", id));
@@ -110,17 +107,15 @@ const Bookmarks = () => {
     }
   };
 
-  
   const isValidUrl = (url) => {
     try {
-      new URL(url);  
+      new URL(url);
       return true;
     } catch (error) {
       return false;
     }
   };
 
-  
   const renderBookmarks = (category) => {
     const combinedBookmarks = [
       ...initialBookmarks[category],
@@ -145,27 +140,28 @@ const Bookmarks = () => {
               }`}
               alt={`${bookmark.name} favicon`}
               onError={(e) => {
-                e.target.src = "/path/to/default-icon.png";  
+                e.target.src = "/path/to/default-icon.png";
               }}
-              className="w-10 h-10 mb-1" 
+              className="w-10 h-10 mb-1"
             />
-            <span className="block dark:text-white w-2 mr-12">{bookmark.name}</span>
+            <span className="block dark:text-white w-2 mr-12">
+              {bookmark.name}
+            </span>
           </a>
         ) : (
-           
           <div
             onClick={() => alert("Invalid URL")}
             className="cursor-pointer flex flex-col w-full items-center text-center text-red-500"
           >
             <img
-              src="/path/to/default-icon.png" 
+              src="/path/to/default-icon.png"
               alt="default favicon"
               className="w-10 h-10 mb-1"
             />
             <span className="block w-2 mr-12">{bookmark.name}</span>
           </div>
         )}
-         
+
         {bookmark.id && (
           <button
             onClick={() => deleteBookmark(category, bookmark.id)}
@@ -183,34 +179,33 @@ const Bookmarks = () => {
       <h2 className="text-3xl dark:text-white font-semibold mb-6 text-center">
         My Bookmarks
       </h2>
+      
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
         {/* Popular Bookmarks Section */}
         <section className="bg-white/20 p-4 rounded-lg shadow">
-          <h3 className="text-xl dark:text-white  font-semibold mb-4">
+          <h3 className="text-xl dark:text-white font-semibold mb-4">
             Popular
           </h3>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
             {renderBookmarks("Popular")}
           </div>
         </section>
 
         {/* Travel Bookmarks Section */}
         <section className="bg-white/20 p-4 rounded-lg shadow">
-          <h3 className="text-xl font-semibold dark:text-white  mb-4">
-            Travel
-          </h3>
-          <div className="grid grid-cols-3 gap-2">
+          <h3 className="text-xl font-semibold dark:text-white mb-4">Travel</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-2">
             {renderBookmarks("Travel")}
           </div>
         </section>
 
         {/* Shopping Bookmarks Section */}
         <section className="bg-white/20 p-4 rounded-lg shadow">
-          <h3 className="text-xl font-semibold dark:text-white  mb-4">
+          <h3 className="text-xl font-semibold dark:text-white mb-4">
             Shopping
           </h3>
-          <div className="grid grid-row-2 gap-2 justify-start">
+          <div className="grid grid-row-2 sm:grid-row-2 md:grid-row-2 justify-start gap-2">
             {renderBookmarks("Shopping")}
           </div>
         </section>

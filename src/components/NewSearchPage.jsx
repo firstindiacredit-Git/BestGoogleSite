@@ -125,35 +125,35 @@ function NewSearchPage() {
     setShowButtons((prev) => !prev);
   };
 
-  // Placeholder functions for the new components
+   
   const handleCalculatorClick = () => {
     console.log("Calculator clicked");
-    // Implement your calculator logic here
+    
   };
 
   const handleNotepadClick = () => {
     console.log("Notepad clicked");
-    // Implement your notepad logic here
+    
   };
 
   const handleImageUploaderClick = () => {
     console.log("Image Uploader clicked");
-    // Implement your image uploader logic here
+    
   };
 
   const handlePopularBookmarksClick = () => {
     console.log("Popular Bookmarks clicked");
-    // Implement your popular bookmarks logic here
+     
   };
 
   const handleWeatherClick = () => {
     console.log("Weather clicked");
-    // Implement your weather logic here
+     
   };
 
   const handleCalendarClick = () => {
     console.log("Calendar clicked");
-    // Implement your calendar logic here
+    
   };
 
   useEffect(() => {
@@ -210,37 +210,37 @@ function NewSearchPage() {
         <div className="flex flex-col space-y-2 items-center mt-4">
           <button
             onClick={handleCalculatorClick}
-            className="text-xs p-2 w-full rounded grid items-center justify-center bg-blue-500 text-white"
+            className="text-xs p-2 w-64 rounded grid items-center justify-center bg-blue-500 text-white"
           >
             Calculator
           </button>
           <button
             onClick={handleNotepadClick}
-            className="text-xs p-2 w-full rounded grid items-center justify-center bg-green-500 text-white"
+            className="text-xs p-2 w-64 rounded grid items-center justify-center bg-green-500 text-white"
           >
             Notepad
           </button>
           <button
             onClick={handleImageUploaderClick}
-            className="text-xs p-2 w-full rounded grid items-center justify-center bg-yellow-500 text-white"
+            className="text-xs p-2 w-64 rounded grid items-center justify-center bg-yellow-500 text-white"
           >
             Image Uploader
           </button>
           <button
             onClick={handlePopularBookmarksClick}
-            className="text-xs p-2 w-full rounded grid items-center justify-center bg-purple-500 text-white"
+            className="text-xs p-2 w-64 rounded grid items-center justify-center bg-purple-500 text-white"
           >
             Popular Bookmarks
           </button>
           <button
             onClick={handleWeatherClick}
-            className="text-xs p-2 w-full rounded grid items-center justify-center bg-red-500 text-white"
+            className="text-xs p-2 w-64 rounded grid items-center justify-center bg-red-500 text-white"
           >
             Weather
           </button>
           <button
             onClick={handleCalendarClick}
-            className="text-xs p-2 w-full rounded grid items-center justify-center bg-orange-500 text-white"
+            className="text-xs p-2 w-64 rounded grid items-center justify-center bg-orange-500 text-white"
           >
             Calendar
           </button>

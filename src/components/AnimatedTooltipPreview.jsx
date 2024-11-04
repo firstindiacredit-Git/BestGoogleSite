@@ -147,19 +147,19 @@ export default function AnimatedTooltipPreview() {
   };
 
   const saveBookmark = async (e) => {
-    e.preventDefault(); // Prevent form reload
+    e.preventDefault();  
     if (!userId || !newBookmark.name || !newBookmark.link) {
-      setErrorMessage("Please fill in both fields."); // Alert if any field is empty
-      return; // Prevent adding bookmark
+      setErrorMessage("Please fill in both fields.");  
+      return;  
     }
 
     if (!validateURL(newBookmark.link)) {
-      setErrorMessage("Please enter a valid URL."); // Set error message if URL is invalid
-      return; // Prevent adding bookmark
+      setErrorMessage("Please enter a valid URL.");  
+      return;  
     }
 
-    setErrorMessage(""); // Clear error message if all validations pass
-    setSuccessMessage(""); // Clear any previous success message
+    setErrorMessage(""); 
+    setSuccessMessage("");  
 
     try {
       if (editMode) {
@@ -255,7 +255,7 @@ export default function AnimatedTooltipPreview() {
 
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white dark:bg-gray-900 dark:text-white   p-4 rounded shadow-md w-80">
+          <div className="bg-white dark:bg-gray-900 dark:text-white   p-4 rounded-2xl shadow-md w-80">
             <h2 className="text-lg font-bold mb-2">
               {editMode ? "Edit Bookmark" : "Add Bookmark"}
             </h2>
@@ -266,7 +266,7 @@ export default function AnimatedTooltipPreview() {
               onChange={(e) =>
                 setNewBookmark({ ...newBookmark, name: e.target.value })
               }
-              className="border border-gray-300 rounded p-2 mb-2 w-full"
+              className="border border-gray-300 dark:bg-gray-900 rounded p-2 mb-2 w-full"
             />
             <input
               type="text"
@@ -275,7 +275,7 @@ export default function AnimatedTooltipPreview() {
               onChange={(e) =>
                 setNewBookmark({ ...newBookmark, link: e.target.value })
               }
-              className="border border-gray-300 rounded p-2 mb-2 w-full"
+              className="border border-gray-300 dark:bg-gray-900 rounded p-2 mb-2 w-full"
             />
             {errorMessage && (
               <p className="text-red-500 text-sm mb-2">{errorMessage}</p>
