@@ -44,7 +44,7 @@ function Calculator() {
             {["7", "8", "9", "/"].map((val) => (
               <button
                 key={val}
-                className="bg-gray-900 dark:bg-gray-900 hover:bg-gray-300 dark:hover:bg-gray-600 text-lg p-4 rounded-md"
+                className="bg-gray-900 hover:text-black dark:bg-gray-900 hover:bg-gray-300 dark:hover:bg-gray-600 text-lg p-4 rounded-md"
                 onClick={() => handleCalcInput(val)}
               >
                 {val}
@@ -53,7 +53,7 @@ function Calculator() {
             {["4", "5", "6", "*"].map((val) => (
               <button
                 key={val}
-                className="bg-gray-900 dark:bg-gray-900 hover:bg-gray-300 dark:hover:bg-gray-600 text-lg p-4 rounded-md"
+                className="bg-gray-900 dark:bg-gray-900 hover:text-black hover:bg-gray-300 dark:hover:bg-gray-600 text-lg p-4 rounded-md"
                 onClick={() => handleCalcInput(val)}
               >
                 {val}
@@ -62,26 +62,26 @@ function Calculator() {
             {["1", "2", "3", "-"].map((val) => (
               <button
                 key={val}
-                className="bg-gray-900 dark:bg-gray-900 hover:bg-gray-300 dark:hover:bg-gray-600 text-lg p-4 rounded-md"
+                className="bg-gray-900 dark:bg-gray-900 hover:text-black hover:bg-gray-300 dark:hover:bg-gray-600 text-lg p-4 rounded-md"
                 onClick={() => handleCalcInput(val)}
               >
                 {val}
               </button>
             ))}
             <button
-              className="col-span-1 bg-gray-900 dark:bg-gray-900 hover:bg-gray-300 dark:hover:bg-gray-600 text-lg p-4 rounded-md"
+              className="col-span-1 bg-gray-900 dark:bg-gray-900 hover:text-black hover:bg-gray-300 dark:hover:bg-gray-600 text-lg p-4 rounded-md"
               onClick={() => handleCalcInput("0")}
             >
               0
             </button>
             <button
-              className="bg-gray-900 dark:bg-gray-900 hover:bg-gray-300 dark:hover:bg-gray-600 text-lg p-4 rounded-md"
+              className="bg-gray-900 dark:bg-gray-900 hover:text-black hover:bg-gray-300 dark:hover:bg-gray-600 text-lg p-4 rounded-md"
               onClick={() => handleCalcInput(".")}
             >
               .
             </button>
             <button
-              className="bg-gray-900 dark:bg-gray-900 hover:bg-gray-300 dark:hover:bg-gray-600 text-lg p-4 rounded-md"
+              className="bg-gray-900 dark:bg-gray-900 hover:text-black hover:bg-gray-300 dark:hover:bg-gray-600 text-lg p-4 rounded-md"
               onClick={() => handleCalcInput("+")}
             >
               +
