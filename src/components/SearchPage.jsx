@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Header from "../components/Header";
 import AnimatedTooltipPreview from "./AnimatedTooltipPreview";
 import Anotherpage from "../components/Anotherpage";
@@ -13,16 +13,14 @@ function SearchPage() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [backgroundImage, setBackgroundImage] = useState("");
   const [showButtons, setShowButtons] = useState(false);
+  const [Url, setUrl] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const storedBackgroundImage = localStorage.getItem("backgroundImage");
-    
-
     if (storedBackgroundImage) {
       setBackgroundImage(storedBackgroundImage);
     }
-  
   }, []);
 
   const toggleTheme = () => {
@@ -55,7 +53,6 @@ function SearchPage() {
     setShowButtons(!showButtons);
   };
 
-  // Google search script
   useEffect(() => {
     const script = document.createElement("script");
     script.id = "google-cse";
@@ -69,6 +66,14 @@ function SearchPage() {
     };
   }, [navigate]);
 
+  const handleFileClick = useCallback(() => {
+    setUrl("https://pizeonflytools.vercel.app/");
+  }, []);
+
+  const closeViewer = () => {
+    setUrl(null);
+  };
+
   return (
     <div
       className="bg-zinc-100 dark:bg-[#060d1c] min-h-screen h-full"
@@ -79,7 +84,6 @@ function SearchPage() {
         backgroundAttachment: "fixed",
       }}
     >
-      {/* Header */}
       <Header isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
 
       <div className="mt-6">
@@ -131,12 +135,21 @@ function SearchPage() {
         )}
         <div className="flex flex-col items-center mt-[1vh]">
           <img
-            src={isDarkMode ? "GoogleBlack.png" : "GoogleWhite.png"} // Adjusted for dark mode condition
+            src={isDarkMode ? "GoogleBlack.png" : "GoogleWhite.png"}
             alt="Google Logo"
             className="mb-4 h-16"
           />
           <div className="gcse-searchbox-only" />
           <AnimatedTooltipPreview />
+        </div>
+        <div className="border border-2 border-gray-400 rounded-2xl dark:text-white space-x-16 w-[65%] text-center -mb-[70px] p-1.5 mt-32 justify-center m-auto">
+          <button>BOOKMARK</button>
+          <button>NOTES</button>
+          <button>PASSWORDS</button>
+          <button>NEWS</button>
+          <button>SPORTS</button>
+          <button>TOP100</button>
+          <button onClick={handleFileClick}>TOOLS</button>
         </div>
 
         <Anotherpage
@@ -144,6 +157,32 @@ function SearchPage() {
           isDarkMode={isDarkMode}
         />
       </div>
+
+      {/* Centered Tools Iframe Modal */}
+      {Url && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="modal-content bg-white rounded-lg overflow-hidden shadow-lg w-[80%] max-w-4xl">
+            <div className="modal-header flex justify-between items-center p-4 border-b border-gray-200">
+              <h5 className="text-lg font-medium text-gray-900">DAILY TOOLS</h5>
+              <button
+                type="button"
+                className="text-gray-400 hover:text-gray-500"
+                onClick={closeViewer}
+              >
+                &times;
+              </button>
+            </div>
+            <div className="modal-body p-4">
+              <iframe
+                src={Url}
+                style={{ width: "100%", height: "500px" }}
+                title="URL Viewer"
+                className="rounded-lg"
+              ></iframe>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
