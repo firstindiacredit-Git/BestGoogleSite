@@ -120,7 +120,7 @@ function SearchPage() {
                 <img src={remove} alt="Remove" className="h-9 w-9 m-auto" />
                 <span className="dark:text-white">Remove Image</span>
               </button>
-              <Link to="/NewSearchPage">
+              <Link to="/">
                 <img src={layers} alt="Upload" className="h-9 w-9 m-auto " />
                 <span className="text-xs p-1 dark:text-white w-28 rounded m-auto grid items-center justify-center ">
                   Customize Widgets
