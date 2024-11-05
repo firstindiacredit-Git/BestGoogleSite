@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 
 function Calculator() {
-  // State for Calculator
+  
   const [calcInput, setCalcInput] = useState("");
   const [calcResult, setCalcResult] = useState("");
 
-  // Handle calculator input
+  
   const handleCalcInput = (value) => {
     if (value === "=") {
       try {
-        const result = eval(calcInput); // Caution: eval can be risky; consider safer alternatives
+        const result = eval(calcInput); 
         setCalcResult(result);
         setCalcInput(result.toString());
       } catch (error) {
