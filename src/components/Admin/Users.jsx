@@ -5,6 +5,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../firebase";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
+import { CiGrid31, CiCircleList } from "react-icons/ci";
 
 export default function Users() {
   const [users, setUsers] = useState([]);
@@ -12,6 +13,7 @@ export default function Users() {
   const [error, setError] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [viewType, setViewType] = useState("list"); // New state for view type
   const usersPerPage = 15;
 
   useEffect(() => {
@@ -55,6 +57,9 @@ export default function Users() {
   const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
   const totalPages = Math.ceil(users.length / usersPerPage);
 
+  // Create array of page numbers
+  const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
+
   return (
     <div className="flex min-h-screen">
       <Sidebar />
@@ -62,18 +67,50 @@ export default function Users() {
         <Header />
         <div className="p-6 flex-1">
           <h1 className="text-2xl font-bold mb-6 text-center">All Users</h1>
-          <div className="flex flex-col">
+
+          {/* Toggle View Buttons */}
+          <div className="flex justify-end mb-4">
+            <button
+              onClick={() => setViewType("list")}
+              className={`px-4 py-2 mr-2 ${
+                viewType === "list" ? "bg-blue-500 text-white" : "bg-gray-200"
+              } rounded`}
+            >
+              <CiCircleList />
+            </button>
+            <button
+              onClick={() => setViewType("grid")}
+              className={`px-4 py-2 ${
+                viewType === "grid" ? "bg-blue-500 text-white" : "bg-gray-200"
+              } rounded`}
+            >
+              <CiGrid31 />
+            </button>
+          </div>
+
+          {/* Users Display */}
+          <div
+            className={`grid ${viewType === "grid" ? "grid-cols-3 gap-4" : ""}`}
+          >
             {currentUsers.map(({ id, photoURL, displayName, email, bio }) => (
               <div
                 key={id}
-                className="flex items-center p-4 bg-white shadow-md rounded-lg mb-4"
+                className={`${
+                  viewType === "grid"
+                    ? "flex flex-col items-center p-4 bg-white shadow-md rounded-lg"
+                    : "flex items-center p-4 bg-white shadow-md rounded-lg mb-4"
+                }`}
               >
                 <img
                   src={photoURL || "/default-avatar.png"}
                   alt="User Avatar"
-                  className="h-[60px] w-[60px] rounded-full border border-gray-300 dark:border-gray-600 mr-4"
+                  className={`${
+                    viewType === "grid"
+                      ? "h-[80px] w-[80px]"
+                      : "h-[60px] w-[60px]"
+                  } rounded-full border border-gray-300 dark:border-gray-600 mb-2`}
                 />
-                <div className="flex-1">
+                <div className="text-center flex-1">
                   <div className="text-xl font-semibold">
                     {displayName || "No Name"}
                   </div>
@@ -83,7 +120,9 @@ export default function Users() {
               </div>
             ))}
           </div>
-          <div className="flex justify-between mt-4">
+
+          {/* Pagination Controls */}
+          <div className="flex justify-center items-center mt-4 space-x-2">
             <button
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
@@ -91,6 +130,19 @@ export default function Users() {
             >
               Previous
             </button>
+            {pageNumbers.map((number) => (
+              <button
+                key={number}
+                onClick={() => setCurrentPage(number)}
+                className={`px-4 py-2 rounded ${
+                  currentPage === number
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200"
+                }`}
+              >
+                {number}
+              </button>
+            ))}
             <button
               onClick={() =>
                 setCurrentPage((prev) => Math.min(prev + 1, totalPages))
