@@ -142,14 +142,19 @@ function SearchPage() {
           <div className="gcse-searchbox-only" />
           <AnimatedTooltipPreview />
         </div>
-        <div className="border border-2 border-gray-400 rounded-2xl dark:text-white space-x-16 w-[65%] text-center -mb-[70px] p-1.5 mt-32 justify-center m-auto">
-          <button>BOOKMARK</button>
-          <button>NOTES</button>
-          <button>PASSWORDS</button>
-          <button>NEWS</button>
-          <button>SPORTS</button>
-          <button>TOP100</button>
-          <button onClick={handleFileClick}>TOOLS</button>
+        <div className="border border-2 border-gray-400 rounded-3xl dark:text-white  font-semibold text-center space-x-12 w-[80%] -mb-[70px] p-1.5 mt-32 justify-center  m-auto">
+          <button className="hover:bg-gray-500 hover:text-white w-[11%] rounded-xl">BOOKMARK</button>
+          <button className="hover:bg-gray-500 hover:text-white w-[8%] rounded-xl ">NOTES</button>
+          <button className="hover:bg-gray-500 hover:text-white w-[11%] rounded-xl">PASSWORDS</button>
+          <button className="hover:bg-gray-500 hover:text-white w-[8%] rounded-xl">NEWS</button>
+          <button className="hover:bg-gray-500 hover:text-white w-[11%] rounded-xl">SPORTS</button>
+          <button className="hover:bg-gray-500 hover:text-white w-[11%] rounded-xl">TOP100</button>
+          <button
+            onClick={handleFileClick}
+            className="hover:bg-gray-500 w-[8%]  hover:text-white rounded-xl"
+          >
+            TOOLS
+          </button>
         </div>
 
         <Anotherpage
@@ -161,18 +166,18 @@ function SearchPage() {
       {/* Centered Tools Iframe Modal */}
       {Url && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="modal-content bg-white rounded-lg overflow-hidden shadow-lg w-[80%] max-w-4xl">
+          <div className="modal-content bg-white  rounded-lg overflow-hidden shadow-lg w-[80%] max-w-4xl">
             <div className="modal-header flex justify-between items-center p-4 border-b border-gray-200">
               <h5 className="text-lg font-medium text-gray-900">DAILY TOOLS</h5>
               <button
                 type="button"
-                className="text-gray-400 hover:text-gray-500"
+                className="text-gray-400  hover:text-gray-500"
                 onClick={closeViewer}
               >
                 &times;
               </button>
             </div>
-            <div className="modal-body p-4">
+            <div className="modal-body  p-4">
               <iframe
                 src={Url}
                 style={{ width: "100%", height: "500px" }}
