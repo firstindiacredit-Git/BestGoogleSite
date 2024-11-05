@@ -19,7 +19,7 @@ const initialBookmarks = {
     { name: "LinkedIn", link: "https://www.linkedin.com" },
   ],
   Travel: [
-    { name: "Booking.com", link: "https://www.booking.com" },
+    { name: "Booking", link: "https://www.booking.com" },
     { name: "Emirates", link: "https://www.emirates.com" },
     { name: "Hotels.com", link: "https://www.hotels.com" },
     { name: "Trip Advisor", link: "https://www.tripadvisor.com" },
@@ -144,7 +144,7 @@ const Bookmarks = () => {
               }}
               className="w-10 h-10 mb-1"
             />
-            <span className="block dark:text-white w-2 mr-12">
+            <span className="block text-sm dark:text-white w-2 mr-12">
               {bookmark.name}
             </span>
           </a>

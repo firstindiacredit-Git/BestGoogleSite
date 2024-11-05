@@ -247,7 +247,7 @@ const Anotherpage = ({ backgroundImage }) => {
                     {visibleItem === "Weather" && (
                       <>
                         <div className="fixed inset-0 bg-transparent bg-opacity-50 backdrop-blur-sm z-40"></div>
-                        <div className="fixed top-1/2 left-1/2 z-50 w-[50%] p-6 shadow-lg transform -translate-x-1/2 -translate-y-1/2 bg-[#f3e9ff] dark:bg-[#4a454e] rounded-lg">
+                        <div className="fixed top-1/2 left-1/2 z-50 w-[50%] h-[]p-6 shadow-lg transform -translate-x-1/2 -translate-y-1/2 bg-[#f3e9ff] dark:bg-[#4a454e] rounded-lg">
                           <Weather />
                           <button
                             className="absolute top-1 right-2 mb-5 dark:text-white "

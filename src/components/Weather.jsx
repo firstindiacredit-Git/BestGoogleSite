@@ -1,28 +1,28 @@
-import React, { useState } from "react";
+import React from "react";
 
-// Sample static weather data (replace with your own)
+// Sample static weather data
 const staticWeatherData = {
-  city: "London",
-  country: "GB",
-  temperature: 35,
-  feels_like: 17,
-  humidity: 65,
+  city: "Dunmore",
+  country: "Ireland",
+  temperature: 23,
+  feels_like: 20,
+  humidity: 30,
   description: "clear sky",
-  icon: "02d", // Use an icon code from OpenWeatherMap or other sources
+  icon: "01d",
+  windSpeed: 15,
 };
 
+// Weather icon URLs based on weather condition code
 const weatherIcons = {
   "01d": "https://openweathermap.org/img/wn/01d@2x.png", // Clear sky day icon
   "01n": "https://openweathermap.org/img/wn/01n@2x.png", // Clear sky night icon
   "02d": "https://openweathermap.org/img/wn/02d@2x.png", // Few clouds day icon
   "02n": "https://openweathermap.org/img/wn/02n@2x.png", // Few clouds night icon
-  "03d": "https://openweathermap.org/img/wn/03d@2x.png", // Scattered clouds icon
+  "03d": "https://openweathermap.org/img/wn/03d@2x.png", // Scattered clouds day icon
   // Add more icons as needed
 };
 
 const WeatherPage = () => {
-  const [weatherData, setWeatherData] = useState(staticWeatherData);
-
   const {
     city,
     country,
@@ -31,24 +31,49 @@ const WeatherPage = () => {
     humidity,
     description,
     icon,
-  } = weatherData;
+    windSpeed,
+  } = staticWeatherData;
 
   return (
-    <div>
-      <div className="bg-white/10 p-5 mb-6 w-[98%] flex rounded-lg m-auto shadow-lg text-center">
-        <img
-          src={weatherIcons[icon]} // Static icon from the weatherIcons object
-          alt={description}
-          className=" mb-4 shadow-2xl rounded-[50%]"
-        />
-        <h2 className="text-2xl dark:text-white ml-2 font-semibold flex mt-16">
-          {temperature}°C
-        </h2>
-        <p className="text-lg dark:text-white flex capitalize">{description}</p>
-        <p className="text-sm dark:text-white flex mt-9">
-          Feels like: {feels_like}°C
-        </p>
-        <p className="text-sm dark:text-white flex">Humidity: {humidity}%</p>
+    <div className="flex flex-col items-center -mt-8 p-2 border bg-white/10 backdrop-blur-lg rounded-lg shadow-lg">
+      {/* Main Weather Information */}
+      <div className="flex items-center justify-center p-2 border bg-white/5 backdrop-blur-lg rounded-lg mb-2">
+        <div className="w-24 h-24">
+          <img
+            src={weatherIcons[icon]}
+            alt={description}
+            className="w-full h-full"
+          />
+        </div>
+        <div className="text-center ml-4">
+          <div className="text-3xl font-semibold dark:text-white">
+            {temperature}°C
+          </div>
+          <div className="dark:text-gray-300">
+            {city}, {country}
+          </div>
+        </div>
+      </div>
+
+      {/* Additional Details */}
+      <div className="flex justify-between items-center w-full border bg-white/10 backdrop-blur-lg rounded-lg p-3 dark:text-white">
+        {/* Humidity */}
+        <div className="flex flex-col items-center">
+          <div className="text-lg">Humidity</div>
+          <div className="text-2xl font-bold">{humidity}%</div>
+        </div>
+
+        {/* Feels Like */}
+        <div className="flex flex-col items-center">
+          <div className="text-lg">Feels Like</div>
+          <div className="text-2xl font-bold">{feels_like}°C</div>
+        </div>
+
+        {/* Wind Speed */}
+        <div className="flex flex-col items-center">
+          <div className="text-lg">Wind</div>
+          <div className="text-2xl font-bold">{windSpeed} km/h</div>
+        </div>
       </div>
     </div>
   );

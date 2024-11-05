@@ -142,16 +142,28 @@ function SearchPage() {
           <div className="gcse-searchbox-only" />
           <AnimatedTooltipPreview />
         </div>
-        <div className="border border-2 border-gray-400 rounded-3xl dark:text-white  font-semibold text-center space-x-12 w-[80%] -mb-[70px] p-1.5 mt-32 justify-center  m-auto">
-          <button className="hover:bg-gray-500 hover:text-white w-[11%] rounded-xl">BOOKMARK</button>
-          <button className="hover:bg-gray-500 hover:text-white w-[8%] rounded-xl ">NOTES</button>
-          <button className="hover:bg-gray-500 hover:text-white w-[11%] rounded-xl">PASSWORDS</button>
-          <button className="hover:bg-gray-500 hover:text-white w-[8%] rounded-xl">NEWS</button>
-          <button className="hover:bg-gray-500 hover:text-white w-[11%] rounded-xl">SPORTS</button>
-          <button className="hover:bg-gray-500 hover:text-white w-[11%] rounded-xl">TOP100</button>
+        <div className="border border-2 border-gray-400 rounded-3xl dark:text-white font-semibold text-center space-x-2 sm:space-x-4 md:space-x-6 lg:space-x-10 w-[90%] md:w-[80%] lg:w-[70%] xl:w-[80%] p-2 mt-32 mx-auto flex flex-wrap justify-center gap-2 md:gap-3 lg:gap-4">
+          <button className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[20%] lg:w-[15%] xl:w-[11%] rounded-xl">
+            BOOKMARK
+          </button>
+          <button className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[20%] lg:w-[15%] xl:w-[8%] rounded-xl">
+            NOTES
+          </button>
+          <button className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[20%] lg:w-[15%] xl:w-[11%] rounded-xl">
+            PASSWORDS
+          </button>
+          <button className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[20%] lg:w-[15%] xl:w-[8%] rounded-xl">
+            NEWS
+          </button>
+          <button className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[20%] lg:w-[15%] xl:w-[11%] rounded-xl">
+            SPORTS
+          </button>
+          <button className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[20%] lg:w-[15%] xl:w-[11%] rounded-xl">
+            TOP100
+          </button>
           <button
             onClick={handleFileClick}
-            className="hover:bg-gray-500 w-[8%]  hover:text-white rounded-xl"
+            className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[20%] lg:w-[15%] xl:w-[8%] rounded-xl"
           >
             TOOLS
           </button>
@@ -171,7 +183,7 @@ function SearchPage() {
               <h5 className="text-lg font-medium text-gray-900">DAILY TOOLS</h5>
               <button
                 type="button"
-                className="text-gray-400  hover:text-gray-500"
+                className="text-gray-400 text-2xl hover:text-gray-500"
                 onClick={closeViewer}
               >
                 &times;

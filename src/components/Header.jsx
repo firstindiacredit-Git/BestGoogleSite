@@ -60,12 +60,13 @@ const Header = () => {
   return (
     <header className="p-2 bg-white/10 dark:bg-black/10 backdrop-blur-lg shadow-md flex justify-between items-center sticky top-0 z-50">
       <div className="flex items-center space-x-2">
-        <span className="text-green-500 dark:text-green-300">Best</span>
-        <span className="text-red-500 dark:text-red-300">Google</span>
-        <span className="text-yellow-500 dark:text-yellow-300">Sites</span>
-
+        <Link to="/">
+          <span className="text-green-500 dark:text-green-300">Best</span>
+          <span className="text-red-500 dark:text-red-300">Google</span>
+          <span className="text-yellow-500 dark:text-yellow-300">Sites</span>
+        </Link>
         <Link to="/PremiumPage">
-          <button className="border ml-5 border-blue-500 text-blue-500 px-3 py-1 rounded hover:bg-blue-500 hover:text-white transition-colors duration-200 dark:border-blue-300 dark:text-blue-300 dark:hover:bg-blue-300">
+          <button className="border ml-2 border-blue-500 text-blue-500 px-3 py-1 rounded hover:bg-blue-500 hover:text-white transition-colors duration-200 dark:border-blue-300 dark:text-blue-300 dark:hover:bg-blue-300">
             Premium
           </button>
         </Link>
