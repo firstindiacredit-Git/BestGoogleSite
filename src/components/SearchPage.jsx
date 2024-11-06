@@ -1,20 +1,26 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { TbGridDots } from "react-icons/tb";
+import { IoIosCloseCircleOutline } from "react-icons/io";
 import Header from "../components/Header";
 import AnimatedTooltipPreview from "./AnimatedTooltipPreview";
 import Anotherpage from "../components/Anotherpage";
-import { TbGridDots } from "react-icons/tb";
+import PopularBookmarks from "../components/PopularBookmarks";
+import Notepad from "../components/Notepad";
 import galleryupload from "/galleryupload.png";
 import layers from "/layers.png";
 import remove from "/remove.png";
-import { Link, useNavigate } from "react-router-dom";
 import "./style.css";
+
 
 function SearchPage() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [backgroundImage, setBackgroundImage] = useState("");
   const [showButtons, setShowButtons] = useState(false);
-  const [Url, setUrl] = useState(null);
+  const [url, setUrl] = useState(null);
+  const [visibleItem, setVisibleItem] = useState(null);
   const navigate = useNavigate();
+  
 
   useEffect(() => {
     const storedBackgroundImage = localStorage.getItem("backgroundImage");
@@ -66,14 +72,25 @@ function SearchPage() {
     };
   }, [navigate]);
 
-  const handleFileClick = useCallback(() => {
+  const handleFileClick = () => {
     setUrl("https://pizeonflytools.vercel.app/");
-  }, []);
+  };
 
   const closeViewer = () => {
     setUrl(null);
   };
 
+  const handleToggleVisibility = (itemId) => {
+    setVisibleItem((prevVisibleItem) =>
+      prevVisibleItem === itemId ? null : itemId
+    );
+  };
+
+  const handleClose = (id) => {
+    setVisibleItem(null);
+  };
+  
+  
   return (
     <div
       className="bg-zinc-100 dark:bg-[#060d1c] min-h-screen h-full"
@@ -133,6 +150,7 @@ function SearchPage() {
             </div>
           </div>
         )}
+
         <div className="flex flex-col items-center mt-[1vh]">
           <img
             src={isDarkMode ? "GoogleBlack.png" : "GoogleWhite.png"}
@@ -142,25 +160,142 @@ function SearchPage() {
           <div className="gcse-searchbox-only" />
           <AnimatedTooltipPreview />
         </div>
-        <div className="border border-2 border-gray-400 rounded-3xl dark:text-white font-semibold text-center space-x-2 sm:space-x-4 md:space-x-6 lg:space-x-10 w-[90%] md:w-[80%] lg:w-[70%] xl:w-[80%] p-2 mt-32 mx-auto flex flex-wrap justify-center gap-2 md:gap-3 lg:gap-4">
-          <button className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[20%] lg:w-[15%] xl:w-[11%] rounded-xl">
-            BOOKMARK
-          </button>
-          <button className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[20%] lg:w-[15%] xl:w-[8%] rounded-xl">
-            NOTES
-          </button>
-          <button className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[20%] lg:w-[15%] xl:w-[11%] rounded-xl">
-            PASSWORDS
-          </button>
-          <button className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[20%] lg:w-[15%] xl:w-[8%] rounded-xl">
-            NEWS
-          </button>
-          <button className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[20%] lg:w-[15%] xl:w-[11%] rounded-xl">
-            SPORTS
-          </button>
-          <button className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[20%] lg:w-[15%] xl:w-[11%] rounded-xl">
-            TOP100
-          </button>
+
+        <div className="border border-2 border-gray-400 rounded-3xl dark:text-white font-semibold text-center space-x-6 sm:space-x-4 md:space-x-6 lg:space-x-10 w-[70%] md:w-[70%] lg:w-[50%] xl:w-[60%] p-2 mt-32 mx-auto flex flex-wrap justify-center gap-2 md:gap-3 lg:gap-4">
+          <div>
+            <button
+              className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[100%] lg:w-[120%] xl:w-[120%] rounded-xl"
+              onClick={() => handleToggleVisibility("PopularBookmarks")}
+            >
+              BOOKMARKS
+            </button>
+            {visibleItem === "PopularBookmarks" && (
+              <>
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"></div>
+                <div className="fixed top-1/2 left-1/2 z-50 w-[90%] h-[90%] max-h-[90vh] p-4 shadow-lg transform -translate-x-1/2 -translate-y-1/2 bg-[#f3e9ff] dark:bg-[#4a454e] rounded-lg overflow-y-auto">
+                  <PopularBookmarks />
+                  <button
+                    className="absolute top-3 right-3 dark:text-white"
+                    onClick={() => handleClose("PopularBookmarks")}
+                  >
+                    <IoIosCloseCircleOutline size={30} />
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+
+          <div>
+            <button
+              className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[100%] lg:w-[100%] xl:w-[120%] rounded-xl"
+              onClick={() => handleToggleVisibility("Notepad")}
+            >
+              NOTES
+            </button>
+            {visibleItem === "Notepad" && (
+              <>
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"></div>
+                <div className="fixed top-1/2 left-1/2 z-50 w-[70%] h-[100%] p-4 shadow-lg transform -translate-x-1/2 -translate-y-1/2 bg-[#f3e9ff] dark:bg-[#4a454e] rounded-lg">
+                  <Notepad />
+                  <button
+                    className="absolute top-3 right-3 dark:text-white"
+                    onClick={() => handleClose("Notepad")}
+                  >
+                    <IoIosCloseCircleOutline size={30} />
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+          <div>
+            <button
+              className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[100%] lg:w-[100%] xl:w-[120%] rounded-xl"
+              onClick={() => handleToggleVisibility("Password")}
+            >
+              PASSWORD
+            </button>
+            {/* {visibleItem === "Password" && (
+              <>
+                <div className="fixed inset-0 bg-transparent bg-opacity-70 backdrop-blur-sm z-40"></div>
+                <div className="fixed top-1/2 left-1/2 z-50 w-[70%] h-[100%] p-4 shadow-lg transform -translate-x-1/2 -translate-y-1/2 bg-[#f3e9ff] dark:bg-[#4a454e] rounded-lg">
+                  <Password />
+                  <button
+                    className="absolute top-3 right-3 dark:text-white"
+                    onClick={() => handleClose("Password")}
+                  >
+                    <IoIosCloseCircleOutline size={30} />
+                  </button>
+                </div>
+              </>
+            )} */}
+          </div>
+          <div>
+            <button
+              className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[100%] lg:w-[100%] xl:w-[120%] rounded-xl"
+              onClick={() => handleToggleVisibility("NEWS")}
+            >
+              NEWS
+            </button>
+            {/* {visibleItem === "NEWS" && (
+              <>
+                <div className="fixed inset-0 bg-transparent bg-opacity-70 backdrop-blur-sm z-40"></div>
+                <div className="fixed top-1/2 left-1/2 z-50 w-[70%] h-[100%] p-4 shadow-lg transform -translate-x-1/2 -translate-y-1/2 bg-[#f3e9ff] dark:bg-[#4a454e] rounded-lg">
+                  <NEWS />
+                  <button
+                    className="absolute top-3 right-3 dark:text-white"
+                    onClick={() => handleClose("NEWS")}
+                  >
+                    <IoIosCloseCircleOutline size={30} />
+                  </button>
+                </div>
+              </>
+            )} */}
+          </div>
+          <div>
+            <button
+              className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[100%] lg:w-[100%] xl:w-[120%] rounded-xl"
+              onClick={() => handleToggleVisibility("SPORTS")}
+            >
+              SPORTS
+            </button>
+            {/* {visibleItem === "SPORTS" && (
+              <>
+                <div className="fixed inset-0 bg-transparent bg-opacity-70 backdrop-blur-sm z-40"></div>
+                <div className="fixed top-1/2 left-1/2 z-50 w-[70%] h-[100%] p-4 shadow-lg transform -translate-x-1/2 -translate-y-1/2 bg-[#f3e9ff] dark:bg-[#4a454e] rounded-lg">
+                  <SPORTS />
+                  <button
+                    className="absolute top-3 right-3 dark:text-white"
+                    onClick={() => handleClose("SPORTS")}
+                  >
+                    <IoIosCloseCircleOutline size={30} />
+                  </button>
+                </div>
+              </>
+            )} */}
+          </div>
+          <div>
+            <button
+              className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[100%] lg:w-[100%] xl:w-[120%] rounded-xl"
+              onClick={() => handleToggleVisibility("TOP100")}
+            >
+              TOP100
+            </button>
+            {/* {visibleItem === "TOP100" && (
+              <>
+                <div className="fixed inset-0 bg-transparent bg-opacity-70 backdrop-blur-sm z-40"></div>
+                <div className="fixed top-1/2 left-1/2 z-50 w-[70%] h-[100%] p-4 shadow-lg transform -translate-x-1/2 -translate-y-1/2 bg-[#f3e9ff] dark:bg-[#4a454e] rounded-lg">
+                  <TOP100 />
+                  <button
+                    className="absolute top-3 right-3 dark:text-white"
+                    onClick={() => handleClose("TOP100")}
+                  >
+                    <IoIosCloseCircleOutline size={30} />
+                  </button>
+                </div>
+              </>
+            )} */}
+          </div>
+          {/* Other buttons iframe */}
           <button
             onClick={handleFileClick}
             className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[20%] lg:w-[15%] xl:w-[8%] rounded-xl"
@@ -176,9 +311,9 @@ function SearchPage() {
       </div>
 
       {/* Centered Tools Iframe Modal */}
-      {Url && (
+      {url && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="modal-content bg-white  rounded-lg overflow-hidden shadow-lg w-[80%] max-w-4xl">
+          <div className="modal-content bg-white rounded-lg overflow-hidden shadow-lg w-[80%] max-w-4xl">
             <div className="modal-header flex justify-between items-center p-4 border-b border-gray-200">
               <h5 className="text-lg font-medium text-gray-900">DAILY TOOLS</h5>
               <button
@@ -189,9 +324,9 @@ function SearchPage() {
                 &times;
               </button>
             </div>
-            <div className="modal-body  p-4">
+            <div className="modal-body p-4">
               <iframe
-                src={Url}
+                src={url}
                 style={{ width: "100%", height: "500px" }}
                 title="URL Viewer"
                 className="rounded-lg"

@@ -46,7 +46,7 @@ const WeatherPage = () => {
           />
         </div>
         <div className="text-center ml-4">
-          <div className="text-3xl font-semibold dark:text-white">
+          <div className="text-3xl  dark:text-white">
             {temperature}°C
           </div>
           <div className="dark:text-gray-300">
@@ -60,19 +60,19 @@ const WeatherPage = () => {
         {/* Humidity */}
         <div className="flex flex-col items-center">
           <div className="text-lg">Humidity</div>
-          <div className="text-2xl font-bold">{humidity}%</div>
+          <div className="text-xl ">{humidity}%</div>
         </div>
 
         {/* Feels Like */}
         <div className="flex flex-col items-center">
           <div className="text-lg">Feels Like</div>
-          <div className="text-2xl font-bold">{feels_like}°C</div>
+          <div className="text-xl ">{feels_like}°C</div>
         </div>
 
         {/* Wind Speed */}
         <div className="flex flex-col items-center">
           <div className="text-lg">Wind</div>
-          <div className="text-2xl font-bold">{windSpeed} km/h</div>
+          <div className="text-xl ">{windSpeed} km/h</div>
         </div>
       </div>
     </div>
