@@ -8,6 +8,7 @@ import Anotherpage from "../components/Anotherpage";
 import PopularBookmarks from "../components/PopularBookmarks";
 import Notepad from "../components/Notepad";
 import PasswordGenerator from "../components/PasswordGenerater";
+import News from "../components/News";
 import galleryupload from "/galleryupload.png";
 import layers from "/layers.png";
 import remove from "/remove.png";
@@ -233,24 +234,24 @@ function SearchPage() {
           <div>
             <button
               className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[100%] lg:w-[100%] xl:w-[120%] rounded-xl"
-              onClick={() => handleToggleVisibility("NEWS")}
+              onClick={() => handleToggleVisibility("News")}
             >
               NEWS
             </button>
-            {/* {visibleItem === "NEWS" && (
+            {visibleItem === "News" && (
               <>
-                <div className="fixed inset-0 bg-transparent bg-opacity-70 backdrop-blur-sm z-40"></div>
-                <div className="fixed top-1/2 left-1/2 z-50 w-[70%] h-[100%] p-4 shadow-lg transform -translate-x-1/2 -translate-y-1/2 bg-[#f3e9ff] dark:bg-[#4a454e] rounded-lg">
-                  <NEWS />
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"></div>
+                <div className="fixed top-1/2 left-1/2 z-50 w-[70%] h-[100%] p-4 shadow-lg transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-[#4a454e] rounded-lg">
+                  <News />
                   <button
                     className="absolute top-3 right-3 dark:text-white"
-                    onClick={() => handleClose("NEWS")}
+                    onClick={() => handleClose("News")}
                   >
                     <IoIosCloseCircleOutline size={30} />
                   </button>
                 </div>
               </>
-            )} */}
+            )}
           </div>
           <div>
             <button
