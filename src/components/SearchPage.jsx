@@ -173,7 +173,7 @@ function SearchPage() {
             {visibleItem === "PopularBookmarks" && (
               <>
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"></div>
-                <div className="fixed top-1/2 left-1/2 z-50 w-[90%] h-[90%] max-h-[90vh] p-4 shadow-lg transform -translate-x-1/2 -translate-y-1/2 bg-[#f3e9ff] dark:bg-[#4a454e] rounded-lg overflow-y-auto">
+                <div className="fixed top-1/2 left-1/2 z-50 w-[90%] h-[90%] max-h-[90vh] p-4 shadow-lg transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-[#4a454e] rounded-lg overflow-y-auto">
                   <PopularBookmarks />
                   <button
                     className="absolute top-3 right-3 dark:text-white"
@@ -196,7 +196,7 @@ function SearchPage() {
             {visibleItem === "Notepad" && (
               <>
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"></div>
-                <div className="fixed top-1/2 left-1/2 z-50 w-[70%] h-[100%] p-4 shadow-lg transform -translate-x-1/2 -translate-y-1/2 bg-[#f3e9ff] dark:bg-[#4a454e] rounded-lg">
+                <div className="fixed top-1/2 left-1/2 z-50 w-[70%] h-[100%] p-4  transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-[#4a454e] rounded-lg">
                   <Notepad />
                   <button
                     className="absolute top-3 right-3 dark:text-white"
@@ -218,7 +218,7 @@ function SearchPage() {
             {visibleItem === "PasswordGenerator" && (
               <>
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"></div>
-                <div className="fixed top-1/2 left-1/2 z-50 w-[90%] h-[90%] max-h-[90vh] p-4 shadow-lg transform -translate-x-1/2 -translate-y-1/2 bg-[#f3e9ff] dark:bg-[#4a454e] rounded-lg overflow-y-auto">
+                <div className="fixed top-1/2 left-1/2 z-50 w-[90%] h-[90%] max-h-[90vh] p-4  transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-[#4a454e] rounded-lg overflow-y-auto">
                   <PasswordGenerator />
                   <button
                     className="absolute top-3 right-3 dark:text-white"

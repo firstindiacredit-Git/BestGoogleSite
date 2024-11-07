@@ -37,7 +37,7 @@ const WeatherPage = () => {
   return (
     <div className="flex flex-col items-center -mt-8 p-2 border bg-white/10 backdrop-blur-lg rounded-lg shadow-lg">
       {/* Main Weather Information */}
-      <div className="flex items-center justify-center p-2 border bg-white/5 backdrop-blur-lg rounded-lg mb-2">
+      <div className="flex items-center justify-center p-2   rounded-lg mb-2">
         <div className="w-24 h-24">
           <img
             src={weatherIcons[icon]}
@@ -56,23 +56,23 @@ const WeatherPage = () => {
       </div>
 
       {/* Additional Details */}
-      <div className="flex justify-between items-center w-full border bg-white/10 backdrop-blur-lg rounded-lg p-3 dark:text-white">
+      <div className="flex justify-between items-center w-full border-t-2   p-3 dark:text-white">
         {/* Humidity */}
         <div className="flex flex-col items-center">
-          <div className="text-lg">Humidity</div>
-          <div className="text-xl ">{humidity}%</div>
+          <div className="text-md">Humidity</div>
+          <div className="text-md ">{humidity}%</div>
         </div>
 
         {/* Feels Like */}
         <div className="flex flex-col items-center">
-          <div className="text-lg">Feels Like</div>
-          <div className="text-xl ">{feels_like}°C</div>
+          <div className="text-md">Feels Like</div>
+          <div className="text-md ">{feels_like}°C</div>
         </div>
 
         {/* Wind Speed */}
         <div className="flex flex-col items-center">
-          <div className="text-lg">Wind</div>
-          <div className="text-xl ">{windSpeed} km/h</div>
+          <div className="text-md">Wind</div>
+          <div className="text-md ">{windSpeed} km/h</div>
         </div>
       </div>
     </div>

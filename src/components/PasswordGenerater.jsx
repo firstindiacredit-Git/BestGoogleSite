@@ -107,8 +107,8 @@ const PasswordGenerator = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-6xl">
+    <div className="min-h-screen flex items-center justify-center  bg-transparent">
+      <div className="bg-white dark:bg-[#4a454e] dark:text-white p-8 rounded-lg  w-full max-w-6xl">
         <h2 className="text-2xl font-bold mb-6 text-center">
           Password Generator
         </h2>
@@ -213,9 +213,25 @@ const PasswordGenerator = () => {
                 {submittedData.map((data) => (
                   <tr key={data.id}>
                     <td className="border px-4 py-2">{data.name}</td>
-                    <td className="border px-4 py-2">{data.username}</td>
+                    <td className="border px-4 py-2">
+                      {data.username}{" "}
+                      <button
+                        onClick={() => copyToClipboard(data.username)}
+                        className="p-3 text-blue-500  dark:text-white rounded-r-md  focus:outline-none"
+                      >
+                        <FaCopy />
+                      </button>
+                    </td>
                     <td className="border px-4 py-2">{data.url}</td>
-                    <td className="border px-4 py-2">{data.password}</td>
+                    <td className="border px-4 py-2">
+                      {data.password}
+                      <button
+                        onClick={() => copyToClipboard(data.password)}
+                        className="ml-2 text-blue-500 hover:text-blue-700"
+                      >
+                        <FaCopy />
+                      </button>
+                    </td>
                     <td className="border px-4 py-2">{data.email}</td>
                     <td className="border px-4 py-2">{data.phone}</td>
                     <td className="border px-4 py-2">
