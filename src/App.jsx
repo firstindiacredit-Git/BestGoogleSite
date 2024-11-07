@@ -11,6 +11,8 @@ import Dashboard from "./components/Admin/Dashboard.jsx";
 import Login from "./components/Admin/Login.jsx";
 import Users from "./components/Admin/Users.jsx";
 import PremiumPage from "./components/PremiumPage.jsx";
+import PasswordGenerator from "./components/PasswordGenerater.jsx";
+
 
 function App() {
   return (
@@ -26,6 +28,7 @@ function App() {
         <Route path="/admin/users" element={<Users />} />
         <Route path="/PremiumPage" element={<PremiumPage />} />
         <Route path="/admin/dashboard" element={<Dashboard />} />
+        <Route path="/PasswordGenerator" element={<PasswordGenerator />} />
       </Routes>
     </Router>
   );

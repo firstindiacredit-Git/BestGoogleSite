@@ -16,3 +16,7 @@ body {
   width: 0px;
   background: transparent;
 }
+
+.Toastify__toast-container {
+  backdrop-filter: none;  /* Remove any background filter or blur effect */
+}
