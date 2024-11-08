@@ -31,12 +31,7 @@ const PasswordGenerator = () => {
 
   useEffect(() => {
     if (currentUser) {
-      const userDocRef = collection(
-        db,
-        "users",
-        currentUser.uid,
-        "passwords"
-      );
+      const userDocRef = collection(db, "users", currentUser.uid, "passwords");
       const unsubscribe = onSnapshot(userDocRef, (snapshot) => {
         const data = snapshot.docs.map((doc) => ({
           id: doc.id,
@@ -71,7 +66,17 @@ const PasswordGenerator = () => {
     }
 
     setPassword(generatedPassword);
-    const newEntry = { ...formData, password: generatedPassword };
+
+    // Extract the favicon URL from the entered URL
+    const faviconUrl = formData.url
+      ? `https://www.google.com/s2/favicons?domain=${formData.url}`
+      : "";
+
+    const newEntry = {
+      ...formData,
+      password: generatedPassword,
+      favicon: faviconUrl,
+    };
 
     try {
       await addDoc(
@@ -86,9 +91,7 @@ const PasswordGenerator = () => {
 
   const handleDelete = async (docId) => {
     try {
-      await deleteDoc(
-        doc(db, "users", currentUser.uid, "passwords", docId)
-      );
+      await deleteDoc(doc(db, "users", currentUser.uid, "passwords", docId));
       setSubmittedData(submittedData.filter((item) => item.id !== docId));
     } catch (error) {
       console.error("Error deleting document:", error);
@@ -107,14 +110,14 @@ const PasswordGenerator = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center  bg-transparent">
-      <div className="bg-white dark:bg-[#4a454e] dark:text-white p-8 rounded-lg  w-full max-w-6xl">
+    <div className="min-h-screen flex items-center justify-center bg-transparent">
+      <div className="bg-white dark:bg-[#4a454e] dark:text-white p-8 rounded-lg w-full max-w-6xl">
         <h2 className="text-2xl font-bold mb-6 text-center">
           Password Generator
         </h2>
 
         {/* Form Fields */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
           {["name", "username", "url", "email", "phone"].map((field) => (
             <div key={field}>
               <label htmlFor={field} className="block mb-2 capitalize">
@@ -145,7 +148,7 @@ const PasswordGenerator = () => {
               onChange={(e) => setLength(Number(e.target.value))}
               min="4"
               max="20"
-              className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border dark:text-black border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
             />
           </div>
           {[
@@ -154,7 +157,7 @@ const PasswordGenerator = () => {
             ["Include Symbols", includeSymbols, setIncludeSymbols],
           ].map(([label, state, setter], i) => (
             <div key={i}>
-              <label className="flex items-center">
+              <label className="flex items-center mt-10">
                 <input
                   type="checkbox"
                   checked={state}
@@ -197,7 +200,7 @@ const PasswordGenerator = () => {
         {/* Display Submitted Data in Table */}
         {submittedData.length > 0 && (
           <div className="mt-6">
-            <table className="min-w-full table-auto border-collapse">
+            <table className="min-w-full border rounded-lg table-auto border-collapse">
               <thead>
                 <tr>
                   <th className="border px-4 py-2">Name</th>
@@ -214,15 +217,24 @@ const PasswordGenerator = () => {
                   <tr key={data.id}>
                     <td className="border px-4 py-2">{data.name}</td>
                     <td className="border px-4 py-2">
-                      {data.username}{" "}
+                      {data.username}
                       <button
                         onClick={() => copyToClipboard(data.username)}
-                        className="p-3 text-blue-500  dark:text-white rounded-r-md  focus:outline-none"
+                        className="p-3 text-blue-500 rounded-r-md focus:outline-none"
                       >
                         <FaCopy />
                       </button>
                     </td>
-                    <td className="border px-4 py-2">{data.url}</td>
+                    <td className="border px-4 py-2">
+                      {data.favicon && (
+                        <img
+                          src={data.favicon}
+                          alt="favicon"
+                          className="inline mr-2 w-4 h-4"
+                        />
+                      )}
+                      {data.url}
+                    </td>
                     <td className="border px-4 py-2">
                       {data.password}
                       <button

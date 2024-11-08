@@ -30,6 +30,12 @@ const initialBookmarks = {
     { name: "Rediff", link: "https://www.rediff.com" },
     { name: "Myntra", link: "https://www.myntra.com" },
   ],
+  Social: [
+    { name: "Whatsapp", link: "https://www.whatsapp.com" },
+    { name: "Facebook", link: "https://www.facebook.com" },
+    { name: "Twitter", link: "https://www.twitter.com" },
+    { name: "Skype", link: "https://www.skype.com" },
+  ],
 };
 
 const Bookmarks = () => {
@@ -38,6 +44,7 @@ const Bookmarks = () => {
     Popular: [],
     Travel: [],
     Shopping: [],
+    Social: [],
   });
   const [newBookmark, setNewBookmark] = useState({
     name: "",
@@ -55,9 +62,9 @@ const Bookmarks = () => {
 
   useEffect(() => {
     if (user) {
-      const categories = ["Popular", "Travel", "Shopping"];
+      const categories = ["Popular", "Social", "Shopping", "Travel"];
       const unsubscribeFns = categories.map((category) => {
-        const bookmarksRef = collection(db, "users", user.uid, "bookmarks");
+        const bookmarksRef = collection(db, "users", user.uid, "addbookmarks");
         return onSnapshot(bookmarksRef, (snapshot) => {
           const bookmarksData = snapshot.docs
             .map((doc) => ({
@@ -85,7 +92,11 @@ const Bookmarks = () => {
     if (!isValidUrl(newBookmark.link)) return alert("Invalid URL.");
 
     try {
-      await addDoc(collection(db, "users", user.uid, "bookmarks"), newBookmark);
+      // Save the bookmark to Firestore
+      await addDoc(
+        collection(db, "users", user.uid, "addbookmarks"),
+        newBookmark
+      );
       setNewBookmark({ name: "", link: "", category: "Popular" });
       setShowForm(false);
     } catch (error) {
@@ -96,7 +107,8 @@ const Bookmarks = () => {
 
   const deleteBookmark = async (category, id) => {
     try {
-      await deleteDoc(doc(db, "users", user.uid, "bookmarks", id));
+      // Delete the bookmark from Firestore
+      await deleteDoc(doc(db, "users", user.uid, "addbookmarks", id));
       setFirebaseBookmarks((prev) => ({
         ...prev,
         [category]: prev[category].filter((bookmark) => bookmark.id !== id),
@@ -179,7 +191,6 @@ const Bookmarks = () => {
       <h2 className="text-3xl dark:text-white font-semibold mb-6 text-center">
         My Bookmarks
       </h2>
-      
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
         {/* Popular Bookmarks Section */}
@@ -192,11 +203,11 @@ const Bookmarks = () => {
           </div>
         </section>
 
-        {/* Travel Bookmarks Section */}
+        {/* Social Bookmarks Section */}
         <section className="bg-white/10 p-4 border rounded-lg shadow">
-          <h3 className="text-xl font-semibold dark:text-white mb-4">Travel</h3>
+          <h3 className="text-xl font-semibold dark:text-white mb-4">Social</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-2">
-            {renderBookmarks("Travel")}
+            {renderBookmarks("Social")}
           </div>
         </section>
 
@@ -207,6 +218,14 @@ const Bookmarks = () => {
           </h3>
           <div className="grid grid-row-2 sm:grid-row-2 md:grid-row-2 justify-start gap-2">
             {renderBookmarks("Shopping")}
+          </div>
+        </section>
+
+        {/* Travel Bookmarks Section */}
+        <section className="bg-white/10 p-4 border rounded-lg shadow">
+          <h3 className="text-xl font-semibold dark:text-white mb-4">Travel</h3>
+          <div className="grid grid-row-2 sm:grid-row-2 md:grid-row-2 justify-start gap-2">
+            {renderBookmarks("Travel")}
           </div>
         </section>
       </div>
@@ -220,11 +239,11 @@ const Bookmarks = () => {
         Add Bookmark
       </button>
 
-      {/* Form to Add Bookmark */}
+      {/* Add Bookmark Form */}
       {showForm && (
         <form
           onSubmit={addBookmark}
-          className="mt-4 grid grid-cols-2 gap-2 mx-auto"
+          className="mt-4 flex flex-col w-full items-center gap-4"
         >
           <input
             type="text"
@@ -233,7 +252,7 @@ const Bookmarks = () => {
             onChange={(e) =>
               setNewBookmark({ ...newBookmark, name: e.target.value })
             }
-            className="border p-1 text-black border-gray-300 rounded-lg"
+            className="w-3/4 py-2 px-4 border rounded-md"
           />
           <input
             type="text"
@@ -242,24 +261,13 @@ const Bookmarks = () => {
             onChange={(e) =>
               setNewBookmark({ ...newBookmark, link: e.target.value })
             }
-            className="border p-1 text-black border-gray-300 rounded-lg"
+            className="w-3/4 py-2 px-4 border rounded-md"
           />
-          <select
-            value={newBookmark.category}
-            onChange={(e) =>
-              setNewBookmark({ ...newBookmark, category: e.target.value })
-            }
-            className="border p-1 text-black border-gray-300 rounded-lg"
-          >
-            <option value="Popular">Popular</option>
-            <option value="Travel">Travel</option>
-            <option value="Shopping">Shopping</option>
-          </select>
           <button
             type="submit"
-            className="bg-blue-600 text-white px-2 py-2 rounded-lg"
+            className="bg-blue-500 text-white py-2 px-4 rounded-md"
           >
-            Add
+            Add Bookmark
           </button>
         </form>
       )}
