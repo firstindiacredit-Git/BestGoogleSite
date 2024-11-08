@@ -43,7 +43,7 @@ const News = () => {
       try {
         console.log("Fetching news for:", country, category, language); // Debug log
         const response = await axios.get(
-          `https://newsapi.org/v2/top-headlines?country=${country}&category=${category}&language=${language}&apiKey=30b17b84e97c4baeab832d7ada2e27a8`
+          `https://newsapi.org/v2/top-headlines?country=${country}&category=${category}&language=${language}&apiKey=8062ee449f054dfaa9df5baaa2e9a439`
         );
 
         console.log("Response:", response.data); // Debug log
