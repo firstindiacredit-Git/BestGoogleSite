@@ -31,7 +31,7 @@ const initialBookmarks = {
     { name: "Myntra", link: "https://www.myntra.com" },
   ],
   Social: [
-    { name: "Whatsapp", link: "https://www.whatsapp.com" },
+    { name: "Whatsapp", link: "https://web.whatsapp.com/" },
     { name: "Facebook", link: "https://www.facebook.com" },
     { name: "Twitter", link: "https://www.twitter.com" },
     { name: "Skype", link: "https://www.skype.com" },
