@@ -315,7 +315,7 @@ function SearchPage() {
       {/* Centered Tools Iframe Modal */}
       {url && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="modal-content bg-white rounded-lg overflow-hidden shadow-lg w-[80%] max-w-4xl">
+          <div className="modal-content bg-white rounded-lg overflow-hidden shadow-lg w-[95%] max-w-6xl">
             <div className="modal-header flex justify-between items-center p-4 border-b border-gray-200">
               <h5 className="text-lg font-medium text-gray-900">DAILY TOOLS</h5>
               <button
@@ -326,7 +326,7 @@ function SearchPage() {
                 &times;
               </button>
             </div>
-            <div className="modal-body p-4">
+            <div className="modal-body  p-4">
               <iframe
                 src={url}
                 style={{ width: "100%", height: "500px" }}
