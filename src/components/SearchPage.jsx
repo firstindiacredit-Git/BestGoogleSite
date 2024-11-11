@@ -95,7 +95,7 @@ function SearchPage() {
   
   return (
     <div
-      className="bg-zinc-100 dark:bg-[#060d1c] min-h-screen h-full"
+      className="bg-zinc-50 dark:bg-[#060d1c] min-h-screen h-full"
       style={{
         backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",
         backgroundSize: "cover",
@@ -153,17 +153,20 @@ function SearchPage() {
           </div>
         )}
 
-        <div className="flex flex-col items-center mt-[1vh]">
+        <div className="flex flex-col items-center mt-[3vh]">
           <img
             src={isDarkMode ? "GoogleBlack.png" : "GoogleWhite.png"}
             alt="Google Logo"
-            className="mb-4 h-16"
+            className="mb-4 filter bluescale  contrast-700 h-20"
           />
-          <div className="gcse-searchbox-only" />
+          <div
+            className="gcse-searchbox-only"
+            data-resultsUrl="https://www.google.com/search?client=ms-google-coop&qcx=80904074a37154829"
+          />
           <AnimatedTooltipPreview />
         </div>
 
-        <div className="border border-2 border-gray-400 rounded-3xl dark:text-white font-semibold text-center space-x-6 sm:space-x-4 md:space-x-6 lg:space-x-10 w-[70%] md:w-[70%] lg:w-[50%] xl:w-[60%] p-2 mt-32 mx-auto flex flex-wrap justify-center gap-2 md:gap-3 lg:gap-4">
+        <div className="border border-2 border-gray-400 rounded-3xl dark:text-white font-semibold text-center space-x-6 sm:space-x-4 md:space-x-6 lg:space-x-10 w-[70%] md:w-[70%] lg:w-[50%] xl:w-[60%] p-2 mt-[110px] mx-auto flex flex-wrap justify-center gap-2 md:gap-3 lg:gap-4">
           <div>
             <button
               className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[100%] lg:w-[120%] xl:w-[120%] rounded-xl"
