@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { db, auth } from "../firebase";
 import {
@@ -62,9 +63,9 @@ const Bookmarks = () => {
 
   useEffect(() => {
     if (user) {
-      const categories = ["Popular", "Social", "Shopping", "Travel"];
+      const categories = ["Popular", "Travel", "Shopping", "Social"];
       const unsubscribeFns = categories.map((category) => {
-        const bookmarksRef = collection(db, "users", user.uid, "addbookmarks");
+        const bookmarksRef = collection(db, "users", user.uid, "bookmarks");
         return onSnapshot(bookmarksRef, (snapshot) => {
           const bookmarksData = snapshot.docs
             .map((doc) => ({
@@ -92,11 +93,7 @@ const Bookmarks = () => {
     if (!isValidUrl(newBookmark.link)) return alert("Invalid URL.");
 
     try {
-      // Save the bookmark to Firestore
-      await addDoc(
-        collection(db, "users", user.uid, "addbookmarks"),
-        newBookmark
-      );
+      await addDoc(collection(db, "users", user.uid, "bookmarks"), newBookmark);
       setNewBookmark({ name: "", link: "", category: "Popular" });
       setShowForm(false);
     } catch (error) {
@@ -107,8 +104,7 @@ const Bookmarks = () => {
 
   const deleteBookmark = async (category, id) => {
     try {
-      // Delete the bookmark from Firestore
-      await deleteDoc(doc(db, "users", user.uid, "addbookmarks", id));
+      await deleteDoc(doc(db, "users", user.uid, "bookmarks", id));
       setFirebaseBookmarks((prev) => ({
         ...prev,
         [category]: prev[category].filter((bookmark) => bookmark.id !== id),
@@ -156,6 +152,7 @@ const Bookmarks = () => {
               }}
               className="w-10 h-10 mb-1"
             />
+           
             <span className="block text-sm dark:text-white w-2 mr-12">
               {bookmark.name}
             </span>
@@ -194,7 +191,7 @@ const Bookmarks = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
         {/* Popular Bookmarks Section */}
-        <section className="bg-white/10 p-4 border rounded-lg shadow">
+        <section className="bg-white/20 p-4 rounded-lg shadow">
           <h3 className="text-xl dark:text-white font-semibold mb-4">
             Popular
           </h3>
@@ -202,30 +199,29 @@ const Bookmarks = () => {
             {renderBookmarks("Popular")}
           </div>
         </section>
-
         {/* Social Bookmarks Section */}
-        <section className="bg-white/10 p-4 border rounded-lg shadow">
+        <section className="bg-white/10 p-4 rounded-lg shadow">
           <h3 className="text-xl font-semibold dark:text-white mb-4">Social</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-2">
             {renderBookmarks("Social")}
           </div>
         </section>
 
+        {/* Travel Bookmarks Section */}
+        <section className="bg-white/20 p-4 rounded-lg shadow">
+          <h3 className="text-xl font-semibold dark:text-white mb-4">Travel</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-2">
+            {renderBookmarks("Travel")}
+          </div>
+        </section>
+
         {/* Shopping Bookmarks Section */}
-        <section className="bg-white/10 p-4 border rounded-lg shadow">
+        <section className="bg-white/20 p-4 rounded-lg shadow">
           <h3 className="text-xl font-semibold dark:text-white mb-4">
             Shopping
           </h3>
           <div className="grid grid-row-2 sm:grid-row-2 md:grid-row-2 justify-start gap-2">
             {renderBookmarks("Shopping")}
-          </div>
-        </section>
-
-        {/* Travel Bookmarks Section */}
-        <section className="bg-white/10 p-4 border rounded-lg shadow">
-          <h3 className="text-xl font-semibold dark:text-white mb-4">Travel</h3>
-          <div className="grid grid-row-2 sm:grid-row-2 md:grid-row-2 justify-start gap-2">
-            {renderBookmarks("Travel")}
           </div>
         </section>
       </div>
@@ -239,11 +235,11 @@ const Bookmarks = () => {
         Add Bookmark
       </button>
 
-      {/* Add Bookmark Form */}
+      {/* Form to Add Bookmark */}
       {showForm && (
         <form
           onSubmit={addBookmark}
-          className="mt-4 flex flex-col w-full items-center gap-4"
+          className="mt-4 grid grid-cols-2 gap-2 mx-auto"
         >
           <input
             type="text"
@@ -252,7 +248,7 @@ const Bookmarks = () => {
             onChange={(e) =>
               setNewBookmark({ ...newBookmark, name: e.target.value })
             }
-            className="w-3/4 py-2 px-4 border rounded-md"
+            className="border p-1 text-black border-gray-300 rounded-lg"
           />
           <input
             type="text"
@@ -261,13 +257,25 @@ const Bookmarks = () => {
             onChange={(e) =>
               setNewBookmark({ ...newBookmark, link: e.target.value })
             }
-            className="w-3/4 py-2 px-4 border rounded-md"
+            className="border p-1 text-black border-gray-300 rounded-lg"
           />
+          <select
+            value={newBookmark.category}
+            onChange={(e) =>
+              setNewBookmark({ ...newBookmark, category: e.target.value })
+            }
+            className="border p-1 text-black border-gray-300 rounded-lg"
+          >
+            <option value="Popular">Popular</option>
+            <option value="Travel">Travel</option>
+            <option value="Shopping">Shopping</option>
+            <option value="Social">Social</option>
+          </select>
           <button
             type="submit"
-            className="bg-blue-500 text-white py-2 px-4 rounded-md"
+            className="bg-blue-600 text-white px-2 py-2 rounded-lg"
           >
-            Add Bookmark
+            Add
           </button>
         </form>
       )}
