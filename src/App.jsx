@@ -12,6 +12,7 @@ import Login from "./components/Admin/Login.jsx";
 import Users from "./components/Admin/Users.jsx";
 import PremiumPage from "./components/PremiumPage.jsx";
 import PasswordGenerator from "./components/PasswordGenerater.jsx";
+import PremiumForm from "./components/PremiumForm.jsx";
 
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
         <Route path="/PremiumPage" element={<PremiumPage />} />
         <Route path="/admin/dashboard" element={<Dashboard />} />
         <Route path="/PasswordGenerator" element={<PasswordGenerator />} />
+        <Route path="/PremiumForm" element={<PremiumForm />} />
       </Routes>
     </Router>
   );

@@ -11,6 +11,7 @@ import {
 import { onAuthStateChanged } from "firebase/auth";
 import { MdAdd, MdDelete } from "react-icons/md";
 
+
 // Pre-defined static bookmarks
 const initialBookmarks = {
   Popular: [

@@ -162,6 +162,8 @@ function SearchPage() {
           <div
             className="gcse-searchbox-only"
             data-resultsUrl="https://www.google.com/search?client=ms-google-coop&qcx=80904074a37154829"
+            data-defaultToImageSearch="true"
+           
           />
           <AnimatedTooltipPreview />
         </div>
