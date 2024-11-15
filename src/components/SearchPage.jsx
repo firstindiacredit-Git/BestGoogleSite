@@ -31,6 +31,13 @@ function SearchPage() {
     }
   }, []);
 
+window.addEventListener("scroll", () => {
+  const completionContainer = document.querySelector(
+    ".gsc-completion-container"
+  );
+  if (completionContainer) completionContainer.style.display = "none";
+});
+
   const toggleTheme = () => {
     setIsDarkMode((prev) => {
       const newMode = !prev;
@@ -143,7 +150,7 @@ function SearchPage() {
                 <img src={remove} alt="Remove" className="h-9 w-9 m-auto" />
                 <span className="dark:text-white">Remove Image</span>
               </button>
-              <Link to="/">
+              <Link to="/NewSearchPage">
                 <img src={layers} alt="Upload" className="h-9 w-9 m-auto " />
                 <span className="text-xs p-1 dark:text-white w-28 rounded m-auto grid items-center justify-center ">
                   Customize Widgets
@@ -163,7 +170,6 @@ function SearchPage() {
             className="gcse-searchbox-only"
             data-resultsUrl="https://www.google.com/search?client=ms-google-coop&qcx=80904074a37154829"
             data-defaultToImageSearch="true"
-           
           />
           <AnimatedTooltipPreview />
         </div>

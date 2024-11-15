@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { LuLayoutDashboard } from "react-icons/lu";
 import { MdOutlineAddLink } from "react-icons/md";
 import { LuUser2 } from "react-icons/lu";
-import { IoSettingsOutline } from "react-icons/io5";
+import { IoSettingsOutline, IoSunny, IoMoon } from "react-icons/io5"; // Added missing imports
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../../firebase";
 import { doc, getDoc } from "firebase/firestore";
@@ -12,7 +12,8 @@ export default function Sidebar() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [dispName, setDispName] = useState("");
-  const [link, setLink] = useState("/default-avatar.png"); 
+  const [link, setLink] = useState("/default-avatar.png");
+  const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,31 +22,38 @@ export default function Sidebar() {
         const userDocRef = doc(db, "users", user.uid);
         try {
           const userDocSnap = await getDoc(userDocRef);
-
           if (userDocSnap.exists()) {
             const userData = userDocSnap.data();
             if (userData.role === "admin") {
               setIsAdmin(true);
-              setLink(userData.photoURL || "/default-avatar.png");  
-              setDispName(userData.displayName || "User");  
+              setLink(userData.photoURL || "/default-avatar.png");
+              setDispName(userData.displayName || "User");
             } else {
-              navigate("../Admin/login");  
+              navigate("../Admin/login");
             }
           } else {
             console.error("User document does not exist");
-            setLoading(false);  
           }
         } catch (error) {
           console.error("Error fetching user data: ", error);
         }
       } else {
-        navigate("../Admin/login");  
+        navigate("../Admin/login");
       }
-      setLoading(false); 
+      setLoading(false);
     });
 
     return () => unsubscribe();
   }, [navigate]);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", theme === "dark");
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prevTheme) => (prevTheme === "dark" ? "light" : "dark"));
+  };
 
   if (loading) {
     return <div className="text-center">Loading...</div>;
@@ -94,14 +102,28 @@ export default function Sidebar() {
               Add Links
             </Link>
           </li>
-          <li className="p-4 mx-10">
+          {/* <li className="p-4 mx-10">
             <Link to="/settings" className="hover:bg-gray-700 p-2 flex rounded">
               <IoSettingsOutline className="mt-1 mr-1" />
               Settings
             </Link>
-          </li>
+          </li> */}
         </ul>
       </nav>
+      {/* Theme Toggle Button */}
+      <button
+        onClick={toggleTheme}
+        className="w-full p-4 mt-4 flex items-center justify-center bg-gray-700 rounded hover:bg-gray-600 transition"
+      >
+        {theme === "dark" ? (
+          <IoSunny className="text-yellow-300" />
+        ) : (
+          <IoMoon className="text-blue-500" />
+        )}
+        <span className="ml-2">
+          {theme === "dark" ? "Light Mode" : "Dark Mode"}
+        </span>
+      </button>
     </div>
   );
 }

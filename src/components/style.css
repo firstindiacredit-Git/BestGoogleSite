@@ -58,6 +58,8 @@
   margin-left: -14px !important;
   margin-top: -10px !important;
   padding-top: 50px !important;
+ 
+  
   
 
   
@@ -84,19 +86,22 @@
 .dark #gs_tti50 input {
   background-color: white !important;
   color: black !important;
-   /* background-image:none !important */
+  
 }
 
 #gs_tti50 input {
   background-color: white !important;
   color: black !important;
-  /* background-image:none !important */
+  /* background-image:url("../../public/Search.png&quot") !important; */
+  /* width: 200px !important; */
+  /* height: 30px !important;
+  margin-bottom: -50px !important;
+  padding-bottom: 18px !important;
+ background-repeat: no-repeat !important;
+ outline: none !important; */
+  
 }
-/* .gsc-input::placeholder {
-  content: "Enter your number" !important;
-  color: black !important;
-    
-} */
+
 
 .gsc-search-button .gsc-search-button-v2 {
   background-color: white !important;

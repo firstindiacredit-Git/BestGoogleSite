@@ -196,14 +196,16 @@ function AddLinks() {
   }
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-auto dark:bg-gray-900">
       <Sidebar />
       <div className="flex-1">
         <Header />
-        <h1 className="text-4xl text-center  font-bold">ADD LINKS</h1>
-        <div className="p-4 w-[70%] m-auto">
+        <h1 className="text-4xl text-center dark:bg-gray-900 dark:text-white  font-bold">
+          ADD LINKS
+        </h1>
+        <div className="p-4 w-[70%] m-auto dark:bg-gray-900 dark:text-white">
           {/* Add Bookmark Card */}
-          <div className="bg-white shadow-md rounded-lg p-4 mb-4">
+          <div className="bg-white dark:bg-gray-800 dark:text-white shadow-md rounded-lg p-4 mb-4">
             <h2 className="text-lg font-semibold mb-2">Add Bookmark</h2>
             <button
               onClick={() => setBookmarkModalOpen(true)}
@@ -222,7 +224,7 @@ function AddLinks() {
                       <input
                         id="name"
                         type="text"
-                        className="w-full p-2 border rounded"
+                        className="w-full p-2 dark:text-white  dark:bg-gray-900 border rounded"
                         placeholder="Bookmark Name"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
@@ -235,7 +237,7 @@ function AddLinks() {
                       <input
                         id="link"
                         type="url"
-                        className=" p-2 w-full border rounded"
+                        className=" p-2 w-full  dark:text-white  dark:bg-gray-900 border rounded"
                         placeholder="Bookmark URL"
                         value={link}
                         onChange={(e) => setLink(e.target.value)}
@@ -247,7 +249,7 @@ function AddLinks() {
                       </label>
                       <select
                         id="category"
-                        className="  p-2 w-[30%] border rounded"
+                        className="  p-2 w-[30%]  dark:text-white  dark:bg-gray-900 border rounded"
                         value={category}
                         onChange={(e) => setCategory(e.target.value)}
                       >
@@ -280,7 +282,7 @@ function AddLinks() {
           </div>
 
           {/* Add Category Card */}
-          <div className="bg-white shadow-md rounded-lg p-4 mb-4">
+          <div className="bg-white dark:bg-gray-800 dark:text-white shadow-md rounded-lg p-4 mb-4">
             <h2 className="text-lg font-semibold mb-2">Add Category</h2>
             <button
               onClick={() => setCategoryModalOpen(true)}
@@ -289,7 +291,7 @@ function AddLinks() {
               Open Category Form
             </button>
             {isCategoryModalOpen && (
-              <div className="mt-4">
+              <div className="mt-4 dark:bg-gray-800 dark:text-white">
                 <form onSubmit={handleCatSubmit}>
                   <div className="flex flex-col space-y-3">
                     <div>
@@ -299,7 +301,7 @@ function AddLinks() {
                       <input
                         id="newCategory"
                         type="text"
-                        className="w-full p-2 border rounded"
+                        className="w-full p-2  dark:text-white  dark:bg-gray-900  border rounded"
                         placeholder="Add New Category"
                         value={newCategory}
                         onChange={(e) => setNewCategory(e.target.value)}
@@ -324,11 +326,11 @@ function AddLinks() {
           </div>
           <p className="font-bold text-2xl">BOOKMARKS HISTORY</p>
           {/* Dropdowns for Links */}
-          <div className="mt-4">
+          <div className="mt-4 dark:bg-gray-800 dark:text-white">
             {newCategories.map((category) => (
               <div key={category.id} className="mb-2">
                 <button
-                  className="w-[75%] text-left bg-gray-200 p-2 rounded"
+                  className="w-[75%] text-left bg-gray-200 rounded-[5px] dark:text-white  dark:bg-gray-800 p-2 "
                   onClick={() => toggleDropdown(category.newCategory)}
                 >
                   {category.newCategory}
@@ -347,7 +349,7 @@ function AddLinks() {
                       .map((link) => (
                         <div
                           key={link.id}
-                          className="flex justify-between items-center bg-gray-100 p-2 rounded mb-1"
+                          className="flex justify-between items-center  dark:text-white  dark:bg-gray-900 bg-gray-100 p-2 rounded mb-1"
                         >
                           <div className="flex items-center">
                             {/* Display the favicon */}

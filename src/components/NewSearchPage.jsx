@@ -1,253 +1,237 @@
-import React, { useEffect, useState } from "react";
-import Header from "../components/Header";
-import galleryupload from "/galleryupload.png";
-import remove from "/remove.png";
-import { TbGridDots } from "react-icons/tb";
-import ShowLinks from "./ShowLinks";
-import { auth, db } from "../firebase";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import AnimatedTooltipPreview from "./AnimatedTooltipPreview";
-import { arrayMove } from "@dnd-kit/sortable";
+import React, { useState, useEffect, useRef } from "react";
+import PropTypes from "prop-types";
+import Draggable from "react-draggable";
+import { motion } from "framer-motion"; // For animations
+import { db } from "../firebase";
+import { collection, query, where, getDocs } from "firebase/firestore";
 
-function NewSearchPage() {
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [backgroundImage, setBackgroundImage] = useState("");
-  const [showButtons, setShowButtons] = useState(false);
-  const [items, setItems] = useState([]);
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    const storedBackgroundImage = localStorage.getItem("backgroundImage");
-    const storedTheme = localStorage.getItem("themeMode");
-
-    if (storedBackgroundImage) {
-      setBackgroundImage(storedBackgroundImage);
-    }
-    if (storedTheme === "dark") {
-      setIsDarkMode(true);
-    }
-  }, []);
-
-  const toggleTheme = () => {
-    setIsDarkMode((prev) => {
-      const newMode = !prev;
-      localStorage.setItem("themeMode", newMode ? "dark" : "light");
-      return newMode;
-    });
-  };
+// Draggable Dropdown Component
+function DraggableDropdown({
+  category,
+  toggleDropdown,
+  isOpen,
+  fetchLinks,
+  cachedLinks,
+  setCachedLinks,
+  index,
+  moveItem,
+}) {
+  const [links, setLinks] = useState([]);
+  const [loadingLinks, setLoadingLinks] = useState(false);
+  const [error, setError] = useState(null);
+  const modalRef = useRef(null);
 
   useEffect(() => {
-    const authInstance = getAuth();
-    const unsubscribe = onAuthStateChanged(authInstance, (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
+    if (isOpen) {
+      if (cachedLinks[category]) {
+        setLinks(cachedLinks[category]);
       } else {
-        setUser(null);
+        setLoadingLinks(true);
+        setError(null);
+        fetchLinks(category)
+          .then((fetchedLinks) => {
+            setLinks(fetchedLinks);
+            setCachedLinks((prev) => ({
+              ...prev,
+              [category]: fetchedLinks,
+            }));
+          })
+          .catch((error) => {
+            console.error("Error fetching links: ", error);
+            setError("Failed to load links.");
+          })
+          .finally(() => {
+            setLoadingLinks(false);
+          });
       }
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  const saveItems = async (newItems) => {
-    setItems(newItems);
-    if (user) {
-      const positions = newItems.map((item, index) => ({
-        id: item.id,
-        position: index,
-      }));
-      const docRef = doc(db, "Widgets", user.uid);
-      try {
-        await setDoc(docRef, { items: positions }, { merge: true });
-      } catch (error) {
-        console.error("Error saving items:", error);
-      }
+    } else {
+      setLinks([]);
     }
+  }, [isOpen, fetchLinks, category, cachedLinks, setCachedLinks]);
+
+  const handleStop = (e, data) => {
+    moveItem(index, data.x);
   };
-
-  useEffect(() => {
-    const fetchWidgets = async () => {
-      if (user) {
-        const docRef = doc(db, "Widgets", user.uid);
-        try {
-          const docSnap = await getDoc(docRef);
-          if (docSnap.exists()) {
-            const savedItems = docSnap.data().items || [];
-            const sortedItems = savedItems.sort(
-              (a, b) => a.position - b.position
-            );
-            setItems(sortedItems.map((item) => ({ id: item.id })));
-          } else {
-            console.log("No such document!");
-          }
-        } catch (error) {
-          console.error("Error fetching widgets:", error);
-        }
-      }
-    };
-
-    fetchWidgets();
-  }, [user]);
-
-  const handleDragEnd = (event) => {
-    const { active, over } = event;
-    if (active.id !== over.id) {
-      setItems((prevItems) => {
-        const oldIndex = prevItems.findIndex((item) => item.id === active.id);
-        const newIndex = prevItems.findIndex((item) => item.id === over.id);
-        const newItems = arrayMove(prevItems, oldIndex, newIndex);
-        saveItems(newItems);
-        return newItems;
-      });
-    }
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const imageData = reader.result;
-        setBackgroundImage(imageData);
-        localStorage.setItem("backgroundImage", imageData);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const removeBackground = () => {
-    setBackgroundImage("");
-    localStorage.removeItem("backgroundImage");
-  };
-
-  const handleIconClick = () => {
-    setShowButtons((prev) => !prev);
-  };
-
-   
-  const handleCalculatorClick = () => {
-    console.log("Calculator clicked");
-    
-  };
-
-  const handleNotepadClick = () => {
-    console.log("Notepad clicked");
-    
-  };
-
-  const handleImageUploaderClick = () => {
-    console.log("Image Uploader clicked");
-    
-  };
-
-  const handlePopularBookmarksClick = () => {
-    console.log("Popular Bookmarks clicked");
-     
-  };
-
-  const handleWeatherClick = () => {
-    console.log("Weather clicked");
-     
-  };
-
-  const handleCalendarClick = () => {
-    console.log("Calendar clicked");
-    
-  };
-
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.id = "google-cse";
-    script.src = "https://cse.google.com/cse.js?cx=80904074a37154829";
-    script.async = true;
-    script.defer = true;
-    document.body.appendChild(script);
-
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
 
   return (
-    <div
-      className={`${
-        isDarkMode ? "bg-gray-900 text-white" : "bg-zinc-100 text-black"
-      } min-h-screen h-full`}
-      style={{
-        backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundAttachment: "fixed",
-      }}
+    <Draggable
+      axis="x"
+      onStop={handleStop}
+      position={{ x: index * 220, y: 0 }}
+      bounds="parent"
     >
-      <Header isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
-
-      <div className="mt-4">
-        <div
-          onClick={handleIconClick}
-          className="cursor-pointer flex m-2 mr-3 justify-end"
+      <div className="relative p-2 bg-transparent border ml-[18%]  rounded-lg shadow-lg">
+        <button
+          onClick={toggleDropdown}
+          className="bg-blue-500 text-white w-48 px-4 py-2 rounded focus:outline-none text-center"
         >
-          <TbGridDots className="w-8 h-8 hover:border border-slate-400 p-1 m-2 shadow-lg rounded-full" />
-        </div>
+          {category}
+        </button>
 
-        <div className="flex flex-col items-center mt-[1vh]">
-          <img
-            src={isDarkMode ? "GoogleBlack.png" : "GoogleWhite.png"}
-            alt="Google Logo"
-            className="mb-4 h-16"
-          />
-          <div className="gcse-searchbox-only" />
-          <AnimatedTooltipPreview />
-        </div>
-        <h1 className="text-2xl py-3 font-bold text-center">COMPONENTS</h1>
-
-        <div>
-          <ShowLinks items={items} />
-        </div>
-
-        {/* Buttons section for various features */}
-        <div className="flex flex-col space-y-2 items-center mt-4">
-          <button
-            onClick={handleCalculatorClick}
-            className="text-xs p-2 w-64 rounded grid items-center justify-center bg-blue-500 text-white"
-          >
-            Calculator
-          </button>
-          <button
-            onClick={handleNotepadClick}
-            className="text-xs p-2 w-64 rounded grid items-center justify-center bg-green-500 text-white"
-          >
-            Notepad
-          </button>
-          <button
-            onClick={handleImageUploaderClick}
-            className="text-xs p-2 w-64 rounded grid items-center justify-center bg-yellow-500 text-white"
-          >
-            Image Uploader
-          </button>
-          <button
-            onClick={handlePopularBookmarksClick}
-            className="text-xs p-2 w-64 rounded grid items-center justify-center bg-purple-500 text-white"
-          >
-            Popular Bookmarks
-          </button>
-          <button
-            onClick={handleWeatherClick}
-            className="text-xs p-2 w-64 rounded grid items-center justify-center bg-red-500 text-white"
-          >
-            Weather
-          </button>
-          <button
-            onClick={handleCalendarClick}
-            className="text-xs p-2 w-64 rounded grid items-center justify-center bg-orange-500 text-white"
-          >
-            Calendar
-          </button>
-        </div>
+        {isOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-40 w-70 z-40 flex items-center justify-center">
+            <div
+              ref={modalRef}
+              className="relative backdrop-blur-lg bg-white/30 text-black dark:text-white rounded-lg shadow-lg p-6 transform transition-transform duration-300 scale-90"
+              style={{ zIndex: 999, width: "100%", maxWidth: "23rem" }}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg text-black w-full font-semibold">
+                  Related Links
+                </h2>
+                <button
+                  onClick={toggleDropdown}
+                  className="text-black border bg-transparent px-3 py-1 rounded-lg transition"
+                >
+                  Close
+                </button>
+              </div>
+              {loadingLinks ? (
+                <p>Loading links...</p>
+              ) : error ? (
+                <p className="text-sm text-red-500">{error}</p>
+              ) : links.length > 0 ? (
+                <div className="sm:grid-cols-2 ">
+                  {links.map((link) => (
+                    <div
+                      key={link.id}
+                      className="flex items-center bg-gray-100 p-2 rounded mb-1"
+                    >
+                      {link.logoUrl && (
+                        <img
+                          src={link.logoUrl}
+                          alt={link.name}
+                          className="w-4 h-4 mr-2"
+                        />
+                      )}
+                      <a
+                        href={link.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-black font-semibold"
+                      >
+                        {link.name}
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  No bookmarks available.
+                </p>
+              )}
+            </div>
+          </div>
+        )}
       </div>
+    </Draggable>
+  );
+}
+
+DraggableDropdown.propTypes = {
+  category: PropTypes.string.isRequired,
+  toggleDropdown: PropTypes.func.isRequired,
+  isOpen: PropTypes.bool.isRequired,
+  fetchLinks: PropTypes.func.isRequired,
+  cachedLinks: PropTypes.object.isRequired,
+  setCachedLinks: PropTypes.func.isRequired,
+  index: PropTypes.number.isRequired,
+  moveItem: PropTypes.func.isRequired,
+};
+
+// Main ShowLinks Component
+function ShowLinks() {
+  const [isOpen, setIsOpen] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+  const [error, setError] = useState(null);
+  const [cachedLinks, setCachedLinks] = useState({});
+  const [items, setItems] = useState([]);
+
+  const fetchCategories = async () => {
+    setLoadingCategories(true);
+    setError(null);
+    try {
+      const querySnapshot = await getDocs(collection(db, "category"));
+      const fetchedCategories = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setCategories(fetchedCategories);
+      setItems(fetchedCategories);
+    } catch (error) {
+      setError("Failed to load categories.");
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchLinks = async (newCategory) => {
+    try {
+      const linksQuery = query(
+        collection(db, "links"),
+        where("category", "==", newCategory)
+      );
+      const querySnapshot = await getDocs(linksQuery);
+      return querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        logoUrl: `https://logo.clearbit.com/${
+          new URL(doc.data().link).hostname
+        }`,
+      }));
+    } catch (error) {
+      setError("Failed to load links.");
+      return [];
+    }
+  };
+
+  const moveItem = (index, newXPosition) => {
+    const newItems = [...items];
+    const movedItem = newItems[index];
+    const newIndex = Math.floor(newXPosition / 220);
+    if (newIndex !== index) {
+      newItems.splice(index, 1);
+      newItems.splice(newIndex, 0, movedItem);
+      setItems(newItems);
+    }
+  };
+
+  const toggleDropdown = (index) => {
+    setIsOpen((prevOpen) => (prevOpen === index ? null : index));
+  };
+
+  return (
+    <div className="relative p-4  border-gray-300">
+      {loadingCategories ? (
+        <p>Loading categories...</p>
+      ) : error ? (
+        <p className="text-sm text-red-500">{error}</p>
+      ) : (
+        <div className="flex -space-x-[16%]">
+          {" "}
+          {/* Removed gaps between items */}
+          {items.map((categoryItem, index) => (
+            <DraggableDropdown
+              key={categoryItem.id}
+              category={categoryItem.newCategory || categoryItem.name}
+              toggleDropdown={() => toggleDropdown(index)}
+              isOpen={isOpen === index}
+              fetchLinks={fetchLinks}
+              cachedLinks={cachedLinks}
+              setCachedLinks={setCachedLinks}
+              index={index}
+              moveItem={moveItem}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
-export default NewSearchPage;
+export default ShowLinks;

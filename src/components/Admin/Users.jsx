@@ -65,7 +65,7 @@ export default function Users() {
       <Sidebar />
       <div className="flex-1 flex flex-col">
         <Header />
-        <div className="p-6 flex-1">
+        <div className="p-6 flex-1 dark:bg-gray-900 dark:text-white">
           <h1 className="text-2xl font-bold mb-6 text-center">All Users</h1>
 
           {/* Toggle View Buttons */}
@@ -73,7 +73,9 @@ export default function Users() {
             <button
               onClick={() => setViewType("list")}
               className={`px-4 py-2 mr-2 ${
-                viewType === "list" ? "bg-blue-500 text-white" : "bg-gray-200"
+                viewType === "list"
+                  ? "bg-blue-500  text-white"
+                  : "bg-gray-200 dark:bg-gray-700 dark:text-white"
               } rounded`}
             >
               <CiCircleList />
@@ -81,7 +83,9 @@ export default function Users() {
             <button
               onClick={() => setViewType("grid")}
               className={`px-4 py-2 ${
-                viewType === "grid" ? "bg-blue-500 text-white" : "bg-gray-200"
+                viewType === "grid"
+                  ? "bg-blue-500  text-white"
+                  : "bg-gray-200 dark:bg-gray-700 dark:text-white text-black"
               } rounded`}
             >
               <CiGrid31 />
@@ -97,8 +101,8 @@ export default function Users() {
                 key={id}
                 className={`${
                   viewType === "grid"
-                    ? "flex flex-col items-center p-4 bg-white shadow-md rounded-lg"
-                    : "flex items-center p-4 bg-white shadow-md rounded-lg mb-4"
+                    ? "flex flex-col items-center border p-4 bg-white dark:bg-gray-800  shadow-md rounded-lg"
+                    : "flex items-center p-4 bg-white dark:bg-gray-800 shadow-md rounded-lg mb-4"
                 }`}
               >
                 <img
@@ -114,8 +118,12 @@ export default function Users() {
                   <div className="text-xl font-semibold">
                     {displayName || "No Name"}
                   </div>
-                  <p className="text-gray-500">{email}</p>
-                  {bio && <p className="text-gray-600 italic">{bio}</p>}
+                  <p className="text-gray-500 dark:text-blue-600">{email}</p>
+                  {bio && (
+                    <p className="text-gray-600 dark:text-blue-400 italic">
+                      {bio}
+                    </p>
+                  )}
                 </div>
               </div>
             ))}
@@ -126,7 +134,7 @@ export default function Users() {
             <button
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+              className="px-4 py-2 bg-gray-200 dark:bg-gray-800 rounded disabled:opacity-50"
             >
               Previous
             </button>
@@ -148,7 +156,7 @@ export default function Users() {
                 setCurrentPage((prev) => Math.min(prev + 1, totalPages))
               }
               disabled={currentPage === totalPages}
-              className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+              className="px-4 py-2 bg-gray-200 dark:bg-gray-800 rounded disabled:opacity-50"
             >
               Next
             </button>

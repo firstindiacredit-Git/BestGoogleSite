@@ -201,7 +201,7 @@ const Bookmarks = () => {
           </div>
         </section>
         {/* Social Bookmarks Section */}
-        <section className="bg-white/10 p-4 rounded-lg shadow">
+        <section className="bg-white/20 p-4 rounded-lg shadow">
           <h3 className="text-xl font-semibold dark:text-white mb-4">Social</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-2">
             {renderBookmarks("Social")}

@@ -4,7 +4,7 @@ import Header from "../components/Header";
 
 const PremiumForm = () => {
   const location = useLocation();
-  const initialPlan = location.state?.selectedPlan || "Free";
+  const initialPlan = location.state?.selectedPlan || "Standard ";
 
   const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -109,7 +109,7 @@ const PremiumForm = () => {
   return (
     <div className={`min-h-screen ${isDarkMode ? "bg-gray-900" : "bg-white"}`}>
       <Header isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
-      <div className="max-w-3xl mx-auto p-3 mt-2 bg-white dark:bg-gray-900 border dark:text-white rounded-lg shadow-md">
+      <div className="max-w-3xl mx-auto p-3 mt-10 bg-white dark:bg-gray-900 border dark:text-white rounded-lg shadow-md">
         <h1 className="text-2xl font-bold mb-6 text-center">
           Premium Signup Form
         </h1>
@@ -211,8 +211,8 @@ const PremiumForm = () => {
               onChange={handleChange}
               className="w-full p-2 border dark:text-black rounded"
             >
-              <option value="Free">Free - $0/month</option>
               <option value="Standard">Standard - $5/month</option>
+              <option value="Free">Free - $0/month</option>
               <option value="Pro">Pro - $10/month</option>
             </select>
           </div>

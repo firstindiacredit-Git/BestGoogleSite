@@ -117,7 +117,7 @@ const SignIn = () => {
           </button>
           <div className="bg-gradient-to-r from-transparent via-neutral-300 dark:via-neutral-700 to-transparent my-8 h-[1px] w-full" />
           <button
-            className="border shadow-sm dark:text-green-500 text-lg text-center px-4 w-full h-10 font-medium border-green-500 text-green-500 rounded hover:bg-green-500 hover:text-white"
+            className="border shadow-sm text-lg text-center px-4 w-full h-10 font-medium border-green-500 text-green-500 rounded hover:bg-green-500 hover:text-white"
             type="button"
             onClick={handleGoogleSignIn}
           >

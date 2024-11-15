@@ -5,7 +5,7 @@ import { DndContext, closestCenter } from "@dnd-kit/core";
 import { SortableContext, arrayMove, rectSortingStrategy } from "@dnd-kit/sortable";
 import Calculator from "./Calculator";
 import Notepad from "./Notepad";
-import ShowLinks from "./ShowLinks";
+import NewSearchPage from "./NewSearchPage";
 import Calendar from "./Calendar";
 import ImageUploader from "./ImageUploader";
 import PopularBookmarks from "./PopularBookmarks";
@@ -109,7 +109,7 @@ const Anotherpage = ({ backgroundImage }) => {
         </h1>
 
         <div>
-          <ShowLinks items={items} />
+          <NewSearchPage items={items} />
         </div>
 
         <div className="flex justify-center gap-1 mt-6 mb-4">
