@@ -70,12 +70,12 @@ function DraggableDropdown({
             style={{ zIndex: 999, width: "100%", maxWidth: "23rem" }}
           >
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg text-black w-full font-semibold">
+              <h2 className=" text-black dark:text-white w-full font-semibold">
                 Related Links
               </h2>
               <button
                 onClick={toggleDropdown}
-                className="text-black border bg-transparent px-3 py-1 rounded-lg transition"
+                className="text-black border dark:text-white bg-transparent px-2 py-1 rounded-lg transition"
               >
                 Close
               </button>
