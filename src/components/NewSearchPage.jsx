@@ -220,7 +220,7 @@ function ShowLinks() {
       ) : error ? (
         <p className="text-sm text-red-500">{error}</p>
       ) : (
-        <div className="flex justify-start -space-x-[16%]">
+        <div className="flex justify-start -ml-36 -space-x-[14%]">
           {items.map((categoryItem, index) => (
             <DraggableDropdown
               key={categoryItem.id}
