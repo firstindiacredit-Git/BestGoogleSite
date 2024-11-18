@@ -4,6 +4,7 @@ import Draggable from "react-draggable";
 import { motion } from "framer-motion"; // For animations
 import { db } from "../firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
+import { FaLock, FaUnlock } from "react-icons/fa"; // Icons for lock/unlock
 
 // Draggable Dropdown Component
 function DraggableDropdown({
@@ -15,6 +16,7 @@ function DraggableDropdown({
   setCachedLinks,
   index,
   moveItem,
+  isDraggable,
 }) {
   const [links, setLinks] = useState([]);
   const [loadingLinks, setLoadingLinks] = useState(false);
@@ -50,81 +52,87 @@ function DraggableDropdown({
   }, [isOpen, fetchLinks, category, cachedLinks, setCachedLinks]);
 
   const handleStop = (e, data) => {
-    moveItem(index, data.x);
+    if (isDraggable) moveItem(index, data.x);
   };
 
-  return (
+  const DropdownContent = (
+    <div className="relative p-2 bg-transparent border ml-[18%] rounded-lg shadow-lg">
+      <button
+        onClick={toggleDropdown}
+        className="bg-blue-500 text-white w-48 px-4 py-2 rounded focus:outline-none text-center"
+      >
+        {category}
+      </button>
+
+      {isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 w-70 z-40 flex items-center justify-center">
+          <div
+            ref={modalRef}
+            className="relative backdrop-blur-lg bg-white/30 text-black dark:text-white rounded-lg shadow-lg p-6 transform transition-transform duration-300 scale-90"
+            style={{ zIndex: 999, width: "100%", maxWidth: "23rem" }}
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg text-black w-full font-semibold">
+                Related Links
+              </h2>
+              <button
+                onClick={toggleDropdown}
+                className="text-black border bg-transparent px-3 py-1 rounded-lg transition"
+              >
+                Close
+              </button>
+            </div>
+            {loadingLinks ? (
+              <p>Loading links...</p>
+            ) : error ? (
+              <p className="text-sm text-red-500">{error}</p>
+            ) : links.length > 0 ? (
+              <div className="sm:grid-cols-2 ">
+                {links.map((link) => (
+                  <div
+                    key={link.id}
+                    className="flex items-center bg-gray-100 p-2 rounded mb-1"
+                  >
+                    {link.logoUrl && (
+                      <img
+                        src={link.logoUrl}
+                        alt={link.name}
+                        className="w-4 h-4 mr-2"
+                      />
+                    )}
+                    <a
+                      href={link.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-black font-semibold"
+                    >
+                      {link.name}
+                    </a>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                No bookmarks available.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  return isDraggable ? (
     <Draggable
       axis="x"
       onStop={handleStop}
       position={{ x: index * 220, y: 0 }}
       bounds="parent"
     >
-      <div className="relative p-2 bg-transparent border ml-[18%]  rounded-lg shadow-lg">
-        <button
-          onClick={toggleDropdown}
-          className="bg-blue-500 text-white w-48 px-4 py-2 rounded focus:outline-none text-center"
-        >
-          {category}
-        </button>
-
-        {isOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-40 w-70 z-40 flex items-center justify-center">
-            <div
-              ref={modalRef}
-              className="relative backdrop-blur-lg bg-white/30 text-black dark:text-white rounded-lg shadow-lg p-6 transform transition-transform duration-300 scale-90"
-              style={{ zIndex: 999, width: "100%", maxWidth: "23rem" }}
-            >
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg text-black w-full font-semibold">
-                  Related Links
-                </h2>
-                <button
-                  onClick={toggleDropdown}
-                  className="text-black border bg-transparent px-3 py-1 rounded-lg transition"
-                >
-                  Close
-                </button>
-              </div>
-              {loadingLinks ? (
-                <p>Loading links...</p>
-              ) : error ? (
-                <p className="text-sm text-red-500">{error}</p>
-              ) : links.length > 0 ? (
-                <div className="sm:grid-cols-2 ">
-                  {links.map((link) => (
-                    <div
-                      key={link.id}
-                      className="flex items-center bg-gray-100 p-2 rounded mb-1"
-                    >
-                      {link.logoUrl && (
-                        <img
-                          src={link.logoUrl}
-                          alt={link.name}
-                          className="w-4 h-4 mr-2"
-                        />
-                      )}
-                      <a
-                        href={link.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-black font-semibold"
-                      >
-                        {link.name}
-                      </a>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  No bookmarks available.
-                </p>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
+      {DropdownContent}
     </Draggable>
+  ) : (
+    DropdownContent
   );
 }
 
@@ -137,6 +145,7 @@ DraggableDropdown.propTypes = {
   setCachedLinks: PropTypes.func.isRequired,
   index: PropTypes.number.isRequired,
   moveItem: PropTypes.func.isRequired,
+  isDraggable: PropTypes.bool.isRequired,
 };
 
 // Main ShowLinks Component
@@ -147,6 +156,7 @@ function ShowLinks() {
   const [error, setError] = useState(null);
   const [cachedLinks, setCachedLinks] = useState({});
   const [items, setItems] = useState([]);
+  const [isDraggable, setIsDraggable] = useState(true);
 
   const fetchCategories = async () => {
     setLoadingCategories(true);
@@ -206,15 +216,21 @@ function ShowLinks() {
   };
 
   return (
-    <div className="relative p-4  border-gray-300">
+    <div className="relative p-4 border-gray-300">
+      <div className="flex justify-end mb-4">
+        <button
+          onClick={() => setIsDraggable((prev) => !prev)}
+          className="bg-gray-200 p-2 rounded-full focus:outline-none"
+        >
+          {isDraggable ? <FaLock /> : <FaUnlock />}
+        </button>
+      </div>
       {loadingCategories ? (
         <p>Loading categories...</p>
       ) : error ? (
         <p className="text-sm text-red-500">{error}</p>
       ) : (
         <div className="flex -space-x-[16%]">
-          {" "}
-          {/* Removed gaps between items */}
           {items.map((categoryItem, index) => (
             <DraggableDropdown
               key={categoryItem.id}
@@ -226,6 +242,7 @@ function ShowLinks() {
               setCachedLinks={setCachedLinks}
               index={index}
               moveItem={moveItem}
+              isDraggable={isDraggable}
             />
           ))}
         </div>

@@ -102,7 +102,7 @@ const SortableToDoList = () => {
   );
 };
 
-const App = () => {
+const Todolist = () => {
   return (
     <div className="p-5">
       <SortableToDoList />
@@ -110,4 +110,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default Todolist;
