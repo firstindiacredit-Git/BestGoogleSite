@@ -10,7 +10,6 @@ import Calendar from "./Calendar";
 import ImageUploader from "./ImageUploader";
 import PopularBookmarks from "./PopularBookmarks";
 import Weather from "./Weather";
-import TodoList from "./todolist"
 import { auth, db } from "../firebase";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 
@@ -146,7 +145,6 @@ const Anotherpage = ({ backgroundImage }) => {
               <div className="w-full md:w-1/4 lg:w-1/4 p-2">
                 <Calculator />
                 <Notepad />
-                <TodoList />
               </div>
               <div className="w-full md:w-1/2 lg:w-1/2 ">
                 <PopularBookmarks />
@@ -278,30 +276,6 @@ const Anotherpage = ({ backgroundImage }) => {
                           <button
                             className="absolute top-1 right-2 mb-5  dark:text-white"
                             onClick={() => handleClose("Calendar")}
-                          >
-                            <IoIosCloseCircleOutline size={30} />
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-                <div className="w-full md:w-1/2 lg:w-1/2">
-                  <div className="relative flex items-center justify-between p-2 mb-2 border rounded w-full">
-                    <button
-                      className="w-full dark:text-white text-left"
-                      onClick={() => handleToggleVisibility("TodoList")}
-                    >
-                      Todo List
-                    </button>
-                    {visibleItem === "TodoList" && (
-                      <>
-                        <div className="fixed inset-0 bg-transparent bg-opacity-50 backdrop-blur-sm z-40"></div>
-                        <div className="fixed top-1/2 left-1/2 z-50 w-[50%] p-6 shadow-lg transform -translate-x-1/2 -translate-y-1/2 bg-[#f3e9ff] dark:bg-[#4a454e] rounded-lg">
-                          <TodoList />
-                          <button
-                            className="absolute top-1 right-2 mb-5  dark:text-white"
-                            onClick={() => handleClose("TodoList")}
                           >
                             <IoIosCloseCircleOutline size={30} />
                           </button>

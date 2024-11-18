@@ -1,27 +1,43 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import Draggable from "react-draggable";
-import { motion } from "framer-motion"; // For animations
+import { FaLock, FaLockOpen } from "react-icons/fa";
 import { db } from "../firebase";
-import { collection, query, where, getDocs } from "firebase/firestore";
-import { FaLock, FaUnlock } from "react-icons/fa"; // Icons for lock/unlock
+import { collection, getDocs, query, where } from "firebase/firestore";
 
-// Draggable Dropdown Component
 function DraggableDropdown({
   category,
+  isDraggable,
   toggleDropdown,
   isOpen,
   fetchLinks,
   cachedLinks,
   setCachedLinks,
+  savedPositions,
+  setSavedPositions,
   index,
-  moveItem,
-  isDraggable,
 }) {
   const [links, setLinks] = useState([]);
   const [loadingLinks, setLoadingLinks] = useState(false);
   const [error, setError] = useState(null);
   const modalRef = useRef(null);
+  const draggableRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (modalRef.current && !modalRef.current.contains(event.target)) {
+        toggleDropdown();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen, toggleDropdown]);
 
   useEffect(() => {
     if (isOpen) {
@@ -51,112 +67,119 @@ function DraggableDropdown({
     }
   }, [isOpen, fetchLinks, category, cachedLinks, setCachedLinks]);
 
-  const handleStop = (e, data) => {
-    if (isDraggable) moveItem(index, data.x);
+  const handleDragStop = (_, data) => {
+    const newPositions = {
+      ...savedPositions,
+      [index]: { x: data.x, y: data.y },
+    };
+
+    setSavedPositions(newPositions);
+    localStorage.setItem("savedPositions", JSON.stringify(newPositions)); // Save positions to localStorage
   };
 
-  const DropdownContent = (
-    <div className="relative p-2 bg-transparent border ml-[18%] rounded-lg shadow-lg">
-      <button
-        onClick={toggleDropdown}
-        className="bg-blue-500 text-white w-48 px-4 py-2 rounded focus:outline-none text-center"
-      >
-        {category}
-      </button>
-
-      {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 w-70 z-40 flex items-center justify-center">
-          <div
-            ref={modalRef}
-            className="relative backdrop-blur-lg bg-white/30 text-black dark:text-white rounded-lg shadow-lg p-6 transform transition-transform duration-300 scale-90"
-            style={{ zIndex: 999, width: "100%", maxWidth: "23rem" }}
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg text-black w-full font-semibold">
-                Related Links
-              </h2>
-              <button
-                onClick={toggleDropdown}
-                className="text-black border bg-transparent px-3 py-1 rounded-lg transition"
-              >
-                Close
-              </button>
-            </div>
-            {loadingLinks ? (
-              <p>Loading links...</p>
-            ) : error ? (
-              <p className="text-sm text-red-500">{error}</p>
-            ) : links.length > 0 ? (
-              <div className="sm:grid-cols-2 ">
-                {links.map((link) => (
-                  <div
-                    key={link.id}
-                    className="flex items-center bg-gray-100 p-2 rounded mb-1"
-                  >
-                    {link.logoUrl && (
-                      <img
-                        src={link.logoUrl}
-                        alt={link.name}
-                        className="w-4 h-4 mr-2"
-                      />
-                    )}
-                    <a
-                      href={link.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-black font-semibold"
-                    >
-                      {link.name}
-                    </a>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                No bookmarks available.
-              </p>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-
-  return isDraggable ? (
+  return (
     <Draggable
-      axis="x"
-      onStop={handleStop}
-      position={{ x: index * 220, y: 0 }}
-      bounds="parent"
+      disabled={!isDraggable}
+      nodeRef={draggableRef}
+      position={savedPositions[index] || { x: 0, y: 0 }}
+      onStop={handleDragStop}
     >
-      {DropdownContent}
+      <div
+        ref={draggableRef}
+        className={`relative gap-2 p-2 ${
+          isDraggable ? "cursor-move" : "cursor-not-allowed"
+        } bg-transparent border rounded-lg shadow-lg`}
+      >
+        <button
+          onClick={toggleDropdown}
+          className="bg-blue-500 text-white md:w-56 px-10 py-2 rounded focus:outline-none"
+        >
+          {category}
+        </button>
+
+        {isOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-40 w-full z-40 flex items-center justify-center">
+            <div
+              ref={modalRef}
+              className="relative backdrop-blur-lg bg-white/30 text-black dark:text-white rounded-lg shadow-lg p-6 transform transition-transform duration-300 scale-90"
+              style={{ zIndex: 999, width: "90%", maxWidth: "50rem" }}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg text-black w-full font-semibold">
+                  Related Links
+                </h2>
+                <button
+                  onClick={toggleDropdown}
+                  className="text-black border bg-transparent px-3 py-1 rounded-lg transition"
+                >
+                  Close
+                </button>
+              </div>
+              {loadingLinks ? (
+                <p>Loading links...</p>
+              ) : error ? (
+                <p className="text-sm text-red-500">{error}</p>
+              ) : links.length > 0 ? (
+                <div className="sm:grid-cols-2 gap-4">
+                  {links.map((link) => (
+                    <div
+                      key={link.id}
+                      className="flex items-center bg-gray-100 p-2 rounded mb-1"
+                    >
+                      {link.logoUrl && (
+                        <img
+                          src={link.logoUrl}
+                          alt={link.name}
+                          className="w-4 h-4 mr-2"
+                        />
+                      )}
+                      <a
+                        href={link.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-black font-semibold"
+                      >
+                        {link.name}
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  No bookmarks available.
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     </Draggable>
-  ) : (
-    DropdownContent
   );
 }
 
 DraggableDropdown.propTypes = {
   category: PropTypes.string.isRequired,
+  isDraggable: PropTypes.bool.isRequired,
   toggleDropdown: PropTypes.func.isRequired,
   isOpen: PropTypes.bool.isRequired,
   fetchLinks: PropTypes.func.isRequired,
   cachedLinks: PropTypes.object.isRequired,
   setCachedLinks: PropTypes.func.isRequired,
+  savedPositions: PropTypes.object.isRequired,
+  setSavedPositions: PropTypes.func.isRequired,
   index: PropTypes.number.isRequired,
-  moveItem: PropTypes.func.isRequired,
-  isDraggable: PropTypes.bool.isRequired,
 };
 
-// Main ShowLinks Component
 function ShowLinks() {
+  const [isDraggable, setIsDraggable] = useState(true);
   const [isOpen, setIsOpen] = useState(null);
   const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [error, setError] = useState(null);
   const [cachedLinks, setCachedLinks] = useState({});
-  const [items, setItems] = useState([]);
-  const [isDraggable, setIsDraggable] = useState(true);
+  const [savedPositions, setSavedPositions] = useState(
+    JSON.parse(localStorage.getItem("savedPositions")) || {}
+  );
 
   const fetchCategories = async () => {
     setLoadingCategories(true);
@@ -168,9 +191,8 @@ function ShowLinks() {
         ...doc.data(),
       }));
       setCategories(fetchedCategories);
-      setItems(fetchedCategories);
     } catch (error) {
-      setError("Failed to load categories.");
+      setError(error.message || "Failed to load categories.");
     } finally {
       setLoadingCategories(false);
     }
@@ -200,53 +222,49 @@ function ShowLinks() {
     }
   };
 
-  const moveItem = (index, newXPosition) => {
-    const newItems = [...items];
-    const movedItem = newItems[index];
-    const newIndex = Math.floor(newXPosition / 220);
-    if (newIndex !== index) {
-      newItems.splice(index, 1);
-      newItems.splice(newIndex, 0, movedItem);
-      setItems(newItems);
-    }
-  };
-
   const toggleDropdown = (index) => {
     setIsOpen((prevOpen) => (prevOpen === index ? null : index));
   };
 
+  const toggleDraggable = () => {
+    setIsDraggable((prev) => !prev);
+  };
+
   return (
-    <div className="relative p-4 border-gray-300">
-      <div className="flex justify-end mb-4">
-        <button
-          onClick={() => setIsDraggable((prev) => !prev)}
-          className="bg-gray-200 p-2 rounded-full focus:outline-none"
-        >
-          {isDraggable ? <FaLock /> : <FaUnlock />}
-        </button>
-      </div>
+    <div className="flex flex-wrap items-center justify-center space-x-4">
       {loadingCategories ? (
         <p>Loading categories...</p>
       ) : error ? (
         <p className="text-sm text-red-500">{error}</p>
       ) : (
-        <div className="flex -space-x-[16%]">
-          {items.map((categoryItem, index) => (
+        categories.map((categoryItem, index) => {
+          const newCategory = categoryItem.newCategory || "";
+
+          if (!newCategory || newCategory.trim() === "") return null;
+
+          return (
             <DraggableDropdown
               key={categoryItem.id}
-              category={categoryItem.newCategory || categoryItem.name}
+              category={newCategory}
+              isDraggable={isDraggable}
               toggleDropdown={() => toggleDropdown(index)}
               isOpen={isOpen === index}
               fetchLinks={fetchLinks}
               cachedLinks={cachedLinks}
               setCachedLinks={setCachedLinks}
+              savedPositions={savedPositions}
+              setSavedPositions={setSavedPositions}
               index={index}
-              moveItem={moveItem}
-              isDraggable={isDraggable}
             />
-          ))}
-        </div>
+          );
+        })
       )}
+      <button
+        onClick={toggleDraggable}
+        className="bg-transparent dark:text-white rounded-full shadow-lg"
+      >
+        {isDraggable ? <FaLockOpen size={20} /> : <FaLock size={20} />}
+      </button>
     </div>
   );
 }
