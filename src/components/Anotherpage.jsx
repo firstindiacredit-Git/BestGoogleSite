@@ -10,6 +10,7 @@ import Calendar from "./Calendar";
 import ImageUploader from "./ImageUploader";
 import PopularBookmarks from "./PopularBookmarks";
 import Weather from "./Weather";
+import TodoList from "./todolist"
 import { auth, db } from "../firebase";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 
@@ -145,6 +146,7 @@ const Anotherpage = ({ backgroundImage }) => {
               <div className="w-full md:w-1/4 lg:w-1/4 p-2">
                 <Calculator />
                 <Notepad />
+                <TodoList/>
               </div>
               <div className="w-full md:w-1/2 lg:w-1/2 ">
                 <PopularBookmarks />
