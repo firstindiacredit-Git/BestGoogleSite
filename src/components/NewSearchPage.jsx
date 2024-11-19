@@ -1,244 +1,193 @@
-import React, { useState, useEffect, useRef } from "react";
-import PropTypes from "prop-types";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Draggable from "react-draggable";
-import { db } from "../firebase";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import Weather from "./Weather";
+import Calculator from "./Calculator";
+import Notepad from "./Notepad";
+import Calendar from "./Calendar";
+import WidgetBookmark from "./WidgetBookmark";
+import AnimatedTooltipPreview from "./AnimatedTooltipPreview";
+import Header from "../components/Header";
 
-// Draggable Dropdown Component
-function DraggableDropdown({
-  category,
-  toggleDropdown,
-  isOpen,
-  fetchLinks,
-  cachedLinks,
-  setCachedLinks,
-  index,
-  moveItem,
-  isDraggable,
-}) {
-  const [links, setLinks] = useState([]);
-  const [loadingLinks, setLoadingLinks] = useState(false);
-  const [error, setError] = useState(null);
-  const modalRef = useRef(null);
-
-  useEffect(() => {
-    if (isOpen) {
-      if (cachedLinks[category]) {
-        setLinks(cachedLinks[category]);
-      } else {
-        setLoadingLinks(true);
-        setError(null);
-        fetchLinks(category)
-          .then((fetchedLinks) => {
-            setLinks(fetchedLinks);
-            setCachedLinks((prev) => ({
-              ...prev,
-              [category]: fetchedLinks,
-            }));
-          })
-          .catch((error) => {
-            console.error("Error fetching links: ", error);
-            setError("Failed to load links.");
-          })
-          .finally(() => {
-            setLoadingLinks(false);
-          });
-      }
-    } else {
-      setLinks([]);
-    }
-  }, [isOpen, fetchLinks, category, cachedLinks, setCachedLinks]);
-
-  const handleStop = (e, data) => {
-    if (isDraggable) moveItem(index, data.x);
-  };
-
-  const DropdownContent = (
-    <div className="relative p-2 bg-transparent border ml-[18%] rounded-lg shadow-lg">
-      <button
-        onClick={toggleDropdown}
-        className="bg-blue-500 text-white w-48 px-4 py-2 rounded focus:outline-none text-center"
-      >
-        {category}
-      </button>
-
-      {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 w-70 z-40 flex items-center justify-center">
-          <div
-            ref={modalRef}
-            className="relative backdrop-blur-lg bg-white/30 text-black dark:text-white rounded-lg shadow-lg p-6"
-            style={{ zIndex: 999, width: "100%", maxWidth: "23rem" }}
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h2 className=" text-black dark:text-white w-full font-semibold">
-                Related Links
-              </h2>
-              <button
-                onClick={toggleDropdown}
-                className="text-black border dark:text-white bg-transparent px-2 py-1 rounded-lg transition"
-              >
-                Close
-              </button>
-            </div>
-            {loadingLinks ? (
-              <p>Loading links...</p>
-            ) : error ? (
-              <p className="text-sm text-red-500">{error}</p>
-            ) : links.length > 0 ? (
-              <div className="sm:grid-cols-2">
-                {links.map((link) => (
-                  <div
-                    key={link.id}
-                    className="flex items-center bg-gray-100 p-2 rounded mb-1"
-                  >
-                    {link.logoUrl && (
-                      <img
-                        src={link.logoUrl}
-                        alt={link.name}
-                        className="w-4 h-4 mr-2"
-                      />
-                    )}
-                    <a
-                      href={link.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-black font-semibold"
-                    >
-                      {link.name}
-                    </a>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                No bookmarks available.
-              </p>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
+const Dashboard = () => {
+  const [widgets, setWidgets] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(
+    localStorage.getItem("themeMode") === "dark"
   );
 
-  return isDraggable ? (
-    <Draggable
-      axis="x"
-      onStop={handleStop}
-      position={{ x: index * 220, y: 0 }}
-      bounds="parent"
-    >
-      {DropdownContent}
-    </Draggable>
-  ) : (
-    DropdownContent
-  );
-}
+  const widgetOptions = [
+    { id: "calculator", name: "Calculator", content: <CalculateWidget /> },
+    { id: "notepad", name: "Notepad", content: <NotepadWidget /> },
+    { id: "calendar", name: "Calendar", content: <CalendarWidget /> },
+    { id: "weather", name: "Weather", content: <WeatherWidget /> },
+    { id: "bookmarks", name: "Bookmarks", content: <BookmarksWidget /> },
+  ];
 
-DraggableDropdown.propTypes = {
-  category: PropTypes.string.isRequired,
-  toggleDropdown: PropTypes.func.isRequired,
-  isOpen: PropTypes.bool.isRequired,
-  fetchLinks: PropTypes.func.isRequired,
-  cachedLinks: PropTypes.object.isRequired,
-  setCachedLinks: PropTypes.func.isRequired,
-  index: PropTypes.number.isRequired,
-  moveItem: PropTypes.func.isRequired,
-  isDraggable: PropTypes.bool.isRequired,
-};
-
-// Main ShowLinks Component
-function ShowLinks() {
-  const [isOpen, setIsOpen] = useState(null);
-  const [categories, setCategories] = useState([]);
-  const [loadingCategories, setLoadingCategories] = useState(true);
-  const [error, setError] = useState(null);
-  const [cachedLinks, setCachedLinks] = useState({});
-  const [items, setItems] = useState([]);
-  const [isDraggable, setIsDraggable] = useState(true);
-
-  const fetchCategories = async () => {
-    setLoadingCategories(true);
-    setError(null);
-    try {
-      const querySnapshot = await getDocs(collection(db, "category"));
-      const fetchedCategories = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setCategories(fetchedCategories);
-      setItems(fetchedCategories);
-    } catch (error) {
-      setError("Failed to load categories.");
-    } finally {
-      setLoadingCategories(false);
-    }
+  const toggleTheme = () => {
+    setIsDarkMode((prev) => {
+      const newMode = !prev;
+      localStorage.setItem("themeMode", newMode ? "dark" : "light");
+      return newMode;
+    });
   };
 
   useEffect(() => {
-    fetchCategories();
+    const script = document.createElement("script");
+    script.id = "google-cse";
+    script.src = "https://cse.google.com/cse.js?cx=80904074a37154829";
+    script.async = true;
+    script.defer = true;
+    document.body.appendChild(script);
+
+    const hideCompletionContainer = () => {
+      const completionContainer = document.querySelector(
+        ".gsc-completion-container"
+      );
+      if (completionContainer) completionContainer.style.display = "none";
+    };
+
+    window.addEventListener("scroll", hideCompletionContainer);
+
+    return () => {
+      document.body.removeChild(script);
+      window.removeEventListener("scroll", hideCompletionContainer);
+    };
   }, []);
 
-  const fetchLinks = async (newCategory) => {
-    try {
-      const linksQuery = query(
-        collection(db, "links"),
-        where("category", "==", newCategory)
-      );
-      const querySnapshot = await getDocs(linksQuery);
-      return querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-        logoUrl: `https://logo.clearbit.com/${
-          new URL(doc.data().link).hostname
-        }`,
-      }));
-    } catch (error) {
-      setError("Failed to load links.");
-      return [];
+  const addWidget = (widget) => {
+    if (!widgets.some((w) => w.id === widget.id)) {
+      setWidgets((prevWidgets) => [...prevWidgets, widget]);
     }
   };
 
-  const moveItem = (index, newXPosition) => {
-    const newItems = [...items];
-    const movedItem = newItems[index];
-    const newIndex = Math.floor(newXPosition / 220);
-    if (newIndex !== index) {
-      newItems.splice(index, 1);
-      newItems.splice(newIndex, 0, movedItem);
-      setItems(newItems);
-    }
+  const removeWidget = (id) => {
+    setWidgets((prevWidgets) => prevWidgets.filter((w) => w.id !== id));
   };
 
-  const toggleDropdown = (index) => {
-    setIsOpen((prevOpen) => (prevOpen === index ? null : index));
+  const handleDragStop = (e, data, widget) => {
+    const updatedWidgets = widgets.map((w) =>
+      w.id === widget.id ? { ...w, position: { x: data.x, y: data.y } } : w
+    );
+    setWidgets(updatedWidgets);
   };
 
   return (
-    <div className="relative p-4 border-gray-300">
-      {loadingCategories ? (
-        <p>Loading categories...</p>
-      ) : error ? (
-        <p className="text-sm text-red-500">{error}</p>
-      ) : (
-        <div className="flex justify-start -ml-36 -space-x-[14%]">
-          {items.map((categoryItem, index) => (
-            <DraggableDropdown
-              key={categoryItem.id}
-              category={categoryItem.newCategory || categoryItem.name}
-              toggleDropdown={() => toggleDropdown(index)}
-              isOpen={isOpen === index}
-              fetchLinks={fetchLinks}
-              cachedLinks={cachedLinks}
-              setCachedLinks={setCachedLinks}
-              index={index}
-              moveItem={moveItem}
-              isDraggable={isDraggable}
-            />
-          ))}
+    <div
+      className={` -mt-1 relative ${
+        isDarkMode ? "bg-gray-900 text-white" : ""
+      }`}
+    >
+      <Header isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
+      <div className="dark:bg-[#060d1c] ">
+        <div className="flex flex-col dark:bg-[#060d1c] -mt-12 items-center">
+          <img
+            src={isDarkMode ? "GoogleBlack.png" : "GoogleWhite.png"}
+            alt="Google Logo"
+            className="mb-4 mt-20 filter bluescale contrast-700 h-20"
+          />
+          <div
+            className="gcse-searchbox-only"
+            data-resultsUrl="https://www.google.com/search?client=ms-google-coop&qcx=80904074a37154829"
+            data-defaultToImageSearch="true"
+          />
+          <AnimatedTooltipPreview />
         </div>
+        <div className="mt-44 dark:bg-[#060d1c] ">
+          <div className="mb-4 dark:bg-[#060d1c] ">
+            <button
+              className="bg-blue-500 ml-4 text-white mb-3 px-4 py-2 rounded"
+              aria-haspopup="true"
+              onClick={() => setShowDropdown((prev) => !prev)}
+            >
+              Add Widget
+            </button>
+            {showDropdown && (
+              <div className="absolute mt-2 bg-white dark:bg-gray-800 border shadow ml-4  dark:shadow-white rounded w-48 z-10">
+                {widgetOptions.map((option) => (
+                  <button
+                    key={option.id}
+                    className="block w-full text-left ml-10 dark:text-white px-4 py-2 hover:-ml-[0px] hover:dark:text-black hover:bg-gray-100"
+                    onClick={() => {
+                      addWidget(option);
+                      setShowDropdown(false);
+                    }}
+                  >
+                    {option.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+         <div
+      className="grid grid-cols-3 -mt-4 gap-4 border-2 border-dashed dark:bg-[#060d1c] border-gray-300 rounded-lg p-4 min-h-[400px]"
+      style={{ position: "relative" }}
+    >
+      {widgets.length === 0 ? (
+        <p className="text-gray-500 text-center col-span-3">
+          No widgets added yet.
+        </p>
+      ) : (
+        widgets.map((widget) => (
+          <Draggable
+            key={widget.id}
+            bounds="parent"
+            position={widget.position || { x: 0, y: 0 }}
+            onStop={(e, data) => handleDragStop(e, data, widget)}
+          >
+            <div className="bg-white dark:bg-[#060d1c] dark:text-white shadow dark:shadow-white rounded p-4 cursor-move relative">
+              <button
+                className="absolute top-4 right-2 text-red-500"
+                aria-label="Remove Widget"
+                onClick={() => removeWidget(widget.id)}
+              >
+                ✖
+              </button>
+              {widget.content}
+            </div>
+          </Draggable>
+        ))
       )}
     </div>
+      </div>
+    </div>
   );
-}
+};
 
-export default ShowLinks;
+const CalculateWidget = () => (
+  <div>
+    <h3 className="font-bold -mb-7">Calculator</h3>
+    <Calculator />
+  </div>
+);
+
+const NotepadWidget = () => (
+  <div>
+    <h3 className="font-bold">Notepad</h3>
+    <Notepad />
+  </div>
+);
+
+const CalendarWidget = () => (
+  <div>
+    <h3 className="font-bold mb-2">Calendar</h3>
+    <Calendar />
+  </div>
+);
+
+const WeatherWidget = () => (
+  <div>
+    <h3 className="font-bold mb-12">Weather</h3>
+    <Weather />
+  </div>
+);
+
+const BookmarksWidget = () => (
+  <div>
+    <h3 className="font-bold">Bookmarks</h3>
+    <WidgetBookmark />
+  </div>
+);
+
+export default Dashboard;
