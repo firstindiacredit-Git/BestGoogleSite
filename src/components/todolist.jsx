@@ -104,7 +104,7 @@ const SortableToDoList = () => {
   };
 
   return (
-    <div className="ml-1 border p-4 rounded-lg bg-white/10 backdrop-blur-lg shadow-2xl">
+    <div className="ml-1 border p-4 mt-2 rounded-lg bg-white/10 backdrop-blur-lg ">
       <h1 className="dark:text-white text-xl font-semibold mb-3">
         TO DO LISTS
       </h1>

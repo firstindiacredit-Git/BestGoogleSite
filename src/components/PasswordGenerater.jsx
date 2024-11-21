@@ -112,7 +112,7 @@ const PasswordGenerator = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-transparent">
       <div className="bg-white dark:bg-[#4a454e] dark:text-white p-8 rounded-lg w-full max-w-6xl">
-        <h2 className="text-2xl font-bold mb-6 text-center">
+        <h2 className="text-2xl  text-black dark:text-white font-bold mb-6 text-center">
           Password Generator
         </h2>
 
@@ -120,7 +120,10 @@ const PasswordGenerator = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
           {["name", "username", "url", "email", "phone"].map((field) => (
             <div key={field}>
-              <label htmlFor={field} className="block mb-2 capitalize">
+              <label
+                htmlFor={field}
+                className="block mb-2 text-black dark:text-white capitalize"
+              >
                 {field}
               </label>
               <input
@@ -129,7 +132,7 @@ const PasswordGenerator = () => {
                 type={field === "email" ? "email" : "text"}
                 value={formData[field]}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border text-black dark:text-white border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
               />
             </div>
           ))}
@@ -138,7 +141,10 @@ const PasswordGenerator = () => {
         {/* Password Length & Options */}
         <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <div>
-            <label htmlFor="password-length" className="block mb-2">
+            <label
+              htmlFor="password-length"
+              className="block mb-2 text-black dark:text-white"
+            >
               Password Length
             </label>
             <input
@@ -148,7 +154,7 @@ const PasswordGenerator = () => {
               onChange={(e) => setLength(Number(e.target.value))}
               min="4"
               max="20"
-              className="w-full px-4 py-2 border dark:text-black border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border text-black   dark:text-black border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
             />
           </div>
           {[
@@ -157,7 +163,7 @@ const PasswordGenerator = () => {
             ["Include Symbols", includeSymbols, setIncludeSymbols],
           ].map(([label, state, setter], i) => (
             <div key={i}>
-              <label className="flex items-center mt-10">
+              <label className="flex text-black dark:text-white items-center mt-10">
                 <input
                   type="checkbox"
                   checked={state}
@@ -184,7 +190,7 @@ const PasswordGenerator = () => {
             type="text"
             value={password}
             readOnly
-            className="w-full p-3 border border-gray-300 rounded-l-md focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 border text-black dark:text-white border-gray-300 rounded-l-md focus:ring-2 focus:ring-blue-500"
           />
           <button
             onClick={() => copyToClipboard(password)}
@@ -203,20 +209,36 @@ const PasswordGenerator = () => {
             <table className="min-w-full border rounded-lg table-auto border-collapse">
               <thead>
                 <tr>
-                  <th className="border px-4 py-2">Name</th>
-                  <th className="border px-4 py-2">Username</th>
-                  <th className="border px-4 py-2">URL</th>
-                  <th className="border px-4 py-2">Generated Password</th>
-                  <th className="border px-4 py-2">Email</th>
-                  <th className="border px-4 py-2">Phone</th>
-                  <th className="border px-4 py-2">Actions</th>
+                  <th className="border text-black dark:text-white px-4 py-2">
+                    Name
+                  </th>
+                  <th className="border text-black dark:text-white px-4 py-2">
+                    Username
+                  </th>
+                  <th className="border text-black dark:text-white px-4 py-2">
+                    URL
+                  </th>
+                  <th className="border text-black dark:text-white px-4 py-2">
+                    Generated Password
+                  </th>
+                  <th className="border text-black dark:text-white px-4 py-2">
+                    Email
+                  </th>
+                  <th className="border text-black dark:text-white px-4 py-2">
+                    Phone
+                  </th>
+                  <th className="border text-black dark:text-white px-4 py-2">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {submittedData.map((data) => (
                   <tr key={data.id}>
-                    <td className="border px-4 py-2">{data.name}</td>
-                    <td className="border px-4 py-2">
+                    <td className="border text-black dark:text-white px-4 py-2">
+                      {data.name}
+                    </td>
+                    <td className="border text-black dark:text-white px-4 py-2">
                       {data.username}
                       <button
                         onClick={() => copyToClipboard(data.username)}
@@ -225,7 +247,7 @@ const PasswordGenerator = () => {
                         <FaCopy />
                       </button>
                     </td>
-                    <td className="border px-4 py-2">
+                    <td className="border text-black dark:text-white px-4 py-2">
                       {data.favicon && (
                         <img
                           src={data.favicon}
@@ -235,7 +257,7 @@ const PasswordGenerator = () => {
                       )}
                       {data.url}
                     </td>
-                    <td className="border px-4 py-2">
+                    <td className="border text-black dark:text-white px-4 py-2">
                       {data.password}
                       <button
                         onClick={() => copyToClipboard(data.password)}
@@ -244,9 +266,13 @@ const PasswordGenerator = () => {
                         <FaCopy />
                       </button>
                     </td>
-                    <td className="border px-4 py-2">{data.email}</td>
-                    <td className="border px-4 py-2">{data.phone}</td>
-                    <td className="border px-4 py-2">
+                    <td className="border px-4 text-black dark:text-white py-2">
+                      {data.email}
+                    </td>
+                    <td className="border px-4 text-black dark:text-white py-2">
+                      {data.phone}
+                    </td>
+                    <td className="border px-4 text-black dark:text-white py-2">
                       <button
                         onClick={() => handleDelete(data.id)}
                         className="text-red-500 hover:text-red-700"

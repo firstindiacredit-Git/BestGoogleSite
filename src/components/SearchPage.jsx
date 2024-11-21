@@ -1,17 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { TbGridDots } from "react-icons/tb";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 import Header from "../components/Header";
 import AnimatedTooltipPreview from "./AnimatedTooltipPreview";
 import Anotherpage from "../components/Anotherpage";
 import PopularBookmarks from "../components/PopularBookmarks";
-import Notepad from "../components/Notepad";
+import NotebookAndSheet from "../components/NotebookAndSheet";
 import PasswordGenerator from "../components/PasswordGenerater";
 import News from "../components/News";
-import galleryupload from "/galleryupload.png";
-import layers from "/layers.png";
-import remove from "/remove.png";
+import { FaHome } from "react-icons/fa";
+import { MdAddHomeWork } from "react-icons/md";
+
 import "./style.css";
 
 
@@ -23,28 +22,26 @@ function SearchPage() {
   const [visibleItem, setVisibleItem] = useState(null);
   const navigate = useNavigate();
   
-
+ useEffect(() => {
+   const storedThemeMode = localStorage.getItem("themeMode");
+   if (storedThemeMode) {
+     setIsDarkMode(storedThemeMode === "dark");
+   }
+ }, []);
+  
   useEffect(() => {
     const storedBackgroundImage = localStorage.getItem("backgroundImage");
     if (storedBackgroundImage) {
       setBackgroundImage(storedBackgroundImage);
     }
   }, []);
-
-window.addEventListener("scroll", () => {
-  const completionContainer = document.querySelector(
-    ".gsc-completion-container"
-  );
-  if (completionContainer) completionContainer.style.display = "none";
-});
-
-  const toggleTheme = () => {
-    setIsDarkMode((prev) => {
-      const newMode = !prev;
-      localStorage.setItem("themeMode", newMode ? "dark" : "light");
-      return newMode;
-    });
-  };
+   useEffect(() => {
+     if (isDarkMode) {
+       document.body.classList.add("dark");
+     } else {
+       document.body.classList.remove("dark");
+     }
+   }, [isDarkMode]);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -59,10 +56,25 @@ window.addEventListener("scroll", () => {
     }
   };
 
-  const removeBackground = () => {
-    setBackgroundImage("");
-    localStorage.removeItem("backgroundImage");
-  };
+
+window.addEventListener("scroll", () => {
+  const completionContainer = document.querySelector(
+    ".gsc-completion-container"
+  );
+  if (completionContainer) completionContainer.style.display = "none";
+});
+
+ const toggleTheme = () => {
+   setIsDarkMode((prev) => {
+     const newMode = !prev;
+     localStorage.setItem("themeMode", newMode ? "dark" : "light");
+     return newMode;
+   });
+ };
+
+  
+
+  
 
   const handleIconClick = () => {
     setShowButtons(!showButtons);
@@ -102,7 +114,7 @@ window.addEventListener("scroll", () => {
   
   return (
     <div
-      className="bg-zinc-50 dark:bg-[#060d1c] min-h-screen h-full"
+      className="bg-zinc-50 dark:bg-gray-900 h-screen"
       style={{
         backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",
         backgroundSize: "cover",
@@ -110,57 +122,14 @@ window.addEventListener("scroll", () => {
         backgroundAttachment: "fixed",
       }}
     >
-      <Header isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
+      <Header
+        isDarkMode={isDarkMode}
+        toggleTheme={toggleTheme}
+        handleImageChange={handleImageChange}
+      />
 
       <div className="mt-6">
-        <div
-          onClick={handleIconClick}
-          className="cursor-pointer flex m-1 mr-3 justify-end"
-        >
-          <TbGridDots className="w-8 h-8 hover:border dark:text-white border-slate-400 p-1 m-2 shadow-lg rounded-full" />
-        </div>
-        {showButtons && (
-          <div className="absolute right-10 top-20 bg-white/10 p-4 w-70 mr-2 shadow-lg rounded-2xl">
-            <div className="grid grid-cols-2 gap-1">
-              <label
-                className="cursor-pointer text-xs p-1 rounded items-center justify-center"
-                htmlFor="image-upload"
-              >
-                <img
-                  src={galleryupload}
-                  alt="Upload"
-                  className="h-9 w-9 m-auto "
-                />
-                <span className="text-xs dark:text-white p-1 w-28 rounded grid items-center justify-center">
-                  Change Image
-                </span>
-              </label>
-              <input
-                id="image-upload"
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="hidden"
-              />
-              <button
-                onClick={removeBackground}
-                className="text-xs p-1 w-32 rounded grid items-center justify-center "
-                style={{ textAlign: "center" }}
-              >
-                <img src={remove} alt="Remove" className="h-9 w-9 m-auto" />
-                <span className="dark:text-white">Remove Image</span>
-              </button>
-              <Link to="/NewSearchPage">
-                <img src={layers} alt="Upload" className="h-9 w-9 m-auto " />
-                <span className="text-xs p-1 dark:text-white w-28 rounded m-auto grid items-center justify-center ">
-                  Customize Widgets
-                </span>
-              </Link>
-            </div>
-          </div>
-        )}
-
-        <div className="flex flex-col items-center mt-[3vh]">
+        <div className="flex flex-col items-center mt-10 h-screen">
           <img
             src={isDarkMode ? "GoogleBlack.png" : "GoogleWhite.png"}
             alt="Google Logo"
@@ -172,12 +141,30 @@ window.addEventListener("scroll", () => {
             data-defaultToImageSearch="true"
           />
           <AnimatedTooltipPreview />
+          <div className="-mt-10">
+            <Link to="/">
+              <button className=" h-10 w-10 rounded-2xl  ">
+                <FaHome className="text-green-700 h-10 w-7 text-center justify-center m-auto " />
+              </button>
+            </Link>
+            <Link to="/NewSearchPage">
+              <button className=" h-10 w-10 rounded-2xl  ">
+                <MdAddHomeWork className="text-green-700 h-10 w-7 text-center justify-center m-auto " />
+              </button>
+            </Link>
+          </div>
         </div>
 
-        <div className="border border-2 border-gray-400 rounded-3xl dark:text-white font-semibold text-center space-x-6 sm:space-x-4 md:space-x-6 lg:space-x-10 w-[70%] md:w-[70%] lg:w-[50%] xl:w-[60%] p-2 mt-[110px] mx-auto flex flex-wrap justify-center gap-2 md:gap-3 lg:gap-4">
+        <div className="bg-gray-800 border-gray-400 p-2 -mt-[49vh] -mb-20 text-white  dark:text-white font-semibold text-center space-x-6 sm:space-x-4 md:space-x-6 lg:space-x-10 mx-auto flex flex-wrap justify-center gap-2 md:gap-3 lg:gap-10">
+          <Link to="/">
+            <button className="bg-white h-7 w-7 rounded-2xl">
+              <FaHome className="text-green-700 text-center justify-center m-auto " />
+            </button>
+          </Link>
+
           <div>
             <button
-              className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[100%] lg:w-[120%] xl:w-[120%] rounded-xl"
+              className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[100%] lg:w-[120%] xl:w-[170%] rounded-xl -ml-8"
               onClick={() => handleToggleVisibility("PopularBookmarks")}
             >
               BOOKMARKS
@@ -188,7 +175,7 @@ window.addEventListener("scroll", () => {
                 <div className="fixed top-1/2 left-1/2 z-50 w-[90%] h-[90%] max-h-[90vh] p-4 shadow-lg transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-[#4a454e] rounded-lg overflow-y-auto">
                   <PopularBookmarks />
                   <button
-                    className="absolute top-3 right-3 dark:text-white"
+                    className="absolute top-3 right-3 text-black dark:text-white"
                     onClick={() => handleClose("PopularBookmarks")}
                   >
                     <IoIosCloseCircleOutline size={30} />
@@ -201,21 +188,23 @@ window.addEventListener("scroll", () => {
           <div>
             <button
               className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[100%] lg:w-[100%] xl:w-[120%] rounded-xl"
-              onClick={() => handleToggleVisibility("Notepad")}
+              onClick={() => handleToggleVisibility("NotebookAndSheet")}
             >
               NOTES
             </button>
-            {visibleItem === "Notepad" && (
+            {visibleItem === "NotebookAndSheet" && (
               <>
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"></div>
-                <div className="fixed top-1/2 left-1/2 z-50 w-[70%] h-[100%] p-4  transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-[#4a454e] rounded-lg">
-                  <Notepad />
-                  <button
-                    className="absolute top-3 right-3 dark:text-white"
-                    onClick={() => handleClose("Notepad")}
-                  >
-                    <IoIosCloseCircleOutline size={30} />
-                  </button>
+                <div className="fixed top-1/2 left-1/2 z-50 w-[90%] h-[100%] p-4  transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-[#4a454e] rounded-lg overflow-y-auto">
+                  <div>
+                    <button
+                      className="absolute top-3 right-3 text-black dark:text-white"
+                      onClick={() => handleClose("NotebookAndSheet")}
+                    >
+                      <IoIosCloseCircleOutline size={30} />
+                    </button>{" "}
+                  </div>
+                  <NotebookAndSheet />
                 </div>
               </>
             )}
@@ -233,7 +222,7 @@ window.addEventListener("scroll", () => {
                 <div className="fixed top-1/2 left-1/2 z-50 w-[90%] h-[90%] max-h-[90vh] p-4  transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-[#4a454e] rounded-lg overflow-y-auto">
                   <PasswordGenerator />
                   <button
-                    className="absolute top-3 right-3 dark:text-white"
+                    className="absolute top-3 right-3 text-black dark:text-white"
                     onClick={() => handleClose("PasswordGenerator")}
                   >
                     <IoIosCloseCircleOutline size={30} />
@@ -252,10 +241,10 @@ window.addEventListener("scroll", () => {
             {visibleItem === "News" && (
               <>
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"></div>
-                <div className="fixed top-1/2 left-1/2 z-50 w-[70%] h-[100%] p-4 shadow-lg transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-[#4a454e] rounded-lg">
+                <div className="fixed top-1/2 left-1/2 z-50 w-[70%] h-[100%] p-4 shadow-lg transform -translate-x-1/2 -translate-y-1/2  bg-white dark:bg-[#4a454e] rounded-lg">
                   <News />
                   <button
-                    className="absolute top-3 right-3 dark:text-white"
+                    className="absolute top-3 right-3 text-black dark:text-white"
                     onClick={() => handleClose("News")}
                   >
                     <IoIosCloseCircleOutline size={30} />
@@ -309,12 +298,14 @@ window.addEventListener("scroll", () => {
             )} */}
           </div>
           {/* Other buttons iframe */}
-          <button
-            onClick={handleFileClick}
-            className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[20%] lg:w-[15%] xl:w-[8%] rounded-xl"
-          >
-            TOOLS
-          </button>
+          <div>
+            <button
+              onClick={handleFileClick}
+              className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[20%] lg:w-[15%] xl:w-[120%] rounded-2xl"
+            >
+              TOOLS
+            </button>
+          </div>
         </div>
 
         <Anotherpage

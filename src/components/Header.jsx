@@ -1,31 +1,19 @@
+// Header.js
+
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { signOut, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase";
 import { FaSun, FaMoon } from "react-icons/fa";
+import { TbGridDots } from "react-icons/tb";
+import galleryupload from "/galleryupload.png";
+import layers from "/layers.png";
+import remove from "/remove.png";
 
-const Header = () => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [panel, setPanel] = useState(false);
+const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
+  const [showButtons, setShowButtons] = useState(false);
   const [user, setUser] = useState(null);
-
-  const toggleTheme = () => {
-    setIsDarkMode((prevMode) => !prevMode);
-    if (!isDarkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-    localStorage.setItem("theme", !isDarkMode ? "dark" : "light");
-  };
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "dark") {
-      setIsDarkMode(true);
-      document.documentElement.classList.add("dark");
-    }
-  }, []);
+  const [panel, setPanel] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -48,6 +36,10 @@ const Header = () => {
     setPanel(!panel);
   };
 
+  const handleIconClick = () => {
+    setShowButtons(!showButtons);
+  };
+
   const handleSignOut = async () => {
     try {
       await signOut(auth);
@@ -65,15 +57,9 @@ const Header = () => {
           <span className="text-red-500 dark:text-red-300">Google</span>
           <span className="text-yellow-500 dark:text-yellow-300">Sites</span>
         </Link>
-        <Link to="/PremiumPage">
-          <button className="border ml-2 border-blue-500 text-blue-500 px-3 py-1 rounded hover:bg-blue-500 hover:text-white transition-colors duration-200 dark:border-blue-300 dark:text-blue-300 dark:hover:bg-blue-300">
-            Premium
-          </button>
-        </Link>
       </div>
 
       <div className="flex items-center space-x-4">
-        {/* Dark Mode Toggle Switch */}
         <div className="flex items-center">
           <span className="text-sm mr-2 dark:text-white">
             {isDarkMode ? <FaSun /> : <FaMoon />}
@@ -90,6 +76,62 @@ const Header = () => {
           </label>
         </div>
 
+        <div className="-mb-2 -mt-2">
+          <div
+            onClick={handleIconClick}
+            className="cursor-pointer flex justify-end"
+          >
+            <TbGridDots className="w-8 h-8 hover:border dark:text-white border-slate-400 p-1 m-2 rounded-full" />
+          </div>
+          {showButtons && (
+            <div className="absolute right-1 top-20 bg-white/10 p-4 w-70 mr-2 shadow-lg rounded-2xl">
+              <div className="grid grid-cols-2 gap-1">
+                <label
+                  className="cursor-pointer text-xs p-1 rounded items-center justify-center"
+                  htmlFor="image-upload"
+                >
+                  <img
+                    src={galleryupload}
+                    alt="Upload"
+                    className="h-9 w-9 m-auto"
+                  />
+                  <span className="text-xs dark:text-white p-1 w-28 rounded grid items-center justify-center">
+                    Change Image
+                  </span>
+                </label>
+                <input
+                  id="image-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange} // Use the passed function
+                  className="hidden"
+                />
+                <button
+                  onClick={() => {
+                    localStorage.removeItem("backgroundImage");
+                    setShowButtons(false);
+                    window.reload()
+                  }}
+                  className="text-xs p-1 w-32 rounded grid items-center justify-center"
+                >
+                  <img src={remove} alt="Remove" className="h-9 w-9 m-auto" />
+                  <span className="dark:text-white">Remove Image</span>
+                </button>
+                <Link to="/NewSearchPage">
+                  <img
+                    src={layers}
+                    alt="Customize"
+                    className="h-9 w-9 m-auto"
+                  />
+                  <span className="text-xs p-1 dark:text-white w-28 rounded m-auto grid items-center justify-center">
+                    Customize Widgets
+                  </span>
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+
         {user ? (
           <div className="relative">
             <div
@@ -102,9 +144,8 @@ const Header = () => {
                 className="h-8 w-8 rounded-full border border-gray-300 dark:border-gray-500"
               />
             </div>
-
             {panel && (
-              <div className="absolute right-0 mt-2 w-48 py-2 bg-white shadow-lg rounded-lg text-sm dark:bg-gray-700">
+              <div className="absolute right-0 mt-2 w-60 py-2 bg-white shadow-lg rounded-lg text-sm dark:bg-gray-700">
                 <div className="px-4 py-2 text-center dark:text-white">
                   <p className="font-bold">{user.displayName || "User"}</p>
                   <p>{user.email}</p>
@@ -120,16 +161,18 @@ const Header = () => {
             )}
           </div>
         ) : (
-          <div className="flex space-x-2">
-            <Link to="/signin">
-              <button className="px-4 py-1 border border-blue-500 text-blue-500 rounded hover:bg-blue-500 hover:text-white transition-colors duration-200 dark:border-blue-300 dark:text-blue-300 dark:hover:bg-blue-300">
-                Sign In
-              </button>
+          <div className="flex space-x-4">
+            <Link
+              to="/signin"
+              className="text-sm font-medium text-blue-500 dark:text-blue-300"
+            >
+              Sign In
             </Link>
-            <Link to="/signup">
-              <button className="px-4 py-1 border border-green-500 text-green-500 rounded hover:bg-green-500 hover:text-white transition-colors duration-200 dark:border-green-300 dark:text-green-300 dark:hover:bg-green-300">
-                Sign Up
-              </button>
+            <Link
+              to="/signup"
+              className="text-sm font-medium text-blue-500 dark:text-blue-300"
+            >
+              Sign Up
             </Link>
           </div>
         )}

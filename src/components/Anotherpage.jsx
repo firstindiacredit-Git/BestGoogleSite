@@ -145,8 +145,8 @@ const Anotherpage = ({ backgroundImage }) => {
             <>
               <div className="w-full md:w-1/4 lg:w-1/4 p-2">
                 <Calculator />
-                <Notepad />
                 <TodoList/>
+                <Notepad />
               </div>
               <div className="w-full md:w-1/2 lg:w-1/2 ">
                 <PopularBookmarks />

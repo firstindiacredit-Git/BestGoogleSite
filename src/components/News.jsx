@@ -69,7 +69,9 @@ const News = () => {
 
   return (
     <div className="max-w-5xl mx-auto p-5">
-      <h1 className="text-3xl font-bold text-center mb-6">Latest News</h1>
+      <h1 className="text-3xl font-bold text-black dark:text-white text-center mb-6">
+        Latest News
+      </h1>
 
       {/* Country Selector */}
       <div className="flex space-x-2 mb-2 ">
@@ -134,7 +136,9 @@ const News = () => {
               />
             )}
             <h2 className="text-lg  font-semibold mb-2">{article.title}</h2>
-            <p className="text-gray-700 dark:text-blue-500 flex-grow">{article.description}</p>
+            <p className="text-gray-700 dark:text-blue-500 flex-grow">
+              {article.description}
+            </p>
             <a
               href={article.url}
               target="_blank"

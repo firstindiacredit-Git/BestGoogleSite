@@ -154,7 +154,7 @@ const Bookmarks = () => {
               className="w-10 h-10 mb-1"
             />
            
-            <span className="block text-sm dark:text-white w-2 mr-12">
+            <span className="block text-black text-sm dark:text-white w-2 mr-12">
               {bookmark.name}
             </span>
           </a>
@@ -186,14 +186,14 @@ const Bookmarks = () => {
 
   return (
     <div className="container mx-auto py-10">
-      <h2 className="text-3xl dark:text-white font-semibold mb-6 text-center">
+      <h2 className="text-3xl dark:text-white text-black font-semibold mb-6 text-center">
         My Bookmarks
       </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
         {/* Popular Bookmarks Section */}
         <section className="bg-white/20 p-4 rounded-lg shadow">
-          <h3 className="text-xl dark:text-white font-semibold mb-4">
+          <h3 className="text-xl text-black dark:text-white font-semibold mb-4">
             Popular
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
@@ -202,7 +202,9 @@ const Bookmarks = () => {
         </section>
         {/* Social Bookmarks Section */}
         <section className="bg-white/20 p-4 rounded-lg shadow">
-          <h3 className="text-xl font-semibold dark:text-white mb-4">Social</h3>
+          <h3 className="text-xl font-semibold text-black dark:text-white mb-4">
+            Social
+          </h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-2">
             {renderBookmarks("Social")}
           </div>
@@ -210,7 +212,9 @@ const Bookmarks = () => {
 
         {/* Travel Bookmarks Section */}
         <section className="bg-white/20 p-4 rounded-lg shadow">
-          <h3 className="text-xl font-semibold dark:text-white mb-4">Travel</h3>
+          <h3 className="text-xl font-semibold text-black dark:text-white mb-4">
+            Travel
+          </h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-2">
             {renderBookmarks("Travel")}
           </div>
@@ -218,7 +222,7 @@ const Bookmarks = () => {
 
         {/* Shopping Bookmarks Section */}
         <section className="bg-white/20 p-4 rounded-lg shadow">
-          <h3 className="text-xl font-semibold dark:text-white mb-4">
+          <h3 className="text-xl font-semibold text-black dark:text-white mb-4">
             Shopping
           </h3>
           <div className="grid grid-row-2 sm:grid-row-2 md:grid-row-2 justify-start gap-2">

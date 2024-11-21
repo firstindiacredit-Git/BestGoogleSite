@@ -46,9 +46,7 @@ const WeatherPage = () => {
           />
         </div>
         <div className="text-center ml-4">
-          <div className="text-3xl  dark:text-white">
-            {temperature}°C
-          </div>
+          <div className="text-3xl  dark:text-white">{temperature}°C</div>
           <div className="dark:text-gray-300">
             {city}, {country}
           </div>
@@ -56,7 +54,7 @@ const WeatherPage = () => {
       </div>
 
       {/* Additional Details */}
-      <div className="flex justify-between items-center w-full border-t-2   p-3 dark:text-white">
+      <div className="flex justify-between items-center w-full border-t-2 text-black   p-3 dark:text-white">
         {/* Humidity */}
         <div className="flex flex-col items-center">
           <div className="text-md">Humidity</div>
