@@ -111,7 +111,7 @@ const PasswordGenerator = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-transparent">
-      <div className="bg-white dark:bg-[#4a454e] dark:text-white p-8 rounded-lg w-full max-w-6xl">
+      <div className="bg-white dark:bg-gray-900 dark:text-white p-8 rounded-lg w-full max-w-6xl">
         <h2 className="text-2xl  text-black dark:text-white font-bold mb-6 text-center">
           Password Generator
         </h2>
@@ -272,10 +272,10 @@ const PasswordGenerator = () => {
                     <td className="border px-4 text-black dark:text-white py-2">
                       {data.phone}
                     </td>
-                    <td className="border px-4 text-black dark:text-white py-2">
+                    <td className="border px-4 text-center text-black dark:text-white py-2">
                       <button
                         onClick={() => handleDelete(data.id)}
-                        className="text-red-500 hover:text-red-700"
+                        className="text-red-500  hover:text-red-700"
                       >
                         <FaTrash />
                       </button>

@@ -116,9 +116,10 @@ const NotebookAndDocumentSheet = () => {
   };
 
   return (
-    <div className="min-h-screen dark:bg-[#4a454e] bg-gray-100 p-6">
+    <div className="min-h-screen dark:bg-gray-900 bg-gray-100 p-6">
+      <h1>NOTES</h1>
       <div>
-        <div className="w-[141%] mx-auto grid grid-cols-1 -mt-5 md:grid-cols-2 gap-6">
+        <div className="w-[152%] mx-auto grid grid-cols-1 -mt-5 md:grid-cols-2 gap-6">
           {/* Notebook Section (Wider) */}
           <div className="bg-white text-black p-4 rounded-lg shadow-md col-span-1 md:col-span-1">
             <h2 className="text-xl font-semibold">Notebook</h2>
@@ -232,14 +233,18 @@ const NotebookAndDocumentSheet = () => {
         {/* Render all tables */}
         {tables.map((table) => (
           <div key={table.id} className="">
-            {/* Table Name Input */}
-            <input
-              type="text"
-              value={table.name}
-              onChange={(e) => handleTableNameChange(table.id, e.target.value)}
-              className="text-lg font-medium ml-16 text-black w-60 border-none px-4 py-2 rounded"
-              placeholder="Enter table name"
-            />
+            <div className="text-center">
+              {/* Table Name Input */}
+              <input
+                type="text"
+                value={table.name}
+                onChange={(e) =>
+                  handleTableNameChange(table.id, e.target.value)
+                }
+                className="text-lg font-medium text-center m-auto text-black w-60 border-none px-4 py-2 rounded"
+                placeholder="Enter table name"
+              />
+            </div>
 
             <table className="table-auto border-collapse border border-gray-300 w-full text-left">
               <thead>

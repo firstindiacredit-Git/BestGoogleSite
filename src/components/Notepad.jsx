@@ -30,7 +30,7 @@ const NotepadWithLines = () => {
   const [error, setError] = useState("");
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [backgroundColor, setBackgroundColor] = useState(
-    localStorage.getItem("notepadBackgroundColor") || "#FFFFF0"
+    localStorage.getItem("notepadBackgroundColor") || "#FDFS97"
   );
   const [showColorPicker, setShowColorPicker] = useState(false);
 

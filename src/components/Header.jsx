@@ -110,7 +110,7 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
                   onClick={() => {
                     localStorage.removeItem("backgroundImage");
                     setShowButtons(false);
-                    window.reload()
+                    window.reload();
                   }}
                   className="text-xs p-1 w-32 rounded grid items-center justify-center"
                 >
@@ -153,7 +153,7 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
                 <hr className="my-2 border-gray-200 dark:border-gray-600" />
                 <button
                   onClick={handleSignOut}
-                  className="w-full px-4 py-2 text-center text-sm text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600 rounded transition-colors duration-200"
+                  className="w-full px-4 py-2 text-center text-sm  text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600 rounded transition-colors duration-200"
                 >
                   Sign Out
                 </button>
@@ -164,13 +164,13 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
           <div className="flex space-x-4">
             <Link
               to="/signin"
-              className="text-sm font-medium text-blue-500 dark:text-blue-300"
+              className="px-2 py-1 border border-blue-500 text-blue-500 rounded hover:bg-blue-500 hover:text-white transition-colors duration-200 dark:border-blue-300 dark:text-blue-300 dark:hover:bg-blue-300"
             >
               Sign In
             </Link>
             <Link
               to="/signup"
-              className="text-sm font-medium text-blue-500 dark:text-blue-300"
+              className="px-2 py-1 border border-green-500 text-green-500 rounded hover:bg-green-500 hover:text-white transition-colors duration-200 dark:border-green-300 dark:text-green-300 dark:hover:bg-green-300"
             >
               Sign Up
             </Link>

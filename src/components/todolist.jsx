@@ -9,6 +9,7 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
+import { MdDeleteOutline } from "react-icons/md";
 
 const SortableToDoList = () => {
   const [tasks, setTasks] = useState([]);
@@ -139,30 +140,52 @@ const SortableToDoList = () => {
                       ref={provided.innerRef}
                       {...provided.draggableProps}
                       {...provided.dragHandleProps}
-                      className={`flex items-center justify-between p-5 border-b border-gray-300 cursor-move bg-white text-black text-sm box-border transition-transform duration-250 ease-in-out ${
+                      className={`flex items-center justify-between p-2 border-b border-gray-300 cursor-move bg-white text-black text-sm box-border transition-transform duration-250 ease-in-out ${
                         task.isCompleted ? "bg-green-100" : ""
                       }`}
                     >
-                      <span
-                        onClick={() => handleToggleCompletion(task.id)}
-                        className={`font-bold text-base flex-1 ${
-                          task.isCompleted
-                            ? "line-through text-gray-500"
-                            : "text-black"
-                        }`}
-                      >
-                        {task.text}
+                      {/* Index */}
+                      <span className="font-semibold text-gray-600 mr-2">
+                        {index + 1}.
                       </span>
+
+                      {/* Checkbox */}
+                      <input
+                        type="checkbox"
+                        checked={task.isCompleted}
+                        onChange={() => handleToggleCompletion(task.id)}
+                        className="mr-3 h-4 w-4 accent-blue-500 cursor-pointer"
+                      />
+
+                      {/* Task Details */}
+                      <div className="flex-1">
+                        <span
+                          onClick={() => handleToggleCompletion(task.id)}
+                          className={`font-bold text-base ${
+                            task.isCompleted
+                              ? "line-through text-gray-400"
+                              : "text-black"
+                          }`}
+                        >
+                          {task.text}
+                        </span>
+                        <div className="text-sm text-gray-500">
+                          <span>{task.date}</span> - <span>{task.time}</span>
+                        </div>
+                      </div>
+
+                      {/* Delete Button */}
                       <button
                         onClick={() => handleDeleteTask(task.id)}
-                        className="p-1 bg-red-500 text-white rounded-md ml-2 hover:bg-red-600 transition"
+                        className="p-1 text-black rounded-md ml-2 hover:bg-gray-600 transition"
                       >
-                        Delete
+                        <MdDeleteOutline />
                       </button>
                     </div>
                   )}
                 </Draggable>
               ))}
+
               {provided.placeholder}
             </div>
           )}

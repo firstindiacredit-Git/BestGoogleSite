@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { IoIosCloseCircleOutline } from "react-icons/io";
+import { FaArrowUp } from "react-icons/fa";
 import Header from "../components/Header";
 import AnimatedTooltipPreview from "./AnimatedTooltipPreview";
 import Anotherpage from "../components/Anotherpage";
@@ -8,40 +8,63 @@ import PopularBookmarks from "../components/PopularBookmarks";
 import NotebookAndSheet from "../components/NotebookAndSheet";
 import PasswordGenerator from "../components/PasswordGenerater";
 import News from "../components/News";
+import Tool from "../components/Tool";
 import { FaHome } from "react-icons/fa";
 import { MdAddHomeWork } from "react-icons/md";
-
 import "./style.css";
-
 
 function SearchPage() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [backgroundImage, setBackgroundImage] = useState("");
-  const [showButtons, setShowButtons] = useState(false);
-  const [url, setUrl] = useState(null);
-  const [visibleItem, setVisibleItem] = useState(null);
+  
+  const [activeComponent, setActiveComponent] = useState(null);
   const navigate = useNavigate();
-  
- useEffect(() => {
-   const storedThemeMode = localStorage.getItem("themeMode");
-   if (storedThemeMode) {
-     setIsDarkMode(storedThemeMode === "dark");
-   }
- }, []);
-  
+  const [showButton, setShowButton] = useState(false);
+
+  useEffect(() => {
+    const storedThemeMode = localStorage.getItem("themeMode");
+    if (storedThemeMode) {
+      setIsDarkMode(storedThemeMode === "dark");
+    }
+  }, []);
+
   useEffect(() => {
     const storedBackgroundImage = localStorage.getItem("backgroundImage");
     if (storedBackgroundImage) {
       setBackgroundImage(storedBackgroundImage);
     }
   }, []);
-   useEffect(() => {
-     if (isDarkMode) {
-       document.body.classList.add("dark");
-     } else {
-       document.body.classList.remove("dark");
-     }
-   }, [isDarkMode]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowButton(true);
+      } else {
+        setShowButton(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.body.classList.add("dark");
+    } else {
+      document.body.classList.remove("dark");
+    }
+  }, [isDarkMode]);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -56,28 +79,21 @@ function SearchPage() {
     }
   };
 
+  const toggleTheme = () => {
+    setIsDarkMode((prev) => {
+      const newMode = !prev;
+      localStorage.setItem("themeMode", newMode ? "dark" : "light");
+      return newMode;
+    });
+  };
 
-window.addEventListener("scroll", () => {
-  const completionContainer = document.querySelector(
-    ".gsc-completion-container"
-  );
-  if (completionContainer) completionContainer.style.display = "none";
-});
+ 
 
- const toggleTheme = () => {
-   setIsDarkMode((prev) => {
-     const newMode = !prev;
-     localStorage.setItem("themeMode", newMode ? "dark" : "light");
-     return newMode;
-   });
- };
-
+  const handleToggleComponent = (componentName) => {
   
-
-  
-
-  const handleIconClick = () => {
-    setShowButtons(!showButtons);
+    setActiveComponent((prevComponent) =>
+      prevComponent === componentName ? null : componentName
+    );
   };
 
   useEffect(() => {
@@ -93,25 +109,6 @@ window.addEventListener("scroll", () => {
     };
   }, [navigate]);
 
-  const handleFileClick = () => {
-    setUrl("https://pizeonflytools.vercel.app/");
-  };
-
-  const closeViewer = () => {
-    setUrl(null);
-  };
-
-  const handleToggleVisibility = (itemId) => {
-    setVisibleItem((prevVisibleItem) =>
-      prevVisibleItem === itemId ? null : itemId
-    );
-  };
-
-  const handleClose = (id) => {
-    setVisibleItem(null);
-  };
-  
-  
   return (
     <div
       className="bg-zinc-50 dark:bg-gray-900 h-screen"
@@ -133,7 +130,7 @@ window.addEventListener("scroll", () => {
           <img
             src={isDarkMode ? "GoogleBlack.png" : "GoogleWhite.png"}
             alt="Google Logo"
-            className="mb-4 filter bluescale  contrast-700 h-20"
+            className="mb-4 filter bluescale contrast-700 h-20"
           />
           <div
             className="gcse-searchbox-only"
@@ -143,202 +140,114 @@ window.addEventListener("scroll", () => {
           <AnimatedTooltipPreview />
           <div className="-mt-10">
             <Link to="/">
-              <button className=" h-10 w-10 rounded-2xl  ">
-                <FaHome className="text-green-700 h-10 w-7 text-center justify-center m-auto " />
+              <button className="h-10 w-10 rounded-2xl">
+                <FaHome className="text-green-700 h-10 w-7 text-center justify-center m-auto" />
               </button>
             </Link>
             <Link to="/NewSearchPage">
-              <button className=" h-10 w-10 rounded-2xl  ">
-                <MdAddHomeWork className="text-green-700 h-10 w-7 text-center justify-center m-auto " />
+              <button className="h-10 w-10 rounded-2xl">
+                <MdAddHomeWork className="text-green-700 h-10 w-7 text-center justify-center m-auto" />
               </button>
             </Link>
           </div>
         </div>
-
-        <div className="bg-gray-800 border-gray-400 p-2 -mt-[49vh] -mb-20 text-white  dark:text-white font-semibold text-center space-x-6 sm:space-x-4 md:space-x-6 lg:space-x-10 mx-auto flex flex-wrap justify-center gap-2 md:gap-3 lg:gap-10">
-          <Link to="/">
-            <button className="bg-white h-7 w-7 rounded-2xl">
-              <FaHome className="text-green-700 text-center justify-center m-auto " />
-            </button>
-          </Link>
-
+        <div className="bg-gray-800 border-gray-400 p-2 -mt-[49vh] -mb-20 text-white dark:text-white font-semibold text-center space-x-6 sm:space-x-4 md:space-x-6 lg:space-x-10 mx-auto flex flex-wrap justify-center gap-2 md:gap-3 lg:gap-10">
           <div>
             <button
-              className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[100%] lg:w-[120%] xl:w-[170%] rounded-xl -ml-8"
-              onClick={() => handleToggleVisibility("PopularBookmarks")}
+              className="bg-white p-1 rounded-3xl"
+              onClick={() => handleToggleComponent("Anotherpage")}
             >
-              BOOKMARKS
+              <FaHome className="text-green-700 h-5 w-5 text-center justify-center m-auto" />
             </button>
-            {visibleItem === "PopularBookmarks" && (
-              <>
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"></div>
-                <div className="fixed top-1/2 left-1/2 z-50 w-[90%] h-[90%] max-h-[90vh] p-4 shadow-lg transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-[#4a454e] rounded-lg overflow-y-auto">
-                  <PopularBookmarks />
-                  <button
-                    className="absolute top-3 right-3 text-black dark:text-white"
-                    onClick={() => handleClose("PopularBookmarks")}
-                  >
-                    <IoIosCloseCircleOutline size={30} />
-                  </button>
-                </div>
-              </>
-            )}
           </div>
-
-          <div>
+          {showButton && (
             <button
-              className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[100%] lg:w-[100%] xl:w-[120%] rounded-xl"
-              onClick={() => handleToggleVisibility("NotebookAndSheet")}
+              onClick={scrollToTop}
+              className="fixed bottom-6 right-6 p-3 rounded-full bg-blue-500 text-white shadow-lg hover:bg-blue-600 transition-all"
             >
-              NOTES
+              <FaArrowUp size={20} />
             </button>
-            {visibleItem === "NotebookAndSheet" && (
-              <>
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"></div>
-                <div className="fixed top-1/2 left-1/2 z-50 w-[90%] h-[100%] p-4  transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-[#4a454e] rounded-lg overflow-y-auto">
-                  <div>
-                    <button
-                      className="absolute top-3 right-3 text-black dark:text-white"
-                      onClick={() => handleClose("NotebookAndSheet")}
-                    >
-                      <IoIosCloseCircleOutline size={30} />
-                    </button>{" "}
-                  </div>
-                  <NotebookAndSheet />
-                </div>
-              </>
-            )}
-          </div>
-          <div>
-            <button
-              className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[100%] lg:w-[120%] xl:w-[130%] rounded-xl"
-              onClick={() => handleToggleVisibility("PasswordGenerator")}
-            >
-              PASSWORD
-            </button>
-            {visibleItem === "PasswordGenerator" && (
-              <>
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"></div>
-                <div className="fixed top-1/2 left-1/2 z-50 w-[90%] h-[90%] max-h-[90vh] p-4  transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-[#4a454e] rounded-lg overflow-y-auto">
-                  <PasswordGenerator />
-                  <button
-                    className="absolute top-3 right-3 text-black dark:text-white"
-                    onClick={() => handleClose("PasswordGenerator")}
-                  >
-                    <IoIosCloseCircleOutline size={30} />
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-          <div>
-            <button
-              className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[100%] lg:w-[100%] xl:w-[120%] rounded-xl"
-              onClick={() => handleToggleVisibility("News")}
-            >
-              NEWS
-            </button>
-            {visibleItem === "News" && (
-              <>
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"></div>
-                <div className="fixed top-1/2 left-1/2 z-50 w-[70%] h-[100%] p-4 shadow-lg transform -translate-x-1/2 -translate-y-1/2  bg-white dark:bg-[#4a454e] rounded-lg">
-                  <News />
-                  <button
-                    className="absolute top-3 right-3 text-black dark:text-white"
-                    onClick={() => handleClose("News")}
-                  >
-                    <IoIosCloseCircleOutline size={30} />
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-          <div>
-            <button
-              className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[100%] lg:w-[100%] xl:w-[120%] rounded-xl"
-              onClick={() => handleToggleVisibility("SPORTS")}
-            >
-              SPORTS
-            </button>
-            {/* {visibleItem === "SPORTS" && (
-              <>
-                <div className="fixed inset-0 bg-transparent bg-opacity-70 backdrop-blur-sm z-40"></div>
-                <div className="fixed top-1/2 left-1/2 z-50 w-[70%] h-[100%] p-4 shadow-lg transform -translate-x-1/2 -translate-y-1/2 bg-[#f3e9ff] dark:bg-[#4a454e] rounded-lg">
-                  <SPORTS />
-                  <button
-                    className="absolute top-3 right-3 dark:text-white"
-                    onClick={() => handleClose("SPORTS")}
-                  >
-                    <IoIosCloseCircleOutline size={30} />
-                  </button>
-                </div>
-              </>
-            )} */}
-          </div>
-          <div>
-            <button
-              className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[100%] lg:w-[100%] xl:w-[120%] rounded-xl"
-              onClick={() => handleToggleVisibility("TOP100")}
-            >
-              TOP100
-            </button>
-            {/* {visibleItem === "TOP100" && (
-              <>
-                <div className="fixed inset-0 bg-transparent bg-opacity-70 backdrop-blur-sm z-40"></div>
-                <div className="fixed top-1/2 left-1/2 z-50 w-[70%] h-[100%] p-4 shadow-lg transform -translate-x-1/2 -translate-y-1/2 bg-[#f3e9ff] dark:bg-[#4a454e] rounded-lg">
-                  <TOP100 />
-                  <button
-                    className="absolute top-3 right-3 dark:text-white"
-                    onClick={() => handleClose("TOP100")}
-                  >
-                    <IoIosCloseCircleOutline size={30} />
-                  </button>
-                </div>
-              </>
-            )} */}
-          </div>
-          {/* Other buttons iframe */}
-          <div>
-            <button
-              onClick={handleFileClick}
-              className="hover:bg-gray-500 hover:text-white w-[45%] sm:w-[30%] md:w-[20%] lg:w-[15%] xl:w-[120%] rounded-2xl"
-            >
-              TOOLS
-            </button>
-          </div>
+          )}
+          <button
+            className="hover:bg-gray-500 hover:text-white rounded-2xl"
+            onClick={() => handleToggleComponent("PopularBookmarks")}
+          >
+            BOOKMARKS
+          </button>
+          <button
+            className="hover:bg-gray-500 hover:text-white  rounded-xl"
+            onClick={() => handleToggleComponent("NotebookAndSheet")}
+          >
+            NOTES
+          </button>
+          <button
+            className="hover:bg-gray-500 hover:text-white  rounded-xl"
+            onClick={() => handleToggleComponent("PasswordGenerator")}
+          >
+            PASSWORD
+          </button>
+          <button
+            className="hover:bg-gray-500 hover:text-white rounded-xl"
+            onClick={() => handleToggleComponent("News")}
+          >
+            NEWS
+          </button>
+          <button
+            className="hover:bg-gray-500 hover:text-white rounded-xl"
+            onClick={() => handleToggleComponent("News")}
+          >
+            SPORTS
+          </button>
+          <button
+            className="hover:bg-gray-500 hover:text-white rounded-xl"
+            onClick={() => handleToggleComponent("News")}
+          >
+            TOP100
+          </button>
+          <button
+            className="hover:bg-gray-500 hover:text-white  rounded-2xl"
+            onClick={() => handleToggleComponent("Tool")}
+          >
+            TOOLS
+          </button>
+        </div>
+        <div className="mt-20 dark:bg-gray-900 bg-white">
+          {activeComponent === "NotebookAndSheet" ? (
+            <NotebookAndSheet />
+          ) : activeComponent === "PopularBookmarks" ? (
+            <PopularBookmarks />
+          ) : activeComponent === "PasswordGenerator" ? (
+            <PasswordGenerator />
+          ) : activeComponent === "News" ? (
+            <News />
+          ) : activeComponent === "Anotherpage" ? (
+            <Anotherpage />
+          ) : activeComponent === "Tool" ? (
+            <Tool/>
+          ):
+           (
+            <Anotherpage
+              backgroundImage={backgroundImage}
+              isDarkMode={isDarkMode}
+            />
+          )}
         </div>
 
-        <Anotherpage
-          backgroundImage={backgroundImage}
-          isDarkMode={isDarkMode}
-        />
-      </div>
-
-      {/* Centered Tools Iframe Modal */}
-      {url && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="modal-content bg-white rounded-lg overflow-hidden shadow-lg w-[95%] max-w-6xl">
-            <div className="modal-header flex justify-between items-center p-4 border-b border-gray-200">
-              <h5 className="text-lg font-medium text-gray-900">DAILY TOOLS</h5>
-              <button
-                type="button"
-                className="text-gray-400 text-2xl hover:text-gray-500"
-                onClick={closeViewer}
-              >
-                &times;
-              </button>
-            </div>
-            <div className="modal-body  p-4">
+        {/* Close the iframe when another component is selected
+        {url && (
+          <div className="modal-content bg-white shadow-lg w-full">
+            <div className="modal-header flex justify-between items-center border-b border-gray-200"></div>
+            <div className="modal-body -mt-[111vh]">
               <iframe
                 src={url}
-                style={{ width: "100%", height: "500px" }}
+                style={{ width: "100%", height: "900px" }}
                 title="URL Viewer"
-                className="rounded-lg"
+                className=""
               ></iframe>
             </div>
           </div>
-        </div>
-      )}
+        )} */}
+      </div>
     </div>
   );
 }
