@@ -68,23 +68,28 @@ const SortableToDoList = () => {
     reorderedTasks.splice(destination.index, 0, movedTask);
 
     setTasks(reorderedTasks);
-
-    // Optionally save updated order (not required for Firestore as task order is UI-only)
   };
 
   const handleAddTask = () => {
     if (newTask.trim() !== "") {
+      const now = new Date();
       const newTaskObj = {
         id: String(Date.now()), // Unique ID
         text: newTask,
         isCompleted: false,
+        timestamp: `${now.toLocaleDateString()}, ${now.toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        })}`, // e.g., "11/22/2024, 2:30 PM"
       };
 
       setTasks([...tasks, newTaskObj]);
       saveTask(newTaskObj);
-      setNewTask(""); // Clear input after adding
+      setNewTask(""); 
     }
   };
+
+  
 
   const handleToggleCompletion = (taskId) => {
     const updatedTasks = tasks.map((task) =>
@@ -149,14 +154,6 @@ const SortableToDoList = () => {
                         {index + 1}.
                       </span>
 
-                      {/* Checkbox */}
-                      <input
-                        type="checkbox"
-                        checked={task.isCompleted}
-                        onChange={() => handleToggleCompletion(task.id)}
-                        className="mr-3 h-4 w-4 accent-blue-500 cursor-pointer"
-                      />
-
                       {/* Task Details */}
                       <div className="flex-1">
                         <span
@@ -169,10 +166,17 @@ const SortableToDoList = () => {
                         >
                           {task.text}
                         </span>
-                        <div className="text-sm text-gray-500">
-                          <span>{task.date}</span> - <span>{task.time}</span>
-                        </div>
                       </div>
+                      <div className="text-[11px] mr-1 text-gray-500">
+                        <span>{task.timestamp}</span>
+                      </div>
+                      {/* Checkbox */}
+                      <input
+                        type="checkbox"
+                        checked={task.isCompleted}
+                        onChange={() => handleToggleCompletion(task.id)}
+                        className="h-4 w-4 accent-blue-500 cursor-pointer"
+                      />
 
                       {/* Delete Button */}
                       <button
