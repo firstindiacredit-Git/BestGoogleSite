@@ -84,7 +84,7 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
             <TbGridDots className="w-8 h-8 hover:border dark:text-white border-slate-400 p-1 m-2 rounded-full" />
           </div>
           {showButtons && (
-            <div className="absolute right-1 top-20 bg-white/10 p-4 w-70 mr-2 shadow-lg rounded-2xl">
+            <div className="absolute right-1 top-14 bg-white/10 p-3 w-70 mr-2 shadow-lg rounded-2xl">
               <div className="grid grid-cols-2 gap-1">
                 <label
                   className="cursor-pointer text-xs p-1 rounded items-center justify-center"
@@ -112,7 +112,7 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
                     setShowButtons(false);
                     window.reload();
                   }}
-                  className="text-xs p-1 w-32 rounded grid items-center justify-center"
+                  className="text-xs -mr-4 p-1 w-32 rounded grid items-center justify-center"
                 >
                   <img src={remove} alt="Remove" className="h-9 w-9 m-auto" />
                   <span className="dark:text-white">Remove Image</span>

@@ -145,7 +145,7 @@ const SortableToDoList = () => {
                       ref={provided.innerRef}
                       {...provided.draggableProps}
                       {...provided.dragHandleProps}
-                      className={`flex items-center justify-between p-2 border-b border-gray-300 cursor-move bg-white text-black text-sm box-border transition-transform duration-250 ease-in-out ${
+                      className={`flex items-center justify-between p-1 border-b border-gray-300 cursor-move bg-white text-black text-sm box-border transition-transform duration-250 ease-in-out ${
                         task.isCompleted ? "bg-green-100" : ""
                       }`}
                     >
@@ -155,19 +155,25 @@ const SortableToDoList = () => {
                       </span>
 
                       {/* Task Details */}
-                      <div className="flex-1">
+                      <div className="">
                         <span
                           onClick={() => handleToggleCompletion(task.id)}
-                          className={`font-bold text-base ${
+                          className={`font-bold  text-base ${
                             task.isCompleted
                               ? "line-through text-gray-400"
                               : "text-black"
-                          }`}
+                          } break-words`}
+                          style={{
+                            display: "inline-block",
+                            width: "15ch", // Limits the width to 26 characters
+                            overflowWrap: "break-word", // Ensures proper word wrapping
+                          }}
                         >
                           {task.text}
                         </span>
                       </div>
-                      <div className="text-[11px] mr-1 text-gray-500">
+
+                      <div className="text-[10px]  mr-1 text-gray-500">
                         <span>{task.timestamp}</span>
                       </div>
                       {/* Checkbox */}

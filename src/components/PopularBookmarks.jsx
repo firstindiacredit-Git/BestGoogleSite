@@ -154,7 +154,7 @@ const Bookmarks = () => {
               className="w-10 h-10 mb-1"
             />
            
-            <span className="block text-black text-sm dark:text-white w-2 mr-12">
+            <span className="block text-black text-xs dark:text-white w-2 mr-10">
               {bookmark.name}
             </span>
           </a>
@@ -196,7 +196,7 @@ const Bookmarks = () => {
           <h3 className="text-xl text-black dark:text-white font-semibold mb-4">
             Popular
           </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
             {renderBookmarks("Popular")}
           </div>
         </section>
