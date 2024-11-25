@@ -4,14 +4,14 @@ import { MdAdd, MdDelete } from "react-icons/md";
 function ImageUploader() {
   const [image, setImage] = useState(null);
   const [imageUrl, setImageUrl] = useState("");
-  const [showOptions, setShowOptions] = useState(false); // State to manage visibility of download options
+  const [showOptions, setShowOptions] = useState(false);  
 
   useEffect(() => {
-    // Load image from local storage when the component mounts
+     
     const storedImage = localStorage.getItem("uploadedImage");
     if (storedImage) {
       setImageUrl(storedImage);
-      setImage({ name: "Uploaded Image", url: storedImage }); // Simulating file object for easier handling
+      setImage({ name: "Uploaded Image", url: storedImage }); 
     }
   }, []);
 
@@ -21,46 +21,46 @@ function ImageUploader() {
       const reader = new FileReader();
       reader.onloadend = () => {
         setImageUrl(reader.result);
-        setImage({ name: file.name, url: reader.result }); // Store the image as an object with a name
-        localStorage.setItem("uploadedImage", reader.result); // Store image in local storage
-        setShowOptions(false); // Hide options when a new image is uploaded
+        setImage({ name: file.name, url: reader.result });  
+        localStorage.setItem("uploadedImage", reader.result);  
+        setShowOptions(false); 
       };
-      reader.readAsDataURL(file); // Read the file as a data URL
+      reader.readAsDataURL(file);  
     }
   };
 
   const downloadImage = () => {
     const link = document.createElement("a");
     link.href = imageUrl;
-    link.download = image.name; // Set the download name to the original file name
+    link.download = image.name;  
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
   const handleImageClick = () => {
-    setShowOptions(true); // Show options when the image is clicked
+    setShowOptions(true); 
   };
 
   const removeImage = () => {
     setImage(null);
     setImageUrl("");
-    localStorage.removeItem("uploadedImage"); // Remove image from local storage
-    setShowOptions(false); // Hide options when the image is removed
+    localStorage.removeItem("uploadedImage");  
+    setShowOptions(false);  
   };
 
   return (
-    <div className="container w-full mx-auto py-10">
-      {/* Hidden file input */}
+    <div className="container -mt-6 w-full mx-auto py-10">
+      
       <input
         type="file"
         accept="image/*"
         onChange={handleImageUpload}
-        className="hidden" // Hide the input field
-        id="file-input" // Add an ID for reference
+        className="hidden" 
+        id="file-input" 
       />
 
-      {/* Conditionally render the add icon button */}
+     
       {!image && (
         <div className="border bg-white/10 border-gray-300 rounded-lg h-80 m-auto max-w-sm">
           <label htmlFor="file-input" className="cursor-pointer mb-4">
@@ -69,19 +69,19 @@ function ImageUploader() {
         </div>
       )}
 
-      {/* Image preview */}
+      
       {imageUrl && (
         <div className="mb-4">
           <img
             src={imageUrl}
             alt="Uploaded"
             className="w-full h-96 object-cover border border-gray-300 rounded-lg cursor-pointer"
-            onClick={handleImageClick} // Open options on image click
+            onClick={handleImageClick}  
           />
         </div>
       )}
 
-      {/* Show download button and remove/change options if image is present */}
+       
       {showOptions && (
         <div className="flex items-center ml-28 space-x-4">
           <button

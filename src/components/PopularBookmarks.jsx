@@ -1,291 +1,381 @@
+import React, { useState } from "react";
+import { BsThreeDotsVertical } from "react-icons/bs";
 
-import React, { useState, useEffect } from "react";
-import { db, auth } from "../firebase";
-import {
-  collection,
-  addDoc,
-  deleteDoc,
-  doc,
-  onSnapshot,
-} from "firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth";
-import { MdAdd, MdDelete } from "react-icons/md";
-
-
-// Pre-defined static bookmarks
-const initialBookmarks = {
+const initialData = {
+  Social: [
+    { id: 1, title: "Facebook", url: "https://facebook.com" },
+    { id: 2, title: "Twitter", url: "https://twitter.com" },
+  ],
   Popular: [
-    { name: "Google", link: "https://www.google.com" },
-    { name: "Facebook", link: "https://www.facebook.com" },
-    { name: "YouTube", link: "https://www.youtube.com" },
-    { name: "LinkedIn", link: "https://www.linkedin.com" },
+    { id: 3, title: "Amazon", url: "https://amazon.com" },
+    { id: 4, title: "YouTube", url: "https://youtube.com" },
   ],
   Travel: [
-    { name: "Booking", link: "https://www.booking.com" },
-    { name: "Emirates", link: "https://www.emirates.com" },
-    { name: "Hotels.com", link: "https://www.hotels.com" },
-    { name: "Trip Advisor", link: "https://www.tripadvisor.com" },
+    { id: 5, title: "TripAdvisor", url: "https://tripadvisor.com" },
+    { id: 6, title: "Expedia", url: "https://expedia.com" },
   ],
   Shopping: [
-    { name: "Amazon", link: "https://www.amazon.com" },
-    { name: "Flipkart", link: "https://www.flipkart.com" },
-    { name: "Rediff", link: "https://www.rediff.com" },
-    { name: "Myntra", link: "https://www.myntra.com" },
-  ],
-  Social: [
-    { name: "Whatsapp", link: "https://web.whatsapp.com/" },
-    { name: "Facebook", link: "https://www.facebook.com" },
-    { name: "Twitter", link: "https://www.twitter.com" },
-    { name: "Skype", link: "https://www.skype.com" },
+    { id: 7, title: "eBay", url: "https://ebay.com" },
+    { id: 8, title: "Walmart", url: "https://walmart.com" },
   ],
 };
 
-const Bookmarks = () => {
-  const [user, setUser] = useState(null);
-  const [firebaseBookmarks, setFirebaseBookmarks] = useState({
-    Popular: [],
-    Travel: [],
-    Shopping: [],
-    Social: [],
+const colorPalette = [
+  "#ff5722",
+  "#ffc107",
+  "#8bc34a",
+  "#00bcd4",
+  "#3f51b5",
+  "#9c27b0",
+  "#e91e63",
+  "#607d8b",
+  "#ffffff",
+  "#000000",
+];
+
+const BookmarkPage = () => {
+  const [data] = useState(initialData);
+  const [categorySettings, setCategorySettings] = useState({
+    Social: {
+      bgColor: "#cfe8fc",
+      textColor: "#000000",
+      view: "list",
+      position: "start",
+    },
+    Popular: {
+      bgColor: "#f9e1cf",
+      textColor: "#000000",
+      view: "grid",
+      position: "middle",
+    },
+    Travel: {
+      bgColor: "#d8f8d8",
+      textColor: "#000000",
+      view: "icon",
+      position: "end",
+    },
+    Shopping: {
+      bgColor: "#fef6c3",
+      textColor: "#000000",
+      view: "list",
+      position: "start",
+    },
   });
-  const [newBookmark, setNewBookmark] = useState({
-    name: "",
-    link: "",
-    category: "Popular",
-  });
-  const [showForm, setShowForm] = useState(false);
+  const [menuOpen, setMenuOpen] = useState({});
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-    return () => unsubscribe();
-  }, []);
+  const fetchFavicon = (url) =>
+    `https://www.google.com/s2/favicons?sz=64&domain=${url}`;
 
-  useEffect(() => {
-    if (user) {
-      const categories = ["Popular", "Travel", "Shopping", "Social"];
-      const unsubscribeFns = categories.map((category) => {
-        const bookmarksRef = collection(db, "users", user.uid, "bookmarks");
-        return onSnapshot(bookmarksRef, (snapshot) => {
-          const bookmarksData = snapshot.docs
-            .map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-            }))
-            .filter((bookmark) => bookmark.category === category);
-
-          setFirebaseBookmarks((prev) => ({
-            ...prev,
-            [category]: bookmarksData,
-          }));
-        });
-      });
-
-      return () => unsubscribeFns.forEach((unsubscribe) => unsubscribe());
-    }
-  }, [user]);
-
-  // Add a new bookmark
-  const addBookmark = async (e) => {
-    e.preventDefault();
-    if (!newBookmark.name || !newBookmark.link) return;
-    if (!user) return alert("Please log in to save bookmarks.");
-    if (!isValidUrl(newBookmark.link)) return alert("Invalid URL.");
-
-    try {
-      await addDoc(collection(db, "users", user.uid, "bookmarks"), newBookmark);
-      setNewBookmark({ name: "", link: "", category: "Popular" });
-      setShowForm(false);
-    } catch (error) {
-      console.error("Error adding bookmark: ", error);
-      alert(`Error adding bookmark: ${error.message}`);
-    }
+  const toggleMenu = (category) => {
+    setMenuOpen((prev) => ({
+      ...prev,
+      [category]: !prev[category],
+    }));
   };
 
-  const deleteBookmark = async (category, id) => {
-    try {
-      await deleteDoc(doc(db, "users", user.uid, "bookmarks", id));
-      setFirebaseBookmarks((prev) => ({
-        ...prev,
-        [category]: prev[category].filter((bookmark) => bookmark.id !== id),
-      }));
-    } catch (error) {
-      console.error("Error deleting bookmark: ", error);
-      alert(`Error deleting bookmark: ${error.message}`);
-    }
+  const updateCategorySetting = (category, settingType, value) => {
+    setCategorySettings((prev) => ({
+      ...prev,
+      [category]: { ...prev[category], [settingType]: value },
+    }));
   };
+const renderBookmarks = (category) => {
+  const bookmarks = data[category];
+  const { view, textColor, position } = categorySettings[category];
 
-  const isValidUrl = (url) => {
-    try {
-      new URL(url);
-      return true;
-    } catch (error) {
-      return false;
-    }
-  };
+  // Map position to Tailwind classes
+  const positionClass =
+    position === "start"
+      ? "justify-start"
+      :""
+      ? "justify-center"
+      : "justify-end";
 
-  const renderBookmarks = (category) => {
-    const combinedBookmarks = [
-      ...initialBookmarks[category],
-      ...firebaseBookmarks[category],
-    ];
-
-    return combinedBookmarks.map((bookmark, index) => (
-      <div
-        key={bookmark.id || index}
-        className="flex flex-col w-full items-center gap-2 p-2 rounded transition"
-      >
-        {isValidUrl(bookmark.link) ? (
+  return bookmarks.map((bookmark) => (
+    <div
+      className={`grid gap-1 ${
+        view === "grid"
+          ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+          : view === "icon"
+          ? "grid-cols-4"
+          : "grid-cols-1"
+      } ${positionClass}`}
+    >
+      {bookmarks.map((bookmark) => (
+        <div
+          key={bookmark.id}
+          className={`p-3 rounded shadow-sm flex flex-col items-center`}
+          style={{
+            color: textColor,
+            textAlign: "center",
+          }}
+        >
           <a
-            href={bookmark.link}
+            href={bookmark.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex flex-col w-full items-center text-center"
+            className="block"
           >
             <img
-              src={`https://logo.clearbit.com/${
-                new URL(bookmark.link).hostname
-              }`}
-              alt={`${bookmark.name} favicon`}
-              onError={(e) => {
-                e.target.src = "/path/to/default-icon.png";
-              }}
-              className="w-10 h-10 mb-1"
+              src={fetchFavicon(bookmark.url)}
+              alt={bookmark.title}
+              className="w-8 h-8 mx-auto mb-2"
             />
-           
-            <span className="block text-black text-xs dark:text-white w-2 mr-10">
-              {bookmark.name}
-            </span>
+            {view !== "icon" && (
+              <span className="text-sm block mt-1">{bookmark.title}</span>
+            )}
           </a>
-        ) : (
-          <div
-            onClick={() => alert("Invalid URL")}
-            className="cursor-pointer flex flex-col w-full items-center text-center text-red-500"
-          >
-            <img
-              src="/path/to/default-icon.png"
-              alt="default favicon"
-              className="w-10 h-10 mb-1"
-            />
-            <span className="block w-2 mr-12">{bookmark.name}</span>
-          </div>
-        )}
-
-        {bookmark.id && (
-          <button
-            onClick={() => deleteBookmark(category, bookmark.id)}
-            className="ml-auto text-red-500"
-          >
-            <MdDelete />
-          </button>
-        )}
-      </div>
-    ));
-  };
+        </div>
+      ))}
+    </div>
+  ));
+};
 
   return (
-    <div className="container mx-auto py-10">
-      <h2 className="text-3xl dark:text-white text-black font-semibold mb-6 text-center">
-        My Bookmarks
-      </h2>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-        {/* Popular Bookmarks Section */}
-        <section className="bg-white/20 p-4 rounded-lg shadow">
-          <h3 className="text-xl text-black dark:text-white font-semibold mb-4">
-            Popular
-          </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
-            {renderBookmarks("Popular")}
-          </div>
-        </section>
-        {/* Social Bookmarks Section */}
-        <section className="bg-white/20 p-4 rounded-lg shadow">
-          <h3 className="text-xl font-semibold text-black dark:text-white mb-4">
-            Social
-          </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-2">
-            {renderBookmarks("Social")}
-          </div>
-        </section>
-
-        {/* Travel Bookmarks Section */}
-        <section className="bg-white/20 p-4 rounded-lg shadow">
-          <h3 className="text-xl font-semibold text-black dark:text-white mb-4">
-            Travel
-          </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-2">
-            {renderBookmarks("Travel")}
-          </div>
-        </section>
-
-        {/* Shopping Bookmarks Section */}
-        <section className="bg-white/20 p-4 rounded-lg shadow">
-          <h3 className="text-xl font-semibold text-black dark:text-white mb-4">
-            Shopping
-          </h3>
-          <div className="grid grid-row-2 sm:grid-row-2 md:grid-row-2 justify-start gap-2">
-            {renderBookmarks("Shopping")}
-          </div>
-        </section>
-      </div>
-
-      {/* Add Bookmark Button */}
-      <button
-        onClick={() => setShowForm(!showForm)}
-        className="flex items-center mt-6 text-blue-600 mx-auto"
-      >
-        <MdAdd className="mr-2" />
-        Add Bookmark
-      </button>
-
-      {/* Form to Add Bookmark */}
-      {showForm && (
-        <form
-          onSubmit={addBookmark}
-          className="mt-4 grid grid-cols-2 gap-2 mx-auto"
+    <div className="p-4 mt-2 grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
+      {Object.keys(data).map((category) => (
+        <div
+          key={category}
+          className="p-4 rounded-lg shadow-lg relative"
+          style={{
+            backgroundColor: categorySettings[category]?.bgColor,
+            color: categorySettings[category]?.textColor,
+          }}
         >
-          <input
-            type="text"
-            placeholder="Bookmark Name"
-            value={newBookmark.name}
-            onChange={(e) =>
-              setNewBookmark({ ...newBookmark, name: e.target.value })
-            }
-            className="border p-1 text-black border-gray-300 rounded-lg"
-          />
-          <input
-            type="text"
-            placeholder="Bookmark URL"
-            value={newBookmark.link}
-            onChange={(e) =>
-              setNewBookmark({ ...newBookmark, link: e.target.value })
-            }
-            className="border p-1 text-black border-gray-300 rounded-lg"
-          />
-          <select
-            value={newBookmark.category}
-            onChange={(e) =>
-              setNewBookmark({ ...newBookmark, category: e.target.value })
-            }
-            className="border p-1 text-black border-gray-300 rounded-lg"
+          {/* Card Header */}
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-bold">{category}</h2>
+            <div className="relative">
+              <button
+                onClick={() => toggleMenu(category)}
+                className="px-2 py-2 rounded-full hover:bg-gray-200"
+              >
+                <BsThreeDotsVertical />
+              </button>
+
+              {/* Three-dot Menu */}
+              {menuOpen[category] && (
+                <div className="absolute top-full right-0 mt-2 w-28 bg-white border border-gray-300 rounded-lg shadow-lg z-20">
+                  <div className="p-4">
+                    {/* Background Color Option */}
+                    <button
+                      onClick={() =>
+                        updateCategorySetting(
+                          category,
+                          "showBgColor",
+                          !categorySettings[category]?.showBgColor
+                        )
+                      }
+                      className={`w-full text-left text-sm font-medium mb-2 ${
+                        categorySettings[category]?.showBgColor
+                          ? "text-red-500"
+                          : ""
+                      }`}
+                    >
+                      Background
+                    </button>
+                    {categorySettings[category]?.showBgColor && (
+                      <>
+                        <div className="flex p-1 flex-wrap gap-2 mb-">
+                          {colorPalette.map((color) => (
+                            <button
+                              key={color}
+                              className="w-6 h-6 rounded-full border"
+                              style={{
+                                backgroundColor: color,
+                                borderColor:
+                                  categorySettings[category]?.bgColor === color
+                                    ? "black"
+                                    : "transparent",
+                              }}
+                              onClick={() =>
+                                updateCategorySetting(
+                                  category,
+                                  "bgColor",
+                                  color
+                                )
+                              }
+                            />
+                          ))}
+                        </div>
+                        <span className="text-xs">Custom Color:</span>
+                        <input
+                          type="color"
+                          value={
+                            categorySettings[category]?.bgColor || "#ffffff"
+                          }
+                          onChange={(e) =>
+                            updateCategorySetting(
+                              category,
+                              "bgColor",
+                              e.target.value
+                            )
+                          }
+                          className="w-full rounded-full mb-4 cursor-pointer"
+                        />
+                      </>
+                    )}
+
+                    {/* Text Color Option */}
+                    <button
+                      onClick={() =>
+                        updateCategorySetting(
+                          category,
+                          "showTextColor",
+                          !categorySettings[category]?.showTextColor
+                        )
+                      }
+                      className={`w-full text-left text-sm font-medium mb-2 ${
+                        categorySettings[category]?.showTextColor
+                          ? "text-red-500"
+                          : ""
+                      }`}
+                    >
+                      Text Color
+                    </button>
+                    {categorySettings[category]?.showTextColor && (
+                      <>
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {colorPalette.map((color) => (
+                            <button
+                              key={color}
+                              className="w-6 h-6 rounded-full border"
+                              style={{
+                                backgroundColor: color,
+                                borderColor:
+                                  categorySettings[category]?.textColor ===
+                                  color
+                                    ? "black"
+                                    : "transparent",
+                              }}
+                              onClick={() =>
+                                updateCategorySetting(
+                                  category,
+                                  "textColor",
+                                  color
+                                )
+                              }
+                            />
+                          ))}
+                        </div>
+                        <span className="text-xs">Custom Color:</span>
+                        <input
+                          type="color"
+                          value={
+                            categorySettings[category]?.textColor || "#000000"
+                          }
+                          onChange={(e) =>
+                            updateCategorySetting(
+                              category,
+                              "textColor",
+                              e.target.value
+                            )
+                          }
+                          className="w-full rounded-2xl mb-4 cursor-pointer"
+                        />
+                      </>
+                    )}
+
+                    {/* View Option */}
+                    <button
+                      onClick={() =>
+                        updateCategorySetting(
+                          category,
+                          "showView",
+                          !categorySettings[category]?.showView
+                        )
+                      }
+                      className={`w-full text-left text-sm font-medium mb-2 ${
+                        categorySettings[category]?.showView
+                          ? "text-red-500"
+                          : ""
+                      }`}
+                    >
+                      View
+                    </button>
+                    {categorySettings[category]?.showView && (
+                      <select
+                        value={categorySettings[category]?.view || "list"}
+                        onChange={(e) =>
+                          updateCategorySetting(
+                            category,
+                            "view",
+                            e.target.value
+                          )
+                        }
+                        className="w-full p-1 border rounded"
+                      >
+                        <option value="list">List</option>
+                        <option value="grid">Grid</option>
+                        <option value="icon">Icon Only</option>
+                      </select>
+                    )}
+
+                    {/* Position Option */}
+                    <button
+                      onClick={() =>
+                        updateCategorySetting(
+                          category,
+                          "showPosition",
+                          !categorySettings[category]?.showPosition
+                        )
+                      }
+                      className={`w-full text-left text-sm font-medium mb-2 ${
+                        categorySettings[category]?.showPosition
+                          ? "text-red-500"
+                          : ""
+                      }`}
+                    >
+                      Position
+                    </button>
+                    {categorySettings[category]?.showPosition && (
+                      <div className="flex border rounded-xl flex-col">
+                        <button
+                          onClick={() =>
+                            updateCategorySetting(category, "position", "start")
+                          }
+                          className="w-full text-sm font-medium mb-2"
+                        >
+                          Start
+                        </button>
+                        <button
+                          onClick={() =>
+                            updateCategorySetting(
+                              category,
+                              "position",
+                              "middle"
+                            )
+                          }
+                          className="w-full text-sm font-medium mb-2"
+                        >
+                          Middle
+                        </button>
+                        <button
+                          onClick={() =>
+                            updateCategorySetting(category, "position", "end")
+                          }
+                          className="w-full text-sm font-medium mb-2"
+                        >
+                          End
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Bookmarks */}
+          <div
+            className={`grid gap-4 justify-${categorySettings[category]?.position}`}
           >
-            <option value="Popular">Popular</option>
-            <option value="Travel">Travel</option>
-            <option value="Shopping">Shopping</option>
-            <option value="Social">Social</option>
-          </select>
-          <button
-            type="submit"
-            className="bg-blue-600 text-white px-2 py-2 rounded-lg"
-          >
-            Add
-          </button>
-        </form>
-      )}
+            {renderBookmarks(category)}
+          </div>
+        </div>
+      ))}
     </div>
   );
 };
 
-export default Bookmarks;
+export default BookmarkPage;
