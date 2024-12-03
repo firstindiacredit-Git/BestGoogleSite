@@ -35,7 +35,7 @@ const WeatherPage = () => {
   } = staticWeatherData;
 
   return (
-    <div className="flex flex-col items-center -mt-8 p-2 border bg-white/10 backdrop-blur-lg rounded-lg shadow-lg">
+    <div className="flex flex-col items-center mt-5 p-2 border bg-white/10 backdrop-blur-lg rounded-lg shadow-lg">
       {/* Main Weather Information */}
       <div className="flex items-center justify-center p-2   rounded-lg mb-2">
         <div className="w-24 h-24">

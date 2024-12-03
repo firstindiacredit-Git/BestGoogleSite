@@ -151,10 +151,10 @@ function SearchPage() {
             </Link>
           </div>
         </div>
-        <div className="bg-gray-800 border-gray-400 p-2 -mt-6 -mb-20 text-white dark:text-white font-semibold text-center space-x-6 sm:space-x-4 md:space-x-6 lg:space-x-10 mx-auto flex flex-wrap justify-center gap-2 md:gap-3 lg:gap-10">
+        <div className="bg-gray-800 border-gray-400 p-2 -mt-6 -mb-20 text-white dark:text-white font-semibold text-center  mx-auto flex flex-wrap justify-center">
           <div>
             <button
-              className="bg-white p-1 rounded-3xl"
+              className="bg-white p-1 ml-18 rounded-3xl"
               onClick={() => handleToggleComponent("Anotherpage")}
             >
               <FaHome className="text-green-700 h-5 w-5 text-center justify-center m-auto" />
@@ -169,43 +169,43 @@ function SearchPage() {
             </button>
           )}
           <button
-            className="hover:bg-gray-500 hover:text-white rounded-2xl"
+            className="hover:bg-gray-500  w-[9rem] hover:text-white"
             onClick={() => handleToggleComponent("PopularBookmarks")}
           >
             BOOKMARKS
           </button>
           <button
-            className="hover:bg-gray-500 hover:text-white  rounded-xl"
+            className="hover:bg-gray-500 w-[9rem] hover:text-white  "
             onClick={() => handleToggleComponent("NotebookAndSheet")}
           >
             NOTES
           </button>
           <button
-            className="hover:bg-gray-500 hover:text-white  rounded-xl"
+            className="hover:bg-gray-500  w-[9rem] hover:text-white"
             onClick={() => handleToggleComponent("PasswordGenerator")}
           >
             PASSWORD
           </button>
           <button
-            className="hover:bg-gray-500 hover:text-white rounded-xl"
+            className="hover:bg-gray-500 w-[9rem] hover:text-white "
             onClick={() => handleToggleComponent("News")}
           >
             NEWS
           </button>
           <button
-            className="hover:bg-gray-500 hover:text-white rounded-xl"
+            className="hover:bg-gray-500 w-[9rem] hover:text-white"
             onClick={() => handleToggleComponent("News")}
           >
             SPORTS
           </button>
           <button
-            className="hover:bg-gray-500 hover:text-white rounded-xl"
+            className="hover:bg-gray-500 w-[9rem] hover:text-white"
             onClick={() => handleToggleComponent("News")}
           >
             TOP100
           </button>
           <button
-            className="hover:bg-gray-500 hover:text-white  rounded-2xl"
+            className="hover:bg-gray-500 w-[9rem] hover:text-white "
             onClick={() => handleToggleComponent("Tool")}
           >
             TOOLS
