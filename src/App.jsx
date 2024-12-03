@@ -6,7 +6,7 @@ import AddList from "./components/Calculator.jsx";
 import Signin from "./components/Signup/signin.jsx";
 import Signup from "./components/Signup.jsx";
 import NewSearchPage from "./components/NewSearchPage.jsx";
-import Category from "./components/category.jsx";
+import Category from "./components/Category.jsx";
 import AddLinks from "./components/Admin/AddLinks.jsx";
 import Dashboard from "./components/Admin/Dashboard.jsx";
 import Login from "./components/Admin/Login.jsx";
