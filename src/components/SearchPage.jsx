@@ -111,7 +111,7 @@ function SearchPage() {
 
   return (
     <div
-      className="bg-zinc-50 dark:bg-gray-900 h-screen"
+      className="bg-white dark:bg-gray-900 h-screen"
       style={{
         backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",
         backgroundSize: "cover",
