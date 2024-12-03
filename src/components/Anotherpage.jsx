@@ -146,6 +146,7 @@ const Anotherpage = ({ backgroundImage }) => {
           {viewMode === "grid" ? (
             <>
               <div className="w-full md:w-1/4 lg:w-1/4 p-2">
+                <Weather />
                 <Calculator />
                 <TodoList />
                 <Notepad />
@@ -155,7 +156,7 @@ const Anotherpage = ({ backgroundImage }) => {
               </div>
               <div className="w-full md:w-1/4 lg:w-1/4 p-2">
                 <ImageUploader />
-                <Weather />
+
                 <Calendar />
               </div>
             </>
