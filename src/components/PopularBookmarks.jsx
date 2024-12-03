@@ -91,7 +91,7 @@ const Bookmarks = () => {
   const [positionbackground, setPositionBackground] = useState(false);
    const [categories, setCategories] = useState([]); // Categories data
    const [newCategory, setNewCategory] = useState(""); 
-  const [firebaseBookmarks, setFirebaseBookmarks] = useState(initialBookmarks);
+  const [firebaseBookmarks, setFirebaseBookmarks] = useState("");
   
 
   // Load category settings from localStorage or use default values
@@ -109,7 +109,7 @@ const Bookmarks = () => {
           Travel: {
             bgColor: "#f9e1cf",
             textColor: "#000",
-            view: "grid",
+            view: "list",
             position: "start",
           },
         };
