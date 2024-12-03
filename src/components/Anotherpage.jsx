@@ -13,6 +13,8 @@ import Weather from "./Weather";
 import TodoList from "./todolist"
 import { auth, db } from "../firebase";
 import { IoIosCloseCircleOutline } from "react-icons/io";
+import { FaListAlt } from "react-icons/fa";
+import { BsFillGrid1X2Fill } from "react-icons/bs";
 
 const Anotherpage = ({ backgroundImage }) => {
   const [user, setUser] = useState(null);
@@ -122,7 +124,7 @@ const Anotherpage = ({ backgroundImage }) => {
                 : "bg-transparent border text-black dark:text-white"
             }`}
           >
-            Grid View
+            <BsFillGrid1X2Fill className="text-green-700" />
           </button>
           <button
             onClick={() => setViewMode("list")}
@@ -132,7 +134,7 @@ const Anotherpage = ({ backgroundImage }) => {
                 : "bg-transparent border text-black dark:text-white"
             }`}
           >
-            List View
+            <FaListAlt className="text-green-700" />
           </button>
         </div>
 
@@ -145,7 +147,7 @@ const Anotherpage = ({ backgroundImage }) => {
             <>
               <div className="w-full md:w-1/4 lg:w-1/4 p-2">
                 <Calculator />
-                <TodoList/>
+                <TodoList />
                 <Notepad />
               </div>
               <div className="w-full md:w-1/2 lg:w-1/2 ">
