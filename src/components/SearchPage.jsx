@@ -126,7 +126,7 @@ function SearchPage() {
       />
 
       <div className="mt-6">
-        <div className="flex flex-col items-center  min-h-[52vh]">
+        <div className="flex flex-col items-center  min-h-[23vw]">
           <img
             src={isDarkMode ? "GoogleBlack.png" : "GoogleWhite.png"}
             alt="Google Logo"
