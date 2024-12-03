@@ -97,7 +97,7 @@ const Anotherpage = ({ backgroundImage }) => {
   return (
     <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <div
-        className={`bg-white dark:bg-gray-900 mt-[13vh]`}
+        className={`bg-white dark:bg-gray-900 mt-[15vh]`}
         style={{
           backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",
           backgroundSize: "cover",
@@ -105,15 +105,15 @@ const Anotherpage = ({ backgroundImage }) => {
           backgroundAttachment: "fixed",
         }}
       >
-        <h1 className="text-2xl dark:text-white py-3 font-bold text-center">
+        {/* <h1 className="text-2xl dark:text-white py-3 font-bold text-center">
           COMPONENTS
-        </h1>
+        </h1> */}
 
-        <div>
+        {/* <div>
           <ShowLinks items={items} />
-        </div>
+        </div> */}
 
-        <div className="flex justify-center gap-1 mt-6 mb-4">
+        <div className="flex justify-center gap-1 mb-4">
           <button
             onClick={() => setViewMode("grid")}
             className={`p-2 rounded ${

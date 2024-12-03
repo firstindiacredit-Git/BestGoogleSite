@@ -398,8 +398,8 @@ const Bookmarks = () => {
     setVisibleForm((prev) => (prev === category ? null : category));
   };
   return (
-    <div className="container mx-auto">
-      <h2 className="text-3xl dark:text-white font-semibold mb-6 text-center">My Bookmarks</h2>
+    <div className="container mt-7 mx-auto">
+      {/* <h2 className="text-3xl dark:text-white font-semibold mb-6 text-center">My Bookmarks</h2> */}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {Object.keys(initialBookmarks).map((category) => {
