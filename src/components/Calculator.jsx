@@ -55,10 +55,10 @@ function Calculator() {
 
   return (
     <div className="flex items-center mt-5 rounded-lg mb-5 h-[80vh] justify-center">
-      <div className="bg-black h-[30rem] rounded-lg shadow-lg p-4 w-80">
+      <div className="bg-[#1f345f] h-[30rem] rounded-lg shadow-lg p-4 w-80">
         {showHistory ? (
           /* History View */
-          <div className="bg-gray-800 text-white p-4 rounded-lg">
+          <div className="bg-[#1f345f] text-white p-4 rounded-lg">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-bold text-lg">History</h3>
               <button
