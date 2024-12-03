@@ -126,7 +126,7 @@ function SearchPage() {
       />
 
       <div className="mt-6">
-        <div className="flex flex-col items-center mt-10 h-screen">
+        <div className="flex flex-col items-center mt-10 min-h-[60vh]">
           <img
             src={isDarkMode ? "GoogleBlack.png" : "GoogleWhite.png"}
             alt="Google Logo"
@@ -151,7 +151,7 @@ function SearchPage() {
             </Link>
           </div>
         </div>
-        <div className="bg-gray-800 border-gray-400 p-2 -mt-[49vh] -mb-20 text-white dark:text-white font-semibold text-center space-x-6 sm:space-x-4 md:space-x-6 lg:space-x-10 mx-auto flex flex-wrap justify-center gap-2 md:gap-3 lg:gap-10">
+        <div className="bg-gray-800 border-gray-400 p-2 -mt-6 -mb-20 text-white dark:text-white font-semibold text-center space-x-6 sm:space-x-4 md:space-x-6 lg:space-x-10 mx-auto flex flex-wrap justify-center gap-2 md:gap-3 lg:gap-10">
           <div>
             <button
               className="bg-white p-1 rounded-3xl"
