@@ -105,7 +105,7 @@ function Calculator() {
                   className={`p-4 rounded-full text-lg font-bold ${
                     i === 3
                       ? "bg-[#ff9502] text-white"
-                      : "bg-gray-600 text-black hover:bg-gray-500"
+                      : "bg-[#4a5b8a] text-black hover:bg-gray-500"
                   }`}
                   onClick={() => handleCalcInput(val)}
                 >
@@ -118,7 +118,7 @@ function Calculator() {
                   className={`p-4 rounded-full text-lg font-bold ${
                     i === 3
                       ? "bg-[#ff9502] text-white"
-                      : "bg-gray-700 text-white hover:bg-gray-600"
+                      : "bg-[#4a5b8a] text-white hover:bg-gray-600"
                   }`}
                   onClick={() => handleCalcInput(val)}
                 >
@@ -131,7 +131,7 @@ function Calculator() {
                   className={`p-4 rounded-full text-lg font-bold ${
                     i === 3
                       ? "bg-[#ff9502] text-white"
-                      : "bg-gray-700 text-white hover:bg-gray-600"
+                      : "bg-[#4a5b8a] text-white hover:bg-gray-600"
                   }`}
                   onClick={() => handleCalcInput(val)}
                 >
@@ -144,7 +144,7 @@ function Calculator() {
                   className={`p-4 rounded-full text-lg font-bold ${
                     i === 3
                       ? "bg-[#ff9502] text-white"
-                      : "bg-gray-700 text-white hover:bg-gray-600"
+                      : "bg-[#4a5b8a] text-white hover:bg-gray-600"
                   }`}
                   onClick={() => handleCalcInput(val)}
                 >
@@ -154,21 +154,21 @@ function Calculator() {
 
               {/* History Button */}
               <button
-                className="p-6 rounded-full m-auto text-lg font-bold bg-gray-700 text-white hover:bg-gray-600"
+                className="p-6 rounded-full m-auto text-lg font-bold bg-[#4a5b8a] text-white hover:bg-gray-600"
                 onClick={toggleHistory}
               >
                 <FaHistory />
               </button>
 
               <button
-                className="col-span-1 p-2 rounded-full text-lg font-bold bg-gray-700 text-white hover:bg-gray-600"
+                className="col-span-1 p-2 rounded-full text-lg font-bold bg-[#4a5b8a] text-white hover:bg-gray-600"
                 onClick={() => handleCalcInput("0")}
               >
                 0
               </button>
 
               <button
-                className="p-4 rounded-full text-lg font-bold bg-gray-700 text-white hover:bg-gray-600"
+                className="p-4 rounded-full text-lg font-bold bg-[#4a5b8a] text-white hover:bg-gray-600"
                 onClick={() => handleCalcInput(".")}
               >
                 .
