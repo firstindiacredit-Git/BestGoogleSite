@@ -1,5 +1,3 @@
-// Header.js
-
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { signOut, onAuthStateChanged } from "firebase/auth";
@@ -49,6 +47,43 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
     }
   };
 
+  // Close menus on outside click or scroll
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      const menu = document.querySelector(".menu-buttons");
+      const userPanel = document.querySelector(".user-panel");
+
+      if (
+        menu &&
+        !menu.contains(event.target) &&
+        !event.target.closest(".menu-icon")
+      ) {
+        setShowButtons(false);
+      }
+
+      if (
+        userPanel &&
+        !userPanel.contains(event.target) &&
+        !event.target.closest(".user-avatar")
+      ) {
+        setPanel(false);
+      }
+    };
+
+    const handleScroll = () => {
+      setShowButtons(false);
+      setPanel(false);
+    };
+
+    document.addEventListener("click", handleOutsideClick);
+    document.addEventListener("scroll", handleScroll);
+
+    return () => {
+      document.removeEventListener("click", handleOutsideClick);
+      document.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
   return (
     <header className="p-2 bg-white/10 dark:bg-black/10 backdrop-blur-lg shadow-md flex justify-between items-center sticky top-0 z-50">
       <div className="flex items-center space-x-2">
@@ -79,12 +114,12 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
         <div className="-mb-2 -mt-2">
           <div
             onClick={handleIconClick}
-            className="cursor-pointer flex justify-end"
+            className="cursor-pointer flex justify-end menu-icon"
           >
             <TbGridDots className="w-8 h-8 hover:border dark:text-white border-slate-400 p-1 m-2 rounded-full" />
           </div>
           {showButtons && (
-            <div className="absolute right-1 top-14 bg-white/10 p-3 w-70 mr-2 shadow-lg rounded-2xl">
+            <div className="absolute right-1 top-14 bg-white/10 p-3 w-70 mr-2 shadow-lg rounded-2xl menu-buttons">
               <div className="grid grid-cols-2 gap-1">
                 <label
                   className="cursor-pointer text-xs p-1 rounded items-center justify-center"
@@ -103,7 +138,7 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
                   id="image-upload"
                   type="file"
                   accept="image/*"
-                  onChange={handleImageChange} // Use the passed function
+                  onChange={handleImageChange}
                   className="hidden"
                 />
                 <button
@@ -136,7 +171,7 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
           <div className="relative">
             <div
               onClick={panelClicker}
-              className="flex items-center cursor-pointer"
+              className="flex items-center cursor-pointer user-avatar"
             >
               <img
                 src={user.photoURL || "/default-avatar.png"}
@@ -145,7 +180,7 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
               />
             </div>
             {panel && (
-              <div className="absolute right-0 mt-2 w-60 py-2 bg-white shadow-lg rounded-lg text-sm dark:bg-gray-700">
+              <div className="absolute right-0 mt-2 w-60 py-2 bg-white shadow-lg rounded-lg text-sm dark:bg-gray-700 user-panel">
                 <div className="px-4 py-2 text-center dark:text-white">
                   <p className="font-bold">{user.displayName || "User"}</p>
                   <p>{user.email}</p>

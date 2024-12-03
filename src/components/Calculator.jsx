@@ -1,16 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { FaHistory } from "react-icons/fa";
+import { IoClose } from "react-icons/io5";
 
 function Calculator() {
-  
   const [calcInput, setCalcInput] = useState("");
   const [calcResult, setCalcResult] = useState("");
+  const [history, setHistory] = useState([]);
+  const [showHistory, setShowHistory] = useState(false);
 
-  
+  // Load history from localStorage on component mount
+  useEffect(() => {
+    const savedHistory = JSON.parse(localStorage.getItem("calcHistory")) || [];
+    setHistory(savedHistory);
+  }, []);
+
   const handleCalcInput = (value) => {
     if (value === "=") {
       try {
-        const result = eval(calcInput); 
+        const result = eval(calcInput); // Replace eval with a safer method in production
         setCalcResult(result);
+
+        // Save to history
+        const newEntry = `${calcInput} = ${result}`;
+        const updatedHistory = [newEntry, ...history].slice(0, 10); // Keep only the latest 10 entries
+        setHistory(updatedHistory);
+        localStorage.setItem("calcHistory", JSON.stringify(updatedHistory));
+
         setCalcInput(result.toString());
       } catch (error) {
         setCalcResult("Error");
@@ -29,91 +44,144 @@ function Calculator() {
     }
   };
 
+  const toggleHistory = () => {
+    setShowHistory(!showHistory);
+  };
+
+  const clearHistory = () => {
+    setHistory([]);
+    localStorage.removeItem("calcHistory");
+  };
+
   return (
-    <div className="min-h w-full m-auto bg-transparent ">
-      {/* Calculator */}
-      <div className="mb-4 w-full">
-        <div className="bg-white/10 backdrop-blur-lg border  my-4 rounded-lg p-4 sm:p-6 w-full max-w-full">
-          <div className="mb-4 text-right ">
-            <div className="text-xl dark:text-white ">{calcInput || "0"}</div>
-            <div className="text-3xl dark:text-white font-bold">
-              {calcResult || "0"}
+    <div className="flex items-center mt-5 rounded-lg mb-5 h-[80vh] justify-center bg-gray-900">
+      <div className="bg-black h-[30rem] rounded-lg shadow-lg p-4 w-80">
+        {showHistory ? (
+          /* History View */
+          <div className="bg-gray-800 text-white p-4 rounded-lg">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-bold text-lg">History</h3>
+              <button
+                onClick={toggleHistory}
+                className="text-gray-400 hover:text-white"
+              >
+                <IoClose size={24} />
+              </button>
             </div>
-          </div>
-          <div className="grid grid-cols-4 text-white gap-2">
-            {["7", "8", "9", "/"].map((val) => (
-              <button
-                key={val}
-                className="bg-gray-900 hover:text-black dark:bg-gray-900 hover:bg-gray-300 dark:hover:bg-gray-600 text-lg p-4 rounded-md"
-                onClick={() => handleCalcInput(val)}
-              >
-                {val}
-              </button>
-            ))}
-            {["4", "5", "6", "*"].map((val) => (
-              <button
-                key={val}
-                className="bg-gray-900 dark:bg-gray-900 hover:text-black hover:bg-gray-300 dark:hover:bg-gray-600 text-lg p-4 rounded-md"
-                onClick={() => handleCalcInput(val)}
-              >
-                {val}
-              </button>
-            ))}
-            {["1", "2", "3", "-"].map((val) => (
-              <button
-                key={val}
-                className="bg-gray-900 dark:bg-gray-900 hover:text-black hover:bg-gray-300 dark:hover:bg-gray-600 text-lg p-4 rounded-md"
-                onClick={() => handleCalcInput(val)}
-              >
-                {val}
-              </button>
-            ))}
+            <div className="max-h-40 overflow-y-auto">
+              {history.length > 0 ? (
+                history.map((entry, index) => (
+                  <div key={index} className="text-sm mb-1">
+                    {entry}
+                  </div>
+                ))
+              ) : (
+                <div className="text-sm text-gray-400">
+                  No history available
+                </div>
+              )}
+            </div>
             <button
-              className="col-span-1 bg-gray-900 dark:bg-gray-900 hover:text-black hover:bg-gray-300 dark:hover:bg-gray-600 text-lg p-4 rounded-md"
-              onClick={() => handleCalcInput("0")}
+              className="w-full mt-4 p-2 rounded-lg bg-red-500 text-white font-bold hover:bg-red-600"
+              onClick={clearHistory}
             >
-              0
-            </button>
-            <button
-              className="bg-gray-900 dark:bg-gray-900 hover:text-black hover:bg-gray-300 dark:hover:bg-gray-600 text-lg p-4 rounded-md"
-              onClick={() => handleCalcInput(".")}
-            >
-              .
-            </button>
-            <button
-              className="bg-gray-900 dark:bg-gray-900 hover:text-black hover:bg-gray-300 dark:hover:bg-gray-600 text-lg p-4 rounded-md"
-              onClick={() => handleCalcInput("+")}
-            >
-              +
-            </button>
-            <button
-              className="col-span-1 bg-blue-500 flex justify-center items-center dark:bg-blue-600 hover:bg-yellow-400 dark:hover:bg-yellow-700 rounded-md"
-              onClick={() => handleCalcInput("C")}
-            >
-              <img
-                width="24"
-                height="24"
-                src="https://img.icons8.com/ios-glyphs/30/ffffff/clear-symbol.png"
-                alt="clear-symbol"
-              />
-            </button>
-            <button
-              className="col-span-2 bg-red-400 dark:bg-red-600 hover:bg-red-500 dark:hover:bg-red-700 text-white text-lg p-4 rounded-md"
-              onClick={() => {
-                setCalcInput("");
-                setCalcResult("");
-              }}
-            >
-              AC
-            </button>
-            <button
-              className="col-span-2 bg-blue-400 dark:bg-blue-500 hover:bg-blue-500 dark:hover:bg-blue-700 text-white text-lg p-4 rounded-md"
-              onClick={() => handleCalcInput("=")}
-            >
-              =
+              Clear History
             </button>
           </div>
-        </div>
+        ) : (
+          /* Calculator View */
+          <>
+            {/* Display */}
+            <div className="text-right text-white p-4 rounded-lg bg-gray-800 mb-4">
+              <div className="text-lg opacity-70">{calcInput || "0"}</div>
+              <div className="text-3xl font-bold">{calcResult || "0"}</div>
+            </div>
+
+            {/* Buttons */}
+            <div className="grid grid-cols-4 gap-2 mb-4">
+              {["C", "+/-", "%", "/"].map((val, i) => (
+                <button
+                  key={val}
+                  className={`p-4 rounded-full text-lg font-bold ${
+                    i === 3
+                      ? "bg-orange-500 text-white"
+                      : "bg-gray-600 text-black hover:bg-gray-500"
+                  }`}
+                  onClick={() => handleCalcInput(val)}
+                >
+                  {val}
+                </button>
+              ))}
+              {["7", "8", "9", "*"].map((val, i) => (
+                <button
+                  key={val}
+                  className={`p-4 rounded-full text-lg font-bold ${
+                    i === 3
+                      ? "bg-orange-500 text-white"
+                      : "bg-gray-700 text-white hover:bg-gray-600"
+                  }`}
+                  onClick={() => handleCalcInput(val)}
+                >
+                  {val}
+                </button>
+              ))}
+              {["4", "5", "6", "-"].map((val, i) => (
+                <button
+                  key={val}
+                  className={`p-4 rounded-full text-lg font-bold ${
+                    i === 3
+                      ? "bg-orange-500 text-white"
+                      : "bg-gray-700 text-white hover:bg-gray-600"
+                  }`}
+                  onClick={() => handleCalcInput(val)}
+                >
+                  {val}
+                </button>
+              ))}
+              {["1", "2", "3", "+"].map((val, i) => (
+                <button
+                  key={val}
+                  className={`p-4 rounded-full text-lg font-bold ${
+                    i === 3
+                      ? "bg-orange-500 text-white"
+                      : "bg-gray-700 text-white hover:bg-gray-600"
+                  }`}
+                  onClick={() => handleCalcInput(val)}
+                >
+                  {val}
+                </button>
+              ))}
+
+              {/* History Button */}
+              <button
+                className="p-6 rounded-full m-auto text-lg font-bold bg-gray-700 text-white hover:bg-gray-600"
+                onClick={toggleHistory}
+              >
+                <FaHistory />
+              </button>
+
+              <button
+                className="col-span-1 p-2 rounded-full text-lg font-bold bg-gray-700 text-white hover:bg-gray-600"
+                onClick={() => handleCalcInput("0")}
+              >
+                0
+              </button>
+
+              <button
+                className="p-4 rounded-full text-lg font-bold bg-gray-700 text-white hover:bg-gray-600"
+                onClick={() => handleCalcInput(".")}
+              >
+                .
+              </button>
+              <button
+                className="p-4 rounded-full text-lg font-bold bg-orange-500 text-white"
+                onClick={() => handleCalcInput("=")}
+              >
+                =
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

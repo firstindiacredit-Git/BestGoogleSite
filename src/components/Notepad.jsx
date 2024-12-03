@@ -1,5 +1,5 @@
 import { BsThreeDotsVertical } from "react-icons/bs";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   doc,
   collection,
@@ -30,7 +30,7 @@ const NotepadWithLines = () => {
   const [error, setError] = useState("");
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [backgroundColor, setBackgroundColor] = useState(
-    localStorage.getItem("notepadBackgroundColor") || "#FDFS97"
+    localStorage.getItem("notepadBackgroundColor") || "#FDF8C8"
   );
   const [showColorPicker, setShowColorPicker] = useState(false);
 
@@ -48,6 +48,55 @@ const NotepadWithLines = () => {
     });
     return () => unsubscribe();
   }, []);
+
+  const colorPalette = [
+    // Row 1
+    "#000000",
+    "#424242",
+    "#666666",
+    "#808080",
+    "#999999",
+    "#B3B3B3",
+    "#CCCCCC",
+    "#E6E6E6",
+    "#F2F2F2",
+    "#FFFFFF",
+    // Row 2
+    "#FF0000",
+    "#FF4500",
+    "#FF8C00",
+    "#FFD700",
+    "#32CD32",
+    "#00FF00",
+    "#00CED1",
+    "#0000FF",
+    "#8A2BE2",
+    "#FF00FF",
+    // Row 3
+    "#FFB6C1",
+    "#FFA07A",
+    "#FFE4B5",
+    "#FFFACD",
+    "#98FB98",
+    "#AFEEEE",
+    "#87CEEB",
+    "#E6E6FA",
+    "#DDA0DD",
+    "#FFC0CB",
+    // Row 4
+    "#DC143C",
+    "#FF4500",
+    "#FFA500",
+    "#FFD700",
+    "#32CD32",
+    "#20B2AA",
+    "#4169E1",
+    "#8A2BE2",
+    "#9370DB",
+    "#FF69B4",
+    
+  ];
+
 
   useEffect(() => {
     localStorage.setItem("notepadBackgroundColor", backgroundColor);
@@ -135,6 +184,12 @@ const NotepadWithLines = () => {
       setError("Error deleting note: " + err.message);
     }
   };
+  
+  const handleColorSelection = (color) => {
+    setBackgroundColor(color);
+  };
+
+
 
   const editHistoryNote = (index) => {
     setNote(history[index]);
@@ -149,6 +204,20 @@ const NotepadWithLines = () => {
       await deleteNote(noteToDelete.id);
     }
   };
+  const menuRef = useRef(null); 
+
+   useEffect(() => {
+     const handleClickOutside = (event) => {
+       if (menuRef.current && !menuRef.current.contains(event.target)) {
+         setShowColorPicker(false);
+       }
+     };
+
+     document.addEventListener("mousedown", handleClickOutside);
+     return () => {
+       document.removeEventListener("mousedown", handleClickOutside);
+     };
+   }, []);
 
   return (
     <div
@@ -165,15 +234,32 @@ const NotepadWithLines = () => {
             <BsThreeDotsVertical className="text-xl cursor-pointer" />
           </button>
           {showColorPicker && (
-            <div className="absolute right-0 mt-2 bg-white border rounded shadow-lg p-4">
+            <div
+              ref={menuRef}
+              className="absolute space-x-1 w-64 left-0 -mt-2 bg-white border rounded shadow-lg p-4"
+            >
+              {colorPalette.map((color) => (
+                <button
+                  key={color}
+                  className={`w-5 h-5 border-1  transition-all duration-200 ${
+                    backgroundColor === color
+                      ? "border-black" // Black border for the selected color
+                      : "border-gray-700" // Default light gray border
+                  } hover:border-gray-500 focus:outline `}
+                  style={{ backgroundColor: color }}
+                  onClick={() => handleColorSelection(color)}
+                  aria-label={`Select ${color} as background color`}
+                  title={`Select ${color}`}
+                />
+              ))}
               <label className="block mb-2 text-sm font-medium">
                 Choose Background Color:
               </label>
               <input
                 type="color"
-                value={backgroundColor}
+                value={backgroundColor || "#ffffff"}
                 onChange={handleBackgroundColorChange}
-                className="w-full h-10 cursor-pointer border border-gray-300 rounded"
+                className="w-full cursor-pointer border border-gray-300 rounded"
               />
             </div>
           )}
@@ -183,13 +269,15 @@ const NotepadWithLines = () => {
         value={note}
         onChange={handleNoteChange}
         placeholder="Start writing..."
-        className="w-full h-32 p-1 bg-yellow-50 border rounded resize-none focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder-gray-500"
+        className="w-full h-32 p-1 border rounded resize-none focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder-gray-500"
         style={{
+          backgroundColor: backgroundColor || "#fff", // Set the background color dynamically
           backgroundImage: `linear-gradient(to bottom, transparent 95%, #d3d3d3 95%, #d3d3d3 100%)`,
           backgroundSize: "100% 24px", // Adjust the spacing between lines here
           lineHeight: "24px", // Match the background size
         }}
       />
+
       <div className="flex justify-between mt-3">
         <button
           onClick={saveNote}

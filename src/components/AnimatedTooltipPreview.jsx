@@ -122,7 +122,7 @@ export default function AnimatedTooltipPreview() {
       if (userId && cachedBookmarks.length === 0) {
         try {
           const bookmarksSnapshot = await getDocs(
-            collection(db, "users", userId, "bookmarks")
+            collection(db, "users", userId, "addbookmarks")
           );
           const bookmarksData = bookmarksSnapshot.docs.map((doc) => ({
             id: doc.id,
@@ -181,7 +181,7 @@ export default function AnimatedTooltipPreview() {
         setSuccessMessage("Bookmark updated successfully!");
       } else {
         const newBookmarkRef = await addDoc(
-          collection(db, "users", userId, "bookmarks"),
+          collection(db, "users", userId, "addbookmarks"),
           {
             name: newBookmark.name,
             link: newBookmark.link,
@@ -216,7 +216,7 @@ export default function AnimatedTooltipPreview() {
 
   const handleDelete = async (id) => {
     try {
-      await deleteDoc(doc(db, "users", userId, "bookmarks", id));
+      await deleteDoc(doc(db, "users", userId, "addbookmarks", id));
       setPeople((prevPeople) =>
         prevPeople.filter((person) => person.id !== id)
       );
