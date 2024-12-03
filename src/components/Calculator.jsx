@@ -104,7 +104,7 @@ function Calculator() {
                   key={val}
                   className={`p-4 rounded-full text-lg font-bold ${
                     i === 3
-                      ? "bg-orange-500 text-white"
+                      ? "bg-[#ff9502] text-white"
                       : "bg-gray-600 text-black hover:bg-gray-500"
                   }`}
                   onClick={() => handleCalcInput(val)}
@@ -117,7 +117,7 @@ function Calculator() {
                   key={val}
                   className={`p-4 rounded-full text-lg font-bold ${
                     i === 3
-                      ? "bg-orange-500 text-white"
+                      ? "bg-[#ff9502] text-white"
                       : "bg-gray-700 text-white hover:bg-gray-600"
                   }`}
                   onClick={() => handleCalcInput(val)}
@@ -130,7 +130,7 @@ function Calculator() {
                   key={val}
                   className={`p-4 rounded-full text-lg font-bold ${
                     i === 3
-                      ? "bg-orange-500 text-white"
+                      ? "bg-[#ff9502] text-white"
                       : "bg-gray-700 text-white hover:bg-gray-600"
                   }`}
                   onClick={() => handleCalcInput(val)}
@@ -143,7 +143,7 @@ function Calculator() {
                   key={val}
                   className={`p-4 rounded-full text-lg font-bold ${
                     i === 3
-                      ? "bg-orange-500 text-white"
+                      ? "bg-[#ff9502] text-white"
                       : "bg-gray-700 text-white hover:bg-gray-600"
                   }`}
                   onClick={() => handleCalcInput(val)}
@@ -174,7 +174,7 @@ function Calculator() {
                 .
               </button>
               <button
-                className="p-4 rounded-full text-lg font-bold bg-orange-500 text-white"
+                className="p-4 rounded-full text-lg font-bold bg-[#ff9502] text-white"
                 onClick={() => handleCalcInput("=")}
               >
                 =
