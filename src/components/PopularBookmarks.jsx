@@ -101,13 +101,13 @@ const Bookmarks = () => {
       ? JSON.parse(storedSettings)
       : {
           Popular: {
-            bgColor: "#cfe8fc",
+            bgColor: "#f8f9fa",
             textColor: "#000",
             view: "grid",
             position: "start",
           },
           Travel: {
-            bgColor: "#f9e1cf",
+            bgColor: "#f8f9fa",
             textColor: "#000",
             view: "list",
             position: "start",
@@ -341,7 +341,7 @@ const Bookmarks = () => {
         {combinedBookmarks.map((bookmark, index) => (
           <div
             key={bookmark.id || index}
-            className="p-2 rounded shadow items-center relative group"
+            className="p-2 items-center relative group"
             style={{ color: textColor, textAlign: "center" }}
           >
             <a
