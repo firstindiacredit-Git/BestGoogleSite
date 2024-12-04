@@ -17,7 +17,6 @@ const FullCalendar = () => {
   const [selectedYear, setSelectedYear] = useState(currentYear);
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
   const [holidaysList, setHolidaysList] = useState([]);
-  const [goToDate, setGoToDate] = useState("");
 
   // Generate years and months
   const years = Array.from({ length: 177 }, (_, i) => currentYear - 100 + i);
@@ -41,6 +40,7 @@ const FullCalendar = () => {
 
   // Get the first day of the week for alignment
   const firstDayOfWeek = new Date(selectedYear, selectedMonth, 1).getDay();
+   const lastDayOfWeek = new Date(selectedYear, selectedMonth, 1).getDay();
 
   useEffect(() => {
     // Filter holidays that fall in the selected year and month
@@ -53,14 +53,6 @@ const FullCalendar = () => {
     });
     setHolidaysList(filteredHolidays);
   }, [selectedYear, selectedMonth]);
-
-  // Check if a given day is a holiday
-  const isHoliday = (date) => {
-    return holidaysList.some((holiday) => {
-      const holidayDate = new Date(holiday.date.iso);
-      return holidayDate.getDate() === date.getDate();
-    });
-  };
 
   // Get the holiday details for a specific day
   const getHolidayDetails = (date) => {
@@ -92,13 +84,6 @@ const FullCalendar = () => {
     });
   };
 
-  // Go to a specific date (month and year)
-  const handleGoToDate = () => {
-    const [year, month] = goToDate.split("-");
-    setSelectedYear(parseInt(year, 10));
-    setSelectedMonth(parseInt(month, 10));
-  };
-
   // Go to today's date
   const goToToday = () => {
     const today = new Date();
@@ -106,20 +91,23 @@ const FullCalendar = () => {
     setSelectedMonth(today.getMonth());
   };
 
+  // Adjust grid based on number of rows needed
+  const numberOfRows = Math.ceil((days.length + firstDayOfWeek) / 7);
+
   return (
-    <div className="border p-2 rounded-lg">
+    <div className="border p-2 h-[22rem] rounded-lg">
       {/* Year and Month Selectors */}
       <div className="flex justify-center gap-2 items-center mb-3">
         <button
           onClick={goToPreviousMonth}
-          className="px-2 py-1 border rounded"
+          className="px-2 py-1 border dark:text-white rounded"
         >
           {"<"}
         </button>
         <select
           value={selectedYear}
           onChange={(e) => setSelectedYear(parseInt(e.target.value, 10))}
-          className="p-1 border rounded"
+          className="p-1 border dark:text-white dark:bg-gray-900 rounded"
         >
           {years.map((year) => (
             <option key={year} value={year}>
@@ -130,7 +118,7 @@ const FullCalendar = () => {
         <select
           value={selectedMonth}
           onChange={(e) => setSelectedMonth(parseInt(e.target.value, 10))}
-          className="p-1 border rounded"
+          className="p-1 dark:text-white dark:bg-gray-900 border rounded"
         >
           {months.map((month, index) => (
             <option key={index} value={index}>
@@ -138,13 +126,16 @@ const FullCalendar = () => {
             </option>
           ))}
         </select>
-        <button onClick={goToNextMonth} className="px-2 py-1 border rounded">
+        <button
+          onClick={goToNextMonth}
+          className="px-2 dark:text-white py-1 border rounded"
+        >
           {">"}
         </button>
       </div>
 
       {/* Calendar Grid */}
-      <div className="grid grid-cols-7">
+      <div className="grid grid-cols-7 dark:text-blue-500 ">
         {/* Weekday Headers */}
         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
           <div key={day} className="text-center font-bold">
@@ -154,12 +145,13 @@ const FullCalendar = () => {
 
         {/* Empty spaces for alignment */}
         {Array.from({ length: firstDayOfWeek }).map((_, index) => (
-          <div key={`empty-${index}`} className="text-center "></div>
+          <div key={`empty-${index}`} className="text-center border"></div>
         ))}
 
         {/* Days of the Month */}
         {days.map((date) => {
           const holiday = getHolidayDetails(date);
+          const isSunday = date.getDay() === 0; // Check if it's Sunday
           return (
             <div
               key={date.toISOString()}
@@ -167,7 +159,9 @@ const FullCalendar = () => {
                 date.toDateString() === new Date().toDateString()
                   ? "bg-blue-200 dark:text-black font-bold"
                   : ""
-              } ${holiday ? " font-bold" : ""}`}
+              } ${holiday ? "bg-yellow-200 font-bold" : ""} ${
+                isSunday ? "text-red-500 dark:text-red-500 font-bold" : "" // Add red styles for Sundays
+              }`}
             >
               {date.getDate()}
               {holiday && (
@@ -176,7 +170,7 @@ const FullCalendar = () => {
                 </div>
               )}
               {holiday && (
-                <div className="absolute inset-0  bg-black bg-opacity-50 hidden hover:block text-white text-xs p-2">
+                <div className="absolute inset-0 bg-black bg-opacity-50 hidden hover:block text-white text-xs p-2">
                   <div>
                     <strong>{holiday.name}</strong>
                   </div>
@@ -195,10 +189,17 @@ const FullCalendar = () => {
             </div>
           );
         })}
+
+        {/* Empty spaces at the end of the month */}
+        {Array.from({
+          length: (7 + ((days.length + lastDayOfWeek) % 7)) % 7,
+        }).map((_, index) => (
+          <div key={`empty-end-${index}`} className="text-center border"></div>
+        ))}
       </div>
 
       {/* Go to Today */}
-      <div className="flex justify-center gap-2 mt-4">
+      <div className="flex  justify-center relative gap-2 mt-4">
         <button
           onClick={goToToday}
           className="px-2 py-1 border rounded text-black dark:text-white"
