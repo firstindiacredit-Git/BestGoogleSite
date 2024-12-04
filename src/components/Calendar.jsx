@@ -1,99 +1,213 @@
-import React, { useState } from "react";
-
-const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+import React, { useState, useEffect } from "react";
+import holidays from "./holidays"; // Import the holidays array
 
 const getDaysInMonth = (year, month) => {
-  return new Date(year, month + 1, 0).getDate();
+  const date = new Date(year, month, 1);
+  const days = [];
+  while (date.getMonth() === month) {
+    days.push(new Date(date));
+    date.setDate(date.getDate() + 1);
+  }
+  return days;
 };
 
-const getFirstDayOfMonth = (year, month) => {
-  return new Date(year, month, 1).getDay();
-};
+const FullCalendar = () => {
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth();
+  const [selectedYear, setSelectedYear] = useState(currentYear);
+  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+  const [holidaysList, setHolidaysList] = useState([]);
+  const [goToDate, setGoToDate] = useState("");
 
-const Calendar = () => {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const today = new Date().getDate();
-  const month = currentDate.getMonth();
-  const year = currentDate.getFullYear();
-  const daysInMonth = getDaysInMonth(year, month);
-  const firstDay = getFirstDayOfMonth(year, month);
+  // Generate years and months
+  const years = Array.from({ length: 177 }, (_, i) => currentYear - 100 + i);
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
 
-  const handleNextMonth = () => {
-    setCurrentDate(new Date(year, month + 1, 1));
-  };
+  // Generate the days for the selected month
+  const days = getDaysInMonth(selectedYear, selectedMonth);
 
-  const handlePreviousMonth = () => {
-    setCurrentDate(new Date(year, month - 1, 1));
-  };
+  // Get the first day of the week for alignment
+  const firstDayOfWeek = new Date(selectedYear, selectedMonth, 1).getDay();
 
-  const renderDays = () => {
-    const daysArray = [];
-
-    // Add empty divs to align the first day
-    for (let i = 0; i < firstDay; i++) {
-      daysArray.push(<div key={`empty-${i}`} className="day w-12 h-12"></div>);
-    }
-
-    // Render days of the month
-    for (let day = 1; day <= daysInMonth; day++) {
-      const isToday =
-        day === today &&
-        month === new Date().getMonth() &&
-        year === new Date().getFullYear();
-      const isSunday = new Date(year, month, day).getDay() === 0;
-
-      daysArray.push(
-        <div
-          key={day}
-          className={`day w-11 h-11 gap-2 flex items-center rounded-[50%] justify-center border border-gray-200 ${
-            isToday ? "bg-blue-300" : ""
-          } ${isSunday ? "text-red-500 font-bold" : " "}`}
-        >
-          {day}
-        </div>
+  useEffect(() => {
+    // Filter holidays that fall in the selected year and month
+    const filteredHolidays = holidays.filter((holiday) => {
+      const holidayDate = new Date(holiday.date.iso);
+      return (
+        holidayDate.getFullYear() === selectedYear &&
+        holidayDate.getMonth() === selectedMonth
       );
-    }
+    });
+    setHolidaysList(filteredHolidays);
+  }, [selectedYear, selectedMonth]);
 
-    return daysArray;
+  // Check if a given day is a holiday
+  const isHoliday = (date) => {
+    return holidaysList.some((holiday) => {
+      const holidayDate = new Date(holiday.date.iso);
+      return holidayDate.getDate() === date.getDate();
+    });
+  };
+
+  // Get the holiday details for a specific day
+  const getHolidayDetails = (date) => {
+    return holidaysList.find((holiday) => {
+      const holidayDate = new Date(holiday.date.iso);
+      return holidayDate.getDate() === date.getDate();
+    });
+  };
+
+  // Navigate to the previous month
+  const goToPreviousMonth = () => {
+    setSelectedMonth((prevMonth) => {
+      if (prevMonth === 0) {
+        setSelectedYear((prevYear) => prevYear - 1);
+        return 11; // December
+      }
+      return prevMonth - 1;
+    });
+  };
+
+  // Navigate to the next month
+  const goToNextMonth = () => {
+    setSelectedMonth((prevMonth) => {
+      if (prevMonth === 11) {
+        setSelectedYear((prevYear) => prevYear + 1);
+        return 0; // January
+      }
+      return prevMonth + 1;
+    });
+  };
+
+  // Go to a specific date (month and year)
+  const handleGoToDate = () => {
+    const [year, month] = goToDate.split("-");
+    setSelectedYear(parseInt(year, 10));
+    setSelectedMonth(parseInt(month, 10));
+  };
+
+  // Go to today's date
+  const goToToday = () => {
+    const today = new Date();
+    setSelectedYear(today.getFullYear());
+    setSelectedMonth(today.getMonth());
   };
 
   return (
-    <div className="max-w-sm m-auto w-full justify-between  h-[460px] bg-white/10 backdrop-blur-lg mt-1 p-4 border border-gray-300 rounded-lg shadow-lg">
-      <div className="header flex justify-between items-center mb-4">
+    <div className="border p-2 rounded-lg">
+      {/* Year and Month Selectors */}
+      <div className="flex justify-center gap-2 items-center mb-3">
         <button
-          className="bg-gray-200 font-semibold dark:text-white dark:bg-transparent border p-2 rounded"
-          onClick={handlePreviousMonth}
+          onClick={goToPreviousMonth}
+          className="px-2 py-1 border rounded"
         >
-          Prev
+          {"<"}
         </button>
-        <h2 className="text-lg dark:text-white font-semibold">
-          {currentDate.toLocaleString("default", { month: "long" })} {year}
-        </h2>
-        <button
-          className="bg-gray-200 dark:text-white p-2 font-semibold dark:bg-transparent border rounded"
-          onClick={handleNextMonth}
+        <select
+          value={selectedYear}
+          onChange={(e) => setSelectedYear(parseInt(e.target.value, 10))}
+          className="p-1 border rounded"
         >
-          Next
+          {years.map((year) => (
+            <option key={year} value={year}>
+              {year}
+            </option>
+          ))}
+        </select>
+        <select
+          value={selectedMonth}
+          onChange={(e) => setSelectedMonth(parseInt(e.target.value, 10))}
+          className="p-1 border rounded"
+        >
+          {months.map((month, index) => (
+            <option key={index} value={index}>
+              {month}
+            </option>
+          ))}
+        </select>
+        <button onClick={goToNextMonth} className="px-2 py-1 border rounded">
+          {">"}
         </button>
       </div>
-      <div className="days grid grid-cols-7 dark:text-white gap-1 md:gap-2">
-        {days.map((day) => (
-          <div key={day} className="day text-center font-semibold">
+
+      {/* Calendar Grid */}
+      <div className="grid grid-cols-7">
+        {/* Weekday Headers */}
+        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+          <div key={day} className="text-center font-bold">
             {day}
           </div>
         ))}
-        {renderDays()}
+
+        {/* Empty spaces for alignment */}
+        {Array.from({ length: firstDayOfWeek }).map((_, index) => (
+          <div key={`empty-${index}`} className="text-center "></div>
+        ))}
+
+        {/* Days of the Month */}
+        {days.map((date) => {
+          const holiday = getHolidayDetails(date);
+          return (
+            <div
+              key={date.toISOString()}
+              className={`text-center px-2 py-1 border dark:text-white relative ${
+                date.toDateString() === new Date().toDateString()
+                  ? "bg-blue-200 dark:text-black font-bold"
+                  : ""
+              } ${holiday ? " font-bold" : ""}`}
+            >
+              {date.getDate()}
+              {holiday && (
+                <div className="absolute z-50 bottom-0 left-1/2 transform -translate-x-1/2 text-xs bg-gray-700 text-white px-1 rounded opacity-0 hover:opacity-100 transition-opacity duration-300">
+                  {holiday.name}
+                </div>
+              )}
+              {holiday && (
+                <div className="absolute inset-0  bg-black bg-opacity-50 hidden hover:block text-white text-xs p-2">
+                  <div>
+                    <strong>{holiday.name}</strong>
+                  </div>
+                  <div>{holiday.description}</div>
+                  <div>Type: {holiday.type.join(", ")}</div>
+                  <a
+                    href={holiday.canonical_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-400 underline"
+                  >
+                    More Info
+                  </a>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Go to Today */}
+      <div className="flex justify-center gap-2 mt-4">
+        <button
+          onClick={goToToday}
+          className="px-2 py-1 border rounded text-black dark:text-white"
+        >
+          Go to Today
+        </button>
       </div>
     </div>
   );
 };
 
-const App = () => {
-  return (
-    <div>
-      <Calendar />
-    </div>
-  );
-};
-
-export default Calendar;
+export default FullCalendar;
