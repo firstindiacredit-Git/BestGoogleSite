@@ -1,0 +1,30 @@
+/* Custom Toast container styles */
+.custom-toast-container {
+  z-index: 9999;
+  font-family: 'Arial', sans-serif;
+  margin-top: 10px;
+}
+
+.Toastify__toast--error {
+  border: 1px solid #EB5757;
+  border-radius: 50px !important;
+  background: #FAE1E2 !important;
+}
+
+
+
+.Toastify__toast--success {
+  border: 1px solid #ffffff !important;
+  border-radius: 50px !important;
+  background: #F0F9FA !important;
+}
+
+.Toastify__toast > button>  svg {
+   margin-top: 15px;
+   margin-right: 5px;
+}
+
+.Toastify__toast--warning {
+  border-radius: 50px !important; 
+}
+

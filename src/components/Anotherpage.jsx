@@ -6,6 +6,7 @@ import { SortableContext, arrayMove, rectSortingStrategy } from "@dnd-kit/sortab
 import Calculator from "./Calculator";
 import Notepad from "./Notepad";
 import ShowLinks from "./ShowLinks";
+import Clock from "./Clock";
 import Calendar from "./Calendar";
 import ImageUploader from "./ImageUploader";
 import PopularBookmarks from "./PopularBookmarks";
@@ -34,44 +35,44 @@ const Anotherpage = ({ backgroundImage }) => {
     return () => unsubscribe();
   }, []);
 
-  const saveItems = async (newItems) => {
-    setItems(newItems);
-    if (user) {
-      const positions = newItems.map((item, index) => ({
-        id: item.id,
-        position: index,
-      }));
-      const docRef = doc(db, "Widgets", user.uid);
-      try {
-        await setDoc(docRef, { items: positions }, { merge: true });
-      } catch (error) {
-        console.error("Error saving items:", error);
-      }
-    }
-  };
+  // const saveItems = async (newItems) => {
+  //   setItems(newItems);
+  //   if (user) {
+  //     const positions = newItems.map((item, index) => ({
+  //       id: item.id,
+  //       position: index,
+  //     }));
+  //     const docRef = doc(db, "Widgets", user.uid);
+  //     try {
+  //       await setDoc(docRef, { items: positions }, { merge: true });
+  //     } catch (error) {
+  //       console.error("Error saving items:", error);
+  //     }
+  //   }
+  // };
 
-  useEffect(() => {
-    const fetchWidgets = async () => {
-      if (user) {
-        const docRef = doc(db, "Widgets", user.uid);
-        try {
-          const docSnap = await getDoc(docRef);
-          if (docSnap.exists()) {
-            const savedItems = docSnap.data().items || [];
-            const sortedItems = savedItems.sort(
-              (a, b) => a.position - b.position
-            );
-            setItems(sortedItems.map((item) => ({ id: item.id })));
-          } else {
-            console.log("No such document!");
-          }
-        } catch (error) {
-          console.error("Error fetching Widgets:", error);
-        }
-      }
-    };
-    fetchWidgets();
-  }, [user]);
+  // useEffect(() => {
+  //   const fetchWidgets = async () => {
+  //     if (user) {
+  //       const docRef = doc(db, "Widgets", user.uid);
+  //       try {
+  //         const docSnap = await getDoc(docRef);
+  //         if (docSnap.exists()) {
+  //           const savedItems = docSnap.data().items || [];
+  //           const sortedItems = savedItems.sort(
+  //             (a, b) => a.position - b.position
+  //           );
+  //           setItems(sortedItems.map((item) => ({ id: item.id })));
+  //         } else {
+  //           console.log("No such document!");
+  //         }
+  //       } catch (error) {
+  //         console.error("Error fetching Widgets:", error);
+  //       }
+  //     }
+  //   };
+  //   fetchWidgets();
+  // }, [user]);
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
@@ -146,6 +147,7 @@ const Anotherpage = ({ backgroundImage }) => {
           {viewMode === "grid" ? (
             <>
               <div className="w-full md:w-1/4 lg:w-1/4 p-2">
+                <Clock />
                 <Weather />
                 <Calculator />
                 <TodoList />
