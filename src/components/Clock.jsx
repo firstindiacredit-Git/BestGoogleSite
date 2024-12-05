@@ -2,13 +2,11 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import moment from "moment-timezone";
 import { IoCloseOutline } from "react-icons/io5";
-import { ToastContainer, toast } from "react-toastify"; // Import toastify
-import "react-toastify/dist/ReactToastify.css"; 
-import "./ToastifyNotification.css";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ClockApp = () => {
   const [clockStyle, setClockStyle] = useState("digital");
-  const [clocks, setClocks] = useState([]);
   const [selectedCountries, setSelectedCountries] = useState([]);
 
   const availableCountries = [
@@ -34,24 +32,14 @@ const ClockApp = () => {
     { label: "New Zealand", timezone: "Pacific/Auckland" },
   ];
 
-  // Load data from localStorage on mount
   useEffect(() => {
     const savedClockStyle = localStorage.getItem("clockStyle") || "digital";
     const savedSelectedCountries = JSON.parse(
       localStorage.getItem("selectedCountries")
-    ) || ["USA", "India", "UK", "Japan"]; // Default to 3 countries
-
+    ) || ["USA", "India", "UK", "Japan"];
     setClockStyle(savedClockStyle);
     setSelectedCountries(savedSelectedCountries);
   }, []);
-
-  // Update clocks when selectedCountries changes
-  useEffect(() => {
-    const updatedClocks = availableCountries.filter((country) =>
-      selectedCountries.includes(country.label)
-    );
-    setClocks(updatedClocks);
-  }, [selectedCountries]);
 
   const handleClockStyleChange = (style) => {
     setClockStyle(style);
@@ -69,8 +57,6 @@ const ClockApp = () => {
         "selectedCountries",
         JSON.stringify(updatedCountries)
       );
-
-      // Show toast notification when a new clock is added
       toast.success(`Clock for ${countryLabel} added!`);
     } else if (selectedCountries.length >= 4) {
       toast.warn("You can only add up to 4 clocks.");
@@ -85,15 +71,10 @@ const ClockApp = () => {
     localStorage.setItem("selectedCountries", JSON.stringify(updatedCountries));
   };
 
-  const getCurrentTime = (timezone) =>
-    moment()
-      .tz(timezone)
-      .format(clockStyle === "digital" ? "HH:mm:ss" : "h:mm A");
-
   return (
-    <div className="flex flex-col h-[10rem] items-center border rounded-lg p-4 justify-center">
+    <div className="flex flex-col h-auto items-center border rounded-lg p-4">
       <StyledWrapper>
-        <div className="flex gap-1 mt-6">
+        <div className="flex gap-2 mt-6">
           <select
             onChange={(e) => handleClockStyleChange(e.target.value)}
             value={clockStyle}
@@ -105,7 +86,7 @@ const ClockApp = () => {
 
           <select
             onChange={(e) => handleAddClock(e.target.value)}
-            className="border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Select a country</option>
             {availableCountries.map((country) => (
@@ -116,25 +97,29 @@ const ClockApp = () => {
           </select>
         </div>
 
-        <div className="grid -ml-7 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-          {clocks.map((clock) => (
-            <div key={clock.label} className="card relative group">
-              <Clock clockStyle={clockStyle} timezone={clock.timezone} />
-              <h2 className="text-sm font-mono text-center ml-5">
-                {clock.label}
-              </h2>
-              <button
-                onClick={() => handleRemoveClock(clock.label)}
-                className="absolute top-2 -right-4 opacity-0 group-hover:opacity-100 bg-white hover:bg-red-500 hover:text-black rounded-2xl transition-opacity"
-              >
-                <IoCloseOutline size={24} />
-              </button>
-            </div>
-          ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+          {selectedCountries.map((countryLabel) => {
+            const country = availableCountries.find(
+              (c) => c.label === countryLabel
+            );
+            return (
+              <div key={countryLabel} className="card relative group">
+                <Clock clockStyle={clockStyle} timezone={country.timezone} />
+                <h2 className="text-sm font-mono text-center">
+                  {country.label}
+                </h2>
+                <button
+                  onClick={() => handleRemoveClock(country.label)}
+                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-white hover:bg-red-500 hover:text-black rounded-2xl transition-opacity"
+                >
+                  <IoCloseOutline size={24} />
+                </button>
+              </div>
+            );
+          })}
         </div>
       </StyledWrapper>
       <ToastContainer />
-      {/* Add the ToastContainer here */}
     </div>
   );
 };
@@ -166,13 +151,14 @@ const DigitalClock = ({ time }) => (
 
 // Analog Clock Component
 const AnalogClock = ({ time }) => {
-  const hours = time.hours() % 12;
+  const hours = time.hours() % 12; // Convert 24-hour time to 12-hour format
   const minutes = time.minutes();
   const seconds = time.seconds();
 
-  const hourDegrees = (hours + minutes / 60) * 30;
-  const minuteDegrees = (minutes + seconds / 60) * 6;
-  const secondDegrees = seconds * 6;
+  // Calculate the degree rotations for the clock hands
+  const hourDegrees = (hours + minutes / 60) * 30; // Each hour is 30 degrees
+  const minuteDegrees = (minutes + seconds / 60) * 6; // Each minute is 6 degrees
+  const secondDegrees = seconds * 6; // Each second is 6 degrees
 
   return (
     <AnalogClockWrapper>
@@ -192,19 +178,19 @@ const AnalogClock = ({ time }) => {
             style={{ transform: `rotate(${secondDegrees}deg)` }}
           />
           <div className="center-circle" />
-          <div className="clock-numbers ">
+          <div className="clock-numbers">
             {[...Array(12)].map((_, i) => {
-              const angle = (i + 1) * (360 / 12); // Calculate the angle for each number
-              const radius = 24; // Adjust radius for small clock size
-              const x = Math.cos((angle - 90) * (Math.PI / 180)) * radius + 29; // Adjust x position
-              const y = Math.sin((angle - 90) * (Math.PI / 180)) * radius + 29; // Adjust y position
+              const angle = (i + 1) * 30; // Each number is spaced 30 degrees apart
+              const radius = 24; // Adjust for small clock size
+              const x = Math.cos((angle - 90) * (Math.PI / 180)) * radius + 29;
+              const y = Math.sin((angle - 90) * (Math.PI / 180)) * radius + 29;
               return (
                 <p
                   key={i}
                   style={{
                     top: `${y}px`,
                     left: `${x}px`,
-                    transform: "translate(-50%, -50%)", // Center the text
+                    transform: "translate(-50%, -50%)",
                   }}
                   className="number"
                 >
@@ -226,7 +212,6 @@ const StyledWrapper = styled.div`
     text-align: center;
   }
 `;
-
 
 const AnalogClockWrapper = styled.div`
   .realistic-clock {
