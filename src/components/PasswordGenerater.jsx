@@ -4,7 +4,6 @@ import { collection, addDoc, getDocs, query } from "firebase/firestore";
 import { FaLock, FaEye, FaEyeSlash, FaCopy } from "react-icons/fa";
 
 const CredentialManager = () => {
-  const userId = auth.currentUser?.uid;
   const [showPasswords, setShowPasswords] = useState({});
   const [isGridView, setIsGridView] = useState(false);
   const [credentials, setCredentials] = useState([]);
@@ -26,68 +25,7 @@ const CredentialManager = () => {
   const [includeNumbers, setIncludeNumbers] = useState(true);
   const [includeLetters, setIncludeLetters] = useState(true);
   const [includeSpecialChars, setIncludeSpecialChars] = useState(true);
-  const placeholderCredentials = [
-    {
-      website: "Google",
-      url: "https://www.google.com",
-      username: "your username",
-      password: "your password",
-    },
-    {
-      website: "Facebook",
-      url: "https://www.facebook.com",
-      username: "your username",
-      password: "your password",
-    },
-    {
-      website: "Twitter",
-      url: "https://www.twitter.com",
-      username: "your username",
-      password: "your password",
-    },
-    {
-      website: "Instagram",
-      url: "https://www.instagram.com",
-      username: "your username",
-      password: "your password",
-    },
-    {
-      website: "LinkedIn",
-      url: "https://www.linkedin.com",
-      username: "your username",
-      password: "your password",
-    },
-    {
-      website: "YouTube",
-      url: "https://www.youtube.com",
-      username: "your username",
-      password: "your password",
-    },
-    {
-      website: "GitHub",
-      url: "https://www.github.com",
-      username: "your username",
-      password: "your password",
-    },
-    {
-      website: "Amazon",
-      url: "https://www.amazon.com",
-      username: "your username",
-      password: "your password",
-    },
-    {
-      website: "Netflix",
-      url: "https://www.netflix.com",
-      username: "your username",
-      password: "your password",
-    },
-    {
-      website: "Spotify",
-      url: "https://www.spotify.com",
-      username: "your username",
-      password: "your password",
-    },
-  ];
+  const [userId, setUserId] = useState(null);
 
   const togglePasswordVisibility = (website) => {
     setShowPasswords((prev) => ({
@@ -186,23 +124,56 @@ const CredentialManager = () => {
     }
   };
 
-  // Function to load credentials from Firestore
-  const loadCredentialsFromFirestore = async () => {
-    try {
-      if (userId) {
-        const q = query(collection(db, `users/${userId}/passwords`));
-        const querySnapshot = await getDocs(q);
-        const loadedCredentials = querySnapshot.docs.map((doc) => doc.data());
-        setCredentials(loadedCredentials);
-      }
-    } catch (error) {
-      console.error("Error loading documents: ", error);
-    }
-  };
-
+  // Handle auth state changes
   useEffect(() => {
-    loadCredentialsFromFirestore();
-  }, [userId]);
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        setUserId(user.uid);
+      } else {
+        setUserId(null);
+      }
+    });
+
+    // Cleanup subscription
+    return () => unsubscribe();
+  }, []); // Empty dependency array as we only want this to run once
+
+  // Separate useEffect for loading credentials
+  useEffect(() => {
+    let isMounted = true; // Add mounted check
+
+    const loadAllCredentials = async () => {
+      if (!userId || !isMounted) return;
+
+      try {
+        // Load starter credentials first
+        const starterQuery = query(collection(db, "starterCredentials"));
+        const starterSnapshot = await getDocs(starterQuery);
+        const starterCreds = starterSnapshot.docs.map((doc) => doc.data());
+
+        if (!isMounted) return;
+
+        // Then load user credentials
+        const userQuery = query(collection(db, `users/${userId}/passwords`));
+        const userSnapshot = await getDocs(userQuery);
+        const userCreds = userSnapshot.docs.map((doc) => doc.data());
+
+        if (!isMounted) return;
+
+        // Combine both sets of credentials
+        setCredentials([...starterCreds, ...userCreds]);
+      } catch (error) {
+        console.error("Error loading credentials:", error);
+      }
+    };
+
+    loadAllCredentials();
+
+    // Cleanup function
+    return () => {
+      isMounted = false;
+    };
+  }, [userId]); // Only depend on userId
 
   const handleSave = async (event) => {
     event.preventDefault();
