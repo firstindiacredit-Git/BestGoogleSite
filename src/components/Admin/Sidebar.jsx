@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { LuLayoutDashboard } from "react-icons/lu";
+import { LuLayoutDashboard, LuUsers } from "react-icons/lu";
 import { MdOutlineAddLink } from "react-icons/md";
-import { LuUser2 } from "react-icons/lu";
 import { IoSettingsOutline, IoSunny, IoMoon } from "react-icons/io5"; // Added missing imports
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../../firebase";
@@ -89,7 +88,7 @@ export default function Sidebar() {
               to="/admin/users"
               className="hover:bg-gray-700 p-2 flex rounded"
             >
-              <LuUser2 className="mt-1 mr-1" />
+              <LuUsers className="mt-1 mr-1" />
               Users
             </Link>
           </li>
