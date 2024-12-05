@@ -106,42 +106,42 @@ export default function AnimatedTooltipPreview() {
   // Cache to avoid multiple calls to Firebase
   const [cachedBookmarks, setCachedBookmarks] = useState([]);
 
-  // Fetch bookmarks when the user logs in
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUserId(user.uid);
-      } else {
-        setUserId(null);
-      }
-    });
+  // // Fetch bookmarks when the user logs in
+  // useEffect(() => {
+  //   const unsubscribe = onAuthStateChanged(auth, (user) => {
+  //     if (user) {
+  //       setUserId(user.uid);
+  //     } else {
+  //       setUserId(null);
+  //     }
+  //   });
 
-    return () => unsubscribe();
-  }, []);
+  //   return () => unsubscribe();
+  // }, []);
 
-  useEffect(() => {
-    const fetchBookmarks = async () => {
-      if (userId && cachedBookmarks.length === 0) {
-        try {
-          const bookmarksSnapshot = await getDocs(
-            collection(db, "users", userId, "addbookmarks")
-          );
-          const bookmarksData = bookmarksSnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
+  // useEffect(() => {
+  //   const fetchBookmarks = async () => {
+  //     if (userId && cachedBookmarks.length === 0) {
+  //       try {
+  //         const bookmarksSnapshot = await getDocs(
+  //           collection(db, "users", userId, "addbookmarks")
+  //         );
+  //         const bookmarksData = bookmarksSnapshot.docs.map((doc) => ({
+  //           id: doc.id,
+  //           ...doc.data(),
+  //         }));
 
-          setPeople((prev) => [...defaultPeople, ...bookmarksData]);
-          setCachedBookmarks(bookmarksData); // Cache bookmarks after fetching
-        } catch (error) {
-          console.error("Error fetching bookmarks:", error);
-          setErrorMessage("Failed to fetch bookmarks. Please try again.");
-        }
-      }
-    };
+  //         setPeople((prev) => [...defaultPeople, ...bookmarksData]);
+  //         setCachedBookmarks(bookmarksData); // Cache bookmarks after fetching
+  //       } catch (error) {
+  //         console.error("Error fetching bookmarks:", error);
+  //         setErrorMessage("Failed to fetch bookmarks. Please try again.");
+  //       }
+  //     }
+  //   };
 
-    fetchBookmarks();
-  }, [userId, cachedBookmarks]); // Only fetch when userId or cachedBookmarks changes
+  //   fetchBookmarks();
+  // }, [userId, cachedBookmarks]); // Only fetch when userId or cachedBookmarks changes
 
   const validateURL = (url) => {
     const pattern = /^(http|https):\/\/[^\s$.?#].[^\s]*$/;
@@ -207,10 +207,7 @@ export default function AnimatedTooltipPreview() {
       setEditMode(false);
       setEditingBookmarkId(null);
 
-      // Automatically clear success message after 3 seconds
-      setTimeout(() => {
-        setSuccessMessage("");
-      }, 3000);
+  
     } catch (error) {
       console.error("Error saving bookmark:", error);
       setErrorMessage("Failed to save bookmark. Please try again.");
