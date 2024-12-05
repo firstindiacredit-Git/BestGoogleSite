@@ -106,113 +106,137 @@ export default function AnimatedTooltipPreview() {
   // Cache to avoid multiple calls to Firebase
   const [cachedBookmarks, setCachedBookmarks] = useState([]);
 
-  // useEffect(() => {
-  //   const unsubscribe = onAuthStateChanged(auth, (user) => {
-  //     if (user) {
-  //       setUserId(user.uid);
-  //     } else {
-  //       setUserId(null);
-  //     }
-  //   });
-  //   return () => unsubscribe();
-  // }, []);
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserId(user.uid);
+      } else {
+        setUserId(null);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
-  // useEffect(() => {
-  //   const fetchBookmarks = async () => {
-  //     if (userId && cachedBookmarks.length === 0) {
-  //       try {
-  //         const bookmarksSnapshot = await getDocs(
-  //           collection(db, "users", userId, "addbookmarks")
-  //         );
-  //         const bookmarksData = bookmarksSnapshot.docs.map((doc) => ({
-  //           id: doc.id,
-  //           ...doc.data(),
-  //         }));
+ const fetchBookmarks = async (
+   db,
+   userId,
+   defaultPeople,
+   setPeople,
+   setCachedBookmarks,
+   setErrorMessage
+ ) => {
+   try {
+     const bookmarksSnapshot = await getDocs(
+       collection(db, "users", userId, "addbookmarks")
+     );
+     const bookmarksData = bookmarksSnapshot.docs.map((doc) => ({
+       id: doc.id,
+       ...doc.data(),
+     }));
 
-  //         setPeople((prev) => [...defaultPeople, ...bookmarksData]);
-  //         setCachedBookmarks(bookmarksData); // Cache bookmarks after fetching
-  //       } catch (error) {
-  //         console.error("Error fetching bookmarks:", error);
-  //         setErrorMessage("Failed to fetch bookmarks. Please try again.");
-  //       }
-  //     }
-  //   };
+     setPeople((prev) => [...defaultPeople, ...bookmarksData]);
+     setCachedBookmarks(bookmarksData); // Cache bookmarks after fetching
+   } catch (error) {
+     console.error("Error fetching bookmarks:", error);
+     setErrorMessage("Failed to fetch bookmarks. Please try again.");
+   }
+ };
 
-  //   fetchBookmarks();
-  // }, [userId, cachedBookmarks]);
+ const useBookmarks = (
+   db,
+   userId,
+   defaultPeople,
+   cachedBookmarks,
+   setPeople,
+   setCachedBookmarks,
+   setErrorMessage
+ ) => {
+   useEffect(() => {
+     if (userId && cachedBookmarks.length === 0) {
+       fetchBookmarks(
+         db,
+         userId,
+         defaultPeople,
+         setPeople,
+         setCachedBookmarks,
+         setErrorMessage
+       );
+     }
+   }, [userId]); // Only trigger when userId changes
+ };
 
-  // const validateURL = (url) => {
-  //   const pattern = /^(http|https):\/\/[^\s$.?#].[^\s]*$/;
-  //   return pattern.test(url);
-  // };
+  const validateURL = (url) => {
+    const pattern = /^(http|https):\/\/[^\s$.?#].[^\s]*$/;
+    return pattern.test(url);
+  };
 
-  // const saveBookmark = async (e) => {
-  //   e.preventDefault();  
-  //   if (!userId || !newBookmark.name || !newBookmark.link) {
-  //     setErrorMessage("Please fill in both fields.");  
-  //     return;  
-  //   }
+  const saveBookmark = async (e) => {
+    e.preventDefault();  
+    if (!userId || !newBookmark.name || !newBookmark.link) {
+      setErrorMessage("Please fill in both fields.");  
+      return;  
+    }
 
-  //   if (!validateURL(newBookmark.link)) {
-  //     setErrorMessage("Please enter a valid URL.");  
-  //     return;  
-  //   }
+    if (!validateURL(newBookmark.link)) {
+      setErrorMessage("Please enter a valid URL.");  
+      return;  
+    }
 
-  //   setErrorMessage(""); 
-  //   setSuccessMessage("");  
+    setErrorMessage(""); 
+    setSuccessMessage("");  
 
-  //   try {
-  //     if (editMode) {
-  //       await updateDoc(
-  //         doc(db, "users", userId, "bookmarks", editingBookmarkId),
-  //         {
-  //           name: newBookmark.name,
-  //           link: newBookmark.link,
-  //         }
-  //       );
+    try {
+      if (editMode) {
+        await updateDoc(
+          doc(db, "users", userId, "bookmarks", editingBookmarkId),
+          {
+            name: newBookmark.name,
+            link: newBookmark.link,
+          }
+        );
 
-  //       setPeople((prevPeople) =>
-  //         prevPeople.map((bookmark) =>
-  //           bookmark.id === editingBookmarkId
-  //             ? { ...bookmark, name: newBookmark.name, link: newBookmark.link }
-  //             : bookmark
-  //         )
-  //       );
-  //       setSuccessMessage("Bookmark updated successfully!");
-  //     } else {
-  //       const newBookmarkRef = await addDoc(
-  //         collection(db, "users", userId, "addbookmarks"),
-  //         {
-  //           name: newBookmark.name,
-  //           link: newBookmark.link,
-  //           image: "default.png",
-  //         }
-  //       );
-  //       const addedBookmark = {
-  //         id: newBookmarkRef.id,
-  //         name: newBookmark.name,
-  //         link: newBookmark.link,
-  //         image: "default.png",
-  //       };
-  //       setPeople((prevPeople) => [...prevPeople, addedBookmark]);
-  //       setCachedBookmarks((prev) => [...prev, addedBookmark]); // Update cache
-  //       setSuccessMessage("Bookmark added successfully!");
-  //     }
+        setPeople((prevPeople) =>
+          prevPeople.map((bookmark) =>
+            bookmark.id === editingBookmarkId
+              ? { ...bookmark, name: newBookmark.name, link: newBookmark.link }
+              : bookmark
+          )
+        );
+        setSuccessMessage("Bookmark updated successfully!");
+      } else {
+        const newBookmarkRef = await addDoc(
+          collection(db, "users", userId, "addbookmarks"),
+          {
+            name: newBookmark.name,
+            link: newBookmark.link,
+            image: "default.png",
+          }
+        );
+        const addedBookmark = {
+          id: newBookmarkRef.id,
+          name: newBookmark.name,
+          link: newBookmark.link,
+          image: "default.png",
+        };
+        setPeople((prevPeople) => [...prevPeople, addedBookmark]);
+        setCachedBookmarks((prev) => [...prev, addedBookmark]); // Update cache
+        setSuccessMessage("Bookmark added successfully!");
+      }
 
-  //     setNewBookmark({ name: "", link: "" });
-  //     setShowModal(false);
-  //     setEditMode(false);
-  //     setEditingBookmarkId(null);
+      setNewBookmark({ name: "", link: "" });
+      setShowModal(false);
+      setEditMode(false);
+      setEditingBookmarkId(null);
 
-  //     // Automatically clear success message after 3 seconds
-  //     setTimeout(() => {
-  //       setSuccessMessage("");
-  //     }, 3000);
-  //   } catch (error) {
-  //     console.error("Error saving bookmark:", error);
-  //     setErrorMessage("Failed to save bookmark. Please try again.");
-  //   }
-  // };
+      // Automatically clear success message after 3 seconds
+      setTimeout(() => {
+        setSuccessMessage("");
+      }, 3000);
+    } catch (error) {
+      console.error("Error saving bookmark:", error);
+      setErrorMessage("Failed to save bookmark. Please try again.");
+    }
+  };
 
   const handleDelete = async (id) => {
     try {
