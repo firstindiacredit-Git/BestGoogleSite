@@ -52,7 +52,7 @@ function AnimatedTooltip({ items, handleEdit, handleDelete }) {
             <img
               src={`https://logo.clearbit.com/${new URL(person.link).hostname}`}
               alt={person.name}
-              className="w-7 h-7 mx-auto rounded-[50%] transition-transform duration-300  transform hover:scale-110 hover:shadow-lg"
+              className="w-7 h-7 mx-auto rounded-[50%] transition-transform duration-300 transform hover:scale-110 hover:shadow-lg"
             />
           </a>
           <h3 className="text-md font-semibold mb-2 w-16 mt-2 transition-all duration-300 transform group-hover:translate-y-1 group-hover:translate-x-1">
@@ -100,12 +100,13 @@ export default function AnimatedTooltipPreview() {
   const [editMode, setEditMode] = useState(false);
   const [editingBookmarkId, setEditingBookmarkId] = useState(null);
   const [userId, setUserId] = useState(null);
-  const [errorMessage, setErrorMessage] = useState(""); // State for error messages
-  const [successMessage, setSuccessMessage] = useState(""); // State for success messages
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   // Cache to avoid multiple calls to Firebase
   const [cachedBookmarks, setCachedBookmarks] = useState([]);
 
+  // Fetch bookmarks when the user logs in
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -114,56 +115,33 @@ export default function AnimatedTooltipPreview() {
         setUserId(null);
       }
     });
+
     return () => unsubscribe();
   }, []);
 
- const fetchBookmarks = async (
-   db,
-   userId,
-   defaultPeople,
-   setPeople,
-   setCachedBookmarks,
-   setErrorMessage
- ) => {
-   try {
-     const bookmarksSnapshot = await getDocs(
-       collection(db, "users", userId, "addbookmarks")
-     );
-     const bookmarksData = bookmarksSnapshot.docs.map((doc) => ({
-       id: doc.id,
-       ...doc.data(),
-     }));
+  useEffect(() => {
+    const fetchBookmarks = async () => {
+      if (userId && cachedBookmarks.length === 0) {
+        try {
+          const bookmarksSnapshot = await getDocs(
+            collection(db, "users", userId, "addbookmarks")
+          );
+          const bookmarksData = bookmarksSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
 
-     setPeople((prev) => [...defaultPeople, ...bookmarksData]);
-     setCachedBookmarks(bookmarksData); // Cache bookmarks after fetching
-   } catch (error) {
-     console.error("Error fetching bookmarks:", error);
-     setErrorMessage("Failed to fetch bookmarks. Please try again.");
-   }
- };
+          setPeople((prev) => [...defaultPeople, ...bookmarksData]);
+          setCachedBookmarks(bookmarksData); // Cache bookmarks after fetching
+        } catch (error) {
+          console.error("Error fetching bookmarks:", error);
+          setErrorMessage("Failed to fetch bookmarks. Please try again.");
+        }
+      }
+    };
 
- const useBookmarks = (
-   db,
-   userId,
-   defaultPeople,
-   cachedBookmarks,
-   setPeople,
-   setCachedBookmarks,
-   setErrorMessage
- ) => {
-   useEffect(() => {
-     if (userId && cachedBookmarks.length === 0) {
-       fetchBookmarks(
-         db,
-         userId,
-         defaultPeople,
-         setPeople,
-         setCachedBookmarks,
-         setErrorMessage
-       );
-     }
-   }, [userId]); // Only trigger when userId changes
- };
+    fetchBookmarks();
+  }, [userId, cachedBookmarks]); // Only fetch when userId or cachedBookmarks changes
 
   const validateURL = (url) => {
     const pattern = /^(http|https):\/\/[^\s$.?#].[^\s]*$/;
@@ -171,24 +149,25 @@ export default function AnimatedTooltipPreview() {
   };
 
   const saveBookmark = async (e) => {
-    e.preventDefault();  
+    e.preventDefault();
+
     if (!userId || !newBookmark.name || !newBookmark.link) {
-      setErrorMessage("Please fill in both fields.");  
-      return;  
+      setErrorMessage("Please fill in both fields.");
+      return;
     }
 
     if (!validateURL(newBookmark.link)) {
-      setErrorMessage("Please enter a valid URL.");  
-      return;  
+      setErrorMessage("Please enter a valid URL.");
+      return;
     }
 
-    setErrorMessage(""); 
-    setSuccessMessage("");  
+    setErrorMessage("");
+    setSuccessMessage("");
 
     try {
       if (editMode) {
         await updateDoc(
-          doc(db, "users", userId, "bookmarks", editingBookmarkId),
+          doc(db, "users", userId, "addbookmarks", editingBookmarkId),
           {
             name: newBookmark.name,
             link: newBookmark.link,
@@ -263,7 +242,7 @@ export default function AnimatedTooltipPreview() {
   };
 
   return (
-    <div className="flex items-center mt-2  dark:text-white justify-center mb-10 w-full">
+    <div className="flex items-center mt-2 dark:text-white justify-center mb-10 w-full">
       <AnimatedTooltip
         items={people}
         handleEdit={handleEdit}
@@ -279,43 +258,55 @@ export default function AnimatedTooltipPreview() {
 
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white dark:bg-gray-900 dark:text-white   p-4 rounded-2xl shadow-md w-80">
-            <h2 className="text-lg font-bold mb-2">
-              {editMode ? "Edit Bookmark" : "Add Bookmark"}
+          <div className="bg-white dark:bg-gray-900 dark:text-white p-4 rounded-2xl shadow-md w-80">
+            <h2 className="text-lg font-semibold mb-4">
+              {editMode ? "Edit" : "Add"} Bookmark
             </h2>
-            <input
-              type="text"
-              placeholder="Bookmark Name"
-              value={newBookmark.name}
-              onChange={(e) =>
-                setNewBookmark({ ...newBookmark, name: e.target.value })
-              }
-              className="border border-gray-300 dark:bg-gray-900 rounded p-2 mb-2 w-full"
-            />
-            <input
-              type="text"
-              placeholder="Bookmark URL"
-              value={newBookmark.link}
-              onChange={(e) =>
-                setNewBookmark({ ...newBookmark, link: e.target.value })
-              }
-              className="border border-gray-300 dark:bg-gray-900 rounded p-2 mb-2 w-full"
-            />
-            {errorMessage && (
-              <p className="text-red-500 text-sm mb-2">{errorMessage}</p>
-            )}
+            {errorMessage && <p className="text-red-500">{errorMessage}</p>}
             {successMessage && (
-              <p className="text-green-500 text-sm mb-2">{successMessage}</p>
+              <p className="text-green-500">{successMessage}</p>
             )}
-            <button
-              onClick={saveBookmark}
-              className="bg-blue-500 text-white rounded p-2 w-full"
-            >
-              {editMode ? "Update" : "Add"}
-            </button>
+            <form onSubmit={saveBookmark}>
+              <div className="mb-4">
+                <label htmlFor="name" className="block mb-1">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  value={newBookmark.name}
+                  onChange={(e) =>
+                    setNewBookmark({ ...newBookmark, name: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border rounded-md"
+                  required
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="link" className="block mb-1">
+                  Link
+                </label>
+                <input
+                  type="text"
+                  id="link"
+                  value={newBookmark.link}
+                  onChange={(e) =>
+                    setNewBookmark({ ...newBookmark, link: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border rounded-md"
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full bg-blue-500 text-white px-3 py-2 rounded-md"
+              >
+                Save
+              </button>
+            </form>
             <button
               onClick={() => setShowModal(false)}
-              className="bg-red-500 text-white rounded p-2 w-full mt-2"
+              className="mt-2 text-red-500 w-full"
             >
               Cancel
             </button>
