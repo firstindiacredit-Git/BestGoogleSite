@@ -1,294 +1,366 @@
 import React, { useState, useEffect } from "react";
-import { FaTrash, FaCopy } from "react-icons/fa";
-import { db } from "../firebase"; // Adjust the import path as needed
-import {
-  collection,
-  addDoc,
-  deleteDoc,
-  onSnapshot,
-  doc,
-} from "firebase/firestore";
-import { getAuth } from "firebase/auth";
+import { db } from "../../src/firebase"; // Import Firebase config
+import { FaLock } from "react-icons/fa";
 
-const PasswordGenerator = () => {
-  const [password, setPassword] = useState("");
-  const [length, setLength] = useState(12);
-  const [includeUppercase, setIncludeUppercase] = useState(true);
-  const [includeNumbers, setIncludeNumbers] = useState(true);
-  const [includeSymbols, setIncludeSymbols] = useState(true);
-  const [formData, setFormData] = useState({
-    name: "",
-    username: "",
+const CredentialManager = () => {
+  // Initial placeholder credentials
+  const placeholderCredentials = [
+    {
+      website: "Google",
+      url: "https://www.google.com",
+      username: "your username",
+      password: "your password",
+    },
+    {
+      website: "Facebook",
+      url: "https://www.facebook.com",
+      username: "your username",
+      password: "your password",
+    },
+    {
+      website: "Twitter",
+      url: "https://www.twitter.com",
+      username: "your username",
+      password: "your password",
+    },
+    {
+      website: "Instagram",
+      url: "https://www.instagram.com",
+      username: "your username",
+      password: "your password",
+    },
+    {
+      website: "LinkedIn",
+      url: "https://www.linkedin.com",
+      username: "your username",
+      password: "your password",
+    },
+    {
+      website: "YouTube",
+      url: "https://www.youtube.com",
+      username: "your username",
+      password: "your password",
+    },
+    {
+      website: "GitHub",
+      url: "https://www.github.com",
+      username: "your username",
+      password: "your password",
+    },
+    {
+      website: "Amazon",
+      url: "https://www.amazon.com",
+      username: "your username",
+      password: "your password",
+    },
+    {
+      website: "Netflix",
+      url: "https://www.netflix.com",
+      username: "your username",
+      password: "your password",
+    },
+    {
+      website: "Spotify",
+      url: "https://www.spotify.com",
+      username: "your username",
+      password: "your password",
+    },
+  ];
+
+  const [credentials, setCredentials] = useState(placeholderCredentials);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [currentCredential, setCurrentCredential] = useState(null);
+  const [formValues, setFormValues] = useState({
+    website: "",
     url: "",
-    email: "",
-    phone: "",
+    username: "",
+    password: "",
+    notes: "",
   });
-  const [submittedData, setSubmittedData] = useState([]);
-  const [copyAlert, setCopyAlert] = useState("");
+  const [length, setLength] = useState(6);
+  const [genPass, setGenPass] = useState("");
 
-  const auth = getAuth();
-  const currentUser = auth.currentUser;
+  // Locker screen state
+  const [isLocked, setIsLocked] = useState(true);
+  const [password, setPassword] = useState("");
+  const correctPassword = "0000"; // Set the correct password here
+  const [includeNumbers, setIncludeNumbers] = useState(true);
+const [includeLetters, setIncludeLetters] = useState(true);
+const [includeSpecialChars, setIncludeSpecialChars] = useState(true);
 
-  useEffect(() => {
-    if (currentUser) {
-      const userDocRef = collection(db, "users", currentUser.uid, "passwords");
-      const unsubscribe = onSnapshot(userDocRef, (snapshot) => {
-        const data = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setSubmittedData(data);
-      });
-      return () => unsubscribe();
+  const generateRandomPassword = (length = 12) => {
+    let characters = "";
+    
+    if (includeLetters) {
+      characters += "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     }
-  }, [currentUser]);
-
-  const generatePassword = async () => {
-    if (
-      !formData.name ||
-      !formData.username ||
-      !formData.email ||
-      !formData.phone
-    ) {
-      alert("Please fill in all required fields.");
-      return;
+    if (includeNumbers) {
+      characters += "0123456789";
     }
-
-    const characters =
-      "abcdefghijklmnopqrstuvwxyz" +
-      (includeUppercase ? "ABCDEFGHIJKLMNOPQRSTUVWXYZ" : "") +
-      (includeNumbers ? "0123456789" : "") +
-      (includeSymbols ? "!@#$%^&*()_+[]{}|;:,.<>?" : "");
-    let generatedPassword = "";
+    if (includeSpecialChars) {
+      characters += "!@#$%^&*()_-+=<>?";
+    }
+  
+    // If no character types are selected, default to letters
+    if (characters === "") {
+      characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    }
+  
+    let password = "";
     for (let i = 0; i < length; i++) {
-      generatedPassword +=
-        characters[Math.floor(Math.random() * characters.length)];
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      password += characters.charAt(randomIndex);
     }
+  
+    setGenPass(password);
+  };
+  
+  // Handle password copy
+  const handleCopyPassword = () => {
+    navigator.clipboard.writeText(genPass).then(() => {
+      alert("Password copied to clipboard!");
+    });
+  };
 
-    setPassword(generatedPassword);
+  // Show modal for add/edit
+  const showModal = (credential = null) => {
+    setCurrentCredential(credential);
+    if (credential) {
+      setFormValues({
+        website: credential.website,
+        url: credential.url,
+        username: credential.username,
+        password: credential.password,
+        notes: credential.notes || "",
+      });
+    } else {
+      setFormValues({
+        website: "",
+        url: "",
+        username: "",
+        password: "",
+        notes: "",
+      });
+    }
+    setIsModalVisible(true);
+  };
 
-    // Extract the favicon URL from the entered URL
-    const faviconUrl = formData.url
-      ? `https://www.google.com/s2/favicons?domain=${formData.url}`
-      : "";
-
-    const newEntry = {
-      ...formData,
-      password: generatedPassword,
-      favicon: faviconUrl,
-    };
+  // Handle saving credentials (add or edit)
+  const handleSave = async (event) => {
+    event.preventDefault();
+    const { website, url, username, password, notes } = formValues;
 
     try {
-      await addDoc(
-        collection(db, "users", currentUser.uid, "passwords"),
-        newEntry
-      );
-      setFormData({ name: "", username: "", url: "", email: "", phone: "" });
+      if (currentCredential) {
+        // Edit existing credential
+        setCredentials(
+          credentials.map((cred) =>
+            cred.website === currentCredential.website
+              ? { ...cred, website, url, username, password, notes }
+              : cred
+          )
+        );
+      } else {
+        // Add new credential
+        setCredentials([
+          ...credentials,
+          { website, url, username, password, notes },
+        ]);
+      }
+      setIsModalVisible(false);
+      setCurrentCredential(null);
     } catch (error) {
-      console.error("Error adding document:", error);
+      console.error("Error saving credential:", error);
     }
   };
 
-  const handleDelete = async (docId) => {
-    try {
-      await deleteDoc(doc(db, "users", currentUser.uid, "passwords", docId));
-      setSubmittedData(submittedData.filter((item) => item.id !== docId));
-    } catch (error) {
-      console.error("Error deleting document:", error);
-    }
+  // Handle delete action
+  const handleDelete = (website) => {
+    setCredentials(credentials.filter((cred) => cred.website !== website));
   };
 
-  const handleChange = (e) => {
+  // Handle form input changes
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormValues((prevValues) => ({ ...prevValues, [name]: value }));
   };
 
-  const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text);
-    setCopyAlert("Copied to clipboard!");
-    setTimeout(() => setCopyAlert(""), 2000);
+  // Handle password input change
+  const handlePasswordChange = (e) => {
+    setPassword(e.target.value);
+  };
+
+  // Handle password verification
+  const handleUnlock = () => {
+    if (password === correctPassword) {
+      setIsLocked(false);
+    } else {
+      alert("Incorrect password!");
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-transparent">
-      <div className="bg-white dark:bg-gray-900 dark:text-white p-8 rounded-lg w-full max-w-6xl">
-        <h2 className="text-2xl  text-black dark:text-white font-bold mb-6 text-center">
-          Password Generator
-        </h2>
-
-        {/* Form Fields */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
-          {["name", "username", "url", "email", "phone"].map((field) => (
-            <div key={field}>
-              <label
-                htmlFor={field}
-                className="block mb-2 text-black dark:text-white capitalize"
-              >
-                {field}
-              </label>
-              <input
-                id={field}
-                name={field}
-                type={field === "email" ? "email" : "text"}
-                value={formData[field]}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border text-black dark:text-white border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          ))}
-        </div>
-
-        {/* Password Length & Options */}
-        <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div>
-            <label
-              htmlFor="password-length"
-              className="block mb-2 text-black dark:text-white"
+    <>
+      {isLocked ? (
+       <div className="fixed w-full bg-opacity-50 py-[5vh] flex items-center justify-center">
+       <div className="bg-gray-50 p-8 text-center rounded-lg shadow-lg w-96">
+         <div className="flex justify-center">
+           <FaLock color="#3B82F6" size={50} />
+         </div>
+         <h2 className="text-2xl my-1 font-bold">Credential Locker</h2>
+         <div className="mb-4 text-gray-600">Enter PIN to access credentials</div>
+         <div className="w-full px-4 space-x-4">
+           <input
+             type="password"
+             value={password}
+             onChange={handlePasswordChange}
+             className="w-32 px-4 py-2 border border-gray-300 rounded-md mb-4"
+             placeholder="Enter PIN"
+           />
+           <button
+             onClick={handleUnlock}
+             className="bg-blue-500 text-white px-4 py-2 rounded-md"
+           >
+             Unlock
+           </button>
+         </div>
+         <div className="text-sm text-gray-600 relative group">
+           PIN?
+           <span className="absolute w-fit left-1/2 transform -translate-x-1/2 mt-2 px-2 py-1 bg-gray-700 text-white text-xs rounded-md shadow-lg cursor-default opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            Current PIN: 0000
+           </span>
+         </div>
+       </div>
+     </div>
+     
+      ) : (
+        <div className=" mx-auto p-12 pb-14 bg-[#f8f9fa]">
+          <div className="flex justify-between w-full">
+            <button
+              className="bg-blue-500 text-white px-4 py-2 rounded-md mb-4"
+              onClick={() => showModal()}
             >
-              Password Length
-            </label>
-            <input
-              id="password-length"
-              type="number"
-              value={length}
-              onChange={(e) => setLength(Number(e.target.value))}
-              min="4"
-              max="20"
-              className="w-full px-4 py-2 border text-black   dark:text-black border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-            />
+              Add Credential
+            </button>
+            <button
+              className="transition-all border-red-500 border text-red-500 hover:bg-red-500 hover:text-white px-4 py-2 rounded-md mb-4"
+              onClick={() => {setIsLocked(true); setPassword("") }}
+            >
+              Lock Credential
+            </button>
           </div>
-          {[
-            ["Include Uppercase", includeUppercase, setIncludeUppercase],
-            ["Include Numbers", includeNumbers, setIncludeNumbers],
-            ["Include Symbols", includeSymbols, setIncludeSymbols],
-          ].map(([label, state, setter], i) => (
-            <div key={i}>
-              <label className="flex text-black dark:text-white items-center mt-10">
-                <input
-                  type="checkbox"
-                  checked={state}
-                  onChange={() => setter(!state)}
-                  className="mr-2"
-                />
-                {label}
-              </label>
-            </div>
-          ))}
-        </div>
 
-        {/* Generate Password Button */}
-        <button
-          onClick={generatePassword}
-          className="w-full py-3 bg-green-500 text-white rounded mt-4 hover:bg-green-600 focus:outline-none"
-        >
-          Generate Password
-        </button>
-
-        {/* Display Password and Copy Button */}
-        <div className="mt-6 flex items-center space-x-2">
-          <input
-            type="text"
-            value={password}
-            readOnly
-            className="w-full p-3 border text-black dark:text-white border-gray-300 rounded-l-md focus:ring-2 focus:ring-blue-500"
-          />
-          <button
-            onClick={() => copyToClipboard(password)}
-            className="p-3 bg-blue-500 text-white rounded-r-md hover:bg-blue-600 focus:outline-none"
-          >
-            <FaCopy />
-          </button>
-        </div>
-        {copyAlert && (
-          <div className="mt-2 text-green-500 text-center">{copyAlert}</div>
-        )}
-
-        {/* Display Submitted Data in Table */}
-        {submittedData.length > 0 && (
-          <div className="mt-6">
-            <table className="min-w-full border rounded-lg table-auto border-collapse">
-              <thead>
-                <tr>
-                  <th className="border text-black dark:text-white px-4 py-2">
-                    Name
-                  </th>
-                  <th className="border text-black dark:text-white px-4 py-2">
-                    Username
-                  </th>
-                  <th className="border text-black dark:text-white px-4 py-2">
-                    URL
-                  </th>
-                  <th className="border text-black dark:text-white px-4 py-2">
-                    Generated Password
-                  </th>
-                  <th className="border text-black dark:text-white px-4 py-2">
-                    Email
-                  </th>
-                  <th className="border text-black dark:text-white px-4 py-2">
-                    Phone
-                  </th>
-                  <th className="border text-black dark:text-white px-4 py-2">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {submittedData.map((data) => (
-                  <tr key={data.id}>
-                    <td className="border text-black dark:text-white px-4 py-2">
-                      {data.name}
-                    </td>
-                    <td className="border text-black dark:text-white px-4 py-2">
-                      {data.username}
-                      <button
-                        onClick={() => copyToClipboard(data.username)}
-                        className="p-3 text-blue-500 rounded-r-md focus:outline-none"
-                      >
-                        <FaCopy />
-                      </button>
-                    </td>
-                    <td className="border text-black dark:text-white px-4 py-2">
-                      {data.favicon && (
-                        <img
-                          src={data.favicon}
-                          alt="favicon"
-                          className="inline mr-2 w-4 h-4"
-                        />
-                      )}
-                      {data.url}
-                    </td>
-                    <td className="border text-black dark:text-white px-4 py-2">
-                      {data.password}
-                      <button
-                        onClick={() => copyToClipboard(data.password)}
-                        className="ml-2 text-blue-500 hover:text-blue-700"
-                      >
-                        <FaCopy />
-                      </button>
-                    </td>
-                    <td className="border px-4 text-black dark:text-white py-2">
-                      {data.email}
-                    </td>
-                    <td className="border px-4 text-black dark:text-white py-2">
-                      {data.phone}
-                    </td>
-                    <td className="border px-4 text-center text-black dark:text-white py-2">
-                      <button
-                        onClick={() => handleDelete(data.id)}
-                        className="text-red-500  hover:text-red-700"
-                      >
-                        <FaTrash />
-                      </button>
-                    </td>
+          <div className="flex justify-between space-x-4 w-full">
+            <div className="overflow-x-auto w-[80%] bg-white shadow-md rounded-lg">
+              <table className="min-w-full table-auto">
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th className="py-2 px-4 w-8 text-left">S.no</th>
+                    <th className="py-2 px-4 text-left">Website</th>
+                    <th className="py-2 px-4 text-left">URL</th>
+                    <th className="py-2 px-4 text-left">Username</th>
+                    <th className="py-2 px-4 text-left">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {credentials.map((cred, index) => (
+                    <tr key={index} className="border-b hover:bg-gray-50">
+                      <td className="py-2 px-4 w-8">{index + 1}</td>
+                      <td className="py-2 px-4">{cred.website}</td>
+                      <td className="py-2 px-4">{cred.url}</td>
+                      <td className="py-2 px-4">{cred.username}</td>
+                      <td className="py-2 px-4 flex space-x-2">
+                        <button
+                          className="text-blue-500 hover:underline"
+                          onClick={() => showModal(cred)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="text-red-500 hover:underline"
+                          onClick={() => handleDelete(cred.website)}
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="w-[20%]">
+              <div className="bg-gray-700 text-center space-y-5 shadow-xl w-full min-h-24 text-white rounded-md p-6">
+                <h2 className="text-2xl font-semibold">Generate Password</h2>
+                <div className="text-black bg-gray-100 p-3 text-xl font-mono rounded-md">
+                  {genPass || "Your password will appear here"}
+                </div>
+              
+                  
+                <div className="mt-4 text-left space-y-2">
+                  <label className="block text-sm ">
+                    <input
+                      type="number"
+                      min="6"
+                      max="20"
+                      value={length}
+                      onChange={(e) => setLength(e.target.value)}
+                      className="mr-2 text-black px-3 py-2 rounded-md"
+                    />
+                    <span className="">Length</span>
+                  </label>
+                  <label className="block text-sm ">
+                    <input
+                      type="checkbox"
+                      checked={includeNumbers}
+                      onChange={() => setIncludeNumbers(!includeNumbers)}
+                      className="mr-2"
+                    />
+                    Numbers (0-9)
+                  </label>
+                  <label className="block text-sm">
+                    <input
+                      type="checkbox"
+                      checked={includeLetters}
+                      onChange={() => setIncludeLetters(!includeLetters)}
+                      className="mr-2"
+                    />
+                    Letters (a-z, A-Z)
+                  </label>
+                  <label className="block text-sm">
+                    <input
+                      type="checkbox"
+                      checked={includeSpecialChars}
+                      onChange={() =>
+                        setIncludeSpecialChars(!includeSpecialChars)
+                      }
+                      className="mr-2"
+                    />
+                    Special Characters (!@#$%^&*)
+                  </label>
+                </div>
+                <div className="flex justify-center w-full space-x-3 mt-4">
+                  <button
+                    onClick={() => generateRandomPassword(length)}
+                    className="bg-black text-white  w-full px-4 py-2 rounded-md hover:bg-gray-800 transition duration-300"
+                  >
+                    Generate
+                  </button>
+                  <button
+                    onClick={handleCopyPassword}
+                    className="bg-blue-500 text-white w-full  px-4 py-2 rounded-md hover:bg-blue-400 transition duration-300"
+                  >
+                    Copy
+                  </button>
+                  {/* ? */}
+                  {/*  */}
+                </div>
+              </div>
+            </div>
           </div>
-        )}
-      </div>
-    </div>
+        </div>
+      )}
+    </>
   );
 };
 
-export default PasswordGenerator;
+export default CredentialManager;

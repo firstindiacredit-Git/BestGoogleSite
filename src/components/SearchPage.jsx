@@ -134,8 +134,8 @@ function SearchPage() {
           />
           <div
             className="gcse-searchbox-only"
-            data-resultsUrl="https://www.google.com/search?client=ms-google-coop&qcx=80904074a37154829"
-            data-defaultToImageSearch="true"
+            data-resultsurl="https://www.google.com/search?client=ms-google-coop&qcx=80904074a37154829"
+            data-defaulttoimagesearch="true"
           />
           <AnimatedTooltipPreview />
           <div className="-mt-10">
@@ -211,7 +211,7 @@ function SearchPage() {
             TOOLS
           </button>
         </div>
-        <div className="mt-20 dark:bg-gray-900 bg-white">
+        <div className="mt-20 w-full  dark:bg-gray-900 bg-[#f8f9fa]">
           {activeComponent === "NotebookAndSheet" ? (
             <NotebookAndSheet />
           ) : activeComponent === "PopularBookmarks" ? (
@@ -231,21 +231,6 @@ function SearchPage() {
             />
           )}
         </div>
-
-        {/* Close the iframe when another component is selected
-        {url && (
-          <div className="modal-content bg-white shadow-lg w-full">
-            <div className="modal-header flex justify-between items-center border-b border-gray-200"></div>
-            <div className="modal-body -mt-[111vh]">
-              <iframe
-                src={url}
-                style={{ width: "100%", height: "900px" }}
-                title="URL Viewer"
-                className=""
-              ></iframe>
-            </div>
-          </div>
-        )} */}
       </div>
     </div>
   );
