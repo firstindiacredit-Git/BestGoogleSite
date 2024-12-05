@@ -85,7 +85,7 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
   }, []);
 
   return (
-    <header className="p-2 bg-white/10 dark:bg-black/10 backdrop-blur-lg shadow-md flex justify-between items-center sticky top-0 z-50">
+    <header className="p-2 bg-white/10 dark:bg-black/10 backdrop-blur-lg flex justify-between items-center sticky top-0 z-50">
       <div className="flex items-center space-x-2">
         <Link to="/">
           <span className="text-green-500 dark:text-green-300">Best</span>
