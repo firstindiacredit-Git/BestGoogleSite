@@ -76,7 +76,7 @@ function Calculator() {
   };
 
   return (
-    <div className="flex items-center mt-5 rounded-lg mb-5 h-[80vh] justify-center">
+    <div className="flex items-center mt-1 rounded-lg mb-5 h-[80vh] justify-center">
       <div className="bg-[#1f345f] h-[30rem] w-full rounded-lg shadow-lg p-4 ">
         {showHistory ? (
           /* History View */
