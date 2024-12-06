@@ -42,7 +42,7 @@ const WeatherIcon = ({ condition, className = "w-12 h-12" }) => {
 
 const WeatherDetail = ({ label, value, icon }) => (
   <div className="flex items-center border shadow gap-2 bg-white/10 rounded-lg p-1">
-    <div className="text-gray-800">{icon}</div>
+    <div className="text-gray-900">{icon}</div>
     <div>
       <p className="text-sm text-gray-400">{label}</p>
       <p className="font-medium">{value}</p>
