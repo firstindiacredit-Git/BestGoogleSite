@@ -110,22 +110,24 @@ const ClockApp = () => {
           </select>
         </div>
 
-        <div className="grid justify-items-center items-center grid-cols-1 sm:grid-cols-2 lg:grid-cols-4  ">
-          <div className="justify-center flex flex-grow-0 w-80 -ml-6 m-auto">
-            {clocks.map((clock) => (
-              <div key={clock.label} className="card relative group">
-                <Clock clockStyle={clockStyle} timezone={clock.timezone} />
-                <h2 className="text-xs font-mono text-center dark:text-white">
-                  {clock.label}
-                </h2>
-                <button
-                  onClick={() => handleRemoveClock(clock.label)}
-                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-white  hover:bg-red-500 hover:text-black rounded-2xl transition-opacity"
-                >
-                  <IoCloseOutline size={24} />
-                </button>
-              </div>
-            ))}
+        <div className="grid justify-items-between items-center grid-cols-1 sm:grid-cols-2 lg:grid-cols-4  ">
+          <div className="w-80 mx-auto -ml-7 justify-between">
+            <div className="justify-center flex flex-grow-0 w-full m-auto ">
+              {clocks.map((clock) => (
+                <div key={clock.label} className="card relative group">
+                  <Clock clockStyle={clockStyle} timezone={clock.timezone} />
+                  <h2 className="text-xs ml-2 font-mono text-center dark:text-white">
+                    {clock.label}
+                  </h2>
+                  <button
+                    onClick={() => handleRemoveClock(clock.label)}
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-white  hover:bg-red-500 hover:text-black rounded-2xl transition-opacity"
+                  >
+                    <IoCloseOutline size={24} />
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </StyledWrapper>

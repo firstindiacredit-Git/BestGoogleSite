@@ -1,80 +1,95 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
-// Sample static weather data
-const staticWeatherData = {
-  city: "Dunmore",
-  country: "Ireland",
-  temperature: 23,
-  feels_like: 20,
-  humidity: 30,
-  description: "clear sky",
-  icon: "01d",
-  windSpeed: 15,
-};
+const Weather = () => {
+  const [city, setCity] = useState(null);
+  const [weatherData, setWeatherData] = useState(null);
+  const [error, setError] = useState(null);
 
-// Weather icon URLs based on weather condition code
-const weatherIcons = {
-  "01d": "https://openweathermap.org/img/wn/01d@2x.png", // Clear sky day icon
-  "01n": "https://openweathermap.org/img/wn/01n@2x.png", // Clear sky night icon
-  "02d": "https://openweathermap.org/img/wn/02d@2x.png", // Few clouds day icon
-  "02n": "https://openweathermap.org/img/wn/02n@2x.png", // Few clouds night icon
-  "03d": "https://openweathermap.org/img/wn/03d@2x.png", // Scattered clouds day icon
-  // Add more icons as needed
-};
+  const API_KEY = "78a1522c5ec67352674263eaaa54bffa"; // Your OpenWeather API Key
 
-const WeatherPage = () => {
-  const {
-    city,
-    country,
-    temperature,
-    feels_like,
-    humidity,
-    description,
-    icon,
-    windSpeed,
-  } = staticWeatherData;
+  // Fetch weather data based on the city
+  const fetchWeather = async (cityName) => {
+    const BASE_URL = `https://api.openweathermap.org/data/2.5/weather`;
+
+    try {
+      const response = await axios.get(BASE_URL, {
+        params: {
+          q: cityName,
+          appid: API_KEY,
+          units: "metric",
+        },
+      });
+      setWeatherData(response.data);
+      setError(null); // Clear previous errors
+    } catch (err) {
+      setError("Could not fetch weather data.");
+      setWeatherData(null);
+    }
+  };
+
+  // Fetch user's city based on geolocation
+  const fetchCityFromCoordinates = async (latitude, longitude) => {
+    const GEO_URL = `https://api.openweathermap.org/geo/1.0/reverse`;
+
+    try {
+      const response = await axios.get(GEO_URL, {
+        params: {
+          lat: latitude,
+          lon: longitude,
+          appid: API_KEY,
+        },
+      });
+      if (response.data.length > 0) {
+        const cityName = response.data[0].name;
+        setCity(cityName);
+        fetchWeather(cityName); // Automatically fetch weather for detected city
+      }
+    } catch (err) {
+      setError("Could not determine your location.");
+    }
+  };
+
+  // Get user's coordinates using the Geolocation API
+  const getUserLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          fetchCityFromCoordinates(latitude, longitude);
+        },
+        () => {
+          setError("Enabale your Location Permission of browser.");
+        }
+      );
+    } else {
+      setError("Geolocation is not supported by your browser.");
+    }
+  };
+
+  useEffect(() => {
+    getUserLocation(); // Automatically detect city on component mount
+  }, []);
 
   return (
-    <div className="flex flex-col items-center mt-5 p-2 border bg-white/10 backdrop-blur-lg rounded-lg shadow-lg">
-      {/* Main Weather Information */}
-      <div className="flex items-center justify-center p-2   rounded-lg mb-2">
-        <div className="w-24 h-24">
-          <img
-            src={weatherIcons[icon]}
-            alt={description}
-            className="w-full h-full"
-          />
-        </div>
-        <div className="text-center ml-4">
-          <div className="text-3xl  dark:text-white">{temperature}°C</div>
-          <div className="dark:text-gray-300">
-            {city}, {country}
-          </div>
-        </div>
-      </div>
+    <div className="max-w-md mx-auto p-4 bg-blue-100 dark:bg-gray-800 rounded-lg shadow-md">
+      <h1 className="text-xl font-bold text-center mb-4">Weather App</h1>
 
-      {/* Additional Details */}
-      <div className="flex justify-between items-center w-full border-t-2 text-black   p-3 dark:text-white">
-        {/* Humidity */}
-        <div className="flex flex-col items-center">
-          <div className="text-md">Humidity</div>
-          <div className="text-md ">{humidity}%</div>
-        </div>
+      {error && <p className="text-red-500 text-center">{error}</p>}
 
-        {/* Feels Like */}
-        <div className="flex flex-col items-center">
-          <div className="text-md">Feels Like</div>
-          <div className="text-md ">{feels_like}°C</div>
+      {weatherData ? (
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold">{weatherData.name}</h2>
+          <p className="text-lg">Temp: {weatherData.main.temp}°C</p>
+          <p>Weather: {weatherData.weather[0].description}</p>
+          <p>Humidity: {weatherData.main.humidity}%</p>
+          <p>Wind Speed: {weatherData.wind.speed} m/s</p>
         </div>
-
-        {/* Wind Speed */}
-        <div className="flex flex-col items-center">
-          <div className="text-md">Wind</div>
-          <div className="text-md ">{windSpeed} km/h</div>
-        </div>
-      </div>
+      ) : (
+        !error && <p className="text-center">Fetching weather data...</p>
+      )}
     </div>
   );
 };
 
-export default WeatherPage;
+export default Weather;
