@@ -110,24 +110,26 @@ const ClockApp = () => {
           </select>
         </div>
 
-        <div className="grid -ml-7 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-          {clocks.map((clock) => (
-            <div key={clock.label} className="card ml-1 relative group">
-              <Clock clockStyle={clockStyle} timezone={clock.timezone} />
-              <h2 className="text-sm font-mono text-center ml-4">
-                {clock.label}
-              </h2>
-              <button
-                onClick={() => handleRemoveClock(clock.label)}
-                className="absolute top-2 -right-4 opacity-0 group-hover:opacity-100 bg-white hover:bg-red-500 hover:text-black rounded-2xl transition-opacity"
-              >
-                <IoCloseOutline size={24} />
-              </button>
-            </div>
-          ))}
+        <div className="grid justify-items-center items-center grid-cols-1 sm:grid-cols-2 lg:grid-cols-4  ">
+          <div className="justify-center flex flex-grow-0 w-80 -ml-6 m-auto">
+            {clocks.map((clock) => (
+              <div key={clock.label} className="card relative group">
+                <Clock clockStyle={clockStyle} timezone={clock.timezone} />
+                <h2 className="text-xs font-mono text-center dark:text-white">
+                  {clock.label}
+                </h2>
+                <button
+                  onClick={() => handleRemoveClock(clock.label)}
+                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-white  hover:bg-red-500 hover:text-black rounded-2xl transition-opacity"
+                >
+                  <IoCloseOutline size={24} />
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       </StyledWrapper>
-      <ToastContainer />
+      {/* <ToastContainer /> */}
     </div>
   );
 };
@@ -212,6 +214,7 @@ const StyledWrapper = styled.div`
   .card {
     padding: 20px;
     text-align: center;
+    width: 80px;
   }
 `;
 
@@ -221,9 +224,10 @@ const DigitalClockWrapper = styled.div`
   align-items: center;
   height: 25px;
   width: 69px;
+  margin-left: -5px ;
   background: #111;
   border-radius: 10%;
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+  
 
   .digital-clock-text {
     font-size: 12px;
@@ -232,6 +236,7 @@ const DigitalClockWrapper = styled.div`
     text-align: center;
     padding: 10px;
   }
+    
 `;
 
 const AnalogClockWrapper = styled.div`
@@ -249,7 +254,7 @@ const AnalogClockWrapper = styled.div`
     background: radial-gradient(circle, #333, #111);
     border-radius: 50%;
     border: 1px solid #cec5c5;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5),
+    box-shadow: 0 0 0px rgba(0, 0, 0, 0.5),
       inset 0 0 5px rgba(255, 255, 255, 0.1);
   }
 
