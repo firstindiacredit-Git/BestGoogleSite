@@ -16,10 +16,12 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
+        // Use username if available, otherwise fallback to displayName
         const userProfile = {
           displayName: currentUser.displayName,
           email: currentUser.email,
           photoURL: currentUser.photoURL,
+          username: currentUser.username || null,
         };
         setUser(userProfile);
       } else {
@@ -182,20 +184,22 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
             {panel && (
               <div className="absolute right-0 mt-2 w-60 py-2 bg-white shadow-lg rounded-lg text-sm dark:bg-gray-700 user-panel">
                 <div className="px-4 py-2 text-center dark:text-white">
-                  <p className="font-bold">{user.displayName || "User"}</p>
+                  <p className="font-bold">
+                    {user.username || user.displayName || "User"}
+                  </p>
                   <p>{user.email}</p>
                 </div>
                 <hr className="my-2 border-gray-200 dark:border-gray-600" />
                 <Link to="/ProfilePage">
-                <button
-                  className="w-full px-4 py-2 text-center text-sm  text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600 rounded transition-colors duration-200"
-                >
-                  Profile
-                </button></Link>
+                  <button className="w-full px-4 py-2 text-center text-sm text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600 rounded transition-colors duration-200">
+                    Profile
+                  </button>
+                </Link>
                 <button
                   onClick={handleSignOut}
-                  className="w-full px-4 py-2 text-center text-sm  text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600 rounded transition-colors duration-200"
+                  className="w-full px-4 py-2 text-center text-sm text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600 rounded transition-colors duration-200"
                 >
+                 
                   Sign Out
                 </button>
               </div>

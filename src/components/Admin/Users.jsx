@@ -16,32 +16,41 @@ export default function Users() {
   const [viewType, setViewType] = useState("list"); // New state for view type
   const usersPerPage = 15;
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "users"));
-        const usersList = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setUsers(usersList);
-      } catch (err) {
-        console.error("Error fetching users: ", err);
-        setError("Failed to load users. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Fetch the users from Firestore
+  const fetchUsers = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "users"));
+      const usersList = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setUsers(usersList);
+    } catch (err) {
+      console.error("Error fetching users: ", err);
+      setError("Failed to load users. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
+    // Listen for authentication state changes
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
       if (user) {
-        fetchUsers();
+        fetchUsers(); // Fetch users when the user is authenticated
       }
     });
 
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    // Re-fetch users when currentUser changes (for example, after updating profile)
+    if (currentUser) {
+      fetchUsers();
+    }
+  }, [currentUser]); // This will trigger when currentUser is updated
 
   if (loading) {
     return <div>Loading users...</div>;

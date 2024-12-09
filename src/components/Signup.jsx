@@ -8,9 +8,8 @@ import {
   signOut,
 } from "firebase/auth";
 import { auth, provider } from "../firebase";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 import Header from "./Header";
-  
 
 const Signup = () => {
   const [email, setEmail] = useState("");
@@ -23,10 +22,22 @@ const Signup = () => {
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [user, setUser] = useState(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   const toggleTheme = () => {
     setIsDarkMode((prev) => !prev);
+  };
+
+  // Move the updateUserProfile function outside the handleEmailSignUp function
+  const updateUserProfile = async (user, firstName, lastName) => {
+    try {
+      await user.updateProfile({
+        displayName: `${firstName} ${lastName}`,
+      });
+      console.log("User profile updated:", user.displayName);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    }
   };
 
   const handleEmailSignUp = async (e) => {
@@ -41,6 +52,10 @@ const Signup = () => {
         password
       );
       const user = userCredential.user;
+
+      // Call the updateUserProfile function after user creation
+      await updateUserProfile(user, firstName, lastName);
+
       await sendEmailVerification(user);
       setIsOtpSent(true);
       alert("Verification email sent. Please check your inbox.");
@@ -60,7 +75,7 @@ const Signup = () => {
       const currentUser = auth.currentUser;
       if (currentUser.emailVerified) {
         alert("Email verified. You are logged in.");
-        navigate("/"); 
+        navigate("/");
       } else {
         setError("Email not verified. Please check your inbox.");
       }
@@ -78,25 +93,38 @@ const Signup = () => {
       const userCredential = await signInWithPopup(auth, provider);
       const user = userCredential.user;
       alert("Successfully signed in with Google.");
-      navigate("/");  
+      navigate("/");
     } catch (error) {
       setError(getErrorMessage(error.code));
     }
   };
 
   const handleLogout = async () => {
-    await signOut(auth);
-    localStorage.setItem("loggedOut", "true"); 
-    window.location.reload();  
+    setLoading(true); 
+    window.loading = true;  
+
+    try {
+      await signOut(auth);  
+      localStorage.setItem("loggedOut", "true"); 
+      window.location.reload();  
+      alert("You have been logged out.");
+    } catch (error) {
+      console.error("Error signing out:", error);  
+      setError("Error signing out. Please try again.");
+    } finally {
+      setLoading(false);  
+      window.loading = false;  
+    }
   };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
-        navigate("/"); 
+        navigate("/");
       }
     });
+    
 
     return () => unsubscribe();
   }, [navigate]);
@@ -126,7 +154,7 @@ const Signup = () => {
         user={user}
         onLogout={handleLogout}
       />
-      
+
       <div className="max-w-md w-full mx-auto mt-1 rounded-none md:rounded-2xl border shadow-2xl p-4 md:p-8 shadow-input bg-transparent ">
         <h2 className="font-bold text-xl text-center ">
           Welcome to BESTGOOGLESITES
@@ -154,7 +182,7 @@ const Signup = () => {
                   type="text"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  className="border p-2 rounded  "
+                  className="border p-2 rounded"
                   required
                 />
               </div>
@@ -167,7 +195,7 @@ const Signup = () => {
                   type="text"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  className="border p-2 rounded "
+                  className="border p-2 rounded"
                   required
                 />
               </div>
@@ -181,7 +209,7 @@ const Signup = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="border p-2 rounded w-full "
+                className="border p-2 rounded w-full"
                 required
               />
             </div>
@@ -199,7 +227,7 @@ const Signup = () => {
               />
             </div>
             <button
-              className="border-blue-500 text-blue-500 rounded hover:bg-blue-500 hover:text-white w-full border h-10 font-medium  dark:hover:bg-blue-600"
+              className="border-blue-500 text-blue-500 rounded hover:bg-blue-500 hover:text-white w-full border h-10 font-medium dark:hover:bg-blue-600"
               type="submit"
               disabled={loading}
             >
@@ -233,7 +261,7 @@ const Signup = () => {
               placeholder="Enter OTP"
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
-              className="border p-2 rounded w-full mb-4  "
+              className="border p-2 rounded w-full mb-4"
               required
             />
             <button

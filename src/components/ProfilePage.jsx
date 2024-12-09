@@ -10,7 +10,7 @@ const ProfilePage = () => {
   const [photoURL, setPhotoURL] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // State for password visibility
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(true);
@@ -59,16 +59,22 @@ const ProfilePage = () => {
     }
 
     try {
-      const userDoc = doc(db, "users", auth.currentUser.uid);
-      await setDoc(userDoc, { username }, { merge: true });
+      const currentUser = auth.currentUser;
 
-      if (!displayName) {
-        await updateProfile(auth.currentUser, { displayName: username });
+      if (currentUser) {
+         
+        await updateProfile(currentUser, { displayName: username });
+
+        
+        const userDoc = doc(db, "users", currentUser.uid);
+        await setDoc(userDoc, { username }, { merge: true });
+
+        setSuccess("Username updated successfully!");
+        setDisplayName(username); // Sync the local displayName state
       }
-
-      setSuccess("Username updated successfully!");
     } catch (err) {
-      setError(err.message);
+      console.error("Error updating username:", err.message);
+      setError("Failed to update username.");
     }
   };
 
@@ -84,7 +90,7 @@ const ProfilePage = () => {
     try {
       await updatePassword(auth.currentUser, newPassword);
       setSuccess("Password updated successfully!");
-      setNewPassword(""); // Clear password field
+      setNewPassword("");
     } catch (err) {
       setError(err.message);
     }
@@ -121,7 +127,7 @@ const ProfilePage = () => {
           <input
             id="username"
             type="text"
-            value={username || displayName}
+            value={username}
             onChange={(e) => setUsername(e.target.value)}
             className="w-full border p-1 rounded dark:bg-gray-700 dark:text-white"
           />
