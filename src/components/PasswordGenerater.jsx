@@ -13,6 +13,7 @@ import { FaLock, FaEye, FaEyeSlash, FaCopy, FaPlus } from "react-icons/fa";
 import { IoGrid, IoList, IoLockClosed } from "react-icons/io5";
 import { AiFillEyeInvisible, AiFillEye } from "react-icons/ai";
 import { MdDelete, MdEdit, MdEditSquare } from "react-icons/md";
+import { FiPlusCircle } from "react-icons/fi";
 
 const CredentialManager = () => {
   const [showPasswords, setShowPasswords] = useState({});
@@ -346,7 +347,7 @@ const CredentialManager = () => {
               <button
                 className={`px-2   py-1 rounded-lg border border-black/5 hover:border-white/20 ${
                   !isGridView
-                    ? "bg-gray-400 dark:bg-gray-700 text-gray-400 hover:border-white/20"
+                    ? "bg-gray-400 dark:bg-gray-700 text-gray-100 dark:text-gray-400 hover:border-white/20"
                     : "bg-gray-200 dark:bg-gray-700"
                 }`}
                 onClick={() => setIsGridView(false)}
@@ -356,7 +357,7 @@ const CredentialManager = () => {
               <button
                 className={`px-3   py-1 rounded-lg border border-black/5 hover:border-white/20 ${
                   isGridView
-                    ? "bg-gray-400 dark:bg-gray-700 text-gray-400 hover:border-white/20"
+                    ? "bg-gray-400 dark:bg-gray-700 text-gray-100 dark:text-gray-400 hover:border-white/20"
                     : "bg-gray-200 dark:bg-gray-700"
                 }`}
                 onClick={() => setIsGridView(true)}
@@ -527,131 +528,154 @@ const CredentialManager = () => {
               </div>
             ) : (
               <div className="overflow-x-auto w-[80%] dark:bg-gray-800 bg-white shadow-md rounded-lg">
-                <table className="min-w-full border rounded-lg border-black/5 table-auto">
-                  <thead className="dark:bg-gray-700 dark:text-gray-400 bg-gray-100 rounded-lg">
-                    <tr className="rounded-lg">
-                      <th className="py-2 px-4 w-8 text-left">S.no</th>
-                      <th className="py-2 px-4 text-left max-w-24  lg:max-w-32">
-                        Website
-                      </th>
-                      <th className="py-2 px-4 none xl:block text-left">URL</th>
-                      <th className="py-2 px-4 text-left">Username</th>
-                      <th className="py-2 px-4 text-left">Password</th>
-                      <th className="py-2 px-4 text-center max-w-24  lg:max-w-32">
-                        Notes
-                      </th>
-                      <th className="py-2 px-4 text-center max-w-24  lg:max-w-32">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="rounded-lg">
-                    {filteredCredentials.map((cred, index) => (
-                      <tr
-                        key={index}
-                        className="border-b dark:border-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-900"
-                      >
-                        <td className="py-2 px-2 text-center   max-w-6 ">
-                          {index + 1}
-                        </td>
-                        <td className="py-2 px-4 overflow-hidden max-w-14 ">
-                          <div className=" flex  items-center justify-left">
-                            <img
-                              src={fetchFavicon(cred.url)}
-                              alt={cred.url}
-                              className="w-4 h-4 mx-2 items-center"
-                            />
-                            <span
-                              title={cred.website}
-                              className="dark:text-gray-400 text-gray-700 overflow-auto truncate max-w-24 lg:max-w-32 font-medium uppercase"
-                            >
-                              {cred.website}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="py-2 px-4 max-w-[15ch] overflow-hidden text-blue-500 cursor-pointer hover:underline">
-                          <a
-                            href={cred.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {cred.url}
-                          </a>
-                        </td>
-                        <td className="py-2 px-4 text-gray-700  max-w-12">
-                          <div className="flex  px-1 min-w-fit  dark:bg-gray-900 dark:text-gray-400  bg-gray-50 border border-gray-200/20 rounded-md justify-between items-center space-x-2 whitespace-nowrap">
-                            <span
-                              className="overflow-hidden  lg:max-w-24 max-w-[14ch]"
-                              title={cred.username}
-                            >
-                              {cred.username}
-                            </span>
-                            <button
-                              onClick={() => handleCopyText(cred.username)}
-                              className="text-gray-300 dark:hover:text-gray-500 dark:text-gray-600 hover:text-gray-400 transition-all"
-                            >
-                              <FaCopy />
-                            </button>
-                          </div>
-                        </td>
-                        <td className="py-2 text-gray-500 px-4  max-w-12">
-                          <div className="flex dark:bg-gray-900 min-w-fit dark:text-gray-400 bg-gray-50 border border-gray-200/20 px-1 rounded-md justify-between items-center space-x-2 whitespace-nowrap">
-                            <span
-                              className="overflow-hidden   lg:max-w-24 max-w-[14ch]"
-                              title={cred.password}
-                            >
-                              {showPasswords[cred.website]
-                                ? cred.password
-                                : "••••••••"}
-                            </span>
-                            <div className="flex space-x-1">
-                              <button
-                                onClick={() =>
-                                  togglePasswordVisibility(cred.website)
-                                }
-                                className="text-gray-300 dark:hover:text-gray-500 dark:text-gray-600 hover:text-gray-400 transition-all"
+                {filteredCredentials.length > 0 ? (
+                  filteredCredentials.map((cred, index) => (
+                    <table className="min-w-full border rounded-lg border-black/5 table-auto">
+                      <thead className="dark:bg-gray-700 dark:text-gray-400 bg-gray-100 rounded-lg">
+                        <tr className="rounded-lg">
+                          <th className="py-2 px-4 w-8 text-left">S.no</th>
+                          <th className="py-2 px-4 text-left max-w-24  lg:max-w-32">
+                            Website
+                          </th>
+                          <th className="py-2 px-4 none xl:block text-left">
+                            URL
+                          </th>
+                          <th className="py-2 px-4 text-left">Username</th>
+                          <th className="py-2 px-4 text-left">Password</th>
+                          <th className="py-2 px-4 text-center max-w-24  lg:max-w-32">
+                            Notes
+                          </th>
+                          <th className="py-2 px-4 text-center max-w-24  lg:max-w-32">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="rounded-lg">
+                        <tr
+                          key={index}
+                          className="border-b dark:border-gray-700 dark:text-gray-200 hover:bg-gray-50/50 dark:hover:bg-gray-900"
+                        >
+                          <td className="py-2 px-2 text-center   max-w-6 ">
+                            {index + 1}
+                          </td>
+                          <td className="py-2 px-4 overflow-hidden max-w-14 ">
+                            <div className=" flex  items-center justify-left">
+                              <img
+                                src={fetchFavicon(cred.url)}
+                                alt={cred.url}
+                                className="w-5 h-5 mx-2 items-center"
+                              />
+                              <span
+                                title={cred.website}
+                                className="dark:text-gray-400 text-gray-700 overflow-auto truncate max-w-24 lg:max-w-32 font-medium uppercase"
                               >
-                                {showPasswords[cred.website] ? (
-                                  <FaEye />
-                                ) : (
-                                  <FaEyeSlash />
-                                )}
-                              </button>
+                                {cred.website}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="py-2 px-4 max-w-[15ch] overflow-hidden text-blue-500 cursor-pointer hover:underline">
+                            <a
+                              href={cred.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {cred.url}
+                            </a>
+                          </td>
+                          <td className="py-2 px-4 text-gray-700  max-w-12">
+                            <div className="flex  px-1 min-w-fit  dark:bg-gray-900 dark:text-gray-400  bg-gray-50 border border-gray-200/20 rounded-md justify-between items-center space-x-2 whitespace-nowrap">
+                              <span
+                                className="overflow-hidden  lg:max-w-24 max-w-[14ch]"
+                                title={cred.username}
+                              >
+                                {cred.username}
+                              </span>
                               <button
-                                onClick={() => handleCopyText(cred.password)}
+                                onClick={() => handleCopyText(cred.username)}
                                 className="text-gray-300 dark:hover:text-gray-500 dark:text-gray-600 hover:text-gray-400 transition-all"
                               >
                                 <FaCopy />
                               </button>
                             </div>
-                          </div>
-                        </td>
-                        <td className="py-2 dark:text-gray-500  text-center text-gray-600 overflow-hidden truncate max-w-[14ch] lg:max-w-24 px-6 lg:px-4">
-                          {cred.notes}
-                        </td>
-                        <td className="py-2 px-4   max-w-14 lg:max-w-24">
-                          <div className="flex justify-center gap-4">
-                            <button
-                              className="text-gray-300 dark:text-gray-600 dark:hover:text-blue-600 dark:hover:bg-gray-800 transition-all  hover:text-blue-500 hover:bg-white p-1 rounded-md "
-                              onClick={() => {
-                                setSelectedCred(cred.id);
-                                showModal(cred);
-                              }}
-                            >
-                              <MdEdit size={20} />
-                            </button>
-                            <button
-                              className="text-gray-300  dark:text-gray-600 dark:hover:text-red-600 dark:hover:bg-gray-800 transition-all hover:text-red-500 hover:bg-white p-1 rounded-md "
-                              onClick={() => handleDelete(cred.id)}
-                            >
-                              <MdDelete size={20} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                          </td>
+                          <td className="py-2 text-gray-500 px-4  max-w-12">
+                            <div className="flex dark:bg-gray-900 min-w-fit dark:text-gray-400 bg-gray-50 border border-gray-200/20 px-1 rounded-md justify-between items-center space-x-2 whitespace-nowrap">
+                              <span
+                                className="overflow-hidden   lg:max-w-24 max-w-[14ch]"
+                                title={cred.password}
+                              >
+                                {showPasswords[cred.website]
+                                  ? cred.password
+                                  : "••••••••"}
+                              </span>
+                              <div className="flex space-x-1">
+                                <button
+                                  onClick={() =>
+                                    togglePasswordVisibility(cred.website)
+                                  }
+                                  className="text-gray-300 dark:hover:text-gray-500 dark:text-gray-600 hover:text-gray-400 transition-all"
+                                >
+                                  {showPasswords[cred.website] ? (
+                                    <FaEye />
+                                  ) : (
+                                    <FaEyeSlash />
+                                  )}
+                                </button>
+                                <button
+                                  onClick={() => handleCopyText(cred.password)}
+                                  className="text-gray-300 dark:hover:text-gray-500 dark:text-gray-600 hover:text-gray-400 transition-all"
+                                >
+                                  <FaCopy />
+                                </button>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-2 dark:text-gray-500  text-center text-gray-600 overflow-hidden truncate max-w-[14ch] lg:max-w-24 px-6 lg:px-4">
+                            {cred.notes}
+                          </td>
+                          <td className="py-2 px-4   max-w-14 lg:max-w-24">
+                            <div className="flex justify-center gap-4">
+                              <button
+                                className="text-gray-300 dark:text-gray-600 dark:hover:text-blue-600 dark:hover:bg-gray-800 transition-all  hover:text-blue-500 hover:bg-white p-1 rounded-md "
+                                onClick={() => {
+                                  setSelectedCred(cred.id);
+                                  showModal(cred);
+                                }}
+                              >
+                                <MdEdit size={20} />
+                              </button>
+                              <button
+                                className="text-gray-300  dark:text-gray-600 dark:hover:text-red-600 dark:hover:bg-gray-800 transition-all hover:text-red-500 hover:bg-white p-1 rounded-md "
+                                onClick={() => handleDelete(cred.id)}
+                              >
+                                <MdDelete size={20} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  ))
+                ) : (
+                  <div className="flex flex-col justify-center items-center h-full w-full text-gray-500">
+                    {/* Icon */}
+                    <FiPlusCircle
+                      size={80}
+                      onClick={() => showModal()}
+                      className="mb-4 dark:text-gray-700 cursor-pointer transition-all hover:scale-105 text-blue-200"
+                    />
+
+                    {/* Title */}
+                    <h2 className="text-xl dark:text-gray-600  text-gray-400 font-semibold">
+                      Create Your First Credential
+                    </h2>
+
+                    {/* Subtitle */}
+                    <p className="  dark:text-gray-600 text-gray-300">
+                      Start by adding your credentials securely.
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
