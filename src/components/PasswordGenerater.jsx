@@ -23,6 +23,7 @@ const CredentialManager = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCred, setSelectedCred] = useState("");
   const [currentCredential, setCurrentCredential] = useState(null);
+
   const [formValues, setFormValues] = useState({
     website: "",
     url: "",
@@ -34,11 +35,41 @@ const CredentialManager = () => {
   const [genPass, setGenPass] = useState("");
   const [isLocked, setIsLocked] = useState(true);
   const [password, setPassword] = useState("");
-  const correctPassword = "0000";
   const [includeNumbers, setIncludeNumbers] = useState(true);
   const [includeLetters, setIncludeLetters] = useState(true);
   const [includeSpecialChars, setIncludeSpecialChars] = useState(true);
   const [userId, setUserId] = useState(null);
+  const correctPassword = "0000";
+  const [otp, setOtp] = useState(["", "", "", ""]);
+
+  const handleInputOTPChange = (value, index) => {
+    if (value.length > 1) value = value.slice(0, 1); // Ensure only one digit
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    setOtp(newOtp);
+
+    if (value && index < otp.length - 1) {
+      document.getElementById(`otp-${index + 1}`).focus(); // Move to the next input
+    }
+  };
+
+  const handleKeyDown = (e, index) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      document.getElementById(`otp-${index - 1}`).focus(); // Move to the previous input
+    }
+    if (e.key === "e") e.preventDefault(); // Prevent entering 'e' in number inputs
+    if (e.key === "Enter") handleUnlock(); // Handle Enter key
+  };
+
+  const handleUnlock = () => {
+    const enteredOtp = otp.join("");
+    if (enteredOtp === correctPassword) {
+      setIsLocked(false);
+      setOtp(["", "", "", ""]);
+    } else {
+      alert("Incorrect OTP! Please try again.");
+    }
+  };
 
   const calculatePasswordStrength = (password) => {
     let score = 0;
@@ -281,49 +312,40 @@ const CredentialManager = () => {
     setPassword(e.target.value);
   };
 
-  const handleUnlock = () => {
-    if (password === correctPassword) {
-      setIsLocked(false);
-    } else {
-      alert("Incorrect password!");
-    }
-  };
-
   return (
     <>
       {isLocked ? (
         <div className="w-full bg-gray-50 dark:bg-gray-900 min-h-[40vh] bg-opacity-50 py-[5vh] flex items-center justify-center">
-          <div className=" p-8 dark:bg-gray-800 border border-gray-500/5 text-center rounded-lg shadow-lg w-96">
-            <div className="flex justify-center">
-              <FaLock color={"#3B82F6"} size={50} />
+          <div className="p-8  dark:bg-gray-800 border  border-gray-500/5 text-center rounded-lg shadow-lg w-fit">
+            <div className="flex text-blue-500 text-6xl items-center justify-center">
+              <FaLock />
             </div>
-            <h2 className="text-2xl my-1 mt-4 font-bold dark:text-gray-200">
-              Credential Locker
+            <h2 className="text-2xl my-1 mt-4 font-semibold dark:text-gray-200">
+              Enter PIN to Unlock
             </h2>
-            <div className="mb-4 text-gray-600 dark:text-gray-300">
-              Enter PIN to access credentials
+            <div className="flex justify-center mt-4 space-x-2 mb-4">
+              {otp.map((value, index) => (
+                <input
+                  key={index}
+                  id={`otp-${index}`}
+                  value={value}
+                  onChange={(e) => handleInputOTPChange(e.target.value, index)}
+                  onKeyDown={(e) => handleKeyDown(e, index)}
+                  className="w-12 h-12 border border-gray-300 rounded-md text-center text-lg dark:text-white dark:bg-gray-700"
+                  style={{
+                    appearance: "none", // Removes the arrows
+                    MozAppearance: "textfield", // Firefox-specific
+                    WebkitAppearance: "none", // Chrome/Safari-specific
+                  }}
+                />
+              ))}
             </div>
-            <div className="w-full px-4 space-x-4">
-              <input
-                type="password"
-                value={password}
-                onChange={handlePasswordChange}
-                className="w-32 px-4 py-2 border dark:text-white dark:bg-gray-700 border-gray-300 dark:border-gray-500 rounded-md mb-4"
-                placeholder="Enter PIN"
-              />
-              <button
-                onClick={handleUnlock}
-                className="bg-blue-500 hover:bg-blue-600 transition-all text-white px-4 py-2 rounded-md"
-              >
-                Unlock
-              </button>
-            </div>
-            <div className="text-sm text-gray-600 dark:text-gray-300 relative group">
-              PIN?
-              <span className="absolute w-fit left-1/2 transform -translate-x-1/2 mt-2 px-2 py-1 bg-gray-700 text-white text-xs rounded-md shadow-lg cursor-default opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                Current PIN: 0000
-              </span>
-            </div>
+            <button
+              onClick={handleUnlock}
+              className="bg-blue-500 w-full hover:bg-blue-600 transition-all text-white px-4 py-2 rounded-md"
+            >
+              Unlock
+            </button>
           </div>
         </div>
       ) : (
@@ -393,8 +415,8 @@ const CredentialManager = () => {
 
           <div className="flex justify-between space-x-4 w-full">
             {isGridView ? (
-              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-col-3  p-5 dark:bg-gray-950/10 bg-gray-100 border h-fit  border-black/5 rounded-lg gap-4 w-[70%] xl:w-[80%]">
-                {filteredCredentials.map((cred, index) => {
+              filteredCredentials.length > 0 ? (
+                filteredCredentials.map((cred, index) => {
                   const { label, color, message } = calculatePasswordStrength(
                     cred.password
                   );
@@ -402,132 +424,148 @@ const CredentialManager = () => {
                   return (
                     <div
                       key={index}
-                      className="bg-white dark:bg-gray-800  dark:text-gray-400 overflow-auto p-4 h-fit rounded-lg border border-black/10 relative"
+                      className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 p-5 dark:bg-gray-950/10 bg-gray-100 border h-fit border-black/5 rounded-lg gap-4 w-[70%] xl:w-[80%]"
                     >
-                      {/* Title and Logo */}
-                      <div className="flex items-center justify-between mb-4">
-                        <h2 className="font-bold text-2xl uppercase ">
-                          {cred.website}
-                        </h2>
-                        <img
-                          src={fetchFavicon(cred.url)} // Add a `logoUrl` in your data
-                          alt="logo"
-                          className="h-8"
-                        />
-                      </div>
-
-                      {/* URL */}
-                      <div className="text-gray-400 font-bold -mt-2 flex justify-between  mb-3">
-                        URL:{" "}
-                        <a
-                          href={cred.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="truncate hover:underline transition-all text-xl text-blue-500"
-                        >
-                          {cred.url}
-                        </a>
-                      </div>
-
-                      {/* Username */}
-                      <div className="flex justify-between w-full items-center mb-3">
-                        <span className="text-gray-600 w-[30%]  font-bold dark:text-gray-400">
-                          Username:
-                        </span>
-                        <div className="flex dark:bg-gray-900 w-[70%]  rounded-md justify-between  bg-gray-50 px-3  items-center space-x-2">
-                          <span>{cred.username}</span>
-                          <button
-                            onClick={() => handleCopyText(cred.username)}
-                            className="text-gray-400 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-500"
-                          >
-                            <FaCopy />
-                          </button>
+                      <div className="bg-white dark:bg-gray-800 dark:text-gray-400 overflow-auto p-4 h-fit rounded-lg border border-black/10 relative">
+                        {/* Title and Logo */}
+                        <div className="flex items-center justify-between mb-4">
+                          <h2 className="font-bold text-2xl uppercase">
+                            {cred.website}
+                          </h2>
+                          <img
+                            src={fetchFavicon(cred.url)}
+                            alt="logo"
+                            className="h-8"
+                          />
                         </div>
-                      </div>
 
-                      {/* Password */}
-                      <div className="flex justify-between w-full  items-center mb-4">
-                        <span className="text-gray-600 w-[30%]  font-bold dark:text-gray-400">
-                          Password:
-                        </span>
-                        <div className="flex dark:bg-gray-900  w-[70%] rounded-md bg-gray-50 px-3  items-center justify-between space-x-2">
-                          <span className="text-gray-800 dark:text-gray-400 overflow-hidden">
-                            {showPasswords[cred.website]
-                              ? cred.password
-                              : "••••••••"}
+                        {/* URL */}
+                        <div className="text-gray-400 font-bold -mt-2 flex justify-between mb-3">
+                          URL:{" "}
+                          <a
+                            href={cred.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="truncate hover:underline transition-all text-xl text-blue-500"
+                          >
+                            {cred.url}
+                          </a>
+                        </div>
+
+                        {/* Username */}
+                        <div className="flex justify-between w-full items-center mb-3">
+                          <span className="text-gray-600 w-[30%] font-bold dark:text-gray-400">
+                            Username:
                           </span>
-                          <div className="flex items-center space-x-2">
+                          <div className="flex dark:bg-gray-900 w-[70%] rounded-md justify-between bg-gray-50 px-3 items-center space-x-2">
+                            <span>{cred.username}</span>
                             <button
-                              onClick={() =>
-                                togglePasswordVisibility(cred.website)
-                              }
-                              className=" transition-all text-gray-400 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-500"
-                            >
-                              {showPasswords[cred.website] ? (
-                                <FaEye />
-                              ) : (
-                                <FaEyeSlash />
-                              )}
-                            </button>
-                            <button
-                              onClick={() => handleCopyText(cred.password)}
-                              className=" transition-all text-gray-400 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-500"
+                              onClick={() => handleCopyText(cred.username)}
+                              className="text-gray-400 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-500"
                             >
                               <FaCopy />
                             </button>
                           </div>
                         </div>
-                      </div>
 
-                      {/* Password Strength */}
-                      <div className="mb-4">
-                        <div className="flex items-center">
-                          <div
-                            className={`h-1 flex-grow rounded-full ${color}`}
-                          />
-                        </div>
-                        <div
-                          className={`text-sm mt-1 ${
-                            label === "Strong"
-                              ? "text-green-600"
-                              : label === "Medium"
-                              ? "text-yellow-600"
-                              : "text-red-600"
-                          }`}
-                        >
-                          <span>Strength: {label}</span>
-                        </div>
-                      </div>
-
-                      {/* Actions */}
-                      <div className="flex justify-between space-x-3 mt-2">
-                        <div className="">
-                          <div className="text-xs text-gray-500">
-                            Time needed to crack the Password
+                        {/* Password */}
+                        <div className="flex justify-between w-full items-center mb-4">
+                          <span className="text-gray-600 w-[30%] font-bold dark:text-gray-400">
+                            Password:
+                          </span>
+                          <div className="flex dark:bg-gray-900 w-[70%] rounded-md bg-gray-50 px-3 items-center justify-between space-x-2">
+                            <span className="text-gray-800 dark:text-gray-400 overflow-hidden">
+                              {showPasswords[cred.website]
+                                ? cred.password
+                                : "••••••••"}
+                            </span>
+                            <div className="flex items-center space-x-2">
+                              <button
+                                onClick={() =>
+                                  togglePasswordVisibility(cred.website)
+                                }
+                                className="transition-all text-gray-400 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-500"
+                              >
+                                {showPasswords[cred.website] ? (
+                                  <FaEye />
+                                ) : (
+                                  <FaEyeSlash />
+                                )}
+                              </button>
+                              <button
+                                onClick={() => handleCopyText(cred.password)}
+                                className="transition-all text-gray-400 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-500"
+                              >
+                                <FaCopy />
+                              </button>
+                            </div>
                           </div>
-                          <div className="font-semibold ">{message}</div>
                         </div>
-                        <div>
-                          <button
-                            className="text-blue-500 hover:bg-gray-100 p-[0.1rem] py-[0.12rem]   transition-all rounded-sm -translate-x-1 -translate-y-[2px] "
-                            onClick={() => showModal(cred)}
+
+                        {/* Password Strength */}
+                        <div className="mb-4">
+                          <div className="flex items-center">
+                            <div
+                              className={`h-1 flex-grow rounded-full ${color}`}
+                            />
+                          </div>
+                          <div
+                            className={`text-sm mt-1 ${
+                              label === "Strong"
+                                ? "text-green-600"
+                                : label === "Medium"
+                                ? "text-yellow-600"
+                                : "text-red-600"
+                            }`}
                           >
-                            <MdEditSquare size={21} />
-                          </button>
-                          <button
-                            className="text-red-500 hover:bg-gray-100    rounded-sm  transition-all "
-                            onClick={() => handleDelete(cred.id)}
-                          >
-                            <MdDelete size={25} />
-                          </button>
+                            <span>Strength: {label}</span>
+                          </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex justify-between space-x-3 mt-2">
+                          <div>
+                            <div className="text-xs text-gray-500">
+                              Time needed to crack the Password
+                            </div>
+                            <div className="font-semibold">{message}</div>
+                          </div>
+                          <div>
+                            <button
+                              className="text-blue-500 hover:bg-gray-100 p-[0.1rem] py-[0.12rem] transition-all rounded-sm -translate-x-1 -translate-y-[2px]"
+                              onClick={() => showModal(cred)}
+                            >
+                              <MdEditSquare size={21} />
+                            </button>
+                            <button
+                              className="text-red-500 hover:bg-gray-100 rounded-sm transition-all"
+                              onClick={() => handleDelete(cred.id)}
+                            >
+                              <MdDelete size={25} />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
                   );
-                })}
-              </div>
+                })
+              ) : (
+                <div className="flex flex-col w-[70%] xl:w-[80%] p-5 dark:bg-gray-800 bg-white rounded-lg border border-gray-800/10 min-h-72 justify-center items-center  text-gray-500">
+                  <FiPlusCircle
+                    size={80}
+                    onClick={() => showModal()}
+                    className="mb-4 text-blue-500 dark:text-gray-700 cursor-pointer transition-all hover:scale-105"
+                  />
+                  <h2 className="text-xl  text-gray-600 font-semibold">
+                    Create Your First Credential
+                  </h2>
+                  <p className=" text-gray-600">
+                    Start by adding your credentials securely.
+                  </p>
+                </div>
+              )
             ) : (
-              <div className="overflow-x-auto w-[80%] dark:bg-gray-800 bg-white shadow-md rounded-lg">
+              <div className="overflow-x-auto w-[80%] min-h-72 dark:bg-gray-800 bg-white shadow-md rounded-lg">
                 {filteredCredentials.length > 0 ? (
                   filteredCredentials.map((cred, index) => (
                     <table className="min-w-full border rounded-lg border-black/5 table-auto">
@@ -678,25 +716,24 @@ const CredentialManager = () => {
                 )}
               </div>
             )}
-
-            <div className="w-[30%] xl:w-[20%]">
+            <div className="w-[30%] xl:w-[20%] min-h-72">
               <h2
                 className={`font-semibold ${
                   window.size < 1134 ? "-translate-y-8" : "-translate-y-14"
-                } text-center dark:text-gray-100 text-2xl`}
+                } text-center dark:text-gray-100 text-lg lg:text-2xl`}
               >
                 Generate Password
               </h2>
               <div
                 className={`dark:bg-gray-800 bg-gray-100 ${
                   window.size < 1134 ? "-translate-y-8" : "-translate-y-16"
-                } border border-black/5 -translate-y-8 text-center space-y-5  w-full min-h-24 text-gray-700 rounded-md p-6`}
+                } border border-black/5 flex flex-col justify-between -translate-y-8 text-center space-y-5  w-full h-full   text-gray-700 rounded-md p-6`}
               >
-                <div className="text-gray-700 border border-black/10 dark:bg-gray-900 dark:text-gray-300 bg-white p-3 text-sm lg:text-lg font-mono rounded-md">
+                <div className="text-gray-700 border border-black/10 dark:bg-gray-900 dark:text-gray-300 bg-white p-3 text-[1vw] font-mono rounded-md">
                   {genPass || "Generate hackproof password"}
                 </div>
 
-                <div className="mt-4 text-left space-y-2">
+                <div className="mt-4 text-left flex flex-col  justify-between   space-y-2">
                   <label className="block text-sm">
                     <input
                       type="number"
