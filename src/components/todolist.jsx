@@ -105,7 +105,7 @@ const SortableToDoList = () => {
   };
 
   return (
-    <div className="ml-1 border p-4 mt-2 rounded-lg bg-white/10 backdrop-blur-lg ">
+    <div className="ml-1 border w-full p-4 mt-2 rounded-lg bg-white/10 backdrop-blur-lg ">
       <h1 className="dark:text-white text-xl font-semibold mb-3">
         TO DO LISTS
       </h1>
@@ -168,7 +168,7 @@ const SortableToDoList = () => {
                         </span>
                       </div>
 
-                      <div className="text-[10px]  mr-1 text-gray-500">
+                      <div className="text-[10px] -ml-5 text-gray-500">
                         <span>{task.timestamp}</span>
                       </div>
                       {/* Checkbox */}

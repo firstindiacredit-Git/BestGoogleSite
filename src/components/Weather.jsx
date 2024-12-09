@@ -1,80 +1,175 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import {
+  Cloud,
+  CloudDrizzle,
+  CloudLightning,
+  CloudRain,
+  CloudSnow,
+  Sun,
+  Droplets,
+  Wind,
+  Gauge,
+  Eye,
+  Sunrise,
+  Sunset,
+} from "lucide-react";
+import { format } from "date-fns";
 
-// Sample static weather data
-const staticWeatherData = {
-  city: "Dunmore",
-  country: "Ireland",
-  temperature: 23,
-  feels_like: 20,
-  humidity: 30,
-  description: "clear sky",
-  icon: "01d",
-  windSpeed: 15,
+const API_KEY = "78a1522c5ec67352674263eaaa54bffa";
+const CITY = "Delhi";
+
+const WeatherIcon = ({ condition, className = "w-12 h-12" }) => {
+  const getIcon = () => {
+    switch (condition.toLowerCase()) {
+      case "clear":
+        return <Sun className={className} />;
+      case "rain":
+        return <CloudRain className={className} />;
+      case "drizzle":
+        return <CloudDrizzle className={className} />;
+      case "snow":
+        return <CloudSnow className={className} />;
+      case "thunderstorm":
+        return <CloudLightning className={className} />;
+      default:
+        return <Cloud className={className} />;
+    }
+  };
+
+  return getIcon();
 };
 
-// Weather icon URLs based on weather condition code
-const weatherIcons = {
-  "01d": "https://openweathermap.org/img/wn/01d@2x.png", // Clear sky day icon
-  "01n": "https://openweathermap.org/img/wn/01n@2x.png", // Clear sky night icon
-  "02d": "https://openweathermap.org/img/wn/02d@2x.png", // Few clouds day icon
-  "02n": "https://openweathermap.org/img/wn/02n@2x.png", // Few clouds night icon
-  "03d": "https://openweathermap.org/img/wn/03d@2x.png", // Scattered clouds day icon
-  // Add more icons as needed
-};
+const WeatherDetail = ({ label, value, icon }) => (
+  <div className="flex items-center border shadow gap-2 bg-white/10 rounded-lg p-1">
+    <div className="text-gray-400">{icon}</div>
+    <div>
+      <p className="text-sm ">{label}</p>
+      <p className="font-medium">{value}</p>
+    </div>
+  </div>
+);
 
-const WeatherPage = () => {
-  const {
-    city,
-    country,
-    temperature,
-    feels_like,
-    humidity,
-    description,
-    icon,
-    windSpeed,
-  } = staticWeatherData;
+const WeatherCard = ({ weatherData, time, date }) => {
+  const sunrise = new Date(weatherData.sys.sunrise * 1000);
+  const sunset = new Date(weatherData.sys.sunset * 1000);
 
   return (
-    <div className="flex flex-col items-center mt-5 p-2 border bg-white/10 backdrop-blur-lg rounded-lg shadow-lg">
-      {/* Main Weather Information */}
-      <div className="flex items-center justify-center p-2   rounded-lg mb-2">
-        <div className="w-24 h-24">
-          <img
-            src={weatherIcons[icon]}
-            alt={description}
-            className="w-full h-full"
-          />
-        </div>
-        <div className="text-center ml-4">
-          <div className="text-3xl  dark:text-white">{temperature}°C</div>
-          <div className="dark:text-gray-300">
-            {city}, {country}
+    <div className="bg-gradient-to-br from-yellow-500 to-purple-600 text-white border  rounded-xl p-4 shadow-lg w-full">
+      <div className="text-center">
+        <div className="flex justify-between">
+          <p className="text-4xl mt-2 font-bold">{weatherData.main.temp}°C</p>
+          <div className="flex justify-center">
+            <WeatherIcon
+              condition={weatherData.weather[0].main}
+              className="w-20 h-20 -mt-2"
+            />
           </div>
         </div>
+        <p className="text-lg capitalize">
+          {weatherData.weather[0].description}
+        </p>
+        <p className="text-sm opacity-75 mb-4">
+          Feels like {weatherData.main.feels_like}°C
+        </p>
       </div>
 
-      {/* Additional Details */}
-      <div className="flex justify-between items-center w-full border-t-2 text-black   p-3 dark:text-white">
-        {/* Humidity */}
-        <div className="flex flex-col items-center">
-          <div className="text-md">Humidity</div>
-          <div className="text-md ">{humidity}%</div>
+      <div className="text-center ">
+        <p className="uppercase font-bold">{time}</p>
+        <p className=" opacity-75">{date}</p>
+      </div>
+      <div className="grid grid-cols-2 gap-1">
+        <WeatherDetail
+          label="Humidity"
+          value={`${weatherData.main.humidity}%`}
+          icon={<Droplets className="w-4 h-4" />}
+          
+        />
+        <WeatherDetail
+          icon={<Wind className="w-4 h-4" />}
+          label="Wind"
+          value={`${weatherData.wind.speed} m/s`}
+        />
+        <WeatherDetail
+          label="Pressure"
+          value={`${weatherData.main.pressure} hPa`}
+          icon={<Gauge className="w-4 h-4" />}
+        />
+        <WeatherDetail
+          label="Visibility"
+          value={`${weatherData.visibility / 1000} km`}
+          icon={<Eye className="w-4 h-4" />}
+        />
+      </div>
+      <div className="mt-2 flex justify-between text-sm">
+        <div className="flex items-center gap-2">
+          <Sunrise className="w-4 h-4" />
+          <span>Sunrise: {format(sunrise, "HH:mm")}</span>
         </div>
-
-        {/* Feels Like */}
-        <div className="flex flex-col items-center">
-          <div className="text-md">Feels Like</div>
-          <div className="text-md ">{feels_like}°C</div>
-        </div>
-
-        {/* Wind Speed */}
-        <div className="flex flex-col items-center">
-          <div className="text-md">Wind</div>
-          <div className="text-md ">{windSpeed} km/h</div>
+        <div className="flex items-center gap-2">
+          <Sunset className="w-4 h-4" />
+          <span>Sunset: {format(sunset, "HH:mm")}</span>
         </div>
       </div>
     </div>
   );
 };
 
-export default WeatherPage;
+const Weather = () => {
+  const [weatherData, setWeatherData] = useState(null);
+  const [time, setTime] = useState("");
+  const [date, setDate] = useState("");
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const updateTimeDate = () => {
+      const now = new Date();
+      setTime(
+        now.toLocaleTimeString("en-IN", {
+          hour: "2-digit",
+          minute: "2-digit",
+                 })
+      );
+      setDate(
+        now.toLocaleDateString("en-IN", {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        })
+      );
+    };
+    updateTimeDate();
+    const intervalId = setInterval(updateTimeDate, 1000);
+    return () => clearInterval(intervalId);
+  }, []);
+
+  useEffect(() => {
+    const fetchWeather = async () => {
+      try {
+        const { data } = await axios.get(
+          `https://api.openweathermap.org/data/2.5/weather`,
+          { params: { q: CITY, appid: API_KEY, units: "metric" } }
+        );
+        setWeatherData(data);
+        setError(null);
+      } catch {
+        setError("Could not fetch weather data.");
+      }
+    };
+    fetchWeather();
+  }, []);
+
+  return (
+    <div className="items-center justify-center mt-1">
+      {error && <p className="text-red-400">{error}</p>}
+      {weatherData ? (
+        <WeatherCard weatherData={weatherData} time={time} date={date} />
+      ) : (
+        !error && <p className="text-white">Fetching weather data...</p>
+      )}
+    </div>
+  );
+};
+
+export default Weather;

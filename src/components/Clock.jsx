@@ -8,6 +8,7 @@ import { IoCloseOutline } from "react-icons/io5";
 
 const ClockApp = () => {
   const [clockStyle, setClockStyle] = useState("digital");
+  const [clocks, setClocks] = useState([]);
   const [selectedCountries, setSelectedCountries] = useState([]);
 
   const availableCountries = [
@@ -42,6 +43,13 @@ const ClockApp = () => {
     setSelectedCountries(savedSelectedCountries);
   }, []);
 
+  useEffect(() => {
+    const updatedClocks = availableCountries.filter((country) =>
+      selectedCountries.includes(country.label)
+    );
+    setClocks(updatedClocks);
+  }, [selectedCountries]);
+
   const handleClockStyleChange = (style) => {
     setClockStyle(style);
     localStorage.setItem("clockStyle", style);
@@ -72,10 +80,15 @@ const ClockApp = () => {
     localStorage.setItem("selectedCountries", JSON.stringify(updatedCountries));
   };
 
+  const getCurrentTime = (timezone) =>
+    moment()
+      .tz(timezone)
+      .format(clockStyle === "digital" ? "HH:mm:ss" : "h:mm A");
+
   return (
-    <div className="flex flex-col h-auto items-center border rounded-lg p-4">
+    <div className="flex flex-col h-[10rem] items-center border rounded-lg p-4 justify-center">
       <StyledWrapper>
-        <div className="flex gap-2 mt-6">
+        <div className="flex gap-1 mt-6">
           <select
             onChange={(e) => handleClockStyleChange(e.target.value)}
             value={clockStyle}
@@ -84,10 +97,9 @@ const ClockApp = () => {
             <option value="digital">Digital</option>
             <option value="analog">Analog</option>
           </select>
-
           <select
             onChange={(e) => handleAddClock(e.target.value)}
-            className="px-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Select a country</option>
             {availableCountries.map((country) => (
@@ -98,28 +110,28 @@ const ClockApp = () => {
           </select>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
-          {selectedCountries.map((countryLabel) => {
-            const country = availableCountries.find(
-              (c) => c.label === countryLabel
-            );
-            return (
-              <div key={countryLabel} className="card relative group">
-                <Clock clockStyle={clockStyle} timezone={country.timezone} />
-                <h2 className="text-sm font-mono text-center">
-                  {country.label}
-                </h2>
-                <button
-                  onClick={() => handleRemoveClock(country.label)}
-                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-white hover:bg-red-500 hover:text-black rounded-2xl transition-opacity"
-                >
-                  <IoCloseOutline size={24} />
-                </button>
-              </div>
-            );
-          })}
+        <div className="grid justify-items-between items-center grid-cols-1 sm:grid-cols-2 lg:grid-cols-4  ">
+          <div className="w-80 mx-auto -ml-7 justify-between">
+            <div className="justify-center flex flex-grow-0 w-full m-auto ">
+              {clocks.map((clock) => (
+                <div key={clock.label} className="card relative group">
+                  <Clock clockStyle={clockStyle} timezone={clock.timezone} />
+                  <h2 className="text-xs ml-2 font-mono text-center dark:text-white">
+                    {clock.label}
+                  </h2>
+                  <button
+                    onClick={() => handleRemoveClock(clock.label)}
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-white  hover:bg-red-500 hover:text-black rounded-2xl transition-opacity"
+                  >
+                    <IoCloseOutline size={24} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </StyledWrapper>
+      {/* <ToastContainer /> */}
       {/* <ToastContainer /> */}
     </div>
   );
@@ -143,26 +155,21 @@ const Clock = ({ clockStyle, timezone }) => {
 };
 
 const DigitalClock = ({ time }) => (
-  <div>
-    <h2 className="text-xl font-mono text-green-500">
-      {time.format("HH:mm:ss")}
-    </h2>
-  </div>
+  <DigitalClockWrapper>
+    <h2 className="digital-clock-text ">{time.format("HH:mm:ss")}</h2>
+  </DigitalClockWrapper>
 );
-
-// Analog Clock Component
 const AnalogClock = ({ time }) => {
-  const hours = time.hours() % 12; // Convert 24-hour time to 12-hour format
+  const hours = time.hours() % 12;
   const minutes = time.minutes();
   const seconds = time.seconds();
 
-  // Calculate the degree rotations for the clock hands
-  const hourDegrees = (hours + minutes / 60) * 30; // Each hour is 30 degrees
-  const minuteDegrees = (minutes + seconds / 60) * 6; // Each minute is 6 degrees
-  const secondDegrees = seconds * 6; // Each second is 6 degrees
+  const hourDegrees = (hours + minutes / 60) * 30;
+  const minuteDegrees = (minutes + seconds / 60) * 6;
+  const secondDegrees = seconds * 6;
 
   return (
-    <AnalogClockWrapper>
+    <AnalogClockWrapper size="60px">
       <div className="realistic-clock">
         <div className="clock-face">
           <div className="glass-cover" />
@@ -181,8 +188,8 @@ const AnalogClock = ({ time }) => {
           <div className="center-circle" />
           <div className="clock-numbers">
             {[...Array(12)].map((_, i) => {
-              const angle = (i + 1) * 30; // Each number is spaced 30 degrees apart
-              const radius = 24; // Adjust for small clock size
+              const angle = (i + 1) * (360 / 12);
+              const radius = 23;
               const x = Math.cos((angle - 90) * (Math.PI / 180)) * radius + 29;
               const y = Math.sin((angle - 90) * (Math.PI / 180)) * radius + 29;
               return (
@@ -206,11 +213,30 @@ const AnalogClock = ({ time }) => {
   );
 };
 
-// Styled Components
 const StyledWrapper = styled.div`
   .card {
     padding: 20px;
     text-align: center;
+    width: 80px;
+  }
+`;
+
+const DigitalClockWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 25px;
+  width: 69px;
+  margin-left: -5px;
+  background: #111;
+  border-radius: 10%;
+
+  .digital-clock-text {
+    font-size: 12px;
+    color: #fff;
+    font-family: "Courier New", monospace;
+    text-align: center;
+    padding: 10px;
   }
 `;
 
@@ -229,7 +255,7 @@ const AnalogClockWrapper = styled.div`
     background: radial-gradient(circle, #333, #111);
     border-radius: 50%;
     border: 1px solid #cec5c5;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5),
+    box-shadow: 0 0 0px rgba(0, 0, 0, 0.5),
       inset 0 0 5px rgba(255, 255, 255, 0.1);
   }
 
@@ -245,52 +271,63 @@ const AnalogClockWrapper = styled.div`
     transform: translate(-50%, -50%);
   }
 
-  .center-circle {
-    width: ${(props) => (props.size ? `calc(${props.size} / 15)` : "8px")};
-    height: ${(props) => (props.size ? `calc(${props.size} / 15)` : "8px")};
-    background-color: #333;
-    border-radius: 50%;
+  .hand {
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 3;
-  }
-
-  .clock-numbers p {
-    position: absolute;
-    font-size: ${(props) =>
-      props.size ? `calc(${props.size} / 5)` : "0.5rem"};
-    color: white;
-    transform-origin: 50% 50%;
-  }
-
-  .hour,
-  .minute,
-  .second {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform-origin: 0% 50%;
-    transform: rotate(0deg);
+    width: 2px;
+    height: 50%;
+    background: #fff;
+    transform-origin: 50% 100%;
+    transition: transform 0.1s ease;
   }
 
   .hour {
-    width: 30%;
-    height: ${(props) => (props.size ? `calc(${props.size} / 15)` : "4px")};
-    background-color: #d1c8b1;
+    height: 23%;
+    top: 30%;
+    background-color: #ff6600;
   }
 
   .minute {
-    width: 50%;
-    height: ${(props) => (props.size ? `calc(${props.size} / 20)` : "4px")};
-    background-color: #8d8d8d;
+    height: 34%;
+    top: 17%;
+    background-color: #66ccff;
   }
 
   .second {
-    width: 50%;
-    height: ${(props) => (props.size ? `calc(${props.size} / 20)` : "1px")};
-    background-color: #f00;
+    height: 34%;
+    top: 17%;
+    width: 1px;
+    background-color: red;
+  }
+
+  .center-circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 8px;
+    height: 8px;
+    background-color: #fff;
+    border-radius: 50%;
+    z-index: 3;
+    transform: translate(-50%, -50%);
+  }
+
+  .clock-numbers {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    transform: translate(-50%, -50%);
+  }
+
+  .number {
+    position: absolute;
+    font-size: 10px;
+    font-weight: bold;
+    color: #fff;
+    transition: all 0.3s ease;
   }
 `;
 

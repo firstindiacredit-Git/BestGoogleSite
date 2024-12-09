@@ -49,121 +49,79 @@ const AnimatedTooltipPreview = () => {
     errorMessage: "",
     successMessage: "",
   });
+  const validateURL = (url) => {
+    const pattern = /^(http|https):\/\/[^\s$.?#].[^\s]*$/;
+    return pattern.test(url);
+  };
+  const saveBookmark = useCallback(async (e) => {
+    e.preventDefault();
+    if (!user?.uid) return;
 
-  // Fetch bookmarks only when user changes
-  useEffect(() => {
-    const fetchBookmarks = async () => {
-      if (!user?.uid) return;
+    const { newBookmark, editMode, editingBookmarkId } = bookmarkState;
 
-      try {
-        const bookmarksSnapshot = await getDocs(
-          collection(db, "users", user.uid, "bookmarks") // Changed from "addbookmarks" to "bookmarks"
-        );
-        const bookmarksData = bookmarksSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+    if (!newBookmark.name || !newBookmark.link) {
+      setBookmarkState((prev) => ({
+        ...prev,
+        errorMessage: "Please fill in both fields.",
+      }));
+      return;
+    }
+
+    try {
+      if (editMode && editingBookmarkId) {
+        const bookmarkRef = doc(
+          db,
+          "users",
+          user.uid,
+          "bookmarks",
+          editingBookmarkId
+        ); // Changed from "addbookmarks" to "bookmarks"
+        await updateDoc(bookmarkRef, {
+          name: newBookmark.name,
+          link: newBookmark.link,
+          updatedAt: new Date().toISOString(),
+        });
 
         setBookmarkState((prev) => ({
           ...prev,
-          people: [...defaultPeople, ...bookmarksData],
+          people: prev.people.map((bookmark) =>
+            bookmark.id === editingBookmarkId
+              ? {
+                  ...bookmark,
+                  name: newBookmark.name,
+                  link: newBookmark.link,
+                }
+              : bookmark
+          ),
+          successMessage: "Bookmark updated successfully!",
+          showModal: false,
+          editMode: false,
+          editingBookmarkId: null,
+          newBookmark: { name: "", link: "" },
         }));
-      } catch (error) {
-        console.error("Error fetching bookmarks:", error);
-        setBookmarkState((prev) => ({
-          ...prev,
-          errorMessage: "Failed to fetch bookmarks. Please try again.",
-        }));
+      } else {
+        const bookmarksRef = collection(db, "users", user.uid, "bookmarks"); // Changed from "addbookmarks" to "bookmarks"
+        const newBookmarkData = {
+          name: newBookmark.name,
+          link: newBookmark.link,
+          image: "default.png",
+        };
+
+        const addedBookmark = {
+          id: newBookmarkRef.id,
+          name: newBookmark.name,
+          link: newBookmark.link,
+          image: "default.png",
+        };
+        setPeople((prevPeople) => [...prevPeople, addedBookmark]);
+        setCachedBookmarks((prev) => [...prev, addedBookmark]); // Update cache
+        setSuccessMessage("Bookmark added successfully!");
       }
-    };
-
-    fetchBookmarks();
-  }, [user?.uid]);
-
-  const saveBookmark = useCallback(
-    async (e) => {
-      e.preventDefault();
-      if (!user?.uid) return;
-
-      const { newBookmark, editMode, editingBookmarkId } = bookmarkState;
-
-      if (!newBookmark.name || !newBookmark.link) {
-        setBookmarkState((prev) => ({
-          ...prev,
-          errorMessage: "Please fill in both fields.",
-        }));
-        return;
-      }
-
-      try {
-        if (editMode && editingBookmarkId) {
-          const bookmarkRef = doc(
-            db,
-            "users",
-            user.uid,
-            "bookmarks",
-            editingBookmarkId
-          ); // Changed from "addbookmarks" to "bookmarks"
-          await updateDoc(bookmarkRef, {
-            name: newBookmark.name,
-            link: newBookmark.link,
-            updatedAt: new Date().toISOString(),
-          });
-
-          setBookmarkState((prev) => ({
-            ...prev,
-            people: prev.people.map((bookmark) =>
-              bookmark.id === editingBookmarkId
-                ? {
-                    ...bookmark,
-                    name: newBookmark.name,
-                    link: newBookmark.link,
-                  }
-                : bookmark
-            ),
-            successMessage: "Bookmark updated successfully!",
-            showModal: false,
-            editMode: false,
-            editingBookmarkId: null,
-            newBookmark: { name: "", link: "" },
-          }));
-        } else {
-          const bookmarksRef = collection(db, "users", user.uid, "bookmarks"); // Changed from "addbookmarks" to "bookmarks"
-          const newBookmarkData = {
-            name: newBookmark.name,
-            link: newBookmark.link,
-            image: "default.png",
-            createdAt: new Date().toISOString(),
-          };
-
-          const docRef = await addDoc(bookmarksRef, newBookmarkData);
-          const addedBookmark = {
-            id: docRef.id,
-            ...newBookmarkData,
-          };
-
-          setBookmarkState((prev) => ({
-            ...prev,
-            people: [...prev.people, addedBookmark],
-            successMessage: "Bookmark added successfully!",
-            showModal: false,
-            newBookmark: { name: "", link: "" },
-          }));
-        }
-
-        setTimeout(() => {
-          setBookmarkState((prev) => ({ ...prev, successMessage: "" }));
-        }, 3000);
-      } catch (error) {
-        console.error("Error saving bookmark:", error);
-        setBookmarkState((prev) => ({
-          ...prev,
-          errorMessage: "Failed to save bookmark. Please try again.",
-        }));
-      }
-    },
-    [user?.uid, bookmarkState]
-  );
+    } catch (error) {
+      console.error("Error saving bookmark:", error);
+      setErrorMessage("Failed to save bookmark. Please try again.");
+    }
+  });
 
   const handleDelete = useCallback(
     async (id) => {
@@ -204,8 +162,6 @@ const AnimatedTooltipPreview = () => {
     },
     [user?.uid]
   );
-
-  // ... keep the rest of the component as is ...
 };
 
 export default React.memo(AnimatedTooltipPreview);
