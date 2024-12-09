@@ -1,14 +1,12 @@
- 
 import React, { useState } from "react";
-import { auth, provider } from "../../firebase";  
-import { useAuth } from "../../hooks/useAuth"; 
-import { signInWithPopup } from "firebase/auth";  
-import { useNavigate } from "react-router-dom";  
+import { auth, provider } from "../../firebase";
+import { useAuth } from "../../hooks/AuthContext";
+import { signInWithPopup } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 import Header from "../Header";
 
-
 const SignIn = () => {
-  const { login } = useAuth();  
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -17,21 +15,19 @@ const SignIn = () => {
 
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  
   const toggleTheme = () => {
     setIsDarkMode((prev) => !prev);
   };
 
-   
   const handleEmailSignIn = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError("");  
+    setError("");
 
     try {
       await login(email, password);
       console.log("Sign-in successful!");
-      navigate("/"); 
+      navigate("/");
     } catch (err) {
       if (err.code === "auth/user-not-found") {
         setError("No user found with this email.");
@@ -40,7 +36,7 @@ const SignIn = () => {
       } else {
         setError("Failed to sign in: " + err.message);
       }
-      console.error(err); 
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -50,7 +46,7 @@ const SignIn = () => {
   const handleGoogleSignIn = async () => {
     try {
       await signInWithPopup(auth, provider);
-      navigate("/"); 
+      navigate("/");
     } catch (err) {
       if (err.code === "User have already exist") {
         setError("Use another. Please try again.");

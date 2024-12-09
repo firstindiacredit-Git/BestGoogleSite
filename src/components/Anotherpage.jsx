@@ -2,7 +2,11 @@ import React, { useEffect, useState } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { DndContext, closestCenter } from "@dnd-kit/core";
-import { SortableContext, arrayMove, rectSortingStrategy } from "@dnd-kit/sortable";
+import {
+  SortableContext,
+  arrayMove,
+  rectSortingStrategy,
+} from "@dnd-kit/sortable";
 import Calculator from "./Calculator";
 import Notepad from "./Notepad";
 import ShowLinks from "./ShowLinks";
@@ -11,7 +15,7 @@ import Calendar from "./Calendar";
 import ImageUploader from "./ImageUploader";
 import PopularBookmarks from "./PopularBookmarks";
 import Weather from "./Weather";
-import TodoList from "./todolist"
+import TodoList from "./todolist";
 import { auth, db } from "../firebase";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 import { FaListAlt } from "react-icons/fa";
@@ -81,7 +85,7 @@ const Anotherpage = ({ backgroundImage }) => {
         const oldIndex = prevItems.findIndex((item) => item.id === active.id);
         const newIndex = prevItems.findIndex((item) => item.id === over.id);
         const newItems = arrayMove(prevItems, oldIndex, newIndex);
-        saveItems(newItems);
+
         return newItems;
       });
     }
@@ -100,7 +104,7 @@ const Anotherpage = ({ backgroundImage }) => {
   return (
     <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <div
-        className={`bg-white dark:bg-gray-900 mt-[15vh]`}
+        className={`bg-white dark:bg-gray-900 `}
         style={{
           backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",
           backgroundSize: "cover",
@@ -108,15 +112,7 @@ const Anotherpage = ({ backgroundImage }) => {
           backgroundAttachment: "fixed",
         }}
       >
-        {/* <h1 className="text-2xl dark:text-white py-3 font-bold text-center">
-          COMPONENTS
-        </h1> */}
-
-        {/* <div>
-          <ShowLinks items={items} />
-        </div> */}
-
-        <div className="flex justify-center gap-1 mb-4">
+        <div className="flex justify-center gap-1 mt-12 mb-4">
           <button
             onClick={() => setViewMode("grid")}
             className={`p-2 rounded ${
@@ -125,7 +121,7 @@ const Anotherpage = ({ backgroundImage }) => {
                 : "bg-transparent border text-black dark:text-white"
             }`}
           >
-            <BsFillGrid1X2Fill className="text-green-700" />
+            <BsFillGrid1X2Fill className="text-gray-500" />
           </button>
           <button
             onClick={() => setViewMode("list")}
@@ -135,7 +131,7 @@ const Anotherpage = ({ backgroundImage }) => {
                 : "bg-transparent border text-black dark:text-white"
             }`}
           >
-            <FaListAlt className="text-green-700" />
+            <FaListAlt className="text-gray-500" />
           </button>
         </div>
 
@@ -146,7 +142,7 @@ const Anotherpage = ({ backgroundImage }) => {
         >
           {viewMode === "grid" ? (
             <>
-              <div className="w-full md:w-1/4 lg:w-1/4 p-2">
+              <div className="w-full   md:w-1/4 lg:w-1/4 p-2">
                 <Clock />
                 <Weather />
                 <Calculator />

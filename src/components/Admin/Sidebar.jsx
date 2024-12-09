@@ -54,10 +54,6 @@ export default function Sidebar() {
     setTheme((prevTheme) => (prevTheme === "dark" ? "light" : "dark"));
   };
 
-  if (loading) {
-    return <div className="text-center">Loading...</div>;
-  }
-
   return (
     <div className="w-64 h-auto bg-gray-800 text-white">
       <div className="p-4 text-2xl font-bold">Admin Panel</div>

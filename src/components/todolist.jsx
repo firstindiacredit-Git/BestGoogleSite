@@ -10,7 +10,6 @@ import {
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { MdDeleteOutline } from "react-icons/md";
-
 const SortableToDoList = () => {
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState("");
@@ -32,15 +31,13 @@ const SortableToDoList = () => {
   }, []);
 
   const fetchTasks = async (uid) => {
-    const tasksCollection = collection(db, "users", uid, "todolist");
-    const taskSnapshot = await getDocs(tasksCollection);
-
-    const fetchedTasks = taskSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-
-    setTasks(fetchedTasks);
+    // const tasksCollection = collection(db, "users", uid, "todolist");
+    // const taskSnapshot = await getDocs(tasksCollection);
+    // const fetchedTasks = taskSnapshot.docs.map((doc) => ({
+    //   id: doc.id,
+    //   ...doc.data(),
+    // }));
+    // setTasks(fetchedTasks);
   };
 
   const saveTask = async (task) => {
@@ -85,11 +82,9 @@ const SortableToDoList = () => {
 
       setTasks([...tasks, newTaskObj]);
       saveTask(newTaskObj);
-      setNewTask(""); 
+      setNewTask("");
     }
   };
-
-  
 
   const handleToggleCompletion = (taskId) => {
     const updatedTasks = tasks.map((task) =>

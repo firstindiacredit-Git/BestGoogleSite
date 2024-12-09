@@ -43,10 +43,6 @@ export default function Users() {
     return () => unsubscribe();
   }, []);
 
-  if (loading) {
-    return <div>Loading users...</div>;
-  }
-
   if (error) {
     return <div className="text-red-500 text-center">{error}</div>;
   }

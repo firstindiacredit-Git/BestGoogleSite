@@ -15,7 +15,7 @@ const CategoryPage = () => {
   const [user, setUser] = useState(null);
   const [background, setBackground] = useState(false);
   const [textbackground, setTextBackground] = useState(false);
-   const [viewbackground, setViewBackground] = useState(false);
+  const [viewbackground, setViewBackground] = useState(false);
   const [positionbackground, setPositionBackground] = useState(false);
   const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState("");
@@ -162,7 +162,6 @@ const CategoryPage = () => {
     }
   };
 
-
   const handleSettingsChange = (categoryName, key, value) => {
     setCategorySettings((prevSettings) => ({
       ...prevSettings,
@@ -246,15 +245,15 @@ const CategoryPage = () => {
       [category]: !prev[category],
     }));
   };
- const toggleBookmark = (categoryName) => {
-   setBackground((prevState) => ({
-     ...prevState,
-     [categoryName]: {
-       ...prevState[categoryName],
-       showBgColor: !prevState[categoryName]?.showBgColor,
-     },
-   }));
- };
+  const toggleBookmark = (categoryName) => {
+    setBackground((prevState) => ({
+      ...prevState,
+      [categoryName]: {
+        ...prevState[categoryName],
+        showBgColor: !prevState[categoryName]?.showBgColor,
+      },
+    }));
+  };
   const toggleTextBookmark = (categoryName) => {
     setTextBackground((prevState) => ({
       ...prevState,
@@ -282,10 +281,10 @@ const CategoryPage = () => {
       },
     }));
   };
-   const backgroundRef = useRef(null);
-   const anotherRef = useRef(null);
+  const backgroundRef = useRef(null);
+  const anotherRef = useRef(null);
 
-    useEffect(() => {
+  useEffect(() => {
     const handleClickOption = (event) => {
       // Check if the clicked area is outside the backgroundRef and close the options
       if (
@@ -318,7 +317,6 @@ const CategoryPage = () => {
         );
 
         // Update Firebase or local state with updatedCategory
-        
       } else {
         throw new Error("Category is not an array");
       }
@@ -327,11 +325,9 @@ const CategoryPage = () => {
     }
   };
 
- 
   const toggleForm = (category) => {
     setVisibleForm((prev) => (prev === category ? null : category));
   };
-
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -800,21 +796,6 @@ const CategoryPage = () => {
           );
         })}
       </div>
-      {/* <div className="mb-6">
-        <input
-          type="text"
-          value={newCategory}
-          onChange={(e) => setNewCategory(e.target.value)}
-          placeholder="New Category Name"
-          className="border rounded-lg p-2 w-full"
-        />
-        <button
-          onClick={handleAddCategory}
-          className="bg-blue-500 text-white py-2 px-4 mt-2 rounded-lg hover:bg-blue-600"
-        >
-          Add Category
-        </button>
-      </div> */}
     </div>
   );
 };

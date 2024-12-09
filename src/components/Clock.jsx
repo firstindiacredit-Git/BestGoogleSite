@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import moment from "moment-timezone";
 import { IoCloseOutline } from "react-icons/io5";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+// import { ToastContainer, toast } from "react-toastify";
+// import "./ToastifyNotification.css";
+// import "react-toastify/dist/ReactToastify.css";
 
 const ClockApp = () => {
   const [clockStyle, setClockStyle] = useState("digital");
@@ -57,9 +58,9 @@ const ClockApp = () => {
         "selectedCountries",
         JSON.stringify(updatedCountries)
       );
-      toast.success(`Clock for ${countryLabel} added!`);
+      // toast.success(`Clock for ${countryLabel} added!`);
     } else if (selectedCountries.length >= 4) {
-      toast.warn("You can only add up to 4 clocks.");
+      // toast.warn("You can only add up to 4 clocks.");
     }
   };
 
@@ -119,7 +120,7 @@ const ClockApp = () => {
           })}
         </div>
       </StyledWrapper>
-      <ToastContainer />
+      {/* <ToastContainer /> */}
     </div>
   );
 };
