@@ -1,9 +1,13 @@
 import React, { useState } from "react";
+// import { useAuth } from "../../hooks/useAuth";
 import { auth, provider } from "../../firebase";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth } from "../../hooks/AuthContext";
 import { signInWithPopup } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import Header from "../Header";
+// import { auth, provider } from "../../firebase";
+// import { useNavigate } from "react-router-dom";
+// import { signInWithPopup } from "firebase/auth";
 
 const SignIn = () => {
   const { login } = useAuth();

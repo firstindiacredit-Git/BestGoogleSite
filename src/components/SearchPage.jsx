@@ -16,7 +16,7 @@ import "./style.css";
 function SearchPage() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [backgroundImage, setBackgroundImage] = useState("");
-  
+
   const [activeComponent, setActiveComponent] = useState(null);
   const navigate = useNavigate();
   const [showButton, setShowButton] = useState(false);
@@ -51,13 +51,6 @@ function SearchPage() {
     };
   }, []);
 
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  };
-
   useEffect(() => {
     if (isDarkMode) {
       document.body.classList.add("dark");
@@ -87,13 +80,14 @@ function SearchPage() {
     });
   };
 
- 
-
   const handleToggleComponent = (componentName) => {
-  
     setActiveComponent((prevComponent) =>
       prevComponent === componentName ? null : componentName
     );
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -151,67 +145,87 @@ function SearchPage() {
             </Link>
           </div>
         </div>
-        <div className="bg-gray-800 border-gray-400 p-2 -mt-6 -mb-20 text-white dark:text-white font-semibold text-center  mx-auto flex flex-wrap justify-center">
-          <div>
+        <div className="bg-gray-800 border-gray-400 p-2 flex justify-center w-full text-white dark:text-white font-semibold text-center ">
+          <div className="grid grid-cols-4 lg:grid-cols-8  w-full gap-4">
+            <div>
+              <button
+                className={`bg-white p-1 rounded-3xl ${
+                  activeComponent === "Anotherpage" ? "bg-gray-500" : ""
+                }`}
+                onClick={() => handleToggleComponent("Anotherpage")}
+              >
+                <FaHome className="text-green-700 h-5 w-5 text-center justify-center m-auto" />
+              </button>
+            </div>
+
+            {showButton && (
+              <button
+                onClick={scrollToTop}
+                className="fixed bottom-6 right-6 p-3 rounded-full bg-blue-500 text-white shadow-lg hover:bg-blue-600 transition-all"
+              >
+                <FaArrowUp size={20} />
+              </button>
+            )}
+
             <button
-              className="bg-white p-1 ml-18 rounded-3xl"
-              onClick={() => handleToggleComponent("Anotherpage")}
+              className={`w-full hover:text-white  hover:bg-gray-600 rounded-sm transition-all ${
+                activeComponent === "PopularBookmarks" ? "bg-gray-500" : ""
+              }`}
+              onClick={() => handleToggleComponent("PopularBookmarks")}
             >
-              <FaHome className="text-green-700 h-5 w-5 text-center justify-center m-auto" />
+              BOOKMARKS
+            </button>
+            <button
+              className={`w-full hover:text-white hover:bg-gray-600 rounded-sm transition-all ${
+                activeComponent === "NotebookAndSheet" ? "bg-gray-500" : ""
+              }`}
+              onClick={() => handleToggleComponent("NotebookAndSheet")}
+            >
+              NOTES
+            </button>
+            <button
+              className={`w-full hover:text-white hover:bg-gray-600 rounded-sm transition-all ${
+                activeComponent === "PasswordGenerator" ? "bg-gray-500" : ""
+              }`}
+              onClick={() => handleToggleComponent("PasswordGenerator")}
+            >
+              PASSWORD
+            </button>
+            <button
+              className={`w-full hover:text-white hover:bg-gray-600 rounded-sm transition-all ${
+                activeComponent === "News" ? "bg-gray-500" : ""
+              }`}
+              onClick={() => handleToggleComponent("News")}
+            >
+              NEWS
+            </button>
+            <button
+              className={`w-full hover:text-white hover:bg-gray-600 rounded-sm transition-all ${
+                activeComponent === "Sports" ? "bg-gray-500" : ""
+              }`}
+              onClick={() => handleToggleComponent("Sports")}
+            >
+              SPORTS
+            </button>
+            <button
+              className={`w-full hover:text-white hover:bg-gray-600 rounded-sm transition-all ${
+                activeComponent === "Top100" ? "bg-gray-500" : ""
+              }`}
+              onClick={() => handleToggleComponent("Top100")}
+            >
+              TOP100
+            </button>
+            <button
+              className={`w-full hover:text-white hover:bg-gray-600 rounded-sm transition-all ${
+                activeComponent === "Tool" ? "bg-gray-500" : ""
+              }`}
+              onClick={() => handleToggleComponent("Tool")}
+            >
+              TOOLS
             </button>
           </div>
-          {showButton && (
-            <button
-              onClick={scrollToTop}
-              className="fixed bottom-6 right-6 p-3 rounded-full bg-blue-500 text-white shadow-lg hover:bg-blue-600 transition-all"
-            >
-              <FaArrowUp size={20} />
-            </button>
-          )}
-          <button
-            className="hover:bg-gray-500  w-[9rem] hover:text-white"
-            onClick={() => handleToggleComponent("PopularBookmarks")}
-          >
-            BOOKMARKS
-          </button>
-          <button
-            className="hover:bg-gray-500 w-[9rem] hover:text-white  "
-            onClick={() => handleToggleComponent("NotebookAndSheet")}
-          >
-            NOTES
-          </button>
-          <button
-            className="hover:bg-gray-500  w-[9rem] hover:text-white"
-            onClick={() => handleToggleComponent("PasswordGenerator")}
-          >
-            PASSWORD
-          </button>
-          <button
-            className="hover:bg-gray-500 w-[9rem] hover:text-white "
-            onClick={() => handleToggleComponent("News")}
-          >
-            NEWS
-          </button>
-          <button
-            className="hover:bg-gray-500 w-[9rem] hover:text-white"
-            onClick={() => handleToggleComponent("News")}
-          >
-            SPORTS
-          </button>
-          <button
-            className="hover:bg-gray-500 w-[9rem] hover:text-white"
-            onClick={() => handleToggleComponent("News")}
-          >
-            TOP100
-          </button>
-          <button
-            className="hover:bg-gray-500 w-[9rem] hover:text-white "
-            onClick={() => handleToggleComponent("Tool")}
-          >
-            TOOLS
-          </button>
         </div>
-        <div className="mt-20 w-full  dark:bg-gray-900 bg-[#f8f9fa]">
+        <div className=" w-full   dark:bg-gray-900 bg-[#f8f9fa]">
           {activeComponent === "NotebookAndSheet" ? (
             <NotebookAndSheet />
           ) : activeComponent === "PopularBookmarks" ? (

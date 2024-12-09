@@ -76,11 +76,11 @@ function Calculator() {
   };
 
   return (
-    <div className="flex items-center mt-1 rounded-lg mb-5 h-[80vh] justify-center">
-      <div className="bg-[#1f345f] h-[30rem] w-full rounded-lg shadow-lg p-4 ">
+    <div className="flex items-center  mt-5 rounded-lg mb-5 min-h-96 justify-center">
+      <div className="dark:bg-[#1f345f] bg-gray-200  h-full w-full max-w-lg rounded-lg shadow-lg p-4 ">
         {showHistory ? (
           /* History View */
-          <div className="bg-[#1f345f] text-white p-4 rounded-lg">
+          <div className=" dark:bg-[#1f345f] text-white w-full h-full p-4 rounded-lg">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-bold text-lg">History</h3>
               <button
@@ -90,13 +90,15 @@ function Calculator() {
                 <IoClose size={24} />
               </button>
             </div>
-            <div className="max-h-40 overflow-y-auto">
+            <div className="overflow-y-auto">
               {history.length > 0 ? (
                 history.map((entry, index) => (
                   <div
                     key={index}
                     className={`text-sm mb-1 p-1 ${
-                      index % 2 === 0 ? "bg-gray-700" : "bg-gray-800"
+                      index % 2 === 0
+                        ? "bg-gray-700 dark:bg-gray-700"
+                        : "dark:bg-gray-800"
                     }`}
                   >
                     {entry}
@@ -119,7 +121,7 @@ function Calculator() {
           /* Calculator View */
           <>
             {/* Display */}
-            <div className="text-right text-white p-4 rounded-lg bg-gray-800 mb-4">
+            <div className="text-right text-gray-700 dark:text-white p-4 rounded-lg bg-white dark:bg-gray-800 mb-4">
               <div className="text-lg opacity-70">
                 {(history.length > 0 && history[0]) || "0"}
               </div>
@@ -130,10 +132,10 @@ function Calculator() {
 
             {/* Buttons */}
             <div className="grid grid-cols-4 gap-2 mb-4">
-              {["C", "+/-", "(", ")"].map((val, i) => (
+              {["C", "%", "(", ")"].map((val, i) => (
                 <button
                   key={val}
-                  className={`p-4 rounded-full text-lg font-bold bg-[#4a5b8a] text-white hover:bg-gray-600`}
+                  className={`p-4 rounded-full w-20 h-20 text-lg font-bold bg-gray-300 dark:bg-[#4a5b8a] text-gray-500 hover:text-gray-100 transition-all dark:text-white hover:bg-gray-600`}
                   onClick={() => handleCalcInput(val)}
                 >
                   {val}
@@ -142,10 +144,10 @@ function Calculator() {
               {["7", "8", "9", "/"].map((val, i) => (
                 <button
                   key={val}
-                  className={`p-4 rounded-full text-lg font-bold ${
+                  className={`p-4 w-20 h-20 rounded-full text-lg font-bold ${
                     i === 3
-                      ? "bg-[#ff9502] text-white"
-                      : "bg-[#4a5b8a] text-white hover:bg-gray-600"
+                      ? "bg-gray-600 hover:bg-gray-800  dark:bg-[#ff9502] text-gray-100 hover:text-gray-100 transition-all dark:text-white"
+                      : "bg-gray-300 dark:bg-[#4a5b8a] text-gray-500 hover:text-gray-100 transition-all dark:text-white hover:bg-gray-600"
                   }`}
                   onClick={() => handleCalcInput(val)}
                 >
@@ -155,10 +157,10 @@ function Calculator() {
               {["4", "5", "6", "*"].map((val, i) => (
                 <button
                   key={val}
-                  className={`p-4 rounded-full text-lg font-bold ${
+                  className={`p-4 rounded-full w-20 h-20 text-lg font-bold ${
                     i === 3
-                      ? "bg-[#ff9502] text-white"
-                      : "bg-[#4a5b8a] text-white hover:bg-gray-600"
+                      ? "bg-gray-600 hover:bg-gray-800  dark:bg-[#ff9502] text-gray-100 hover:text-gray-100 transition-all dark:text-white"
+                      : "bg-gray-300 dark:bg-[#4a5b8a] text-gray-500 hover:text-gray-100 transition-all dark:text-white hover:bg-gray-600"
                   }`}
                   onClick={() => handleCalcInput(val)}
                 >
@@ -168,10 +170,10 @@ function Calculator() {
               {["1", "2", "3", "-"].map((val, i) => (
                 <button
                   key={val}
-                  className={`p-4 rounded-full text-lg font-bold ${
+                  className={`p-4 rounded-full w-20 h-20 text-lg font-bold ${
                     i === 3
-                      ? "bg-[#ff9502] text-white"
-                      : "bg-[#4a5b8a] text-white hover:bg-gray-600"
+                      ? "bg-gray-600 hover:bg-gray-800 dark:bg-[#ff9502] text-gray-100 hover:text-gray-100 transition-all dark:text-white"
+                      : "bg-gray-300 dark:bg-[#4a5b8a] text-gray-500 hover:text-gray-100 transition-all dark:text-white hover:bg-gray-600"
                   }`}
                   onClick={() => handleCalcInput(val)}
                 >
@@ -179,25 +181,25 @@ function Calculator() {
                 </button>
               ))}
               <button
-                className="p-6 rounded-full m-auto text-lg font-bold bg-[#4a5b8a] text-white hover:bg-gray-600"
+                className="p-6 rounded-full w-20 h-20 flex justify-center  text-lg font-bold  bg-gray-300 dark:bg-[#4a5b8a] text-gray-500 hover:text-gray-100 transition-all dark:text-white hover:bg-gray-600"
                 onClick={toggleHistory}
               >
                 <FaHistory />
               </button>
               <button
-                className="col-span-1 p-2 rounded-full text-lg font-bold bg-[#4a5b8a] text-white hover:bg-gray-600"
+                className="col-span-1 p-2 rounded-full w-20 h-20 text-lg font-bold bg-gray-300 dark:bg-[#4a5b8a] text-gray-500 hover:text-gray-100 transition-all dark:text-white hover:bg-gray-600"
                 onClick={() => handleCalcInput("0")}
               >
                 0
               </button>
               <button
-                className="p-4 rounded-full text-lg font-bold bg-[#4a5b8a] text-white hover:bg-gray-600"
+                className="p-4 rounded-full w-20 h-20 text-lg font-bold bg-gray-300 dark:bg-[#4a5b8a] text-gray-500 hover:text-gray-100 transition-all dark:text-white hover:bg-gray-600"
                 onClick={() => handleCalcInput(".")}
               >
                 .
               </button>
               <button
-                className="p-4 rounded-full text-lg font-bold bg-[#ff9502] text-white"
+                className="p-4 rounded-full w-20 h-20 text-lg font-bold  bg-gray-600 hover:bg-gray-800 dark:bg-[#ff9502] text-gray-100 hover:text-gray-100 transition-all dark:text-white"
                 onClick={() => handleCalcInput("=")}
               >
                 =

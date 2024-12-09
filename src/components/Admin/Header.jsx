@@ -10,6 +10,7 @@ export default function Header() {
     try {
       await signOut(auth);
       navigate("../Admin/login");
+      window.location.reload();
     } catch (error) {
       console.error("Error signing out:", error);
     }

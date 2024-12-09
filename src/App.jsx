@@ -1,6 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-
+import { AuthProvider } from "./hooks/AuthContext.jsx";
 import SearchPage from "./components/SearchPage.jsx";
 import AddList from "./components/Calculator.jsx";
 import Signin from "./components/Signup/signin.jsx";
@@ -16,27 +16,28 @@ import PremiumPage from "./components/PremiumPage.jsx";
 import PasswordGenerator from "./components/PasswordGenerater.jsx";
 import PremiumForm from "./components/PremiumForm.jsx";
 
-
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<SearchPage />} />
-        <Route path="/AddList" element={<AddList />} />
-        <Route path="/Signin" element={<Signin />} />
-        <Route path="/Signup" element={<Signup />} />
-        <Route path="/NewSearchPage" element={<NewSearchPage />} />
-        <Route path="/Forgotpassword" element={<Forgotpassword />} />
-        <Route path="/ProfilePage" element={<ProfilePage />} />
-        <Route path="/admin/addlinks" element={<AddLinks />} />
-        <Route path="/admin/login" element={<Login />} />
-        <Route path="/admin/users" element={<Users />} />
-        <Route path="/PremiumPage" element={<PremiumPage />} />
-        <Route path="/admin/dashboard" element={<Dashboard />} />
-        <Route path="/PasswordGenerator" element={<PasswordGenerator />} />
-        <Route path="/PremiumForm" element={<PremiumForm />} />
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<SearchPage />} />
+          <Route path="/AddList" element={<AddList />} />
+          <Route path="/Signin" element={<Signin />} />
+          <Route path="/Signup" element={<Signup />} />
+          <Route path="/NewSearchPage" element={<NewSearchPage />} />
+          <Route path="/Forgotpassword" element={<Forgotpassword />} />
+          <Route path="/ProfilePage" element={<ProfilePage />} />
+          <Route path="/admin/addlinks" element={<AddLinks />} />
+          <Route path="/admin/login" element={<Login />} />
+          <Route path="/admin/users" element={<Users />} />
+          <Route path="/PremiumPage" element={<PremiumPage />} />
+          <Route path="/admin/dashboard" element={<Dashboard />} />
+          <Route path="/PasswordGenerator" element={<PasswordGenerator />} />
+          <Route path="/PremiumForm" element={<PremiumForm />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 

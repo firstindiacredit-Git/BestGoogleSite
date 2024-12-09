@@ -43,7 +43,7 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
   const handleSignOut = async () => {
     try {
       await signOut(auth);
-      alert("You have been signed out.");
+      window.location.reload();
     } catch (error) {
       console.error("Sign out error:", error.message);
     }
