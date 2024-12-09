@@ -13,17 +13,16 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
   const [user, setUser] = useState(null);
   const [panel, setPanel] = useState(false);
 
+  // Check for user authentication state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
-        // Use username if available, otherwise fallback to displayName
-        const userProfile = {
+        setUser({
           displayName: currentUser.displayName,
           email: currentUser.email,
           photoURL: currentUser.photoURL,
           username: currentUser.username || null,
-        };
-        setUser(userProfile);
+        });
       } else {
         setUser(null);
       }
@@ -32,14 +31,13 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
     return () => unsubscribe();
   }, []);
 
-  const panelClicker = () => {
-    setPanel(!panel);
-  };
+  // Toggle panel visibility
+  const togglePanel = () => setPanel(!panel);
 
-  const handleIconClick = () => {
-    setShowButtons(!showButtons);
-  };
+  // Toggle the visibility of the settings buttons
+  const toggleMenu = () => setShowButtons(!showButtons);
 
+  // Handle user sign out
   const handleSignOut = async () => {
     try {
       await signOut(auth);
@@ -49,23 +47,18 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
     }
   };
 
-  // Close menus on outside click or scroll
+  // Close menus when clicking outside
   useEffect(() => {
     const handleOutsideClick = (event) => {
-      const menu = document.querySelector(".menu-buttons");
-      const userPanel = document.querySelector(".user-panel");
-
       if (
-        menu &&
-        !menu.contains(event.target) &&
+        !event.target.closest(".menu-buttons") &&
         !event.target.closest(".menu-icon")
       ) {
         setShowButtons(false);
       }
 
       if (
-        userPanel &&
-        !userPanel.contains(event.target) &&
+        !event.target.closest(".user-panel") &&
         !event.target.closest(".user-avatar")
       ) {
         setPanel(false);
@@ -115,11 +108,12 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
 
         <div className="-mb-2 -mt-2">
           <div
-            onClick={handleIconClick}
+            onClick={toggleMenu}
             className="cursor-pointer flex justify-end menu-icon"
           >
             <TbGridDots className="w-8 h-8 hover:border dark:text-white border-slate-400 p-1 m-2 rounded-full" />
           </div>
+
           {showButtons && (
             <div className="absolute right-1 top-14 bg-white/10 p-3 w-70 mr-2 shadow-lg rounded-2xl menu-buttons">
               <div className="grid grid-cols-2 gap-1">
@@ -147,7 +141,7 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
                   onClick={() => {
                     localStorage.removeItem("backgroundImage");
                     setShowButtons(false);
-                    window.reload();
+                    window.location.reload();
                   }}
                   className="text-xs -mr-4 p-1 w-32 rounded grid items-center justify-center"
                 >
@@ -172,7 +166,7 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
         {user ? (
           <div className="relative">
             <div
-              onClick={panelClicker}
+              onClick={togglePanel}
               className="flex items-center cursor-pointer user-avatar"
             >
               <img
@@ -181,6 +175,7 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
                 className="h-8 w-8 rounded-full border border-gray-300 dark:border-gray-500"
               />
             </div>
+
             {panel && (
               <div className="absolute right-0 mt-2 w-60 py-2 bg-white shadow-lg rounded-lg text-sm dark:bg-gray-700 user-panel">
                 <div className="px-4 py-2 text-center dark:text-white">
@@ -199,7 +194,6 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
                   onClick={handleSignOut}
                   className="w-full px-4 py-2 text-center text-sm text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600 rounded transition-colors duration-200"
                 >
-                 
                   Sign Out
                 </button>
               </div>
