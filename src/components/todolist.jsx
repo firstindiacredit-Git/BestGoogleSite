@@ -173,7 +173,7 @@ const SortableToDoList = () => {
                         </span>
                       </div>
 
-                      <div className="text-[10px]  mr-1 text-gray-500">
+                      <div className="text-[10px] -ml-5 text-gray-500">
                         <span>{task.timestamp}</span>
                       </div>
                       {/* Checkbox */}

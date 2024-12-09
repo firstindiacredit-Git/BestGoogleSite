@@ -44,7 +44,7 @@ const WeatherDetail = ({ label, value, icon }) => (
   <div className="flex items-center border shadow gap-2 bg-white/10 rounded-lg p-1">
     <div className="text-gray-400">{icon}</div>
     <div>
-      <p className="text-sm text-gray-400">{label}</p>
+      <p className="text-sm ">{label}</p>
       <p className="font-medium">{value}</p>
     </div>
   </div>

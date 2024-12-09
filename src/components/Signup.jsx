@@ -127,11 +127,11 @@ const Signup = () => {
         onLogout={handleLogout}
       />
       
-      <div className="max-w-md w-full mx-auto mt-10 rounded-none md:rounded-2xl border shadow-2xl p-4 md:p-8 shadow-input bg-transparent ">
+      <div className="max-w-md w-full mx-auto mt-1 rounded-none md:rounded-2xl border shadow-2xl p-4 md:p-8 shadow-input bg-transparent ">
         <h2 className="font-bold text-xl text-center ">
           Welcome to BESTGOOGLESITES
         </h2>
-        <p className=" text-xl max-w-sm mt-4 font-semibold text-center  uppercase">
+        <p className=" text-xl max-w-sm mt-1 font-semibold text-center  uppercase">
           Sign up
         </p>
 
@@ -143,8 +143,8 @@ const Signup = () => {
 
         {/* Show the signup form if OTP has not been sent yet */}
         {!isOtpSent ? (
-          <form className="my-8" onSubmit={handleEmailSignUp}>
-            <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 mb-4">
+          <form className="my-4" onSubmit={handleEmailSignUp}>
+            <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 mb-2">
               <div className="flex flex-col space-y-2 w-[48.5%]">
                 <label htmlFor="firstname" className="font-medium ">
                   First name
@@ -205,9 +205,9 @@ const Signup = () => {
             >
               {loading ? "Sending OTP..." : "Sign Up"}
             </button>
-            <div className="bg-gradient-to-r from-transparent via-neutral-300 dark:via-neutral-700 to-transparent my-8 h-[1px] w-full" />
+            <div className="bg-gradient-to-r from-transparent via-neutral-300 dark:via-neutral-700 to-transparent my-4 h-[1px] w-full" />
             <button
-              className="text-white border shadow-sm dark:text-green-500 text-lg text-center px-4 w-full rounded-md h-10 font-medium border-green-500 hover:bg-green-500 hover:text-white"
+              className="text-green-500 border shadow-sm dark:text-green-500 text-lg text-center px-4 w-full rounded-md h-10 font-medium border-green-500 hover:bg-green-500 hover:text-white"
               type="button"
               onClick={handleGoogleSignIn}
               disabled={loading}
