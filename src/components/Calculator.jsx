@@ -76,7 +76,7 @@ function Calculator() {
   };
 
   return (
-    <div className="flex items-center w-full  mt-5 rounded-lg mb-5 min-h-96 justify-center">
+    <div className="flex items-center w-full  mt-1 rounded-lg mb-5 min-h-96 justify-center">
       <div className="dark:bg-[#1f345f] bg-gray-200  h-full w-full rounded-lg shadow-lg p-4 ">
         {showHistory ? (
           /* History View */
@@ -90,12 +90,12 @@ function Calculator() {
                 <IoClose size={24} />
               </button>
             </div>
-            <div className="overflow-y-auto">
+            <div className="min-h-96 w-full -mb-4">
               {history.length > 0 ? (
                 history.map((entry, index) => (
                   <div
                     key={index}
-                    className={`text-sm mb-1 p-1 ${
+                    className={`text-sm mb-1 ${
                       index % 2 === 0
                         ? "bg-gray-700 dark:bg-gray-700"
                         : "dark:bg-gray-800"
