@@ -91,8 +91,8 @@ const NotePage = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
+    <div className=" mx-auto px-4 py-8">
+      <div className=" mx-auto">
         <div className="bg-white rounded-lg shadow-xl overflow-hidden">
           <div className="p-6 transition-colors duration-200" style={{ backgroundColor: noteColor }}>
             <div className="flex justify-between items-center mb-6">

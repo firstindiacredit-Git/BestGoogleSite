@@ -1,11 +1,25 @@
-import React, { useState,useEffect,useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import ReactQuill from "react-quill";
 import NotePage from "./NotePage";
-import SpreadsheetComponent from "./SpreadsheetComponent";
+import Excel from "./Excel";
 import TodoComponent from "./TodoComponent";
 import "react-quill/dist/quill.snow.css";
 import { MdOutlinePlaylistRemove } from "react-icons/md";
-import { FaPalette, FaDownload, FaBold, FaUnderline, FaMinus, FaPlus, FaTrash, FaMicrophone, FaMicrophoneSlash, FaVolumeUp, FaVolumeMute, FaSearchPlus, FaSearchMinus } from 'react-icons/fa';
+import {
+  FaPalette,
+  FaDownload,
+  FaBold,
+  FaUnderline,
+  FaMinus,
+  FaPlus,
+  FaTrash,
+  FaMicrophone,
+  FaMicrophoneSlash,
+  FaVolumeUp,
+  FaVolumeMute,
+  FaSearchPlus,
+  FaSearchMinus,
+} from "react-icons/fa";
 
 import CustomColorPicker, { isLightColor } from "./CustomColorPicker";
 
@@ -18,9 +32,9 @@ const NotebookAndDocumentSheet = () => {
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [todo, setTodo] = useState("");
   const [todos, setTodos] = useState([]);
-  const [notepadColor, setNotepadColor] = useState('#fff3cd');
+  const [notepadColor, setNotepadColor] = useState("#fff3cd");
   const [zoomLevel, setZoomLevel] = useState(100);
-  const [notes, setNotes] = useState('');
+  const [notes, setNotes] = useState("");
   const [notepadId, setNotepadId] = useState(null);
   const [showNotePadPicker, setShowNotePadPicker] = useState(false);
   const [isBold, setIsBold] = useState(false);
@@ -29,16 +43,16 @@ const NotebookAndDocumentSheet = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [newTodo, setNewTodo] = useState('');
+  const [newTodo, setNewTodo] = useState("");
   const [todoId, setTodoId] = useState(null);
-  const [todoColor, setTodoColor] = useState('#cfe2ff');
+  const [todoColor, setTodoColor] = useState("#cfe2ff");
   const [showTodoPicker, setShowTodoPicker] = useState(false);
   const [editingTodo, setEditingTodo] = useState(null);
-  const [editedTodoText, setEditedTodoText] = useState('');
+  const [editedTodoText, setEditedTodoText] = useState("");
   const [excelSheetId, setExcelSheetId] = useState(null);
-  const [excelSheetColor, setExcelSheetColor] = useState('#d4edda');
+  const [excelSheetColor, setExcelSheetColor] = useState("#d4edda");
   const [showExcelPicker, setShowExcelPicker] = useState(false);
-  const [deleteAction, setDeleteAction] = useState({ type: '', index: null });
+  const [deleteAction, setDeleteAction] = useState({ type: "", index: null });
   const notePadRef = useRef(null);
   const colorPickerRef = useRef(null);
 
@@ -87,17 +101,17 @@ const NotebookAndDocumentSheet = () => {
   };
 
   const downloadNotePad = () => {
-    const element = document.createElement('a');
-    const file = new Blob([notes], { type: 'text/plain' });
+    const element = document.createElement("a");
+    const file = new Blob([notes], { type: "text/plain" });
     element.href = URL.createObjectURL(file);
-    element.download = 'notepad.txt';
+    element.download = "notepad.txt";
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
   };
 
   const toggleSpeechToText = () => {
-    if ('webkitSpeechRecognition' in window) {
+    if ("webkitSpeechRecognition" in window) {
       const recognition = new window.webkitSpeechRecognition();
       recognition.continuous = true;
       recognition.interimResults = true;
@@ -108,12 +122,12 @@ const NotebookAndDocumentSheet = () => {
 
         recognition.onresult = (event) => {
           const transcript = Array.from(event.results)
-            .map(result => result[0])
-            .map(result => result.transcript)
-            .join('');
+            .map((result) => result[0])
+            .map((result) => result.transcript)
+            .join("");
 
-          setNotes(prev => prev + ' ' + transcript);
-          handleNotesChange({ target: { value: notes + ' ' + transcript } });
+          setNotes((prev) => prev + " " + transcript);
+          handleNotesChange({ target: { value: notes + " " + transcript } });
         };
 
         recognition.onerror = (event) => {
@@ -129,7 +143,7 @@ const NotebookAndDocumentSheet = () => {
         setIsListening(false);
       }
     } else {
-      alert('Speech recognition is not supported in your browser.');
+      alert("Speech recognition is not supported in your browser.");
     }
   };
 
@@ -144,7 +158,6 @@ const NotebookAndDocumentSheet = () => {
       setIsSpeaking(false);
     }
   };
-
 
   const toggleBold = () => setIsBold(!isBold);
   const toggleUnderline = () => setIsUnderline(!isUnderline);
@@ -169,19 +182,16 @@ const NotebookAndDocumentSheet = () => {
   };
 
   const handleSelectAll = () => {
-    const textarea = notePadRef.current.querySelector('textarea');
+    const textarea = notePadRef.current.querySelector("textarea");
     textarea.select();
   };
 
   const clearNotePad = () => {
-    setDeleteAction({ type: 'notepad' });
-    $('#deleteproject').modal('show');
+    setDeleteAction({ type: "notepad" });
+    $("#deleteproject").modal("show");
   };
 
-  const updateColors = async (type, color) => {
-    
-  };
-
+  const updateColors = async (type, color) => {};
 
   // Handle table name change
   const handleTableNameChange = (tableId, value) => {
@@ -230,7 +240,6 @@ const NotebookAndDocumentSheet = () => {
     ]);
   };
 
-
   const handleAddTodo = () => {
     if (todo) {
       setTodos([...todos, { text: todo, completed: false }]);
@@ -248,19 +257,17 @@ const NotebookAndDocumentSheet = () => {
     setTodos(newTodos);
   };
 
-  
-    return (
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6">
-        <div className="max-w-4xl bg-white  dark:bg-gray-800 rounded-lg shadow-xl mx-auto">
-          <div className="flex">
-            <NotePage/>
-            <TodoComponent/>
-          </div>
-            <SpreadsheetComponent/>
+  return (
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6">
+      <div className=" bg-white  dark:bg-gray-800 rounded-lg shadow-xl mx-auto">
+        <div className="flex gap-10 w-full">
+          <div className="w-[60%]"><NotePage /></div>
+          <div className="w-[40%]"><TodoComponent /></div>
         </div>
+        <Excel />
       </div>
-    );
-  }
-  
+    </div>
+  );
+};
 
 export default NotebookAndDocumentSheet;

@@ -565,7 +565,7 @@ const CredentialManager = () => {
                 </div>
               )
             ) : (
-              <div className="overflow-x-auto w-[80%] min-h-72 dark:bg-gray-800 bg-white shadow-md rounded-lg">
+              <div className="overflow-x-auto w-[80%] min-h-72 dark:bg-gray-800 bg-white  rounded-lg">
                 {filteredCredentials.length > 0 ? (
                   filteredCredentials.map((cred, index) => (
                     <table className="min-w-full border rounded-lg border-black/5 table-auto">
