@@ -3,6 +3,7 @@ import { db, auth } from "../firebase";
 import {
   collection,
   addDoc,
+  getDoc,
   getDocs,
   doc,
   updateDoc,
@@ -23,6 +24,7 @@ const CredentialManager = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCred, setSelectedCred] = useState("");
   const [currentCredential, setCurrentCredential] = useState(null);
+  const [correctPassword, setCorrectPassword] = useState("0000");
 
   const [formValues, setFormValues] = useState({
     website: "",
@@ -39,7 +41,7 @@ const CredentialManager = () => {
   const [includeLetters, setIncludeLetters] = useState(true);
   const [includeSpecialChars, setIncludeSpecialChars] = useState(true);
   const [userId, setUserId] = useState(null);
-  const correctPassword = "0000";
+
   const [otp, setOtp] = useState(["", "", "", ""]);
 
   const handleInputOTPChange = (value, index) => {
@@ -67,7 +69,7 @@ const CredentialManager = () => {
       setIsLocked(false);
       setOtp(["", "", "", ""]);
     } else {
-      alert("Incorrect OTP! Please try again.");
+      alert("Incorrect Pin! Please try again.");
     }
   };
 
@@ -233,18 +235,35 @@ const CredentialManager = () => {
   };
 
   // Handle auth state changes
+  const fetchPin = async (userId) => {
+    try {
+      const docRef = doc(db, `users/${userId}`);
+      const snap = await getDoc(docRef);
+
+      if (!snap.exists()) throw new Error("User not found");
+
+      setCorrectPassword(snap.data().pin || "0000"); // Set the user's PIN from Firestore or default to '0000'
+      return snap.data();
+    } catch (error) {
+      console.log("Error fetching PIN:", error);
+    }
+  };
+
+  // Handle auth state changes and fetch PIN once the user is authenticated
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
         setUserId(user.uid);
+        fetchPin(user.uid); // Fetch user's PIN from Firestore
       } else {
         setUserId(null);
+        setCorrectPassword(""); // Clear the PIN if the user logs out
       }
     });
 
     // Cleanup subscription
     return () => unsubscribe();
-  }, []); // Empty dependency array as we only want this to run once
+  }, []); // Empty dependency array ensures this effect runs only once when the component mounts
 
   // Separate useEffect for loading credentials
   useEffect(() => {
@@ -565,7 +584,7 @@ const CredentialManager = () => {
                 </div>
               )
             ) : (
-              <div className="overflow-x-auto w-[80%] min-h-72 dark:bg-gray-800 bg-white  rounded-lg">
+              <div className="overflow-x-auto w-[80%] min-h-72 dark:bg-gray-800 bg-white shadow-md rounded-lg">
                 {filteredCredentials.length > 0 ? (
                   filteredCredentials.map((cred, index) => (
                     <table className="min-w-full border rounded-lg border-black/5 table-auto">

@@ -9,6 +9,7 @@ import NotebookAndSheet from "../components/NotebookAndSheet";
 import PasswordGenerator from "../components/PasswordGenerater";
 import News from "../components/News";
 import Tool from "../components/Tool";
+import Top100 from "../components/Top100";
 import { FaHome } from "react-icons/fa";
 import { MdAddHomeWork } from "react-icons/md";
 import "./style.css";
@@ -211,7 +212,10 @@ function SearchPage() {
               className={`w-full hover:text-white hover:bg-gray-600 rounded-sm transition-all ${
                 activeComponent === "Top100" ? "bg-gray-500" : ""
               }`}
-              onClick={() => handleToggleComponent("Top100")}
+              onClick={() => {
+                handleToggleComponent("Top100");
+                console.log("click Top");
+              }}
             >
               TOP100
             </button>
@@ -236,6 +240,8 @@ function SearchPage() {
             <News />
           ) : activeComponent === "Anotherpage" ? (
             <Anotherpage />
+          ) : activeComponent === "Top100" ? (
+            <Top100 />
           ) : activeComponent === "Tool" ? (
             <Tool />
           ) : (
