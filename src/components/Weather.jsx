@@ -41,7 +41,7 @@ const WeatherIcon = ({ condition, className = "w-12 h-12" }) => {
 };
 
 const WeatherDetail = ({ label, value, icon }) => (
-  <div className="flex items-center border shadow gap-2 bg-white/10 rounded-lg p-1">
+  <div className="flex items-center border gap-2 bg-white/10 rounded-lg p-1">
     <div className="text-gray-400">{icon}</div>
     <div>
       <p className="text-sm ">{label}</p>
@@ -55,7 +55,7 @@ const WeatherCard = ({ weatherData, time, date }) => {
   const sunset = new Date(weatherData.sys.sunset * 1000);
 
   return (
-    <div className="bg-gradient-to-br from-yellow-500 to-purple-600 text-white border  rounded-xl p-4 shadow-lg w-full">
+    <div className="bg-gradient-to-br from-yellow-500 to-purple-600 text-white border  rounded-xl p-4 w-full">
       <div className="text-center">
         <div className="flex justify-between">
           <p className="text-4xl mt-2 font-bold">{weatherData.main.temp}°C</p>

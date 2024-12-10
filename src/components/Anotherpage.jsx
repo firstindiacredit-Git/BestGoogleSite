@@ -112,7 +112,7 @@ const Anotherpage = ({ backgroundImage }) => {
           backgroundAttachment: "fixed",
         }}
       >
-        <div className="flex justify-center gap-1 mt-12 mb-4">
+        <div className="flex justify-center gap-1 mt-4 -mb-4">
           <button
             onClick={() => setViewMode("grid")}
             className={`p-2 rounded ${
@@ -138,11 +138,11 @@ const Anotherpage = ({ backgroundImage }) => {
         <div
           className={`flex ${
             viewMode === "list" ? "flex-col" : "flex-row"
-          } justify-between w-full gap-4`}
+          } justify-between mt-2 w-full gap-4`}
         >
           {viewMode === "grid" ? (
             <>
-              <div className="w-full   md:w-1/4 lg:w-1/4 p-2">
+              <div className="w-full md:w-1/4 lg:w-1/4 p-2">
                 <Clock />
                 <Weather />
                 <Calculator />

@@ -77,7 +77,7 @@ function Calculator() {
 
   return (
     <div className="flex items-center w-full  mt-1 rounded-lg mb-5 min-h-96 justify-center">
-      <div className="dark:bg-[#1f345f] bg-gray-200  h-full w-full rounded-lg shadow-lg p-4 ">
+      <div className="dark:bg-[#1f345f] bg-gray-200  h-full w-full rounded-lg p-4 ">
         {showHistory ? (
           /* History View */
           <div className=" dark:bg-[#1f345f] text-white w-full h-full p-4 rounded-lg">
