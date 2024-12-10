@@ -104,6 +104,12 @@ const SortableToDoList = () => {
     deleteTask(taskId);
   };
 
+   const handleKeyDown = (e) => {
+    
+     if (e.key === "e") e.preventDefault(); // Prevent entering 'e' in number inputs
+     if (e.key === "Enter") handleAddTask(); // Handle Enter key
+   };
+
   return (
     <div className="ml-1 border w-full p-4 mt-2 rounded-lg bg-white/10 backdrop-blur-lg ">
       <h1 className="dark:text-white text-xl font-semibold mb-3">
@@ -114,6 +120,7 @@ const SortableToDoList = () => {
           type="text"
           value={newTask}
           onChange={(e) => setNewTask(e.target.value)}
+          onKeyDown={(e) => handleKeyDown(e)}
           placeholder="Add a new task..."
           className="p-2 border border-gray-300 rounded-md w-60 focus:ring-2 focus:ring-blue-400"
         />

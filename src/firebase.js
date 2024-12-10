@@ -1,8 +1,9 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
 import { getAuth, GoogleAuthProvider, onAuthStateChanged } from "firebase/auth";
-import { getStorage } from "firebase/storage"; // Import getStorage
+import { getStorage } from "firebase/storage"; // Firebase Storage initialization
 
+// Firebase configuration from environment variables
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -12,21 +13,21 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase
+// Initialize Firebase app and services
 const app = initializeApp(firebaseConfig);
-
-// Initialize Firestore, Auth, Storage
 const db = getFirestore(app);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
-const storage = getStorage(app); // Initialize Firebase Storage
+const storage = getStorage(app); // Firebase Storage initialization
 
+// User State Listener and Firestore Sync
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     const userDocRef = doc(db, "users", user.uid);
     const userDocSnap = await getDoc(userDocRef);
 
     if (!userDocSnap.exists()) {
+      // Create a new Firestore document for the user
       try {
         await setDoc(userDocRef, {
           uid: user.uid,
@@ -48,12 +49,11 @@ onAuthStateChanged(auth, async (user) => {
         console.error("Error creating user document: ", error);
       }
     } else {
+      // Update last login time and handle roles
       const userRole = userDocSnap.data().role;
       if (userRole === "admin") {
-        // Admin specific logic
         console.log("Admin user logged in");
       } else {
-        // Non-admin users can be redirected or given limited access
         console.log("Non-admin user logged in");
       }
       try {
@@ -72,4 +72,4 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 // Export Firebase services
-export { db, auth, provider, storage }; // Export storage as well
+export { db, auth, provider, storage };
