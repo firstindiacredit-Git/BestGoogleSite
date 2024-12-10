@@ -1,0 +1,949 @@
+import React, { useState, useEffect, useCallback } from "react";
+import { db, auth } from "../firebase";
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  getDocs,
+  query,
+  getDoc,
+  setDoc,
+} from "firebase/firestore";
+import { toast } from "react-toastify";
+import CustomColorPicker from "./CustomColorPicker";
+import debounce from "lodash/debounce";
+
+const Excel = () => {
+  const [userId, setUserId] = useState(null);
+  const [tables, setTables] = useState([]);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [activeTableIndex, setActiveTableIndex] = useState(null);
+  const [selectedCell, setSelectedCell] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [tableNames, setTableNames] = useState({});
+  const [formulaBarValue, setFormulaBarValue] = useState('');
+  const [columnWidths, setColumnWidths] = useState({});
+  const [rowHeights, setRowHeights] = useState({});
+  const [isResizing, setIsResizing] = useState(false);
+  const [editingCell, setEditingCell] = useState(null);
+
+  // Get column label (A, B, C, etc.)
+  const getColumnLabel = (index) => {
+    return String.fromCharCode(65 + index);
+  };
+
+  // Transform array data to object format for Firestore
+  const transformTableDataToObject = (data) => {
+    const transformedData = {};
+    data.forEach((row, rowIndex) => {
+      row.forEach((cell, colIndex) => {
+        transformedData[`${rowIndex}-${colIndex}`] = cell;
+      });
+    });
+    return transformedData;
+  };
+
+  // Transform object data back to array format for UI
+  const transformTableDataToArray = (data, rows, cols) => {
+    const arrayData = Array(rows)
+      .fill()
+      .map(() => Array(cols).fill(""));
+    Object.entries(data).forEach(([key, value]) => {
+      const [rowIndex, colIndex] = key.split("-").map(Number);
+      if (rowIndex < rows && colIndex < cols) {
+        arrayData[rowIndex][colIndex] = value;
+      }
+    });
+    return arrayData;
+  };
+
+  // Debounced save function
+  const debouncedSave = useCallback(
+    debounce(async (tableId, data) => {
+      try {
+        const transformedData = transformTableDataToObject(data);
+        await updateDoc(doc(db, "users", userId, "excel", tableId), {
+          tableData: transformedData,
+        });
+      } catch (error) {
+        console.error("Error auto-saving:", error);
+        toast.error("Failed to auto-save changes");
+      }
+    }, 1000),
+    [userId]
+  );
+
+  // Debounced save for table name
+  const debouncedSaveTableName = useCallback(
+    debounce(async (tableId, newName) => {
+      try {
+        await updateDoc(doc(db, "users", userId, "excel", tableId), {
+          tableName: newName,
+        });
+      } catch (error) {
+        console.error("Error updating table name:", error);
+        toast.error("Failed to update table name");
+      }
+    }, 3000),
+    [userId]
+  );
+
+  // Delete row
+  const deleteRow = async (tableIndex, rowIndex) => {
+    if (!isAuthenticated) {
+      toast.error("Please sign in to delete a row");
+      return;
+    }
+
+    const updatedTables = [...tables];
+    const table = updatedTables[tableIndex];
+    table.data.splice(rowIndex, 1);
+    table.rows -= 1;
+
+    try {
+      const transformedData = transformTableDataToObject(table.data);
+      await updateDoc(doc(db, "users", userId, "excel", table.id), {
+        tableData: transformedData,
+        rows: table.rows,
+      });
+      setTables(updatedTables);
+    } catch (error) {
+      console.error("Error deleting row:", error);
+      toast.error("Failed to delete row");
+    }
+  };
+
+  // Delete column
+  const deleteColumn = async (tableIndex, colIndex) => {
+    if (!isAuthenticated) {
+      toast.error("Please sign in to delete a column");
+      return;
+    }
+
+    const updatedTables = [...tables];
+    const table = updatedTables[tableIndex];
+    table.data = table.data.map((row) => {
+      row.splice(colIndex, 1);
+      return row;
+    });
+    table.cols -= 1;
+
+    try {
+      const transformedData = transformTableDataToObject(table.data);
+      await updateDoc(doc(db, "users", userId, "excel", table.id), {
+        tableData: transformedData,
+        cols: table.cols,
+      });
+      setTables(updatedTables);
+    } catch (error) {
+      console.error("Error deleting column:", error);
+      toast.error("Failed to delete column");
+    }
+  };
+
+  // Download as Excel
+  const downloadExcel = (tableIndex) => {
+    const table = tables[tableIndex];
+    let csv = "";
+
+    // Add column headers
+    for (let i = 0; i < table.cols; i++) {
+      csv += getColumnLabel(i) + ",";
+    }
+    csv = csv.slice(0, -1) + "\n";
+
+    // Add data
+    table.data.forEach((row) => {
+      csv += row.join(",") + "\n";
+    });
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `excel_sheet_${tableIndex + 1}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
+
+  // Helper function to get cell value from reference (e.g., "A1" -> value)
+  const getCellValueFromRef = (tableData, ref) => {
+    const colLetter = ref.match(/[A-Z]+/)[0];
+    const rowNum = parseInt(ref.match(/\d+/)[0]) - 1;
+    const colNum = colLetter.split('').reduce((acc, char) => 
+      acc * 26 + char.charCodeAt(0) - 'A'.charCodeAt(0), 0
+    );
+    return tableData[rowNum]?.[colNum] || '';
+  };
+
+  // Helper function to get range of cells (e.g., "A1:A3" -> [value1, value2, value3])
+  const getCellRange = (tableData, range) => {
+    const [start, end] = range.split(':');
+    const startCol = start.match(/[A-Z]+/)[0];
+    const startRow = parseInt(start.match(/\d+/)[0]) - 1;
+    const endCol = end.match(/[A-Z]+/)[0];
+    const endRow = parseInt(end.match(/\d+/)[0]) - 1;
+
+    const startColNum = startCol.split('').reduce((acc, char) => 
+      acc * 26 + char.charCodeAt(0) - 'A'.charCodeAt(0), 0
+    );
+    const endColNum = endCol.split('').reduce((acc, char) => 
+      acc * 26 + char.charCodeAt(0) - 'A'.charCodeAt(0), 0
+    );
+
+    const values = [];
+    for (let row = startRow; row <= endRow; row++) {
+      for (let col = startColNum; col <= endColNum; col++) {
+        const value = tableData[row]?.[col];
+        if (value && !isNaN(parseFloat(value))) {
+          values.push(parseFloat(value));
+        }
+      }
+    }
+    return values;
+  };
+
+  // Evaluate formula
+  const evaluateFormula = (formula, tableData) => {
+    try {
+      // Remove the leading =
+      formula = formula.substring(1).toUpperCase();
+
+      // Handle SUM function
+      if (formula.startsWith('SUM(')) {
+        const range = formula.match(/SUM\((.*)\)/)[1];
+        const values = getCellRange(tableData, range);
+        return values.reduce((sum, val) => sum + val, 0);
+      }
+
+      // Handle AVERAGE function
+      if (formula.startsWith('AVERAGE(')) {
+        const range = formula.match(/AVERAGE\((.*)\)/)[1];
+        const values = getCellRange(tableData, range);
+        return values.reduce((sum, val) => sum + val, 0) / values.length;
+      }
+
+      // Handle MAX function
+      if (formula.startsWith('MAX(')) {
+        const range = formula.match(/MAX\((.*)\)/)[1];
+        const values = getCellRange(tableData, range);
+        return Math.max(...values);
+      }
+
+      // Handle MIN function
+      if (formula.startsWith('MIN(')) {
+        const range = formula.match(/MIN\((.*)\)/)[1];
+        const values = getCellRange(tableData, range);
+        return Math.min(...values);
+      }
+
+      // Handle basic arithmetic with cell references
+      // Replace cell references with their values
+      let expression = formula.replace(/[A-Z]+\d+/g, (match) => {
+        const value = getCellValueFromRef(tableData, match);
+        return isNaN(parseFloat(value)) ? '0' : value;
+      });
+
+      // Safely evaluate the arithmetic expression
+      return eval(expression);
+    } catch (error) {
+      console.error('Formula error:', error);
+      return '#ERROR!';
+    }
+  };
+
+  // Handle cell change with formula support
+  const handleCellChange = async (tableIndex, rowIndex, colIndex, value) => {
+    if (!isAuthenticated) {
+      toast.error("Please sign in to edit cells");
+      return;
+    }
+
+    const updatedTables = [...tables];
+    const table = updatedTables[tableIndex];
+
+    // Check if the value is a formula (starts with =)
+    if (value.startsWith('=')) {
+      const result = evaluateFormula(value, table.data);
+      // Store both the formula and the result
+      table.data[rowIndex][colIndex] = value;
+      table.formulas = table.formulas || {};
+      table.formulas[`${rowIndex}-${colIndex}`] = {
+        formula: value,
+        result: result
+      };
+    } else {
+      table.data[rowIndex][colIndex] = value;
+      // Clear any existing formula for this cell
+      if (table.formulas) {
+        delete table.formulas[`${rowIndex}-${colIndex}`];
+      }
+    }
+
+    setTables(updatedTables);
+    debouncedSave(table.id, table.data);
+  };
+
+  // Handle keyboard navigation
+  const handleCellKeyDown = (e, tableIndex, rowIndex, colIndex) => {
+    if (e.key === "ArrowRight") {
+      const nextCell = document.querySelector(
+        `[data-cell="${tableIndex}-${rowIndex}-${colIndex + 1}"]`
+      );
+      nextCell?.focus();
+    } else if (e.key === "ArrowLeft") {
+      const prevCell = document.querySelector(
+        `[data-cell="${tableIndex}-${rowIndex}-${colIndex - 1}"]`
+      );
+      prevCell?.focus();
+    } else if (e.key === "ArrowUp") {
+      const upCell = document.querySelector(
+        `[data-cell="${tableIndex}-${rowIndex - 1}-${colIndex}"]`
+      );
+      upCell?.focus();
+    } else if (e.key === "ArrowDown") {
+      const downCell = document.querySelector(
+        `[data-cell="${tableIndex}-${rowIndex + 1}-${colIndex}"]`
+      );
+      downCell?.focus();
+    }
+  };
+
+  // Clear table cells
+  const clearTable = async (tableIndex) => {
+    if (!isAuthenticated) {
+      toast.error("Please sign in to clear table");
+      return;
+    }
+
+    const updatedTables = [...tables];
+    const table = updatedTables[tableIndex];
+    table.data = Array(table.rows)
+      .fill()
+      .map(() => Array(table.cols).fill(""));
+
+    try {
+      const transformedData = transformTableDataToObject(table.data);
+      await updateDoc(doc(db, "users", userId, "excel", table.id), {
+        tableData: transformedData,
+      });
+      setTables(updatedTables);
+      toast.success("Table cleared successfully");
+    } catch (error) {
+      console.error("Error clearing table:", error);
+      toast.error("Failed to clear table");
+    }
+  };
+
+  // Handle cell selection
+  const handleCellSelect = (tableIndex, rowIndex, colIndex) => {
+    const table = tables[tableIndex];
+    const cellKey = `${rowIndex}-${colIndex}`;
+    const formula = table.formulas?.[cellKey]?.formula || table.data[rowIndex][colIndex];
+    setSelectedCell({ tableIndex, rowIndex, colIndex });
+    setFormulaBarValue(formula || '');
+  };
+
+  // Handle formula bar change
+  const handleFormulaBarChange = (value) => {
+    if (!selectedCell) return;
+    
+    setFormulaBarValue(value);
+    handleCellChange(
+      selectedCell.tableIndex,
+      selectedCell.rowIndex,
+      selectedCell.colIndex,
+      value
+    );
+  };
+
+  // Recalculate all formulas in the table
+  const recalculateFormulas = (tableIndex) => {
+    const updatedTables = [...tables];
+    const table = updatedTables[tableIndex];
+    
+    // Update all formulas in the table
+    Object.keys(table.formulas || {}).forEach(cellKey => {
+      const [row, col] = cellKey.split('-').map(Number);
+      const formula = table.formulas[cellKey].formula;
+      const result = evaluateFormula(formula, table.data);
+      table.formulas[cellKey].result = result;
+    });
+    
+    setTables(updatedTables);
+  };
+
+  // Handle cell double click for editing
+  const handleCellDoubleClick = (tableIndex, rowIndex, colIndex) => {
+    setEditingCell({ tableIndex, rowIndex, colIndex });
+  };
+
+  // Handle cell edit
+  const handleCellEdit = (tableIndex, rowIndex, colIndex, value) => {
+    handleCellChange(tableIndex, rowIndex, colIndex, value);
+    setEditingCell(null);
+    recalculateFormulas(tableIndex);
+  };
+
+  // Handle column resize
+  const handleColumnResize = (tableIndex, colIndex, width) => {
+    setColumnWidths(prev => ({
+      ...prev,
+      [`${tableIndex}-${colIndex}`]: Math.max(60, width)
+    }));
+  };
+
+  // Handle row resize
+  const handleRowResize = (tableIndex, rowIndex, height) => {
+    setRowHeights(prev => ({
+      ...prev,
+      [`${tableIndex}-${rowIndex}`]: Math.max(24, height)
+    }));
+  };
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        setUserId(user.uid);
+        setIsAuthenticated(true);
+        try {
+          await fetchTables(user.uid);
+        } catch (error) {
+          console.error("Error fetching tables:", error);
+          setError("Failed to fetch tables");
+        }
+      } else {
+        setUserId(null);
+        setIsAuthenticated(false);
+        setTables([]);
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Ensure user document exists
+  const ensureUserDocument = async (uid) => {
+    const userDocRef = doc(db, "users", uid);
+    const userDocSnap = await getDoc(userDocRef);
+
+    if (!userDocSnap.exists()) {
+      const user = auth.currentUser;
+      await setDoc(userDocRef, {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName || "",
+        photoURL: user.photoURL || "",
+        createdAt: new Date(),
+        lastLoginAt: new Date(),
+      });
+    }
+  };
+
+  // Fetch tables from Firestore
+  const fetchTables = async (uid) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      await ensureUserDocument(uid);
+
+      const tablesRef = collection(db, "users", uid, "excel");
+      const q = query(tablesRef);
+      const querySnapshot = await getDocs(q);
+
+      const fetchedTables = querySnapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          rows: data.rows,
+          cols: data.cols,
+          data: transformTableDataToArray(data.tableData, data.rows, data.cols),
+          cardStyle: data.cardStyle || {},
+          tableName:
+            data.tableName || `Table ${querySnapshot.docs.indexOf(doc) + 1}`,
+          formulas: data.formulas || {},
+        };
+      });
+
+      if (fetchedTables.length > 0) {
+        setTables(fetchedTables);
+        setTableNames(
+          fetchedTables.reduce(
+            (acc, table) => ({ ...acc, [table.id]: table.tableName }),
+            {}
+          )
+        );
+      } else {
+        // Initialize with one empty table if none exists
+        const emptyData = Array(5)
+          .fill()
+          .map(() => Array(5).fill(""));
+        const newTable = {
+          rows: 5,
+          cols: 5,
+          tableData: transformTableDataToObject(emptyData),
+          cardStyle: {},
+          tableName: "Table 1",
+        };
+
+        const docRef = await addDoc(tablesRef, newTable);
+        setTables([
+          {
+            id: docRef.id,
+            rows: 5,
+            cols: 5,
+            data: emptyData,
+            cardStyle: {},
+            tableName: "Table 1",
+          },
+        ]);
+        setTableNames({ [docRef.id]: "Table 1" });
+      }
+    } catch (error) {
+      console.error("Error fetching tables:", error);
+      setError("Failed to fetch tables");
+      toast.error("Failed to fetch tables");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Add new table
+  const addTable = async () => {
+    if (!isAuthenticated) {
+      toast.error("Please sign in to add a table");
+      return;
+    }
+
+    const emptyData = Array(5)
+      .fill()
+      .map(() => Array(5).fill(""));
+    const newTable = {
+      rows: 5,
+      cols: 5,
+      tableData: transformTableDataToObject(emptyData),
+      cardStyle: {},
+      tableName: `Table ${tables.length + 1}`,
+    };
+
+    try {
+      const tablesRef = collection(db, "users", userId, "excel");
+      const docRef = await addDoc(tablesRef, newTable);
+      setTables([
+        ...tables,
+        {
+          id: docRef.id,
+          rows: 5,
+          cols: 5,
+          data: emptyData,
+          cardStyle: {},
+          tableName: `Table ${tables.length + 1}`,
+        },
+      ]);
+      setTableNames((prev) => ({
+        ...prev,
+        [docRef.id]: `Table ${tables.length + 1}`,
+      }));
+      toast.success("New table added successfully!");
+    } catch (error) {
+      console.error("Error adding table:", error);
+      toast.error("Failed to add new table");
+    }
+  };
+
+  // Add row to specific table
+  const addRow = async (tableIndex) => {
+    if (!isAuthenticated) {
+      toast.error("Please sign in to add a row");
+      return;
+    }
+
+    const updatedTables = [...tables];
+    const table = updatedTables[tableIndex];
+    const newRow = Array(table.cols).fill("");
+    table.data.push(newRow);
+    table.rows += 1;
+
+    try {
+      const transformedData = transformTableDataToObject(table.data);
+      await updateDoc(doc(db, "users", userId, "excel", table.id), {
+        tableData: transformedData,
+        rows: table.rows,
+      });
+      setTables(updatedTables);
+    } catch (error) {
+      console.error("Error adding row:", error);
+      toast.error("Failed to add row");
+    }
+  };
+
+  // Add column to specific table
+  const addColumn = async (tableIndex) => {
+    if (!isAuthenticated) {
+      toast.error("Please sign in to add a column");
+      return;
+    }
+
+    const updatedTables = [...tables];
+    const table = updatedTables[tableIndex];
+    table.data.forEach((row) => row.push(""));
+    table.cols += 1;
+
+    try {
+      const transformedData = transformTableDataToObject(table.data);
+      await updateDoc(doc(db, "users", userId, "excel", table.id), {
+        tableData: transformedData,
+        cols: table.cols,
+      });
+      setTables(updatedTables);
+    } catch (error) {
+      console.error("Error adding column:", error);
+      toast.error("Failed to add column");
+    }
+  };
+
+  // Delete table
+  const deleteTable = async (tableId) => {
+    if (!isAuthenticated) {
+      toast.error("Please sign in to delete a table");
+      return;
+    }
+
+    try {
+      await deleteDoc(doc(db, "users", userId, "excel", tableId));
+      setTables(tables.filter((table) => table.id !== tableId));
+      setTableNames((prev) => {
+        const newTableNames = { ...prev };
+        delete newTableNames[tableId];
+        return newTableNames;
+      });
+      toast.success("Table deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting table:", error);
+      toast.error("Failed to delete table");
+    }
+  };
+
+  // Update table name with debounce
+  const updateTableName = (tableId, newName) => {
+    if (!isAuthenticated) {
+      toast.error("Please sign in to rename table");
+      return;
+    }
+
+    setTableNames((prev) => ({ ...prev, [tableId]: newName }));
+    debouncedSaveTableName(tableId, newName);
+  };
+
+  // Update card background color
+  const updateCardColor = async (tableIndex, color) => {
+    if (!isAuthenticated) {
+      toast.error("Please sign in to change colors");
+      return;
+    }
+
+    const updatedTables = [...tables];
+    const table = updatedTables[tableIndex];
+    table.cardStyle = { backgroundColor: color };
+    
+    try {
+      await updateDoc(doc(db, "users", userId, "excel", table.id), {
+        cardStyle: { backgroundColor: color }
+      });
+      setTables(updatedTables);
+      setShowColorPicker(false);
+      setActiveTableIndex(null);
+    } catch (error) {
+      console.error("Error updating card color:", error);
+      toast.error("Failed to update card color");
+    }
+  };
+
+  if (loading) return <div className="text-center py-4">Loading...</div>;
+  if (error)
+    return <div className="text-center py-4 text-red-500">{error}</div>;
+  if (!isAuthenticated)
+    return <div className="text-center py-4">Please sign in to use Excel</div>;
+
+  return (
+    <div className=" mx-auto relative py-8 px-4">
+      
+
+      {tables.map((table, tableIndex) => (
+        <div
+          key={table.id}
+          className="mb-8 bg-white border rounded-lg p-4"
+          style={table.cardStyle}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-1/3">
+              <input
+                type="text"
+                value={tableNames[table.id] || `Table ${tableIndex + 1}`}
+                onChange={(e) => updateTableName(table.id, e.target.value)}
+                className="text-lg font-semibold bg-transparent border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none px-2"
+              />
+            </div>
+            <h1 className="text-2xl w-1/3 font-bold text-center mb-6">Excel Sheet</h1>
+            <div className="w-1/3"></div>
+          </div>
+
+          {/* Formula Bar */}
+          <div className="flex flex-col mb-4">
+            <div className="flex items-center gap-2 px-2 py-1 bg-gray-100 border-b text-sm text-gray-600">
+              <div className="font-medium min-w-[60px]">
+                {selectedCell && selectedCell.tableIndex === tableIndex ? 
+                  `${String.fromCharCode(65 + selectedCell.colIndex)}${selectedCell.rowIndex + 1}` : 
+                  'Select Cell'}
+              </div>
+            </div>
+            <div className="flex items-center gap-2 px-2 py-1.5 bg-white border">
+              <span className="text-gray-500 font-medium">ƒx</span>
+              <input
+                type="text"
+                value={selectedCell?.tableIndex === tableIndex ? formulaBarValue : ''}
+                onChange={(e) => handleFormulaBarChange(e.target.value)}
+                placeholder="Enter formula or value"
+                className="flex-1 outline-none border-none"
+                disabled={!selectedCell || selectedCell.tableIndex !== tableIndex}
+              />
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr>
+                  <th className="border bg-gray-50 px-4 py-2 w-[40px] relative">
+                    #
+                  </th>
+                  {table.data[0].map((_, colIndex) => (
+                    <th 
+                      key={colIndex} 
+                      className="border bg-gray-50 px-4 py-2 relative"
+                      style={{ 
+                        width: columnWidths[`${tableIndex}-${colIndex}`] || '120px',
+                        minWidth: '60px'
+                      }}
+                    >
+                      <div className="flex justify-between items-center">
+                        {String.fromCharCode(65 + colIndex)}
+                        <button
+                          onClick={() => deleteColumn(tableIndex, colIndex)}
+                          className="text-gray-400 hover:text-red-500 ml-2"
+                          title="Delete column"
+                        >
+                          ×
+                        </button>
+                      </div>
+                      <div
+                        className="absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-blue-500"
+                        onMouseDown={(e) => {
+                          const startX = e.pageX;
+                          const startWidth = columnWidths[`${tableIndex}-${colIndex}`] || 120;
+                          
+                          const handleMouseMove = (e) => {
+                            const diff = e.pageX - startX;
+                            handleColumnResize(tableIndex, colIndex, startWidth + diff);
+                          };
+                          
+                          const handleMouseUp = () => {
+                            document.removeEventListener('mousemove', handleMouseMove);
+                            document.removeEventListener('mouseup', handleMouseUp);
+                            setIsResizing(false);
+                          };
+                          
+                          document.addEventListener('mousemove', handleMouseMove);
+                          document.addEventListener('mouseup', handleMouseUp);
+                          setIsResizing(true);
+                        }}
+                      />
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {table.data.map((row, rowIndex) => (
+                  <tr key={rowIndex}>
+                    <td 
+                      className="border bg-gray-50 text-center relative"
+                      style={{ height: rowHeights[`${tableIndex}-${rowIndex}`] || '24px' }}
+                    >
+                      <div className="flex items-center justify-between px-2">
+                        {rowIndex + 1}
+                        <button
+                          onClick={() => deleteRow(tableIndex, rowIndex)}
+                          className="text-gray-400 hover:text-red-500"
+                          title="Delete row"
+                        >
+                          ×
+                        </button>
+                      </div>
+                      <div
+                        className="absolute bottom-0 left-0 w-full h-1 cursor-row-resize hover:bg-blue-500"
+                        onMouseDown={(e) => {
+                          const startY = e.pageY;
+                          const startHeight = rowHeights[`${tableIndex}-${rowIndex}`] || 24;
+                          
+                          const handleMouseMove = (e) => {
+                            const diff = e.pageY - startY;
+                            handleRowResize(tableIndex, rowIndex, startHeight + diff);
+                          };
+                          
+                          const handleMouseUp = () => {
+                            document.removeEventListener('mousemove', handleMouseMove);
+                            document.removeEventListener('mouseup', handleMouseUp);
+                            setIsResizing(false);
+                          };
+                          
+                          document.addEventListener('mousemove', handleMouseMove);
+                          document.addEventListener('mouseup', handleMouseUp);
+                          setIsResizing(true);
+                        }}
+                      />
+                    </td>
+                    {row.map((cell, colIndex) => {
+                      const cellKey = `${rowIndex}-${colIndex}`;
+                      const formula = table.formulas?.[cellKey];
+                      const isEditing = editingCell?.tableIndex === tableIndex && 
+                                      editingCell?.rowIndex === rowIndex && 
+                                      editingCell?.colIndex === colIndex;
+                      
+                      return (
+                        <td
+                          key={colIndex}
+                          className="border px-2 py-1 relative"
+                          onClick={() => handleCellSelect(tableIndex, rowIndex, colIndex)}
+                          onDoubleClick={() => handleCellDoubleClick(tableIndex, rowIndex, colIndex)}
+                          style={{ 
+                            width: columnWidths[`${tableIndex}-${colIndex}`] || '120px',
+                            height: rowHeights[`${tableIndex}-${rowIndex}`] || '24px'
+                          }}
+                        >
+                          {isEditing ? (
+                            <input
+                              type="text"
+                              autoFocus
+                              value={formula?.formula || table.data[rowIndex][colIndex] || ''}
+                              onChange={(e) => handleCellEdit(tableIndex, rowIndex, colIndex, e.target.value)}
+                              onBlur={() => setEditingCell(null)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  handleCellEdit(tableIndex, rowIndex, colIndex, e.target.value);
+                                }
+                              }}
+                              className="w-full h-full outline-none border-none"
+                            />
+                          ) : (
+                            <div
+                              className={`w-full h-full flex items-center ${
+                                formula || !isNaN(table.data[rowIndex][colIndex]) 
+                                  ? 'justify-end' 
+                                  : 'justify-start'
+                              } ${
+                                selectedCell?.tableIndex === tableIndex &&
+                                selectedCell?.rowIndex === rowIndex &&
+                                selectedCell?.colIndex === colIndex
+                                  ? 'ring-2 ring-blue-500'
+                                  : ''
+                              }`}
+                            >
+                              {formula ? formula.result : table.data[rowIndex][colIndex]}
+                            </div>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="flex justify-between relative  mt-4">
+            <div className=" w-1/3 flex gap-3">
+            <button
+              onClick={() => {
+                setActiveTableIndex(tableIndex);
+                setShowColorPicker(true);
+              }}
+              className="flex items-center gap-2 bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700"
+            >
+              Color
+            </button>
+            {showColorPicker && activeTableIndex === tableIndex && (
+              <div className="absolute top-0 left-0 w-full h-full z-50">
+                <div className="p-4 rounded-lg">
+                  <CustomColorPicker
+                    onChange={(color) => updateCardColor(tableIndex, color)}
+                    onClose={() => {
+                      setShowColorPicker(false);
+                      setActiveTableIndex(null);
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+            <button
+              onClick={() => downloadExcel(tableIndex)}
+              className="flex items-center gap-2 bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700"
+            >
+              Excel
+            </button>
+            </div>
+            <div className=" w-1/3 flex justify-center gap-3">
+            
+            <button
+              onClick={() => addRow(tableIndex)}
+              className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600"
+            >
+              Add Row
+            </button>
+            <button
+              onClick={() => addColumn(tableIndex)}
+              className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600"
+            >
+              Add Column
+            </button>
+            </div>
+            <div className=" w-1/3 flex justify-end gap-3">
+            {tables.length > 1 && (
+              <button
+                onClick={() => deleteTable(table.id)}
+                className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600"
+                title="Delete table"
+              >
+                Delete Table
+              </button>
+            )}
+            <button
+              onClick={() => clearTable(tableIndex)}
+              className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+              title="Clear table cells"
+            >
+              Clear Table
+            </button>
+            </div>
+          </div>
+        </div>
+      ))}
+      <div className="flex items-center justify-center transition-all">
+      <button
+              onClick={() => addTable()}
+              className="border border-gray-300 transition-all text-gray-300 px-3 py-1 rounded hover:bg-gray-600"
+            >
+              +  Table
+            </button></div>
+    </div>
+  );
+};
+
+export default Excel;
