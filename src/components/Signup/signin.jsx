@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { auth, provider } from "../../firebase";
 import { useAuth } from "../../hooks/AuthContext";
-import { signInWithPopup } from "firebase/auth";
+import { signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 
 const SignIn = () => {
@@ -42,10 +42,16 @@ const SignIn = () => {
     setError("");
 
     try {
-      await (login || defaultLogin)(email, password);
+      await signInWithEmailAndPassword(auth, email, password);
       navigate("/");
     } catch (err) {
-      setError("Failed to sign in: " + err.message);
+      if (err.code === "auth/user-not-found") {
+        setError("No user found with this email.");
+      } else if (err.code === "auth/wrong-password") {
+        setError("Incorrect password. Please try again.");
+      } else {
+        setError("Failed to sign in: " + err.message);
+      }
       console.error(err);
     } finally {
       setLoading(false);
