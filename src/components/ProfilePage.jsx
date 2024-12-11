@@ -13,6 +13,7 @@ const ProfilePage = () => {
   const [accountType, setAccountType] = useState("Free");
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingPassword, setIsEditingPassword] = useState(false);
+  const [isEditingPin, setIsEditingPin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(null);
 
@@ -117,12 +118,24 @@ const ProfilePage = () => {
     navigate("/premiumPage");
   };
 
+   const goBack = () => {
+     navigate(-1); 
+   };
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-      <h1 className="text-2xl font-semibold mb-6">User account</h1>
+    <div className="min-h-screen bg-gray-50  dark:bg-gray-900 p-6">
+      <button
+        onClick={goBack}
+        className="absolute top-4 left-4 text-blue-600 border border-blue-600 px-6 py-1 rounded hover:text-white hover:bg-blue-600"
+      >
+        Back
+      </button>
+      <h1 className="text-2xl m-auto text-center font-semibold mb-6">
+        USER ACCOUNT
+      </h1>
 
       {/* Account Details Section */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 space-y-4">
+      <div className="bg-white dark:bg-gray-800 w-[60%] m-auto rounded-lg shadow-lg p-6 space-y-4">
         {/* Avatar Section */}
         <div className="flex items-center space-x-4">
           <img
@@ -192,10 +205,10 @@ const ProfilePage = () => {
         </div>
 
         {/* Account Type */}
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between border-b items-center">
           <div>
             <h2 className="font-semibold">Account</h2>
-            <p>{accountType}</p>
+            <p className="text-green-500">{accountType}</p>
           </div>
           <button
             onClick={handleUpgrade}
@@ -208,34 +221,40 @@ const ProfilePage = () => {
 
         {/* Change PIN Section */}
         {userId && (
-          <div>
-            <h2 className="text-xl font-semibold mb-1">Change PIN</h2>
-            <div className="relative mb-2 flex space-x-2">
-              {newPin.map((digit, index) => (
-                <input
-                  key={index}
-                  id={`pin-input-${index}`}
-                  type={showPin ? "text" : "password"}
-                  value={digit}
-                  maxLength="1"
-                  onChange={(e) => handleInputChange(e, index)}
-                  className="w-10 h-10 text-center text-2xl border p-1 rounded dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              ))}
-              <button
-                type="button"
-                onClick={() => setShowPin(!showPin)}
-                className="inset-y-0 right-5 flex items-center text-gray-500 dark:text-gray-400"
-              >
-                {showPin ? <FaEye /> : <FaEyeSlash />}
-              </button>
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="font-semibold ">Change PIN</h2>
+              {isEditingPin && (
+                <div className="relative mb-2 flex items-center space-x-2">
+                  {newPin.map((digit, index) => (
+                    <input
+                      key={index}
+                      id={`pin-input-${index}`}
+                      type={showPin ? "text" : "password"}
+                      value={digit}
+                      maxLength="1"
+                      onChange={(e) => handleInputChange(e, index)}
+                      className="w-10 h-10 text-center text-2xl border p-1 rounded dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setShowPin(!showPin)}
+                    className="flex items-center text-gray-500 dark:text-gray-400"
+                  >
+                    {showPin ? <FaEye /> : <FaEyeSlash />}
+                  </button>
+                  <button
+                    onClick={handleChangePin}
+                    className="bg-blue-600 text-white py-1 px-10 rounded"
+                  >
+                    Update PIN
+                  </button>
+                </div>
+              )}
             </div>
-
-            <button
-              onClick={handleChangePin}
-              className="mt-1 bg-green-500 hover:bg-green-600 text-white py-1 px-10 rounded"
-            >
-              Update PIN
+            <button onClick={() => setIsEditingPin(!isEditingPin)}>
+              <FaPen className="text-gray-500 hover:text-gray-700" />
             </button>
           </div>
         )}
