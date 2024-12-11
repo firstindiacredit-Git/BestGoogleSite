@@ -15,6 +15,7 @@ import { IoGrid, IoList, IoLockClosed } from "react-icons/io5";
 import { AiFillEyeInvisible, AiFillEye } from "react-icons/ai";
 import { MdDelete, MdEdit, MdEditSquare } from "react-icons/md";
 import { FiPlusCircle } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 
 const CredentialManager = () => {
   const [showPasswords, setShowPasswords] = useState({});
@@ -110,6 +111,8 @@ const CredentialManager = () => {
         message: "Age of Universe",
       };
   };
+
+  const navigate = useNavigate();
 
   const togglePasswordVisibility = (website) => {
     setShowPasswords((prev) => ({
@@ -365,6 +368,14 @@ const CredentialManager = () => {
             >
               Unlock
             </button>
+            <div className="text-center flex justify-center gap-2 mt-3 -mb-3">
+              <button
+                className="text-blue-500 hover:text-blue-700 text-xs transition duration-200"
+                onClick={() => navigate("/ProfilePage")}
+              >
+                Forgot Pin?
+              </button>
+            </div>
           </div>
         </div>
       ) : (
