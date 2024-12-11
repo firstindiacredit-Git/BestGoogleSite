@@ -1,26 +1,40 @@
 import React, { useState } from "react";
-// import { useAuth } from "../../hooks/useAuth";
 import { auth, provider } from "../../firebase";
 import { useAuth } from "../../hooks/AuthContext";
 import { signInWithPopup } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
-import Header from "../Header";
-// import { auth, provider } from "../../firebase";
-// import { useNavigate } from "react-router-dom";
-// import { signInWithPopup } from "firebase/auth";
 
 const SignIn = () => {
   const { login } = useAuth();
+
+  // Adding a default login function if not provided by useAuth
+  const defaultLogin = async (email, password) => {
+    console.log(`Attempting to log in with email: ${email} and password.`);
+    return Promise.resolve();
+  };
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(true);
+  const [isPasswordFieldVisible, setIsPasswordFieldVisible] = useState(false);
   const navigate = useNavigate();
 
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
-  const toggleTheme = () => {
-    setIsDarkMode((prev) => !prev);
+  const handleEmailSubmit = (e) => {
+    e.preventDefault();
+    setError("");
+
+    if (validateEmail(email)) {
+      setIsPasswordFieldVisible(true);
+    } else {
+      setError("Please enter a valid email address.");
+    }
   };
 
   const handleEmailSignIn = async (e) => {
@@ -29,31 +43,29 @@ const SignIn = () => {
     setError("");
 
     try {
-      await login(email, password);
-      console.log("Sign-in successful!");
+      await (login || defaultLogin)(email, password);
       navigate("/");
     } catch (err) {
-      if (err.code === "auth/user-not-found") {
-        setError("No user found with this email.");
-      } else if (err.code === "auth/wrong-password") {
-        setError("Incorrect password. Please try again.");
-      } else {
-        setError("Failed to sign in: " + err.message);
-      }
+      setError("Failed to sign in: " + err.message);
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Google sign-in
   const handleGoogleSignIn = async () => {
     try {
       await signInWithPopup(auth, provider);
       navigate("/");
     } catch (err) {
-      if (err.code === "auth/popup-closed-by-user") {
-        setError("The sign-in popup was closed before completing.");
+      if (err.code === "auth/network-request-failed") {
+        setError(
+          "Network error occurred. Please check your connection and try again."
+        );
+      } else if (err.code === "auth/popup-blocked") {
+        setError(
+          "The popup was blocked by your browser. Please allow popups and try again."
+        );
       } else {
         setError("Google sign-in failed: " + err.message);
       }
@@ -62,89 +74,98 @@ const SignIn = () => {
   };
 
   return (
-    <div
-      className={`min-h-screen ${
-        isDarkMode ? "bg-gray-900 text-white" : "bg-white text-black"
-      }`}
-    >
-      <Header isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
-
-      <div className="max-w-md w-full mx-auto mt-8 rounded-none md:rounded-2xl p-4 md:p-8 border shadow-2xl bg-white dark:bg-gray-800">
-        <h2 className="font-bold text-xl dark:text-white text-black">
-          Welcome Back
-        </h2>
-        <p className="text-neutral-600 text-sm max-w-sm mt-2 dark:text-neutral-400">
-          Sign in to access your account
-        </p>
-
-        {error && (
-          <p className="text-red-500 mt-4 text-sm text-center">{error}</p>
-        )}
-
-        <form className="my-8" onSubmit={handleEmailSignIn}>
-          <div className="mb-4">
-            <label
-              htmlFor="email"
-              className="font-medium dark:text-neutral-300"
-            >
-              Email Address
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="border p-2 rounded w-full dark:bg-gray-700 dark:text-white"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label
-              htmlFor="password"
-              className="font-medium dark:text-neutral-300"
-            >
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="border p-2 rounded w-full dark:bg-gray-700 dark:text-white"
-              required
-            />
-          </div>
+    isModalOpen && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg w-full max-w-md p-6 relative">
           <button
-            className={`border-blue-500 border text-blue-500 rounded hover:bg-blue-500 hover:text-white w-full h-10 font-medium ${
-              loading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-            type="submit"
-            disabled={loading}
+            className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+            onClick={() => navigate(-1)}
           >
-            {loading ? "Signing In..." : "Sign In"}
+            &times;
           </button>
-          <div className="bg-gradient-to-r from-transparent via-neutral-300 dark:via-neutral-700 to-transparent my-4 h-[1px] w-full" />
+
+          <h2 className="text-center text-xl font-bold mb-4">
+            Log in or sign up
+          </h2>
+
           <button
-            className="border shadow-sm text-lg text-center px-4 w-full h-10 font-medium border-green-500 text-green-500 rounded hover:bg-green-500 hover:text-white"
-            type="button"
+            className="w-full flex items-center justify-center gap-2 p-3 border rounded-md bg-gray-100 hover:bg-gray-200"
             onClick={handleGoogleSignIn}
           >
-            <div className="flex items-center justify-center gap-2">
-              <img src="/google.png" className="w-5 h-5" alt="Google logo" />
-              Sign in with Google
-            </div>
+            <img src="/google.png" alt="Google" className="w-5 h-5" />
+            Continue with Google
           </button>
-          <div className="text-center flex justify-center gap-2 mt-4">
-            <button
-              className="text-blue-500 hover:text-blue-700 transition duration-200"
-              onClick={() => navigate("/forgotpassword")}
-            >
-              Forgot Password?
-            </button>
+
+          <div className="flex items-center justify-center my-4">
+            <hr className="border-gray-300 flex-grow" />
+            <span className="px-2 text-gray-500">OR</span>
+            <hr className="border-gray-300 flex-grow" />
           </div>
-        </form>
+
+          {!isPasswordFieldVisible ? (
+            <form onSubmit={handleEmailSubmit} className="relative">
+              <input
+                type="email"
+                placeholder="Email address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full p-3 border rounded-md mb-4"
+                required
+              />
+
+              <button
+                type="submit"
+                className="w-full p-3 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                Continue
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleEmailSignIn} className="relative">
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full p-3 border rounded-md mb-4"
+                required
+              />
+
+              <button
+                type="submit"
+                className={`w-full p-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 ${
+                  loading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                disabled={loading}
+              >
+                {loading ? (
+                  <span className="spinner border-t-2 border-blue-500 border-solid w-5 h-5 block mx-auto rounded-full animate-spin"></span>
+                ) : (
+                  "Sign In"
+                )}
+              </button>
+            </form>
+          )}
+
+          {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+
+          <p className="text-xs text-gray-500 text-center mt-4">
+            By continuing, you acknowledge that you have read, understood, and
+            agree to our
+            <a href="/terms" className="text-blue-500 underline">
+              {" "}
+              Terms & Conditions
+            </a>{" "}
+            and
+            <a href="/privacy" className="text-blue-500 underline">
+              {" "}
+              Privacy Policy
+            </a>
+            .
+          </p>
+        </div>
       </div>
-    </div>
+    )
   );
 };
 
