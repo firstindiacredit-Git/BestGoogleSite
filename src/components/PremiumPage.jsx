@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Header from "../components/Header";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const pricingData = [
   {
@@ -24,6 +25,7 @@ const pricingData = [
   },
 ];
 
+
 const PremiumPage = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -43,10 +45,21 @@ const PremiumPage = () => {
       return newMode;
     });
   };
+  const goBack = () => {
+    navigate(-1);
+  };
+
+   const navigate = useNavigate();
 
   return (
     <div className={`min-h-screen ${isDarkMode ? "bg-gray-900" : "bg-white"}`}>
       <Header isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
+      <button
+        onClick={goBack}
+        className="absolute top-16 left-4 text-blue-600 border border-blue-600 px-6 py-1 rounded hover:text-white hover:bg-blue-600"
+      >
+        Back
+      </button>
       <h1
         className={`text-2xl mt-5 font-semibold text-center mb-4  ${
           isDarkMode ? "text-white" : "text-gray-900"
