@@ -106,37 +106,37 @@ export default function AnimatedTooltipPreview() {
   // Cache to avoid multiple calls to Firebase
   const [cachedBookmarks, setCachedBookmarks] = useState([]);
 
-   useEffect(() => {
-     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-       if (user) {
-         setUserId(user.uid);
+  //  useEffect(() => {
+  //    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+  //      if (user) {
+  //        setUserId(user.uid);
 
-         // Fetch bookmarks only if they are not already cached
-         if (cachedBookmarks.length === 0) {
-           try {
-             const bookmarksSnapshot = await getDocs(
-               collection(db, "users", user.uid, "addbookmarks")
-             );
-             const bookmarksData = bookmarksSnapshot.docs.map((doc) => ({
-               id: doc.id,
-               ...doc.data(),
-             }));
+  //        // Fetch bookmarks only if they are not already cached
+  //        if (cachedBookmarks.length === 0) {
+  //          try {
+  //            const bookmarksSnapshot = await getDocs(
+  //              collection(db, "users", user.uid, "addbookmarks")
+  //            );
+  //            const bookmarksData = bookmarksSnapshot.docs.map((doc) => ({
+  //              id: doc.id,
+  //              ...doc.data(),
+  //            }));
 
-             setPeople((prev) => [...defaultPeople, ...bookmarksData]);
-             setCachedBookmarks(bookmarksData);
-           } catch (error) {
-             console.error("Error fetching bookmarks:", error);
-             setErrorMessage("Failed to fetch bookmarks. Please try again.");
-           }
-         }
-       } else {
-         setUserId(null);
-         setPeople(defaultPeople); // Reset to default if the user logs out
-       }
-     });
+  //            setPeople((prev) => [...defaultPeople, ...bookmarksData]);
+  //            setCachedBookmarks(bookmarksData);
+  //          } catch (error) {
+  //            console.error("Error fetching bookmarks:", error);
+  //            setErrorMessage("Failed to fetch bookmarks. Please try again.");
+  //          }
+  //        }
+  //      } else {
+  //        setUserId(null);
+  //        setPeople(defaultPeople); // Reset to default if the user logs out
+  //      }
+  //    });
 
-     return () => unsubscribe();
-   }, [cachedBookmarks]);
+  //    return () => unsubscribe();
+  //  }, [cachedBookmarks]);
 
 
   const validateURL = (url) => {
