@@ -102,42 +102,38 @@ export default function AnimatedTooltipPreview() {
   const [userId, setUserId] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-
-  // Cache to avoid multiple calls to Firebase
   const [cachedBookmarks, setCachedBookmarks] = useState([]);
 
-  //  useEffect(() => {
-  //    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-  //      if (user) {
-  //        setUserId(user.uid);
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setUserId(user.uid);
 
-  //        // Fetch bookmarks only if they are not already cached
-  //        if (cachedBookmarks.length === 0) {
-  //          try {
-  //            const bookmarksSnapshot = await getDocs(
-  //              collection(db, "users", user.uid, "addbookmarks")
-  //            );
-  //            const bookmarksData = bookmarksSnapshot.docs.map((doc) => ({
-  //              id: doc.id,
-  //              ...doc.data(),
-  //            }));
+        if (!cachedBookmarks.length) {
+          try {
+            const bookmarksSnapshot = await getDocs(
+              collection(db, "users", user.uid, "addbookmarks")
+            );
+            const bookmarksData = bookmarksSnapshot.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }));
 
-  //            setPeople((prev) => [...defaultPeople, ...bookmarksData]);
-  //            setCachedBookmarks(bookmarksData);
-  //          } catch (error) {
-  //            console.error("Error fetching bookmarks:", error);
-  //            setErrorMessage("Failed to fetch bookmarks. Please try again.");
-  //          }
-  //        }
-  //      } else {
-  //        setUserId(null);
-  //        setPeople(defaultPeople); // Reset to default if the user logs out
-  //      }
-  //    });
+            setPeople([...defaultPeople, ...bookmarksData]);
+            setCachedBookmarks(bookmarksData);
+          } catch (error) {
+            console.error("Error fetching bookmarks:", error);
+            setErrorMessage("Failed to fetch bookmarks. Please try again.");
+          }
+        }
+      } else {
+        setUserId(null);
+        setPeople(defaultPeople);
+      }
+    });
 
-  //    return () => unsubscribe();
-  //  }, [cachedBookmarks]);
-
+    return () => unsubscribe();
+  }, []); // Dependencies removed to prevent looping
 
   const validateURL = (url) => {
     const pattern = /^(http|https):\/\/[^\s$.?#].[^\s]*$/;
@@ -194,7 +190,7 @@ export default function AnimatedTooltipPreview() {
           image: "default.png",
         };
         setPeople((prevPeople) => [...prevPeople, addedBookmark]);
-        setCachedBookmarks((prev) => [...prev, addedBookmark]); // Update cache
+        setCachedBookmarks((prev) => [...prev, addedBookmark]);
         setSuccessMessage("Bookmark added successfully!");
       }
 
@@ -214,7 +210,7 @@ export default function AnimatedTooltipPreview() {
       setPeople((prevPeople) =>
         prevPeople.filter((person) => person.id !== id)
       );
-      setCachedBookmarks((prev) => prev.filter((person) => person.id !== id)); // Update cache
+      setCachedBookmarks((prev) => prev.filter((person) => person.id !== id));
       setSuccessMessage("Bookmark deleted successfully!");
       setTimeout(() => {
         setSuccessMessage("");
@@ -246,7 +242,6 @@ export default function AnimatedTooltipPreview() {
       >
         +
       </button>
-
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white dark:bg-gray-900 dark:text-white p-4 rounded-2xl shadow-md w-80">
