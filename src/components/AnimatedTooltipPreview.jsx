@@ -144,6 +144,7 @@ export default function AnimatedTooltipPreview() {
     e.preventDefault();
 
     if (!userId || !newBookmark.name || !newBookmark.link) {
+      alert("Please Login to Save Bookmarks");
       setErrorMessage("Please fill in both fields.");
       return;
     }
@@ -199,6 +200,7 @@ export default function AnimatedTooltipPreview() {
       setEditMode(false);
       setEditingBookmarkId(null);
     } catch (error) {
+      
       console.error("Error saving bookmark:", error);
       setErrorMessage("Failed to save bookmark. Please try again.");
     }

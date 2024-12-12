@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { MdAdd, MdDelete } from "react-icons/md";
 
 function ImageUploader() {
   const [image, setImage] = useState(null);
   const [imageUrl, setImageUrl] = useState("");
   const [showOptions, setShowOptions] = useState(false);  
+    const optionsRef = useRef(null); 
 
   useEffect(() => {
      
@@ -49,18 +50,34 @@ function ImageUploader() {
     setShowOptions(false);  
   };
 
+   useEffect(() => {
+     const handleOutsideClick = (event) => {
+       if (optionsRef.current && !optionsRef.current.contains(event.target)) {
+         setShowOptions(false);
+       }
+     };
+
+     if (showOptions) {
+       document.addEventListener("mousedown", handleOutsideClick);
+     } else {
+       document.removeEventListener("mousedown", handleOutsideClick);
+     }
+
+     return () => {
+       document.removeEventListener("mousedown", handleOutsideClick);
+     };
+   }, [showOptions]);
+
   return (
     <div className="container -mt-6 w-full mx-auto py-10">
-      
       <input
         type="file"
         accept="image/*"
         onChange={handleImageUpload}
-        className="hidden" 
-        id="file-input" 
+        className="hidden"
+        id="file-input"
       />
 
-     
       {!image && (
         <div className="border bg-white/10 border-gray-300 rounded-lg h-80 m-auto  w-full">
           <label htmlFor="file-input" className="cursor-pointer mb-4">
@@ -69,32 +86,30 @@ function ImageUploader() {
         </div>
       )}
 
-      
       {imageUrl && (
-        <div className="mb-4">
+        <div className="mb-1">
           <img
             src={imageUrl}
             alt="Uploaded"
             className="w-full h-96 object-cover border border-gray-300 rounded-lg cursor-pointer"
-            onClick={handleImageClick}  
+            onClick={handleImageClick}
           />
         </div>
       )}
 
-       
       {showOptions && (
-        <div className="flex items-center ml-28 space-x-4">
+        <div ref={optionsRef} className="flex items-center  ml-20 space-x-2">
           <button
             onClick={downloadImage}
-            className="bg-blue-600 text-white px-2 py-2 rounded-lg transition duration-300 hover:bg-blue-700"
+            className="border border-blue-500 text-blue-500 p-0.5 rounded "
           >
-            Download Image
+            Download
           </button>
           <button
             onClick={removeImage}
-            className="text-red-500 hover:text-red-700 flex items-center"
+            className="text-red-500 border p-0.5 rounded border-red-500 flex items-center"
           >
-            Remove Image
+            Remove
           </button>
         </div>
       )}

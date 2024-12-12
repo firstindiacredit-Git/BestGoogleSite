@@ -285,6 +285,7 @@ const Bookmarks = () => {
         setNewBookmark({ name: "", link: "" });
         setVisibleForm(null);
       } catch (error) {
+        alert("Please Login to Save Bookmarks")
         console.error("Error adding bookmark:", error);
       }
     } else {
