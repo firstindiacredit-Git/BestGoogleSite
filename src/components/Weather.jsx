@@ -66,6 +66,7 @@ const WeatherCard = ({ weatherData, time, date }) => {
             />
           </div>
         </div>
+        <p className="text-2xl -mt-3 font-semibold capitalize">{CITY}</p>
         <p className="text-lg capitalize">
           {weatherData.weather[0].description}
         </p>
@@ -83,7 +84,6 @@ const WeatherCard = ({ weatherData, time, date }) => {
           label="Humidity"
           value={`${weatherData.main.humidity}%`}
           icon={<Droplets className="w-4 h-4" />}
-          
         />
         <WeatherDetail
           icon={<Wind className="w-4 h-4" />}

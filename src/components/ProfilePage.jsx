@@ -123,7 +123,7 @@ const ProfilePage = () => {
    };
 
   return (
-    <div className="min-h-screen bg-gray-50  dark:bg-gray-900 p-6">
+    <div className="min-h-screen bg-gray-50 dark:text-white dark:bg-gray-900 p-6">
       <button
         onClick={goBack}
         className="absolute top-4 left-4 text-blue-600 border border-blue-600 px-6 py-1 rounded hover:text-white hover:bg-blue-600"
@@ -159,7 +159,7 @@ const ProfilePage = () => {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="border rounded p-2 w-full"
+                  className="border dark:text-black rounded p-2 w-full"
                 />
                 <button
                   onClick={handleSaveName}
@@ -185,7 +185,7 @@ const ProfilePage = () => {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="border rounded p-2 w-full"
+                  className="border rounded dark:text-black p-2 w-full"
                 />
                 <button onClick={() => setShowPassword(!showPassword)}>
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
@@ -223,7 +223,7 @@ const ProfilePage = () => {
         {userId && (
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="font-semibold ">Change PIN</h2>
+              <h2 className="font-semibold mb-2">Change PIN</h2>
               {isEditingPin && (
                 <div className="relative mb-2 flex items-center space-x-2">
                   {newPin.map((digit, index) => (
