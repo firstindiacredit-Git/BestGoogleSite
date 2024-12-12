@@ -11,7 +11,7 @@ const pricingData = [
   },
   {
     tier: "Standard",
-    price: "$5",
+    price: "$1",
     benefits: [
       "Unlimited queries",
       "Priority support",
@@ -20,7 +20,7 @@ const pricingData = [
   },
   {
     tier: "Pro",
-    price: "$10",
+    price: "$2",
     benefits: ["Unlimited queries", "Dedicated support", "Custom integrations"],
   },
 ];

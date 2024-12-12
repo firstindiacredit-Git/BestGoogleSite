@@ -34,6 +34,7 @@ const CredentialManager = () => {
     password: "",
     notes: "",
   });
+  
   const [length, setLength] = useState(12);
   const [genPass, setGenPass] = useState("");
   const [isLocked, setIsLocked] = useState(true);

@@ -106,42 +106,38 @@ export default function AnimatedTooltipPreview() {
   // Cache to avoid multiple calls to Firebase
   const [cachedBookmarks, setCachedBookmarks] = useState([]);
 
-  // // Fetch bookmarks when the user logs in
-  // useEffect(() => {
-  //   const unsubscribe = onAuthStateChanged(auth, (user) => {
-  //     if (user) {
-  //       setUserId(user.uid);
-  //     } else {
-  //       setUserId(null);
-  //     }
-  //   });
+   useEffect(() => {
+     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+       if (user) {
+         setUserId(user.uid);
 
-  //   return () => unsubscribe();
-  // }, []);
+         // Fetch bookmarks only if they are not already cached
+         if (cachedBookmarks.length === 0) {
+           try {
+             const bookmarksSnapshot = await getDocs(
+               collection(db, "users", user.uid, "addbookmarks")
+             );
+             const bookmarksData = bookmarksSnapshot.docs.map((doc) => ({
+               id: doc.id,
+               ...doc.data(),
+             }));
 
-  // useEffect(() => {
-  //   const fetchBookmarks = async () => {
-  //     if (userId && cachedBookmarks.length === 0) {
-  //       try {
-  //         const bookmarksSnapshot = await getDocs(
-  //           collection(db, "users", userId, "addbookmarks")
-  //         );
-  //         const bookmarksData = bookmarksSnapshot.docs.map((doc) => ({
-  //           id: doc.id,
-  //           ...doc.data(),
-  //         }));
+             setPeople((prev) => [...defaultPeople, ...bookmarksData]);
+             setCachedBookmarks(bookmarksData);
+           } catch (error) {
+             console.error("Error fetching bookmarks:", error);
+             setErrorMessage("Failed to fetch bookmarks. Please try again.");
+           }
+         }
+       } else {
+         setUserId(null);
+         setPeople(defaultPeople); // Reset to default if the user logs out
+       }
+     });
 
-  //         setPeople((prev) => [...defaultPeople, ...bookmarksData]);
-  //         setCachedBookmarks(bookmarksData); // Cache bookmarks after fetching
-  //       } catch (error) {
-  //         console.error("Error fetching bookmarks:", error);
-  //         setErrorMessage("Failed to fetch bookmarks. Please try again.");
-  //       }
-  //     }
-  //   };
+     return () => unsubscribe();
+   }, [cachedBookmarks]);
 
-  //   fetchBookmarks();
-  // }, [userId, cachedBookmarks]); // Only fetch when userId or cachedBookmarks changes
 
   const validateURL = (url) => {
     const pattern = /^(http|https):\/\/[^\s$.?#].[^\s]*$/;

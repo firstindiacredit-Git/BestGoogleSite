@@ -205,7 +205,7 @@ const ProfilePage = () => {
         </div>
 
         {/* Account Type */}
-        <div className="flex justify-between border-b items-center">
+        <div className="flex justify-between border-b  items-center">
           <div>
             <h2 className="font-semibold">Account</h2>
             <p className="text-green-500">{accountType}</p>
