@@ -66,9 +66,9 @@ const ClockApp = () => {
         "selectedCountries",
         JSON.stringify(updatedCountries)
       );
-      // toast.success(`Clock for ${countryLabel} added!`);
+      
     } else if (selectedCountries.length >= 4) {
-      // toast.warn("You can only add up to 4 clocks.");
+  
     }
   };
 

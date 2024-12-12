@@ -13,10 +13,9 @@ export default function Users() {
   const [error, setError] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [viewType, setViewType] = useState("list"); // New state for view type
+  const [viewType, setViewType] = useState("list");  
   const usersPerPage = 15;
-
-  // Fetch the users from Firestore
+ 
   const fetchUsers = async () => {
     try {
       const querySnapshot = await getDocs(collection(db, "users"));
@@ -34,11 +33,11 @@ export default function Users() {
   };
 
   useEffect(() => {
-    // Listen for authentication state changes
+    
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
       if (user) {
-        fetchUsers(); // Fetch users when the user is authenticated
+        fetchUsers(); 
       }
     });
 
@@ -46,11 +45,11 @@ export default function Users() {
   }, []);
 
   useEffect(() => {
-    // Re-fetch users when currentUser changes (for example, after updating profile)
+     
     if (currentUser) {
       fetchUsers();
     }
-  }, [currentUser]); // This will trigger when currentUser is updated
+  }, [currentUser]); 
 
   if (loading) {
     return <div>Loading users...</div>;
@@ -59,14 +58,12 @@ export default function Users() {
   if (error) {
     return <div className="text-red-500 text-center">{error}</div>;
   }
-
-  // Pagination logic
+ 
   const indexOfLastUser = currentPage * usersPerPage;
   const indexOfFirstUser = indexOfLastUser - usersPerPage;
   const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
   const totalPages = Math.ceil(users.length / usersPerPage);
-
-  // Create array of page numbers
+ 
   const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   return (

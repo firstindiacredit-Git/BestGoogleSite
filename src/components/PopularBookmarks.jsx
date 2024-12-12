@@ -273,7 +273,6 @@ const Bookmarks = () => {
      },
    }));
  };
-
   const fetchFavicon = (url) =>
     `https://www.google.com/s2/favicons?sz=64&domain=${url}`;
 
@@ -398,11 +397,15 @@ const Bookmarks = () => {
   const toggleForm = (category) => {
     setVisibleForm((prev) => (prev === category ? null : category));
   };
+
+   const handleKeyDown = (e) => {
+     if (e.key === "e") e.preventDefault();  
+     if (e.key === "Enter") handleAddCategory(); 
+   };
   return (
     <div className="container mt-7 mx-auto">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {Object.keys(initialBookmarks).map((category) => {
-          // Define settings to avoid ReferenceError
           const settings = categorySettings[category] || {};
 
           return (
@@ -410,13 +413,13 @@ const Bookmarks = () => {
               key={category}
               className="rounded-lg shadow relative"
               style={{
-                backgroundColor: settings.bgColor || " ", // Default to white if undefined
+                backgroundColor: settings.bgColor || " ",  
               }}
             >
               <div className="flex justify-between items-center p-4">
                 <h3
                   className="text-xl font-semibold"
-                  style={{ color: settings.textColor || " " }} // Default to black if undefined
+                  style={{ color: settings.textColor || " " }}  
                 >
                   {category}
                 </h3>
@@ -473,8 +476,8 @@ const Bookmarks = () => {
                               key={color}
                               className={`w-5 h-5 border-1 transition-all duration-200 ${
                                 background[category]?.bgColor === color
-                                  ? "border-black" // Black border for the selected color
-                                  : "border-gray-700" // Default light gray border
+                                  ? "border-black"  
+                                  : "border-gray-700"  
                               } hover:border-gray-500 focus:outline`}
                               style={{ backgroundColor: color }}
                               onClick={() =>
@@ -540,8 +543,8 @@ const Bookmarks = () => {
                               key={color}
                               className={`w-5 h-5 border-1 transition-all duration-200 ${
                                 background[category]?.textColor === color
-                                  ? "border-black" // Black border for the selected color
-                                  : "border-gray-700" // Default light gray border
+                                  ? "border-black"  
+                                  : "border-gray-700" 
                               } hover:border-gray-500 focus:outline`}
                               style={{ backgroundColor: color }}
                               onClick={() =>
@@ -781,8 +784,6 @@ const Bookmarks = () => {
                 </button>
               </div>
 
-              
-
               {/* Add Bookmark */}
               {/* <div>
                 <h4 className="text-sm font-semibold text-gray-500 mb-2">
@@ -833,6 +834,7 @@ const Bookmarks = () => {
         <input
           type="text"
           value={newCategory}
+          onKeyDown={(e) => handleKeyDown(e)}
           onChange={(e) => setNewCategory(e.target.value)}
           placeholder="New Category Name"
           className="border rounded-lg p-2 w-full"

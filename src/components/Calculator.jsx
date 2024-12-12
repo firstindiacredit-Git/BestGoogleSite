@@ -71,7 +71,7 @@ function Calculator() {
 
   const clearHistory = () => {
     setHistory([]);
-    setCalcInput(""); // Clear input when clearing history
+    setCalcInput("");  
     localStorage.removeItem("calcHistory");
   };
 
@@ -79,7 +79,7 @@ function Calculator() {
     <div className="flex items-center w-full  mt-1 rounded-lg mb-5 min-h-96 justify-center">
       <div className="dark:bg-[#1f345f] bg-gray-200  h-full w-full rounded-lg p-4 ">
         {showHistory ? (
-          /* History View */
+           
           <div className=" dark:bg-[#1f345f] text-white w-full h-full p-4 rounded-lg">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-bold text-lg">History</h3>
@@ -118,7 +118,7 @@ function Calculator() {
             </button>
           </div>
         ) : (
-          /* Calculator View */
+           
           <>
             {/* Display */}
             <div className="text-right text-gray-700 dark:text-white p-4 rounded-lg bg-white dark:bg-gray-800 mb-4">

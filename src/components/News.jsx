@@ -5,9 +5,9 @@ const News = () => {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [country, setCountry] = useState("us"); // Default to India
+  const [country, setCountry] = useState("us"); 
   const [category, setCategory] = useState("general");
-  const [language, setLanguage] = useState("en"); // Default to English
+  const [language, setLanguage] = useState("en");  
 
   const categories = [
     "general",
@@ -24,8 +24,7 @@ const News = () => {
     { code: "es", name: "Spanish" },
     { code: "fr", name: "French" },
     { code: "de", name: "German" },
-    // Add more languages as needed
-  ];
+       ];
 
   const countries = [
     { code: "us", name: "United States" },
@@ -33,20 +32,19 @@ const News = () => {
     { code: "gb", name: "United Kingdom" },
     { code: "au", name: "Australia" },
     { code: "ca", name: "Canada" },
-    // Add more countries as needed
-  ];
+    ];
 
   useEffect(() => {
     const fetchNews = async () => {
       setLoading(true);
       setError(null);
       try {
-        console.log("Fetching news for:", country, category, language); // Debug log
+        console.log("Fetching news for:", country, category, language); 
         const response = await axios.get(
           `https://newsapi.org/v2/top-headlines?country=${country}&category=${category}&language=${language}&apiKey=8062ee449f054dfaa9df5baaa2e9a439`
         );
 
-        console.log("Response:", response.data); // Debug log
+        console.log("Response:", response.data);  
         if (response.data.articles && response.data.articles.length > 0) {
           setArticles(response.data.articles);
         } else {

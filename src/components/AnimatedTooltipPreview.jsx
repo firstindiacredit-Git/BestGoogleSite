@@ -42,8 +42,8 @@ function AnimatedTooltip({ items, handleEdit, handleDelete }) {
   };
 
    const handleKeyDown = (e) => {
-     if (e.key === "e") e.preventDefault(); // Prevent entering 'e' in number inputs
-     if (e.key === "Enter") handleAddTask(); // Handle Enter key
+     if (e.key === "e") e.preventDefault(); 
+     if (e.key === "Enter") handleAddTask(); 
    };
 
   return (
@@ -138,7 +138,7 @@ export default function AnimatedTooltipPreview() {
     });
 
     return () => unsubscribe();
-  }, []); // Dependencies removed to prevent looping
+  }, []);  
 
   const validateURL = (url) => {
     const pattern = /^(http|https):\/\/[^\s$.?#].[^\s]*$/;

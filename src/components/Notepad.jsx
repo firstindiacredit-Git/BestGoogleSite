@@ -138,7 +138,7 @@ const NotepadWithLines = () => {
   };
 
   const saveNote = async () => {
-    if (!note.trim()) return; // Prevent saving blank text
+    if (!note.trim()) return;  
 
     if (!user) {
       alert("Please log in to save notes.");
@@ -243,8 +243,8 @@ const NotepadWithLines = () => {
                   key={color}
                   className={`w-5 h-5 border-1  transition-all duration-200 ${
                     backgroundColor === color
-                      ? "border-black" // Black border for the selected color
-                      : "border-gray-700" // Default light gray border
+                      ? "border-black" 
+                      : "border-gray-700"  
                   } hover:border-gray-500 focus:outline `}
                   style={{ backgroundColor: color }}
                   onClick={() => handleColorSelection(color)}

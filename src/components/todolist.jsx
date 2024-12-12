@@ -106,8 +106,8 @@ const SortableToDoList = () => {
 
    const handleKeyDown = (e) => {
     
-     if (e.key === "e") e.preventDefault(); // Prevent entering 'e' in number inputs
-     if (e.key === "Enter") handleAddTask(); // Handle Enter key
+     if (e.key === "e") e.preventDefault(); 
+     if (e.key === "Enter") handleAddTask(); 
    };
 
   return (
@@ -167,8 +167,8 @@ const SortableToDoList = () => {
                           } break-words`}
                           style={{
                             display: "inline-block",
-                            width: "15ch", // Limits the width to 26 characters
-                            overflowWrap: "break-word", // Ensures proper word wrapping
+                            width: "15ch",  
+                            overflowWrap: "break-word",  
                           }}
                         >
                           {task.text}

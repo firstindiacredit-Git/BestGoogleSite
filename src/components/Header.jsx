@@ -15,8 +15,7 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
   const [showButtons, setShowButtons] = useState(false);
   const [user, setUser] = useState(null);
   const [panel, setPanel] = useState(false);
-
-  // Check for user authentication state
+ 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
@@ -33,14 +32,11 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
 
     return () => unsubscribe();
   }, []);
-
-  // Toggle panel visibility
+ 
   const togglePanel = () => setPanel(!panel);
-
-  // Toggle the visibility of the settings buttons
+ 
   const toggleMenu = () => setShowButtons(!showButtons);
-
-  // Handle user sign out
+ 
   const handleSignOut = async () => {
     try {
       await signOut(auth);
@@ -49,8 +45,7 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
       console.error("Sign out error:", error.message);
     }
   };
-
-  // Close menus when clicking outside
+ 
   useEffect(() => {
     const handleOutsideClick = (event) => {
       if (

@@ -94,7 +94,6 @@ const CategoryPage = () => {
     return brightness > 128;
   };
 
-  // Update localStorage whenever categorySettings changes
   useEffect(() => {
     localStorage.setItem("categorySettings", JSON.stringify(categorySettings));
   }, [categorySettings]);
@@ -153,7 +152,7 @@ const CategoryPage = () => {
   }, [user, categories]);
   const handleDeleteCategory = async (categoryId) => {
     try {
-      // Delete the category document from Firestore
+      
       await deleteDoc(doc(db, "users", user.uid, "categories", categoryId));
 
       console.log(`Category ${categoryId} deleted successfully.`);
@@ -286,7 +285,7 @@ const CategoryPage = () => {
 
   useEffect(() => {
     const handleClickOption = (event) => {
-      // Check if the clicked area is outside the backgroundRef and close the options
+       
       if (
         backgroundRef.current &&
         !backgroundRef.current.contains(event.target)
@@ -296,9 +295,9 @@ const CategoryPage = () => {
         setViewBackground(false);
         setPositionBackground(false);
       }
-      // Check if the clicked area is outside anotherRef and reset other state
+      
       if (anotherRef.current && !anotherRef.current.contains(event.target)) {
-        setTextBookmark(false); // Reset toggleTextBookmark if clicked outside
+        setTextBookmark(false); 
       }
     };
 
@@ -310,14 +309,13 @@ const CategoryPage = () => {
 
   const handleDeleteCatBookmarks = (category, bookmarkId) => {
     try {
-      // Assuming `category` is an array of bookmark objects
+     
       if (Array.isArray(category)) {
         const updatedCategory = category.filter(
           (bookmark) => bookmark.id !== bookmarkId
         );
 
-        // Update Firebase or local state with updatedCategory
-      } else {
+             } else {
         throw new Error("Category is not an array");
       }
     } catch (error) {
@@ -353,6 +351,8 @@ const CategoryPage = () => {
       }[position] || "justify-start"
     );
   };
+
+  
 
   return (
     <div>
@@ -446,7 +446,7 @@ const CategoryPage = () => {
                                   color
                                     ? "2px solid black"
                                     : "none",
-                                position: "relative", // Ensure checkmark is positioned correctly
+                                position: "relative", 
                               }}
                               className="w-[20px] h-[20px] border border-gray-300"
                             >
@@ -458,7 +458,7 @@ const CategoryPage = () => {
                                     top: "50%",
                                     left: "50%",
                                     transform: "translate(-50%, -50%)",
-                                    color: isLightColor(color) ? "" : "", // Check for light color
+                                    color: isLightColor(color) ? "" : "", 
                                   }}
                                 >
                                   ✓
@@ -494,7 +494,7 @@ const CategoryPage = () => {
                   {/* Text Color Option */}
                   <div className="relative">
                     <button
-                      onClick={() => toggleTextBookmark(category.name)} // Toggle the state
+                      onClick={() => toggleTextBookmark(category.name)}  
                       className={`w-full text-left text-sm font-medium mb-2 ${
                         textbackground[category.name]?.showTextColor
                           ? "text-red-500"
@@ -540,7 +540,7 @@ const CategoryPage = () => {
                                   color
                                     ? "2px solid black"
                                     : "none",
-                                position: "relative", // Ensure checkmark is positioned correctly
+                                position: "relative",  
                               }}
                               className="w-[20px] h-[20px] border border-gray-300"
                             >
@@ -552,7 +552,7 @@ const CategoryPage = () => {
                                     top: "50%",
                                     left: "50%",
                                     transform: "translate(-50%, -50%)",
-                                    color: isLightColor(color) ? "" : "", // Check for light color
+                                    color: isLightColor(color) ? "" : "",  
                                   }}
                                 >
                                   ✓
@@ -686,7 +686,7 @@ const CategoryPage = () => {
                     )}
                     <div className="w-full text-left text-sm font-medium mb-2">
                       <button
-                        onClick={() => handleDeleteCategory(category.id)} // Call the updated function
+                        onClick={() => handleDeleteCategory(category.id)}  
                         className="flex w-full text-left text-red-500 hover:bg-red-100"
                       >
                         <MdDeleteForever className="mt-[3px]" />

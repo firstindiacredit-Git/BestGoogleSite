@@ -52,8 +52,7 @@ export default function Dashboard() {
 
     fetchTotals();
   }, []);
-
-  // Real-time recent activity listener
+ 
   useEffect(() => {
     const unsubscribeUsers = onSnapshot(collection(db, "users"), (snapshot) => {
       snapshot.docChanges().forEach((change) => {
@@ -98,8 +97,7 @@ export default function Dashboard() {
       unsubscribeLinks();
     };
   }, []);
-
-  // Prepare data for the Bar chart
+ 
   const barChartData = {
     labels: ["Users", "Categories", "Links"],
     datasets: [
