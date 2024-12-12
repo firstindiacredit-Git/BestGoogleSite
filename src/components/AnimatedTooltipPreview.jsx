@@ -41,6 +41,11 @@ function AnimatedTooltip({ items, handleEdit, handleDelete }) {
     setMenuVisible(menuVisible === id ? null : id);
   };
 
+   const handleKeyDown = (e) => {
+     if (e.key === "e") e.preventDefault(); // Prevent entering 'e' in number inputs
+     if (e.key === "Enter") handleAddTask(); // Handle Enter key
+   };
+
   return (
     <div className="flex gap-3 mt-2">
       {items.map((person) => (
@@ -277,6 +282,7 @@ export default function AnimatedTooltipPreview() {
                 <input
                   type="text"
                   id="link"
+                  onKeyDown={(e) => handleKeyDown(e)}
                   value={newBookmark.link}
                   onChange={(e) =>
                     setNewBookmark({ ...newBookmark, link: e.target.value })

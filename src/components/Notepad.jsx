@@ -271,10 +271,10 @@ const NotepadWithLines = () => {
         placeholder="Start writing..."
         className="w-full h-32 p-1 border rounded resize-none focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder-gray-500"
         style={{
-          backgroundColor: backgroundColor || "#fff", // Set the background color dynamically
+          backgroundColor: backgroundColor || "#fff", 
           backgroundImage: `linear-gradient(to bottom, transparent 95%, #d3d3d3 95%, #d3d3d3 100%)`,
-          backgroundSize: "100% 24px", // Adjust the spacing between lines here
-          lineHeight: "24px", // Match the background size
+          backgroundSize: "100% 24px", 
+          lineHeight: "24px", 
         }}
       />
 

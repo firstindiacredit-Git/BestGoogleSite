@@ -20,10 +20,10 @@ const SortableToDoList = () => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUserId(user.uid);
-        fetchTasks(user.uid); // Fetch tasks on login
+        fetchTasks(user.uid); 
       } else {
         setUserId(null);
-        setTasks([]); // Reset tasks on logout
+        setTasks([]); 
       }
     });
 
@@ -31,13 +31,13 @@ const SortableToDoList = () => {
   }, []);
 
   const fetchTasks = async (uid) => {
-    // const tasksCollection = collection(db, "users", uid, "todolist");
-    // const taskSnapshot = await getDocs(tasksCollection);
-    // const fetchedTasks = taskSnapshot.docs.map((doc) => ({
-    //   id: doc.id,
-    //   ...doc.data(),
-    // }));
-    // setTasks(fetchedTasks);
+    const tasksCollection = collection(db, "users", uid, "todolist");
+    const taskSnapshot = await getDocs(tasksCollection);
+    const fetchedTasks = taskSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    setTasks(fetchedTasks);
   };
 
   const saveTask = async (task) => {
