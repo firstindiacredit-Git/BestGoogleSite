@@ -102,37 +102,43 @@ export default function Users() {
           <div
             className={`grid ${viewType === "grid" ? "grid-cols-3 gap-4" : ""}`}
           >
-            {currentUsers.map(({ id, photoURL, displayName, email, bio }) => (
-              <div
-                key={id}
-                className={`${
-                  viewType === "grid"
-                    ? "flex flex-col items-center border p-4 bg-white dark:bg-gray-800  shadow-md rounded-lg"
-                    : "flex items-center p-4 bg-white dark:bg-gray-800 shadow-md rounded-lg mb-4"
-                }`}
-              >
-                <img
-                  src={photoURL || "/default-avatar.png"}
-                  alt="User Avatar"
+            {currentUsers.map(
+              ({ id, photoURL, displayName, email, bio, role }) => (
+                <div
+                  key={id}
                   className={`${
                     viewType === "grid"
-                      ? "h-[80px] w-[80px]"
-                      : "h-[60px] w-[60px]"
-                  } rounded-full border border-gray-300 dark:border-gray-600 mb-2`}
-                />
-                <div className="text-center flex-1">
-                  <div className="text-xl font-semibold">
-                    {displayName || "No Name"}
-                  </div>
-                  <p className="text-gray-500 dark:text-blue-600">{email}</p>
-                  {bio && (
-                    <p className="text-gray-600 dark:text-blue-400 italic">
-                      {bio}
+                      ? "flex flex-col items-center border p-4 bg-white dark:bg-gray-800 shadow-md rounded-lg"
+                      : "flex items-center p-4 bg-white dark:bg-gray-800 shadow-md rounded-lg mb-4"
+                  }`}
+                >
+                  <img
+                    src={photoURL || "/default-avatar.png"}
+                    alt="User Avatar"
+                    className={`${
+                      viewType === "grid"
+                        ? "h-[80px] w-[80px]"
+                        : "h-[60px] w-[60px]"
+                    } rounded-full border border-gray-300 dark:border-gray-600 mb-2`}
+                  />
+                  <div className="text-center flex-1">
+                    <div className="text-xl font-semibold">
+                      {displayName || "No Name"}
+                    </div>
+                    <p className="text-gray-500 dark:text-blue-600">{email}</p>
+                    {bio && (
+                      <p className="text-gray-600 dark:text-blue-400 italic">
+                        {bio}
+                      </p>
+                    )}
+                    <p className="text-sm mt-2">
+                      <span className="font-semibold">Role:</span>{" "}
+                      {role || "User"}
                     </p>
-                  )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            )}
           </div>
 
           {/* Pagination Controls */}
