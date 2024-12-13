@@ -123,33 +123,34 @@ const CategoryPage = () => {
     }
   }, [user]);
 
-  useEffect(() => {
-    if (user) {
-      const unsubscribeFns = categories.map((category) => {
-        const bookmarksRef = collection(
-          db,
-          "users",
-          user.uid,
-          "categories",
-          category.id,
-          "catbookmarks"
-        );
-        const unsubscribeBookmarks = onSnapshot(bookmarksRef, (snapshot) => {
-          const bookmarksData = snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-          setFirebaseBookmarks((prev) => ({
-            ...prev,
-            [category.id]: bookmarksData,
-          }));
-        });
-        return unsubscribeBookmarks;
-      });
+ useEffect(() => {
+   if (user) {
+     const unsubscribeFns = categories.map((category) => {
+       const bookmarksRef = collection(
+         db,
+         "users",
+         user.uid,
+         "categories",
+         category.id,
+         "catbookmarks"
+       );
+       const unsubscribeBookmarks = onSnapshot(bookmarksRef, (snapshot) => {
+         const bookmarksData = snapshot.docs.map((doc) => ({
+           id: doc.id,
+           ...doc.data(),
+         }));
+         setFirebaseBookmarks((prev) => ({
+           ...prev,
+           [category.id]: bookmarksData,
+         }));
+       });
+       return unsubscribeBookmarks;
+     });
 
-      return () => unsubscribeFns.forEach((unsubscribe) => unsubscribe());
-    }
-  }, [user, categories]);
+     return () => unsubscribeFns.forEach((unsubscribe) => unsubscribe());
+   }
+ }, [user, categories]);
+
   const handleDeleteCategory = async (categoryId) => {
     try {
       
@@ -193,50 +194,51 @@ const CategoryPage = () => {
     return `https://www.google.com/s2/favicons?sz=64&domain_url=${url}`;
   };
 
-  const handleAddCatBookmark = async (categoryId) => {
-    if (
-      !user ||
-      newCatBookmark.name.trim() === "" ||
-      newCatBookmark.url.trim() === ""
-    )
-      return;
+ const handleAddCatBookmark = async (categoryId) => {
+   if (
+     !user ||
+     newCatBookmark.name.trim() === "" ||
+     newCatBookmark.url.trim() === ""
+   )
+     return;
+   try {
+     const faviconUrl = fetchFavicon(newCatBookmark.url);
+     await addDoc(
+       collection(
+         db,
+         "users",
+         user.uid,
+         "categories",
+         categoryId,
+         "catbookmarks"
+       ),
+       { ...newCatBookmark, favicon: faviconUrl }
+     );
+     setCatNewBookmark({ name: "", url: "" });
+   } catch (error) {
+     console.error("Error adding bookmark: ", error);
+   }
+ };
 
-    try {
-      const faviconUrl = fetchFavicon(newCatBookmark.url);
-      await addDoc(
-        collection(
-          db,
-          "users",
-          user.uid,
-          "categories",
-          categoryId,
-          "catbookmarks"
-        ),
-        { ...newCatBookmark, favicon: faviconUrl }
-      );
-      setCatNewBookmark({ name: "", url: "" });
-    } catch (error) {
-      console.error("Error adding bookmark: ", error);
-    }
-  };
+   const handleDeleteCatBookmark = async (categoryId, bookmarkId) => {
+     try {
+       await deleteDoc(
+         doc(
+           db,
+           "users",
+           user.uid,
+           "categories",
+           categoryId,
+           "catbookmarks",
+           bookmarkId
+         )
+       );
+       console.log(`Bookmark ${bookmarkId} deleted successfully.`);
+     } catch (error) {
+       console.error("Error deleting bookmark: ", error);
+     }
+   };
 
-  const handleDeleteCatBookmark = async (categoryId, bookmarkId) => {
-    try {
-      await deleteDoc(
-        doc(
-          db,
-          "users",
-          user.uid,
-          "categories",
-          categoryId,
-          "catbookmarks",
-          bookmarkId
-        )
-      );
-    } catch (error) {
-      console.error("Error deleting bookmark: ", error);
-    }
-  };
 
   const toggleMenu = (category) => {
     setMenuOpen((prev) => ({
@@ -306,22 +308,6 @@ const CategoryPage = () => {
       document.removeEventListener("mousedown", handleClickOption);
     };
   }, []);
-
-  const handleDeleteCatBookmarks = (category, bookmarkId) => {
-    try {
-     
-      if (Array.isArray(category)) {
-        const updatedCategory = category.filter(
-          (bookmark) => bookmark.id !== bookmarkId
-        );
-
-             } else {
-        throw new Error("Category is not an array");
-      }
-    } catch (error) {
-      console.error("Error deleting bookmark: ", error);
-    }
-  };
 
   const toggleForm = (category) => {
     setVisibleForm((prev) => (prev === category ? null : category));
@@ -446,7 +432,7 @@ const CategoryPage = () => {
                                   color
                                     ? "2px solid black"
                                     : "none",
-                                position: "relative", 
+                                position: "relative",
                               }}
                               className="w-[20px] h-[20px] border border-gray-300"
                             >
@@ -458,7 +444,7 @@ const CategoryPage = () => {
                                     top: "50%",
                                     left: "50%",
                                     transform: "translate(-50%, -50%)",
-                                    color: isLightColor(color) ? "" : "", 
+                                    color: isLightColor(color) ? "" : "",
                                   }}
                                 >
                                   ✓
@@ -494,7 +480,7 @@ const CategoryPage = () => {
                   {/* Text Color Option */}
                   <div className="relative">
                     <button
-                      onClick={() => toggleTextBookmark(category.name)}  
+                      onClick={() => toggleTextBookmark(category.name)}
                       className={`w-full text-left text-sm font-medium mb-2 ${
                         textbackground[category.name]?.showTextColor
                           ? "text-red-500"
@@ -540,7 +526,7 @@ const CategoryPage = () => {
                                   color
                                     ? "2px solid black"
                                     : "none",
-                                position: "relative",  
+                                position: "relative",
                               }}
                               className="w-[20px] h-[20px] border border-gray-300"
                             >
@@ -552,7 +538,7 @@ const CategoryPage = () => {
                                     top: "50%",
                                     left: "50%",
                                     transform: "translate(-50%, -50%)",
-                                    color: isLightColor(color) ? "" : "",  
+                                    color: isLightColor(color) ? "" : "",
                                   }}
                                 >
                                   ✓
@@ -686,7 +672,7 @@ const CategoryPage = () => {
                     )}
                     <div className="w-full text-left text-sm font-medium mb-2">
                       <button
-                        onClick={() => handleDeleteCategory(category.id)}  
+                        onClick={() => handleDeleteCategory(category.id)}
                         className="flex w-full text-left text-red-500 hover:bg-red-100"
                       >
                         <MdDeleteForever className="mt-[3px]" />
@@ -734,9 +720,9 @@ const CategoryPage = () => {
                     {bookmark.id && (
                       <button
                         onClick={() =>
-                          handleDeleteCatBookmarks(category, bookmark.id)
+                          handleDeleteCatBookmark(category.id, bookmark.id)
                         }
-                        className="absolute top-0.5 right-0.5 opacity-0 group-hover:opacity-100 transition-opacity  rounded-full hover:bg-red-200"
+                        className="absolute top-0.5 right-0.5 opacity-0 group-hover:opacity-100 transition-opacity rounded-full hover:bg-red-200"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"

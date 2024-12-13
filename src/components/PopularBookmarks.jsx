@@ -11,7 +11,6 @@ import { onAuthStateChanged } from "firebase/auth";
 import { MdAdd, MdMoreVert } from "react-icons/md";
 import Category from "../components/Category";
 
-
 const initialBookmarks = {
   Popular: [
     { name: "Facebook", link: "https://www.facebook.com" },
@@ -89,10 +88,9 @@ const Bookmarks = () => {
   const [textbackground, setTextBackground] = useState(false);
   const [viewbackground, setViewBackground] = useState(false);
   const [positionbackground, setPositionBackground] = useState(false);
-   const [categories, setCategories] = useState([]); // Categories data
-   const [newCategory, setNewCategory] = useState(""); 
+  const [categories, setCategories] = useState([]); // Categories data
+  const [newCategory, setNewCategory] = useState("");
   const [firebaseBookmarks, setFirebaseBookmarks] = useState("");
-  
 
   // Load category settings from localStorage or use default values
   const [categorySettings, updateCategorySetting] = useState(() => {
@@ -123,18 +121,18 @@ const Bookmarks = () => {
     category: "",
   });
 
- const handleDeleteBookmark = async (category, id) => {
-   try {
-     await deleteDoc(doc(db, "users", user.uid, "bookmarks", id));
-     setFirebaseBookmarks((prev) => ({
-       ...prev,
-       [category]: prev[category].filter((bookmark) => bookmark.id !== id),
-     }));
-   } catch (error) {
-     console.error("Error deleting bookmark: ", error);
-     alert(`Error deleting bookmark: ${error.message}`);
-   }
- };
+  const handleDeleteBookmark = async (category, id) => {
+    try {
+      await deleteDoc(doc(db, "users", user.uid, "bookmarks", id));
+      setFirebaseBookmarks((prev) => ({
+        ...prev,
+        [category]: prev[category].filter((bookmark) => bookmark.id !== id),
+      }));
+    } catch (error) {
+      console.error("Error deleting bookmark: ", error);
+      alert(`Error deleting bookmark: ${error.message}`);
+    }
+  };
 
   // Add a new category
   const handleAddCategory = async () => {
@@ -167,7 +165,7 @@ const Bookmarks = () => {
 
   const menuRef = useRef(null); // Reference for menu
   const backgroundRef = useRef(null);
-    const anotherRef = useRef(null);
+  const anotherRef = useRef(null);
   const formRef = useRef(null); // Reference for form
 
   useEffect(() => {
@@ -227,7 +225,7 @@ const Bookmarks = () => {
         setPositionBackground(false);
       }
       if (anotherRef.current && !anotherRef.current.contains(event.target)) {
-        setTextBackground(false);  
+        setTextBackground(false);
       }
     };
 
@@ -237,42 +235,43 @@ const Bookmarks = () => {
     };
   }, []);
 
- const toggleBookmark = (category) => {
-   setBackground((prev) => ({
-     ...prev,
-     [category]: {
-       ...prev[category],
-       showBgColor: !prev[category]?.showBgColor,
-     },
-   }));
- };
- const toggleTextBookmark = (category) => {
-   setTextBackground((prev) => ({
-     ...prev,
-     [category]: {
-       ...prev[category],
-       showTextColor: !prev[category]?.showTextColor,
-     },
-   }));
- };
- const toggleViewBookmark = (category) => {
-   setViewBackground((prev) => ({
-     ...prev,
-     [category]: {
-       ...prev[category],
-       showView: !prev[category]?.showView,
-     },
-   }));
- };
- const togglePositionBookmark = (category) => {
-   setPositionBackground((prev) => ({
-     ...prev,
-     [category]: {
-       ...prev[category],
-       showPosition: !prev[category]?.showPosition,
-     },
-   }));
- };
+  const toggleBookmark = (category) => {
+    setBackground((prev) => ({
+      ...prev,
+      [category]: {
+        ...prev[category],
+        showBgColor: !prev[category]?.showBgColor,
+      },
+    }));
+  };
+  const toggleTextBookmark = (category) => {
+    setTextBackground((prev) => ({
+      ...prev,
+      [category]: {
+        ...prev[category],
+        showTextColor: !prev[category]?.showTextColor,
+      },
+    }));
+  };
+  const toggleViewBookmark = (category) => {
+    setViewBackground((prev) => ({
+      ...prev,
+      [category]: {
+        ...prev[category],
+        showView: !prev[category]?.showView,
+      },
+    }));
+  };
+  const togglePositionBookmark = (category) => {
+    setPositionBackground((prev) => ({
+      ...prev,
+      [category]: {
+        ...prev[category],
+        showPosition: !prev[category]?.showPosition,
+      },
+    }));
+  };
+
   const fetchFavicon = (url) =>
     `https://www.google.com/s2/favicons?sz=64&domain=${url}`;
 
@@ -284,7 +283,6 @@ const Bookmarks = () => {
         setNewBookmark({ name: "", link: "" });
         setVisibleForm(null);
       } catch (error) {
-        alert("Please Login to Save Bookmarks")
         console.error("Error adding bookmark:", error);
       }
     } else {
@@ -321,12 +319,12 @@ const Bookmarks = () => {
       ...(firebaseBookmarks[category] || []),
     ].sort((a, b) => a.name.localeCompare(b.name));
 
-     const positionClass =
-       position === "start"
-         ? "justify-start"
-         : ""
-         ? "justify-center"
-         : "justify-end";
+    const positionClass =
+      position === "start"
+        ? "justify-start"
+        : ""
+        ? "justify-center"
+        : "justify-end";
     return (
       <div
         className={`grid p-4 gap-2 ${
@@ -397,15 +395,13 @@ const Bookmarks = () => {
   const toggleForm = (category) => {
     setVisibleForm((prev) => (prev === category ? null : category));
   };
-
-   const handleKeyDown = (e) => {
-     if (e.key === "e") e.preventDefault();  
-     if (e.key === "Enter") handleAddCategory(); 
-   };
   return (
     <div className="container mt-7 mx-auto">
+      {/* <h2 className="text-3xl dark:text-white font-semibold mb-6 text-center">My Bookmarks</h2> */}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {Object.keys(initialBookmarks).map((category) => {
+          // Define settings to avoid ReferenceError
           const settings = categorySettings[category] || {};
 
           return (
@@ -413,13 +409,13 @@ const Bookmarks = () => {
               key={category}
               className="rounded-lg shadow relative"
               style={{
-                backgroundColor: settings.bgColor || " ",  
+                backgroundColor: settings.bgColor || " ", // Default to white if undefined
               }}
             >
               <div className="flex justify-between items-center p-4">
                 <h3
                   className="text-xl font-semibold"
-                  style={{ color: settings.textColor || " " }}  
+                  style={{ color: settings.textColor || " " }} // Default to black if undefined
                 >
                   {category}
                 </h3>
@@ -476,8 +472,8 @@ const Bookmarks = () => {
                               key={color}
                               className={`w-5 h-5 border-1 transition-all duration-200 ${
                                 background[category]?.bgColor === color
-                                  ? "border-black"  
-                                  : "border-gray-700"  
+                                  ? "border-black" // Black border for the selected color
+                                  : "border-gray-700" // Default light gray border
                               } hover:border-gray-500 focus:outline`}
                               style={{ backgroundColor: color }}
                               onClick={() =>
@@ -543,8 +539,8 @@ const Bookmarks = () => {
                               key={color}
                               className={`w-5 h-5 border-1 transition-all duration-200 ${
                                 background[category]?.textColor === color
-                                  ? "border-black"  
-                                  : "border-gray-700" 
+                                  ? "border-black" // Black border for the selected color
+                                  : "border-gray-700" // Default light gray border
                               } hover:border-gray-500 focus:outline`}
                               style={{ backgroundColor: color }}
                               onClick={() =>
@@ -834,7 +830,6 @@ const Bookmarks = () => {
         <input
           type="text"
           value={newCategory}
-          onKeyDown={(e) => handleKeyDown(e)}
           onChange={(e) => setNewCategory(e.target.value)}
           placeholder="New Category Name"
           className="border rounded-lg p-2 w-full"

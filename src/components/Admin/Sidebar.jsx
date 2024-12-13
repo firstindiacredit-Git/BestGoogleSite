@@ -97,12 +97,12 @@ export default function Sidebar() {
               Add Links
             </Link>
           </li>
-          {/* <li className="p-4 mx-10">
-            <Link to="/settings" className="hover:bg-gray-700 p-2 flex rounded">
+          <li className="p-4 mx-10">
+            <Link to="/admin/AddBookmark" className="hover:bg-gray-700 p-2 flex rounded">
               <IoSettingsOutline className="mt-1 mr-1" />
               Settings
             </Link>
-          </li> */}
+          </li>
         </ul>
       </nav>
       {/* Theme Toggle Button */}
