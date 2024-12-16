@@ -508,9 +508,14 @@ const Excel = () => {
 
   // Convert Firebase data back to table format
   const convertFirebaseDataToTable = (firebaseData, rowCount, colCount) => {
-    if (!firebaseData || typeof firebaseData !== 'object') return Array(rowCount).fill().map(() => Array(colCount).fill(""));
-    
-    const table = Array(rowCount).fill().map(() => Array(colCount).fill(""));
+    if (!firebaseData || typeof firebaseData !== "object")
+      return Array(rowCount)
+        .fill()
+        .map(() => Array(colCount).fill(""));
+
+    const table = Array(rowCount)
+      .fill()
+      .map(() => Array(colCount).fill(""));
     Object.entries(firebaseData).forEach(([key, value]) => {
       const [rowIndex, colIndex] = key.split("-").map(Number);
       if (rowIndex < rowCount && colIndex < colCount) {
@@ -545,14 +550,18 @@ const Excel = () => {
   // Load table data from Firebase
   const loadTableData = async (tableId) => {
     if (!userId) return null;
-    
+
     try {
       const docSnap = await getDoc(doc(db, "users", userId, "excel", tableId));
       if (docSnap.exists()) {
         const data = docSnap.data();
         return {
           ...data,
-          data: convertFirebaseDataToTable(data.data, data.rowCount, data.colCount),
+          data: convertFirebaseDataToTable(
+            data.data,
+            data.rowCount,
+            data.colCount
+          ),
         };
       }
     } catch (error) {
@@ -565,7 +574,7 @@ const Excel = () => {
   useEffect(() => {
     const debouncedSave = debounce(async () => {
       if (!userId || !tables.length) return;
-      
+
       for (let i = 0; i < tables.length; i++) {
         await saveTableData(i);
       }
@@ -635,7 +644,8 @@ const Excel = () => {
           cols: data.cols,
           data: convertFirebaseDataToTable(data.data, data.rows, data.cols),
           cardStyle: data.cardStyle || {},
-          tableName: data.tableName || `Table ${querySnapshot.docs.indexOf(doc) + 1}`,
+          tableName:
+            data.tableName || `Table ${querySnapshot.docs.indexOf(doc) + 1}`,
           formulas: data.formulas || {},
         };
       });
@@ -905,7 +915,7 @@ const Excel = () => {
           </div>
 
           <div className="overflow-auto">
-            <table className="w-full border-collapse table-fixed">
+            <table className="w-full border-collapse table-fixed ">
               <thead>
                 <tr>
                   <th className="border bg-gray-50 px-4 py-2 w-12 sticky left-0 z-10">
@@ -916,7 +926,8 @@ const Excel = () => {
                       key={colIndex}
                       className="border bg-gray-50 px-4 py-2 relative"
                       style={{
-                        width: columnWidths[`${tableIndex}-${colIndex}`] || "120px",
+                        width:
+                          columnWidths[`${tableIndex}-${colIndex}`] || "120px",
                         minWidth: "60px",
                         position: "relative",
                       }}
@@ -936,18 +947,28 @@ const Excel = () => {
                         className="absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-blue-500"
                         onMouseDown={(e) => {
                           const startX = e.pageX;
-                          const currentWidth = columnWidths[`${tableIndex}-${colIndex}`] || 120;
+                          const currentWidth =
+                            columnWidths[`${tableIndex}-${colIndex}`] || 120;
                           const handleMouseMove = (e) => {
                             const diff = e.pageX - startX;
                             const newWidth = Math.max(60, currentWidth + diff);
                             handleColumnResize(tableIndex, colIndex, newWidth);
                           };
                           const handleMouseUp = () => {
-                            document.removeEventListener("mousemove", handleMouseMove);
-                            document.removeEventListener("mouseup", handleMouseUp);
+                            document.removeEventListener(
+                              "mousemove",
+                              handleMouseMove
+                            );
+                            document.removeEventListener(
+                              "mouseup",
+                              handleMouseUp
+                            );
                             setIsResizing(false);
                           };
-                          document.addEventListener("mousemove", handleMouseMove);
+                          document.addEventListener(
+                            "mousemove",
+                            handleMouseMove
+                          );
                           document.addEventListener("mouseup", handleMouseUp);
                           setIsResizing(true);
                         }}
@@ -960,9 +981,10 @@ const Excel = () => {
                 {table.data.map((row, rowIndex) => (
                   <tr key={rowIndex}>
                     <td
-                      className="border bg-gray-50 text-center sticky left-0 z-10"
+                      className="border bg-gray-50 w-12 text-center sticky left-0 z-10"
                       style={{
-                        height: rowHeights[`${tableIndex}-${rowIndex}`] || "24px",
+                        height:
+                          rowHeights[`${tableIndex}-${rowIndex}`] || "24px",
                       }}
                     >
                       <div className="flex items-center justify-between px-2">
@@ -983,6 +1005,11 @@ const Excel = () => {
                         editingCell?.tableIndex === tableIndex &&
                         editingCell?.rowIndex === rowIndex &&
                         editingCell?.colIndex === colIndex;
+                      const isUrl = (cell) => {
+                        const urlPattern =
+                          /^(https?:\/\/)?([\w.-]+)\.([a-z.]{2,6})([\/\w .-]*)*\/?.*$/;
+                        return urlPattern.test(cell);
+                      };
 
                       return (
                         <td
@@ -990,11 +1017,18 @@ const Excel = () => {
                           className="border px-2 bg-white py-1 relative"
                           onClick={() => {
                             handleCellSelect(tableIndex, rowIndex, colIndex);
-                            handleCellDoubleClick(tableIndex, rowIndex, colIndex);
+                            handleCellDoubleClick(
+                              tableIndex,
+                              rowIndex,
+                              colIndex
+                            );
                           }}
                           style={{
-                            width: columnWidths[`${tableIndex}-${colIndex}`] || "120px",
-                            height: rowHeights[`${tableIndex}-${rowIndex}`] || "24px",
+                            width:
+                              columnWidths[`${tableIndex}-${colIndex}`] ||
+                              "120px",
+                            height:
+                              rowHeights[`${tableIndex}-${rowIndex}`] || "24px",
                           }}
                         >
                           {isEditing ? (
@@ -1012,8 +1046,12 @@ const Excel = () => {
                                 );
                               }}
                               onBlur={() => {
-                                const currentValue = table.data[rowIndex][colIndex];
-                                if (currentValue && currentValue.startsWith('=')) {
+                                const currentValue =
+                                  table.data[rowIndex][colIndex];
+                                if (
+                                  currentValue &&
+                                  currentValue.startsWith("=")
+                                ) {
                                   recalculateFormulas(tableIndex);
                                 }
                                 setEditingCell(null);
@@ -1021,8 +1059,12 @@ const Excel = () => {
                               onKeyDown={(e) => {
                                 if (e.key === "Enter") {
                                   e.preventDefault();
-                                  const currentValue = table.data[rowIndex][colIndex];
-                                  if (currentValue && currentValue.startsWith('=')) {
+                                  const currentValue =
+                                    table.data[rowIndex][colIndex];
+                                  if (
+                                    currentValue &&
+                                    currentValue.startsWith("=")
+                                  ) {
                                     recalculateFormulas(tableIndex);
                                   }
                                   setEditingCell(null);
@@ -1030,6 +1072,15 @@ const Excel = () => {
                               }}
                               className="w-full h-full outline-none border-none"
                             />
+                          ) : isUrl(cell) ? (
+                            <a
+                              href={cell}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-500 underline"
+                            >
+                              {cell}
+                            </a>
                           ) : (
                             <div
                               className={`w-full h-full flex items-center ${

@@ -584,7 +584,7 @@ const CredentialManager = () => {
                 </div>
               )
             ) : (
-              <div className="overflow-x-auto w-[80%] min-h-72 dark:bg-gray-800 bg-white shadow-md rounded-lg">
+              <div className="overflow-x-auto w-[80%] min-h-72 dark:bg-gray-950/10 bg-white border  border-black/10 rounded-lg">
                 {filteredCredentials.length > 0 ? (
                   filteredCredentials.map((cred, index) => (
                     <table className="min-w-full border rounded-lg border-black/5 table-auto">
@@ -719,16 +719,16 @@ const CredentialManager = () => {
                     <FiPlusCircle
                       size={80}
                       onClick={() => showModal()}
-                      className="mb-4 dark:text-gray-700 cursor-pointer transition-all hover:scale-105 text-blue-200"
+                      className="mb-4 dark:text-gray-700 cursor-pointer transition-all hover:scale-105 text-blue-500"
                     />
 
                     {/* Title */}
-                    <h2 className="text-xl dark:text-gray-600  text-gray-400 font-semibold">
+                    <h2 className="text-xl dark:text-gray-600  text-gray-600 font-semibold">
                       Create Your First Credential
                     </h2>
 
                     {/* Subtitle */}
-                    <p className="  dark:text-gray-600 text-gray-300">
+                    <p className="  dark:text-gray-600 text-gray-600">
                       Start by adding your credentials securely.
                     </p>
                   </div>
