@@ -18,7 +18,6 @@ import {
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 
-// AddLinks Component
 function AddLinks() {
   const [link, setLink] = useState("");
   const [category, setCategory] = useState("");
@@ -30,17 +29,15 @@ function AddLinks() {
   const [loading, setLoading] = useState(true);
   const [dropdownStates, setDropdownStates] = useState({});
 
-  // Modal state variables
   const [isBookmarkModalOpen, setBookmarkModalOpen] = useState(false);
   const [isCategoryModalOpen, setCategoryModalOpen] = useState(false);
 
-  // Monitor authentication state and fetch data on user login
   useEffect(() => {
     const setAuthPersistence = async () => {
       try {
-        await setPersistence(auth, browserLocalPersistence); // Set persistence to local
+        await setPersistence(auth, browserLocalPersistence);  
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-          console.log("Current user:", currentUser); // Debugging
+          console.log("Current user:", currentUser);  
           setUser(currentUser);
           if (currentUser) {
             fetchData();
@@ -110,7 +107,7 @@ function AddLinks() {
       setLink("");
       setCategory("");
       fetchLinks();
-      alert("Bookmark added successfully!"); // Re-fetch links to get the latest data
+      alert("Bookmark added successfully!");  
     } catch (error) {
       console.error("Error adding bookmark: ", error);
     }
@@ -128,7 +125,7 @@ function AddLinks() {
       });
       setNewCategory("");
       fetchCategories();
-      alert("Category added successfully!"); // Re-fetch categories after adding a new one
+      alert("Category added successfully!");  
     } catch (error) {
       console.error("Error adding category: ", error);
     }
@@ -142,7 +139,7 @@ function AddLinks() {
 
     try {
       await deleteDoc(doc(db, "links", id));
-      fetchLinks(); // Re-fetch links after deletion
+      fetchLinks();  
     } catch (error) {
       console.error("Error deleting bookmark: ", error);
     }
@@ -160,7 +157,7 @@ function AddLinks() {
           link: newLink,
           category: newCategory,
         });
-        fetchLinks(); // Re-fetch links after update
+        fetchLinks(); 
       } catch (error) {
         console.error("Error updating bookmark: ", error);
       }
@@ -176,9 +173,8 @@ function AddLinks() {
     if (!confirmDelete) return;
 
     try {
-      // Before deleting the category, consider deleting the links associated with it if needed
-      await deleteDoc(doc(db, "category", id));
-      fetchCategories(); // Re-fetch categories after deletion
+           await deleteDoc(doc(db, "category", id));
+      fetchCategories();
     } catch (error) {
       console.error("Error deleting category: ", error);
     }
@@ -187,7 +183,7 @@ function AddLinks() {
   const toggleDropdown = (category) => {
     setDropdownStates((prevStates) => ({
       ...prevStates,
-      [category]: !prevStates[category], // Toggle dropdown for the specific category
+      [category]: !prevStates[category], 
     }));
   };
 

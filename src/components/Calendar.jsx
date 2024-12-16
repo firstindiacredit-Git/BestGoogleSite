@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import holidays from "./holidays"; // Import the holidays array
+import holidays from "./holidays";  
 
 const getDaysInMonth = (year, month) => {
   const date = new Date(year, month, 1);
@@ -34,16 +34,14 @@ const FullCalendar = () => {
     "November",
     "December",
   ];
-
-  // Generate the days for the selected month
+ 
   const days = getDaysInMonth(selectedYear, selectedMonth);
-
-  // Get the first day of the week for alignment
+ 
   const firstDayOfWeek = new Date(selectedYear, selectedMonth, 1).getDay();
    const lastDayOfWeek = new Date(selectedYear, selectedMonth, 1).getDay();
 
   useEffect(() => {
-    // Filter holidays that fall in the selected year and month
+     
     const filteredHolidays = holidays.filter((holiday) => {
       const holidayDate = new Date(holiday.date.iso);
       return (
@@ -53,45 +51,40 @@ const FullCalendar = () => {
     });
     setHolidaysList(filteredHolidays);
   }, [selectedYear, selectedMonth]);
-
-  // Get the holiday details for a specific day
+ 
   const getHolidayDetails = (date) => {
     return holidaysList.find((holiday) => {
       const holidayDate = new Date(holiday.date.iso);
       return holidayDate.getDate() === date.getDate();
     });
   };
-
-  // Navigate to the previous month
+ 
   const goToPreviousMonth = () => {
     setSelectedMonth((prevMonth) => {
       if (prevMonth === 0) {
         setSelectedYear((prevYear) => prevYear - 1);
-        return 11; // December
+        return 11;  
       }
       return prevMonth - 1;
     });
   };
-
-  // Navigate to the next month
+ 
   const goToNextMonth = () => {
     setSelectedMonth((prevMonth) => {
       if (prevMonth === 11) {
         setSelectedYear((prevYear) => prevYear + 1);
-        return 0; // January
+        return 0; 
       }
       return prevMonth + 1;
     });
   };
-
-  // Go to today's date
+ 
   const goToToday = () => {
     const today = new Date();
     setSelectedYear(today.getFullYear());
     setSelectedMonth(today.getMonth());
   };
-
-  // Adjust grid based on number of rows needed
+ 
   const numberOfRows = Math.ceil((days.length + firstDayOfWeek) / 7);
 
   return (
@@ -151,7 +144,7 @@ const FullCalendar = () => {
         {/* Days of the Month */}
         {days.map((date) => {
           const holiday = getHolidayDetails(date);
-          const isSunday = date.getDay() === 0; // Check if it's Sunday
+          const isSunday = date.getDay() === 0;  
           return (
             <div
               key={date.toISOString()}

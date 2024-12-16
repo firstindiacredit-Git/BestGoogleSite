@@ -20,10 +20,10 @@ const SortableToDoList = () => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUserId(user.uid);
-        fetchTasks(user.uid); // Fetch tasks on login
+        fetchTasks(user.uid); 
       } else {
         setUserId(null);
-        setTasks([]); // Reset tasks on logout
+        setTasks([]); 
       }
     });
 
@@ -31,13 +31,13 @@ const SortableToDoList = () => {
   }, []);
 
   const fetchTasks = async (uid) => {
-    // const tasksCollection = collection(db, "users", uid, "todolist");
-    // const taskSnapshot = await getDocs(tasksCollection);
-    // const fetchedTasks = taskSnapshot.docs.map((doc) => ({
-    //   id: doc.id,
-    //   ...doc.data(),
-    // }));
-    // setTasks(fetchedTasks);
+    const tasksCollection = collection(db, "users", uid, "todolist");
+    const taskSnapshot = await getDocs(tasksCollection);
+    const fetchedTasks = taskSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    setTasks(fetchedTasks);
   };
 
   const saveTask = async (task) => {
@@ -106,12 +106,12 @@ const SortableToDoList = () => {
 
    const handleKeyDown = (e) => {
     
-     if (e.key === "e") e.preventDefault(); // Prevent entering 'e' in number inputs
-     if (e.key === "Enter") handleAddTask(); // Handle Enter key
+     if (e.key === "e") e.preventDefault(); 
+     if (e.key === "Enter") handleAddTask(); 
    };
 
   return (
-    <div className="ml-1 border w-full p-4 mt-2 rounded-lg bg-white/10 backdrop-blur-lg ">
+    <div className="border w-full p-4 mt-2 rounded-lg bg-white/10 backdrop-blur-lg ">
       <h1 className="dark:text-white text-xl font-semibold mb-3">
         TO DO LISTS
       </h1>
@@ -167,8 +167,8 @@ const SortableToDoList = () => {
                           } break-words`}
                           style={{
                             display: "inline-block",
-                            width: "15ch", // Limits the width to 26 characters
-                            overflowWrap: "break-word", // Ensures proper word wrapping
+                            width: "15ch",  
+                            overflowWrap: "break-word",  
                           }}
                         >
                           {task.text}

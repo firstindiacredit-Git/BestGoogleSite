@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { sendPasswordResetEmail } from "firebase/auth";
-import { auth } from "../../firebase"; // Adjust path based on your file structure
-import { useNavigate } from "react-router-dom"; // For navigation (if using React Router)
+import { auth } from "../../firebase"; 
+import { useNavigate } from "react-router-dom"; 
 
 const ResetPassword = () => {
   const [email, setEmail] = useState("");
@@ -32,7 +32,7 @@ const ResetPassword = () => {
   };
 
   const goBack = () => {
-    navigate(-1); // Go back to the previous page
+    navigate(-1);  
   };
 
   return (

@@ -11,7 +11,6 @@ import { onAuthStateChanged } from "firebase/auth";
 import { MdAdd, MdMoreVert } from "react-icons/md";
 import Category from "../components/Category";
 
-
 const initialBookmarks = {
   Popular: [
     { name: "Facebook", link: "https://www.facebook.com" },
@@ -89,10 +88,9 @@ const Bookmarks = () => {
   const [textbackground, setTextBackground] = useState(false);
   const [viewbackground, setViewBackground] = useState(false);
   const [positionbackground, setPositionBackground] = useState(false);
-   const [categories, setCategories] = useState([]); // Categories data
-   const [newCategory, setNewCategory] = useState(""); 
+  const [categories, setCategories] = useState([]); // Categories data
+  const [newCategory, setNewCategory] = useState("");
   const [firebaseBookmarks, setFirebaseBookmarks] = useState("");
-  
 
   // Load category settings from localStorage or use default values
   const [categorySettings, updateCategorySetting] = useState(() => {
@@ -123,18 +121,18 @@ const Bookmarks = () => {
     category: "",
   });
 
- const handleDeleteBookmark = async (category, id) => {
-   try {
-     await deleteDoc(doc(db, "users", user.uid, "bookmarks", id));
-     setFirebaseBookmarks((prev) => ({
-       ...prev,
-       [category]: prev[category].filter((bookmark) => bookmark.id !== id),
-     }));
-   } catch (error) {
-     console.error("Error deleting bookmark: ", error);
-     alert(`Error deleting bookmark: ${error.message}`);
-   }
- };
+  const handleDeleteBookmark = async (category, id) => {
+    try {
+      await deleteDoc(doc(db, "users", user.uid, "bookmarks", id));
+      setFirebaseBookmarks((prev) => ({
+        ...prev,
+        [category]: prev[category].filter((bookmark) => bookmark.id !== id),
+      }));
+    } catch (error) {
+      console.error("Error deleting bookmark: ", error);
+      alert(`Error deleting bookmark: ${error.message}`);
+    }
+  };
 
   // Add a new category
   const handleAddCategory = async () => {
@@ -167,7 +165,7 @@ const Bookmarks = () => {
 
   const menuRef = useRef(null); // Reference for menu
   const backgroundRef = useRef(null);
-    const anotherRef = useRef(null);
+  const anotherRef = useRef(null);
   const formRef = useRef(null); // Reference for form
 
   useEffect(() => {
@@ -227,7 +225,7 @@ const Bookmarks = () => {
         setPositionBackground(false);
       }
       if (anotherRef.current && !anotherRef.current.contains(event.target)) {
-        setTextBackground(false);  
+        setTextBackground(false);
       }
     };
 
@@ -237,42 +235,42 @@ const Bookmarks = () => {
     };
   }, []);
 
- const toggleBookmark = (category) => {
-   setBackground((prev) => ({
-     ...prev,
-     [category]: {
-       ...prev[category],
-       showBgColor: !prev[category]?.showBgColor,
-     },
-   }));
- };
- const toggleTextBookmark = (category) => {
-   setTextBackground((prev) => ({
-     ...prev,
-     [category]: {
-       ...prev[category],
-       showTextColor: !prev[category]?.showTextColor,
-     },
-   }));
- };
- const toggleViewBookmark = (category) => {
-   setViewBackground((prev) => ({
-     ...prev,
-     [category]: {
-       ...prev[category],
-       showView: !prev[category]?.showView,
-     },
-   }));
- };
- const togglePositionBookmark = (category) => {
-   setPositionBackground((prev) => ({
-     ...prev,
-     [category]: {
-       ...prev[category],
-       showPosition: !prev[category]?.showPosition,
-     },
-   }));
- };
+  const toggleBookmark = (category) => {
+    setBackground((prev) => ({
+      ...prev,
+      [category]: {
+        ...prev[category],
+        showBgColor: !prev[category]?.showBgColor,
+      },
+    }));
+  };
+  const toggleTextBookmark = (category) => {
+    setTextBackground((prev) => ({
+      ...prev,
+      [category]: {
+        ...prev[category],
+        showTextColor: !prev[category]?.showTextColor,
+      },
+    }));
+  };
+  const toggleViewBookmark = (category) => {
+    setViewBackground((prev) => ({
+      ...prev,
+      [category]: {
+        ...prev[category],
+        showView: !prev[category]?.showView,
+      },
+    }));
+  };
+  const togglePositionBookmark = (category) => {
+    setPositionBackground((prev) => ({
+      ...prev,
+      [category]: {
+        ...prev[category],
+        showPosition: !prev[category]?.showPosition,
+      },
+    }));
+  };
 
   const fetchFavicon = (url) =>
     `https://www.google.com/s2/favicons?sz=64&domain=${url}`;
@@ -321,12 +319,12 @@ const Bookmarks = () => {
       ...(firebaseBookmarks[category] || []),
     ].sort((a, b) => a.name.localeCompare(b.name));
 
-     const positionClass =
-       position === "start"
-         ? "justify-start"
-         : ""
-         ? "justify-center"
-         : "justify-end";
+    const positionClass =
+      position === "start"
+        ? "justify-start"
+        : ""
+        ? "justify-center"
+        : "justify-end";
     return (
       <div
         className={`grid p-4 gap-2 ${
@@ -781,8 +779,6 @@ const Bookmarks = () => {
                   Delete
                 </button>
               </div>
-
-              
 
               {/* Add Bookmark */}
               {/* <div>

@@ -7,13 +7,15 @@ import { TbGridDots } from "react-icons/tb";
 import galleryupload from "/galleryupload.png";
 import layers from "/layers.png";
 import remove from "/remove.png";
+import { IoIosLogOut } from "react-icons/io";
+import { RiUserLine } from "react-icons/ri";
+
 
 const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
   const [showButtons, setShowButtons] = useState(false);
   const [user, setUser] = useState(null);
   const [panel, setPanel] = useState(false);
-
-  // Check for user authentication state
+ 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
@@ -30,14 +32,11 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
 
     return () => unsubscribe();
   }, []);
-
-  // Toggle panel visibility
+ 
   const togglePanel = () => setPanel(!panel);
-
-  // Toggle the visibility of the settings buttons
+ 
   const toggleMenu = () => setShowButtons(!showButtons);
-
-  // Handle user sign out
+ 
   const handleSignOut = async () => {
     try {
       await signOut(auth);
@@ -46,8 +45,7 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
       console.error("Sign out error:", error.message);
     }
   };
-
-  // Close menus when clicking outside
+ 
   useEffect(() => {
     const handleOutsideClick = (event) => {
       if (
@@ -186,15 +184,17 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
                 </div>
                 <hr className="my-2 border-gray-200 dark:border-gray-600" />
                 <Link to="/ProfilePage">
-                  <button className="w-full px-4 py-2 text-center text-sm text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600 rounded transition-colors duration-200">
-                    Profile
+                  <button className="w-full flex items-center justify-center gap-2 px-4 py-2 text-center text-sm text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600 rounded transition-colors duration-200">
+                    <RiUserLine />
+                    <span>Profile</span>
                   </button>
                 </Link>
                 <button
                   onClick={handleSignOut}
-                  className="w-full px-4 py-2 text-center text-sm text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600 rounded transition-colors duration-200"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2 text-center text-sm text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600 rounded transition-colors duration-200"
                 >
-                  Sign Out
+                  <IoIosLogOut />
+                  <span>Sign Out</span>
                 </button>
               </div>
             )}

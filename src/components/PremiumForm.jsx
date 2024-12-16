@@ -211,9 +211,9 @@ const PremiumForm = () => {
               onChange={handleChange}
               className="w-full p-2 border dark:text-black rounded"
             >
-              <option value="Standard">Standard - $5/month</option>
+              <option value="Standard">Standard - $1/month</option>
               <option value="Free">Free - $0/month</option>
-              <option value="Pro">Pro - $10/month</option>
+              <option value="Pro">Pro - $2/month</option>
             </select>
           </div>
           <button

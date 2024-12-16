@@ -10,6 +10,7 @@ import ProfilePage from "./components/ProfilePage.jsx";
 import Forgotpassword from "./components/Signup/Forgotpassword.jsx";
 import AddLinks from "./components/Admin/AddLinks.jsx";
 import Dashboard from "./components/Admin/Dashboard.jsx";
+import AddBookmark from "./components/Admin/AddBookmark.jsx";
 import Login from "./components/Admin/Login.jsx";
 import Users from "./components/Admin/Users.jsx";
 import PremiumPage from "./components/PremiumPage.jsx";
@@ -28,6 +29,7 @@ function App() {
           <Route path="/NewSearchPage" element={<NewSearchPage />} />
           <Route path="/Forgotpassword" element={<Forgotpassword />} />
           <Route path="/ProfilePage" element={<ProfilePage />} />
+          <Route path="/admin/AddBookmark" element={<AddBookmark />} />
           <Route path="/admin/addlinks" element={<AddLinks />} />
           <Route path="/admin/login" element={<Login />} />
           <Route path="/admin/users" element={<Users />} />

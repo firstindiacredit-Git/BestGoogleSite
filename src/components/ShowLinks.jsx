@@ -4,7 +4,7 @@ import Draggable from "react-draggable";
 import { db } from "../firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 
-// Draggable Dropdown Component
+ 
 function DraggableDropdown({
   category,
   toggleDropdown,
@@ -143,8 +143,7 @@ DraggableDropdown.propTypes = {
   moveItem: PropTypes.func.isRequired,
   isDraggable: PropTypes.bool.isRequired,
 };
-
-// Main ShowLinks Component
+ 
 function ShowLinks() {
   const [isOpen, setIsOpen] = useState(null);
   const [categories, setCategories] = useState([]);
@@ -164,8 +163,7 @@ function ShowLinks() {
         ...doc.data(),
       }));
       setCategories(fetchedCategories);
-
-      // Load positions from local storage or fallback to fetched categories
+ 
       const savedItems = JSON.parse(localStorage.getItem("draggableItems"));
       setItems(savedItems || fetchedCategories);
     } catch (error) {
@@ -207,8 +205,7 @@ function ShowLinks() {
       newItems.splice(index, 1);
       newItems.splice(newIndex, 0, movedItem);
       setItems(newItems);
-
-      // Save updated positions to local storage
+ 
       localStorage.setItem("draggableItems", JSON.stringify(newItems));
     }
   };

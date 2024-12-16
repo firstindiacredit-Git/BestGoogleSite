@@ -2,255 +2,296 @@ import React, { useState, useEffect } from "react";
 import { db, auth } from "../firebase";
 import {
   collection,
-  doc,
   addDoc,
-  deleteDoc,
-  updateDoc,
   getDocs,
+  updateDoc,
+  doc,
+  deleteDoc,
+  getDoc,
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 
-const defaultPeople = [
-  {
-    id: 1,
-    name: "Youtube",
-    designation: "YouTube all Fav",
-    image: "youtube.png",
-    link: "https://youtube.com/",
-  },
-  {
-    id: 2,
-    name: "Gmail",
-    designation: "Google All Mails",
-    image: "googlemail.png",
-    link: "https://mail.google.com/",
-  },
-  {
-    id: 3,
-    name: "Github",
-    designation: "Github Easy Access",
-    image: "github.png",
-    link: "https://github.com/",
-  },
-];
-
-function AnimatedTooltip({ items, handleEdit, handleDelete }) {
-  const [menuVisible, setMenuVisible] = useState(null);
-
-  const toggleMenu = (id) => {
-    setMenuVisible(menuVisible === id ? null : id);
-  };
-
-  return (
-    <div className="flex gap-3 mt-2">
-      {items.map((person) => (
-        <div
-          key={person.id}
-          className="text-center bg-transparent rounded-lg transition-transform transform hover:scale-105 group relative"
-        >
-          <a href={person.link} target="_blank" rel="noopener noreferrer">
-            <img
-              src={`https://logo.clearbit.com/${new URL(person.link).hostname}`}
-              alt={person.name}
-              className="w-7 h-7 mx-auto rounded-[50%] transition-transform duration-300 transform hover:scale-110 hover:shadow-lg"
-            />
-          </a>
-          <h3 className="text-md font-semibold mb-2 w-16 mt-2 transition-all duration-300 transform group-hover:translate-y-1 group-hover:translate-x-1">
-            {person.name}
-          </h3>
-
-          <div className="absolute top-6 right-[-2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <button onClick={() => toggleMenu(person.id)} className="font-bold">
-              ⋮
-            </button>
-
-            {menuVisible === person.id && (
-              <div className="absolute bg-white/30 right-2 top-0 backdrop-blur border rounded shadow-md text-left">
-                <button
-                  className="block w-full text-left px-2 py-1 text-sm hover:bg-gray-200"
-                  onClick={() => {
-                    toggleMenu(null);
-                    handleEdit(person);
-                  }}
-                >
-                  Edit
-                </button>
-                <button
-                  className="block w-full text-left px-2 py-1 text-sm text-red-500 hover:bg-gray-200"
-                  onClick={() => {
-                    toggleMenu(null);
-                    handleDelete(person.id);
-                  }}
-                >
-                  Delete
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-export default function AnimatedTooltipPreview() {
-  const [people, setPeople] = useState(defaultPeople);
-  const [newBookmark, setNewBookmark] = useState({ name: "", link: "" });
+function BookmarkPage() {
+  const [userBookmarks, setUserBookmarks] = useState([]);
+  const [globalBookmarks, setGlobalBookmarks] = useState([]);
+  const [name, setName] = useState("");
+  const [link, setLink] = useState("");
+  const [editingBookmark, setEditingBookmark] = useState(null);
+  const [user, setUser] = useState(null);
+  const [hiddenBookmarkIds, setHiddenBookmarkIds] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [editingBookmarkId, setEditingBookmarkId] = useState(null);
-  const [userId, setUserId] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  // Cache to avoid multiple calls to Firebase
-  const [cachedBookmarks, setCachedBookmarks] = useState([]);
+    const [menuVisible, setMenuVisible] = useState(null);
 
-  // // Fetch bookmarks when the user logs in
-  // useEffect(() => {
-  //   const unsubscribe = onAuthStateChanged(auth, (user) => {
-  //     if (user) {
-  //       setUserId(user.uid);
-  //     } else {
-  //       setUserId(null);
-  //     }
-  //   });
+    const toggleMenu = (id) => {
+      setMenuVisible(menuVisible === id ? null : id);
+    };
 
-  //   return () => unsubscribe();
-  // }, []);
+    const handleKeyDown = (e) => {
+      if (e.key === "e") e.preventDefault();
+      if (e.key === "Enter") handleAddTask();
+    };
 
-  // useEffect(() => {
-  //   const fetchBookmarks = async () => {
-  //     if (userId && cachedBookmarks.length === 0) {
-  //       try {
-  //         const bookmarksSnapshot = await getDocs(
-  //           collection(db, "users", userId, "addbookmarks")
-  //         );
-  //         const bookmarksData = bookmarksSnapshot.docs.map((doc) => ({
-  //           id: doc.id,
-  //           ...doc.data(),
-  //         }));
+  // Fetch user and global bookmarks on mount
+  useEffect(() => {
+    const fetchBookmarks = async () => {
+      if (!user) return;
 
-  //         setPeople((prev) => [...defaultPeople, ...bookmarksData]);
-  //         setCachedBookmarks(bookmarksData); // Cache bookmarks after fetching
-  //       } catch (error) {
-  //         console.error("Error fetching bookmarks:", error);
-  //         setErrorMessage("Failed to fetch bookmarks. Please try again.");
-  //       }
-  //     }
-  //   };
+      try {
+        // Fetch hidden bookmarks
+        const userDocRef = doc(db, "users", user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        const hiddenIds = userDocSnap.exists()
+          ? userDocSnap.data().hiddenBookmarkIds || []
+          : [];
+        setHiddenBookmarkIds(hiddenIds);
 
-  //   fetchBookmarks();
-  // }, [userId, cachedBookmarks]); // Only fetch when userId or cachedBookmarks changes
+        // Fetch user bookmarks
+        const userQuerySnapshot = await getDocs(
+          collection(db, "users", user.uid, "addbookmarks")
+        );
+        const userBookmarksList = userQuerySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+          createdByUser: true,
+        }));
+        setUserBookmarks(userBookmarksList);
+
+        // Fetch global bookmarks
+        const globalQuerySnapshot = await getDocs(collection(db, "bookmarks"));
+        const globalBookmarksList = globalQuerySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+          createdByUser: false,
+          isHidden: hiddenIds.includes(doc.id),
+        }));
+        setGlobalBookmarks(globalBookmarksList);
+      } catch (error) {
+        console.error("Error fetching bookmarks:", error);
+      }
+    };
+
+    fetchBookmarks();
+  }, [user]);
+
+  // Track auth state
+  useEffect(() => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+
+    return () => unsubscribeAuth();
+  }, []);
 
   const validateURL = (url) => {
     const pattern = /^(http|https):\/\/[^\s$.?#].[^\s]*$/;
     return pattern.test(url);
   };
 
-  const saveBookmark = async (e) => {
+  const getFavicon = (url) => {
+    try {
+      const domain = new URL(url).hostname;
+      return `https://logo.clearbit.com/${domain}`;
+    } catch (error) {
+      return "https://via.placeholder.com/64?text=?"; // Fallback favicon
+    }
+  };
+
+  const handleAddBookmark = async (e) => {
     e.preventDefault();
 
-    if (!userId || !newBookmark.name || !newBookmark.link) {
-      setErrorMessage("Please fill in both fields.");
+    if (!name || !link) {
+      setErrorMessage("Both name and link fields are required!");
       return;
     }
 
-    if (!validateURL(newBookmark.link)) {
+    if (!validateURL(link)) {
       setErrorMessage("Please enter a valid URL.");
       return;
     }
 
-    setErrorMessage("");
-    setSuccessMessage("");
-
     try {
-      if (editMode) {
-        await updateDoc(
-          doc(db, "users", userId, "addbookmarks", editingBookmarkId),
-          {
-            name: newBookmark.name,
-            link: newBookmark.link,
-          }
-        );
-
-        setPeople((prevPeople) =>
-          prevPeople.map((bookmark) =>
-            bookmark.id === editingBookmarkId
-              ? { ...bookmark, name: newBookmark.name, link: newBookmark.link }
-              : bookmark
-          )
-        );
-        setSuccessMessage("Bookmark updated successfully!");
-      } else {
-        const newBookmarkRef = await addDoc(
-          collection(db, "users", userId, "addbookmarks"),
-          {
-            name: newBookmark.name,
-            link: newBookmark.link,
-            image: "default.png",
-          }
-        );
-        const addedBookmark = {
-          id: newBookmarkRef.id,
-          name: newBookmark.name,
-          link: newBookmark.link,
-          image: "default.png",
-        };
-        setPeople((prevPeople) => [...prevPeople, addedBookmark]);
-        setCachedBookmarks((prev) => [...prev, addedBookmark]); // Update cache
-        setSuccessMessage("Bookmark added successfully!");
+      if (!user || !user.uid) {
+        alert("You must be logged in to add bookmarks.");
+        return;
       }
 
-      setNewBookmark({ name: "", link: "" });
-      setShowModal(false);
-      setEditMode(false);
-      setEditingBookmarkId(null);
+      const docRef = await addDoc(
+        collection(db, "users", user.uid, "addbookmarks"),
+        {
+          name,
+          link,
+          category: "Popular",
+          createdAt: new Date(),
+        }
+      );
+
+      setUserBookmarks((prev) => [
+        ...prev,
+        {
+          id: docRef.id,
+          name,
+          link,
+          category: "Popular",
+          createdAt: new Date(),
+          createdByUser: true,
+        },
+      ]);
+
+      setSuccessMessage("Bookmark added successfully!");
+      setName("");
+      setLink("");
     } catch (error) {
-      console.error("Error saving bookmark:", error);
-      setErrorMessage("Failed to save bookmark. Please try again.");
+      console.error("Error adding bookmark:", error);
+      setErrorMessage("Failed to add bookmark. Please try again.");
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleEditBookmark = (bookmark) => {
+    setEditingBookmark(bookmark);
+    setName(bookmark.name);
+    setLink(bookmark.link);
+    setEditMode(true);
+    setShowModal(true);
+  };
+
+  const handleUpdateBookmark = async (e) => {
+    e.preventDefault();
+
+    if (!editingBookmark) return;
+
     try {
-      await deleteDoc(doc(db, "users", userId, "addbookmarks", id));
-      setPeople((prevPeople) =>
-        prevPeople.filter((person) => person.id !== id)
+      const docRef = doc(
+        db,
+        "users",
+        user.uid,
+        "addbookmarks",
+        editingBookmark.id
       );
-      setCachedBookmarks((prev) => prev.filter((person) => person.id !== id)); // Update cache
+      await updateDoc(docRef, { name, link });
+
+      setUserBookmarks((prev) =>
+        prev.map((bm) =>
+          bm.id === editingBookmark.id ? { ...bm, name, link } : bm
+        )
+      );
+
+      setSuccessMessage("Bookmark updated successfully!");
+      setEditingBookmark(null);
+      setName("");
+      setLink("");
+      setEditMode(false);
+      setShowModal(false);
+    } catch (error) {
+      console.error("Error updating bookmark:", error);
+      setErrorMessage("Failed to update bookmark. Please try again.");
+    }
+  };
+
+  const handleDeleteBookmark = async (bookmarkId) => {
+    try {
+      const docRef = doc(db, "users", user.uid, "addbookmarks", bookmarkId);
+      await deleteDoc(docRef);
+
+      setUserBookmarks((prev) => prev.filter((bm) => bm.id !== bookmarkId));
+
       setSuccessMessage("Bookmark deleted successfully!");
-      setTimeout(() => {
-        setSuccessMessage("");
-      }, 3000);
     } catch (error) {
       console.error("Error deleting bookmark:", error);
       setErrorMessage("Failed to delete bookmark. Please try again.");
     }
   };
 
-  const handleEdit = (bookmark) => {
-    setNewBookmark({ name: bookmark.name, link: bookmark.link });
-    setEditingBookmarkId(bookmark.id);
-    setEditMode(true);
-    setShowModal(true);
+  const handleHideBookmark = async (bookmarkId) => {
+    try {
+      const newHiddenIds = [...hiddenBookmarkIds, bookmarkId];
+      setHiddenBookmarkIds(newHiddenIds);
+
+      const userDocRef = doc(db, "users", user.uid);
+      await updateDoc(userDocRef, { hiddenBookmarkIds: newHiddenIds });
+
+      setSuccessMessage("Bookmark hidden successfully!");
+    } catch (error) {
+      console.error("Error hiding bookmark:", error);
+      setErrorMessage("Failed to hide bookmark. Please try again.");
+    }
   };
 
+  const combinedBookmarks = [
+    ...userBookmarks,
+    ...globalBookmarks.filter((bm) => !bm.isHidden),
+  ];
+
   return (
-    <div className="flex items-center mt-2 dark:text-white justify-center mb-10 w-full">
-      <AnimatedTooltip
-        items={people}
-        handleEdit={handleEdit}
-        handleDelete={handleDelete}
-      />
+    <div className="flex items-center dark:text-white justify-center mb-10 w-full">
+      <div className="flex gap-3  flex-wrap">
+        {combinedBookmarks.map((bookmark) => (
+          <div
+            key={bookmark.id}
+            className="text-center bg-transparent rounded-lg transition-transform transform hover:scale-105 group relative"
+          >
+            <a
+              href={bookmark.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block"
+            >
+              <img
+                src={getFavicon(bookmark.link)}
+                alt={bookmark.name}
+                className="w-7 h-7 mx-auto rounded-full transition-transform duration-300 transform hover:scale-110 hover:shadow-lg"
+              />
+            </a>
+            <h3 className="text-xs font-semibold mt-1 w-16 truncate mx-auto">
+              {bookmark.name}
+            </h3>
+            <div className="absolute top-0 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <button
+                onClick={() => toggleMenu(bookmark.id)}
+                className="font-bold"
+              >
+                ⋮
+              </button>
+              {menuVisible === bookmark.id && (
+                <div className="absolute bg-white/30 right-0 top-6 backdrop-blur border rounded shadow-md text-left z-10">
+                  {bookmark.createdByUser && (
+                    <button
+                      onClick={() => handleEditBookmark(bookmark)}
+                      className="block w-full text-left px-2 py-1 text-sm hover:bg-gray-200"
+                    >
+                      Edit
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleDeleteBookmark(bookmark.id)}
+                    className="block w-full text-left px-2 py-1 text-sm text-red-500 hover:bg-gray-200"
+                  >
+                    Delete
+                  </button>
+                  {!bookmark.createdByUser && (
+                    <button
+                      onClick={() => handleHideBookmark(bookmark.id)}
+                      className="text-gray-500 hover:text-gray-600 block w-full px-2 py-1"
+                    >
+                      Hide
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
 
       <button
         onClick={() => setShowModal(true)}
-        className="bg-white/20 border dark:text-white border-gray-400 mb-10 ml-3 rounded-full w-10 h-10 flex items-center justify-center mt-4"
+        className="bg-white/20 border dark:text-white border-gray-400 mb-10 ml-3 rounded-full w-10 h-10 flex items-center justify-center mt-5"
       >
         +
       </button>
-
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white dark:bg-gray-900 dark:text-white p-4 rounded-2xl shadow-md w-80">
@@ -261,53 +302,62 @@ export default function AnimatedTooltipPreview() {
             {successMessage && (
               <p className="text-green-500">{successMessage}</p>
             )}
-            <form onSubmit={saveBookmark}>
-              <div className="mb-4">
-                <label htmlFor="name" className="block mb-1">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  value={newBookmark.name}
-                  onChange={(e) =>
-                    setNewBookmark({ ...newBookmark, name: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border rounded-md"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label htmlFor="link" className="block mb-1">
-                  Link
-                </label>
-                <input
-                  type="text"
-                  id="link"
-                  value={newBookmark.link}
-                  onChange={(e) =>
-                    setNewBookmark({ ...newBookmark, link: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border rounded-md"
-                  required
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full bg-blue-500 text-white px-3 py-2 rounded-md"
-              >
-                Save
-              </button>
-            </form>
-            <button
-              onClick={() => setShowModal(false)}
-              className="mt-2 text-red-500 w-full"
+            <form
+              onSubmit={
+                editingBookmark ? handleUpdateBookmark : handleAddBookmark
+              }
             >
-              Cancel
-            </button>
+              <div className="flex flex-col space-y-3">
+                <div>
+                  <label htmlFor="name" className="block mb-1">
+                    Name
+                  </label>
+                  <input
+                    id="name"
+                    type="text"
+                    className="w-full p-2 dark:text-white dark:bg-gray-800 border rounded"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="link" className="block mb-1">
+                    Link
+                  </label>
+                  <input
+                    id="link"
+                    type="url"
+                    className="w-full p-2 dark:text-white dark:bg-gray-800 border rounded"
+                    value={link}
+                    onChange={(e) => setLink(e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(e)}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600"
+                >
+                  {editMode ? "Update" : "Add"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowModal(false);
+                    setEditMode(false);
+                    setErrorMessage("");
+                    setSuccessMessage("");
+                  }}
+                  className="bg-gray-400 text-white rounded px-4 py-2 hover:bg-gray-500 mt-2"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
     </div>
   );
 }
+
+export default BookmarkPage;

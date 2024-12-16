@@ -66,9 +66,9 @@ const ClockApp = () => {
         "selectedCountries",
         JSON.stringify(updatedCountries)
       );
-      // toast.success(`Clock for ${countryLabel} added!`);
+      
     } else if (selectedCountries.length >= 4) {
-      // toast.warn("You can only add up to 4 clocks.");
+  
     }
   };
 
@@ -86,7 +86,7 @@ const ClockApp = () => {
       .format(clockStyle === "digital" ? "HH:mm:ss" : "h:mm A");
 
   return (
-    <div className="flex flex-col h-[10rem] items-center border rounded-lg p-4 justify-center">
+    <div className="flex flex-col h-[10rem] mt-5 items-center border rounded-lg p-4 justify-center">
       <StyledWrapper>
         <div className="flex gap-1 mt-6">
           <select

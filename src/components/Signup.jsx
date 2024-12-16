@@ -6,55 +6,40 @@ import {
   onAuthStateChanged,
 } from "firebase/auth";
 import { auth, provider } from "../firebase";
-import { getFirestore, setDoc, doc } from "firebase/firestore"; // Import Firestore functions
+import { getFirestore, setDoc, doc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
-import Header from "./Header";
+import { IoEyeOff, IoEye } from "react-icons/io5";
 
 const Signup = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [user, setUser] = useState(null);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
   const navigate = useNavigate();
-
-  const toggleTheme = () => {
-    setIsDarkMode((prev) => !prev);
-  };
-
-  
   const db = getFirestore();
-   
+
+  const suggestedPassword = "StrongPass123!";
+
   const registerUserInFirestore = async (user) => {
     try {
-      const userRef = doc(db, "users", user.uid);  
+      const userRef = doc(db, "users", user.uid);
       await setDoc(userRef, {
         uid: user.uid,
         email: user.email,
-        displayName: user.displayName || `${firstName} ${lastName}`,
-        photoURL: user.photoURL || "",
-        subscriptionStatus: "free",  
+        firstName,
+        lastName,
+        subscriptionStatus: "free",
         createdAt: new Date(),
-        lastLoginAt: new Date(),
-        preferences: {
-          theme: "light",  
-          notifications: true,  
-        },
-        bookmarks: [],
-        profile: {},
-        role: "user",  
       });
-      console.log("User data saved to Firestore");
     } catch (error) {
-      console.error("Error saving user data to Firestore:", error);
       setError("Failed to save user data. Please try again.");
     }
   };
 
-  // Handle email signup
   const handleEmailSignUp = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -67,179 +52,117 @@ const Signup = () => {
         password
       );
       const user = userCredential.user;
-      
       await registerUserInFirestore(user);
-
-      navigate("/");  
+      navigate("/");
     } catch (error) {
-      setError(getErrorMessage(error.code));
+      setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-   
   const handleGoogleSignIn = async () => {
     setError("");
-
     try {
-      const userCredential = await signInWithPopup(auth, provider);
-      const user = userCredential.user;
-     
-      navigate("/");  
+      await signInWithPopup(auth, provider);
+      navigate("/");
     } catch (error) {
-      setError(getErrorMessage(error.code));
+      setError("Something went wrong. Please try again.");
     }
   };
 
-  // Handle user logout
-  const handleLogout = async () => {
-    setLoading(true);
-    try {
-      await signOut(auth);
-      localStorage.setItem("loggedOut", "true");
-      window.location.reload();
-      alert("You have been logged out.");
-    } catch (error) {
-      console.error("Error signing out:", error);
-      setError("Error signing out. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-   
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
       if (currentUser) {
-        navigate("/");  
+        navigate("/");
       }
     });
 
     return () => unsubscribe();
   }, [navigate]);
 
-  // Get error message based on error code
-  const getErrorMessage = (errorCode) => {
-    switch (errorCode) {
-      case "auth/email-already-in-use":
-        return "Email already in use. Please try another.";
-      case "auth/weak-password":
-        return "Password should be at least 6 characters.";
-      case "auth/invalid-email":
-        return "Invalid email address. Please check and try again.";
-      default:
-        return "Something went wrong. Please try again.";
-    }
-  };
-
   return (
-    <div
-      className={`min-h-screen ${
-        isDarkMode ? "bg-gray-900 text-white" : "bg-transparent text-black"
-      }`}
-    >
-      <Header
-        isDarkMode={isDarkMode}
-        toggleTheme={toggleTheme}
-        user={user}  
-        onLogout={handleLogout}
-      />
+    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="bg-white rounded-lg shadow-md p-8 w-full max-w-md relative">
+        <button
+          className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+          onClick={() => navigate(-1)}
+        >
+          &times;
+        </button>
+        <h2 className="text-2xl font-bold text-center mb-6">Sign up</h2>
 
-      <div className="max-w-md w-full mx-auto mt-1 rounded-none md:rounded-2xl border shadow-2xl p-4 md:p-8 shadow-input bg-transparent">
-        <h2 className="font-bold text-xl text-center">
-          Welcome to BESTGOOGLESITES
-        </h2>
-        <p className="text-xl max-w-sm mt-1 font-semibold text-center uppercase">
-          Sign up
-        </p>
+        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
 
-        {error && (
-          <div role="alert" aria-live="assertive">
-            <p className="text-red-500">{error}</p>
-          </div>
-        )}
-
-        <form className="my-4" onSubmit={handleEmailSignUp}>
-          <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 mb-2">
-            <div className="flex flex-col space-y-2 w-[48.5%]">
-              <label htmlFor="firstname" className="font-medium">
-                First name
-              </label>
-              <input
-                id="firstname"
-                type="text"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                className="border p-2 rounded"
-                required
-              />
-            </div>
-            <div className="flex flex-col space-y-2 w-[48.5%]">
-              <label htmlFor="lastname" className="font-medium">
-                Last name
-              </label>
-              <input
-                id="lastname"
-                type="text"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                className="border p-2 rounded"
-                required
-              />
-            </div>
-          </div>
-          <div className="mb-4">
-            <label htmlFor="email" className="font-medium">
-              Email Address
-            </label>
+        <form onSubmit={handleEmailSignUp}>
+          <div className="grid grid-cols-2 gap-4 mb-4">
             <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="border p-2 rounded w-full"
+              type="text"
+              placeholder="First name"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              className="w-full border border-gray-300 rounded-md p-2 focus:ring focus:ring-blue-200"
+              required
+            />
+            <input
+              type="text"
+              placeholder="Last name"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              className="w-full border border-gray-300 rounded-md p-2 focus:ring focus:ring-blue-200"
               required
             />
           </div>
-          <div className="mb-4">
-            <label htmlFor="password" className="font-medium">
-              Password
-            </label>
+          <input
+            type="email"
+            placeholder="Work Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full border border-gray-300 rounded-md p-2 mb-4 focus:ring focus:ring-blue-200"
+            required
+          />
+          <div className="mb-4 relative">
             <input
-              id="password"
-              type="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="border p-2 rounded w-full"
+              className="w-full border border-gray-300 rounded-md p-2 focus:ring focus:ring-blue-200"
               required
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
+            >
+              {showPassword ? <IoEye /> : <IoEyeOff />}
+            </button>
           </div>
           <button
-            className="border-blue-500 text-blue-500 rounded hover:bg-blue-500 hover:text-white w-full border h-10 font-medium dark:hover:bg-blue-600"
             type="submit"
             disabled={loading}
+            className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 focus:outline-none"
           >
-            {loading ? "Signing up..." : "Sign Up"}
-          </button>
-          <div className="bg-gradient-to-r from-transparent via-neutral-300 dark:via-neutral-700 to-transparent my-4 h-[1px] w-full" />
-          <button
-            className="text-green-500 border shadow-sm dark:text-green-500 text-lg text-center px-4 w-full rounded-md h-10 font-medium border-green-500 hover:bg-green-500 hover:text-white"
-            type="button"
-            onClick={handleGoogleSignIn}
-            disabled={loading}
-          >
-            <div className="text-center justify-center gap-2 flex p-1">
-              <img
-                src="/google.png"
-                className="w-5 h-5 mt-1"
-                alt="Google logo"
-              />
-              Sign up with Google
-            </div>
+            {loading ? "Creating account..." : "Create account"}
           </button>
         </form>
+
+        <div className="flex items-center justify-between my-4">
+          <div className="w-1/2 h-px bg-gray-300"></div>
+          <span className="text-sm text-gray-500 px-4">OR</span>
+          <div className="w-1/2 h-px bg-gray-300"></div>
+        </div>
+
+        <div className="flex flex-col space-y-2">
+          <button
+            onClick={handleGoogleSignIn}
+            disabled={loading}
+            className="flex items-center justify-center w-full border border-gray-300 py-2 rounded-md hover:bg-gray-100 focus:outline-none"
+          >
+            <img src="/google.png" alt="Google" className="w-5 h-5 mr-2" />
+            Sign up with Google
+          </button>
+        </div>
       </div>
     </div>
   );

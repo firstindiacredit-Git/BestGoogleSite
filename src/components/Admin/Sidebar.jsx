@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { LuLayoutDashboard, LuUsers } from "react-icons/lu";
 import { MdOutlineAddLink } from "react-icons/md";
-import { IoSettingsOutline, IoSunny, IoMoon } from "react-icons/io5"; // Added missing imports
+import { IoSettingsOutline, IoSunny, IoMoon } from "react-icons/io5";  
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../../firebase";
 import { doc, getDoc } from "firebase/firestore";
@@ -97,12 +97,12 @@ export default function Sidebar() {
               Add Links
             </Link>
           </li>
-          {/* <li className="p-4 mx-10">
-            <Link to="/settings" className="hover:bg-gray-700 p-2 flex rounded">
+          <li className="p-4 mx-10">
+            <Link to="/admin/AddBookmark" className="hover:bg-gray-700 p-2 flex rounded">
               <IoSettingsOutline className="mt-1 mr-1" />
               Settings
             </Link>
-          </li> */}
+          </li>
         </ul>
       </nav>
       {/* Theme Toggle Button */}
