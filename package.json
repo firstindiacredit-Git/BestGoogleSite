@@ -12,7 +12,6 @@
   "dependencies": {
     "@babel/plugin-transform-runtime": "^7.25.9",
     "@babel/runtime": "^7.26.0",
-    "@dnd-kit/sortable": "^8.0.0",
     "@emotion/styled": "^11.13.0",
     "@mui/icons-material": "^6.1.10",
     "@mui/material": "^6.1.10",
@@ -23,7 +22,6 @@
     "date-fns": "^4.1.0",
     "exceljs": "^4.4.0",
     "firebase": "^10.14.0",
-    "framer-motion": "^11.11.17",
     "gsap": "^3.12.5",
     "icons-react": "^3.7.1",
     "lucide-react": "^0.460.0",

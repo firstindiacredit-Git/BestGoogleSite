@@ -2,7 +2,6 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./hooks/AuthContext.jsx";
 import SearchPage from "./components/SearchPage.jsx";
-
 import AddList from "./components/Calculator.jsx";
 import Signin from "./components/Signup/signin.jsx";
 import Signup from "./components/Signup.jsx";
