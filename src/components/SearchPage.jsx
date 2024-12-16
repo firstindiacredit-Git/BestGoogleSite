@@ -139,7 +139,7 @@ function SearchPage() {
                 <FaHome className="text-green-700 h-10 w-7 text-center justify-center m-auto" />
               </button>
             </Link>
-            <Link to="/AnimatedTooltipPreview">
+            <Link to="/NewSearchPage">
               <button className="h-10 w-10 rounded-2xl">
                 <MdAddHomeWork className="text-green-700 h-10 w-7 text-center justify-center m-auto" />
               </button>

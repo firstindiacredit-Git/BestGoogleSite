@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./hooks/AuthContext.jsx";
 import SearchPage from "./components/SearchPage.jsx";
-import AnimatedTooltipPreview from "./components/AnimatedTooltipPreview.jsx";
+
 import AddList from "./components/Calculator.jsx";
 import Signin from "./components/Signup/signin.jsx";
 import Signup from "./components/Signup.jsx";
@@ -30,10 +30,6 @@ function App() {
           <Route path="/NewSearchPage" element={<NewSearchPage />} />
           <Route path="/Forgotpassword" element={<Forgotpassword />} />
           <Route path="/ProfilePage" element={<ProfilePage />} />
-          <Route
-            path="/AnimatedTooltipPreview"
-            element={<AnimatedTooltipPreview />}
-          />
           <Route path="/admin/AddBookmark" element={<AddBookmark />} />
           <Route path="/admin/addlinks" element={<AddLinks />} />
           <Route path="/admin/login" element={<Login />} />
