@@ -7,6 +7,7 @@ import Signin from "./components/Signup/signin.jsx";
 import Signup from "./components/Signup.jsx";
 import NewSearchPage from "./components/NewSearchPage.jsx";
 import ProfilePage from "./components/ProfilePage.jsx";
+import ShowLinks from "./components/ShowLinks.jsx";
 import Forgotpassword from "./components/Signup/Forgotpassword.jsx";
 import AddLinks from "./components/Admin/AddLinks.jsx";
 import Dashboard from "./components/Admin/Dashboard.jsx";
@@ -29,6 +30,7 @@ function App() {
           <Route path="/NewSearchPage" element={<NewSearchPage />} />
           <Route path="/Forgotpassword" element={<Forgotpassword />} />
           <Route path="/ProfilePage" element={<ProfilePage />} />
+          <Route path="/ShowLinks" element={<ShowLinks />} />
           <Route path="/admin/AddBookmark" element={<AddBookmark />} />
           <Route path="/admin/addlinks" element={<AddLinks />} />
           <Route path="/admin/login" element={<Login />} />

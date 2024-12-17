@@ -26,7 +26,7 @@ const SignInPage = () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       setLoading(false);
-      navigate("/");
+      navigate("/Admin/dashboard");
     } catch (error) {
       setError(error.message);
       setLoading(false);

@@ -10,6 +10,7 @@ import {
 import { onAuthStateChanged } from "firebase/auth";
 import { MdAdd, MdMoreVert } from "react-icons/md";
 import Category from "../components/Category";
+import ShowLinks from "./ShowLinks";
 
 const initialBookmarks = {
   Popular: [
@@ -824,6 +825,7 @@ const Bookmarks = () => {
       </div>
       <div className="">
         <Category />
+        <ShowLinks />
       </div>
       {/* Add Category */}
       <div className="mb-6 mt-4">
