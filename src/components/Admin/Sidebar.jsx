@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, Outlet } from "react-router-dom";
 import { LuLayoutDashboard, LuUsers } from "react-icons/lu";
 import { MdOutlineAddLink } from "react-icons/md";
-import { IoSettingsOutline, IoSunny, IoMoon } from "react-icons/io5";  
+import { IoSettingsOutline, IoSunny, IoMoon } from "react-icons/io5";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../../firebase";
 import { doc, getDoc } from "firebase/firestore";
@@ -13,7 +13,9 @@ export default function Sidebar() {
   const [dispName, setDispName] = useState("");
   const [link, setLink] = useState("/default-avatar.png");
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
+
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -54,71 +56,104 @@ export default function Sidebar() {
     setTheme((prevTheme) => (prevTheme === "dark" ? "light" : "dark"));
   };
 
-  return (
-    <div className="w-64 h-auto bg-gray-800 text-white">
-      <div className="p-4 text-2xl font-bold">Admin Panel</div>
+  // Navigation items with their corresponding paths and icons
+  const navItems = [
+    {
+      path: "/admin/dashboard",
+      label: "Dashboard",
+      icon: LuLayoutDashboard,
+    },
+    {
+      path: "/admin/users",
+      label: "Users",
+      icon: LuUsers,
+    },
+    {
+      path: "/admin/AddLinks",
+      label: "Add Bookmarks",
+      icon: MdOutlineAddLink,
+    },
+    {
+      path: "/admin/AddBookmark",
+      label: "Add Shortcuts",
+      icon: MdOutlineAddLink,
+    },
+    // {
+    //   path: "/admin/settings",
+    //   label: "Settings",
+    //   icon: IoSettingsOutline,
+    // },
+  ];
 
-      <div className="flex items-center mt-6 p-2 bg-gray-700 rounded">
-        <img
-          src={link}
-          className="h-16 w-16 justify-center m-auto flex-shrink-0 rounded-full"
-          alt="Avatar"
-        />
+  return (
+    <div className="flex">
+      <div className="w-[18rem] fixed left-0 top-0 h-screen bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col">
+        {/* Header */}
+        <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white text-center">Admin Panel</h1>
+        </div>
+
+        {/* Profile Section */}
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800">
+          <div className="flex flex-col items-center">
+            <div className="relative">
+              <img
+                src={link}
+                className="h-16 w-16 rounded-full object-cover ring-2 ring-white dark:ring-gray-800 shadow-lg"
+                alt="Avatar"
+              />
+              <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 ring-2 ring-white dark:ring-gray-800"></div>
+            </div>
+            <span className="mt-3 font-medium text-gray-900 dark:text-white">{dispName}</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">Administrator</span>
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
+          {navItems.map((item, index) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path;
+
+            return (
+              <Link
+                key={index}
+                to={item.path}
+                className={`
+                  flex items-center px-4 py-3 rounded-lg transition-all duration-200
+                  ${isActive 
+                    ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
+                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white'
+                  }
+                `}
+              >
+                <Icon className={`w-5 h-5 ${isActive ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`} />
+                <span className="ml-3 font-medium">{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Footer */}
+        <div className="p-4 border-t border-gray-200 dark:border-gray-800">
+          <button
+            onClick={toggleTheme}
+            className="w-full flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/20 rounded-lg transition-colors duration-200"
+          >
+            {theme === "dark" ? (
+              <IoSunny className="w-4 h-4 mr-2 text-yellow-300" />
+            ) : (
+              <IoMoon className="w-4 h-4 mr-2 text-blue-500" />
+            )}
+            <span className="ml-2">
+              {theme === "dark" ? "Light Mode" : "Dark Mode"}
+            </span>
+          </button>
+        </div>
       </div>
-      <div className="flex items-center p-2 bg-gray-700 rounded">
-        <span className="m-auto justify-center w-auto flex">{dispName}</span>
+      <div className="flex-1 ml-[18rem] bg-gray-100 dark:bg-gray-900">
+        <Outlet />
       </div>
-      <nav className="mt-4">
-        <ul>
-          <li className="p-4 mx-10">
-            <Link
-              to="/admin/dashboard"
-              className="hover:bg-gray-700 p-2 flex rounded"
-            >
-              <LuLayoutDashboard className="mt-1 mr-1" />
-              Dashboard
-            </Link>
-          </li>
-          <li className="p-4 mx-10">
-            <Link
-              to="/admin/users"
-              className="hover:bg-gray-700 p-2 flex rounded"
-            >
-              <LuUsers className="mt-1 mr-1" />
-              Users
-            </Link>
-          </li>
-          <li className="p-4 mx-10">
-            <Link
-              to="/admin/AddLinks"
-              className="hover:bg-gray-700 p-2 flex rounded"
-            >
-              <MdOutlineAddLink className="mt-1 mr-1" />
-              Add Links
-            </Link>
-          </li>
-          <li className="p-4 mx-10">
-            <Link to="/admin/AddBookmark" className="hover:bg-gray-700 p-2 flex rounded">
-              <IoSettingsOutline className="mt-1 mr-1" />
-              Settings
-            </Link>
-          </li>
-        </ul>
-      </nav>
-      {/* Theme Toggle Button */}
-      <button
-        onClick={toggleTheme}
-        className="w-full p-4 mt-4 flex items-center justify-center bg-gray-700 rounded hover:bg-gray-600 transition"
-      >
-        {theme === "dark" ? (
-          <IoSunny className="text-yellow-300" />
-        ) : (
-          <IoMoon className="text-blue-500" />
-        )}
-        <span className="ml-2">
-          {theme === "dark" ? "Light Mode" : "Dark Mode"}
-        </span>
-      </button>
     </div>
   );
 }

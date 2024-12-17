@@ -43,6 +43,7 @@ const SignIn = () => {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      localStorage.setItem("imageTrue", true);
       navigate("/");
     } catch (err) {
       if (err.code === "auth/user-not-found") {
@@ -61,6 +62,7 @@ const SignIn = () => {
   const handleGoogleSignIn = async () => {
     try {
       await signInWithPopup(auth, provider);
+      localStorage.setItem("imageTrue", true);
       navigate("/");
     } catch (err) {
       if (err.code === "auth/network-request-failed") {
