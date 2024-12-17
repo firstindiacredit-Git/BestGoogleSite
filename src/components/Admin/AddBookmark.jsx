@@ -6,41 +6,68 @@ import {
   deleteDoc,
   updateDoc,
   addDoc,
+  query,
+  orderBy,
+  limit,
+  startAfter,
 } from "firebase/firestore";
-import { db } from "../../firebase"; // Import Firebase Firestore
+import { db } from "../../firebase";
+
+const fetchFavicon = (url) => {
+  try {
+    const domain = new URL(url).hostname;
+    return `https://www.google.com/s2/favicons?sz=64&domain=${domain}`;
+  } catch (error) {
+    return `https://www.google.com/s2/favicons?sz=64&domain=google.com`; // Default favicon
+  }
+};
+
 
 function BookmarkManager() {
   const [bookmarks, setBookmarks] = useState([]);
-  const [editing, setEditing] = useState(null); // Bookmark being edited
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const itemsPerPage = 12;
+
+  // Bookmark states
+  const [editing, setEditing] = useState(null);
   const [editValues, setEditValues] = useState({
     name: "",
     link: "",
-    category: "",
   });
-
-  const [adding, setAdding] = useState(false); // Toggle add bookmark modal
+  const [adding, setAdding] = useState(false);
   const [newBookmark, setNewBookmark] = useState({
     name: "",
     link: "",
-    category: "Popular",
   });
 
-  // Fetch bookmarks on component mount
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, "bookmarks"), (snapshot) => {
-      const fetchedBookmarks = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setBookmarks(fetchedBookmarks);
-    });
-
-    return () => unsubscribe(); // Cleanup subscription
+    const unsubscribe = onSnapshot(
+      query(collection(db, "bookmarks"), orderBy("createdAt", "desc"), limit(itemsPerPage)),
+      (snapshot) => {
+        const fetchedBookmarks = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setBookmarks(fetchedBookmarks);
+      }
+    );
+    return () => unsubscribe();
   }, []);
 
-  // Add a new bookmark
+  // Filter and search bookmarks
+  const filteredBookmarks = bookmarks.filter(bookmark => {
+    const matchesSearch = bookmark.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         bookmark.link.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesSearch;
+  });
+
+  // Add bookmark with preview
   const handleAddBookmark = async () => {
-    if (!newBookmark.name || !newBookmark.link || !newBookmark.category) {
+    if (!newBookmark.name || !newBookmark.link) {
       alert("All fields are required!");
       return;
     }
@@ -50,107 +77,335 @@ function BookmarkManager() {
         ...newBookmark,
         createdAt: new Date(),
       });
-      alert("Bookmark added successfully!");
-      setNewBookmark({ name: "", link: "", category: "Popular" });
+      setNewBookmark({ name: "", link: ""});
       setAdding(false);
+      setShowPreview(false);
     } catch (error) {
       console.error("Error adding bookmark:", error);
       alert("Failed to add bookmark. Please try again.");
     }
   };
 
-  // Delete a bookmark
-  const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this bookmark?")) {
-      try {
-        await deleteDoc(doc(db, "bookmarks", id));
-        alert("Bookmark deleted successfully!");
-      } catch (error) {
-        console.error("Error deleting bookmark:", error);
-        alert("Failed to delete bookmark. Please try again.");
-      }
-    }
-  };
-
-  // Handle edit start
   const startEditing = (bookmark) => {
     setEditing(bookmark.id);
-    setEditValues({
-      name: bookmark.name,
-      link: bookmark.link,
-      category: bookmark.category,
-    });
+    setEditValues(bookmark);
   };
 
-  // Handle edit save
   const saveEdit = async (id) => {
     try {
       await updateDoc(doc(db, "bookmarks", id), editValues);
-      alert("Bookmark updated successfully!");
-      setEditing(null); // Exit editing mode
+      setEditing(null);
     } catch (error) {
-      console.error("Error updating bookmark:", error);
-      alert("Failed to update bookmark. Please try again.");
+      console.error("Error editing bookmark:", error);
+      alert("Failed to edit bookmark. Please try again.");
     }
   };
 
-  // Cancel editing
-  const cancelEdit = () => {
-    setEditing(null);
-    setEditValues({ name: "", link: "", category: "" });
+  const handleDelete = async (id) => {
+    try {
+      await deleteDoc(doc(db, "bookmarks", id));
+    } catch (error) {
+      console.error("Error deleting bookmark:", error);
+      alert("Failed to delete bookmark. Please try again.");
+    }
   };
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Manage Bookmarks</h1>
+    <div className="min-h-screen dark:bg-gray-900 bg-gray-50">
+      {/* Top Bar with Search and Filters */}
+      <div className="sticky top-0 z-9 dark:bg-white/5 bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+              Add Shortcut
+            </h1>
+            {/* Search Bar */}
+            <div className="relative flex-1 max-w-lg">
+              <input
+                type="text"
+                placeholder="Search Shortcuts..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-2 rounded-lg border dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            {/* Filters and View Toggle */}
+            <div className="flex items-center gap-4">
+
+              <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-2 rounded ${viewMode === 'grid' ? 'bg-white dark:bg-gray-600 shadow-sm' : ''}`}
+                >
+                  <svg className="w-5 h-5 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-2 rounded ${viewMode === 'list' ? 'bg-white dark:bg-gray-600 shadow-sm' : ''}`}
+                >
+                  <svg className="w-5 h-5 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bookmarks Grid/List */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {viewMode === 'grid' ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredBookmarks.map((bookmark) => (
+              <div
+                key={bookmark.id}
+                className="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow p-4"
+              >
+                {editing === bookmark.id ? (
+                  // Edit Mode
+                  <div className="space-y-3">
+                    <input
+                      type="text"
+                      value={editValues.name}
+                      onChange={(e) => setEditValues({ ...editValues, name: e.target.value })}
+                      className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
+                      placeholder="Name"
+                    />
+                    <input
+                      type="url"
+                      value={editValues.link}
+                      onChange={(e) => setEditValues({ ...editValues, link: e.target.value })}
+                      className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
+                      placeholder="Link"
+                    />
+                    
+                    <div className="flex justify-end gap-2">
+                      <button
+                        onClick={() => setEditing(null)}
+                        className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={() => saveEdit(bookmark.id)}
+                        className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md"
+                      >
+                        Save
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  // View Mode
+                  <div className="flex items-start gap-3">
+                    <img 
+                      src={fetchFavicon(bookmark.link)}
+                      alt=""
+                      className="w-8 h-8 rounded"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start">
+                        <h3 className="font-medium text-lg text-gray-900 dark:text-white truncate">
+                          {bookmark.name}
+                        </h3>
+                        <div className="flex items-center gap-2 ml-2">
+                          <button
+                            onClick={() => startEditing(bookmark)}
+                            className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => handleDelete(bookmark.id)}
+                            className="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                      <a
+                        href={bookmark.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 truncate block mt-1"
+                      >
+                        {bookmark.link}
+                      </a>
+                      
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {filteredBookmarks.map((bookmark) => (
+              <div
+                key={bookmark.id}
+                className="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow p-4"
+              >
+                {editing === bookmark.id ? (
+                  // Edit Mode
+                  <div className="space-y-3">
+                    <input
+                      type="text"
+                      value={editValues.name}
+                      onChange={(e) => setEditValues({ ...editValues, name: e.target.value })}
+                      className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
+                      placeholder="Name"
+                    />
+                    <input
+                      type="url"
+                      value={editValues.link}
+                      onChange={(e) => setEditValues({ ...editValues, link: e.target.value })}
+                      className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
+                      placeholder="Link"
+                    />
+                    
+                    <div className="flex justify-end gap-2">
+                      <button
+                        onClick={() => setEditing(null)}
+                        className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={() => saveEdit(bookmark.id)}
+                        className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md"
+                      >
+                        Save
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  // View Mode
+                  <div className="flex items-center gap-4">
+                    <img 
+                      src={fetchFavicon(bookmark.link)}
+                      alt=""
+                      className="w-8 h-8 rounded"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h3 className="font-medium text-lg text-gray-900 dark:text-white">
+                            {bookmark.name}
+                          </h3>
+                          <a
+                            href={bookmark.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+                          >
+                            {bookmark.link}
+                          </a>
+                          
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => startEditing(bookmark)}
+                            className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => handleDelete(bookmark.id)}
+                            className="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Add Bookmark Modal */}
       {adding && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded shadow-lg w-96">
-            <h2 className="text-lg font-bold mb-4">Add Bookmark</h2>
-            <div className="space-y-3">
-              <input
-                type="text"
-                className="w-full p-2 border rounded"
-                placeholder="Name"
-                value={newBookmark.name}
-                onChange={(e) =>
-                  setNewBookmark({ ...newBookmark, name: e.target.value })
-                }
-              />
-              <input
-                type="url"
-                className="w-full p-2 border rounded"
-                placeholder="Link"
-                value={newBookmark.link}
-                onChange={(e) =>
-                  setNewBookmark({ ...newBookmark, link: e.target.value })
-                }
-              />
-              <select
-                className="w-full p-2 border rounded"
-                value={newBookmark.category}
-                onChange={(e) =>
-                  setNewBookmark({ ...newBookmark, category: e.target.value })
-                }
-              >
-                <option value="Popular">Popular</option>
-                <option value="Travel">Travel</option>
-                <option value="Shortcut">Shortcut</option>
-              </select>
-              <div className="flex space-x-2">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <h2 className="text-xl font-semibold mb-4">Add New Shortcut</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  value={newBookmark.name}
+                  onChange={(e) =>
+                    setNewBookmark({ ...newBookmark, name: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Link
+                </label>
+                <input
+                  type="url"
+                  value={newBookmark.link}
+                  onChange={(e) =>
+                    setNewBookmark({ ...newBookmark, link: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                
+                
+              </div>
+
+              {/* Preview */}
+              {showPreview && (
+                <div className="mt-4 p-4 border rounded-lg bg-gray-50">
+                  <h3 className="font-medium mb-2">Preview</h3>
+                  <div className="bg-white p-4 rounded-lg shadow-sm">
+                    <h4 className="font-medium">{newBookmark.name || 'Bookmark Name'}</h4>
+                    <a href="#" className="text-sm text-blue-600">
+                      {newBookmark.link || 'https://example.com'}
+                    </a>
+                    
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3 mt-6">
                 <button
-                  onClick={handleAddBookmark}
-                  className="p-2 bg-blue-500 text-white rounded"
+                  onClick={() => setShowPreview(!showPreview)}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
                 >
-                  Add
+                  {showPreview ? 'Hide Preview' : 'Show Preview'}
                 </button>
                 <button
                   onClick={() => setAdding(false)}
-                  className="p-2 bg-gray-500 text-white rounded"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
                 >
                   Cancel
+                </button>
+                <button
+                  onClick={handleAddBookmark}
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md"
+                >
+                  Add Bookmark
                 </button>
               </div>
             </div>
@@ -158,98 +413,15 @@ function BookmarkManager() {
         </div>
       )}
 
-      {/* Add Bookmark Button */}
+      {/* Add Button */}
       <button
         onClick={() => setAdding(true)}
-        className="mb-4 p-2 bg-green-500 text-white rounded"
+        className="fixed bottom-8 right-8 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
       >
-        Add Bookmark
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+        </svg>
       </button>
-
-      {/* Bookmark List */}
-      <div className="space-y-4">
-        {bookmarks.map((bookmark) => (
-          <div
-            key={bookmark.id}
-            className="p-4 border rounded bg-gray-50 dark:bg-gray-800"
-          >
-            {editing === bookmark.id ? (
-              <div className="space-y-3">
-                <input
-                  type="text"
-                  className="w-full p-2 border rounded"
-                  placeholder="Name"
-                  value={editValues.name}
-                  onChange={(e) =>
-                    setEditValues({ ...editValues, name: e.target.value })
-                  }
-                />
-                <input
-                  type="url"
-                  className="w-full p-2 border rounded"
-                  placeholder="Link"
-                  value={editValues.link}
-                  onChange={(e) =>
-                    setEditValues({ ...editValues, link: e.target.value })
-                  }
-                />
-                <input
-                  type="text"
-                  className="w-full p-2 border rounded"
-                  placeholder="Category"
-                  value={editValues.category}
-                  onChange={(e) =>
-                    setEditValues({ ...editValues, category: e.target.value })
-                  }
-                />
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => saveEdit(bookmark.id)}
-                    className="p-2 bg-blue-500 text-white rounded"
-                  >
-                    Save
-                  </button>
-                  <button
-                    onClick={cancelEdit}
-                    className="p-2 bg-gray-500 text-white rounded"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <h2 className="text-lg font-bold">{bookmark.name}</h2>
-                <p>
-                  <a
-                    href={bookmark.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-500"
-                  >
-                    {bookmark.link}
-                  </a>
-                </p>
-                <p className="text-gray-600">Category: {bookmark.category}</p>
-                <div className="flex space-x-2 mt-2">
-                  <button
-                    onClick={() => startEditing(bookmark)}
-                    className="p-2 bg-yellow-500 text-white rounded"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(bookmark.id)}
-                    className="p-2 bg-red-500 text-white rounded"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
     </div>
   );
 }

@@ -3,7 +3,6 @@ import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../firebase";
-import Sidebar from "./Sidebar";
 import Header from "./Header";
 import { CiGrid31, CiCircleList } from "react-icons/ci";
 
@@ -51,14 +50,6 @@ export default function Users() {
     }
   }, [currentUser]); 
 
-  if (loading) {
-    return <div>Loading users...</div>;
-  }
-
-  if (error) {
-    return <div className="text-red-500 text-center">{error}</div>;
-  }
- 
   const indexOfLastUser = currentPage * usersPerPage;
   const indexOfFirstUser = indexOfLastUser - usersPerPage;
   const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
@@ -67,36 +58,31 @@ export default function Users() {
   const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar />
-      <div className="flex-1 flex flex-col">
-        <Header />
-        <div className="p-6 flex-1 dark:bg-gray-900 dark:text-white">
-          <h1 className="text-2xl font-bold mb-6 text-center">All Users</h1>
-
-          {/* Toggle View Buttons */}
-          <div className="flex justify-end mb-4">
-            <button
-              onClick={() => setViewType("list")}
-              className={`px-4 py-2 mr-2 ${
-                viewType === "list"
-                  ? "bg-blue-500  text-white"
-                  : "bg-gray-200 dark:bg-gray-700 dark:text-white"
-              } rounded`}
-            >
-              <CiCircleList />
-            </button>
-            <button
-              onClick={() => setViewType("grid")}
-              className={`px-4 py-2 ${
-                viewType === "grid"
-                  ? "bg-blue-500  text-white"
-                  : "bg-gray-200 dark:bg-gray-700 dark:text-white text-black"
-              } rounded`}
-            >
-              <CiGrid31 />
-            </button>
-          </div>
+    <div className="p-6 bg-gray-100 dark:bg-gray-900 min-h-screen">
+      <Header />
+      {loading && <div>Loading...</div>}
+      {error && <div className="text-red-500">{error}</div>}
+      {!loading && !error && (
+        <>
+          {/* View Type Toggle */}
+          <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
+                <button
+                  onClick={() => setViewType('grid')}
+                  className={`p-2 rounded ${viewType === 'grid' ? 'bg-white dark:bg-gray-600 shadow-sm' : ''}`}
+                >
+                  <svg className="w-5 h-5 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => setViewType('list')}
+                  className={`p-2 rounded ${viewType === 'list' ? 'bg-white dark:bg-gray-600 shadow-sm' : ''}`}
+                >
+                  <svg className="w-5 h-5 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                </button>
+              </div>
 
           {/* Users Display */}
           <div
@@ -150,19 +136,9 @@ export default function Users() {
             >
               Previous
             </button>
-            {pageNumbers.map((number) => (
-              <button
-                key={number}
-                onClick={() => setCurrentPage(number)}
-                className={`px-4 py-2 rounded ${
-                  currentPage === number
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200"
-                }`}
-              >
-                {number}
-              </button>
-            ))}
+            <span>
+              Page {currentPage} of {totalPages}
+            </span>
             <button
               onClick={() =>
                 setCurrentPage((prev) => Math.min(prev + 1, totalPages))
@@ -173,8 +149,8 @@ export default function Users() {
               Next
             </button>
           </div>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 }

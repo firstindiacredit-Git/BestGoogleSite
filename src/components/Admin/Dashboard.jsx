@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import Sidebar from "./Sidebar";
 import Header from "./Header";
 import { db } from "../../firebase";
 import { collection, getDocs, onSnapshot } from "firebase/firestore";
@@ -52,7 +51,7 @@ export default function Dashboard() {
 
     fetchTotals();
   }, []);
- 
+
   useEffect(() => {
     const unsubscribeUsers = onSnapshot(collection(db, "users"), (snapshot) => {
       snapshot.docChanges().forEach((change) => {
@@ -97,7 +96,7 @@ export default function Dashboard() {
       unsubscribeLinks();
     };
   }, []);
- 
+
   const barChartData = {
     labels: ["Users", "Categories", "Links"],
     datasets: [
@@ -133,70 +132,51 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex">
-      <Sidebar />
-      <div className="flex-1">
-        <Header />
-        <div className="p-6 bg-gray-100 dark:bg-gray-900 min-h-screen">
-          {/* Card Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white dark:bg-gray-700 dark:text-white shadow rounded-lg p-4">
-              <h3 className="text-xl font-semibold">Total Users</h3>
-              <p className="mt-2 text-3xl font-bold">{totalUsers}</p>
-            </div>
+    <div className="p-6 bg-gray-100 dark:bg-gray-900 min-h-screen">
+      <Header />
+      {/* Card Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-white dark:bg-gray-700 dark:text-white shadow rounded-lg p-4">
+          <h3 className="text-xl font-semibold">Total Users</h3>
+          <p className="mt-2 text-3xl font-bold">{totalUsers}</p>
+        </div>
 
-            <div className="bg-white dark:bg-gray-700 dark:text-white shadow rounded-lg p-4">
-              <h3 className="text-xl font-semibold">Revenue</h3>
-              <p className="mt-2 text-3xl font-bold">$12,345</p>
-            </div>
+        <div className="bg-white dark:bg-gray-700 dark:text-white shadow rounded-lg p-4">
+          <h3 className="text-xl font-semibold">Revenue</h3>
+          <p className="mt-2 text-3xl font-bold">$12,345</p>
+        </div>
 
-            <div className="bg-white dark:bg-gray-700 dark:text-white shadow rounded-lg p-4">
-              <h3 className="text-xl font-semibold">Category</h3>
-              <p className="mt-2 text-3xl font-bold">{totalCategories}</p>
-            </div>
+        <div className="bg-white dark:bg-gray-700 dark:text-white shadow rounded-lg p-4">
+          <h3 className="text-xl font-semibold">Category</h3>
+          <p className="mt-2 text-3xl font-bold">{totalCategories}</p>
+        </div>
 
-            <div className="bg-white dark:bg-gray-700 dark:text-white shadow rounded-lg p-4">
-              <h3 className="text-xl font-semibold">Total Links</h3>
-              <p className="mt-2 text-3xl font-bold">{totalLinks}</p>
-            </div>
+        <div className="bg-white dark:bg-gray-700 dark:text-white shadow rounded-lg p-4">
+          <h3 className="text-xl font-semibold">Total Links</h3>
+          <p className="mt-2 text-3xl font-bold">{totalLinks}</p>
+        </div>
+      </div>
+
+      {/* Charts Section */}
+      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Bar Chart */}
+        <div className="bg-white dark:bg-gray-700 dark:text-white shadow rounded-lg p-6">
+          <h3 className="text-xl font-semibold mb-4">
+            Analytics Overview (Bar Chart)
+          </h3>
+          <div style={{ height: "300px", width: "100%" }}>
+            <Bar data={barChartData} options={chartOptions} />
           </div>
+        </div>
 
-          {/* Charts Section */}
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Bar Chart */}
-            <div className="bg-white dark:bg-gray-700 dark:text-white shadow rounded-lg p-6">
-              <h3 className="text-xl font-semibold mb-4">
-                Analytics Overview (Bar Chart)
-              </h3>
-              <div style={{ height: "300px", width: "100%" }}>
-                <Bar data={barChartData} options={chartOptions} />
-              </div>
-            </div>
-
-            {/* Doughnut Chart */}
-            <div className="bg-white dark:bg-gray-700 dark:text-white shadow rounded-lg p-6">
-              <h3 className="text-xl font-semibold mb-4">Analytics Overview</h3>
-              <div style={{ height: "300px", width: "100%" }}>
-                <Doughnut data={doughnutChartData} />
-              </div>
-            </div>
+        {/* Doughnut Chart */}
+        <div className="bg-white dark:bg-gray-700 dark:text-white shadow rounded-lg p-6">
+          <h3 className="text-xl font-semibold mb-4">
+            Data Distribution (Doughnut Chart)
+          </h3>
+          <div style={{ height: "300px", width: "100%" }}>
+            <Doughnut data={doughnutChartData} options={chartOptions} />
           </div>
-
-          {/* Recent Activity */}
-          {/* <div className="mt-8 bg-white shadow rounded-lg p-6">
-            <h3 className="text-xl font-semibold mb-4">Recent Activity</h3>
-            <ul>
-              {recentActivity.length > 0 ? (
-                recentActivity.map((activity, index) => (
-                  <li key={index} className="mb-2">
-                    {activity}
-                  </li>
-                ))
-              ) : (
-                <li className="mb-2">No recent activity.</li>
-              )}
-            </ul>
-          </div> */}
         </div>
       </div>
     </div>

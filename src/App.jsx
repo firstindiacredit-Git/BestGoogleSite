@@ -16,6 +16,7 @@ import Users from "./components/Admin/Users.jsx";
 import PremiumPage from "./components/PremiumPage.jsx";
 import PasswordGenerator from "./components/PasswordGenerater.jsx";
 import PremiumForm from "./components/PremiumForm.jsx";
+import Sidebar from "./components/Admin/Sidebar.jsx";
 
 function App() {
   return (
@@ -29,14 +30,16 @@ function App() {
           <Route path="/NewSearchPage" element={<NewSearchPage />} />
           <Route path="/Forgotpassword" element={<Forgotpassword />} />
           <Route path="/ProfilePage" element={<ProfilePage />} />
-          <Route path="/admin/AddBookmark" element={<AddBookmark />} />
-          <Route path="/admin/addlinks" element={<AddLinks />} />
-          <Route path="/admin/login" element={<Login />} />
-          <Route path="/admin/users" element={<Users />} />
           <Route path="/PremiumPage" element={<PremiumPage />} />
-          <Route path="/admin/dashboard" element={<Dashboard />} />
           <Route path="/PasswordGenerator" element={<PasswordGenerator />} />
           <Route path="/PremiumForm" element={<PremiumForm />} />
+          <Route path="/admin/login" element={<Login />} />
+          <Route element={<Sidebar />}>
+            <Route path="/admin/dashboard" element={<Dashboard />} />
+            <Route path="/admin/users" element={<Users />} />
+            <Route path="/admin/AddBookmark" element={<AddBookmark />} />
+            <Route path="/admin/addlinks" element={<AddLinks />} />
+          </Route>
         </Routes>
       </Router>
     </AuthProvider>

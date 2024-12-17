@@ -10,12 +10,11 @@ import remove from "/remove.png";
 import { IoIosLogOut } from "react-icons/io";
 import { RiUserLine } from "react-icons/ri";
 
-
 const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
   const [showButtons, setShowButtons] = useState(false);
   const [user, setUser] = useState(null);
   const [panel, setPanel] = useState(false);
- 
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
@@ -32,20 +31,21 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
 
     return () => unsubscribe();
   }, []);
- 
+
   const togglePanel = () => setPanel(!panel);
- 
+
   const toggleMenu = () => setShowButtons(!showButtons);
- 
+
   const handleSignOut = async () => {
     try {
       await signOut(auth);
+      localStorage.setItem("imageTrue", false);
       window.location.reload();
     } catch (error) {
       console.error("Sign out error:", error.message);
     }
   };
- 
+
   useEffect(() => {
     const handleOutsideClick = (event) => {
       if (
