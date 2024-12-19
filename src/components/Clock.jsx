@@ -88,14 +88,18 @@ const ClockApp = () => {
   return (
     <div className="flex flex-col h-[10rem] mt-5 items-center border rounded-lg p-4 justify-center">
       <StyledWrapper>
-        <div className="flex gap-1 mt-6">
+        <div className="flex text-[14px] gap-3 mt-6">
           <select
             onChange={(e) => handleClockStyleChange(e.target.value)}
             value={clockStyle}
             className="px-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="digital">Digital</option>
-            <option value="analog">Analog</option>
+            <option className="text-[14px]" value="digital">
+              Digital
+            </option>
+            <option className="text-[14px]" value="analog">
+              Analog
+            </option>
           </select>
           <select
             onChange={(e) => handleAddClock(e.target.value)}

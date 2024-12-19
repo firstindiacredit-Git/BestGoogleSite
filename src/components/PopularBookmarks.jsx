@@ -328,7 +328,7 @@ const Bookmarks = () => {
         : "justify-end";
     return (
       <div
-        className={`grid p-4 gap-2 ${
+        className={`grid p-1 gap-2 ${
           view === "grid"
             ? "grid-cols-1  sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
             : view === "icon"
@@ -340,22 +340,22 @@ const Bookmarks = () => {
         {combinedBookmarks.map((bookmark, index) => (
           <div
             key={bookmark.id || index}
-            className="p-2 items-center relative group"
+            className="p-1 items-center relative group"
             style={{ color: textColor, textAlign: "center" }}
           >
             <a
               href={bookmark.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="block items-center gap-2"
+              className="block items-center gap-1"
             >
               <img
                 src={fetchFavicon(bookmark.link)}
                 alt={bookmark.name}
-                className="w-8 h-8 m-auto items-center"
+                className="w-7 h-7 m-auto items-center"
               />
               {view !== "icon" && (
-                <span className="text-sm block mt-1">{bookmark.name}</span>
+                <span className="text-[12px] block mt-1">{bookmark.name}</span>
               )}
             </a>
             {/* Delete Icon */}
@@ -400,8 +400,366 @@ const Bookmarks = () => {
     <div className="container mt-7 mx-auto">
       {/* <h2 className="text-3xl dark:text-white font-semibold mb-6 text-center">My Bookmarks</h2> */}
 
-      {<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {Object.keys(initialBookmarks).map((category) => {
+          // Define settings to avoid ReferenceError
+          const settings = categorySettings[category] || {};
+
+          return (
+            <section
+              key={category}
+              className="rounded-lg p-1 shadow relative"
+              style={{
+                backgroundColor: settings.bgColor || " ", // Default to white if undefined
+              }}
+            >
+              <div className="flex justify-between items-center p-1">
+                <h3
+                  className="text-[16px] font-semibold"
+                  style={{ color: settings.textColor || " " }} // Default to black if undefined
+                >
+                  {category}
+                </h3>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => toggleMenu(category)}
+                    className="text-gray-600"
+                    ref={menuRef}
+                  >
+                    <MdMoreVert size={24} />
+                  </button>
+                  <button
+                    onClick={() => toggleForm(category)}
+                    className="text-blue-500"
+                  >
+                    <MdAdd size={24} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Options Dropdown */}
+              {menuOpen[category] && (
+                <div
+                  ref={menuRef}
+                  className="absolute top-8 -right-10 mt-2 w-28 bg-white border border-gray-300 rounded shadow-lg z-20"
+                >
+                  <div className="p-2">
+                    {/* Background Color Option */}
+                    <button
+                      onClick={() => toggleBookmark(category)}
+                      className={`w-full text-left text-[14px] mb-1 ${
+                        background[category]?.showBgColor ? "text-red-500" : ""
+                      }`}
+                    >
+                      Background
+                      <span
+                        className={`transition-transform ${
+                          background[category]?.showBgColor
+                            ? "rotate-90 ml-1"
+                            : "hidden"
+                        }`}
+                      >
+                        ➤
+                      </span>
+                    </button>
+                    {background[category]?.showBgColor && (
+                      <div
+                        ref={backgroundRef}
+                        className="absolute top-0 left-full transform translate-x-2 w-60 bg-white border border-gray-300 rounded-lg shadow-lg z-20 p-2"
+                      >
+                        <div className="flex p-1 flex-wrap gap-1 ">
+                          {colorPalette.map((color) => (
+                            <button
+                              key={color}
+                              className={`w-5 h-5 border-1 transition-all duration-200 ${
+                                background[category]?.bgColor === color
+                                  ? "border-black" // Black border for the selected color
+                                  : "border-gray-700" // Default light gray border
+                              } hover:border-gray-500 focus:outline`}
+                              style={{ backgroundColor: color }}
+                              onClick={() =>
+                                updateCategorySetting((prev) => ({
+                                  ...prev,
+                                  [category]: {
+                                    ...prev[category],
+                                    bgColor: color,
+                                  },
+                                }))
+                              }
+                              aria-label={`Select ${color} as background color`}
+                              title={`Select ${color}`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-xs">Custom Color:</span>
+                        <input
+                          type="color"
+                          value={background[category]?.bgColor || "#ffffff"}
+                          onChange={(e) =>
+                            updateCategorySetting((prev) => ({
+                              ...prev,
+                              [category]: {
+                                ...prev[category],
+                                bgColor: e.target.value,
+                              },
+                            }))
+                          }
+                          className="w-full rounded-full cursor-pointer"
+                        />
+                      </div>
+                    )}
+
+                    {/* Text Color Option */}
+                    <button
+                      onClick={() => toggleTextBookmark(category)}
+                      className={`w-full text-left text-[14px] mb-1 ${
+                        textbackground[category]?.showTextColor
+                          ? "text-red-500"
+                          : ""
+                      }`}
+                    >
+                      Text
+                      <span
+                        className={`transition-transform ${
+                          textbackground[category]?.showTextColor
+                            ? "rotate-90 ml-1"
+                            : "hidden"
+                        }`}
+                      >
+                        ➤
+                      </span>
+                    </button>
+                    {textbackground[category]?.showTextColor && (
+                      <div
+                        ref={backgroundRef}
+                        className="absolute top-9 left-full transform translate-x-2 w-60 bg-white border border-gray-300 rounded-lg shadow-lg z-20 p-2"
+                      >
+                        <div className="flex p-1 flex-wrap gap-1">
+                          {colorPalette.map((color) => (
+                            <button
+                              key={color}
+                              className={`w-5 h-5 border-1 transition-all duration-200 ${
+                                background[category]?.textColor === color
+                                  ? "border-black" // Black border for the selected color
+                                  : "border-gray-700" // Default light gray border
+                              } hover:border-gray-500 focus:outline`}
+                              style={{ backgroundColor: color }}
+                              onClick={() =>
+                                updateCategorySetting((prev) => ({
+                                  ...prev,
+                                  [category]: {
+                                    ...prev[category],
+                                    textColor: color,
+                                  },
+                                }))
+                              }
+                              aria-label={`Select ${color} as background color`}
+                              title={`Select ${color}`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-xs">Custom Color:</span>
+                        <input
+                          type="color"
+                          value={background[category]?.bgColor || "#ffffff"}
+                          onChange={(e) =>
+                            updateCategorySetting((prev) => ({
+                              ...prev,
+                              [category]: {
+                                ...prev[category],
+                                bgColor: e.target.value,
+                              },
+                            }))
+                          }
+                          className="w-full rounded-full cursor-pointer"
+                        />
+                      </div>
+                    )}
+
+                    {/* View Option */}
+                    <button
+                      onClick={() => toggleViewBookmark(category)}
+                      className={`w-full text-left text-[14px] mb-1 ${
+                        viewbackground[category]?.showView ? "text-red-500" : ""
+                      }`}
+                    >
+                      View
+                      <span
+                        className={`transition-transform ${
+                          viewbackground[category]?.showView
+                            ? "rotate-90 ml-1"
+                            : "hidden"
+                        }`}
+                      >
+                        ➤
+                      </span>
+                    </button>
+                    {viewbackground[category]?.showView && (
+                      <div
+                        ref={backgroundRef}
+                        className="absolute top-16 -ml-1 left-full transform translate-x-2 w-24 bg-white border border-gray-300 rounded shadow-lg z-20 p-1"
+                      >
+                        <div
+                          className="flex flex-col"
+                          aria-label={`Select view for ${category}`}
+                        >
+                          <button
+                            className={` ${
+                              categorySettings[category]?.view === "list"
+                                ? "text-green-600 text-[14px] bg-green-100"
+                                : "text-gray-700 text-[14px]"
+                            }`}
+                            onClick={() =>
+                              updateCategorySetting((prev) => ({
+                                ...prev,
+                                [category]: {
+                                  ...prev[category],
+                                  view: "list",
+                                },
+                              }))
+                            }
+                          >
+                            List
+                          </button>
+                          <button
+                            className={` ${
+                              categorySettings[category]?.view === "grid"
+                                ? "text-green-600 text-[14px] bg-green-100"
+                                : "text-gray-700 text-[14px]"
+                            }`}
+                            onClick={() =>
+                              updateCategorySetting((prev) => ({
+                                ...prev,
+                                [category]: {
+                                  ...prev[category],
+                                  view: "grid",
+                                },
+                              }))
+                            }
+                          >
+                            Grid
+                          </button>
+                          <button
+                            className={` rounded-md ${
+                              categorySettings[category]?.view === "icon"
+                                ? "text-green-600 text-[14px] bg-green-100"
+                                : "text-gray-700 text-[14px]"
+                            }`}
+                            onClick={() =>
+                              updateCategorySetting((prev) => ({
+                                ...prev,
+                                [category]: {
+                                  ...prev[category],
+                                  view: "icon",
+                                },
+                              }))
+                            }
+                          >
+                            Icon Only
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Position Option */}
+                    <button
+                      onClick={() => togglePositionBookmark(category)}
+                      className={`w-full text-left text-[14px] mb-1 ${
+                        positionbackground[category]?.showPosition
+                          ? "text-red-500"
+                          : ""
+                      }`}
+                    >
+                      Position
+                      <span
+                        className={`transition-transform ${
+                          positionbackground[category]?.showPosition
+                            ? "rotate-90 ml-1"
+                            : "hidden"
+                        }`}
+                      >
+                        ➤
+                      </span>
+                    </button>
+                    {positionbackground[category]?.showPosition && (
+                      <div
+                        ref={backgroundRef}
+                        className="absolute top-20 left-full transform translate-x-2 w-24 -ml-1 bg-white border border-gray-300 rounded-lg shadow-lg z-20 p-2"
+                      >
+                        <div className="flex rounded-xl  flex-col">
+                          {["start", "Center", "end"].map((pos) => (
+                            <button
+                              key={pos}
+                              onClick={() =>
+                                updateCategorySetting((prev) => ({
+                                  ...prev,
+                                  [category]: {
+                                    ...prev[category],
+                                    position: pos,
+                                  },
+                                }))
+                              }
+                              className={`w-18 text-[14px] ${
+                                categorySettings[category]?.position === pos
+                                  ? "bg-green-100  text-green-600"
+                                  : ""
+                              }`}
+                            >
+                              {pos.charAt(0).toUpperCase() + pos.slice(1)}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Add Bookmark Form */}
+              {visibleForm === category && (
+                <div className="p-1" ref={formRef}>
+                  <input
+                    type="text"
+                    placeholder="Name"
+                    value={newBookmark.name}
+                    onChange={(e) =>
+                      setNewBookmark((prev) => ({
+                        ...prev,
+                        name: e.target.value,
+                      }))
+                    }
+                    className="w-full mb-2 p-2 border rounded-lg"
+                  />
+                  <input
+                    type="url"
+                    placeholder="Link"
+                    value={newBookmark.link}
+                    onChange={(e) =>
+                      setNewBookmark((prev) => ({
+                        ...prev,
+                        link: e.target.value,
+                      }))
+                    }
+                    className="w-full mb-4 p-2 border rounded-lg"
+                  />
+                  <button
+                    onClick={() => handleAddBookmark(category)}
+                    className="w-full bg-green-500 text-white py-2 rounded-lg"
+                  >
+                    Add Bookmark
+                  </button>
+                </div>
+              )}
+
+              {/* Bookmarks */}
+              <div
+                className={`grid gap-4 justify-${categorySettings[category]?.position}`}
+              >
+                {renderBookmarks(category)}
+              </div>
+            </section>
+          );
+        })}
 
         {/* Categories and Bookmarks */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

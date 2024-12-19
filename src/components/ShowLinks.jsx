@@ -249,13 +249,13 @@ function DraggableDropdown({
 
   const DropdownContent = (
     <div
-      className="relative p-4  rounded-lg border mt-10 border-gray-200"
+      className="relative p-2 rounded-lg border mt-10 border-gray-200"
       style={{ backgroundColor: settings.bgcolor, color: settings.textColor }}
     >
-      <h2 className="text-xl font-semibold mb-4">{category}</h2>
+      <h2 className="text-[14px] font-semibold mb-1 p-1">{category}</h2>
       <button
         onClick={handleMenuToggle}
-        className="absolute top-2 right-2 p-2 rounded-full"
+        className="absolute top-2 text-gray-600 right-2 p-1 rounded-full"
       >
         <FaEllipsisV />
       </button>
@@ -263,20 +263,20 @@ function DraggableDropdown({
       {menuOpen && (
         <div
           ref={menuRef}
-          className="absolute top-10 -right-20 w-28 bg-white border border-gray-300 rounded-lg shadow-lg z-20 p-4"
+          className="absolute top-10 -right-20 w-28 bg-white border border-gray-300 rounded z-20 p-2"
         >
           {/* Background Picker */}
           <div>
             <button
               onClick={() => toggleDropdown("background")}
-              className={`w-full text-left text-sm font-medium mb-2  ${
+              className={`w-full text-left text-[14px] mb-1  ${
                 dropdowns.background ? "text-red-500" : ""
               }`}
             >
               Background
               <span
                 className={`transition-transform transform ${
-                  dropdowns.background ? "rotate-0" : "hidden"
+                  dropdowns.background ? "rotate-0 ml-1" : "hidden"
                 }`}
               >
                 ➤
@@ -322,14 +322,14 @@ function DraggableDropdown({
           <div>
             <button
               onClick={() => toggleDropdown("text")}
-              className={` w-full text-left text-sm font-medium mb-2  ${
+              className={` w-full text-left text-[14px] mb-1  ${
                 dropdowns.text ? "text-red-500" : ""
               }`}
             >
               Text
               <span
                 className={`transition-transform transform ${
-                  dropdowns.text ? "rotate-0" : "hidden"
+                  dropdowns.text ? "rotate-0 ml-1" : "hidden"
                 }`}
               >
                 ➤
@@ -340,7 +340,7 @@ function DraggableDropdown({
                 ref={textRef}
                 className="absolute top-8 left-full transform translate-x-2 w-60 bg-white border border-gray-300 rounded-lg shadow-lg z-20 p-4"
               >
-                <div className="flex flex-wrap gap-0.5 mb-2">
+                <div className="flex flex-wrap gap-0.5 ">
                   {colorPalette.map((color) => (
                     <div
                       key={color}
@@ -357,7 +357,7 @@ function DraggableDropdown({
                     />
                   ))}
                 </div>
-                <label className="text-xs block mb-1">Custom Color:</label>
+                <label className="text-xs block">Custom Color:</label>
                 <input
                   type="color"
                   value={settings.textColor}
@@ -372,14 +372,14 @@ function DraggableDropdown({
           <div>
             <button
               onClick={() => toggleDropdown("view")}
-              className={` w-full text-left text-sm font-medium mb-2  ${
+              className={` w-full text-left text-[14px] mb-1  ${
                 dropdowns.view ? "text-red-500" : ""
               }`}
             >
               View
               <span
                 className={`transition-transform transform ${
-                  dropdowns.view ? "rotate-0" : "hidden"
+                  dropdowns.view ? "rotate-0 ml-1" : "hidden"
                 }`}
               >
                 ➤
@@ -388,13 +388,13 @@ function DraggableDropdown({
             {dropdowns.view && (
               <div
                 ref={viewRef}
-                className="absolute top-20 left-full transform text-center translate-x-2 w-32 bg-white border border-gray-300 rounded-lg shadow-lg z-20 p-4"
+                className="absolute top-16 left-full transform text-center translate-x-2 w-32 bg-white border border-gray-300 rounded-lg shadow-lg z-20 p-4"
               >
                 <button
                   onClick={() => updateSettings("viewMode", "grid")}
-                  className={`w-full text-center  mb-1 ${
+                  className={`w-full text-center text-[14px]   mb-1 ${
                     settings.viewMode === "grid"
-                      ? "bg-green-100 text-green-600"
+                      ? "bg-green-100 text-[14px] text-green-600"
                       : ""
                   }`}
                 >
@@ -402,9 +402,9 @@ function DraggableDropdown({
                 </button>
                 <button
                   onClick={() => updateSettings("viewMode", "list")}
-                  className={`w-full text-center mb-1 ${
+                  className={`w-full text-center text-[14px] mb-1 ${
                     settings.viewMode === "list"
-                      ? "bg-green-100 text-green-600"
+                      ? "bg-green-100 text-[14px]  text-green-600"
                       : ""
                   }`}
                 >
@@ -412,9 +412,9 @@ function DraggableDropdown({
                 </button>
                 <button
                   onClick={() => updateSettings("viewMode", "icon")}
-                  className={`w-full text-center ${
+                  className={`w-full text-center text-[14px]  ${
                     settings.viewMode === "icon"
-                      ? "bg-green-100 text-green-600"
+                      ? "bg-green-100 text-[14px]  text-green-600"
                       : ""
                   }`}
                 >
@@ -428,14 +428,14 @@ function DraggableDropdown({
           <div>
             <button
               onClick={() => toggleDropdown("position")}
-              className={` w-full text-left text-sm font-medium mb-2  ${
+              className={` w-full text-left text-[14px] mb-1  ${
                 dropdowns.position ? "text-red-500" : ""
               }`}
             >
               Position
               <span
                 className={`transition-transform transform ${
-                  dropdowns.position ? "rotate-0" : "hidden"
+                  dropdowns.position ? "rotate-0 ml-1" : "hidden"
                 }`}
               >
                 ➤
@@ -444,12 +444,12 @@ function DraggableDropdown({
             {dropdowns.position && (
               <div className="relative" ref={positionRef}>
                 {dropdowns.position && (
-                  <div className="absolute -top-9 left-24 transform translate-x-2 w-32 bg-white border border-gray-300 rounded-lg shadow-lg z-20 p-4 ">
+                  <div className="absolute -top-7  text-[14px] left-24 transform translate-x-2 w-32 bg-white border border-gray-300 rounded shadow-lg z-20 p-2">
                     <button
                       className={`w-full text-center ${
                         settings.position === "start"
-                          ? "bg-green-100 text-green-600"
-                          : "hover:bg-gray-100"
+                          ? "bg-green-100 text-[14px] text-green-600"
+                          : "hover:bg-gray-100 text-[14px]"
                       }`}
                       onClick={() => handlePositionChange("start")}
                     >
@@ -458,8 +458,8 @@ function DraggableDropdown({
                     <button
                       className={`w-full text-center ${
                         settings.position === "center"
-                          ? "bg-green-100 text-green-600"
-                          : "hover:bg-gray-100"
+                          ? "bg-green-100 text-[14px] text-green-600"
+                          : "hover:bg-gray-100 text-[14px]"
                       }`}
                       onClick={() => handlePositionChange("center")}
                     >
@@ -468,8 +468,8 @@ function DraggableDropdown({
                     <button
                       className={`w-full text-center ${
                         settings.position === "end"
-                          ? "bg-green-100 text-green-600"
-                          : "hover:bg-gray-100"
+                          ? "bg-green-100 text-[14px] text-green-600"
+                          : "hover:bg-gray-100 text-[14px]"
                       }`}
                       onClick={() => handlePositionChange("end")}
                     >
@@ -494,18 +494,15 @@ function DraggableDropdown({
         }`}
       >
         {links.map((link) => (
-          <div
-            key={link.id}
-            className="flex flex-col items-center p-1 rounded-lg"
-          >
+          <div key={link.id} className="flex flex-col items-center p-1 rounded">
             {link.logoUrl && (
-              <img src={link.logoUrl} alt={link.name} className="w-8 h-8" />
+              <img src={link.logoUrl} alt={link.name} className="w-7 h-7" />
             )}
             <a
               href={link.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="dark:text-white text-xs truncate hover:text-blue-500"
+              className="dark:text-white text-[12px] truncate "
             >
               {settings.viewMode !== "icon" && (
                 <span className="text-sm block mt-1">{link.name}</span>
@@ -629,7 +626,7 @@ function ShowLinks() {
       </button>
 
       {loadingCategories ? (
-        <p className="justify-center text-gray-600">Loading categories...</p>
+        <p className="justify-center  text-gray-600">Loading categories...</p>
       ) : error ? (
         <p className="text-sm text-red-500">{error}</p>
       ) : (
