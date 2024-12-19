@@ -70,7 +70,7 @@ export default function Sidebar() {
     },
     {
       path: "/admin/AddLinks",
-      label: "Add Bookmarks",
+      label: "Add Category",
       icon: MdOutlineAddLink,
     },
     {

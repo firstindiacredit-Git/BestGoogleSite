@@ -328,7 +328,7 @@ const Bookmarks = () => {
         : "justify-end";
     return (
       <div
-        className={`grid p-4 gap-2 ${
+        className={`grid p-1 gap-2 ${
           view === "grid"
             ? "grid-cols-1  sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
             : view === "icon"
@@ -340,22 +340,22 @@ const Bookmarks = () => {
         {combinedBookmarks.map((bookmark, index) => (
           <div
             key={bookmark.id || index}
-            className="p-2 items-center relative group"
+            className="p-1 items-center relative group"
             style={{ color: textColor, textAlign: "center" }}
           >
             <a
               href={bookmark.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="block items-center gap-2"
+              className="block items-center gap-1"
             >
               <img
                 src={fetchFavicon(bookmark.link)}
                 alt={bookmark.name}
-                className="w-8 h-8 m-auto items-center"
+                className="w-7 h-7 m-auto items-center"
               />
               {view !== "icon" && (
-                <span className="text-sm block mt-1">{bookmark.name}</span>
+                <span className="text-[12px] block mt-1">{bookmark.name}</span>
               )}
             </a>
             {/* Delete Icon */}
@@ -408,19 +408,19 @@ const Bookmarks = () => {
           return (
             <section
               key={category}
-              className="rounded-lg shadow relative"
+              className="rounded-lg p-1 shadow relative"
               style={{
                 backgroundColor: settings.bgColor || " ", // Default to white if undefined
               }}
             >
-              <div className="flex justify-between items-center p-4">
+              <div className="flex justify-between items-center p-1">
                 <h3
-                  className="text-xl font-semibold"
+                  className="text-[16px] font-semibold"
                   style={{ color: settings.textColor || " " }} // Default to black if undefined
                 >
                   {category}
                 </h3>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1">
                   <button
                     onClick={() => toggleMenu(category)}
                     className="text-gray-600"
@@ -441,13 +441,13 @@ const Bookmarks = () => {
               {menuOpen[category] && (
                 <div
                   ref={menuRef}
-                  className="absolute top-8 -right-10 mt-2 w-28 bg-white border border-gray-300 rounded-lg shadow-lg z-20"
+                  className="absolute top-8 -right-10 mt-2 w-28 bg-white border border-gray-300 rounded shadow-lg z-20"
                 >
-                  <div className="p-4">
+                  <div className="p-2">
                     {/* Background Color Option */}
                     <button
                       onClick={() => toggleBookmark(category)}
-                      className={`w-full text-left text-sm font-medium mb-2 ${
+                      className={`w-full text-left text-[14px] mb-1 ${
                         background[category]?.showBgColor ? "text-red-500" : ""
                       }`}
                     >
@@ -455,7 +455,7 @@ const Bookmarks = () => {
                       <span
                         className={`transition-transform ${
                           background[category]?.showBgColor
-                            ? "rotate-90"
+                            ? "rotate-90 ml-1"
                             : "hidden"
                         }`}
                       >
@@ -465,7 +465,7 @@ const Bookmarks = () => {
                     {background[category]?.showBgColor && (
                       <div
                         ref={backgroundRef}
-                        className="absolute top-0 left-full transform translate-x-2 w-60 bg-white border border-gray-300 rounded-lg shadow-lg z-20 p-4"
+                        className="absolute top-0 left-full transform translate-x-2 w-60 bg-white border border-gray-300 rounded-lg shadow-lg z-20 p-2"
                       >
                         <div className="flex p-1 flex-wrap gap-1 ">
                           {colorPalette.map((color) => (
@@ -512,7 +512,7 @@ const Bookmarks = () => {
                     {/* Text Color Option */}
                     <button
                       onClick={() => toggleTextBookmark(category)}
-                      className={`w-full text-left text-sm font-medium mb-2 ${
+                      className={`w-full text-left text-[14px] mb-1 ${
                         textbackground[category]?.showTextColor
                           ? "text-red-500"
                           : ""
@@ -522,7 +522,7 @@ const Bookmarks = () => {
                       <span
                         className={`transition-transform ${
                           textbackground[category]?.showTextColor
-                            ? "rotate-90"
+                            ? "rotate-90 ml-1"
                             : "hidden"
                         }`}
                       >
@@ -532,9 +532,9 @@ const Bookmarks = () => {
                     {textbackground[category]?.showTextColor && (
                       <div
                         ref={backgroundRef}
-                        className="absolute top-9 left-full transform translate-x-2 w-60 bg-white border border-gray-300 rounded-lg shadow-lg z-20 p-4"
+                        className="absolute top-9 left-full transform translate-x-2 w-60 bg-white border border-gray-300 rounded-lg shadow-lg z-20 p-2"
                       >
-                        <div className="flex p-1 flex-wrap gap-2 mb-2">
+                        <div className="flex p-1 flex-wrap gap-1">
                           {colorPalette.map((color) => (
                             <button
                               key={color}
@@ -579,7 +579,7 @@ const Bookmarks = () => {
                     {/* View Option */}
                     <button
                       onClick={() => toggleViewBookmark(category)}
-                      className={`w-full text-left text-sm font-medium mb-2 ${
+                      className={`w-full text-left text-[14px] mb-1 ${
                         viewbackground[category]?.showView ? "text-red-500" : ""
                       }`}
                     >
@@ -587,7 +587,7 @@ const Bookmarks = () => {
                       <span
                         className={`transition-transform ${
                           viewbackground[category]?.showView
-                            ? "rotate-90"
+                            ? "rotate-90 ml-1"
                             : "hidden"
                         }`}
                       >
@@ -597,17 +597,17 @@ const Bookmarks = () => {
                     {viewbackground[category]?.showView && (
                       <div
                         ref={backgroundRef}
-                        className="absolute top-20 left-full transform translate-x-2 w-60 bg-white border border-gray-300 rounded-lg shadow-lg z-20 p-4"
+                        className="absolute top-16 -ml-1 left-full transform translate-x-2 w-24 bg-white border border-gray-300 rounded shadow-lg z-20 p-1"
                       >
                         <div
-                          className="flex flex-col space-x-2"
+                          className="flex flex-col"
                           aria-label={`Select view for ${category}`}
                         >
                           <button
                             className={` ${
                               categorySettings[category]?.view === "list"
-                                ? "text-green-600 bg-green-100"
-                                : "text-gray-700"
+                                ? "text-green-600 text-[14px] bg-green-100"
+                                : "text-gray-700 text-[14px]"
                             }`}
                             onClick={() =>
                               updateCategorySetting((prev) => ({
@@ -624,8 +624,8 @@ const Bookmarks = () => {
                           <button
                             className={` ${
                               categorySettings[category]?.view === "grid"
-                                ? "text-green-600 bg-green-100"
-                                : "text-gray-700"
+                                ? "text-green-600 text-[14px] bg-green-100"
+                                : "text-gray-700 text-[14px]"
                             }`}
                             onClick={() =>
                               updateCategorySetting((prev) => ({
@@ -642,8 +642,8 @@ const Bookmarks = () => {
                           <button
                             className={` rounded-md ${
                               categorySettings[category]?.view === "icon"
-                                ? "text-green-600 bg-green-100"
-                                : "text-gray-700"
+                                ? "text-green-600 text-[14px] bg-green-100"
+                                : "text-gray-700 text-[14px]"
                             }`}
                             onClick={() =>
                               updateCategorySetting((prev) => ({
@@ -664,7 +664,7 @@ const Bookmarks = () => {
                     {/* Position Option */}
                     <button
                       onClick={() => togglePositionBookmark(category)}
-                      className={`w-full text-left text-sm font-medium mb-2 ${
+                      className={`w-full text-left text-[14px] mb-1 ${
                         positionbackground[category]?.showPosition
                           ? "text-red-500"
                           : ""
@@ -674,7 +674,7 @@ const Bookmarks = () => {
                       <span
                         className={`transition-transform ${
                           positionbackground[category]?.showPosition
-                            ? "rotate-90"
+                            ? "rotate-90 ml-1"
                             : "hidden"
                         }`}
                       >
@@ -684,9 +684,9 @@ const Bookmarks = () => {
                     {positionbackground[category]?.showPosition && (
                       <div
                         ref={backgroundRef}
-                        className="absolute top-28 left-full transform translate-x-2 w-32 bg-white border border-gray-300 rounded-lg shadow-lg z-20 p-4"
+                        className="absolute top-20 left-full transform translate-x-2 w-24 -ml-1 bg-white border border-gray-300 rounded-lg shadow-lg z-20 p-2"
                       >
-                        <div className="flex rounded-xl flex-col">
+                        <div className="flex rounded-xl  flex-col">
                           {["start", "Center", "end"].map((pos) => (
                             <button
                               key={pos}
@@ -699,9 +699,9 @@ const Bookmarks = () => {
                                   },
                                 }))
                               }
-                              className={`w-18 text-sm font-medium ${
+                              className={`w-18 text-[14px] ${
                                 categorySettings[category]?.position === pos
-                                  ? "bg-green-100 text-green-600"
+                                  ? "bg-green-100  text-green-600"
                                   : ""
                               }`}
                             >
@@ -717,7 +717,7 @@ const Bookmarks = () => {
 
               {/* Add Bookmark Form */}
               {visibleForm === category && (
-                <div className="p-4" ref={formRef}>
+                <div className="p-1" ref={formRef}>
                   <input
                     type="text"
                     placeholder="Name"
