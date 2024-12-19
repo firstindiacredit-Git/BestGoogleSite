@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, Outlet } from "react-router-dom";
 import { LuLayoutDashboard, LuUsers } from "react-icons/lu";
 import { MdOutlineAddLink } from "react-icons/md";
-import { IoSettingsOutline, IoSunny, IoMoon } from "react-icons/io5";
+import { IoSettingsOutline, IoSunny, IoMoon,IoLogOut } from "react-icons/io5";
+import { signOut } from "firebase/auth";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../../firebase";
 import { doc, getDoc } from "firebase/firestore";
@@ -13,6 +14,7 @@ export default function Sidebar() {
   const [dispName, setDispName] = useState("");
   const [link, setLink] = useState("/default-avatar.png");
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -54,6 +56,15 @@ export default function Sidebar() {
 
   const toggleTheme = () => {
     setTheme((prevTheme) => (prevTheme === "dark" ? "light" : "dark"));
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate("/admin/login");
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
   };
 
   // Navigation items with their corresponding paths and icons
@@ -136,19 +147,48 @@ export default function Sidebar() {
 
         {/* Footer */}
         <div className="p-4 border-t border-gray-200 dark:border-gray-800">
-          <button
-            onClick={toggleTheme}
-            className="w-full flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/20 rounded-lg transition-colors duration-200"
-          >
-            {theme === "dark" ? (
-              <IoSunny className="w-4 h-4 mr-2 text-yellow-300" />
-            ) : (
-              <IoMoon className="w-4 h-4 mr-2 text-blue-500" />
-            )}
-            <span className="ml-2">
-              {theme === "dark" ? "Light Mode" : "Dark Mode"}
-            </span>
-          </button>
+          <div className="flex items-center justify-between">
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center  px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/20 rounded-lg transition-colors duration-200"
+            >
+              <span><IoLogOut/></span>
+              
+              Logout
+            </button>
+
+            <div className="relative">
+              <button
+                onClick={() => setShowDropdown(!showDropdown)}
+                className="flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-800/20 transition p-2 rounded"
+              >
+                <IoSettingsOutline className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+              </button>
+
+              {showDropdown && (
+                <div className="absolute bottom-full right-0 mb-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+                  <div className="py-1">
+                    <button
+                      onClick={toggleTheme}
+                      className="w-full px-4 py-2 text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
+                    >
+                      {theme === "dark" ? (
+                        <>
+                          <IoSunny className="w-4 h-4 mr-2 text-yellow-300" />
+                          Light Mode
+                        </>
+                      ) : (
+                        <>
+                          <IoMoon className="w-4 h-4 mr-2 text-blue-500" />
+                          Dark Mode
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
       <div className="flex-1 ml-[18rem] bg-gray-100 dark:bg-gray-900">

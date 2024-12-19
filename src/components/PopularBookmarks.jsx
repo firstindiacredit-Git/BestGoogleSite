@@ -12,18 +12,18 @@ import { MdAdd, MdMoreVert } from "react-icons/md";
 import Category from "../components/Category";
 import ShowLinks from "./ShowLinks";
 
-const initialBookmarks = {
-  Popular: [
-    { name: "Facebook", link: "https://www.facebook.com" },
-    { name: "Twitter", link: "https://www.twitter.com" },
-    { name: "Myntra", link: "https://www.myntra.com" },
-  ],
-  Travel: [
-    { name: "Booking", link: "https://www.booking.com" },
-    { name: "Emirates", link: "https://www.emirates.com" },
-    { name: "Trip Advisor", link: "https://www.tripadvisor.com" },
-  ],
-};
+// const initialBookmarks = {
+//   Popular: [
+//     { name: "Facebook", link: "https://www.facebook.com" },
+//     { name: "Twitter", link: "https://www.twitter.com" },
+//     { name: "Myntra", link: "https://www.myntra.com" },
+//   ],
+//   Travel: [
+//     { name: "Booking", link: "https://www.booking.com" },
+//     { name: "Emirates", link: "https://www.emirates.com" },
+//     { name: "Trip Advisor", link: "https://www.tripadvisor.com" },
+//   ],
+// };
 
 const colorPalette = [
   // Row 1
@@ -180,25 +180,25 @@ const Bookmarks = () => {
     return () => unsubscribe();
   }, []);
 
-  useEffect(() => {
-    if (user) {
-      const unsubscribeFns = Object.keys(initialBookmarks).map((category) => {
-        const bookmarksRef = collection(db, "users", user.uid, "bookmarks");
-        return onSnapshot(bookmarksRef, (snapshot) => {
-          const bookmarksData = snapshot.docs
-            .map((doc) => ({ id: doc.id, ...doc.data() }))
-            .filter((bookmark) => bookmark.category === category);
+  // useEffect(() => {
+  //   if (user) {
+  //     const unsubscribeFns = Object.keys(initialBookmarks).map((category) => {
+  //       const bookmarksRef = collection(db, "users", user.uid, "bookmarks");
+  //       return onSnapshot(bookmarksRef, (snapshot) => {
+  //         const bookmarksData = snapshot.docs
+  //           .map((doc) => ({ id: doc.id, ...doc.data() }))
+  //           .filter((bookmark) => bookmark.category === category);
 
-          setFirebaseBookmarks((prev) => ({
-            ...prev,
-            [category]: bookmarksData,
-          }));
-        });
-      });
+  //         setFirebaseBookmarks((prev) => ({
+  //           ...prev,
+  //           [category]: bookmarksData,
+  //         }));
+  //       });
+  //     });
 
-      return () => unsubscribeFns.forEach((unsubscribe) => unsubscribe());
-    }
-  }, [user]);
+  //     return () => unsubscribeFns.forEach((unsubscribe) => unsubscribe());
+  //   }
+  // }, [user]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -316,7 +316,7 @@ const Bookmarks = () => {
     } = categorySettings[category] || {};
 
     const combinedBookmarks = [
-      ...initialBookmarks[category],
+      // ...initialBookmarks[category],
       ...(firebaseBookmarks[category] || []),
     ].sort((a, b) => a.name.localeCompare(b.name));
 
@@ -400,366 +400,8 @@ const Bookmarks = () => {
     <div className="container mt-7 mx-auto">
       {/* <h2 className="text-3xl dark:text-white font-semibold mb-6 text-center">My Bookmarks</h2> */}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {Object.keys(initialBookmarks).map((category) => {
-          // Define settings to avoid ReferenceError
-          const settings = categorySettings[category] || {};
-
-          return (
-            <section
-              key={category}
-              className="rounded-lg shadow relative"
-              style={{
-                backgroundColor: settings.bgColor || " ", // Default to white if undefined
-              }}
-            >
-              <div className="flex justify-between items-center p-4">
-                <h3
-                  className="text-xl font-semibold"
-                  style={{ color: settings.textColor || " " }} // Default to black if undefined
-                >
-                  {category}
-                </h3>
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={() => toggleMenu(category)}
-                    className="text-gray-600"
-                    ref={menuRef}
-                  >
-                    <MdMoreVert size={24} />
-                  </button>
-                  <button
-                    onClick={() => toggleForm(category)}
-                    className="text-blue-500"
-                  >
-                    <MdAdd size={24} />
-                  </button>
-                </div>
-              </div>
-
-              {/* Options Dropdown */}
-              {menuOpen[category] && (
-                <div
-                  ref={menuRef}
-                  className="absolute top-8 -right-10 mt-2 w-28 bg-white border border-gray-300 rounded-lg shadow-lg z-20"
-                >
-                  <div className="p-4">
-                    {/* Background Color Option */}
-                    <button
-                      onClick={() => toggleBookmark(category)}
-                      className={`w-full text-left text-sm font-medium mb-2 ${
-                        background[category]?.showBgColor ? "text-red-500" : ""
-                      }`}
-                    >
-                      Background
-                      <span
-                        className={`transition-transform ${
-                          background[category]?.showBgColor
-                            ? "rotate-90"
-                            : "hidden"
-                        }`}
-                      >
-                        ➤
-                      </span>
-                    </button>
-                    {background[category]?.showBgColor && (
-                      <div
-                        ref={backgroundRef}
-                        className="absolute top-0 left-full transform translate-x-2 w-60 bg-white border border-gray-300 rounded-lg shadow-lg z-20 p-4"
-                      >
-                        <div className="flex p-1 flex-wrap gap-1 ">
-                          {colorPalette.map((color) => (
-                            <button
-                              key={color}
-                              className={`w-5 h-5 border-1 transition-all duration-200 ${
-                                background[category]?.bgColor === color
-                                  ? "border-black" // Black border for the selected color
-                                  : "border-gray-700" // Default light gray border
-                              } hover:border-gray-500 focus:outline`}
-                              style={{ backgroundColor: color }}
-                              onClick={() =>
-                                updateCategorySetting((prev) => ({
-                                  ...prev,
-                                  [category]: {
-                                    ...prev[category],
-                                    bgColor: color,
-                                  },
-                                }))
-                              }
-                              aria-label={`Select ${color} as background color`}
-                              title={`Select ${color}`}
-                            />
-                          ))}
-                        </div>
-                        <span className="text-xs">Custom Color:</span>
-                        <input
-                          type="color"
-                          value={background[category]?.bgColor || "#ffffff"}
-                          onChange={(e) =>
-                            updateCategorySetting((prev) => ({
-                              ...prev,
-                              [category]: {
-                                ...prev[category],
-                                bgColor: e.target.value,
-                              },
-                            }))
-                          }
-                          className="w-full rounded-full cursor-pointer"
-                        />
-                      </div>
-                    )}
-
-                    {/* Text Color Option */}
-                    <button
-                      onClick={() => toggleTextBookmark(category)}
-                      className={`w-full text-left text-sm font-medium mb-2 ${
-                        textbackground[category]?.showTextColor
-                          ? "text-red-500"
-                          : ""
-                      }`}
-                    >
-                      Text
-                      <span
-                        className={`transition-transform ${
-                          textbackground[category]?.showTextColor
-                            ? "rotate-90"
-                            : "hidden"
-                        }`}
-                      >
-                        ➤
-                      </span>
-                    </button>
-                    {textbackground[category]?.showTextColor && (
-                      <div
-                        ref={backgroundRef}
-                        className="absolute top-9 left-full transform translate-x-2 w-60 bg-white border border-gray-300 rounded-lg shadow-lg z-20 p-4"
-                      >
-                        <div className="flex p-1 flex-wrap gap-2 mb-2">
-                          {colorPalette.map((color) => (
-                            <button
-                              key={color}
-                              className={`w-5 h-5 border-1 transition-all duration-200 ${
-                                background[category]?.textColor === color
-                                  ? "border-black" // Black border for the selected color
-                                  : "border-gray-700" // Default light gray border
-                              } hover:border-gray-500 focus:outline`}
-                              style={{ backgroundColor: color }}
-                              onClick={() =>
-                                updateCategorySetting((prev) => ({
-                                  ...prev,
-                                  [category]: {
-                                    ...prev[category],
-                                    textColor: color,
-                                  },
-                                }))
-                              }
-                              aria-label={`Select ${color} as background color`}
-                              title={`Select ${color}`}
-                            />
-                          ))}
-                        </div>
-                        <span className="text-xs">Custom Color:</span>
-                        <input
-                          type="color"
-                          value={background[category]?.bgColor || "#ffffff"}
-                          onChange={(e) =>
-                            updateCategorySetting((prev) => ({
-                              ...prev,
-                              [category]: {
-                                ...prev[category],
-                                bgColor: e.target.value,
-                              },
-                            }))
-                          }
-                          className="w-full rounded-full cursor-pointer"
-                        />
-                      </div>
-                    )}
-
-                    {/* View Option */}
-                    <button
-                      onClick={() => toggleViewBookmark(category)}
-                      className={`w-full text-left text-sm font-medium mb-2 ${
-                        viewbackground[category]?.showView ? "text-red-500" : ""
-                      }`}
-                    >
-                      View
-                      <span
-                        className={`transition-transform ${
-                          viewbackground[category]?.showView
-                            ? "rotate-90"
-                            : "hidden"
-                        }`}
-                      >
-                        ➤
-                      </span>
-                    </button>
-                    {viewbackground[category]?.showView && (
-                      <div
-                        ref={backgroundRef}
-                        className="absolute top-20 left-full transform translate-x-2 w-60 bg-white border border-gray-300 rounded-lg shadow-lg z-20 p-4"
-                      >
-                        <div
-                          className="flex flex-col space-x-2"
-                          aria-label={`Select view for ${category}`}
-                        >
-                          <button
-                            className={` ${
-                              categorySettings[category]?.view === "list"
-                                ? "text-green-600 bg-green-100"
-                                : "text-gray-700"
-                            }`}
-                            onClick={() =>
-                              updateCategorySetting((prev) => ({
-                                ...prev,
-                                [category]: {
-                                  ...prev[category],
-                                  view: "list",
-                                },
-                              }))
-                            }
-                          >
-                            List
-                          </button>
-                          <button
-                            className={` ${
-                              categorySettings[category]?.view === "grid"
-                                ? "text-green-600 bg-green-100"
-                                : "text-gray-700"
-                            }`}
-                            onClick={() =>
-                              updateCategorySetting((prev) => ({
-                                ...prev,
-                                [category]: {
-                                  ...prev[category],
-                                  view: "grid",
-                                },
-                              }))
-                            }
-                          >
-                            Grid
-                          </button>
-                          <button
-                            className={` rounded-md ${
-                              categorySettings[category]?.view === "icon"
-                                ? "text-green-600 bg-green-100"
-                                : "text-gray-700"
-                            }`}
-                            onClick={() =>
-                              updateCategorySetting((prev) => ({
-                                ...prev,
-                                [category]: {
-                                  ...prev[category],
-                                  view: "icon",
-                                },
-                              }))
-                            }
-                          >
-                            Icon Only
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Position Option */}
-                    <button
-                      onClick={() => togglePositionBookmark(category)}
-                      className={`w-full text-left text-sm font-medium mb-2 ${
-                        positionbackground[category]?.showPosition
-                          ? "text-red-500"
-                          : ""
-                      }`}
-                    >
-                      Position
-                      <span
-                        className={`transition-transform ${
-                          positionbackground[category]?.showPosition
-                            ? "rotate-90"
-                            : "hidden"
-                        }`}
-                      >
-                        ➤
-                      </span>
-                    </button>
-                    {positionbackground[category]?.showPosition && (
-                      <div
-                        ref={backgroundRef}
-                        className="absolute top-28 left-full transform translate-x-2 w-32 bg-white border border-gray-300 rounded-lg shadow-lg z-20 p-4"
-                      >
-                        <div className="flex rounded-xl flex-col">
-                          {["start", "Center", "end"].map((pos) => (
-                            <button
-                              key={pos}
-                              onClick={() =>
-                                updateCategorySetting((prev) => ({
-                                  ...prev,
-                                  [category]: {
-                                    ...prev[category],
-                                    position: pos,
-                                  },
-                                }))
-                              }
-                              className={`w-18 text-sm font-medium ${
-                                categorySettings[category]?.position === pos
-                                  ? "bg-green-100 text-green-600"
-                                  : ""
-                              }`}
-                            >
-                              {pos.charAt(0).toUpperCase() + pos.slice(1)}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Add Bookmark Form */}
-              {visibleForm === category && (
-                <div className="p-4" ref={formRef}>
-                  <input
-                    type="text"
-                    placeholder="Name"
-                    value={newBookmark.name}
-                    onChange={(e) =>
-                      setNewBookmark((prev) => ({
-                        ...prev,
-                        name: e.target.value,
-                      }))
-                    }
-                    className="w-full mb-2 p-2 border rounded-lg"
-                  />
-                  <input
-                    type="url"
-                    placeholder="Link"
-                    value={newBookmark.link}
-                    onChange={(e) =>
-                      setNewBookmark((prev) => ({
-                        ...prev,
-                        link: e.target.value,
-                      }))
-                    }
-                    className="w-full mb-4 p-2 border rounded-lg"
-                  />
-                  <button
-                    onClick={() => handleAddBookmark(category)}
-                    className="w-full bg-green-500 text-white py-2 rounded-lg"
-                  >
-                    Add Bookmark
-                  </button>
-                </div>
-              )}
-
-              {/* Bookmarks */}
-              <div
-                className={`grid gap-4 justify-${categorySettings[category]?.position}`}
-              >
-                {renderBookmarks(category)}
-              </div>
-            </section>
-          );
-        })}
+      {<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
 
         {/* Categories and Bookmarks */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -822,7 +464,7 @@ const Bookmarks = () => {
             </div>
           ))}
         </div>
-      </div>
+      </div>}
       <div className="">
         <Category />
         <ShowLinks />

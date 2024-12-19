@@ -113,46 +113,46 @@ function AddLinks() {
     }
   };
 
-  const handleSubmitBookmark = async (e) => {
-    e.preventDefault();
-    if (!name || !link || !category) {
+  const handleAddCategory = async () => {
+    if (!newCategory.trim()) {
+      alert("Category name is required!");
+      return;
+    }
+
+    try {
+      const categoryRef = collection(db, "categories");
+      await addDoc(categoryRef, {
+        newCategory: newCategory.trim(),
+        color: selectedColor,
+        links: [],
+        createdAt: new Date(),
+      });
+      setNewCategory("");
+      setSelectedColor("#3B82F6"); // Reset to default color
+    } catch (error) {
+      console.error("Error adding category:", error);
+    }
+  };
+
+  const handleAddLink = async () => {
+    if (!newLink.name || !newLink.link || !newLink.category) {
       alert("Please fill in all fields.");
       return;
     }
 
     try {
       await addDoc(collection(db, "links"), {
-        name,
-        link,
-        category,
+        name: newLink.name,
+        link: newLink.link,
+        category: newLink.category,
         createdAt: new Date(),
         createdBy: user.uid,
       });
-      setName("");
-      setLink("");
-      setCategory("");
+      setNewLink({ name: "", link: "", category: "" });
       fetchLinks();
       alert("Bookmark added successfully!");
     } catch (error) {
       console.error("Error adding bookmark: ", error);
-    }
-  };
-
-  const handleCatSubmit = async (e) => {
-    e.preventDefault();
-    if (!newCategory || !user) return;
-
-    try {
-      await addDoc(collection(db, "category"), {
-        newCategory,
-        createdAt: new Date(),
-        createdBy: user.uid,
-      });
-      setNewCategory("");
-      fetchCategories();
-      alert("Category added successfully!");
-    } catch (error) {
-      console.error("Error adding category: ", error);
     }
   };
 
@@ -205,13 +205,6 @@ function AddLinks() {
     }
   };
 
-  // const toggleDropdown = (category) => {
-  //   setDropdownStates((prevStates) => ({
-  //     ...prevStates,
-  //     [category]: !prevStates[category],
-  //   }));
-  // };
-
   const toggleCategory = (categoryId) => {
     setExpandedCategories(prev => ({
       ...prev,
@@ -219,48 +212,7 @@ function AddLinks() {
     }));
   };
 
-  const handleAddCategory = async () => {
-    if (!newCategory.trim()) {
-      alert("Category name is required!");
-      return;
-    }
-
-    try {
-      const categoryRef = collection(db, "categories");
-      await addDoc(categoryRef, {
-        newCategory: newCategory.trim(),
-        color: selectedColor,
-        links: [],
-        createdAt: new Date(),
-      });
-      setNewCategory("");
-      setSelectedColor("#3B82F6"); // Reset to default color
-    } catch (error) {
-      console.error("Error adding category:", error);
-    }
-  };
-
-  const handleAddLink = async () => {
-    if (!newLink.name || !newLink.link || !newLink.category) {
-      alert("Please fill in all fields.");
-      return;
-    }
-
-    try {
-      await addDoc(collection(db, "links"), {
-        name: newLink.name,
-        link: newLink.link,
-        category: newLink.category,
-        createdAt: new Date(),
-        createdBy: user.uid,
-      });
-      setNewLink({ name: "", link: "", category: "" });
-      fetchLinks();
-      alert("Bookmark added successfully!");
-    } catch (error) {
-      console.error("Error adding bookmark: ", error);
-    }
-  };
+  
 
   if (loading) {
     return <div className="min-h-screen bg-gray-50 dark:bg-gray-900"></div>;
