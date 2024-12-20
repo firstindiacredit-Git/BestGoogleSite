@@ -2,15 +2,15 @@ import React, { useEffect, useState } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { motion } from "framer-motion"; // Add Framer Motion for animations
-import Calculator from "./Calculator";
-import Notepad from "./Notepad";
-import ShowLinks from "./ShowLinks";
-import Clock from "./Clock";
-import Calendar from "./Calendar";
-import ImageUploader from "./ImageUploader";
-import PopularBookmarks from "./PopularBookmarks";
-import Weather from "./Weather";
-import Todolist from "./Todolist";
+import Calculator from "./Calculator.jsx";
+import Notepad from "./Notepad.jsx";
+import ShowLinks from "./ShowLinks.jsx";
+import Clock from "./Clock.jsx";
+import Calendar from "./Calendar.jsx";
+import ImageUploader from "./ImageUploader.jsx";
+import PopularBookmarks from "./PopularBookmarks.jsx";
+import Weather from "./Weather.jsx";
+import Todolist from "./Todolist.jsx";
 
 
 const Anotherpage = ({ backgroundImage }) => {
