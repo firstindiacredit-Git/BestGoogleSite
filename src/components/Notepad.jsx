@@ -221,17 +221,17 @@ const NotepadWithLines = () => {
 
   return (
     <div
-      className="w-[101%] mt-1 border p-4 rounded-lg shadow-md"
+      className="w-[101%] mt-1 border p-1.5 rounded-lg shadow-md"
       style={{ backgroundColor }}
     >
-      <h3 className="text-lg font-semibold mb-2 flex justify-between items-center">
+      <h3 className="text-[16px] font-semibold mb-2 flex justify-between items-center">
         Notes
         <div className="relative">
           <button
             onClick={() => setShowColorPicker((prev) => !prev)}
             className="p-2 bg-transparent rounded-full hover:bg-gray-300 focus:outline-none"
           >
-            <BsThreeDotsVertical className="text-xl cursor-pointer" />
+            <BsThreeDotsVertical className="text-[16px] -mr-2 cursor-pointer" />
           </button>
           {showColorPicker && (
             <div
@@ -243,8 +243,8 @@ const NotepadWithLines = () => {
                   key={color}
                   className={`w-5 h-5 border-1  transition-all duration-200 ${
                     backgroundColor === color
-                      ? "border-black" 
-                      : "border-gray-700"  
+                      ? "border-black"
+                      : "border-gray-700"
                   } hover:border-gray-500 focus:outline `}
                   style={{ backgroundColor: color }}
                   onClick={() => handleColorSelection(color)}
@@ -252,7 +252,7 @@ const NotepadWithLines = () => {
                   title={`Select ${color}`}
                 />
               ))}
-              <label className="block mb-2 text-sm font-medium">
+              <label className="block mb-2 text-[14px] font-medium">
                 Choose Background Color:
               </label>
               <input
@@ -271,23 +271,23 @@ const NotepadWithLines = () => {
         placeholder="Start writing..."
         className="w-full h-32 p-1 border rounded resize-none focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder-gray-500"
         style={{
-          backgroundColor: backgroundColor || "#fff", 
+          backgroundColor: backgroundColor || "#fff",
           backgroundImage: `linear-gradient(to bottom, transparent 95%, #d3d3d3 95%, #d3d3d3 100%)`,
-          backgroundSize: "100% 24px", 
-          lineHeight: "24px", 
+          backgroundSize: "100% 24px",
+          lineHeight: "24px",
         }}
       />
 
       <div className="flex justify-between mt-3">
         <button
           onClick={saveNote}
-          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+          className="px-2 py-1 bg-green-500 text-white text-[16px] rounded hover:bg-green-600"
         >
           Save
         </button>
         <button
           onClick={() => setShowHistoryModal(true)}
-          className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+          className="px-2 py-1 bg-gray-500 text-white text-[16px] rounded hover:bg-gray-600"
         >
           History
         </button>
@@ -296,7 +296,7 @@ const NotepadWithLines = () => {
       {showHistoryModal && (
         <div className="fixed inset-0 bg-gray-700 bg-opacity-50 z-50 flex justify-center items-center">
           <div className="bg-white p-6 rounded-lg w-2/3 max-h-3/4 overflow-y-auto">
-            <h2 className="text-2xl font-semibold mb-4">History</h2>
+            <h2 className="text-[16px] font-semibold mb-4">History</h2>
             <ul className="space-y-4">
               {history.map((note, index) => (
                 <li

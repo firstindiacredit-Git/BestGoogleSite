@@ -111,22 +111,22 @@ const SortableToDoList = () => {
    };
 
   return (
-    <div className="border w-full p-4 mt-2 rounded-lg bg-white/10 backdrop-blur-lg ">
-      <h1 className="dark:text-white text-xl font-semibold mb-3">
+    <div className="border w-full p-2 mt-2 rounded-lg bg-white/10 backdrop-blur-lg ">
+      <h1 className="dark:text-white text-[16px] font-semibold mb-3">
         TO DO LISTS
       </h1>
-      <div className="mb-4 flex items-center gap-2">
+      <div className="mb-2 ml-1 flex items-center gap-1">
         <input
           type="text"
           value={newTask}
           onChange={(e) => setNewTask(e.target.value)}
           onKeyDown={(e) => handleKeyDown(e)}
           placeholder="Add a new task..."
-          className="p-2 border border-gray-300 rounded-md w-60 focus:ring-2 focus:ring-blue-400"
+          className="px-2 py-1 border border-gray-300 rounded-md w-60 focus:ring-2 focus:ring-blue-400"
         />
         <button
           onClick={handleAddTask}
-          className="p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
+          className="px-2 py-1 bg-blue-500 text-[16px] text-white rounded hover:bg-blue-600 transition"
         >
           Add
         </button>

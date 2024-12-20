@@ -288,7 +288,7 @@ function DraggableDropdown({
                 className="absolute top-0 left-full transform translate-x-2 w-60 bg-white border border-gray-300 rounded-lg shadow-lg z-20 p-4"
               >
                 {/* Color Palette */}
-                <div className="flex flex-wrap gap-0.5 mb-2">
+                <div className="flex flex-wrap gap-0.5 mb-2 p-2">
                   {uniqueColorPalette.map((color) => (
                     <div
                       key={color}
@@ -340,7 +340,7 @@ function DraggableDropdown({
                 ref={textRef}
                 className="absolute top-8 left-full transform translate-x-2 w-60 bg-white border border-gray-300 rounded-lg shadow-lg z-20 p-4"
               >
-                <div className="flex flex-wrap gap-0.5 ">
+                <div className="flex flex-wrap gap-0.5 p-2 ">
                   {colorPalette.map((color) => (
                     <div
                       key={color}
@@ -388,7 +388,7 @@ function DraggableDropdown({
             {dropdowns.view && (
               <div
                 ref={viewRef}
-                className="absolute top-16 left-full transform text-center translate-x-2 w-32 bg-white border border-gray-300 rounded-lg shadow-lg z-20 p-4"
+                className="absolute top-14 -ml-1 left-full transform text-center translate-x-2 w-24 bg-white border border-gray-300 rounded-lg shadow-lg z-20 p-2"
               >
                 <button
                   onClick={() => updateSettings("viewMode", "grid")}
@@ -505,7 +505,7 @@ function DraggableDropdown({
               className="dark:text-white text-[12px] truncate "
             >
               {settings.viewMode !== "icon" && (
-                <span className="text-sm block mt-1">{link.name}</span>
+                <span className="text-[12px] mt-1">{link.name}</span>
               )}
             </a>
           </div>

@@ -41,7 +41,7 @@ const WeatherIcon = ({ condition, className = "w-12 h-12" }) => {
 };
 
 const WeatherDetail = ({ label, value, icon }) => (
-  <div className="flex items-center border gap-2 bg-white/10 rounded-lg p-1">
+  <div className="flex items-center border gap-2 bg-white/10 rounded-lg">
     <div className="text-gray-400">{icon}</div>
     <div>
       <p className="text-sm ">{label}</p>
@@ -55,31 +55,31 @@ const WeatherCard = ({ weatherData, time, date }) => {
   const sunset = new Date(weatherData.sys.sunset * 1000);
 
   return (
-    <div className="bg-gradient-to-br from-yellow-500 to-purple-600 text-white border  rounded-xl p-4 w-full">
+    <div className="bg-gradient-to-br from-yellow-500 to-purple-600 text-white border  rounded-xl p-2 w-full">
       <div className="text-center">
         <div className="flex justify-between">
-          <p className="text-4xl mt-2 font-bold">{weatherData.main.temp}°C</p>
+          <p className="text-xl mt-2 font-bold">{weatherData.main.temp}°C</p>
           <div className="flex justify-center">
             <WeatherIcon
               condition={weatherData.weather[0].main}
-              className="w-20 h-20 -mt-2"
+              className="w-10 h-14 -mt-2"
             />
           </div>
         </div>
-        <p className="text-2xl -mt-3 font-semibold capitalize">{CITY}</p>
-        <p className="text-lg capitalize">
+        <p className="text-lg -mt-3 font-semibold capitalize">{CITY}</p>
+        <p className="text-[14px] capitalize">
           {weatherData.weather[0].description}
         </p>
-        <p className="text-sm opacity-75 mb-4">
+        <p className="text-[12px] opacity-75 mb-4">
           Feels like {weatherData.main.feels_like}°C
         </p>
       </div>
 
-      <div className="text-center ">
-        <p className="uppercase font-bold">{time}</p>
-        <p className=" opacity-75">{date}</p>
+      <div className="text-center -mt-2">
+        <p className="uppercase text-[14px] font-bold">{time}</p>
+        <p className="text-[12px] opacity-75">{date}</p>
       </div>
-      <div className="grid grid-cols-2 gap-1">
+      <div className="grid text-[12px] grid-cols-2 gap-1">
         <WeatherDetail
           label="Humidity"
           value={`${weatherData.main.humidity}%`}
@@ -94,14 +94,14 @@ const WeatherCard = ({ weatherData, time, date }) => {
           label="Pressure"
           value={`${weatherData.main.pressure} hPa`}
           icon={<Gauge className="w-4 h-4" />}
-        />
+                  />
         <WeatherDetail
           label="Visibility"
           value={`${weatherData.visibility / 1000} km`}
           icon={<Eye className="w-4 h-4" />}
         />
       </div>
-      <div className="mt-2 flex justify-between text-sm">
+      <div className="mt-2 text-[12px] flex justify-between">
         <div className="flex items-center gap-2">
           <Sunrise className="w-4 h-4" />
           <span>Sunrise: {format(sunrise, "HH:mm")}</span>

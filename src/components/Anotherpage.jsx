@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { motion } from "framer-motion"; // Add Framer Motion for animations
 import Calculator from "./Calculator";
 import Notepad from "./Notepad";
 import ShowLinks from "./ShowLinks";
@@ -8,15 +10,45 @@ import Calendar from "./Calendar";
 import ImageUploader from "./ImageUploader";
 import PopularBookmarks from "./PopularBookmarks";
 import Weather from "./Weather";
-import TodoList from "./todolist";
-import { IoIosCloseCircleOutline } from "react-icons/io";
-import { FaListAlt } from "react-icons/fa";
-import { BsFillGrid1X2Fill } from "react-icons/bs";
+import TodoList from "./TodoList";
 
 const Anotherpage = ({ backgroundImage }) => {
   const [user, setUser] = useState(null);
-  const [viewMode, setViewMode] = useState("grid");
-  const [visibleItem, setVisibleItem] = useState(null);
+  const [items, setItems] = useState([
+    { id: "clock", name: "Clock", component: <Clock />, isOpen: false },
+    { id: "weather", name: "Weather", component: <Weather />, isOpen: false },
+    {
+      id: "calculator",
+      name: "Calculator",
+      component: <Calculator />,
+      isOpen: false,
+    },
+    {
+      id: "todolist",
+      name: "Todo List",
+      component: <TodoList />,
+      isOpen: false,
+    },
+    { id: "notepad", name: "Notepad", component: <Notepad />, isOpen: false },
+    {
+      id: "popularBookmarks",
+      name: "Popular Bookmarks",
+      component: <PopularBookmarks />,
+      isOpen: false,
+    },
+    {
+      id: "imageUploader",
+      name: "Image Uploader",
+      component: <ImageUploader />,
+      isOpen: false,
+    },
+    {
+      id: "calendar",
+      name: "Calendar",
+      component: <Calendar />,
+      isOpen: false,
+    },
+  ]);
 
   useEffect(() => {
     const authInstance = getAuth();
@@ -30,19 +62,136 @@ const Anotherpage = ({ backgroundImage }) => {
     return () => unsubscribe();
   }, []);
 
-  const handleClose = (id) => {
-    setVisibleItem(null);
+  useEffect(() => {
+    const savedItems = JSON.parse(localStorage.getItem("draggedItems"));
+    if (savedItems) {
+      const updatedItems = savedItems.map((item) => {
+        // Recreate the components from saved data
+        const { id, name, isOpen } = item;
+        let component;
+
+        switch (id) {
+          case "clock":
+            component = <Clock />;
+            break;
+          case "weather":
+            component = <Weather />;
+            break;
+          case "calculator":
+            component = <Calculator />;
+            break;
+          case "todolist":
+            component = <TodoList />;
+            break;
+          case "notepad":
+            component = <Notepad />;
+            break;
+          case "popularBookmarks":
+            component = <PopularBookmarks />;
+            break;
+          case "imageUploader":
+            component = <ImageUploader />;
+            break;
+          case "calendar":
+            component = <Calendar />;
+            break;
+          default:
+            break;
+        }
+
+        return { id, name, component, isOpen };
+      });
+      setItems(updatedItems);
+    }
+  }, []);
+
+  const onDragEnd = (result) => {
+    const { source, destination } = result;
+    if (!destination) return;
+
+    const updatedItems = Array.from(items);
+    const [removed] = updatedItems.splice(source.index, 1);
+    updatedItems.splice(destination.index, 0, removed);
+
+    // Store only the necessary data (excluding React components)
+    const itemsToSave = updatedItems.map(({ component, ...rest }) => rest);
+    setItems(updatedItems);
+    localStorage.setItem("draggedItems", JSON.stringify(itemsToSave));
   };
 
-  const handleToggleVisibility = (itemId) => {
-    setVisibleItem((prevVisibleItem) =>
-      prevVisibleItem === itemId ? null : itemId
+  const toggleDropdown = (id) => {
+    setItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id
+          ? { ...item, isOpen: !item.isOpen }
+          : { ...item, isOpen: false }
+      )
     );
   };
 
+  const renderDroppable = (sectionItems, sectionId) => (
+    <Droppable droppableId={sectionId} direction="vertical">
+      {(provided) => (
+        <div
+          {...provided.droppableProps}
+          ref={provided.innerRef}
+          className="flex-1 bg-white dark:bg-gray-800 rounded-lg p-4"
+        >
+          <h2 className="text-lg font-semibold mb-2">
+            {sectionId === "droppable1"
+              ? "Widgets"
+              : sectionId === "droppable2"
+              ? "Tools"
+              : "Media"}
+          </h2>
+          {sectionItems.length > 0 ? (
+            sectionItems.map((item, index) => (
+              <Draggable key={item.id} draggableId={item.id} index={index}>
+                {(provided) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                    className="rounded shadow-lg bg-white dark:bg-gray-800 mb-4"
+                  >
+                    <motion.button
+                      className="w-full text-left py-2 px-4 border-b bg-gray-200 dark:bg-gray-700 dark:text-white font-semibold"
+                      onClick={() => toggleDropdown(item.id)}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      {item.name}
+                    </motion.button>
+                    {item.isOpen && (
+                      <motion.div
+                        className="mt-2 bg-gray-50 dark:bg-gray-900 rounded-lg p-4"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        {item.component}
+                      </motion.div>
+                    )}
+                  </div>
+                )}
+              </Draggable>
+            ))
+          ) : (
+            <p className="text-center text-gray-500 dark:text-gray-400">
+              Drag an item here
+            </p>
+          )}
+          {provided.placeholder}
+        </div>
+      )}
+    </Droppable>
+  );
+
   return (
     <div
-      className={`bg-white dark:bg-gray-900 `}
+      className={`bg-white dark:bg-gray-900`}
       style={{
         backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",
         backgroundSize: "cover",
@@ -50,175 +199,31 @@ const Anotherpage = ({ backgroundImage }) => {
         backgroundAttachment: "fixed",
       }}
     >
-      <div className="flex justify-center gap-1 mt-2 mb-">
-        <button
-          onClick={() => setViewMode("grid")}
-          className={`p-2 rounded ${
-            viewMode === "grid"
-              ? "bg-gray-200 text-black"
-              : "bg-transparent border text-black dark:text-white"
-          }`}
-        >
-          <BsFillGrid1X2Fill className="text-gray-500" />
-        </button>
-        <button
-          onClick={() => setViewMode("list")}
-          className={`p-2 rounded ${
-            viewMode === "list"
-              ? "bg-gray-200 text-black border"
-              : "bg-transparent border text-black dark:text-white"
-          }`}
-        >
-          <FaListAlt className="text-gray-500" />
-        </button>
-      </div>
+      <div className="p-4">
+        <DragDropContext onDragEnd={onDragEnd}>
+          <div className="flex gap-4">
+            {["droppable1", "droppable2", "droppable3"].map(
+              (sectionId, idx) => {
+                const sectionItems =
+                  sectionId === "droppable1"
+                    ? items.filter((item) =>
+                        ["clock", "weather", "calculator"].includes(item.id)
+                      )
+                    : sectionId === "droppable2"
+                    ? items.filter((item) =>
+                        ["todolist", "notepad", "popularBookmarks"].includes(
+                          item.id
+                        )
+                      )
+                    : items.filter((item) =>
+                        ["imageUploader", "calendar"].includes(item.id)
+                      );
 
-      <div
-        className={`flex ${
-          viewMode === "list" ? "flex-col" : "flex-row"
-        } justify-between mt-1 w-full gap-4`}
-      >
-        {viewMode === "grid" ? (
-          <>
-            <div className="w-full md:w-1/4 lg:w-1/4 p-2">
-              <Clock />
-              <Weather />
-              <Calculator />
-              <TodoList />
-              <Notepad />
-            </div>
-            <div className="w-full md:w-1/2 lg:w-1/2 ">
-              <PopularBookmarks />
-            </div>
-            <div className="w-full md:w-1/4 lg:w-1/4 p-2">
-              <ImageUploader />
-              <Calendar />
-            </div>
-          </>
-        ) : (
-          <div className="w-full flex gap-2">
-            <div className="w-full md:w-1/2 lg:w-1/2 gap-1">
-              <div className="relative flex items-center justify-between p-2 mb-2 border w-full rounded ">
-                <button
-                  className="w-full dark:text-white text-left"
-                  onClick={() => handleToggleVisibility("Calculator")}
-                >
-                  Calculator
-                </button>
-                {visibleItem === "Calculator" && (
-                  <>
-                    <div className="fixed inset-0 bg-transparent bg-opacity-70 backdrop-blur-sm z-40"></div>
-                    <div className="fixed top-1/2 left-1/2 z-50 w-[30%] h-[100%] p-4 shadow-lg transform -translate-x-1/2 -translate-y-1/2 bg-[#f3e9ff] dark:bg-[#4a454e] rounded-lg">
-                      <Calculator />
-                      <button
-                        className="absolute top-3 right-3 dark:text-white"
-                        onClick={() => handleClose("Calculator")}
-                      >
-                        <IoIosCloseCircleOutline size={30} />
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-
-              <div className="relative flex items-center justify-between p-2 mb-2 border rounded w-full">
-                <button
-                  className="w-full dark:text-white text-left"
-                  onClick={() => handleToggleVisibility("Notepad")}
-                >
-                  Notepad
-                </button>
-                {visibleItem === "Notepad" && (
-                  <>
-                    <div className="fixed inset-0 bg-transparent bg-opacity-50 backdrop-blur-sm z-40"></div>
-                    <div className="fixed top-1/2 left-1/2 z-50 w-[50%] p-6 shadow-lg transform -translate-x-1/2 -translate-y-1/2 bg-[#f3e9ff] dark:bg-[#4a454e] rounded-lg">
-                      <Notepad />
-                      <button
-                        className="absolute  top-1 right-2 mb-5 dark:text-white"
-                        onClick={() => handleClose("Notepad")}
-                      >
-                        <IoIosCloseCircleOutline size={30} />
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-
-            <div className="md:w-1/2 justify-between ">
-              <div className="relative flex items-center justify-between p-2 mb-2 border rounded w-full">
-                <button
-                  className="w-full dark:text-white text-left"
-                  onClick={() => handleToggleVisibility("PopularBookmarks")}
-                >
-                  Popular Bookmarks
-                </button>
-                {visibleItem === "PopularBookmarks" && (
-                  <>
-                    <div className="fixed inset-0 bg-transparent bg-opacity-50 backdrop-blur-sm z-40"></div>
-                    <div className="fixed top-1/2 left-1/2 z-50 w-[90%] max-w-2xl max-h-[90vh] p-6 shadow-lg transform -translate-x-1/2 -translate-y-1/2 bg-[#f3e9ff] dark:bg-[#4a454e] rounded-lg overflow-y-auto">
-                      <PopularBookmarks />
-                      <button
-                        className="absolute top-1 right-2 mb-5 dark:text-white"
-                        onClick={() => handleClose("PopularBookmarks")}
-                      >
-                        <IoIosCloseCircleOutline size={30} />
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-
-              <div className="relative flex items-center justify-between p-2 mb-2 border rounded w-full">
-                <button
-                  className="w-full dark:text-white text-left"
-                  onClick={() => handleToggleVisibility("Weather")}
-                >
-                  Weather
-                </button>
-                {visibleItem === "Weather" && (
-                  <>
-                    <div className="fixed inset-0 bg-transparent bg-opacity-50 backdrop-blur-sm z-40"></div>
-                    <div className="fixed top-1/2 left-1/2 z-50 w-[50%] p-6 shadow-lg transform -translate-x-1/2 -translate-y-1/2 bg-[#f3e9ff] dark:bg-[#4a454e] rounded-lg">
-                      <Weather />
-                      <button
-                        className="absolute top-1 right-2 mb-5 dark:text-white "
-                        onClick={() => handleClose("Weather")}
-                      >
-                        <IoIosCloseCircleOutline size={30} />
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-
-            <div className="w-full md:w-1/2 lg:w-1/2">
-              <div className="relative flex items-center justify-between p-2 mb-2 border rounded w-full">
-                <button
-                  className="w-full dark:text-white text-left"
-                  onClick={() => handleToggleVisibility("Calendar")}
-                >
-                  Calendar
-                </button>
-                {visibleItem === "Calendar" && (
-                  <>
-                    <div className="fixed inset-0 bg-transparent bg-opacity-50 backdrop-blur-sm z-40"></div>
-                    <div className="fixed top-1/2 left-1/2 z-50 w-[50%] p-6 shadow-lg transform -translate-x-1/2 -translate-y-1/2 bg-[#f3e9ff] dark:bg-[#4a454e] rounded-lg">
-                      <Calendar />
-                      <button
-                        className="absolute top-1 right-2 mb-5  dark:text-white"
-                        onClick={() => handleClose("Calendar")}
-                      >
-                        <IoIosCloseCircleOutline size={30} />
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
+                return renderDroppable(sectionItems, sectionId);
+              }
+            )}
           </div>
-        )}
+        </DragDropContext>
       </div>
     </div>
   );
