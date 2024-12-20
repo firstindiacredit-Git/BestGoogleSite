@@ -10,7 +10,7 @@ import Calendar from "./Calendar";
 import ImageUploader from "./ImageUploader";
 import PopularBookmarks from "./PopularBookmarks";
 import Weather from "./Weather";
-import TodoList from "./TodoList";
+import TodoList from "./TodoList"
 
 const Anotherpage = ({ backgroundImage }) => {
   const [user, setUser] = useState(null);
