@@ -17,6 +17,7 @@
     "@mui/material": "^6.1.10",
     "@react-icons/all-files": "^4.1.0",
     "@tabler/icons-react": "^3.19.0",
+    "antd": "^5.22.5",
     "axios": "^1.7.7",
     "chart.js": "^4.4.5",
     "date-fns": "^4.1.0",
