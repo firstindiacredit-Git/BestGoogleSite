@@ -12,6 +12,7 @@ import PopularBookmarks from "./PopularBookmarks";
 import Weather from "./Weather";
 import Todolist from "./Todolist";
 
+
 const Anotherpage = ({ backgroundImage }) => {
   const [user, setUser] = useState(null);
   const [items, setItems] = useState([
