@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { motion } from "framer-motion";
+import { Spin } from "antd";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import Calculator from "./Calculator.jsx";
 import Notepad from "./Notepad.jsx";
@@ -30,6 +31,7 @@ const Anotherpage = ({ backgroundImage }) => {
   const [columns, setColumns] = useState(
     parseInt(localStorage.getItem("columnCount")) || 3
   );
+  const [loading, setLoading] = useState(false); // Loading indicator
 
   const componentMap = {
     clock: <Clock />,
@@ -82,9 +84,20 @@ const Anotherpage = ({ backgroundImage }) => {
     );
   };
 
-  const handleColumnChange = (numColumns) => {
+  const handleColumnChange = async (numColumns) => {
+    setLoading(true);
+    await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate delay for rendering
+
+    const redistributedItems = items.map((item, index) => ({
+      ...item,
+      column: index % numColumns, // Distribute items evenly among the new columns
+    }));
+
+    setItems(redistributedItems);
     setColumns(numColumns);
+    localStorage.setItem("draggedItems", JSON.stringify(redistributedItems));
     localStorage.setItem("columnCount", numColumns);
+    setLoading(false);
   };
 
   const distributeItems = () => {
@@ -108,6 +121,7 @@ const Anotherpage = ({ backgroundImage }) => {
       }}
     >
       <div className="p-4">
+        {/* Column number selection */}
         <div className="mb-4">
           {[1, 2, 3, 4, 5].map((num) => (
             <button
@@ -119,76 +133,82 @@ const Anotherpage = ({ backgroundImage }) => {
             </button>
           ))}
         </div>
-        <DragDropContext onDragEnd={onDragEnd}>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: `repeat(${columns}, 1fr)`,
-              gap: "16px",
-            }}
-          >
-            {distributeItems().map((columnItems, columnIndex) => (
-              <Droppable
-                key={columnIndex}
-                droppableId={String(columnIndex)}
-                direction="vertical"
-              >
-                {(provided, snapshot) => (
-                  <div
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
-                    style={{
-                      backgroundColor: snapshot.isDraggingOver
-                        ? "lightblue"
-                        : "transparent",
-                      padding: "8px",
-                      minHeight: "200px",
-                    }}
-                  >
-                    {columnItems.map((item, index) => (
-                      <Draggable
-                        key={item.id}
-                        draggableId={item.id}
-                        index={index}
-                      >
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className="rounded shadow-lg bg-white dark:bg-gray-800 mb-4"
-                          >
-                            <motion.button
-                              className="w-full text-left py-2 px-4 border-b bg-gray-200 dark:bg-gray-700 dark:text-white font-semibold"
-                              onClick={() => toggleDropdown(item.id)}
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              transition={{ duration: 0.2 }}
-                            >
-                              {item.name}
-                            </motion.button>
-                            {item.isOpen && (
-                              <motion.div
-                                className="mt-2 bg-gray-50 dark:bg-gray-900 rounded-lg p-4"
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: "auto", opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                transition={{ duration: 0.3 }}
-                              >
-                                {componentMap[item.id]}
-                              </motion.div>
-                            )}
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            ))}
+        {loading ? (
+          <div className="flex justify-center items-center min-h-screen">
+            <Spin size="large" />
           </div>
-        </DragDropContext>
+        ) : (
+          <DragDropContext onDragEnd={onDragEnd}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: `repeat(${columns}, 1fr)`,
+                gap: "16px",
+              }}
+            >
+              {distributeItems().map((columnItems, columnIndex) => (
+                <Droppable
+                  key={columnIndex}
+                  droppableId={String(columnIndex)}
+                  direction="vertical"
+                >
+                  {(provided, snapshot) => (
+                    <div
+                      {...provided.droppableProps}
+                      ref={provided.innerRef}
+                      style={{
+                        backgroundColor: snapshot.isDraggingOver
+                          ? "lightblue"
+                          : "transparent",
+                        padding: "8px",
+                        minHeight: "200px",
+                      }}
+                    >
+                      {columnItems.map((item, index) => (
+                        <Draggable
+                          key={item.id}
+                          draggableId={item.id}
+                          index={index}
+                        >
+                          {(provided) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className="rounded shadow-lg bg-white dark:bg-gray-800 mb-4"
+                            >
+                              <motion.button
+                                className="w-full text-left py-2 px-4 border-b bg-gray-200 dark:bg-gray-700 dark:text-white font-semibold"
+                                onClick={() => toggleDropdown(item.id)}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 0.2 }}
+                              >
+                                {item.name}
+                              </motion.button>
+                              {item.isOpen && (
+                                <motion.div
+                                  className="mt-2 bg-gray-50 dark:bg-gray-900 rounded-lg p-4"
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: "auto", opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  transition={{ duration: 0.3 }}
+                                >
+                                  {componentMap[item.id]}
+                                </motion.div>
+                              )}
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              ))}
+            </div>
+          </DragDropContext>
+        )}
       </div>
     </div>
   );
