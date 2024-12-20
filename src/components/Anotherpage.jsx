@@ -10,7 +10,7 @@ import Calendar from "./Calendar.jsx";
 import ImageUploader from "./ImageUploader.jsx";
 import PopularBookmarks from "./PopularBookmarks.jsx";
 import Weather from "./Weather.jsx";
-import Todolist from "./Todolist.jsx";
+// import Todolist from "./Todolist.jsx";
 
 
 const Anotherpage = ({ backgroundImage }) => {
@@ -24,12 +24,12 @@ const Anotherpage = ({ backgroundImage }) => {
       component: <Calculator />,
       isOpen: false,
     },
-    {
-      id: "todolist",
-      name: "Todo List",
-      component: <Todolist />,
-      isOpen: false,
-    },
+    // {
+    //   id: "todolist",
+    //   name: "Todo List",
+    //   component: <Todolist />,
+    //   isOpen: false,
+    // },
     { id: "notepad", name: "Notepad", component: <Notepad />, isOpen: false },
     {
       id: "popularBookmarks",
@@ -80,9 +80,9 @@ const Anotherpage = ({ backgroundImage }) => {
           case "calculator":
             component = <Calculator />;
             break;
-          case "todolist":
-            component = <Todolist />;
-            break;
+          // case "todolist":
+          //   component = <Todolist />;
+          //   break;
           case "notepad":
             component = <Notepad />;
             break;
@@ -210,7 +210,7 @@ const Anotherpage = ({ backgroundImage }) => {
                     )
                   : sectionId === "droppable2"
                   ? items.filter((item) =>
-                      ["todolist", "notepad", "popularBookmarks"].includes(
+                      [ "notepad", "popularBookmarks"].includes(
                         item.id
                       )
                     )
