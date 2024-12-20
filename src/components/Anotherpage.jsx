@@ -10,7 +10,7 @@ import Calendar from "./Calendar";
 import ImageUploader from "./ImageUploader";
 import PopularBookmarks from "./PopularBookmarks";
 import Weather from "./Weather";
-import TodoList from "./Todolist"
+import Todolist from "./Todolist";
 
 const Anotherpage = ({ backgroundImage }) => {
   const [user, setUser] = useState(null);
@@ -26,7 +26,7 @@ const Anotherpage = ({ backgroundImage }) => {
     {
       id: "todolist",
       name: "Todo List",
-      component: <TodoList />,
+      component: <Todolist />,
       isOpen: false,
     },
     { id: "notepad", name: "Notepad", component: <Notepad />, isOpen: false },
@@ -66,7 +66,6 @@ const Anotherpage = ({ backgroundImage }) => {
     const savedItems = JSON.parse(localStorage.getItem("draggedItems"));
     if (savedItems) {
       const updatedItems = savedItems.map((item) => {
-        // Recreate the components from saved data
         const { id, name, isOpen } = item;
         let component;
 
@@ -81,7 +80,7 @@ const Anotherpage = ({ backgroundImage }) => {
             component = <Calculator />;
             break;
           case "todolist":
-            component = <TodoList />;
+            component = <Todolist />;
             break;
           case "notepad":
             component = <Notepad />;
@@ -202,26 +201,24 @@ const Anotherpage = ({ backgroundImage }) => {
       <div className="p-4">
         <DragDropContext onDragEnd={onDragEnd}>
           <div className="flex gap-4">
-            {["droppable1", "droppable2", "droppable3"].map(
-              (sectionId, idx) => {
-                const sectionItems =
-                  sectionId === "droppable1"
-                    ? items.filter((item) =>
-                        ["clock", "weather", "calculator"].includes(item.id)
+            {["droppable1", "droppable2", "droppable3"].map((sectionId) => {
+              const sectionItems =
+                sectionId === "droppable1"
+                  ? items.filter((item) =>
+                      ["clock", "weather", "calculator"].includes(item.id)
+                    )
+                  : sectionId === "droppable2"
+                  ? items.filter((item) =>
+                      ["todolist", "notepad", "popularBookmarks"].includes(
+                        item.id
                       )
-                    : sectionId === "droppable2"
-                    ? items.filter((item) =>
-                        ["todolist", "notepad", "popularBookmarks"].includes(
-                          item.id
-                        )
-                      )
-                    : items.filter((item) =>
-                        ["imageUploader", "calendar"].includes(item.id)
-                      );
+                    )
+                  : items.filter((item) =>
+                      ["imageUploader", "calendar"].includes(item.id)
+                    );
 
-                return renderDroppable(sectionItems, sectionId);
-              }
-            )}
+              return renderDroppable(sectionItems, sectionId);
+            })}
           </div>
         </DragDropContext>
       </div>
