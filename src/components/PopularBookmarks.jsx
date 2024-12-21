@@ -34,6 +34,7 @@ const PopularBookmarks = ({ backgroundImage }) => {
   const [isSorterOpen, setIsSorterOpen] = useState(false);
   const [sortedItems, setSortedItems] = useState([]);
   const [isApplying, setIsApplying] = useState(false);
+  const [previewColumns, setPreviewColumns] = useState(3);
 
   const componentMap = {
     clock: <Clock />,
@@ -65,6 +66,14 @@ const PopularBookmarks = ({ backgroundImage }) => {
   useEffect(() => {
     setSortedItems([...items]);
   }, [items]);
+
+  useEffect(() => {
+    // Initialize preview columns when modal opens
+    if (isSorterOpen) {
+      setPreviewColumns(columns);
+      setSortedItems([...items]);
+    }
+  }, [isSorterOpen, columns, items]);
 
   const onDragEnd = (result) => {
     const { source, destination } = result;
@@ -98,40 +107,55 @@ const PopularBookmarks = ({ backgroundImage }) => {
       return;
     }
 
+    // Create a new copy of items
     const newItems = Array.from(sortedItems);
     
-    // Find the actual items for source and destination
-    const sourceItem = newItems.find(
-      item => item.column === parseInt(source.droppableId) && 
-      newItems.filter(i => i.column === parseInt(source.droppableId)).indexOf(item) === source.index
+    // Get all items in the source column
+    const sourceItems = newItems.filter(
+      item => item.column === parseInt(source.droppableId)
     );
 
-    if (!sourceItem) return;
+    // Get the item being dragged
+    const [draggedItem] = sourceItems.splice(source.index, 1);
+    const draggedItemIndex = newItems.findIndex(
+      item => item.id === draggedItem.id
+    );
 
-    // Remove item from source
-    newItems.splice(newItems.indexOf(sourceItem), 1);
+    // Remove the dragged item from its original position
+    newItems.splice(draggedItemIndex, 1);
 
-    // Find where to insert in destination
+    // Get all items in the destination column
     const destinationItems = newItems.filter(
       item => item.column === parseInt(destination.droppableId)
     );
 
-    // Update the column of the moved item
-    sourceItem.column = parseInt(destination.droppableId);
-
-    // Find the insertion index in the complete array
-    const destinationIndex = newItems.findIndex(
-      item => item.column === parseInt(destination.droppableId) && 
-      destinationItems.indexOf(item) === destination.index
-    );
-
-    if (destinationIndex === -1) {
-      // If no items in destination column, or inserting at the end
-      newItems.push(sourceItem);
+    // Find where to insert in the destination column
+    let insertIndex;
+    if (destinationItems.length === 0) {
+      // If destination column is empty, find the last item of the previous column
+      insertIndex = newItems.findIndex(
+        item => item.column > parseInt(destination.droppableId)
+      );
+      if (insertIndex === -1) insertIndex = newItems.length;
     } else {
-      newItems.splice(destinationIndex, 0, sourceItem);
+      if (destination.index >= destinationItems.length) {
+        // If dropping at the end of the column
+        const lastItemInColumn = destinationItems[destinationItems.length - 1];
+        insertIndex = newItems.indexOf(lastItemInColumn) + 1;
+      } else {
+        // If dropping in the middle of the column
+        const itemAtDestination = destinationItems[destination.index];
+        insertIndex = newItems.indexOf(itemAtDestination);
+      }
     }
 
+    // Update the dragged item's column
+    draggedItem.column = parseInt(destination.droppableId);
+
+    // Insert the dragged item at the new position
+    newItems.splice(insertIndex, 0, draggedItem);
+
+    // Update the state immediately
     setSortedItems(newItems);
   };
 
@@ -144,19 +168,28 @@ const PopularBookmarks = ({ backgroundImage }) => {
   };
 
   const handleColumnChange = async (numColumns) => {
-    setLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate delay for rendering
-
-    const redistributedItems = items.map((item, index) => ({
+    setPreviewColumns(numColumns);
+    
+    const redistributedItems = sortedItems.map((item, index) => ({
       ...item,
-      column: index % numColumns, // Distribute items evenly among the new columns
+      column: index % numColumns,
     }));
 
-    setItems(redistributedItems);
-    setColumns(numColumns);
-    localStorage.setItem("draggedItems", JSON.stringify(redistributedItems));
-    localStorage.setItem("columnCount", numColumns);
-    setLoading(false);
+    setSortedItems(redistributedItems);
+  };
+
+  const handleApplySorting = async () => {
+    setIsApplying(true);
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    
+    // Apply changes to main layout
+    setItems(sortedItems);
+    setColumns(previewColumns);
+    localStorage.setItem("draggedItems", JSON.stringify(sortedItems));
+    localStorage.setItem("columnCount", previewColumns);
+    
+    setIsApplying(false);
+    setIsSorterOpen(false);
   };
 
   const distributeItems = () => {
@@ -177,15 +210,6 @@ const PopularBookmarks = ({ backgroundImage }) => {
     return columnArrays;
   };
 
-  const handleApplySorting = async () => {
-    setIsApplying(true);
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    setItems(sortedItems);
-    localStorage.setItem("draggedItems", JSON.stringify(sortedItems));
-    setIsApplying(false);
-    setIsSorterOpen(false);
-  };
-
   return (
     <div style={{ position: "relative", minHeight: "100vh" }}>
       <div
@@ -198,18 +222,6 @@ const PopularBookmarks = ({ backgroundImage }) => {
         }}
       >
         <div className="p-4">
-          {/* Column number selection */}
-          <div className="mb-4">
-            {[1, 2, 3, 4,].map((num) => (
-              <button
-                key={num}
-                onClick={() => handleColumnChange(num)}
-                className="mr-2 text-gray-500 focus:bg-gray-200 focus:border focus:border-1 focus:border-gray-500 focus:text-gray-800 px-4 py-2 bg-gray-50 dark:bg-gray-700 rounded-md"
-              >
-                {num} Column{num > 1 ? "s" : ""}
-              </button>
-            ))}
-          </div>
           {loading ? (
             <div className="flex justify-center items-center min-h-screen">
               <Spin size="large" />
@@ -252,18 +264,24 @@ const PopularBookmarks = ({ backgroundImage }) => {
                               <div
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
-                                {...provided.dragHandleProps}
                                 className=" bg-white dark:bg-gray-700 mb-4 border-collapse border-1 border rounded-lg"
                               >
-                                <motion.button
-                                  className="w-full text-left py-2 px-4 border-b rounded-t-lg bg-gray-100 dark:bg-gray-700 dark:text-white font-semibold"
-                                  onClick={() => toggleDropdown(item.id)}
-                                  initial={{ opacity: 0 }}
-                                  animate={{ opacity: 1 }}
-                                  transition={{ duration: 0.2 }}
+                                <motion.div
+                                  className="w-full text-left py-2 px-4 border-b rounded-t-lg bg-gray-100 dark:bg-gray-700 dark:text-white font-semibold flex items-center"
                                 >
-                                  {item.name}
-                                </motion.button>
+                                  <div
+                                    {...provided.dragHandleProps}
+                                    className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                                  >
+                                    ⋮⋮
+                                  </div>
+                                  <button
+                                    onClick={() => toggleDropdown(item.id)}
+                                    className="flex-grow text-left focus:outline-none"
+                                  >
+                                    {item.name}
+                                  </button>
+                                </motion.div>
                                 {item.isOpen && (
                                   <motion.div
                                     className=" bg-gray-50 dark:bg-gray-900 rounded-b-lg p-4"
@@ -329,11 +347,23 @@ const PopularBookmarks = ({ backgroundImage }) => {
       <Modal
         title="Sort Widgets"
         open={isSorterOpen}
-        onCancel={() => !isApplying && setIsSorterOpen(false)}
+        onCancel={() => {
+          if (!isApplying) {
+            setIsSorterOpen(false);
+            // Reset preview state when closing
+            setSortedItems([...items]);
+            setPreviewColumns(columns);
+          }
+        }}
         footer={[
           <Button 
             key="cancel" 
-            onClick={() => setIsSorterOpen(false)}
+            onClick={() => {
+              setIsSorterOpen(false);
+              // Reset preview state when canceling
+              setSortedItems([...items]);
+              setPreviewColumns(columns);
+            }}
             disabled={isApplying}
           >
             Cancel
@@ -356,114 +386,113 @@ const PopularBookmarks = ({ backgroundImage }) => {
             <Spin size="large" />
           </div>
         ) : (
-          <DragDropContext onDragEnd={handleSortEnd}>
-            <div className="sort-columns-container" style={{
-              display: 'grid',
-              gridTemplateColumns: `repeat(${columns}, 1fr)`,
-              gap: '16px',
-              marginBottom: '20px',
-              maxHeight: '60vh',
-              overflowY: 'auto',
-              padding: '8px'
-            }}>
-              {Array.from({ length: columns }).map((_, columnIndex) => (
-                <Droppable key={columnIndex} droppableId={String(columnIndex)}>
-                  {(provided, snapshot) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                      className="sort-column"
-                      style={{
-                        padding: '12px',
-                        backgroundColor: snapshot.isDraggingOver 
-                          ? 'rgba(24, 144, 255, 0.1)' 
-                          : 'rgba(0, 0, 0, 0.02)',
-                        borderRadius: '8px',
-                        minHeight: '150px',
-                        transition: 'background-color 0.2s ease',
-                        border: snapshot.isDraggingOver 
-                          ? '2px dashed #1890ff'
-                          : '2px solid transparent'
-                      }}
-                    >
-                      <div className="column-header" style={{ 
-                        marginBottom: '12px', 
-                        fontWeight: 'bold',
-                        color: '#1890ff'
-                      }}>
-                        Column {columnIndex + 1}
-                      </div>
-                      <div className="items-container" style={{ 
-                        display: 'flex', 
-                        flexDirection: 'column', 
-                        gap: '8px' 
-                      }}>
-                        {sortedItems
-                          .filter(item => item.column === columnIndex)
-                          .map((item, index) => (
-                            <Draggable
-                              key={item.id}
-                              draggableId={item.id}
-                              index={index}
-                            >
-                              {(provided, snapshot) => (
-                                <motion.div
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                  className="draggable-item"
-                                  initial={false}
-                                  animate={{
-                                    scale: snapshot.isDragging ? 1.05 : 1,
-                                    boxShadow: snapshot.isDragging 
-                                      ? '0 8px 16px rgba(0,0,0,0.1)' 
-                                      : '0 2px 4px rgba(0,0,0,0.05)',
-                                    zIndex: snapshot.isDragging ? 999 : 1
-                                  }}
-                                  style={{
-                                    ...provided.draggableProps.style,
-                                    padding: '10px 12px',
-                                    backgroundColor: snapshot.isDragging 
-                                      ? '#fafafa' 
-                                      : 'white',
-                                    borderRadius: '6px',
-                                    border: '1px solid #f0f0f0',
-                                    cursor: 'grab',
-                                    userSelect: 'none',
-                                    position: 'relative',
-                                    display: 'flex',
-                                    alignItems: 'center'
-                                  }}
-                                  whileHover={{ 
-                                    scale: 1.02,
-                                    boxShadow: '0 4px 8px rgba(0,0,0,0.08)'
-                                  }}
-                                >
-                                  <div style={{ 
-                                    marginRight: '8px',
-                                    color: '#8c8c8c',
-                                    display: 'flex',
-                                    alignItems: 'center'
-                                  }}>
-                                    ⋮⋮
-                                  </div>
-                                  {item.name}
-                                </motion.div>
-                              )}
-                            </Draggable>
-                          ))}
-                        {provided.placeholder}
-                      </div>
-                    </div>
-                  )}
-                </Droppable>
-              ))}
+          <>
+            <div className="mb-6 flex items-center justify-between">
+              <div className="text-sm text-gray-600 dark:text-gray-400">Select number of columns:</div>
+              <div className="flex gap-2">
+                {[1, 2, 3, 4].map((num) => (
+                  <Button
+                    key={num}
+                    type={previewColumns === num ? 'primary' : 'default'}
+                    onClick={() => handleColumnChange(num)}
+                    className={previewColumns === num ? '' : 'hover:border-primary'}
+                    size="small"
+                  >
+                    {num}
+                  </Button>
+                ))}
+              </div>
             </div>
-          </DragDropContext>
+            <DragDropContext onDragEnd={handleSortEnd}>
+              <div className="sort-columns-container" style={{
+                display: 'grid',
+                gridTemplateColumns: `repeat(${previewColumns}, 1fr)`,
+                gap: '16px',
+                marginBottom: '20px',
+                maxHeight: '60vh',
+                overflowY: 'auto',
+                padding: '8px'
+              }}>
+                {Array.from({ length: previewColumns }).map((_, columnIndex) => (
+                  <Droppable key={columnIndex} droppableId={String(columnIndex)}>
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                        className="sort-column"
+                        style={{
+                          padding: '12px',
+                          backgroundColor: snapshot.isDraggingOver 
+                            ? 'rgba(24, 144, 255, 0.1)' 
+                            : 'rgba(0, 0, 0, 0.02)',
+                          borderRadius: '8px',
+                          minHeight: '150px',
+                          transition: 'background-color 0.2s ease',
+                          border: snapshot.isDraggingOver 
+                            ? '2px dashed #1890ff'
+                            : '2px solid transparent'
+                        }}
+                      >
+                        <div className="column-header" style={{ 
+                          marginBottom: '12px', 
+                          fontWeight: 'bold',
+                          color: '#1890ff'
+                        }}>
+                          Column {columnIndex + 1}
+                        </div>
+                        <div className="items-container" style={{ 
+                          display: 'flex', 
+                          flexDirection: 'column', 
+                          gap: '8px' 
+                        }}>
+                          {sortedItems
+                            .filter(item => item.column === columnIndex)
+                            .map((item, index) => (
+                              <Draggable
+                                key={item.id}
+                                draggableId={item.id}
+                                index={index}
+                              >
+                                {(provided, snapshot) => (
+                                  <div
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    className="bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600"
+                                    style={{
+                                      ...provided.draggableProps.style,
+                                      opacity: snapshot.isDragging ? 0.9 : 1,
+                                      transform: snapshot.isDragging 
+                                        ? `${provided.draggableProps.style.transform} scale(1.05)`
+                                        : provided.draggableProps.style.transform,
+                                    }}
+                                  >
+                                    <div className="flex items-center p-2 gap-2">
+                                      <div
+                                        {...provided.dragHandleProps}
+                                        className="cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                      >
+                                        ⋮⋮
+                                      </div>
+                                      <span className="text-gray-700 dark:text-gray-200">
+                                        {item.name}
+                                      </span>
+                                    </div>
+                                  </div>
+                                )}
+                              </Draggable>
+                            ))}
+                          {provided.placeholder}
+                        </div>
+                      </div>
+                    )}
+                  </Droppable>
+                ))}
+              </div>
+            </DragDropContext>
+          </>
         )}
       </Modal>
     </div>
   );
 };
-
 export default PopularBookmarks;
