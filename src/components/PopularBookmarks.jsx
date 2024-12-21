@@ -1,294 +1,498 @@
 import React, { useState, useEffect } from "react";
-import { db, auth } from "../firebase";
-import {
-  collection,
-  addDoc,
-  deleteDoc,
-  doc,
-  onSnapshot,
-  updateDoc,
-} from "firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth";
-import { MdAdd, MdDeleteForever } from "react-icons/md";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { motion } from "framer-motion";
+import { Spin, Button, Modal } from "antd";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import Calculator from "./Calculator.jsx";
+import Notepad from "./Notepad.jsx";
+import Clock from "./Clock.jsx";
+import Calendar from "./Calendar.jsx";
+import ImageUploader from "./ImageUploader.jsx";
+import Weather from "./Weather.jsx";
 
-const PopularBookmarks = () => {
+const PopularBookmarks = ({ backgroundImage }) => {
   const [user, setUser] = useState(null);
-  const [categories, setCategories] = useState([]);
-  const [bookmarks, setBookmarks] = useState({});
-  const [newBookmark, setNewBookmark] = useState({ name: "", link: "" });
-  const [visibleForm, setVisibleForm] = useState(null);
-  const [settings, setSettings] = useState(() => {
-    const stored = localStorage.getItem("bookmarkSettings");
-    return stored ? JSON.parse(stored) : {};
-  });
+  const [items, setItems] = useState([
+    { id: "clock", name: "Clock", isOpen: false, column: 0 },
+    { id: "weather", name: "Weather", isOpen: false, column: 0 },
+    { id: "calculator", name: "Calculator", isOpen: false, column: 0 },
+    { id: "notepad", name: "Notepad", isOpen: false, column: 1 },
+    {
+      id: "popularBookmarks",
+      name: "Popular Bookmarks",
+      isOpen: false,
+      column: 1,
+    },
+    { id: "imageUploader", name: "Image Uploader", isOpen: false, column: 2 },
+    { id: "calendar", name: "Calendar", isOpen: false, column: 2 },
+  ]);
 
-  // Save settings to localStorage
+  const [columns, setColumns] = useState(
+    parseInt(localStorage.getItem("columnCount")) || 3
+  );
+  const [loading, setLoading] = useState(false); // Loading indicator
+  const [isSorterOpen, setIsSorterOpen] = useState(false);
+  const [sortedItems, setSortedItems] = useState([]);
+  const [isApplying, setIsApplying] = useState(false);
+  const [previewColumns, setPreviewColumns] = useState(3);
+
+  const componentMap = {
+    clock: <Clock />,
+    weather: <Weather />,
+    calculator: <Calculator />,
+    notepad: <Notepad />,
+    popularBookmarks: <PopularBookmarks />,
+    imageUploader: <ImageUploader />,
+    calendar: <Calendar />,
+  };
+
   useEffect(() => {
-    localStorage.setItem("bookmarkSettings", JSON.stringify(settings));
-  }, [settings]);
-
-  // Auth listener
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      if (currentUser) {
-        // Listen to categories
-        const categoriesRef = collection(db, "users", currentUser.uid, "categories");
-        const unsubCategories = onSnapshot(categoriesRef, (snapshot) => {
-          const categoriesData = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-            isOpen: false
-          }));
-          setCategories(categoriesData);
-        });
-
-        // Listen to bookmarks
-        const bookmarksRef = collection(db, "users", currentUser.uid, "bookmarks");
-        const unsubBookmarks = onSnapshot(bookmarksRef, (snapshot) => {
-          const bookmarksData = {};
-          snapshot.docs.forEach(doc => {
-            const data = doc.data();
-            const category = data.category || 'uncategorized';
-            if (!bookmarksData[category]) {
-              bookmarksData[category] = [];
-            }
-            bookmarksData[category].push({
-              id: doc.id,
-              ...data,
-              position: data.position || 0
-            });
-          });
-          
-          // Sort bookmarks by position
-          Object.keys(bookmarksData).forEach(category => {
-            bookmarksData[category].sort((a, b) => a.position - b.position);
-          });
-          
-          setBookmarks(bookmarksData);
-        });
-
-        return () => {
-          unsubCategories();
-          unsubBookmarks();
-        };
-      }
+    const authInstance = getAuth();
+    const unsubscribe = onAuthStateChanged(authInstance, (currentUser) => {
+      setUser(currentUser || null);
     });
-
     return () => unsubscribe();
   }, []);
 
-  const handleAddBookmark = async (category) => {
-    if (!user || !newBookmark.name || !newBookmark.link) return;
-
+  useEffect(() => {
     try {
-      const bookmarksRef = collection(db, "users", user.uid, "bookmarks");
-      await addDoc(bookmarksRef, {
-        ...newBookmark,
-        category,
-        position: bookmarks[category]?.length || 0,
-        createdAt: new Date()
-      });
-      setNewBookmark({ name: "", link: "" });
-      setVisibleForm(null);
-    } catch (error) {
-      console.error("Error adding bookmark:", error);
+      const savedItems = JSON.parse(localStorage.getItem("draggedItems"));
+      if (Array.isArray(savedItems)) setItems(savedItems);
+    } catch (e) {
+      console.error("Failed to load items from localStorage", e);
     }
-  };
+  }, []);
 
-  const handleDeleteBookmark = async (category, bookmarkId) => {
-    if (!user) return;
-    try {
-      await deleteDoc(doc(db, "users", user.uid, "bookmarks", bookmarkId));
-    } catch (error) {
-      console.error("Error deleting bookmark:", error);
+  useEffect(() => {
+    setSortedItems([...items]);
+  }, [items]);
+
+  useEffect(() => {
+    // Initialize preview columns when modal opens
+    if (isSorterOpen) {
+      setPreviewColumns(columns);
+      setSortedItems([...items]);
     }
-  };
+  }, [isSorterOpen, columns, items]);
 
-  const handleDragEnd = async (result) => {
-    if (!result.destination || !user) return;
-
+  const onDragEnd = (result) => {
     const { source, destination } = result;
-    const sourceCategory = source.droppableId;
-    const destCategory = destination.droppableId;
-
-    const newBookmarks = { ...bookmarks };
-    const [movedBookmark] = newBookmarks[sourceCategory].splice(source.index, 1);
-    
-    if (!newBookmarks[destCategory]) {
-      newBookmarks[destCategory] = [];
-    }
-    newBookmarks[destCategory].splice(destination.index, 0, movedBookmark);
-
-    // Update positions in Firebase
-    const updates = [];
-    newBookmarks[sourceCategory].forEach((bookmark, index) => {
-      updates.push(updateDoc(
-        doc(db, "users", user.uid, "bookmarks", bookmark.id),
-        { position: index, category: sourceCategory }
-      ));
-    });
-
-    if (sourceCategory !== destCategory) {
-      newBookmarks[destCategory].forEach((bookmark, index) => {
-        updates.push(updateDoc(
-          doc(db, "users", user.uid, "bookmarks", bookmark.id),
-          { position: index, category: destCategory }
-        ));
-      });
-    }
-
-    try {
-      await Promise.all(updates);
-      setBookmarks(newBookmarks);
-    } catch (error) {
-      console.error("Error updating positions:", error);
-    }
+    if (!destination) return;
+    const columnsArray = distributeItems();
+    const sourceColumnIndex = parseInt(source.droppableId);
+    const destColumnIndex = parseInt(destination.droppableId);
+    const sourceItems = columnsArray[sourceColumnIndex];
+    const destItems = columnsArray[destColumnIndex];
+    const [draggedItem] = sourceItems.splice(source.index, 1);
+    draggedItem.column = destColumnIndex;
+    destItems.splice(destination.index, 0, draggedItem);
+    const updatedItems = columnsArray.flat();
+    setItems(updatedItems);
+    localStorage.setItem("draggedItems", JSON.stringify(updatedItems));
   };
 
-  const toggleCategory = (categoryId) => {
-    setCategories(prevCategories =>
-      prevCategories.map(cat =>
-        cat.id === categoryId
-          ? { ...cat, isOpen: !cat.isOpen }
-          : { ...cat, isOpen: false }
+  const handleSortEnd = (result) => {
+    const { source, destination } = result;
+    
+    // Drop outside the list
+    if (!destination) {
+      return;
+    }
+
+    // Drop in the same position
+    if (
+      source.droppableId === destination.droppableId &&
+      source.index === destination.index
+    ) {
+      return;
+    }
+
+    // Create a new copy of items
+    const newItems = Array.from(sortedItems);
+    
+    // Get all items in the source column
+    const sourceItems = newItems.filter(
+      item => item.column === parseInt(source.droppableId)
+    );
+
+    // Get the item being dragged
+    const [draggedItem] = sourceItems.splice(source.index, 1);
+    const draggedItemIndex = newItems.findIndex(
+      item => item.id === draggedItem.id
+    );
+
+    // Remove the dragged item from its original position
+    newItems.splice(draggedItemIndex, 1);
+
+    // Get all items in the destination column
+    const destinationItems = newItems.filter(
+      item => item.column === parseInt(destination.droppableId)
+    );
+
+    // Find where to insert in the destination column
+    let insertIndex;
+    if (destinationItems.length === 0) {
+      // If destination column is empty, find the last item of the previous column
+      insertIndex = newItems.findIndex(
+        item => item.column > parseInt(destination.droppableId)
+      );
+      if (insertIndex === -1) insertIndex = newItems.length;
+    } else {
+      if (destination.index >= destinationItems.length) {
+        // If dropping at the end of the column
+        const lastItemInColumn = destinationItems[destinationItems.length - 1];
+        insertIndex = newItems.indexOf(lastItemInColumn) + 1;
+      } else {
+        // If dropping in the middle of the column
+        const itemAtDestination = destinationItems[destination.index];
+        insertIndex = newItems.indexOf(itemAtDestination);
+      }
+    }
+
+    // Update the dragged item's column
+    draggedItem.column = parseInt(destination.droppableId);
+
+    // Insert the dragged item at the new position
+    newItems.splice(insertIndex, 0, draggedItem);
+
+    // Update the state immediately
+    setSortedItems(newItems);
+  };
+
+  const toggleDropdown = (id) => {
+    setItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id ? { ...item, isOpen: !item.isOpen } : item
       )
     );
   };
 
-  const fetchFavicon = (url) => {
-    return `https://www.google.com/s2/favicons?sz=64&domain=${url}`;
+  const handleColumnChange = async (numColumns) => {
+    setPreviewColumns(numColumns);
+    
+    const redistributedItems = sortedItems.map((item, index) => ({
+      ...item,
+      column: index % numColumns,
+    }));
+
+    setSortedItems(redistributedItems);
+  };
+
+  const handleApplySorting = async () => {
+    setIsApplying(true);
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    
+    // Apply changes to main layout
+    setItems(sortedItems);
+    setColumns(previewColumns);
+    localStorage.setItem("draggedItems", JSON.stringify(sortedItems));
+    localStorage.setItem("columnCount", previewColumns);
+    
+    setIsApplying(false);
+    setIsSorterOpen(false);
+  };
+
+  const distributeItems = () => {
+    const columnsArray = Array.from({ length: columns }, () => []);
+    items.forEach((item) => {
+      if (item.column >= 0 && item.column < columns) {
+        columnsArray[item.column].push(item);
+      }
+    });
+    return columnsArray;
+  };
+
+  const distributeItemsForSort = (itemsToDistribute) => {
+    const columnArrays = Array.from({ length: columns }, () => []);
+    itemsToDistribute.forEach((item) => {
+      columnArrays[item.column].push(item);
+    });
+    return columnArrays;
   };
 
   return (
-    <div className="p-4 bg-white dark:bg-gray-800 rounded-lg">
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="space-y-4">
-          {categories.map((category) => (
-            <motion.div
-              key={category.id}
-              className="rounded shadow-lg bg-white dark:bg-gray-800"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <motion.button
-                className="w-full text-left py-2 px-4 border-b bg-gray-200 dark:bg-gray-700 dark:text-white font-semibold flex justify-between items-center"
-                onClick={() => toggleCategory(category.id)}
+    <div style={{ position: "relative", minHeight: "100vh" }}>
+      <div
+        className={`bg-white dark:bg-gray-900`}
+        style={{
+          backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundAttachment: "fixed",
+        }}
+      >
+        <div className="p-4">
+          {loading ? (
+            <div className="flex justify-center items-center min-h-screen">
+              <Spin size="large" />
+            </div>
+          ) : (
+            <DragDropContext onDragEnd={onDragEnd}>
+              <div
+                style={{
+                  display: "grid",
+                  maxWidth: "90vw",
+                  gridTemplateColumns: `repeat(${columns}, 1fr)`,
+                  gap: "16px",
+                }}
               >
-                <span>{category.name}</span>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setVisibleForm(category.id);
-                  }}
-                  className="p-1 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full"
-                >
-                  <MdAdd className="text-xl" />
-                </button>
-              </motion.button>
-
-              {category.isOpen && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="p-4 bg-gray-50 dark:bg-gray-900"
-                >
-                  {visibleForm === category.id && (
-                    <div className="mb-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
-                      <input
-                        type="text"
-                        placeholder="Bookmark name"
-                        value={newBookmark.name}
-                        onChange={(e) => setNewBookmark(prev => ({ ...prev, name: e.target.value }))}
-                        className="w-full p-2 mb-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                      />
-                      <input
-                        type="text"
-                        placeholder="URL"
-                        value={newBookmark.link}
-                        onChange={(e) => setNewBookmark(prev => ({ ...prev, link: e.target.value }))}
-                        className="w-full p-2 mb-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                      />
-                      <button
-                        onClick={() => handleAddBookmark(category.id)}
-                        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                      >
-                        Add Bookmark
-                      </button>
-                    </div>
-                  )}
-
-                  <Droppable droppableId={category.id} direction="horizontal" mode="standard">
+                {distributeItems().map((columnItems, columnIndex) => (
+                  <Droppable
+                    key={columnIndex}
+                    droppableId={String(columnIndex)}
+                    direction="vertical"
+                  >
                     {(provided, snapshot) => (
                       <div
-                        ref={provided.innerRef}
                         {...provided.droppableProps}
-                        className={`grid grid-cols-4 gap-4 ${snapshot.isDraggingOver ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}
+                        ref={provided.innerRef}
+                        style={{
+                          backgroundColor: snapshot.isDraggingOver
+                            ? "#f0f0f080"
+                            : "transparent",
+                          padding: "8px",
+                          minHeight: "200px",
+                        }}
                       >
-                        {bookmarks[category.id]?.map((bookmark, index) => (
+                        {columnItems.map((item, index) => (
                           <Draggable
-                            key={bookmark.id}
-                            draggableId={bookmark.id}
+                            key={item.id}
+                            draggableId={item.id}
                             index={index}
                           >
-                            {(provided, snapshot) => (
+                            {(provided) => (
                               <div
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                className={`relative p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow ${
-                                  snapshot.isDragging ? 'shadow-lg ring-2 ring-blue-500' : ''
-                                }`}
+                                className=" bg-white dark:bg-gray-700 mb-4 border-collapse border-1 border rounded-lg"
                               >
-                                <div className="flex flex-col items-center space-y-2">
-                                  <img
-                                    src={fetchFavicon(bookmark.link)}
-                                    alt={bookmark.name}
-                                    className="w-8 h-8 rounded"
-                                  />
-                                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">
-                                    {bookmark.name}
-                                  </span>
-                                  <button
-                                    onClick={() => handleDeleteBookmark(category.id, bookmark.id)}
-                                    className="absolute top-1 right-1 p-1 text-red-500 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                                <motion.div
+                                  className="w-full text-left py-2 px-4 border-b rounded-t-lg bg-gray-100 dark:bg-gray-700 dark:text-white font-semibold flex items-center"
+                                >
+                                  <div
+                                    {...provided.dragHandleProps}
+                                    className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
                                   >
-                                    <MdDeleteForever className="w-5 h-5" />
+                                    ⋮⋮
+                                  </div>
+                                  <button
+                                    onClick={() => toggleDropdown(item.id)}
+                                    className="flex-grow text-left focus:outline-none"
+                                  >
+                                    {item.name}
                                   </button>
-                                  <a
-                                    href={bookmark.link}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="absolute inset-0"
-                                    onClick={(e) => snapshot.isDragging && e.preventDefault()}
-                                  />
-                                </div>
+                                </motion.div>
+                                {item.isOpen && (
+                                  <motion.div
+                                    className=" bg-gray-50 dark:bg-gray-900 rounded-b-lg p-4"
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: "auto", opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    transition={{ duration: 0.3 }}
+                                  >
+                                    {componentMap[item.id]}
+                                  </motion.div>
+                                )}
                               </div>
                             )}
                           </Draggable>
                         ))}
                         {provided.placeholder}
-                        {(!bookmarks[category.id] || bookmarks[category.id].length === 0) && (
-                          <div className="col-span-4 text-center py-8 text-gray-500 dark:text-gray-400">
-                            No bookmarks in this category. Add some!
-                          </div>
-                        )}
                       </div>
                     )}
                   </Droppable>
-                </motion.div>
-              )}
-            </motion.div>
-          ))}
+                ))}
+              </div>
+            </DragDropContext>
+          )}
         </div>
-      </DragDropContext>
+      </div>
+
+      {/* Floating Sort Button */}
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        style={{
+          position: 'fixed',
+          bottom: '20px',
+          right: '20px',
+          width: '50px',
+          height: '50px',
+          borderRadius: '50%',
+          backgroundColor: '#1890ff',
+          color: 'white',
+          border: 'none',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+          zIndex: 1000
+        }}
+        onClick={() => setIsSorterOpen(true)}
+      >
+        <svg 
+          viewBox="0 0 24 24" 
+          width="24" 
+          height="24" 
+          stroke="currentColor" 
+          strokeWidth="2" 
+          fill="none"
+        >
+          <path d="M3 4h18M3 12h18M3 20h18"/>
+        </svg>
+      </motion.button>
+
+      {/* Widget Sorter Modal */}
+      <Modal
+        title="Sort Widgets"
+        open={isSorterOpen}
+        onCancel={() => {
+          if (!isApplying) {
+            setIsSorterOpen(false);
+            // Reset preview state when closing
+            setSortedItems([...items]);
+            setPreviewColumns(columns);
+          }
+        }}
+        footer={[
+          <Button 
+            key="cancel" 
+            onClick={() => {
+              setIsSorterOpen(false);
+              // Reset preview state when canceling
+              setSortedItems([...items]);
+              setPreviewColumns(columns);
+            }}
+            disabled={isApplying}
+          >
+            Cancel
+          </Button>,
+          <Button
+            key="apply"
+            type="primary"
+            onClick={handleApplySorting}
+            disabled={isApplying}
+            loading={isApplying}
+          >
+            Apply Changes
+          </Button>
+        ]}
+        width={800}
+        centered
+      >
+        {isApplying ? (
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '40px' }}>
+            <Spin size="large" />
+          </div>
+        ) : (
+          <>
+            <div className="mb-6 flex items-center justify-between">
+              <div className="text-sm text-gray-600 dark:text-gray-400">Select number of columns:</div>
+              <div className="flex gap-2">
+                {[1, 2, 3, 4].map((num) => (
+                  <Button
+                    key={num}
+                    type={previewColumns === num ? 'primary' : 'default'}
+                    onClick={() => handleColumnChange(num)}
+                    className={previewColumns === num ? '' : 'hover:border-primary'}
+                    size="small"
+                  >
+                    {num}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <DragDropContext onDragEnd={handleSortEnd}>
+              <div className="sort-columns-container" style={{
+                display: 'grid',
+                gridTemplateColumns: `repeat(${previewColumns}, 1fr)`,
+                gap: '16px',
+                marginBottom: '20px',
+                maxHeight: '60vh',
+                overflowY: 'auto',
+                padding: '8px'
+              }}>
+                {Array.from({ length: previewColumns }).map((_, columnIndex) => (
+                  <Droppable key={columnIndex} droppableId={String(columnIndex)}>
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                        className="sort-column"
+                        style={{
+                          padding: '12px',
+                          backgroundColor: snapshot.isDraggingOver 
+                            ? 'rgba(24, 144, 255, 0.1)' 
+                            : 'rgba(0, 0, 0, 0.02)',
+                          borderRadius: '8px',
+                          minHeight: '150px',
+                          transition: 'background-color 0.2s ease',
+                          border: snapshot.isDraggingOver 
+                            ? '2px dashed #1890ff'
+                            : '2px solid transparent'
+                        }}
+                      >
+                        <div className="column-header" style={{ 
+                          marginBottom: '12px', 
+                          fontWeight: 'bold',
+                          color: '#1890ff'
+                        }}>
+                          Column {columnIndex + 1}
+                        </div>
+                        <div className="items-container" style={{ 
+                          display: 'flex', 
+                          flexDirection: 'column', 
+                          gap: '8px' 
+                        }}>
+                          {sortedItems
+                            .filter(item => item.column === columnIndex)
+                            .map((item, index) => (
+                              <Draggable
+                                key={item.id}
+                                draggableId={item.id}
+                                index={index}
+                              >
+                                {(provided, snapshot) => (
+                                  <div
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    className="bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600"
+                                    style={{
+                                      ...provided.draggableProps.style,
+                                      opacity: snapshot.isDragging ? 0.9 : 1,
+                                      transform: snapshot.isDragging 
+                                        ? `${provided.draggableProps.style.transform} scale(1.05)`
+                                        : provided.draggableProps.style.transform,
+                                    }}
+                                  >
+                                    <div className="flex items-center p-2 gap-2">
+                                      <div
+                                        {...provided.dragHandleProps}
+                                        className="cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                      >
+                                        ⋮⋮
+                                      </div>
+                                      <span className="text-gray-700 dark:text-gray-200">
+                                        {item.name}
+                                      </span>
+                                    </div>
+                                  </div>
+                                )}
+                              </Draggable>
+                            ))}
+                          {provided.placeholder}
+                        </div>
+                      </div>
+                    )}
+                  </Droppable>
+                ))}
+              </div>
+            </DragDropContext>
+          </>
+        )}
+      </Modal>
     </div>
   );
 };
-
 export default PopularBookmarks;
