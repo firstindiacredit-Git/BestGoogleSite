@@ -147,15 +147,15 @@ function SearchPage() {
           </div>
         </div>
         <div className="bg-gray-800 border-gray-400 p-2 flex justify-center w-full text-white dark:text-white font-semibold text-center ">
-          <div className="grid grid-cols-4 lg:grid-cols-8  w-full gap-4">
+          <div className="grid grid-cols-4 lg:grid-cols-8   w-[80vw] gap-4">
             <div>
               <button
-                className={`bg-white p-1 rounded-3xl ${
+                className={` w-full hover:text-white  hover:bg-gray-600 rounded-sm transition-all ${
                   activeComponent === "Anotherpage" ? "bg-gray-500" : ""
                 }`}
                 onClick={() => handleToggleComponent("Anotherpage")}
               >
-                <FaHome className="text-green-700 h-5 w-5 text-center justify-center m-auto" />
+                HOME
               </button>
             </div>
 
@@ -229,7 +229,7 @@ function SearchPage() {
             </button>
           </div>
         </div>
-        <div className=" w-full   dark:bg-gray-900 bg-[#f8f9fa]">
+        <div className=" max-w-screen-2xl mx-auto   dark:bg-gray-900 bg-[#f8f9fa]">
           {activeComponent === "NotebookAndSheet" ? (
             <NotebookAndSheet />
           ) : activeComponent === "PopularBookmarks" ? (
