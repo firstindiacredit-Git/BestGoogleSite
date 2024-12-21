@@ -1,4 +1,9 @@
 import React, { useState, useEffect } from "react";
+import { Card, Button, Row, Col, Typography, Spin, Alert, Radio, Input, List, Space } from 'antd';
+import { AppstoreOutlined, UnorderedListOutlined, SearchOutlined } from '@ant-design/icons';
+
+const { Title } = Typography;
+const { Search } = Input;
 
 const Top100Page = () => {
   const [items, setItems] = useState([]);
@@ -6,14 +11,16 @@ const Top100Page = () => {
   const [error, setError] = useState(null);
   const [category, setCategory] = useState('cars');
   const [page, setPage] = useState(1);
+  const [viewMode, setViewMode] = useState('grid');
+  const [searchQuery, setSearchQuery] = useState('');
   const API_KEY = 'BTOsYx47SEw8rRDvct+x+g==SUy2ivypa6z9mOk1';
-const year = new Date().getFullYear();
+  const year = new Date().getFullYear();
   // Updated APIs with real free API endpoints
   const APIs = {
     cars: `https://api.api-ninjas.com/v1/cars?limit=100&year=${year}`,
     stocks: 'https://finnhub.io/api/v1/stock/symbol?exchange=US&token=ctj9ln9r01qgfbt0ega0ctj9ln9r01qgfbt0egag',
     crypto: 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100',
-    billionaires: `https://forbes400.onrender.com/api/forbes400?limit=100&year=${year}`
+    billionaires: 'https://forbes400.onrender.com/api/forbes400?limit=100&year=${year}'
   };
 
   const VIN_NUMBERS = [
@@ -23,9 +30,18 @@ const year = new Date().getFullYear();
     // Add more VIN numbers...
   ];
 
+  // Add filtered items based on search while preserving original indices
+  const filteredItems = items.map((item, index) => ({
+    ...item,
+    originalIndex: index // Store the original index
+  })).filter(item =>
+    item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const fetchTop100 = async (category) => {
     try {
-      console.log(`Fetching ${category} data...`);
+      // console.log(`Fetching ${category} data...`);
       
       if (category === 'cars') {
         const response = await fetch(APIs[category], {
@@ -40,7 +56,7 @@ const year = new Date().getFullYear();
         }
         
         const data = await response.json();
-        console.log(`${category} API response:`, data);
+        // console.log(`${category} API response:`, data);
 
         const processedData = data.map(vehicle => ({
           name: `${vehicle.make} ${vehicle.model}`,
@@ -57,7 +73,7 @@ const year = new Date().getFullYear();
         }
         
         const rawData = await response.text(); // Get raw response first
-        console.log(`Raw ${category} data:`, rawData.substring(0, 200)); // Debug log
+        // console.log(`Raw ${category} data:`, rawData.substring(0, 200)); // Debug log
         
         let data;
         // Special handling for CSV data from Alpha Vantage
@@ -143,67 +159,77 @@ const year = new Date().getFullYear();
     fetchTop100(category);
   }, [category, page]);
 
+  const renderGridView = () => (
+    <Row gutter={[16, 16]}>
+      {filteredItems.map((item) => (
+        <Col xs={24} sm={12} lg={8} key={item.originalIndex}>
+          <Card
+            title={`${item.originalIndex + 1}. ${item.name}`}
+            bordered={true}
+            hoverable
+          >
+            {item.description}
+          </Card>
+        </Col>
+      ))}
+    </Row>
+  );
+
+  const renderListView = () => (
+    <List
+      itemLayout="horizontal"
+      dataSource={filteredItems}
+      renderItem={(item) => (
+        <List.Item>
+          <List.Item.Meta
+            title={`${item.originalIndex + 1}. ${item.name}`}
+            description={item.description}
+          />
+        </List.Item>
+      )}
+    />
+  );
+
   return (
     <div className="max-w-screen-xl mx-auto p-4">
-      <h1 className="text-4xl font-bold mb-6 text-center">
+      <Title level={1} style={{ textAlign: 'center', marginBottom: '2rem' }}>
         Top 100 {category.charAt(0).toUpperCase() + category.slice(1)}
-      </h1>
+      </Title>
 
-      {/* Updated Category Selector */}
-      <div className="flex justify-center mb-6 space-x-4">
-        <button
-          onClick={() => setCategory('cars')}
-          className={`px-4 py-2 rounded-md ${
-            category === 'cars' ? 'bg-blue-500 text-white' : 'bg-gray-200'
-          }`}
-        >
-          Cars
-        </button>
-        <button
-          onClick={() => setCategory('crypto')}
-          className={`px-4 py-2 rounded-md ${
-            category === 'crypto' ? 'bg-blue-500 text-white' : 'bg-gray-200'
-          }`}
-        >
-          Crypto
-        </button>
-        <button
-          onClick={() => setCategory('stocks')}
-          className={`px-4 py-2 rounded-md ${
-            category === 'stocks' ? 'bg-blue-500 text-white' : 'bg-gray-200'
-          }`}
-        >
-          Stocks
-        </button>
-        <button
-          onClick={() => setCategory('billionaires')}
-          className={`px-4 py-2 rounded-md ${
-            category === 'billionaires' ? 'bg-blue-500 text-white' : 'bg-gray-200'
-          }`}
-        >
-          Billionaires
-        </button>
-      </div>
+      <Space direction="vertical" size="middle" style={{ width: '100%', marginBottom: '2rem' }}>
+        {/* Category Selection */}
+        <div style={{ textAlign: 'center' }}>
+          <Radio.Group value={category} onChange={(e) => setCategory(e.target.value)} buttonStyle="solid">
+            <Radio.Button value="cars">Cars</Radio.Button>
+            <Radio.Button value="crypto">Crypto</Radio.Button>
+            <Radio.Button value="stocks">Stocks</Radio.Button>
+            <Radio.Button value="billionaires">Billionaires</Radio.Button>
+          </Radio.Group>
+        </div>
 
-      {loading && <p className="text-center text-lg">Loading...</p>}
-      {error && <p className="text-center text-red-600">{`Error: ${error}`}</p>}
+        {/* Search and View Toggle */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Search
+            placeholder="Search items..."
+            allowClear
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ width: 300 }}
+          />
+          <Radio.Group value={viewMode} onChange={(e) => setViewMode(e.target.value)}>
+            <Radio.Button value="grid">
+              <AppstoreOutlined />
+            </Radio.Button>
+            <Radio.Button value="list">
+              <UnorderedListOutlined />
+            </Radio.Button>
+          </Radio.Group>
+        </div>
+      </Space>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {items.map((item, index) => (
-          <div
-            key={index}
-            className="bg-white rounded-lg shadow-lg overflow-hidden border"
-          >
-            <div className="p-4">
-              <h3 className="text-xl font-semibold text-gray-800">
-                {index + 1}. {item.name}
-              </h3>
-              <p className="text-gray-600 mt-2">{item.description}</p>
-              {/* Add more item details based on category */}
-            </div>
-          </div>
-        ))}
-      </div>
+      {loading && <div style={{ textAlign: 'center', margin: '2rem' }}><Spin size="large" /></div>}
+      {error && <Alert message={error} type="error" showIcon style={{ marginBottom: '2rem' }} />}
+
+      {viewMode === 'grid' ? renderGridView() : renderListView()}
     </div>
   );
 };
