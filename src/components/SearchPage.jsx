@@ -107,12 +107,7 @@ function SearchPage() {
   return (
     <div
       className="bg-white dark:bg-gray-900 h-screen"
-      style={{
-        backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundAttachment: "fixed",
-      }}
+      
     >
       <Header
         isDarkMode={isDarkMode}
@@ -120,8 +115,13 @@ function SearchPage() {
         handleImageChange={handleImageChange}
       />
 
-      <div className="mt-6">
-        <div className="flex flex-col items-center  min-h-[23vw]">
+      <div className="-mt-20">
+        <div style={{
+        backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundAttachment: "fixed",
+      }} className="flex pt-24 flex-col items-center  min-h-[23vw]">
           <img
             src={isDarkMode ? "GoogleBlack.png" : "GoogleWhite.png"}
             alt="Google Logo"
@@ -229,7 +229,7 @@ function SearchPage() {
             </button>
           </div>
         </div>
-        <div className=" max-w-screen-2xl mx-auto   dark:bg-gray-900 bg-[#f8f9fa]">
+        <div className=" max-w-screen-2xl mx-auto   dark:bg-gray-900 bg-white">
           {activeComponent === "NotebookAndSheet" ? (
             <NotebookAndSheet />
           ) : activeComponent === "PopularBookmarks" ? (
@@ -246,7 +246,6 @@ function SearchPage() {
             <Tool />
           ) : (
             <Anotherpage
-              backgroundImage={backgroundImage}
               isDarkMode={isDarkMode}
             />
           )}
