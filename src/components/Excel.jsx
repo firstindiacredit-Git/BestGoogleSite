@@ -855,7 +855,7 @@ const Excel = () => {
       {tables.map((table, tableIndex) => (
         <div
           key={table.id}
-          className="mb-8 bg-gray-100 border border-gray-500/10 shadow-lg rounded-lg p-4"
+          className="mb-8 bg-gray-100 border border-gray-500/10 rounded-lg p-4"
           style={table.cardStyle}
         >
           <div className="flex items-center justify-between mb-4">

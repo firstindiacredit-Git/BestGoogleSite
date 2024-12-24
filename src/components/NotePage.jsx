@@ -1,33 +1,134 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { FaPalette, FaDownload, FaBold, FaUnderline, FaMinus, FaPlus, FaTrash, FaMicrophone, FaMicrophoneSlash } from 'react-icons/fa';
-import CustomColorPicker from './CustomColorPicker';
+import React, { useState, useRef, useEffect } from "react";
+import {
+  Bold,
+  Underline,
+  Download,
+  Mic,
+  MicOff,
+  Palette,
+  History,
+} from "lucide-react";
+import { HiOutlineNumberedList } from "react-icons/hi2";
+import { RxHamburgerMenu } from "react-icons/rx";
 
 const NotePage = () => {
-  const [notes, setNotes] = useState('');
-  const [noteColor, setNoteColor] = useState('#fff3cd');
-  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [notes, setNotes] = useState("");
   const [isBold, setIsBold] = useState(false);
   const [isUnderline, setIsUnderline] = useState(false);
   const [fontSize, setFontSize] = useState(14);
   const [isListening, setIsListening] = useState(false);
   const [lineNumbers, setLineNumbers] = useState(true);
+  const [backgroundColor, setBackgroundColor] = useState("#ffffff");
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [history, setHistory] = useState([]);
+  const [showHistory, setShowHistory] = useState(false);
 
-  const noteRef = useRef(null);
+  const textareaRef = useRef(null);
+  const lineNumberRef = useRef(null);
+  const colorPickerRef = useRef(null);
+
+  const predefinedColors = [
+    "#000000",
+    "#424242",
+    "#666666",
+    "#808080",
+    "#999999",
+    "#B3B3B3",
+    "#CCCCCC",
+    "#E6E6E6",
+    "#F2F2F2",
+    "#FFFFFF",
+    // Row 2
+    "#FF0000",
+    "#FF4500",
+    "#FF8C00",
+    "#FFD700",
+    "#32CD32",
+    "#00FF00",
+    "#00CED1",
+    "#0000FF",
+    "#8A2BE2",
+    "#FF00FF",
+    // Row 3
+    "#FFB6C1",
+    "#FFA07A",
+    "#FFE4B5",
+    "#FFFACD",
+    "#98FB98",
+    "#AFEEEE",
+    "#87CEEB",
+    "#E6E6FA",
+    "#DDA0DD",
+    "#FFC0CB",
+    // Row 4
+    "#DC143C",
+    "#FF4500",
+    "#FFA500",
+    "#FFD700",
+    "#32CD32",
+    "#20B2AA",
+    "#4169E1",
+    "#8A2BE2",
+    "#9370DB",
+    "#FF69B4",
+  ];
 
   useEffect(() => {
-    const savedNotes = localStorage.getItem('notes');
-    const savedColor = localStorage.getItem('noteColor');
+    const savedNotes = localStorage.getItem("notes");
+    const savedColor = localStorage.getItem("backgroundColor");
     if (savedNotes) setNotes(savedNotes);
-    if (savedColor) setNoteColor(savedColor);
+    if (savedColor) setBackgroundColor(savedColor);
   }, []);
 
+    useEffect(() => {
+      function handleClickOutside(event) {
+        if (
+          colorPickerRef.current &&
+          !colorPickerRef.current.contains(event.target)
+        ) {
+          setShowColorPicker(false);
+        }
+      }
+
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }, [colorPickerRef]);
+
   useEffect(() => {
-    localStorage.setItem('notes', notes);
-    localStorage.setItem('noteColor', noteColor);
-  }, [notes, noteColor]);
+    localStorage.setItem("notes", notes);
+    localStorage.setItem("backgroundColor", backgroundColor);
+  }, [notes, backgroundColor]);
+
+  const isColorDark = (hexColor) => {
+    const r = parseInt(hexColor.slice(1, 3), 16);
+    const g = parseInt(hexColor.slice(3, 5), 16);
+    const b = parseInt(hexColor.slice(5, 7), 16);
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    return brightness < 128;
+  };
+
+  const handleScroll = (e) => {
+    const lineNumbersDiv = e.target.previousSibling;
+    if (lineNumbersDiv) {
+      lineNumbersDiv.scrollTop = e.target.scrollTop;
+    }
+  };
+
+  const getTextColor = () => {
+    return isColorDark(backgroundColor) ? "#ffffff" : "#000000";
+  };
+
+  const getLineColor = () => {
+    return isColorDark(backgroundColor)
+      ? "rgba(255, 255, 255, 0.2)"
+      : "rgba(0, 0, 0, 0.1)";
+  };
 
   const handleNotesChange = (e) => {
     setNotes(e.target.value);
+    setHistory((prevHistory) => [...prevHistory, e.target.value]);
   };
 
   const toggleBold = () => setIsBold(!isBold);
@@ -87,140 +188,219 @@ const NotePage = () => {
   };
 
   const getLineCount = () => {
-    return notes.split('\n').length;
+    return notes.split("\n").length;
   };
 
+  const textColor = getTextColor();
+  const lineColor = getLineColor();
+
   return (
-    <div className=" mx-auto px-4 py-8">
-      <div className=" mx-auto">
-        <div className="bg-white rounded-lg shadow-xl overflow-hidden">
-          <div className="p-6 transition-colors duration-200" style={{ backgroundColor: noteColor }}>
+    <div className="mx-auto px-4 py-8">
+      <div className="mx-auto">
+        <div className="rounded-lg overflow-hidden" style={{ backgroundColor }}>
+          <div className="p-6" style={{ backgroundColor }}>
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold">NotePage</h2>
-              <div className="flex items-center space-x-2">
+              <h2 className="text-2xl font-bold" style={{ color: textColor }}>
+                NotePage
+              </h2>
+              <div className="flex gap-2">
                 <button
-                  className="p-2 rounded-lg hover:bg-white/20 transition duration-200"
+                  className="p-2 rounded-lg bg-opacity-20 bg-gray-500 hover:bg-opacity-30 transition duration-200"
                   onClick={toggleLineNumbers}
                   title="Toggle Line Numbers"
+                  style={{ color: textColor }}
                 >
-                  {lineNumbers ? "Hide Lines" : "Show Lines"}
+                  {lineNumbers ? (
+                    <RxHamburgerMenu />
+                  ) : (
+                    <HiOutlineNumberedList />
+                  )}
                 </button>
-                <button
-                  className="p-2 rounded-lg hover:bg-white/20 transition duration-200"
-                  onClick={() => setShowColorPicker(!showColorPicker)}
-                  title="Change background color"
-                >
-                  <FaPalette className="w-5 h-5" />
-                </button>
-                {showColorPicker && (
-                  <div className="absolute mt-2 right-0">
-                    <CustomColorPicker
-                      color={noteColor}
-                      onChange={setNoteColor}
-                      onClose={() => setShowColorPicker(false)}
-                    />
-                  </div>
-                )}
+                <div className="relative" ref={colorPickerRef}>
+                  <button
+                    className="p-2 rounded-lg hover:bg-opacity-20 hover:bg-gray-500 transition duration-200"
+                    onClick={() => setShowColorPicker(!showColorPicker)}
+                    title="Change Background Color"
+                    style={{ color: textColor }}
+                  >
+                    <Palette className="w-5 h-5" />
+                  </button>
+                  {showColorPicker && ( // Render only if the color picker should be visible
+                    <div className="absolute w-48 right-0 z-50 -mt-2 bg-white border rounded shadow-lg p-3">
+                      {/* Predefined Colors */}
+                      <div className="grid grid-cols-7 gap-1">
+                        {predefinedColors.map((color) => (
+                          <button
+                            key={color}
+                            className="w-5 h-5 border border-gray-200 cursor-pointer transition duration-300 ease-in-out transform hover:scale-125 focus:outline-none"
+                            style={{ backgroundColor: color }}
+                            onClick={() => {
+                              setBackgroundColor(color);
+                              setShowColorPicker(false);
+                            }}
+                          />
+                        ))}
+                      </div>
+
+                      {/* Custom Color Picker */}
+                      <div className="mt-1 flex items-center justify-center">
+                        <input
+                          id="customColorPicker"
+                          type="color"
+                          className="w-full h-6 p-0 border border-gray-300 rounded-md cursor-pointer focus:outline-none"
+                          onChange={(e) => {
+                            setBackgroundColor(e.target.value);
+                            setShowColorPicker(false);
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
-            <div className="flex space-x-4" ref={noteRef}>
+            <div className="flex">
               {lineNumbers && (
-                <div className="text-gray-500 text-right pr-2 select-none" style={{ fontSize: `${fontSize}px` }}>
-                  {Array.from({ length: getLineCount() }, (_, i) => i + 1).map((num) => (
-                    <div key={num}>{num}</div>
-                  ))}
+                <div
+                  ref={lineNumberRef}
+                  className="text-right pr-2 overflow-hidden h-[345px]"
+                  style={{
+                    fontSize: `${fontSize}px`,
+                    lineHeight: "3",
+                    color: textColor,
+                  }}
+                >
+                  {Array.from({ length: getLineCount() }, (_, i) => i + 1).map(
+                    (line) => (
+                      <div key={line} style={{ height: `${fontSize * 2.3}px` }}>
+                        {line}
+                      </div>
+                    )
+                  )}
                 </div>
               )}
+
               <textarea
+                ref={textareaRef}
                 value={notes}
                 onChange={handleNotesChange}
-                className="w-full h-96 p-4 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                onScroll={handleScroll}
+                className="hindi-paper"
                 style={{
-                  resize: "vertical",
+                  height: "350px",
+                  marginBottom: "20px",
+                  resize: "none",
+                  color: textColor,
                   backgroundColor: "transparent",
+                  border: "1px solid #6c757d",
+                  padding: "10px 10px 10px 10px",
+                  borderRadius: "5px",
                   fontSize: `${fontSize}px`,
+                  lineHeight: "32px",
+                  fontFamily: "Arial, sans-serif",
+                  position: "relative",
+                  backgroundAttachment: "local",
+                  width: "100%",
+                  transformOrigin: "left top",
                   fontWeight: isBold ? "bold" : "normal",
                   textDecoration: isUnderline ? "underline" : "none",
+                  backgroundImage: `linear-gradient(to bottom,transparent 30px,${lineColor} 31px,transparent 49px)`,
                 }}
                 placeholder="Start typing your notes here..."
               />
+              <style>
+                {`
+                    .hindi-paper {
+                      background-image: linear-gradient(to bottom, transparent 30px, rgba(0, 0, 0, 0.1) 31px, transparent 49px);
+                      background-size: 100% 32px;
+                      background-position-y: -1px;
+                      line-height: 20px;
+                      padding: 0 8px;
+                      overflow-y: scroll;
+                      scrollbar-width: none; /* Firefox */
+                    }
+
+                    .hindi-paper::-webkit-scrollbar {
+                      display: none; /* Chrome, Safari, and Edge */
+                    }
+                  `}
+              </style>
             </div>
 
             <div className="flex flex-wrap justify-between items-center gap-4 mt-6">
               <div className="flex items-center space-x-3">
                 <button
                   className={`p-3 rounded-lg transition duration-200 ${
-                    isBold 
-                      ? "bg-blue-500 text-white" 
-                      : "bg-white/10 hover:bg-white/20"
+                    isBold
+                      ? "bg-blue-500 text-white"
+                      : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
                   }`}
                   onClick={toggleBold}
                   title="Toggle Bold"
+                  style={{ color: isBold ? "white" : textColor }}
                 >
-                  <FaBold className="w-5 h-5" />
+                  <Bold className="w-5 h-5" />
                 </button>
                 <button
                   className={`p-3 rounded-lg transition duration-200 ${
-                    isUnderline 
-                      ? "bg-blue-500 text-white" 
-                      : "bg-white/10 hover:bg-white/20"
+                    isUnderline
+                      ? "bg-blue-500 text-white"
+                      : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
                   }`}
                   onClick={toggleUnderline}
                   title="Toggle Underline"
+                  style={{ color: isUnderline ? "white" : textColor }}
                 >
-                  <FaUnderline className="w-5 h-5" />
+                  <Underline className="w-5 h-5" />
                 </button>
                 <button
                   className={`p-3 rounded-lg transition duration-200 ${
-                    isListening 
-                      ? "bg-red-500 text-white" 
-                      : "bg-white/10 hover:bg-white/20"
+                    isListening
+                      ? "bg-red-500 text-white"
+                      : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
                   }`}
                   onClick={toggleSpeechToText}
                   title="Toggle Speech-to-Text"
+                  style={{ color: isListening ? "white" : textColor }}
                 >
-                  {isListening ? <FaMicrophoneSlash className="w-5 h-5" /> : <FaMicrophone className="w-5 h-5" />}
+                  {isListening ? (
+                    <MicOff className="w-5 h-5" />
+                  ) : (
+                    <Mic className="w-5 h-5" />
+                  )}
+                </button>
+                <button
+                  className="p-3 rounded-lg bg-opacity-20 bg-gray-500 hover:bg-opacity-30 transition duration-200"
+                  onClick={() => setShowHistory(!showHistory)}
+                  title="Show History"
+                  style={{ color: textColor }}
+                >
+                  <History className="w-5 h-5" />
                 </button>
               </div>
-
-              <div className="flex items-center space-x-3">
-                <button
-                  className="p-3 rounded-lg bg-white/10 hover:bg-white/20 transition duration-200 disabled:opacity-50"
-                  onClick={() => handleFontSizeChange(fontSize - 1)}
-                  disabled={fontSize <= 8}
-                >
-                  <FaMinus className="w-5 h-5" />
-                </button>
-                <span className="text-lg font-medium">
-                  {fontSize}
-                </span>
-                <button
-                  className="p-3 rounded-lg bg-white/10 hover:bg-white/20 transition duration-200 disabled:opacity-50"
-                  onClick={() => handleFontSizeChange(fontSize + 1)}
-                  disabled={fontSize >= 32}
-                >
-                  <FaPlus className="w-5 h-5" />
-                </button>
-              </div>
-
-              <div className="flex items-center space-x-3">
-                <button
-                  className="p-3 rounded-lg bg-red-500 text-white hover:bg-red-600 transition duration-200"
-                  onClick={() => setNotes("")}
-                  title="Clear notes"
-                >
-                  <FaTrash className="w-5 h-5" />
-                </button>
-                <button
-                  className="p-3 rounded-lg bg-green-500 text-white hover:bg-green-600 transition duration-200"
-                  onClick={downloadNotes}
-                  title="Download notes"
-                >
-                  <FaDownload className="w-5 h-5" />
-                </button>
-              </div>
+              <button
+                className="p-3 rounded-lg bg-opacity-20 bg-gray-500 hover:bg-opacity-30 transition duration-200"
+                onClick={downloadNotes}
+                title="Download Notes"
+                style={{ color: textColor }}
+              >
+                <Download className="w-5 h-5" />
+              </button>
             </div>
+
+            {showHistory && (
+              <div className="mt-4 bg-gray-100 p-4 rounded-lg shadow-md">
+                <h3 className="text-lg font-bold mb-2">History</h3>
+                <ul className="list-disc pl-6">
+                  {history.map((entry, index) => (
+                    <li key={index} className="text-sm mb-1">
+                      {entry}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
       </div>
