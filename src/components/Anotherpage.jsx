@@ -1,80 +1,66 @@
 import React, { useState, useEffect } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { motion } from "framer-motion";
-import { Spin, Button, Modal } from "antd";
+import {Modal} from "antd";
+import { Spin, Button as AntButton } from "antd";
+import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import Calculator from "./Calculator.jsx";
 import Notepad from "./Notepad.jsx";
 import Clock from "./Clock.jsx";
 import Calendar from "./Calendar.jsx";
 import ImageUploader from "./ImageUploader.jsx";
-import PopularBookmarks from "./PopularBookmarks.jsx";
 import Weather from "./Weather.jsx";
+import { getPageLayout, updatePageLayout, getAvailableWidgets } from "../firebase/widgetLayouts";
 
 const Anotherpage = ({ backgroundImage }) => {
   const [user, setUser] = useState(null);
-  const [items, setItems] = useState([
-    { id: "clock", name: "Clock", isOpen: false, column: 0 },
-    { id: "weather", name: "Weather", isOpen: false, column: 0 },
-    { id: "calculator", name: "Calculator", isOpen: false, column: 0 },
-    { id: "notepad", name: "Notepad", isOpen: false, column: 1 },
-    {
-      id: "popularBookmarks",
-      name: "Popular Bookmarks",
-      isOpen: false,
-      column: 1,
-    },
-    { id: "imageUploader", name: "Image Uploader", isOpen: false, column: 2 },
-    { id: "calendar", name: "Calendar", isOpen: false, column: 2 },
-  ]);
-
-  const [columns, setColumns] = useState(
-    parseInt(localStorage.getItem("columnCount")) || 3
-  );
-  const [loading, setLoading] = useState(false); // Loading indicator
+  const [items, setItems] = useState([]);
+  const [columns, setColumns] = useState(3);
+  const [loading, setLoading] = useState(true); // Loading indicator
   const [isSorterOpen, setIsSorterOpen] = useState(false);
   const [sortedItems, setSortedItems] = useState([]);
   const [isApplying, setIsApplying] = useState(false);
   const [previewColumns, setPreviewColumns] = useState(3);
+  const [availableWidgets, setAvailableWidgets] = useState([]);
 
   const componentMap = {
     clock: <Clock />,
     weather: <Weather />,
     calculator: <Calculator />,
     notepad: <Notepad />,
-    popularBookmarks: <PopularBookmarks />,
     imageUploader: <ImageUploader />,
     calendar: <Calendar />,
   };
 
+  // Load user and layout
   useEffect(() => {
     const authInstance = getAuth();
-    const unsubscribe = onAuthStateChanged(authInstance, (currentUser) => {
-      setUser(currentUser || null);
+    const unsubscribe = onAuthStateChanged(authInstance, async (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        const layout = await getPageLayout(currentUser.uid, 'home');
+        setItems(layout.widgets);
+        setColumns(layout.columns);
+        setLoading(false);
+      } else {
+        setLoading(false);
+      }
     });
     return () => unsubscribe();
   }, []);
 
   useEffect(() => {
-    try {
-      const savedItems = JSON.parse(localStorage.getItem("draggedItems"));
-      if (Array.isArray(savedItems)) setItems(savedItems);
-    } catch (e) {
-      console.error("Failed to load items from localStorage", e);
-    }
-  }, []);
-
-  useEffect(() => {
-    setSortedItems([...items]);
-  }, [items]);
-
-  useEffect(() => {
-    // Initialize preview columns when modal opens
     if (isSorterOpen) {
       setPreviewColumns(columns);
       setSortedItems([...items]);
     }
   }, [isSorterOpen, columns, items]);
+
+  useEffect(() => {
+    // Update available widgets whenever sortedItems changes
+    setAvailableWidgets(getAvailableWidgets(sortedItems));
+  }, [sortedItems]);
 
   const onDragEnd = (result) => {
     const { source, destination } = result;
@@ -89,7 +75,6 @@ const Anotherpage = ({ backgroundImage }) => {
     destItems.splice(destination.index, 0, draggedItem);
     const updatedItems = columnsArray.flat();
     setItems(updatedItems);
-    localStorage.setItem("draggedItems", JSON.stringify(updatedItems));
   };
 
   const handleSortEnd = (result) => {
@@ -180,17 +165,38 @@ const Anotherpage = ({ backgroundImage }) => {
   };
 
   const handleApplySorting = async () => {
+    if (!user) return;
+    
     setIsApplying(true);
     await new Promise((resolve) => setTimeout(resolve, 800));
     
-    // Apply changes to main layout
+    // Update both local state and database
     setItems(sortedItems);
     setColumns(previewColumns);
-    localStorage.setItem("draggedItems", JSON.stringify(sortedItems));
-    localStorage.setItem("columnCount", previewColumns);
+    
+    await updatePageLayout(user.uid, 'home', {
+      widgets: sortedItems,
+      columns: previewColumns
+    });
     
     setIsApplying(false);
     setIsSorterOpen(false);
+  };
+
+  const handleRemoveWidget = (widgetId) => {
+    const updatedItems = sortedItems.filter(item => item.id !== widgetId);
+    setSortedItems(updatedItems);
+    setAvailableWidgets(getAvailableWidgets(updatedItems));
+  };
+
+  const handleAddWidget = (columnIndex, widget) => {
+    const newWidget = {
+      ...widget,
+      column: columnIndex,
+      isOpen: false,
+      position: sortedItems.filter(item => item.column === columnIndex).length
+    };
+    setSortedItems([...sortedItems, newWidget]);
   };
 
   const distributeItems = () => {
@@ -357,7 +363,7 @@ const Anotherpage = ({ backgroundImage }) => {
           }
         }}
         footer={[
-          <Button 
+          <AntButton 
             key="cancel" 
             onClick={() => {
               setIsSorterOpen(false);
@@ -368,8 +374,8 @@ const Anotherpage = ({ backgroundImage }) => {
             disabled={isApplying}
           >
             Cancel
-          </Button>,
-          <Button
+          </AntButton>,
+          <AntButton
             key="apply"
             type="primary"
             onClick={handleApplySorting}
@@ -377,7 +383,7 @@ const Anotherpage = ({ backgroundImage }) => {
             loading={isApplying}
           >
             Apply Changes
-          </Button>
+          </AntButton>
         ]}
         width={800}
         centered
@@ -392,7 +398,7 @@ const Anotherpage = ({ backgroundImage }) => {
               <div className="text-sm text-gray-600 dark:text-gray-400">Select number of columns:</div>
               <div className="flex gap-2">
                 {[1, 2, 3, 4].map((num) => (
-                  <Button
+                  <AntButton
                     key={num}
                     type={previewColumns === num ? 'primary' : 'default'}
                     onClick={() => handleColumnChange(num)}
@@ -400,7 +406,7 @@ const Anotherpage = ({ backgroundImage }) => {
                     size="small"
                   >
                     {num}
-                  </Button>
+                  </AntButton>
                 ))}
               </div>
             </div>
@@ -431,7 +437,9 @@ const Anotherpage = ({ backgroundImage }) => {
                           transition: 'background-color 0.2s ease',
                           border: snapshot.isDraggingOver 
                             ? '2px dashed #1890ff'
-                            : '2px solid transparent'
+                            : '2px solid transparent',
+                          display: 'flex',
+                          flexDirection: 'column'
                         }}
                       >
                         <div className="column-header" style={{ 
@@ -444,7 +452,8 @@ const Anotherpage = ({ backgroundImage }) => {
                         <div className="items-container" style={{ 
                           display: 'flex', 
                           flexDirection: 'column', 
-                          gap: '8px' 
+                          gap: '8px',
+                          flexGrow: 1
                         }}>
                           {sortedItems
                             .filter(item => item.column === columnIndex)
@@ -474,9 +483,16 @@ const Anotherpage = ({ backgroundImage }) => {
                                       >
                                         ⋮⋮
                                       </div>
-                                      <span className="text-gray-700 dark:text-gray-200">
+                                      <span className="text-gray-700 dark:text-gray-200 flex-grow">
                                         {item.name}
                                       </span>
+                                      <AntButton
+                                        type="text"
+                                        icon={<DeleteOutlined />}
+                                        onClick={() => handleRemoveWidget(item.id)}
+                                        className="text-gray-400 hover:text-red-500"
+                                        size="small"
+                                      />
                                     </div>
                                   </div>
                                 )}
@@ -484,6 +500,25 @@ const Anotherpage = ({ backgroundImage }) => {
                             ))}
                           {provided.placeholder}
                         </div>
+                        {availableWidgets.length > 0 && (
+                          <div className="mt-4 p-2 border-t border-gray-200 dark:border-gray-600">
+                            <div className="text-sm text-gray-500 mb-2">Add Widget:</div>
+                            <div className="flex flex-wrap gap-2">
+                              {availableWidgets.map(widget => (
+                                <AntButton
+                                  key={widget.id}
+                                  onClick={() => handleAddWidget(columnIndex, widget)}
+                                  icon={<PlusOutlined />}
+                                  size="small"
+                                  type="dashed"
+                                  className="flex items-center"
+                                >
+                                  {widget.name}
+                                </AntButton>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </Droppable>
