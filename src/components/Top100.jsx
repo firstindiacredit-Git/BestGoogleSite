@@ -1,9 +1,123 @@
 import React, { useState, useEffect } from "react";
-import { Card, Button, Row, Col, Typography, Spin, Alert, Radio, Input, List, Space } from 'antd';
+import { Card, Button, Row, Col, Typography, Spin, Alert, Radio, Input, List, Space, Table } from 'antd';
 import { AppstoreOutlined, UnorderedListOutlined, SearchOutlined } from '@ant-design/icons';
 
 const { Title } = Typography;
 const { Search } = Input;
+
+function WikipediaBanks() {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState('grid');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "https://en.wikipedia.org/w/api.php?action=parse&page=List_of_largest_banks&format=json&origin=*"
+        );
+        const result = await response.json();
+        const htmlContent = result.parse.text["*"];
+        
+        // Extract table data
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = htmlContent;
+        const tableElement = tempDiv.querySelector(".wikitable");
+        
+        // Convert HTML table to array of objects
+        const rows = Array.from(tableElement.querySelectorAll("tr"));
+        const headers = Array.from(rows[0].querySelectorAll("th")).map(th => th.textContent.trim());
+        
+        const tableData = rows.slice(1).map((row, index) => {
+          const cells = Array.from(row.querySelectorAll("td"));
+          const rowData = cells.map(cell => cell.textContent.trim());
+          const obj = {
+            key: index,
+          };
+          headers.forEach((header, i) => {
+            obj[header] = rowData[i];
+          });
+          return obj;
+        });
+
+        setData(tableData);
+        // console.log(tableData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const filteredData = data.filter(item =>
+    item['Bank name']?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item['Rank']?.toString().includes(searchQuery) ||
+    item['Total assets(2023)(US$ billion)']?.toString().includes(searchQuery)
+  );
+
+  const renderGridView = () => (
+    <Row gutter={[16, 16]}>
+      {filteredData.map((item, index) => (
+        <Col xs={24} sm={12} lg={8} key={index}>
+          <Card
+            title={`${index + 1}. ${item['Bank name'] || 'Unknown Bank'}`}
+            bordered={true}
+            hoverable
+          >
+            <p>Rank: {item['Rank'] || 'N/A'}</p>
+            <p>Total Assets: {item['Total assets(2023)(US$ billion)'] || 'N/A'} billion USD</p>
+          </Card>
+        </Col>
+      ))}
+    </Row>
+  );
+
+  const renderListView = () => (
+    <List
+      itemLayout="horizontal"
+      dataSource={filteredData}
+      renderItem={(item, index) => (
+        <List.Item>
+          <List.Item.Meta
+            title={`${index + 1}. ${item['Bank name'] || 'Unknown Bank'}`}
+            description={`Rank: ${item['Rank'] || 'N/A'} | Total Assets: ${item['Total assets(2023)(US$ billion)'] || 'N/A'} billion USD`}
+          />
+        </List.Item>
+      )}
+    />
+  );
+
+  return (
+    <div style={{ padding: '24px' }}>
+      <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Search
+          placeholder="Search banks..."
+          allowClear
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{ width: 300 }}
+        />
+        <Radio.Group value={viewMode} onChange={(e) => setViewMode(e.target.value)}>
+          <Radio.Button value="grid">
+            <AppstoreOutlined />
+          </Radio.Button>
+          <Radio.Button value="list">
+            <UnorderedListOutlined />
+          </Radio.Button>
+        </Radio.Group>
+      </div>
+
+      {loading ? (
+        <Spin size="large" />
+      ) : (
+        viewMode === 'grid' ? renderGridView() : renderListView()
+      )}
+    </div>
+  );
+}
 
 const Top100Page = () => {
   const [items, setItems] = useState([]);
@@ -20,7 +134,8 @@ const Top100Page = () => {
     cars: `https://api.api-ninjas.com/v1/cars?limit=100&year=${year}`,
     stocks: 'https://finnhub.io/api/v1/stock/symbol?exchange=US&token=ctj9ln9r01qgfbt0ega0ctj9ln9r01qgfbt0egag',
     crypto: 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100',
-    billionaires: 'https://forbes400.onrender.com/api/forbes400?limit=100&year=${year}'
+    billionaires: 'https://forbes400.onrender.com/api/forbes400?limit=100&year=${year}',
+    banks: 'wikipedia'
   };
 
   const VIN_NUMBERS = [
@@ -50,6 +165,7 @@ const Top100Page = () => {
             'Content-Type': 'application/json'
           },
         });
+      
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -59,14 +175,13 @@ const Top100Page = () => {
         // console.log(`${category} API response:`, data);
 
         const processedData = data.map(vehicle => ({
-          name: `${vehicle.make} ${vehicle.model}`,
-          description: `Year: ${vehicle.year}, Engine: ${vehicle.engine || 'N/A'}, Transmission: ${vehicle.transmission || 'N/A'}`
+          name: `${vehicle.make}, Model: ${vehicle.model}`,
+          description: `Year: ${vehicle.year}, Class: ${vehicle.class || 'N/A'}, Transmission: ${vehicle.transmission || 'N/A'}`
         }));
         
         setItems(processedData);
         setError(null);
       } else {
-        // बाकी कैटेगरीज के लिए मौजूदा लॉजिक
         const response = await fetch(APIs[category]);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -141,14 +256,14 @@ const Top100Page = () => {
           throw new Error('No valid data found');
         }
 
-        console.log(`Processed ${category} data:`, processedData.slice(0, 2)); // Debug log
+        // console.log(`Processed ${category} data:`, processedData.slice(0, 2)); // Debug log
         setItems(processedData);
         setError(null); // Clear any previous errors
         
       }
     } catch (err) {
-      console.error(`Error fetching ${category} data:`, err);
-      setError(`Failed to fetch ${category} data: ${err.message}`);
+      // console.error(`Error fetching ${category} data:`, err);
+      // setError(`Failed to fetch ${category} data: ${err.message}`);
       setItems([]); // Clear items on error
     } finally {
       setLoading(false);
@@ -204,32 +319,41 @@ const Top100Page = () => {
             <Radio.Button value="crypto">Crypto</Radio.Button>
             <Radio.Button value="stocks">Stocks</Radio.Button>
             <Radio.Button value="billionaires">Billionaires</Radio.Button>
+            <Radio.Button value="banks">Banks</Radio.Button>
           </Radio.Group>
         </div>
 
-        {/* Search and View Toggle */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Search
-            placeholder="Search items..."
-            allowClear
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ width: 300 }}
-          />
-          <Radio.Group value={viewMode} onChange={(e) => setViewMode(e.target.value)}>
-            <Radio.Button value="grid">
-              <AppstoreOutlined />
-            </Radio.Button>
-            <Radio.Button value="list">
-              <UnorderedListOutlined />
-            </Radio.Button>
-          </Radio.Group>
-        </div>
+        {/* Search and View Toggle - Only show if not banks */}
+        {category !== 'banks' && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Search
+              placeholder="Search items..."
+              allowClear
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ width: 300 }}
+            />
+            <Radio.Group value={viewMode} onChange={(e) => setViewMode(e.target.value)}>
+              <Radio.Button value="grid">
+                <AppstoreOutlined />
+              </Radio.Button>
+              <Radio.Button value="list">
+                <UnorderedListOutlined />
+              </Radio.Button>
+            </Radio.Group>
+          </div>
+        )}
       </Space>
 
+      {/* Show loading and error states */}
       {loading && <div style={{ textAlign: 'center', margin: '2rem' }}><Spin size="large" /></div>}
       {error && <Alert message={error} type="error" showIcon style={{ marginBottom: '2rem' }} />}
 
-      {viewMode === 'grid' ? renderGridView() : renderListView()}
+      {/* Render content based on category */}
+      {category === 'banks' ? (
+        <WikipediaBanks />
+      ) : (
+        !loading && !error && (viewMode === 'grid' ? renderGridView() : renderListView())
+      )}
     </div>
   );
 };
