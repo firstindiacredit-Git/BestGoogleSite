@@ -8,6 +8,8 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import Calculator from "./Calculator.jsx";
 import Notepad from "./Notepad.jsx";
 import Clock from "./Clock.jsx";
+import Category from "./Category.jsx";
+import ShowLinks from "./ShowLinks.jsx";
 import Calendar from "./Calendar.jsx";
 import ImageUploader from "./ImageUploader.jsx";
 import Weather from "./Weather.jsx";
@@ -31,6 +33,8 @@ const Anotherpage = ({ backgroundImage }) => {
     notepad: <Notepad />,
     imageUploader: <ImageUploader />,
     calendar: <Calendar />,
+    showlinks: <ShowLinks/>,
+    category: <Category />,
   };
 
   // Load user and layout
