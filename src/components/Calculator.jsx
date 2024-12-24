@@ -17,7 +17,8 @@ function Calculator() {
     // Set the last input from history if no input is provided
     if (savedHistory.length > 0 && !calcInput) {
       const lastEntry = savedHistory[0]; // Use the latest history entry
-      setCalcInput(); // Display in the input
+      const lastInput = lastEntry.split("=")[0].trim(); // Get the input part before the equals sign
+      setCalcInput(lastInput); // Display in the input
     }
   }, []);
 
@@ -71,7 +72,7 @@ function Calculator() {
 
   const clearHistory = () => {
     setHistory([]);
-    setCalcInput("");  
+    setCalcInput("");
     localStorage.removeItem("calcHistory");
   };
 
@@ -79,7 +80,6 @@ function Calculator() {
     <div className="flex items-center w-full  mt-1 rounded-lg mb-5 min-h-96 justify-center">
       <div className="dark:bg-[#1f345f] bg-gray-200  h-full w-full rounded-lg p-4 ">
         {showHistory ? (
-           
           <div className=" dark:bg-[#1f345f] text-white w-full h-full p-4 rounded-lg">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-bold text-lg">History</h3>
@@ -118,7 +118,6 @@ function Calculator() {
             </button>
           </div>
         ) : (
-           
           <>
             {/* Display */}
             <div className="text-right text-gray-700 dark:text-white p-4 rounded-lg bg-white dark:bg-gray-800 mb-4">

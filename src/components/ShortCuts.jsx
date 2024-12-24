@@ -24,16 +24,15 @@ function BookmarkPage() {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-    const [menuVisible, setMenuVisible] = useState(null);
+  const [menuVisible, setMenuVisible] = useState(null);
 
-    const toggleMenu = (id) => {
-      setMenuVisible(menuVisible === id ? null : id);
-    };
+  const toggleMenu = (id) => {
+    setMenuVisible(menuVisible === id ? null : id);
+  };
 
-    const handleKeyDown = (e) => {
-      if (e.key === "e") e.preventDefault();
-      if (e.key === "Enter") handleAddTask();
-    };
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") handleAddBookmark(e);
+  };
 
   // Fetch user and global bookmarks on mount
   useEffect(() => {
@@ -51,7 +50,7 @@ function BookmarkPage() {
 
         // Fetch user bookmarks
         const userQuerySnapshot = await getDocs(
-          collection(db, "users", user.uid, "addbookmarks")
+          collection(db, "users", user.uid, "shortcut")
         );
         const userBookmarksList = userQuerySnapshot.docs.map((doc) => ({
           id: doc.id,
@@ -60,7 +59,7 @@ function BookmarkPage() {
         }));
         setUserBookmarks(userBookmarksList);
 
-        // Fetch global bookmarks
+        // Fetch bookmarks set By admin
         const globalQuerySnapshot = await getDocs(collection(db, "bookmarks"));
         const globalBookmarksList = globalQuerySnapshot.docs.map((doc) => ({
           id: doc.id,
@@ -94,9 +93,9 @@ function BookmarkPage() {
   const getFavicon = (url) => {
     try {
       const domain = new URL(url).hostname;
-      return `https://logo.clearbit.com/${domain}`;
+      return `https://logo.clearbit.com/${domain}`> 0? `https://logo.clearbit.com/${domain}` : "https://www.freeiconspng.com/uploads/web-icon-black-png-planet-web-world-icon-17.png";
     } catch (error) {
-      return "https://via.placeholder.com/64?text=?"; // Fallback favicon
+      return "https://www.freeiconspng.com/uploads/web-icon-black-png-planet-web-world-icon-17.png"; // Fallback favicon
     }
   };
 
@@ -120,7 +119,7 @@ function BookmarkPage() {
       }
 
       const docRef = await addDoc(
-        collection(db, "users", user.uid, "addbookmarks"),
+        collection(db, "users", user.uid, "shortcut"),
         {
           name,
           link,
@@ -168,7 +167,7 @@ function BookmarkPage() {
         db,
         "users",
         user.uid,
-        "addbookmarks",
+        "shortcut",
         editingBookmark.id
       );
       await updateDoc(docRef, { name, link });
@@ -192,12 +191,16 @@ function BookmarkPage() {
   };
 
   const handleDeleteBookmark = async (bookmarkId) => {
+    const bookmark = userBookmarks.find((bm) => bm.id === bookmarkId);
+    if (!bookmark) {
+      // This is an admin bookmark, hide it instead
+      return handleHideBookmark(bookmarkId);
+    }
+
     try {
-      const docRef = doc(db, "users", user.uid, "addbookmarks", bookmarkId);
+      const docRef = doc(db, "users", user.uid, "shortcut", bookmarkId);
       await deleteDoc(docRef);
-
       setUserBookmarks((prev) => prev.filter((bm) => bm.id !== bookmarkId));
-
       setSuccessMessage("Bookmark deleted successfully!");
     } catch (error) {
       console.error("Error deleting bookmark:", error);
@@ -212,6 +215,13 @@ function BookmarkPage() {
 
       const userDocRef = doc(db, "users", user.uid);
       await updateDoc(userDocRef, { hiddenBookmarkIds: newHiddenIds });
+
+      // Update the global bookmarks state to reflect the hidden status
+      setGlobalBookmarks((prev) =>
+        prev.map((bm) =>
+          bm.id === bookmarkId ? { ...bm, isHidden: true } : bm
+        )
+      );
 
       setSuccessMessage("Bookmark hidden successfully!");
     } catch (error) {
@@ -240,7 +250,7 @@ function BookmarkPage() {
               className="block"
             >
               <img
-                src={getFavicon(bookmark.link)}
+                src={getFavicon(bookmark.link) }
                 alt={bookmark.name}
                 className="w-7 h-7 mx-auto rounded-full transition-transform duration-300 transform hover:scale-110 hover:shadow-lg"
               />
@@ -265,16 +275,17 @@ function BookmarkPage() {
                       Edit
                     </button>
                   )}
-                  <button
-                    onClick={() => handleDeleteBookmark(bookmark.id)}
-                    className="block w-full text-left px-2 py-1 text-sm text-red-500 hover:bg-gray-200"
-                  >
-                    Delete
-                  </button>
-                  {!bookmark.createdByUser && (
+                  {bookmark.createdByUser ? (
+                    <button
+                      onClick={() => handleDeleteBookmark(bookmark.id)}
+                      className="block w-full text-left px-2 py-1 text-sm text-red-500 hover:bg-gray-200"
+                    >
+                      Delete
+                    </button>
+                  ) : (
                     <button
                       onClick={() => handleHideBookmark(bookmark.id)}
-                      className="text-gray-500 hover:text-gray-600 block w-full px-2 py-1"
+                      className="block w-full text-left px-2 py-1 text-sm text-red-500 hover:bg-gray-200"
                     >
                       Hide
                     </button>

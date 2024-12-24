@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaArrowUp } from "react-icons/fa";
 import Header from "../components/Header";
-import AnimatedTooltipPreview from "./AnimatedTooltipPreview";
+import Shortcut from "./ShortCuts";
 import Anotherpage from "../components/Anotherpage";
 import PopularBookmarks from "../components/PopularBookmarks";
 import NotebookAndSheet from "../components/NotebookAndSheet";
@@ -132,7 +132,7 @@ function SearchPage() {
             data-resultsurl="https://www.google.com/search?client=ms-google-coop&qcx=80904074a37154829"
             data-defaulttoimagesearch="true"
           />
-          <AnimatedTooltipPreview />
+          <Shortcut />
           <div className="-mt-10">
             <Link to="/">
               <button className="h-10 w-10 rounded-2xl">
