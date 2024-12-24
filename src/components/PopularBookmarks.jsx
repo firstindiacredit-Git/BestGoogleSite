@@ -9,7 +9,7 @@ import Calculator from "./Calculator.jsx";
 import Notepad from "./Notepad.jsx";
 import Clock from "./Clock.jsx";
 import Calendar from "./Calendar.jsx";
-import Category from './Category.jsx'
+import Category from "./Category.jsx";
 import ImageUploader from "./ImageUploader.jsx";
 import Weather from "./Weather.jsx";
 import {
@@ -30,15 +30,7 @@ const PopularBookmarks = ({ backgroundImage }) => {
   const [previewColumns, setPreviewColumns] = useState(3);
   const [availableWidgets, setAvailableWidgets] = useState([]);
 
-  const componentMap = {
-    clock: <Clock />,
-    weather: <Weather />,
-    calculator: <Calculator />,
-    notepad: <Notepad />,
-    imageUploader: <ImageUploader />,
-    Bookmarks: <Category />,
-    calendar: <Calendar />,
-  };
+
 
   // Load user and layout
   useEffect(() => {
@@ -48,7 +40,7 @@ const PopularBookmarks = ({ backgroundImage }) => {
       async (currentUser) => {
         setUser(currentUser);
         if (currentUser) {
-          const layout = await getPageLayout(currentUser.uid, "bookmarks");
+          const layout = await getPageLayout(currentUser.uid, "home");
           setItems(layout.widgets);
           setColumns(layout.columns);
           setLoading(false);
@@ -184,7 +176,7 @@ const PopularBookmarks = ({ backgroundImage }) => {
     setItems(sortedItems);
     setColumns(previewColumns);
 
-    await updatePageLayout(user.uid, "bookmarks", {
+    await updatePageLayout(user.uid, "home", {
       widgets: sortedItems,
       columns: previewColumns,
     });

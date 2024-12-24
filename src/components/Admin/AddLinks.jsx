@@ -15,6 +15,7 @@ import {
   updateDoc,
   doc,
   deleteDoc,
+  getDoc,
 } from "firebase/firestore";
 
 function AddLinks() {
@@ -43,7 +44,7 @@ function AddLinks() {
     .map(category => ({
       ...category,
       links: links.filter(link => 
-        link.category === category.newCategory &&
+        link.categoryId === category.id &&
         (link.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
          link.link.toLowerCase().includes(searchTerm.toLowerCase()) ||
          category.newCategory.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -89,7 +90,7 @@ function AddLinks() {
 
   const fetchLinks = async () => {
     try {
-      const querySnapshot = await getDocs(collection(db, "links"));
+      const querySnapshot = await getDocs(collection(db, "bookmarks"));
       const fetchedLinks = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
@@ -120,15 +121,23 @@ function AddLinks() {
     }
 
     try {
-      const categoryRef = collection(db, "categories");
-      await addDoc(categoryRef, {
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      const isAdmin = userDoc.data()?.role === 'admin';
+      
+      if (!isAdmin) {
+        alert("Only admin users can add categories");
+        return;
+      }
+
+      await addDoc(collection(db, "category"), {
         newCategory: newCategory.trim(),
         color: selectedColor,
-        links: [],
         createdAt: new Date(),
       });
+      
       setNewCategory("");
-      setSelectedColor("#3B82F6"); // Reset to default color
+      setSelectedColor("#3B82F6");
+      fetchCategories();
     } catch (error) {
       console.error("Error adding category:", error);
     }
@@ -141,67 +150,98 @@ function AddLinks() {
     }
 
     try {
-      await addDoc(collection(db, "links"), {
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      const isAdmin = userDoc.data()?.role === 'admin';
+      
+      if (!isAdmin) {
+        alert("Only admin users can add bookmarks");
+        return;
+      }
+
+      await addDoc(collection(db, "bookmarks"), {
         name: newLink.name,
         link: newLink.link,
-        category: newLink.category,
+        categoryId: newLink.category,
         createdAt: new Date(),
-        createdBy: user.uid,
       });
+      
       setNewLink({ name: "", link: "", category: "" });
       fetchLinks();
-      alert("Bookmark added successfully!");
     } catch (error) {
       console.error("Error adding bookmark: ", error);
     }
   };
 
   const handleDelete = async (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this bookmark?"
-    );
-    if (!confirmDelete) return;
-
     try {
-      await deleteDoc(doc(db, "links", id));
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      const isAdmin = userDoc.data()?.role === 'admin';
+      
+      if (!isAdmin) {
+        alert("Only admin users can delete bookmarks");
+        return;
+      }
+
+      const confirmDelete = window.confirm(
+        "Are you sure you want to delete this bookmark?"
+      );
+      if (!confirmDelete) return;
+
+      await deleteDoc(doc(db, "bookmarks", id));
       fetchLinks();
     } catch (error) {
       console.error("Error deleting bookmark: ", error);
     }
   };
 
-  const handleEdit = async (id, currentName, currentLink, currentCategory) => {
-    const newName = prompt("Enter new name:", currentName);
-    const newLink = prompt("Enter new link:", currentLink);
-    const newCategory = prompt("Enter new category:", currentCategory);
-
-    if (newName && newLink && newCategory) {
-      try {
-        await updateDoc(doc(db, "links", id), {
-          name: newName,
-          link: newLink,
-          category: newCategory,
-        });
-        fetchLinks();
-      } catch (error) {
-        console.error("Error updating bookmark: ", error);
-      }
-    } else {
-      alert("All fields are required for updating.");
-    }
-  };
-
   const handleDeleteCategory = async (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this category?"
-    );
-    if (!confirmDelete) return;
-
     try {
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      const isAdmin = userDoc.data()?.role === 'admin';
+      
+      if (!isAdmin) {
+        alert("Only admin users can delete categories");
+        return;
+      }
+
+      const confirmDelete = window.confirm(
+        "Are you sure you want to delete this category?"
+      );
+      if (!confirmDelete) return;
+
       await deleteDoc(doc(db, "category", id));
       fetchCategories();
     } catch (error) {
       console.error("Error deleting category: ", error);
+    }
+  };
+
+  const handleEdit = async (id, currentName, currentLink, currentCategory) => {
+    try {
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      const isAdmin = userDoc.data()?.role === 'admin';
+      
+      if (!isAdmin) {
+        alert("Only admin users can edit bookmarks");
+        return;
+      }
+
+      const newName = prompt("Enter new name:", currentName);
+      const newLink = prompt("Enter new link:", currentLink);
+      const newCategory = prompt("Enter new category:", currentCategory);
+
+      if (newName && newLink && newCategory) {
+        await updateDoc(doc(db, "bookmarks", id), {
+          name: newName,
+          link: newLink,
+          categoryId: newCategory,
+        });
+        fetchLinks();
+      } else {
+        alert("All fields are required for updating.");
+      }
+    } catch (error) {
+      console.error("Error updating bookmark: ", error);
     }
   };
 
@@ -497,7 +537,7 @@ function AddLinks() {
                             </a>
                             <div className="flex items-center space-x-2">
                               <button
-                                onClick={() => handleEdit(link.id, link.name, link.link, link.category)}
+                                onClick={() => handleEdit(link.id, link.name, link.link, link.categoryId)}
                                 className="p-1 text-gray-400 hover:text-blue-500 transition-colors"
                               >
                                 <FaRegEdit size={16} />
@@ -592,7 +632,7 @@ function AddLinks() {
                           </div>
                           <div className="flex items-center space-x-2 flex-shrink-0">
                             <button
-                              onClick={() => handleEdit(link.id, link.name, link.link, link.category)}
+                              onClick={() => handleEdit(link.id, link.name, link.link, link.categoryId)}
                               className="p-1 text-gray-400 hover:text-blue-500 transition-colors"
                             >
                               <FaRegEdit size={16} />
