@@ -5,13 +5,6 @@ import { Modal } from "antd";
 import { Spin, Button as AntButton } from "antd";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import Calculator from "./Calculator.jsx";
-import Notepad from "./Notepad.jsx";
-import Clock from "./Clock.jsx";
-import Calendar from "./Calendar.jsx";
-import Category from "./Category.jsx";
-import ImageUploader from "./ImageUploader.jsx";
-import Weather from "./Weather.jsx";
 import {
   getPageLayout,
   updatePageLayout,
