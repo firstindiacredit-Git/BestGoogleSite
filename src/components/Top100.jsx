@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Card, Button, Row, Col, Typography, Spin, Alert, Radio, Input, List, Space, Table } from 'antd';
 import { AppstoreOutlined, UnorderedListOutlined, SearchOutlined } from '@ant-design/icons';
+import sportsmen from './sportsmen.json';
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -111,7 +112,9 @@ function WikipediaBanks() {
       </div>
 
       {loading ? (
-        <Spin size="large" />
+        <div style={{ textAlign: 'center', margin: '2rem' }}>
+          <Spin size="large" />
+        </div>
       ) : (
         viewMode === 'grid' ? renderGridView() : renderListView()
       )}
@@ -134,8 +137,9 @@ const Top100Page = () => {
     cars: `https://api.api-ninjas.com/v1/cars?limit=100&year=${year}`,
     stocks: 'https://finnhub.io/api/v1/stock/symbol?exchange=US&token=ctj9ln9r01qgfbt0ega0ctj9ln9r01qgfbt0egag',
     crypto: 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100',
-    billionaires: 'https://forbes400.onrender.com/api/forbes400?limit=100&year=${year}',
-    banks: 'wikipedia'
+    billionaires: `https://forbes400.onrender.com/api/forbes400?limit=100&year=${year}`,
+    banks: 'wikipedia',
+    sportsmen: 'local'
   };
 
   const VIN_NUMBERS = [
@@ -156,6 +160,19 @@ const Top100Page = () => {
 
   const fetchTop100 = async (category) => {
     try {
+      setLoading(true);
+      
+      if (category === 'sportsmen') {
+        const processedData = sportsmen.map(person => ({
+          name: `${person.name} ${' '} $${(person.contract_value_usd/1000000).toFixed(1)}M`,
+          description: `Sport: ${person.sport}, Contract: ${person.length_of_contract}`
+        }));
+        setItems(processedData);
+        setError(null);
+        setLoading(false);
+        return;
+      }
+      
       // console.log(`Fetching ${category} data...`);
       
       if (category === 'cars') {
@@ -271,6 +288,7 @@ const Top100Page = () => {
   };
 
   useEffect(() => {
+    setLoading(true); // Set loading to true before fetching
     fetchTop100(category);
   }, [category, page]);
 
@@ -279,7 +297,26 @@ const Top100Page = () => {
       {filteredItems.map((item) => (
         <Col xs={24} sm={12} lg={8} key={item.originalIndex}>
           <Card
-            title={`${item.originalIndex + 1}. ${item.name}`}
+            title={
+              category === 'sportsmen' ? (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>{item.originalIndex + 1}. {item.name?.split('$')[0] || item.name}</span>
+                  <span>{item.name?.includes('$') ? `$${item.name.split('$')[1]}` : ''}</span>
+                </div>
+              ) : category === 'billionaires' ? (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>{item.originalIndex + 1}. {item.name?.split(',')[0] || item.name}</span>
+                  <span>{item.description?.includes('$') ? item.description.split('$')[1]?.split(',')[0] : ''}</span>
+                </div>
+              ) : category === 'crypto' ? (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>{item.originalIndex + 1}. {item.name}</span>
+                  <span>{item.description?.includes('Price: $') ? `$${item.description.split('Price: $')[1]?.split(',')[0]}` : ''}</span>
+                </div>
+              ) : (
+                `${item.originalIndex + 1}. ${item.name}`
+              )
+            }
             bordered={true}
             hoverable
           >
@@ -297,7 +334,26 @@ const Top100Page = () => {
       renderItem={(item) => (
         <List.Item>
           <List.Item.Meta
-            title={`${item.originalIndex + 1}. ${item.name}`}
+            title={
+              category === 'sportsmen' ? (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>{item.originalIndex + 1}. {item.name?.split('$')[0] || item.name}</span>
+                  <span>{item.name?.includes('$') ? `$${item.name.split('$')[1]}` : ''}</span>
+                </div>
+              ) : category === 'billionaires' ? (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>{item.originalIndex + 1}. {item.name?.split(',')[0] || item.name}</span>
+                  <span>{item.description?.includes('$') ? item.description.split('$')[1]?.split(',')[0] : ''}</span>
+                </div>
+              ) : category === 'crypto' ? (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>{item.originalIndex + 1}. {item.name}</span>
+                  <span>{item.description?.includes('Price: $') ? `$${item.description.split('Price: $')[1]?.split(',')[0]}` : ''}</span>
+                </div>
+              ) : (
+                `${item.originalIndex + 1}. ${item.name}`
+              )
+            }
             description={item.description}
           />
         </List.Item>
@@ -320,11 +376,12 @@ const Top100Page = () => {
             <Radio.Button value="stocks">Stocks</Radio.Button>
             <Radio.Button value="billionaires">Billionaires</Radio.Button>
             <Radio.Button value="banks">Banks</Radio.Button>
+            <Radio.Button value="sportsmen">Sports Person</Radio.Button>
           </Radio.Group>
         </div>
 
-        {/* Search and View Toggle - Only show if not banks */}
-        {category !== 'banks' && (
+        {/* Search and View Toggle - Only show if not loading and not banks */}
+        {!loading && category !== 'banks' && (
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Search
               placeholder="Search items..."
@@ -344,15 +401,30 @@ const Top100Page = () => {
         )}
       </Space>
 
-      {/* Show loading and error states */}
-      {loading && <div style={{ textAlign: 'center', margin: '2rem' }}><Spin size="large" /></div>}
-      {error && <Alert message={error} type="error" showIcon style={{ marginBottom: '2rem' }} />}
+      {/* Show loading state */}
+      {loading && (
+        <div style={{ textAlign: 'center', margin: '2rem' }}>
+          <Spin size="large" />
+        </div>
+      )}
 
-      {/* Render content based on category */}
-      {category === 'banks' ? (
-        <WikipediaBanks />
-      ) : (
-        !loading && !error && (viewMode === 'grid' ? renderGridView() : renderListView())
+      {/* Only render content when not loading */}
+      {!loading && (
+        <>
+          {error && <Alert message={error} type="error" showIcon style={{ marginBottom: '2rem' }} />}
+          {category === 'banks' ? (
+            <WikipediaBanks />
+          ) : (
+            <>
+              {category === 'sportsmen' && (
+                <Title level={2} style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                  Overview of largest sports contracts
+                </Title>
+              )}
+              {viewMode === 'grid' ? renderGridView() : renderListView()}
+            </>
+          )}
+        </>
       )}
     </div>
   );
