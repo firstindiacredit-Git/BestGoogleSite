@@ -1,0 +1,602 @@
+[
+    {
+        "Rank": 1,
+        "Brand": "Apple",
+        "Change": "-3%",
+        "Value": "488.9 $B"
+    },
+    {
+        "Rank": 2,
+        "Brand": "Microsoft",
+        "Change": "+11%",
+        "Value": "352.5 $B"
+    },
+    {
+        "Rank": 3,
+        "Brand": "Amazon",
+        "Change": "+8%",
+        "Value": "298.1 $B"
+    },
+    {
+        "Rank": 4,
+        "Brand": "Google",
+        "Change": "+12%",
+        "Value": "291.3 $B"
+    },
+    {
+        "Rank": 5,
+        "Brand": "Samsung",
+        "Change": "+10%",
+        "Value": "100.8 $B"
+    },
+    {
+        "Rank": 6,
+        "Brand": "Toyota",
+        "Change": "+13%",
+        "Value": "72.8 $B"
+    },
+    {
+        "Rank": 7,
+        "Brand": "Coca-Cola",
+        "Change": "+5%",
+        "Value": "61.2 $B"
+    },
+    {
+        "Rank": 8,
+        "Brand": "Mercedes-Benz",
+        "Change": "-4%",
+        "Value": "58.9 $B"
+    },
+    {
+        "Rank": 9,
+        "Brand": "McDonald’s",
+        "Change": "+4%",
+        "Value": "53.0 $B"
+    },
+    {
+        "Rank": 10,
+        "Brand": "BMW",
+        "Change": "+2%",
+        "Value": "52.0 $B"
+    },
+    {
+        "Rank": 11,
+        "Brand": "Louis Vuitton",
+        "Change": "+9%",
+        "Value": "50.9 $B"
+    },
+    {
+        "Rank": 12,
+        "Brand": "Tesla",
+        "Change": "-9%",
+        "Value": "45.5 $B"
+    },
+    {
+        "Rank": 13,
+        "Brand": "Cisco",
+        "Change": "+5%",
+        "Value": "45.5 $B"
+    },
+    {
+        "Rank": 14,
+        "Brand": "Nike",
+        "Change": "-5%",
+        "Value": "45.4 $B"
+    },
+    {
+        "Rank": 15,
+        "Brand": "Instagram",
+        "Change": "+15%",
+        "Value": "45.1 $B"
+    },
+    {
+        "Rank": 16,
+        "Brand": "Disney",
+        "Change": "-11%",
+        "Value": "42.8 $B"
+    },
+    {
+        "Rank": 17,
+        "Brand": "Adobe",
+        "Change": "+12%",
+        "Value": "39.4 $B"
+    },
+    {
+        "Rank": 18,
+        "Brand": "Oracle",
+        "Change": "+9%",
+        "Value": "37.7 $B"
+    },
+    {
+        "Rank": 19,
+        "Brand": "IBM",
+        "Change": "+7%",
+        "Value": "37.3 $B"
+    },
+    {
+        "Rank": 20,
+        "Brand": "SAP",
+        "Change": "+11%",
+        "Value": "36.8 $B"
+    },
+    {
+        "Rank": 21,
+        "Brand": "Facebook",
+        "Change": "+10%",
+        "Value": "34.9 $B"
+    },
+    {
+        "Rank": 22,
+        "Brand": "Hermès",
+        "Change": "+15%",
+        "Value": "34.7 $B"
+    },
+    {
+        "Rank": 23,
+        "Brand": "Chanel",
+        "Change": "+7%",
+        "Value": "33.2 $B"
+    },
+    {
+        "Rank": 24,
+        "Brand": "YouTube",
+        "Change": "+16%",
+        "Value": "30.1 $B"
+    },
+    {
+        "Rank": 25,
+        "Brand": "J.P. Morgan",
+        "Change": "+5%",
+        "Value": "27.1 $B"
+    },
+    {
+        "Rank": 26,
+        "Brand": "Honda",
+        "Change": "+9%",
+        "Value": "26.7 $B"
+    },
+    {
+        "Rank": 27,
+        "Brand": "American Express",
+        "Change": "+11%",
+        "Value": "26.7 $B"
+    },
+    {
+        "Rank": 28,
+        "Brand": "IKEA",
+        "Change": "+6%",
+        "Value": "24.3 $B"
+    },
+    {
+        "Rank": 29,
+        "Brand": "Allianz",
+        "Change": "+13%",
+        "Value": "23.5 $B"
+    },
+    {
+        "Rank": 30,
+        "Brand": "Hyundai",
+        "Change": "+13%",
+        "Value": "23.0 $B"
+    },
+    {
+        "Rank": 31,
+        "Brand": "Accenture",
+        "Change": "+3%",
+        "Value": "21.9 $B"
+    },
+    {
+        "Rank": 32,
+        "Brand": "Visa",
+        "Change": "+13%",
+        "Value": "21.1 $B"
+    },
+    {
+        "Rank": 33,
+        "Brand": "Pepsi",
+        "Change": "+6%",
+        "Value": "21.0 $B"
+    },
+    {
+        "Rank": 34,
+        "Brand": "Sony",
+        "Change": "+9%",
+        "Value": "20.8 $B"
+    },
+    {
+        "Rank": 35,
+        "Brand": "UPS",
+        "Change": "-2%",
+        "Value": "20.0 $B"
+    },
+    {
+        "Rank": 36,
+        "Brand": "Nvidia",
+        "Change": "NEW",
+        "Value": "20.0 $B"
+    },
+    {
+        "Rank": 37,
+        "Brand": "Intel",
+        "Change": "-30%",
+        "Value": "19.7 $B"
+    },
+    {
+        "Rank": 38,
+        "Brand": "Netflix",
+        "Change": "+10%",
+        "Value": "19.7 $B"
+    },
+    {
+        "Rank": 39,
+        "Brand": "MasterCard",
+        "Change": "+8%",
+        "Value": "18.5 $B"
+    },
+    {
+        "Rank": 40,
+        "Brand": "PayPal",
+        "Change": "+3%",
+        "Value": "18.3 $B"
+    },
+    {
+        "Rank": 41,
+        "Brand": "Gucci",
+        "Change": "-10%",
+        "Value": "17.9 $B"
+    },
+    {
+        "Rank": 42,
+        "Brand": "Zara",
+        "Change": "+8%",
+        "Value": "17.8 $B"
+    },
+    {
+        "Rank": 43,
+        "Brand": "Porsche",
+        "Change": "+7%",
+        "Value": "17.4 $B"
+    },
+    {
+        "Rank": 44,
+        "Brand": "Airbnb",
+        "Change": "+6%",
+        "Value": "17.3 $B"
+    },
+    {
+        "Rank": 45,
+        "Brand": "Audi",
+        "Change": "+6%",
+        "Value": "17.3 $B"
+    },
+    {
+        "Rank": 46,
+        "Brand": "Salesforce",
+        "Change": "-7%",
+        "Value": "17.1 $B"
+    },
+    {
+        "Rank": 47,
+        "Brand": "GE",
+        "Change": "+12%",
+        "Value": "17.1 $B"
+    },
+    {
+        "Rank": 48,
+        "Brand": "AXA",
+        "Change": "+2%",
+        "Value": "16.8 $B"
+    },
+    {
+        "Rank": 49,
+        "Brand": "Volkswagen",
+        "Change": "+9%",
+        "Value": "16.5 $B"
+    },
+    {
+        "Rank": 50,
+        "Brand": "Siemens",
+        "Change": "+9%",
+        "Value": "15.8 $B"
+    },
+    {
+        "Rank": 51,
+        "Brand": "adidas",
+        "Change": "-6%",
+        "Value": "15.5 $B"
+    },
+    {
+        "Rank": 52,
+        "Brand": "Starbucks",
+        "Change": "-1%",
+        "Value": "15.3 $B"
+    },
+    {
+        "Rank": 53,
+        "Brand": "L’Oréal Paris",
+        "Change": "+9%",
+        "Value": "14.8 $B"
+    },
+    {
+        "Rank": 54,
+        "Brand": "Pampers",
+        "Change": "+5%",
+        "Value": "14.5 $B"
+    },
+    {
+        "Rank": 55,
+        "Brand": "Citi",
+        "Change": "+6%",
+        "Value": "14.5 $B"
+    },
+    {
+        "Rank": 56,
+        "Brand": "Ford",
+        "Change": "-3%",
+        "Value": "14.4 $B"
+    },
+    {
+        "Rank": 57,
+        "Brand": "Goldman Sachs",
+        "Change": "+1%",
+        "Value": "14.4 $B"
+    },
+    {
+        "Rank": 58,
+        "Brand": "LEGO",
+        "Change": "+7%",
+        "Value": "14.0 $B"
+    },
+    {
+        "Rank": 59,
+        "Brand": "Nissan",
+        "Change": "+10%",
+        "Value": "13.9 $B"
+    },
+    {
+        "Rank": 60,
+        "Brand": "H&M",
+        "Change": "NEW",
+        "Value": "13.6 $B"
+    },
+    {
+        "Rank": 61,
+        "Brand": "Nescafé",
+        "Change": "-9%",
+        "Value": "13.5 $B"
+    },
+    {
+        "Rank": 62,
+        "Brand": "Ferrari",
+        "Change": "+21%",
+        "Value": "13.1 $B"
+    },
+    {
+        "Rank": 63,
+        "Brand": "eBay",
+        "Change": "+1%",
+        "Value": "12.9 $B"
+    },
+    {
+        "Rank": 64,
+        "Brand": "HSBC",
+        "Change": "+6%",
+        "Value": "12.5 $B"
+    },
+    {
+        "Rank": 65,
+        "Brand": "Spotify",
+        "Change": "+12%",
+        "Value": "12.4 $B"
+    },
+    {
+        "Rank": 66,
+        "Brand": "Morgan Stanley",
+        "Change": "+9%",
+        "Value": "12.4 $B"
+    },
+    {
+        "Rank": 67,
+        "Brand": "Budweiser",
+        "Change": "-8%",
+        "Value": "12.0 $B"
+    },
+    {
+        "Rank": 68,
+        "Brand": "HP",
+        "Change": "-2%",
+        "Value": "11.6 $B"
+    },
+    {
+        "Rank": 69,
+        "Brand": "Philips",
+        "Change": "+2%",
+        "Value": "11.5 $B"
+    },
+    {
+        "Rank": 70,
+        "Brand": "Nintendo",
+        "Change": "+9%",
+        "Value": "11.5 $B"
+    },
+    {
+        "Rank": 71,
+        "Brand": "Nestlé",
+        "Change": "-1%",
+        "Value": "11.3 $B"
+    },
+    {
+        "Rank": 72,
+        "Brand": "Colgate",
+        "Change": "+3%",
+        "Value": "10.7 $B"
+    },
+    {
+        "Rank": 73,
+        "Brand": "Cartier",
+        "Change": "+7%",
+        "Value": "10.6 $B"
+    },
+    {
+        "Rank": 74,
+        "Brand": "Dior",
+        "Change": "+8%",
+        "Value": "10.4 $B"
+    },
+    {
+        "Rank": 75,
+        "Brand": "Gillette",
+        "Change": "-3%",
+        "Value": "10.1 $B"
+    },
+    {
+        "Rank": 76,
+        "Brand": "Santander",
+        "Change": "+5%",
+        "Value": "10.0 $B"
+    },
+    {
+        "Rank": 77,
+        "Brand": "LinkedIn",
+        "Change": "+11%",
+        "Value": "9.5 $B"
+    },
+    {
+        "Rank": 78,
+        "Brand": "Uber",
+        "Change": "NEW",
+        "Value": "9.2 $B"
+    },
+    {
+        "Rank": 79,
+        "Brand": "3M",
+        "Change": "-10%",
+        "Value": "8.9 $B"
+    },
+    {
+        "Rank": 80,
+        "Brand": "Corona",
+        "Change": "+8%",
+        "Value": "8.7 $B"
+    },
+    {
+        "Rank": 81,
+        "Brand": "Caterpillar",
+        "Change": "+8%",
+        "Value": "8.7 $B"
+    },
+    {
+        "Rank": 82,
+        "Brand": "Danone",
+        "Change": "-8%",
+        "Value": "8.4 $B"
+    },
+    {
+        "Rank": 83,
+        "Brand": "Prada",
+        "Change": "+14%",
+        "Value": "8.3 $B"
+    },
+    {
+        "Rank": 84,
+        "Brand": "FedEx",
+        "Change": "+3%",
+        "Value": "8.3 $B"
+    },
+    {
+        "Rank": 85,
+        "Brand": "Kellogg’s",
+        "Change": "-7%",
+        "Value": "8.2 $B"
+    },
+    {
+        "Rank": 86,
+        "Brand": "Kia",
+        "Change": "+15%",
+        "Value": "8.1 $B"
+    },
+    {
+        "Rank": 87,
+        "Brand": "Xiaomi",
+        "Change": "+10%",
+        "Value": "8.0 $B"
+    },
+    {
+        "Rank": 88,
+        "Brand": "DHL",
+        "Change": "-5%",
+        "Value": "7.3 $B"
+    },
+    {
+        "Rank": 89,
+        "Brand": "Tiffany & Co.",
+        "Change": "+4%",
+        "Value": "7.3 $B"
+    },
+    {
+        "Rank": 90,
+        "Brand": "Sephora",
+        "Change": "+13%",
+        "Value": "7.2 $B"
+    },
+    {
+        "Rank": 91,
+        "Brand": "Pandora",
+        "Change": "NEW",
+        "Value": "7.1 $B"
+    },
+    {
+        "Rank": 92,
+        "Brand": "Hewlett Packard Enterprise",
+        "Change": "+3%",
+        "Value": "6.8 $B"
+    },
+    {
+        "Rank": 93,
+        "Brand": "Huawei",
+        "Change": "+4%",
+        "Value": "6.8 $B"
+    },
+    {
+        "Rank": 94,
+        "Brand": "Nespresso",
+        "Change": "+9%",
+        "Value": "6.7 $B"
+    },
+    {
+        "Rank": 95,
+        "Brand": "KFC",
+        "Change": "+4%",
+        "Value": "6.7 $B"
+    },
+    {
+        "Rank": 96,
+        "Brand": "Range Rover",
+        "Change": "NEW",
+        "Value": "6.6 $B"
+    },
+    {
+        "Rank": 97,
+        "Brand": "LG Electronics",
+        "Change": "NEW",
+        "Value": "6.5 $B"
+    },
+    {
+        "Rank": 98,
+        "Brand": "Panasonic",
+        "Change": "-4%",
+        "Value": "6.4 $B"
+    },
+    {
+        "Rank": 99,
+        "Brand": "Jordan",
+        "Change": "NEW",
+        "Value": "6.4 $B"
+    },
+    {
+        "Rank": 100,
+        "Brand": "Heineken",
+        "Change": "+4%",
+        "Value": "6.3 $B"
+    }
+]
