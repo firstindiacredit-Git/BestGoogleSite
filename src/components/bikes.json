@@ -1,0 +1,942 @@
+{
+    "motorcycles": [
+        {
+            "model_year": 2012,
+            "motorcycle": "Kawasaki ZX-14R",
+            "time_seconds": 9.47,
+            "speed_mph": 152.83,
+            "speed_kmh": 245.96
+        },
+        {
+            "model_year": 2008,
+            "motorcycle": "Ducati Desmosedici RR",
+            "time_seconds": 9.49,
+            "speed_mph": 152.80,
+            "speed_kmh": 245.91
+        },
+        {
+            "model_year": 2015,
+            "motorcycle": "Kawasaki Ninja H2",
+            "time_seconds": 9.62,
+            "speed_mph": 152.01,
+            "speed_kmh": 244.64
+        },
+        {
+            "model_year": 2008,
+            "motorcycle": "Suzuki Hayabusa",
+            "time_seconds": 9.70,
+            "speed_mph": 148.48,
+            "speed_kmh": 238.96
+        },
+        {
+            "model_year": 2010,
+            "motorcycle": "Kawasaki ZX-10R",
+            "time_seconds": 9.72,
+            "speed_mph": 150.00,
+            "speed_kmh": 241.40
+        },
+        {
+            "model_year": 2008,
+            "motorcycle": "Ducati 1098R",
+            "time_seconds": 9.75,
+            "speed_mph": 148.60,
+            "speed_kmh": 239.15
+        },
+        {
+            "model_year": 2006,
+            "motorcycle": "Kawasaki ZX-10R",
+            "time_seconds": 9.76,
+            "speed_mph": 149.08,
+            "speed_kmh": 239.92
+        },
+        {
+            "model_year": 2013,
+            "motorcycle": "BMW HP4",
+            "time_seconds": 9.76,
+            "speed_mph": 152.40,
+            "speed_kmh": 245.26
+        },
+        {
+            "model_year": 2015,
+            "motorcycle": "Yamaha YZF-R1",
+            "time_seconds": 9.83,
+            "speed_mph": 149.91,
+            "speed_kmh": 241.26
+        },
+        {
+            "model_year": 2014,
+            "motorcycle": "Ducati 1199 Panigale",
+            "time_seconds": 9.84,
+            "speed_mph": 145.68,
+            "speed_kmh": 234.45
+        },
+        {
+            "model_year": 2002,
+            "motorcycle": "Kawasaki ZX-12R",
+            "time_seconds": 9.87,
+            "speed_mph": 146.29,
+            "speed_kmh": 235.43
+        },
+        {
+            "model_year": 2004,
+            "motorcycle": "Yamaha YZF-R1S",
+            "time_seconds": 9.90,
+            "speed_mph": 144.98,
+            "speed_kmh": 233.32
+        },
+        {
+            "model_year": 2011,
+            "motorcycle": "Ducati 1199 Panigale S",
+            "time_seconds": 9.91,
+            "speed_mph": 145.95,
+            "speed_kmh": 234.88
+        },
+        {
+            "model_year": 2011,
+            "motorcycle": "BMW S1000RR",
+            "time_seconds": 9.93,
+            "speed_mph": 149.80,
+            "speed_kmh": 241.08
+        },
+        {
+            "model_year": 2014,
+            "motorcycle": "BMW S1000R",
+            "time_seconds": 9.94,
+            "speed_mph": 141.74,
+            "speed_kmh": 228.11
+        },
+        {
+            "model_year": 2002,
+            "motorcycle": "Suzuki GSXR1000",
+            "time_seconds": 9.95,
+            "speed_mph": 143.69,
+            "speed_kmh": 231.25
+        },
+        {
+            "model_year": 1998,
+            "motorcycle": "Kawasaki ZX-9R",
+            "time_seconds": 9.99,
+            "speed_mph": 136.80,
+            "speed_kmh": 220.16
+        },
+        {
+            "model_year": 2008,
+            "motorcycle": "Suzuki B-King",
+            "time_seconds": 9.99,
+            "speed_mph": 138.42,
+            "speed_kmh": 222.77
+        },
+        {
+            "model_year": 2010,
+            "motorcycle": "Ducati 1198S",
+            "time_seconds": 10.0,
+            "speed_mph": 144.90,
+            "speed_kmh": 233.19
+        },
+        {
+            "model_year": 2012,
+            "motorcycle": "Honda CBR1000RR",
+            "time_seconds": 10.0,
+            "speed_mph": 141.70,
+            "speed_kmh": 228.04
+        },
+        {
+            "model_year": 2012,
+            "motorcycle": "Suzuki GSX-R1000",
+            "time_seconds": 10.03,
+            "speed_mph": 143.80,
+            "speed_kmh": 231.42
+        },
+        {
+            "model_year": 2010,
+            "motorcycle": "Yamaha YZF-R1",
+            "time_seconds": 10.05,
+            "speed_mph": 138.51,
+            "speed_kmh": 222.91
+        },
+        {
+            "model_year": 2010,
+            "motorcycle": "Yamaha VMAX",
+            "time_seconds": 10.11,
+            "speed_mph": 137.00,
+            "speed_kmh": 220.48
+        },
+        {
+            "model_year": 2016,
+            "motorcycle": "Yamaha YZF-R1",
+            "time_seconds": 10.11,
+            "speed_mph": 146.62,
+            "speed_kmh": 235.96
+        },
+        {
+            "model_year": 2002,
+            "motorcycle": "Kawasaki ZZ-R1200",
+            "time_seconds": 10.12,
+            "speed_mph": 136.90,
+            "speed_kmh": 220.32
+        },
+        {
+            "model_year": 2014,
+            "motorcycle": "EBR 1190RX",
+            "time_seconds": 10.12,
+            "speed_mph": 140.29,
+            "speed_kmh": 225.77
+        },
+        {
+            "model_year": 2012,
+            "motorcycle": "Kawasaki ZX-10R ABS",
+            "time_seconds": 10.14,
+            "speed_mph": 144.40,
+            "speed_kmh": 232.39
+        },
+        {
+            "model_year": 2010,
+            "motorcycle": "Aprilia RSV4 Factory",
+            "time_seconds": 10.16,
+            "speed_mph": 142.75,
+            "speed_kmh": 229.73
+        },
+        {
+            "model_year": 2015,
+            "motorcycle": "Ducati 1299 Panigale S",
+            "time_seconds": 10.18,
+            "speed_mph": 151.56,
+            "speed_kmh": 243.91
+        },
+        {
+            "model_year": 1997,
+            "motorcycle": "Honda CBR1100XX",
+            "time_seconds": 10.20,
+            "speed_mph": 136.10,
+            "speed_kmh": 219.03
+        },
+        {
+            "model_year": 2009,
+            "motorcycle": "BMW K1300S",
+            "time_seconds": 10.22,
+            "speed_mph": 135.04,
+            "speed_kmh": 217.33
+        },
+        {
+            "model_year": 2012,
+            "motorcycle": "Yamaha YZF-R1",
+            "time_seconds": 10.24,
+            "speed_mph": 140.00,
+            "speed_kmh": 225.31
+        },
+        {
+            "model_year": 2013,
+            "motorcycle": "KTM 1190 RC8 R",
+            "time_seconds": 10.26,
+            "speed_mph": 137.90,
+            "speed_kmh": 221.93
+        },
+        {
+            "model_year": 2006,
+            "motorcycle": "BMW K1200R",
+            "time_seconds": 10.30,
+            "speed_mph": 132.76,
+            "speed_kmh": 213.66
+        },
+        {
+            "model_year": 2008,
+            "motorcycle": "Ducati 1098",
+            "time_seconds": 10.31,
+            "speed_mph": 142.56,
+            "speed_kmh": 229.43
+        },
+        {
+            "model_year": 2014,
+            "motorcycle": "Ducati Monster 1200 S",
+            "time_seconds": 10.31,
+            "speed_mph": 130.90,
+            "speed_kmh": 210.66
+        },
+        {
+            "model_year": 2002,
+            "motorcycle": "Honda CBR954RR",
+            "time_seconds": 10.32,
+            "speed_mph": 138.12,
+            "speed_kmh": 222.28
+        },
+        {
+            "model_year": 2013,
+            "motorcycle": "Kawasaki ZX-10R ABS",
+            "time_seconds": 10.32,
+            "speed_mph": 140.87,
+            "speed_kmh": 226.71
+        },
+        {
+            "model_year": 2017,
+            "motorcycle": "KTM 1290 Super Duke R",
+            "time_seconds": 10.32,
+            "speed_mph": 137.56,
+            "speed_kmh": 221.38
+        },
+        {
+            "model_year": 2010,
+            "motorcycle": "Honda VFR1200F",
+            "time_seconds": 10.33,
+            "speed_mph": 134.85,
+            "speed_kmh": 217.02
+        },
+        {
+            "model_year": 2003,
+            "motorcycle": "Ducati 999",
+            "time_seconds": 10.36,
+            "speed_mph": 132.89,
+            "speed_kmh": 213.87
+        },
+        {
+            "model_year": 1997,
+            "motorcycle": "Yamaha YZF1000R",
+            "time_seconds": 10.38,
+            "speed_mph": 132.72,
+            "speed_kmh": 213.59
+        },
+        {
+            "model_year": 2013,
+            "motorcycle": "MV Agusta F4RR",
+            "time_seconds": 10.40,
+            "speed_mph": 140.98,
+            "speed_kmh": 226.89
+        },
+        {
+            "model_year": 2013,
+            "motorcycle": "Suzuki GSX-R750",
+            "time_seconds": 10.41,
+            "speed_mph": 135.89,
+            "speed_kmh": 218.69
+        },
+        {
+            "model_year": 1997,
+            "motorcycle": "Kawasaki ZX-11",
+            "time_seconds": 10.42,
+            "speed_mph": 133.02,
+            "speed_kmh": 214.07
+        },
+        {
+            "model_year": 2005,
+            "motorcycle": "Honda RC51",
+            "time_seconds": 10.44,
+            "speed_mph": 133.50,
+            "speed_kmh": 214.85
+        },
+        {
+            "model_year": 2003,
+            "motorcycle": "Aprilia Tuono RSV-R",
+            "time_seconds": 10.49,
+            "speed_mph": 132.15,
+            "speed_kmh": 212.67
+        },
+        {
+            "model_year": 1994,
+            "motorcycle": "Suzuki RF900",
+            "time_seconds": 10.50,
+            "speed_mph": 133.10,
+            "speed_kmh": 214.20
+        },
+        {
+            "model_year": 2010,
+            "motorcycle": "MV Agusta Brutale 1090RR",
+            "time_seconds": 10.50,
+            "speed_mph": 130.98,
+            "speed_kmh": 210.79
+        },
+        {
+            "model_year": 2008,
+            "motorcycle": "Buell 1125R",
+            "time_seconds": 10.51,
+            "speed_mph": 134.32,
+            "speed_kmh": 216.17
+        },
+        {
+            "model_year": 1991,
+            "motorcycle": "Suzuki GSX-R1100M",
+            "time_seconds": 10.55,
+            "speed_mph": 133.70,
+            "speed_kmh": 215.17
+        },
+        {
+            "model_year": 2014,
+            "motorcycle": "Triumph Speed Triple R",
+            "time_seconds": 10.55,
+            "speed_mph": 129.32,
+            "speed_kmh": 208.12
+        },
+        {
+            "model_year": 2011,
+            "motorcycle": "Kawasaki 1400GTR/Concours 14",
+            "time_seconds": 10.56,
+            "speed_mph": 127.68,
+            "speed_kmh": 205.48
+        },
+        {
+            "model_year": 2006,
+            "motorcycle": "Suzuki GSX-R1000",
+            "time_seconds": 10.58,
+            "speed_mph": 144.25,
+            "speed_kmh": 232.15
+        },
+        {
+            "model_year": 2003,
+            "motorcycle": "Suzuki SV1000s",
+            "time_seconds": 10.59,
+            "speed_mph": 130.81,
+            "speed_kmh": 210.52
+        },
+        {
+            "model_year": 1994,
+            "motorcycle": "Honda CBR900RR",
+            "time_seconds": 10.60,
+            "speed_mph": 131.10,
+            "speed_kmh": 210.98
+        },
+        {
+            "model_year": 2001,
+            "motorcycle": "Yamaha FZ1",
+            "time_seconds": 10.62,
+            "speed_mph": 130.02,
+            "speed_kmh": 209.25
+        },
+        {
+            "model_year": 2010,
+            "motorcycle": "Ducati Multistrada 1200 S",
+            "time_seconds": 10.62,
+            "speed_mph": 127.62,
+            "speed_kmh": 205.38
+        },
+        {
+            "model_year": 2011,
+            "motorcycle": "Ducati Diavel",
+            "time_seconds": 10.63,
+            "speed_mph": 128.00,
+            "speed_kmh": 206.00
+        },
+        {
+            "model_year": 2013,
+            "motorcycle": "Yamaha MT-09 (FZ-09)",
+            "time_seconds": 10.66,
+            "speed_mph": 125.24,
+            "speed_kmh": 201.55
+        },
+        {
+            "model_year": 2003,
+            "motorcycle": "Honda CBR600RR",
+            "time_seconds": 10.68,
+            "speed_mph": 130.07,
+            "speed_kmh": 209.33
+        },
+        {
+            "model_year": 1994,
+            "motorcycle": "Kawasaki Ninja ZX-9R",
+            "time_seconds": 10.70,
+            "speed_mph": 129.70,
+            "speed_kmh": 208.73
+        },
+        {
+            "model_year": 2003,
+            "motorcycle": "Kawasaki ZX-6R",
+            "time_seconds": 10.73,
+            "speed_mph": 127.95,
+            "speed_kmh": 205.92
+        },
+        {
+            "model_year": 1997,
+            "motorcycle": "Ducati 916",
+            "time_seconds": 10.77,
+            "speed_mph": 126.30,
+            "speed_kmh": 203.26
+        },
+        {
+            "model_year": 1991,
+            "motorcycle": "Kawasaki ZZR-1100",
+            "time_seconds": 10.78,
+            "speed_mph": 132.00,
+            "speed_kmh": 212.00
+        },
+        {
+            "model_year": 2006,
+            "motorcycle": "Kawasaki Ninja ZX-6R",
+            "time_seconds": 10.78,
+            "speed_mph": 127.12,
+            "speed_kmh": 204.58
+        },
+        {
+            "model_year": 1998,
+            "motorcycle": "Suzuki TL1000R",
+            "time_seconds": 10.79,
+            "speed_mph": 129.54,
+            "speed_kmh": 208.47
+        },
+        {
+            "model_year": 2003,
+            "motorcycle": "Suzuki GSX-R600",
+            "time_seconds": 10.79,
+            "speed_mph": 127.89,
+            "speed_kmh": 205.82
+        },
+        {
+            "model_year": 2006,
+            "motorcycle": "Triumph Speed Triple",
+            "time_seconds": 10.82,
+            "speed_mph": 125.01,
+            "speed_kmh": 201.18
+        },
+        {
+            "model_year": 2003,
+            "motorcycle": "Yamaha YZF-R6",
+            "time_seconds": 10.84,
+            "speed_mph": 127.81,
+            "speed_kmh": 205.69
+        },
+        {
+            "model_year": 2002,
+            "motorcycle": "MV Agusta F4 Senna",
+            "time_seconds": 10.85,
+            "speed_mph": 131.85,
+            "speed_kmh": 212.19
+        },
+        {
+            "model_year": 1997,
+            "motorcycle": "Suzuki TL1000S",
+            "time_seconds": 10.85,
+            "speed_mph": 127.70,
+            "speed_kmh": 205.51
+        },
+        {
+            "model_year": 1991,
+            "motorcycle": "Yamaha FZR1000RU",
+            "time_seconds": 10.87,
+            "speed_mph": 130.00,
+            "speed_kmh": 210.00
+        },
+        {
+            "model_year": 2001,
+            "motorcycle": "Ducati Monster S4",
+            "time_seconds": 10.89,
+            "speed_mph": 119.42,
+            "speed_kmh": 192.19
+        },
+        {
+            "model_year": 1984,
+            "motorcycle": "Suzuki GS1150ES",
+            "time_seconds": 10.94,
+            "speed_mph": 125.00,
+            "speed_kmh": 201.00
+        },
+        {
+            "model_year": 2012,
+            "motorcycle": "Ducati Streetfighter 848",
+            "time_seconds": 10.94,
+            "speed_mph": 125.58,
+            "speed_kmh": 202.10
+        },
+        {
+            "model_year": 1986,
+            "motorcycle": "Honda VFR750F",
+            "time_seconds": 10.95,
+            "speed_mph": 113.95,
+            "speed_kmh": 183.38
+        },
+        {
+            "model_year": 2017,
+            "motorcycle": "Kawasaki Z900",
+            "time_seconds": 10.95,
+            "speed_mph": 125.06,
+            "speed_kmh": 201.25
+        },
+        {
+            "model_year": 2006,
+            "motorcycle": "Triumph Daytona 675",
+            "time_seconds": 10.96,
+            "speed_mph": 127.32,
+            "speed_kmh": 204.90
+        },
+        {
+            "model_year": 2015,
+            "motorcycle": "Yamaha MT-09 (FZ-09)",
+            "time_seconds": 10.97,
+            "speed_mph": 122.58,
+            "speed_kmh": 197.27
+        },
+        {
+            "model_year": 2013,
+            "motorcycle": "Yamaha FJR1300A",
+            "time_seconds": 10.98,
+            "speed_mph": 122.29,
+            "speed_kmh": 196.81
+        },
+        {
+            "model_year": 1986,
+            "motorcycle": "Suzuki GSX-R1100",
+            "time_seconds": 11.04,
+            "speed_mph": 123.13,
+            "speed_kmh": 198.16
+        },
+        {
+            "model_year": 2001,
+            "motorcycle": "Aprilia RST1000 Futura",
+            "time_seconds": 11.04,
+            "speed_mph": 121.12,
+            "speed_kmh": 194.92
+        },
+        {
+            "model_year": 2020,
+            "motorcycle": "Triumph Street Triple RS",
+            "time_seconds": 11.05,
+            "speed_mph": 128.80,
+            "speed_kmh": 207.28
+        },
+        {
+            "model_year": 1983,
+            "motorcycle": "Honda V65 Magna",
+            "time_seconds": 11.07,
+            "speed_mph": 123.62,
+            "speed_kmh": 198.95
+        },
+        {
+            "model_year": 2016,
+            "motorcycle": "Yamaha XSR900",
+            "time_seconds": 11.07,
+            "speed_mph": 122.33,
+            "speed_kmh": 196.97
+        },
+        {
+            "model_year": 1997,
+            "motorcycle": "Yamaha VMAX",
+            "time_seconds": 11.09,
+            "speed_mph": 121.49,
+            "speed_kmh": 195.52
+        },
+        {
+            "model_year": 2003,
+            "motorcycle": "Honda CBR600F4i",
+            "time_seconds": 11.11,
+            "speed_mph": 123.74,
+            "speed_kmh": 199.14
+        },
+        {
+            "model_year": 1983,
+            "motorcycle": "Honda CB1100F",
+            "time_seconds": 11.13,
+            "speed_mph": 120.48,
+            "speed_kmh": 193.89
+        },
+        {
+            "model_year": 2003,
+            "motorcycle": "Ducati 749S",
+            "time_seconds": 11.15,
+            "speed_mph": 123.04,
+            "speed_kmh": 198.01
+        },
+        {
+            "model_year": 1996,
+            "motorcycle": "Kawasaki Ninja ZX-7R",
+            "time_seconds": 11.17,
+            "speed_mph": 122.27,
+            "speed_kmh": 196.77
+        },
+        {
+            "model_year": 2008,
+            "motorcycle": "Triumph Street Triple",
+            "time_seconds": 11.17,
+            "speed_mph": 120.06,
+            "speed_kmh": 193.22
+        },
+        {
+            "model_year": 1981,
+            "motorcycle": "Kawasaki GPZ1100",
+            "time_seconds": 11.18,
+            "speed_mph": 119.10,
+            "speed_kmh": 191.67
+        },
+        {
+            "model_year": 1984,
+            "motorcycle": "Kawasaki GPZ900R",
+            "time_seconds": 11.18,
+            "speed_mph": 121.65,
+            "speed_kmh": 195.78
+        },
+        {
+            "model_year": 1993,
+            "motorcycle": "Honda CBR1000F",
+            "time_seconds": 11.19,
+            "speed_mph": 121.24,
+            "speed_kmh": 195.12
+        },
+        {
+            "model_year": 2012,
+            "motorcycle": "BMW K1600 GTL",
+            "time_seconds": 11.20,
+            "speed_mph": 118.70,
+            "speed_kmh": 191.00
+        },
+        {
+            "model_year": 2014,
+            "motorcycle": "BMW R1200RT",
+            "time_seconds": 11.22,
+            "speed_mph": 119.24,
+            "speed_kmh": 191.90
+        },
+        {
+            "model_year": 2016,
+            "motorcycle": "BMW R nineT",
+            "time_seconds": 11.30,
+            "speed_mph": 118.02,
+            "speed_kmh": 189.93
+        },
+        {
+            "model_year": 1981,
+            "motorcycle": "Suzuki Katana",
+            "time_seconds": 11.32,
+            "speed_mph": 120.00,
+            "speed_kmh": 193.12
+        },
+        {
+            "model_year": 2004,
+            "motorcycle": "Yamaha FZ6",
+            "time_seconds": 11.32,
+            "speed_mph": 118.01,
+            "speed_kmh": 189.92
+        },
+        {
+            "model_year": 2012,
+            "motorcycle": "Triumph Tiger Explorer 1200",
+            "time_seconds": 11.32,
+            "speed_mph": 118.07,
+            "speed_kmh": 190.02
+        },
+        {
+            "model_year": 1979,
+            "motorcycle": "Honda CBX",
+            "time_seconds": 11.36,
+            "speed_mph": 118.11,
+            "speed_kmh": 190.08
+        },
+        {
+            "model_year": 2001,
+            "motorcycle": "Harley-Davidson VRSC V-Rod",
+            "time_seconds": 11.38,
+            "speed_mph": 119.07,
+            "speed_kmh": 191.62
+        },
+        {
+            "model_year": 1980,
+            "motorcycle": "Suzuki GS1100E",
+            "time_seconds": 11.39,
+            "speed_mph": 118.42,
+            "speed_kmh": 190.58
+        },
+        {
+            "model_year": 2011,
+            "motorcycle": "BMW F800R",
+            "time_seconds": 11.39,
+            "speed_mph": 116.83,
+            "speed_kmh": 188.02
+        },
+        {
+            "model_year": 1984,
+            "motorcycle": "Kawasaki GPZ750 Turbo",
+            "time_seconds": 11.40,
+            "speed_mph": 118.42,
+            "speed_kmh": 190.58
+        },
+        {
+            "model_year": 1994,
+            "motorcycle": "Triumph Daytona 900",
+            "time_seconds": 11.40,
+            "speed_mph": 119.10,
+            "speed_kmh": 191.67
+        },
+        {
+            "model_year": 2004,
+            "motorcycle": "Triumph Rocket III",
+            "time_seconds": 11.44,
+            "speed_mph": 118.33,
+            "speed_kmh": 190.43
+        },
+        {
+            "model_year": 2010,
+            "motorcycle": "Triumph Rocket III Roadster",
+            "time_seconds": 11.48,
+            "speed_mph": 115.00,
+            "speed_kmh": 185.00
+        },
+        {
+            "model_year": 2008,
+            "motorcycle": "Moto Guzzi Griso 1200 8V",
+            "time_seconds": 11.51,
+            "speed_mph": 116.00,
+            "speed_kmh": 186.68
+        },
+        {
+            "model_year": 1990,
+            "motorcycle": "Kawasaki ZZ-R600",
+            "time_seconds": 11.55,
+            "speed_mph": 119.00,
+            "speed_kmh": 191.51
+        },
+        {
+            "model_year": 2003,
+            "motorcycle": "Ducati Multistrada",
+            "time_seconds": 11.60,
+            "speed_mph": 113.77,
+            "speed_kmh": 183.10
+        },
+        {
+            "model_year": 2006,
+            "motorcycle": "Suzuki Boulevard M109R",
+            "time_seconds": 11.62,
+            "speed_mph": 114.91,
+            "speed_kmh": 184.93
+        },
+        {
+            "model_year": 2003,
+            "motorcycle": "Suzuki SV650s",
+            "time_seconds": 11.63,
+            "speed_mph": 114.41,
+            "speed_kmh": 184.13
+        },
+        {
+            "model_year": 2009,
+            "motorcycle": "Ducati Sport1000",
+            "time_seconds": 11.64,
+            "speed_mph": 136.50,
+            "speed_kmh": 219.68
+        },
+        {
+            "model_year": 2002,
+            "motorcycle": "Triumph Speed Four",
+            "time_seconds": 11.65,
+            "speed_mph": 114.90,
+            "speed_kmh": 184.91
+        },
+        {
+            "model_year": 1985,
+            "motorcycle": "Yamaha XJ750X Maxim-X",
+            "time_seconds": 11.66,
+            "speed_mph": 116.10,
+            "speed_kmh": 186.84
+        },
+        {
+            "model_year": 1991,
+            "motorcycle": "Triumph Trophy 1200 (120ps)",
+            "time_seconds": 11.70,
+            "speed_mph": 120.00,
+            "speed_kmh": 190.00
+        },
+        {
+            "model_year": 1983,
+            "motorcycle": "Honda CX650 Turbo",
+            "time_seconds": 11.75,
+            "speed_mph": 112.21,
+            "speed_kmh": 180.58
+        },
+        {
+            "model_year": 1978,
+            "motorcycle": "Yamaha XS1100",
+            "time_seconds": 11.78,
+            "speed_mph": 114.21,
+            "speed_kmh": 183.80
+        },
+        {
+            "model_year": 1999,
+            "motorcycle": "BMW R1100S",
+            "time_seconds": 11.78,
+            "speed_mph": 114.73,
+            "speed_kmh": 184.64
+        },
+        {
+            "model_year": 1978,
+            "motorcycle": "Suzuki GS1000",
+            "time_seconds": 11.83,
+            "speed_mph": 107.88,
+            "speed_kmh": 173.62
+        },
+        {
+            "model_year": 2005,
+            "motorcycle": "Ducati Multistrada 1000DS",
+            "time_seconds": 11.88,
+            "speed_mph": 113.10,
+            "speed_kmh": 182.02
+        },
+        {
+            "model_year": 2011,
+            "motorcycle": "Yamaha XT1200Z Super Ténéré",
+            "time_seconds": 11.89,
+            "speed_mph": 109.57,
+            "speed_kmh": 176.34
+        },
+        {
+            "model_year": 1971,
+            "motorcycle": "Norton Dunstall 810",
+            "time_seconds": 11.90,
+            "speed_mph": 107.88,
+            "speed_kmh": 173.62
+        },
+        {
+            "model_year": 2007,
+            "motorcycle": "Victory 8-Ball",
+            "time_seconds": 11.91,
+            "speed_mph": 113.26,
+            "speed_kmh": 182.27
+        },
+        {
+            "model_year": 1979,
+            "motorcycle": "Kawasaki KZ1300",
+            "time_seconds": 11.93,
+            "speed_mph": 114.79,
+            "speed_kmh": 184.74
+        },
+        {
+            "model_year": 1980,
+            "motorcycle": "Honda CBX",
+            "time_seconds": 11.93,
+            "speed_mph": 114.06,
+            "speed_kmh": 183.56
+        },
+        {
+            "model_year": 1982,
+            "motorcycle": "Kawasaki GPZ750",
+            "time_seconds": 11.93,
+            "speed_mph": 109.62,
+            "speed_kmh": 176.42
+        },
+        {
+            "model_year": 2015,
+            "motorcycle": "Indian Scout",
+            "time_seconds": 11.93,
+            "speed_mph": 110.05,
+            "speed_kmh": 177.11
+        },
+        {
+            "model_year": 1987,
+            "motorcycle": "Honda CBR600F",
+            "time_seconds": 11.94,
+            "speed_mph": 111.42,
+            "speed_kmh": 179.31
+        },
+        {
+            "model_year": 1972,
+            "motorcycle": "Kawasaki H2 Mach IV",
+            "time_seconds": 11.95,
+            "speed_mph": 115.38,
+            "speed_kmh": 185.69
+        },
+        {
+            "model_year": 1993,
+            "motorcycle": "Kawasaki Zephyr / ZR1100",
+            "time_seconds": 11.95,
+            "speed_mph": 114.50,
+            "speed_kmh": 184.27
+        },
+        {
+            "model_year": 1993,
+            "motorcycle": "Triumph Trophy 1200 (110ps)",
+            "time_seconds": 12.00,
+            "speed_mph": 117.00,
+            "speed_kmh": 188.00
+        }
+    ]
+}
