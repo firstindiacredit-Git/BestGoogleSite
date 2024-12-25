@@ -3,6 +3,7 @@ import { Card, Button, Row, Col, Typography, Spin, Alert, Radio, Input, List, Sp
 import { AppstoreOutlined, UnorderedListOutlined, SearchOutlined, PlayCircleOutlined } from '@ant-design/icons';
 import sportsmen from './sportsmen.json';
 import brands from './brand.json';
+import bikes from './bikes.json';
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -135,6 +136,7 @@ const Top100Page = () => {
   const year = new Date().getFullYear();
   // Updated APIs with real free API endpoints
   const APIs = {
+    motorcycles: 'local',
     cars: `https://api.api-ninjas.com/v1/cars?limit=100&year=${year}`,
     stocks: 'https://finnhub.io/api/v1/stock/symbol?exchange=US&token=ctj9ln9r01qgfbt0ega0ctj9ln9r01qgfbt0egag',
     crypto: 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100',
@@ -181,6 +183,17 @@ const Top100Page = () => {
           name: `${brand.Brand}`,
           description: `Rank: ${brand.Rank}, Change: ${brand.Change}, Value: ${brand.Value}`,
           value: `$${brand.Value}M`
+        }));
+        setItems(processedData);
+        setError(null);
+        setLoading(false);
+        return;
+      }
+      
+      if (category === 'motorcycles') {
+        const processedData = bikes.motorcycles.map(bike => ({
+          name: bike.motorcycle,
+          description: `Year: ${bike.model_year}, Time: ${bike.time_seconds}s, Mph Speed: ${bike.speed_mph}mph, Kmh Speed: ${bike.speed_kmh}km/h`
         }));
         setItems(processedData);
         setError(null);
@@ -334,59 +347,42 @@ const Top100Page = () => {
     <Row gutter={[16, 16]}>
       {filteredItems.map((item) => (
         <Col xs={24} sm={12} lg={8} key={item.originalIndex}>
-          {category === 'movies' ? (
-            <Card
-              hoverable
-              cover={
-                <img
-                  alt={item.name}
-                  src={item.image}
-                  style={{ height: '300px', objectFit: 'cover' }}
-                />
-              }
-              actions={[
-                <PlayCircleOutlined key="watch" />,
-                <Rate disabled defaultValue={item.rating / 2} count={5} />
-              ]}
-            >
-              <Card.Meta
-                title={`${item.originalIndex + 1}. ${item.name}`}
-                description={item.description}
-              />
-            </Card>
-          ) : (
-            <Card
-              title={
-                category === 'brands' ? (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span>{item.originalIndex + 1}. {item.name}</span>
-                    <span>{item.value}</span>
-                  </div>
-                ) : category === 'sportsmen' ? (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span>{item.originalIndex + 1}. {item.name?.split('$')[0] || item.name}</span>
-                    <span>{item.name?.includes('$') ? `$${item.name.split('$')[1]}` : ''}</span>
-                  </div>
-                ) : category === 'billionaires' ? (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span>{item.originalIndex + 1}. {item.name?.split(',')[0] || item.name}</span>
-                    <span>{item.description?.includes('$') ? item.description.split('$')[1]?.split(',')[0] : ''}</span>
-                  </div>
-                ) : category === 'crypto' ? (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span>{item.originalIndex + 1}. {item.name}</span>
-                    <span>{item.description?.includes('Price: $') ? `$${item.description.split('Price: $')[1]?.split(',')[0]}` : ''}</span>
-                  </div>
-                ) : (
-                  `${item.originalIndex + 1}. ${item.name}`
-                )
-              }
-              bordered={true}
-              hoverable
-            >
-              {item.description}
-            </Card>
-          )}
+          <Card
+            title={
+              category === 'motorcycles' ? (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>{item.originalIndex + 1}. {item.name}</span>
+                  <span>{item.description.split('Kmh Speed: ')[1]?.split('km/h')[0]} km/h</span>
+                </div>
+              ) : category === 'brands' ? (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>{item.originalIndex + 1}. {item.name}</span>
+                  <span>{item.value}</span>
+                </div>
+              ) : category === 'sportsmen' ? (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>{item.originalIndex + 1}. {item.name?.split('$')[0] || item.name}</span>
+                  <span>{item.name?.includes('$') ? `$${item.name.split('$')[1]}` : ''}</span>
+                </div>
+              ) : category === 'billionaires' ? (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>{item.originalIndex + 1}. {item.name?.split(',')[0] || item.name}</span>
+                  <span>{item.description?.includes('$') ? item.description.split('$')[1]?.split(',')[0] : ''}</span>
+                </div>
+              ) : category === 'crypto' ? (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>{item.originalIndex + 1}. {item.name}</span>
+                  <span>{item.description?.includes('Price: $') ? `$${item.description.split('Price: $')[1]?.split(',')[0]}` : ''}</span>
+                </div>
+              ) : (
+                `${item.originalIndex + 1}. ${item.name}`
+              )
+            }
+            bordered={true}
+            hoverable
+          >
+            {item.description}
+          </Card>
         </Col>
       ))}
     </Row>
@@ -398,53 +394,39 @@ const Top100Page = () => {
       dataSource={filteredItems}
       renderItem={(item) => (
         <List.Item>
-          {category === 'movies' ? (
-            <List.Item.Meta
-              avatar={
-                <img 
-                  src={item.image} 
-                  alt={item.name}
-                  style={{ width: '100px', height: '150px', objectFit: 'cover' }}
-                />
-              }
-              title={
+          <List.Item.Meta
+            title={
+              category === 'motorcycles' ? (
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span>{item.originalIndex + 1}. {item.name}</span>
-                  <Rate disabled defaultValue={item.rating / 2} count={5} />
+                  <span>{item.description.split('Kmh Speed: ')[1]?.split('km/h')[0]} km/h</span>
                 </div>
-              }
-              description={item.description}
-            />
-          ) : (
-            <List.Item.Meta
-              title={
-                category === 'brands' ? (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span>{item.originalIndex + 1}. {item.name}</span>
-                    <span>{item.value}</span>
-                  </div>
-                ) : category === 'sportsmen' ? (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span>{item.originalIndex + 1}. {item.name?.split('$')[0] || item.name}</span>
-                    <span>{item.name?.includes('$') ? `$${item.name.split('$')[1]}` : ''}</span>
-                  </div>
-                ) : category === 'billionaires' ? (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span>{item.originalIndex + 1}. {item.name?.split(',')[0] || item.name}</span>
-                    <span>{item.description?.includes('$') ? item.description.split('$')[1]?.split(',')[0] : ''}</span>
-                  </div>
-                ) : category === 'crypto' ? (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span>{item.originalIndex + 1}. {item.name}</span>
-                    <span>{item.description?.includes('Price: $') ? `$${item.description.split('Price: $')[1]?.split(',')[0]}` : ''}</span>
-                  </div>
-                ) : (
-                  `${item.originalIndex + 1}. ${item.name}`
-                )
-              }
-              description={item.description}
-            />
-          )}
+              ) : category === 'brands' ? (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>{item.originalIndex + 1}. {item.name}</span>
+                  <span>{item.value}</span>
+                </div>
+              ) : category === 'sportsmen' ? (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>{item.originalIndex + 1}. {item.name?.split('$')[0] || item.name}</span>
+                  <span>{item.name?.includes('$') ? `$${item.name.split('$')[1]}` : ''}</span>
+                </div>
+              ) : category === 'billionaires' ? (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>{item.originalIndex + 1}. {item.name?.split(',')[0] || item.name}</span>
+                  <span>{item.description?.includes('$') ? item.description.split('$')[1]?.split(',')[0] : ''}</span>
+                </div>
+              ) : category === 'crypto' ? (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>{item.originalIndex + 1}. {item.name}</span>
+                  <span>{item.description?.includes('Price: $') ? `$${item.description.split('Price: $')[1]?.split(',')[0]}` : ''}</span>
+                </div>
+              ) : (
+                `${item.originalIndex + 1}. ${item.name}`
+              )
+            }
+            description={item.description}
+          />
         </List.Item>
       )}
     />
@@ -460,6 +442,7 @@ const Top100Page = () => {
         {/* Category Selection */}
         <div style={{ textAlign: 'center' }}>
           <Radio.Group value={category} onChange={(e) => setCategory(e.target.value)} buttonStyle="solid">
+            <Radio.Button value="motorcycles">Motorcycles</Radio.Button>
             <Radio.Button value="cars">Cars</Radio.Button>
             <Radio.Button value="crypto">Crypto</Radio.Button>
             <Radio.Button value="stocks">Stocks</Radio.Button>
