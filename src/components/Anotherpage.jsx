@@ -9,6 +9,7 @@ import Calculator from "./Calculator.jsx";
 import Notepad from "./Notepad.jsx";
 import Clock from "./Clock.jsx";
 import Category from "./Category.jsx";
+import Todolist from "./Todolist.jsx";
 import ShowLinks from "./ShowLinks.jsx";
 import Calendar from "./Calendar.jsx";
 import ImageUploader from "./ImageUploader.jsx";
@@ -33,7 +34,8 @@ const Anotherpage = ({ backgroundImage }) => {
     notepad: <Notepad />,
     imageUploader: <ImageUploader />,
     calendar: <Calendar />,
-    showlinks: <ShowLinks/>,
+    todolist: <Todolist />,
+    showlinks: <ShowLinks />,
     category: <Category />,
   };
 
