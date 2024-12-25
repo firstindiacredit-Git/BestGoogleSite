@@ -63,7 +63,7 @@ function ImageUploader() {
   }, [showOptions]);
 
   return (
-    <div className="container rounded-md  -mt-6 w-full mx-auto py-10">
+    <div className="container rounded-md w-full">
       <input
         type="file"
         accept="image/*"

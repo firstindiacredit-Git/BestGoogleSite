@@ -6,7 +6,6 @@ import { Spin, Button as AntButton } from "antd";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import Calculator from "./Calculator.jsx";
-import Notepad from "./Notepad.jsx";
 import Clock from "./Clock.jsx";
 import Calendar from "./Calendar.jsx";
 import Category from "./Category.jsx";
@@ -225,11 +224,7 @@ const Anotherpage = ({ backgroundImage }) => {
 
   return (
     <div style={{ position: "relative" }}>
-      
-      <h1 className="text-center bg-blue-500 text-white mt-2">
-        Popular Bookmarks
-      </h1>
-      <div className="flex items-center gap-2 w-fit mx-auto bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
+      <div className="flex items-center gap-2 w-fit mx-auto my-4 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
         <button
           onClick={() => {isGrid(true); console.log("workingGrid")}}
           className={`p-2 rounded ${
@@ -276,7 +271,7 @@ const Anotherpage = ({ backgroundImage }) => {
         </button>
       </div>
       <div
-        className={`bg-white dark:bg-gray-900`}
+        className={`bg-white dark:bg-gray-800 flex justify-center rounded-xl`}
         style={{
           backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",
           backgroundSize: "cover",
@@ -284,7 +279,7 @@ const Anotherpage = ({ backgroundImage }) => {
           backgroundAttachment: "fixed",
         }}
       >
-        <div className="p-4">
+        <div className="p-4 w-fit">
           {loading ? (
             <div className="flex justify-center items-center min-h-screen">
               <Spin size="large" />
@@ -328,37 +323,33 @@ const Anotherpage = ({ backgroundImage }) => {
                               <div
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
-                                className=" bg-white dark:bg-gray-700 mb-4 border-collapse border-1 border rounded-lg"
+                                className=" bg-white dark:bg-gray-700 mb-4 border-collapse dark:border-gray-700 dark:drop-shadow-md border-1 border rounded-lg"
                               >
                                 {grid ? (
                                   <>
-                                    <motion.div className="w-full text-left py-2 px-4 border-b rounded-lg bg-gray-100 dark:bg-gray-700 dark:text-white font-semibold flex items-center">
+                                    <motion.div className="w-full text-left py-2 px-4  rounded-lg bg-gray-100 dark:bg-gray-700 dark:text-white font-semibold flex items-center">
                                       <div
                                         {...provided.dragHandleProps}
                                         className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
                                       >
                                         ⋮⋮
                                       </div>
-                                      <button
-                                        onClick={() => toggleDropdown(item.id)}
-                                        className="flex-grow text-left focus:outline-none"
-                                      >
                                         {item.name}
-                                      </button>
                                     </motion.div>
                                     <motion.div
-                                      className=" bg-gray-50 dark:bg-gray-900 rounded-b-lg p-4"
+                                      className=" bg-gray-50 dark:bg-gray-900 rounded-b-lg"
                                       initial={{ height: 0, opacity: 0 }}
                                       animate={{ height: "auto", opacity: 1 }}
                                       exit={{ height: 0, opacity: 0 }}
-                                      transition={{ duration: 0.3 }}
-                                    >
-                                      {componentMap[item.id]}
+                                      transition={{ duration: 0.1 }}
+                                    > 
+                                       
+                                      <div className=" rounded-b-lg overflow-clip">{componentMap[item.id]}</div>
                                     </motion.div>
                                   </>
                                 ) : (
                                   <>
-                                    <motion.div className="w-full text-left py-2 px-4 border-b rounded-lg bg-gray-100 dark:bg-gray-700 dark:text-white font-semibold flex items-center">
+                                    <motion.div className="w-full text-left py-2 px-4  dark:border-gray-500 rounded-lg bg-gray-100 dark:bg-gray-700 dark:text-white font-semibold flex items-center">
                                       <div
                                         {...provided.dragHandleProps}
                                         className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
@@ -380,7 +371,7 @@ const Anotherpage = ({ backgroundImage }) => {
                                         exit={{ height: 0, opacity: 0 }}
                                         transition={{ duration: 0.3 }}
                                       >
-                                        {componentMap[item.id]}
+                                         <div className=" rounded-b-lg overflow-clip">{componentMap[item.id]}</div>
                                       </motion.div>
                                     )}
                                   </>

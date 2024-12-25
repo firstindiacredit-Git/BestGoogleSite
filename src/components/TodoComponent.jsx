@@ -27,7 +27,6 @@ const TodoComponent = () => {
     "#FF0000",
     "#FF4500",
     "#FF8C00",
-    "#FFD700",
     "#32CD32",
     "#00FF00",
     "#00CED1",
@@ -45,13 +44,10 @@ const TodoComponent = () => {
     "#DDA0DD",
     "#FFC0CB",
     "#DC143C",
-    "#FF4500",
     "#FFA500",
     "#FFD700",
-    "#32CD32",
     "#20B2AA",
     "#4169E1",
-    "#8A2BE2",
     "#9370DB",
     "#FF69B4",
   ];
@@ -164,7 +160,7 @@ const TodoComponent = () => {
 
   return (
     <div
-      className="container mt-8 mx-auto -ml-10 rounded-md"
+      className="container mx-auto rounded-md"
       style={{ backgroundColor: containerColor, color: textColor }}
     >
       <div className="bg-transparent w-full rounded-lg shadow-xl p-6">
@@ -198,8 +194,8 @@ const TodoComponent = () => {
             {showColorPicker && (
               <div
                 ref={colorPickerRef}
-                className="absolute z-10 grid grid-cols-7 gap-2 p-3 bg-white border rounded-md shadow-md"
-                style={{ top: "-20px", left: "300px" }}
+                className="absolute grid w-[10vw] grid-cols-7 gap-2 p-[0.8vw] bg-white border rounded-md shadow-md"
+                style={{ top: "-20px", left: "300px",zIndex:"999" }}
               >
                 {predefinedColors.map((color) => (
                   <button
@@ -211,7 +207,7 @@ const TodoComponent = () => {
                     style={{
                       backgroundColor: color,
                     }}
-                    className="h-5 w-5 border cursor-pointer focus:outline-none"
+                    className="h-[1vw] w-[1vw] border cursor-pointer focus:outline-none"
                     aria-label={`Select color ${color}`}
                   ></button>
                 ))}
@@ -219,7 +215,7 @@ const TodoComponent = () => {
                   <input
                     id="customColorPicker"
                     type="color"
-                    className="w-full h-6 p-0 border-gray-300 rounded-md cursor-pointer focus:outline-none"
+                    className="w-full h-[2vw] border-gray-300 rounded-md cursor-pointer focus:outline-none"
                     onChange={(e) => {
                       setContainerColor(e.target.value);
                       setShowColorPicker(false);
