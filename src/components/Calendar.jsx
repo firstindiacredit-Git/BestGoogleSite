@@ -88,7 +88,7 @@ const FullCalendar = () => {
   const numberOfRows = Math.ceil((days.length + firstDayOfWeek) / 7);
 
   return (
-    <div className="border p-2 h-[20rem] rounded-lg">
+    <div className="p-2 h-[20rem]">
       {/* Year and Month Selectors */}
       <div className="flex justify-center gap-2 text-[14px] items-center mb-3">
         <button
