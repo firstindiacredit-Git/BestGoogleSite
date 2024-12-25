@@ -10,6 +10,7 @@ import PasswordGenerator from "../components/PasswordGenerater";
 import News from "../components/News";
 import Tool from "../components/Tool";
 import Top100 from "../components/Top100";
+import Sports from "../components/Sports";
 import { FaHome } from "react-icons/fa";
 import { MdAddHomeWork } from "react-icons/md";
 import "./style.css";
@@ -139,7 +140,7 @@ function SearchPage() {
                 <FaHome className="text-green-700 h-10 w-7 text-center justify-center m-auto" />
               </button>
             </Link>
-            <Link to="/ShowLinks">
+            <Link to="/TodoComponent">
               <button className="h-10 w-10 rounded-2xl">
                 <MdAddHomeWork className="text-green-700 h-10 w-7 text-center justify-center m-auto" />
               </button>
@@ -244,6 +245,8 @@ function SearchPage() {
             <Top100 />
           ) : activeComponent === "Tool" ? (
             <Tool />
+          ) : activeComponent === "Sports" ? (
+            <Sports />
           ) : (
             <Anotherpage
               backgroundImage={backgroundImage}

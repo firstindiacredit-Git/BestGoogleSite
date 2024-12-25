@@ -7,151 +7,88 @@ import {
   CloudRain,
   CloudSnow,
   Sun,
-  Droplets,
-  Wind,
-  Gauge,
-  Eye,
-  Sunrise,
-  Sunset,
 } from "lucide-react";
-import { format } from "date-fns";
 
 const API_KEY = "78a1522c5ec67352674263eaaa54bffa";
 const CITY = "Delhi";
 
-const WeatherIcon = ({ condition, className = "w-12 h-12" }) => {
+const WeatherIcon = ({ condition }) => {
+  const iconStyles = {
+    clear: "text-yellow-400 drop-shadow-md hover:drop-shadow-400/50",
+    rain: "text-blue-400  shadow-blue-400/50",
+    drizzle: "text-teal-300 drop- shadow-teal-300/50",
+    snow: "text-gray-200  shadow-gray-200/50",
+    thunderstorm: "text-purple-500  shadow-purple-500/50",
+    default: "text-gray-400 ", // Added shadow to default
+  };
+
   const getIcon = () => {
     switch (condition.toLowerCase()) {
       case "clear":
-        return <Sun className={className} />;
+        return <Sun className={`w-10 h-10 ${iconStyles.clear}`} />;
       case "rain":
-        return <CloudRain className={className} />;
+        return <CloudRain className={`w-10 h-10 ${iconStyles.rain}`} />;
       case "drizzle":
-        return <CloudDrizzle className={className} />;
+        return <CloudDrizzle className={`w-10 h-10 ${iconStyles.drizzle}`} />;
       case "snow":
-        return <CloudSnow className={className} />;
+        return <CloudSnow className={`w-10 h-10 ${iconStyles.snow}`} />;
       case "thunderstorm":
-        return <CloudLightning className={className} />;
+        return (
+          <CloudLightning className={`w-10 h-10 ${iconStyles.thunderstorm}`} />
+        );
       default:
-        return <Cloud className={className} />;
+        return <Cloud className={`w-10 h-10 ${iconStyles.default}`} />;
     }
   };
 
-  return getIcon();
-};
-
-const WeatherDetail = ({ label, value, icon }) => (
-  <div className="flex items-center border gap-2 bg-white/10 rounded-lg">
-    <div className="text-gray-400">{icon}</div>
-    <div>
-      <p className="text-sm ">{label}</p>
-      <p className="font-medium">{value}</p>
-    </div>
-  </div>
-);
-
-const WeatherCard = ({ weatherData, time, date }) => {
-  const sunrise = new Date(weatherData.sys.sunrise * 1000);
-  const sunset = new Date(weatherData.sys.sunset * 1000);
-
   return (
-    <div className="bg-gradient-to-br from-yellow-500 to-purple-600 text-white border  rounded-xl p-2 w-full">
-      <div className="text-center">
-        <div className="flex justify-between">
-          <p className="text-xl mt-2 font-bold">{weatherData.main.temp}°C</p>
-          <div className="flex justify-center">
-            <WeatherIcon
-              condition={weatherData.weather[0].main}
-              className="w-10 h-14 -mt-2"
-            />
-          </div>
-        </div>
-        <p className="text-lg -mt-3 font-semibold capitalize">{CITY}</p>
-        <p className="text-[14px] capitalize">
-          {weatherData.weather[0].description}
-        </p>
-        <p className="text-[12px] opacity-75 mb-4">
-          Feels like {weatherData.main.feels_like}°C
-        </p>
-      </div>
-
-      <div className="text-center -mt-2">
-        <p className="uppercase text-[14px] font-bold">{time}</p>
-        <p className="text-[12px] opacity-75">{date}</p>
-      </div>
-      <div className="grid text-[12px] grid-cols-2 gap-1">
-        <WeatherDetail
-          label="Humidity"
-          value={`${weatherData.main.humidity}%`}
-          icon={<Droplets className="w-4 h-4" />}
-        />
-        <WeatherDetail
-          icon={<Wind className="w-4 h-4" />}
-          label="Wind"
-          value={`${weatherData.wind.speed} m/s`}
-        />
-        <WeatherDetail
-          label="Pressure"
-          value={`${weatherData.main.pressure} hPa`}
-          icon={<Gauge className="w-4 h-4" />}
-                  />
-        <WeatherDetail
-          label="Visibility"
-          value={`${weatherData.visibility / 1000} km`}
-          icon={<Eye className="w-4 h-4" />}
-        />
-      </div>
-      <div className="mt-2 text-[12px] flex justify-between">
-        <div className="flex items-center gap-2">
-          <Sunrise className="w-4 h-4" />
-          <span>Sunrise: {format(sunrise, "HH:mm")}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Sunset className="w-4 h-4" />
-          <span>Sunset: {format(sunset, "HH:mm")}</span>
-        </div>
-      </div>
+    <div className="transform  transition-transform hover:scale-105 duration-300">
+      {getIcon()}
     </div>
   );
 };
 
+const WeatherCard = ({ day, temperature, condition }) => (
+  <div className="flex flex-col items-center dark:text-white p-1">
+    <p className="font-bold text-sm">{day}</p>
+    <WeatherIcon condition={condition} />
+    <p className="text-xs mt-1">{temperature}°F</p>
+  </div>
+);
+
 const Weather = () => {
-  const [weatherData, setWeatherData] = useState(null);
-  const [time, setTime] = useState("");
-  const [date, setDate] = useState("");
+  const [currentWeather, setCurrentWeather] = useState(null);
+  const [forecast, setForecast] = useState([]);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const updateTimeDate = () => {
-      const now = new Date();
-      setTime(
-        now.toLocaleTimeString("en-IN", {
-          hour: "2-digit",
-          minute: "2-digit",
-                 })
-      );
-      setDate(
-        now.toLocaleDateString("en-IN", {
-          weekday: "long",
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-        })
-      );
-    };
-    updateTimeDate();
-    const intervalId = setInterval(updateTimeDate, 1000);
-    return () => clearInterval(intervalId);
-  }, []);
+  const getDayName = (dateString) => {
+    const date = new Date(dateString);
+    const options = { weekday: "long" };
+    return new Intl.DateTimeFormat("en-US", options).format(date);
+  };
+
+  const getDaysFromForecast = () => {
+    const today = new Date();
+    return ["Now", ...forecast.slice(1).map((item) => getDayName(item.dt_txt))];
+  };
 
   useEffect(() => {
     const fetchWeather = async () => {
       try {
-        const { data } = await axios.get(
+        const currentResponse = await axios.get(
           `https://api.openweathermap.org/data/2.5/weather`,
-          { params: { q: CITY, appid: API_KEY, units: "metric" } }
+          { params: { q: CITY, appid: API_KEY, units: "imperial" } }
         );
-        setWeatherData(data);
+        const forecastResponse = await axios.get(
+          `https://api.openweathermap.org/data/2.5/forecast`,
+          { params: { q: CITY, appid: API_KEY, units: "imperial" } }
+        );
+
+        setCurrentWeather(currentResponse.data);
+        const dailyForecast = forecastResponse.data.list.filter(
+          (_, index) => index % 8 === 0
+        );
+        setForecast(dailyForecast);
         setError(null);
       } catch {
         setError("Could not fetch weather data.");
@@ -160,14 +97,32 @@ const Weather = () => {
     fetchWeather();
   }, []);
 
+  if (error) {
+    return <p className="text-red-400">{error}</p>;
+  }
+
+  if (!currentWeather || forecast.length === 0) {
+    return <p className="text-white">Fetching weather data...</p>;
+  }
+
+  const days = getDaysFromForecast();
+
   return (
-    <div className="items-center justify-center mt-1">
-      {error && <p className="text-red-400">{error}</p>}
-      {weatherData ? (
-        <WeatherCard weatherData={weatherData} time={time} date={date} />
-      ) : (
-        !error && <p className="text-white">Fetching weather data...</p>
-      )}
+    <div className="dark:bg-transparent border dark:text-white rounded-xl p-1 max-w-sm mx-auto">
+      <div className="text-center mb-4">
+        <h2 className="text-lg font-bold">Weather</h2>
+        <p className="text-sm">{CITY.toUpperCase()}</p>
+      </div>
+      <div className="flex justify-between space-x-1">
+        {forecast.slice(0, 4).map((item, index) => (
+          <WeatherCard
+            key={index}
+            day={days[index]}
+            temperature={Math.round(item.main.temp)}
+            condition={item.weather[0].main}
+          />
+        ))}
+      </div>
     </div>
   );
 };

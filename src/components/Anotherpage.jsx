@@ -8,6 +8,9 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import Calculator from "./Calculator.jsx";
 import Notepad from "./Notepad.jsx";
 import Clock from "./Clock.jsx";
+import Category from "./Category.jsx";
+import Todolist from "./Todolist.jsx";
+import ShowLinks from "./ShowLinks.jsx";
 import Calendar from "./Calendar.jsx";
 import ImageUploader from "./ImageUploader.jsx";
 import Weather from "./Weather.jsx";
@@ -31,6 +34,9 @@ const Anotherpage = ({ backgroundImage }) => {
     notepad: <Notepad />,
     imageUploader: <ImageUploader />,
     calendar: <Calendar />,
+    todolist: <Todolist />,
+    showlinks: <ShowLinks />,
+    category: <Category />,
   };
 
   // Load user and layout
@@ -291,7 +297,7 @@ const Anotherpage = ({ backgroundImage }) => {
                                 </motion.div>
                                 {item.isOpen && (
                                   <motion.div
-                                    className=" bg-gray-50 dark:bg-gray-900 rounded-b-lg p-4"
+                                    className=" bg-gray-50 dark:bg-gray-900 rounded-b-lg p-1 "
                                     initial={{ height: 0, opacity: 0 }}
                                     animate={{ height: "auto", opacity: 1 }}
                                     exit={{ height: 0, opacity: 0 }}
