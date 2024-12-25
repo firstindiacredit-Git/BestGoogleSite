@@ -42,7 +42,6 @@ const NotePage = () => {
     "#FF0000",
     "#FF4500",
     "#FF8C00",
-    "#FFD700",
     "#32CD32",
     "#00FF00",
     "#00CED1",
@@ -62,16 +61,15 @@ const NotePage = () => {
     "#FFC0CB",
     // Row 4
     "#DC143C",
-    "#FF4500",
-    "#FFA500",
+    "#DAA520",  
+    "#FFA500", 
     "#FFD700",
-    "#32CD32",
     "#20B2AA",
     "#4169E1",
-    "#8A2BE2",
     "#9370DB",
     "#FF69B4",
-  ];
+];
+
 
   useEffect(() => {
     const savedNotes = localStorage.getItem("notes");
@@ -195,15 +193,12 @@ const NotePage = () => {
   const lineColor = getLineColor();
 
   return (
-    <div className="mx-auto px-4 py-8">
-      <div className="mx-auto">
-        <div className="rounded-lg overflow-hidden" style={{ backgroundColor }}>
+    <div >
+      <div className="">
+        <div className="overflow-hidden" style={{ backgroundColor }}>
           <div className="p-6" style={{ backgroundColor }}>
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold" style={{ color: textColor }}>
-                NotePage
-              </h2>
-              <div className="flex gap-2">
+              <div className=" w-full flex justify-between">
                 <button
                   className="p-2 rounded-lg bg-opacity-20 bg-gray-500 hover:bg-opacity-30 transition duration-200"
                   onClick={toggleLineNumbers}
@@ -306,6 +301,7 @@ const NotePage = () => {
                   fontWeight: isBold ? "bold" : "normal",
                   textDecoration: isUnderline ? "underline" : "none",
                   backgroundImage: `linear-gradient(to bottom,transparent 30px,${lineColor} 31px,transparent 49px)`,
+                  placeholderColor:textColor
                 }}
                 placeholder="Start typing your notes here..."
               />

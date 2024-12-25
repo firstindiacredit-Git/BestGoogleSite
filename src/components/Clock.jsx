@@ -2,9 +2,6 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import moment from "moment-timezone";
 import { IoCloseOutline } from "react-icons/io5";
-// import { ToastContainer, toast } from "react-toastify";
-// import "./ToastifyNotification.css";
-// import "react-toastify/dist/ReactToastify.css";
 
 const ClockApp = () => {
   const [clockStyle, setClockStyle] = useState("digital");
@@ -86,9 +83,9 @@ const ClockApp = () => {
       .format(clockStyle === "digital" ? "HH:mm:ss" : "h:mm A");
 
   return (
-    <div className="flex flex-col h-[10rem] mt-5 items-center border rounded-lg p-4 justify-center">
+    <div className="flex flex-col min-h-[10rem] items-center border  p-4 justify-center">
       <StyledWrapper>
-        <div className="flex text-[14px] gap-3 mt-6">
+        <div className="flex text-[14px] gap-3">
           <select
             onChange={(e) => handleClockStyleChange(e.target.value)}
             value={clockStyle}

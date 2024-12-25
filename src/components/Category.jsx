@@ -75,7 +75,7 @@ function Category() {
         name: values.title,
         link: values.url,
         createdAt: new Date().toISOString(),
-        logoUrl: `https://logo.clearbit.com/${new URL(values.url).hostname}`,
+        logoUrl: `https://www.google.com/s2/favicons?domain=${new URL(values.url).hostname}`,
       };
 
       if (editingBookmark) {
@@ -128,10 +128,10 @@ function Category() {
   }
 
   return (
-    <div className="p-4">
+    <div className="dark:text-white" >
       <Card
         title={
-          <div className="flex justify-between items-center">
+          <div className="flex dark:bg-gray-800 dark:text-white justify-between items-center">
             <Title level={4} className="m-0">
               My Bookmarks
             </Title>
@@ -143,7 +143,7 @@ function Category() {
             </Button>
           </div>
         }
-        className="shadow-md"
+        className="shadow-md dark:bg-gray-800 dark:text-white"
       >
         <List
           loading={loading}
@@ -176,13 +176,11 @@ function Category() {
                 </Tooltip>,
               ]}
             >
-              {console.log(bookmark.logoUrl)}
               <List.Item.Meta
                 avatar={
-                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={bookmark.logoUrl}
-                    alt=""
+                    alt="Links"
                     className="w-4 h-4"
                     onError={(e) => {
                       e.target.src = "https://www.google.com/favicon.ico";
