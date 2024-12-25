@@ -41,7 +41,7 @@ export default function Dashboard() {
         const categoriesSnapshot = await getDocs(categoriesCollection);
         setTotalCategories(categoriesSnapshot.size);
 
-        const linksCollection = collection(db, "links");
+        const linksCollection = collection(db, "adminlinks");
         const linksSnapshot = await getDocs(linksCollection);
         setTotalLinks(linksSnapshot.size);
       } catch (error) {

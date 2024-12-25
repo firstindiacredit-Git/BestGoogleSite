@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { MdOutlineDeleteOutline } from "react-icons/md";
 import { FaRegEdit } from "react-icons/fa";
-import { IoGrid, IoList } from "react-icons/io5";
 import {
   onAuthStateChanged,
   setPersistence,
@@ -18,38 +17,36 @@ import {
 } from "firebase/firestore";
 
 function AddLinks() {
-  const [link, setLink] = useState("");
-  const [category, setCategory] = useState("");
-  const [name, setName] = useState("");
   const [newCategory, setNewCategory] = useState("");
   const [newLink, setNewLink] = useState({ name: "", link: "", category: "" });
   const [newCategories, setNewCategories] = useState([]);
   const [links, setLinks] = useState([]);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [dropdownStates, setDropdownStates] = useState({}); 
   const [searchTerm, setSearchTerm] = useState("");
   const [isGridView, setIsGridView] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [isBookmarkModalOpen, setBookmarkModalOpen] = useState(false);
   const [isCategoryModalOpen, setCategoryModalOpen] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState({});
-  const [selectedColor, setSelectedColor] = useState("#3B82F6"); // Default blue color
+  const [selectedColor, setSelectedColor] = useState("#3B82F6");
+  const [editBookmarkData, setEditBookmarkData] = useState(null);
+  const [isEditModalOpen, setEditModalOpen] = useState(false);
 
   const ITEMS_PER_PAGE = 5
 
   // Filter categories and their links based on search term
   const filteredCategories = newCategories
-    .map(category => ({
+    .map((category) => ({
       ...category,
-      links: links.filter(link => 
-        link.category === category.newCategory &&
-        (link.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-         link.link.toLowerCase().includes(searchTerm.toLowerCase()) ||
-         category.newCategory.toLowerCase().includes(searchTerm.toLowerCase()))
-      )
+      links: links.filter((link) =>
+        link.category === category.id &&
+        (link.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          link.link?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          category.newCategory?.toLowerCase().includes(searchTerm.toLowerCase()))
+      ) || [], // Ensure links is always an array
     }))
-    .filter(category => category.links.length > 0);
+    .filter((category) => category.newCategory); // Only show categories with names
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredCategories.length / ITEMS_PER_PAGE);
@@ -57,6 +54,17 @@ function AddLinks() {
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
+
+  const getFaviconUrl = (link) => {
+    try {
+      if (!link) return ''; // Return empty string if link is undefined
+      const url = new URL(link);
+      return `https://www.google.com/s2/favicons?domain=${url.hostname}`;
+    } catch (error) {
+      console.error('Invalid URL:', link);
+      return ''; // Return empty string for invalid URLs
+    }
+  };
 
   useEffect(() => {
     const setAuthPersistence = async () => {
@@ -75,6 +83,13 @@ function AddLinks() {
     };
     setAuthPersistence();
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      fetchLinks();
+      fetchCategories();
+    }
+  }, [user]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -108,6 +123,7 @@ function AddLinks() {
         ...doc.data(),
       }));
       setNewCategories(fetchedCategories);
+      console.log('Fetched Categories:', fetchedCategories); // Debug log
     } catch (error) {
       console.error("Error fetching categories: ", error);
     }
@@ -120,17 +136,20 @@ function AddLinks() {
     }
 
     try {
-      const categoryRef = collection(db, "categories");
-      await addDoc(categoryRef, {
+      await addDoc(collection(db, "category"), {
         newCategory: newCategory.trim(),
         color: selectedColor,
-        links: [],
         createdAt: new Date(),
       });
+      
       setNewCategory("");
-      setSelectedColor("#3B82F6"); // Reset to default color
+      setSelectedColor("#3B82F6");
+      setCategoryModalOpen(false);
+      // Fetch updated data
+      fetchCategories();
     } catch (error) {
       console.error("Error adding category:", error);
+      alert("Failed to add category. Please try again.");
     }
   };
 
@@ -149,6 +168,7 @@ function AddLinks() {
         createdBy: user.uid,
       });
       setNewLink({ name: "", link: "", category: "" });
+      // Fetch updated data
       fetchLinks();
       alert("Bookmark added successfully!");
     } catch (error) {
@@ -164,6 +184,7 @@ function AddLinks() {
 
     try {
       await deleteDoc(doc(db, "links", id));
+      // Fetch updated data
       fetchLinks();
     } catch (error) {
       console.error("Error deleting bookmark: ", error);
@@ -171,23 +192,32 @@ function AddLinks() {
   };
 
   const handleEdit = async (id, currentName, currentLink, currentCategory) => {
-    const newName = prompt("Enter new name:", currentName);
-    const newLink = prompt("Enter new link:", currentLink);
-    const newCategory = prompt("Enter new category:", currentCategory);
+    setEditBookmarkData({
+      id,
+      name: currentName,
+      link: currentLink,
+      category: currentCategory
+    });
+    setEditModalOpen(true);
+  };
 
-    if (newName && newLink && newCategory) {
-      try {
-        await updateDoc(doc(db, "links", id), {
-          name: newName,
-          link: newLink,
-          category: newCategory,
-        });
-        fetchLinks();
-      } catch (error) {
-        console.error("Error updating bookmark: ", error);
-      }
-    } else {
-      alert("All fields are required for updating.");
+  const handleUpdateBookmark = async () => {
+    if (!editBookmarkData) return;
+
+    try {
+      await updateDoc(doc(db, "links", editBookmarkData.id), {
+        name: editBookmarkData.name,
+        link: editBookmarkData.link,
+        category: editBookmarkData.category,
+        updatedAt: new Date(),
+      });
+      setEditModalOpen(false);
+      setEditBookmarkData(null);
+      // Fetch updated data
+      fetchLinks();
+    } catch (error) {
+      console.error("Error updating bookmark:", error);
+      alert("Failed to update bookmark. Please try again.");
     }
   };
 
@@ -199,6 +229,7 @@ function AddLinks() {
 
     try {
       await deleteDoc(doc(db, "category", id));
+      // Fetch updated data
       fetchCategories();
     } catch (error) {
       console.error("Error deleting category: ", error);
@@ -459,61 +490,66 @@ function AddLinks() {
           
           {isGridView ? (
             // Grid View
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-auto items-start">
               {paginatedCategories.map((category) => (
                 <div
                   key={category.id}
-                  className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
+                  className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden h-fit"
                 >
-                  <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                  <div className="flex flex-col h-full">
                     <div className="p-4 flex justify-between font-medium text-gray-800 dark:text-white bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700">
                       <div>{category.newCategory}</div>
-                      <div>{category.links.length}</div>
+                      <div>{category.links?.length || 0}</div>
                     </div>
-                    <div className="max-h-[50rem] overflow-y-auto">
-                    {category.links.map((link) => (
-                      <div
-                        key={link.id}
-                        className="p-4 hover:bg-gray-50  dark:hover:bg-gray-700/50 transition-colors"
-                      >
-                        <div className="flex items-center space-x-3 mb-2">
-                          <img
-                            src={`https://www.google.com/s2/favicons?domain=${new URL(link.link).hostname}`}
-                            alt=""
-                              className="w-5 h-5 flex-shrink-0"
-                            />
-                            <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                              {link.name}
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <a
-                              href={link.link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 truncate max-w-[70%]"
-                            >
-                              {link.link}
-                            </a>
-                            <div className="flex items-center space-x-2">
-                              <button
-                                onClick={() => handleEdit(link.id, link.name, link.link, link.category)}
-                                className="p-1 text-gray-400 hover:text-blue-500 transition-colors"
+                    {(category.links || []).length > 0 && (
+                      <div className="max-h-[20rem] overflow-y-auto">
+                        {(category.links || []).map((link) => (
+                          <div
+                            key={link.id}
+                            className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                          >
+                            <div className="flex items-center space-x-3 mb-2">
+                              <img
+                                src={getFaviconUrl(link.link)}
+                                alt=""
+                                className="w-5 h-5 flex-shrink-0"
+                                onError={(e) => {
+                                  e.target.src = 'https://www.google.com/s2/favicons?domain=default'; // Fallback favicon
+                                }}
+                              />
+                              <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                {link.name}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <a
+                                href={link.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 truncate max-w-[70%]"
                               >
-                                <FaRegEdit size={16} />
-                              </button>
-                              <button
-                                onClick={() => handleDelete(link.id)}
-                                className="p-1 text-gray-400 hover:text-red-500 transition-colors"
-                              >
-                                <MdOutlineDeleteOutline size={20} />
-                              </button>
+                                {link.link}
+                              </a>
+                              <div className="flex items-center space-x-2">
+                                <button
+                                  onClick={() => handleEdit(link.id, link.name, link.link, link.category)}
+                                  className="p-1 text-gray-400 hover:text-blue-500 transition-colors"
+                                >
+                                  <FaRegEdit size={16} />
+                                </button>
+                                <button
+                                  onClick={() => handleDelete(link.id)}
+                                  className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                                >
+                                  <MdOutlineDeleteOutline size={20} />
+                                </button>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
                       </div>
-                    </div>
+                    )}
+                  </div>
                   
                 </div>
               ))}
@@ -528,15 +564,17 @@ function AddLinks() {
                 >
                   {/* Category Header */}
                   <button
-                    onClick={() => toggleCategory(category.id)}
-                    className="w-full flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
+                    onClick={() => (category.links || []).length > 0 && toggleCategory(category.id)}
+                    className={`w-full flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 ${
+                      (category.links || []).length > 0 ? 'hover:bg-gray-100 dark:hover:bg-gray-700/50 cursor-pointer' : 'cursor-default'
+                    } transition-colors`}
                   >
                     <div className="flex items-center space-x-2">
                       <span className="text-base font-medium text-gray-900 dark:text-white">
                         {category.newCategory}
                       </span>
                       <span className="text-sm text-gray-500 dark:text-gray-400">
-                        ({category.links.length})
+                        ({category.links?.length || 0})
                       </span>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -549,32 +587,37 @@ function AddLinks() {
                       >
                         <MdOutlineDeleteOutline size={20} />
                       </button>
-                      <svg
-                        className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
-                          expandedCategories[category.id] ? 'transform rotate-180' : ''
-                        }`}
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
+                      {(category.links || []).length > 0 && (
+                        <svg
+                          className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
+                            expandedCategories[category.id] ? 'transform rotate-180' : ''
+                          }`}
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      )}
                     </div>
                   </button>
 
                   {/* Links List */}
-                  {expandedCategories[category.id] && (
+                  {expandedCategories[category.id] && (category.links || []).length > 0 && (
                     <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                      {category.links.map((link) => (
+                      {(category.links || []).map((link) => (
                         <div
                           key={link.id}
                           className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                         >
                           <div className="flex items-center space-x-3 min-w-0 flex-1">
                             <img
-                              src={`https://www.google.com/s2/favicons?domain=${new URL(link.link).hostname}`}
+                              src={getFaviconUrl(link.link)}
                               alt=""
                               className="w-5 h-5 flex-shrink-0"
+                              onError={(e) => {
+                                e.target.src = 'https://www.google.com/s2/favicons?domain=default'; // Fallback favicon
+                              }}
                             />
                             <div className="min-w-0 flex-1">
                               <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
@@ -655,6 +698,86 @@ function AddLinks() {
           )}
         </div>
       </div>
+      {isEditModalOpen && editBookmarkData && (
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full p-6 shadow-xl">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Edit Bookmark</h2>
+            <button
+              onClick={() => {
+                setEditModalOpen(false);
+                setEditBookmarkData(null);
+              }}
+              className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+            >
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Name
+              </label>
+              <input
+                type="text"
+                value={editBookmarkData.name}
+                onChange={(e) => setEditBookmarkData({ ...editBookmarkData, name: e.target.value })}
+                className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter bookmark name"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Link
+              </label>
+              <input
+                type="text"
+                value={editBookmarkData.link}
+                onChange={(e) => setEditBookmarkData({ ...editBookmarkData, link: e.target.value })}
+                className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter bookmark URL"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Category
+              </label>
+              <select
+                value={editBookmarkData.category}
+                onChange={(e) => setEditBookmarkData({ ...editBookmarkData, category: e.target.value })}
+                className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Select a category</option>
+                {newCategories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.newCategory}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                onClick={() => {
+                  setEditModalOpen(false);
+                  setEditBookmarkData(null);
+                }}
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdateBookmark}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
+              >
+                Update Bookmark
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
     </div>
   );
 }

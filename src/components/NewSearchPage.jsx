@@ -6,7 +6,7 @@ import Calculator from "./Calculator";
 import Notepad from "./Notepad";
 import Calendar from "./Calendar";
 import WidgetBookmark from "./WidgetBookmark";
-import AnimatedTooltipPreview from "./AnimatedTooltipPreview";
+import Shortcut from "./ShortCuts"
 import Header from "../components/Header";
 import { FaHome } from "react-icons/fa";
 
@@ -112,7 +112,7 @@ const Dashboard = () => {
             data-resultsUrl="https://www.google.com/search?client=ms-google-coop&qcx=80904074a37154829"
             data-defaultToImageSearch="true"
           />
-          <AnimatedTooltipPreview />
+          <Shortcut/>
           <div>
             <Link to="/">
               <button className=" h-7 w-7 -mt-20 rounded-2xl  ">

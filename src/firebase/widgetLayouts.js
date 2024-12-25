@@ -8,16 +8,17 @@ const defaultWidgets = {
     { id: "weather", name: "Weather", isOpen: false, column: 0, position: 1 },
     { id: "calculator", name: "Calculator", isOpen: false, column: 0, position: 2 },
     { id: "notepad", name: "Notepad", isOpen: false, column: 1, position: 0 },
-    { id: "popularBookmarks", name: "Popular Bookmarks", isOpen: false, column: 1, position: 1 },
     { id: "imageUploader", name: "Image Uploader", isOpen: false, column: 2, position: 0 },
-    { id: "calendar", name: "Calendar", isOpen: false, column: 2, position: 1 }
+    { id: "calendar", name: "Calendar", isOpen: false, column: 2, position: 1 },
+    { id: "Bookmarks", name: "Bookmarks", isOpen: false, column: 2, position: 2 }
   ],
   popularBookmarks: [
     { id: "clock", name: "Clock", isOpen: false, column: 0, position: 0 },
     { id: "weather", name: "Weather", isOpen: false, column: 1, position: 0 },
     { id: "calculator", name: "Calculator", isOpen: false, column: 2, position: 0 },
     { id: "notepad", name: "Notepad", isOpen: false, column: 0, position: 1 },
-    { id: "calendar", name: "Calendar", isOpen: false, column: 1, position: 1 }
+    { id: "calendar", name: "Calendar", isOpen: false, column: 1, position: 1 },
+    { id: "Bookmarks", name: "Bookmarks", isOpen: false, column: 2, position: 2 }
   ]
 };
 
@@ -28,7 +29,8 @@ export const allWidgets = {
   calculator: { id: "calculator", name: "Calculator" },
   notepad: { id: "notepad", name: "Notepad" },
   imageUploader: { id: "imageUploader", name: "Image Uploader" },
-  calendar: { id: "calendar", name: "Calendar" }
+  calendar: { id: "calendar", name: "Calendar" },
+  Bookmarks: { id: "Bookmarks", name: "Bookmarks" }
 };
 
 // Get available widgets that aren't already in use
