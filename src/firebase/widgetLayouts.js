@@ -8,19 +8,10 @@ const defaultWidgets = {
     { id: "weather", name: "Weather", isOpen: false, column: 0, position: 1 },
     { id: "calculator", name: "Calculator", isOpen: false, column: 0, position: 2 },
     { id: "notepad", name: "Notepad", isOpen: false, column: 1, position: 0 },
-    { id: "popularBookmarks", name: "Popular Bookmarks", isOpen: false, column: 1, position: 1 },
     { id: "imageUploader", name: "Image Uploader", isOpen: false, column: 2, position: 0 },
     { id: "calendar", name: "Calendar", isOpen: false, column: 2, position: 1 },
-    { id: "todolist", name: "Todolist", isOpen: false, column: 2, position: 1 },
+    { id: "Bookmarks", name: "Bookmarks", isOpen: false, column: 2, position: 2 }, 
   ],
-  popularBookmarks: [
-    { id: "clock", name: "Clock", isOpen: false, column: 0, position: 0 },
-    { id: "weather", name: "Weather", isOpen: false, column: 1, position: 0 },
-    { id: "calculator", name: "Calculator", isOpen: false, column: 2, position: 0 },
-    { id: "notepad", name: "Notepad", isOpen: false, column: 0, position: 1 },
-    { id: "calendar", name: "Calendar", isOpen: false, column: 1, position: 1 },
-    { id: "todolist", name: "Todolist", isOpen: false, column: 1, position: 1 },
-  ]
 };
 
 // List of all available widgets
@@ -31,7 +22,8 @@ export const allWidgets = {
   notepad: { id: "notepad", name: "Notepad" },
   imageUploader: { id: "imageUploader", name: "Image Uploader" },
   calendar: { id: "calendar", name: "Calendar" },
-  todolist: { id: "todolist", name: "Todolist" },
+  Bookmarks: { id: "Bookmarks", name: "Bookmarks" },
+  Todo: { id: "Todo", name: "Todo List" }
 };
 
 // Get available widgets that aren't already in use

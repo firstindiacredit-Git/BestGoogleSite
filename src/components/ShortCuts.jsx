@@ -10,6 +10,7 @@ import {
   getDoc,
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
+import { Modal, Input, Form, message } from "antd";
 
 function BookmarkPage() {
   const [userBookmarks, setUserBookmarks] = useState([]);
@@ -24,16 +25,15 @@ function BookmarkPage() {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-    const [menuVisible, setMenuVisible] = useState(null);
+  const [menuVisible, setMenuVisible] = useState(null);
 
-    const toggleMenu = (id) => {
-      setMenuVisible(menuVisible === id ? null : id);
-    };
+  const toggleMenu = (id) => {
+    setMenuVisible(menuVisible === id ? null : id);
+  };
 
-    const handleKeyDown = (e) => {
-      if (e.key === "e") e.preventDefault();
-      if (e.key === "Enter") handleAddTask();
-    };
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") handleAddBookmark(e);
+  };
 
   // Fetch user and global bookmarks on mount
   useEffect(() => {
@@ -51,7 +51,7 @@ function BookmarkPage() {
 
         // Fetch user bookmarks
         const userQuerySnapshot = await getDocs(
-          collection(db, "users", user.uid, "addbookmarks")
+          collection(db, "users", user.uid, "shortcut")
         );
         const userBookmarksList = userQuerySnapshot.docs.map((doc) => ({
           id: doc.id,
@@ -60,7 +60,7 @@ function BookmarkPage() {
         }));
         setUserBookmarks(userBookmarksList);
 
-        // Fetch global bookmarks
+        // Fetch bookmarks set By admin
         const globalQuerySnapshot = await getDocs(collection(db, "bookmarks"));
         const globalBookmarksList = globalQuerySnapshot.docs.map((doc) => ({
           id: doc.id,
@@ -93,10 +93,10 @@ function BookmarkPage() {
 
   const getFavicon = (url) => {
     try {
-      const domain = new URL(url).hostname;
-      return `https://logo.clearbit.com/${domain}`;
+      // const domain = new URL(url).hostname;
+      return `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=64`? `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=64` : "https://www.freeiconspng.com/uploads/web-icon-black-png-planet-web-world-icon-17.png";
     } catch (error) {
-      return "https://via.placeholder.com/64?text=?"; // Fallback favicon
+      return "https://www.freeiconspng.com/uploads/web-icon-black-png-planet-web-world-icon-17.png"; // Fallback favicon
     }
   };
 
@@ -120,7 +120,7 @@ function BookmarkPage() {
       }
 
       const docRef = await addDoc(
-        collection(db, "users", user.uid, "addbookmarks"),
+        collection(db, "users", user.uid, "shortcut"),
         {
           name,
           link,
@@ -168,7 +168,7 @@ function BookmarkPage() {
         db,
         "users",
         user.uid,
-        "addbookmarks",
+        "shortcut",
         editingBookmark.id
       );
       await updateDoc(docRef, { name, link });
@@ -192,12 +192,16 @@ function BookmarkPage() {
   };
 
   const handleDeleteBookmark = async (bookmarkId) => {
+    const bookmark = userBookmarks.find((bm) => bm.id === bookmarkId);
+    if (!bookmark) {
+      // This is an admin bookmark, hide it instead
+      return handleHideBookmark(bookmarkId);
+    }
+
     try {
-      const docRef = doc(db, "users", user.uid, "addbookmarks", bookmarkId);
+      const docRef = doc(db, "users", user.uid, "shortcut", bookmarkId);
       await deleteDoc(docRef);
-
       setUserBookmarks((prev) => prev.filter((bm) => bm.id !== bookmarkId));
-
       setSuccessMessage("Bookmark deleted successfully!");
     } catch (error) {
       console.error("Error deleting bookmark:", error);
@@ -212,6 +216,13 @@ function BookmarkPage() {
 
       const userDocRef = doc(db, "users", user.uid);
       await updateDoc(userDocRef, { hiddenBookmarkIds: newHiddenIds });
+
+      // Update the global bookmarks state to reflect the hidden status
+      setGlobalBookmarks((prev) =>
+        prev.map((bm) =>
+          bm.id === bookmarkId ? { ...bm, isHidden: true } : bm
+        )
+      );
 
       setSuccessMessage("Bookmark hidden successfully!");
     } catch (error) {
@@ -240,7 +251,7 @@ function BookmarkPage() {
               className="block"
             >
               <img
-                src={getFavicon(bookmark.link)}
+                src={getFavicon(bookmark.link) }
                 alt={bookmark.name}
                 className="w-7 h-7 mx-auto rounded-full transition-transform duration-300 transform hover:scale-110 hover:shadow-lg"
               />
@@ -265,18 +276,19 @@ function BookmarkPage() {
                       Edit
                     </button>
                   )}
-                  <button
-                    onClick={() => handleDeleteBookmark(bookmark.id)}
-                    className="block w-full text-left px-2 py-1 text-sm text-red-500 hover:bg-gray-200"
-                  >
-                    Delete
-                  </button>
-                  {!bookmark.createdByUser && (
+                  {bookmark.createdByUser ? (
+                    <button
+                      onClick={() => handleDeleteBookmark(bookmark.id)}
+                      className="block w-full text-left px-2 py-1 text-sm text-red-500 hover:bg-gray-200"
+                    >
+                      Delete
+                    </button>
+                  ) : (
                     <button
                       onClick={() => handleHideBookmark(bookmark.id)}
-                      className="text-gray-500 hover:text-gray-600 block w-full px-2 py-1"
+                      className="block w-full text-left px-2 py-1 text-sm text-red-500 hover:bg-gray-200"
                     >
-                      Hide
+                      Delete
                     </button>
                   )}
                 </div>
@@ -292,70 +304,77 @@ function BookmarkPage() {
       >
         +
       </button>
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white dark:bg-gray-900 dark:text-white p-4 rounded-2xl shadow-md w-80">
-            <h2 className="text-lg font-semibold mb-4">
-              {editMode ? "Edit" : "Add"} Bookmark
-            </h2>
-            {errorMessage && <p className="text-red-500">{errorMessage}</p>}
-            {successMessage && (
-              <p className="text-green-500">{successMessage}</p>
-            )}
-            <form
-              onSubmit={
-                editingBookmark ? handleUpdateBookmark : handleAddBookmark
-              }
+      <Modal
+        title={editMode ? "Edit Bookmark" : "Add Bookmark"}
+        open={showModal}
+        onCancel={() => {
+          setShowModal(false);
+          setEditMode(false);
+          setName("");
+          setLink("");
+          setErrorMessage("");
+          setSuccessMessage("");
+        }}
+        footer={null}
+        className="dark:bg-gray-800"
+      >
+        <Form
+          onFinish={editingBookmark ? handleUpdateBookmark : handleAddBookmark}
+          layout="vertical"
+          initialValues={{ name, link }}
+        >
+          <Form.Item
+            label={<span className="dark:text-white">Name</span>}
+            name="name"
+            rules={[{ required: true, message: 'Please enter bookmark name' }]}
+          >
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter bookmark name"
+              className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            />
+          </Form.Item>
+          <Form.Item
+            label={<span className="dark:text-white">URL</span>}
+            name="link"
+            rules={[
+              { required: true, message: 'Please enter URL' },
+              { type: 'url', message: 'Please enter a valid URL' }
+            ]}
+          >
+            <Input
+              value={link}
+              onChange={(e) => setLink(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Enter URL"
+              className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            />
+          </Form.Item>
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setShowModal(false);
+                setEditMode(false);
+                setName("");
+                setLink("");
+                setErrorMessage("");
+                setSuccessMessage("");
+              }}
+              className="px-4 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white rounded transition-colors"
             >
-              <div className="flex flex-col space-y-3">
-                <div>
-                  <label htmlFor="name" className="block mb-1">
-                    Name
-                  </label>
-                  <input
-                    id="name"
-                    type="text"
-                    className="w-full p-2 dark:text-white dark:bg-gray-800 border rounded"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="link" className="block mb-1">
-                    Link
-                  </label>
-                  <input
-                    id="link"
-                    type="url"
-                    className="w-full p-2 dark:text-white dark:bg-gray-800 border rounded"
-                    value={link}
-                    onChange={(e) => setLink(e.target.value)}
-                    onKeyDown={(e) => handleKeyDown(e)}
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600"
-                >
-                  {editMode ? "Update" : "Add"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowModal(false);
-                    setEditMode(false);
-                    setErrorMessage("");
-                    setSuccessMessage("");
-                  }}
-                  className="bg-gray-400 text-white rounded px-4 py-2 hover:bg-gray-500 mt-2"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-1.5 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+            >
+              {editMode ? "Update" : "Add"}
+            </button>
           </div>
-        </div>
-      )}
+        </Form>
+      </Modal>
     </div>
   );
 }

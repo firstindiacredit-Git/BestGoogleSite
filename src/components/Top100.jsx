@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Card, Button, Row, Col, Typography, Spin, Alert, Radio, Input, List, Space, Table } from 'antd';
-import { AppstoreOutlined, UnorderedListOutlined, SearchOutlined } from '@ant-design/icons';
+import { Card, Button, Row, Col, Typography, Spin, Alert, Radio, Input, List, Space, Table, Rate } from 'antd';
+import { AppstoreOutlined, UnorderedListOutlined, SearchOutlined, PlayCircleOutlined } from '@ant-design/icons';
+import sportsmen from './sportsmen.json';
+import brands from './brand.json';
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -111,7 +113,9 @@ function WikipediaBanks() {
       </div>
 
       {loading ? (
-        <Spin size="large" />
+        <div style={{ textAlign: 'center', margin: '2rem' }}>
+          <Spin size="large" />
+        </div>
       ) : (
         viewMode === 'grid' ? renderGridView() : renderListView()
       )}
@@ -134,8 +138,11 @@ const Top100Page = () => {
     cars: `https://api.api-ninjas.com/v1/cars?limit=100&year=${year}`,
     stocks: 'https://finnhub.io/api/v1/stock/symbol?exchange=US&token=ctj9ln9r01qgfbt0ega0ctj9ln9r01qgfbt0egag',
     crypto: 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100',
-    billionaires: 'https://forbes400.onrender.com/api/forbes400?limit=100&year=${year}',
-    banks: 'wikipedia'
+    billionaires: `https://forbes400.onrender.com/api/forbes400?limit=100&year=${year}`,
+    banks: 'wikipedia',
+    sportsmen: 'local',
+    movies: 'https://imdb-top-100-movies.p.rapidapi.com/',
+    brands: 'local'
   };
 
   const VIN_NUMBERS = [
@@ -145,17 +152,42 @@ const Top100Page = () => {
     // Add more VIN numbers...
   ];
 
-  // Add filtered items based on search while preserving original indices
+  // Update the filteredItems definition with null checks
   const filteredItems = items.map((item, index) => ({
     ...item,
-    originalIndex: index // Store the original index
+    originalIndex: index
   })).filter(item =>
-    item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.description.toLowerCase().includes(searchQuery.toLowerCase())
+    (item.name?.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
+    (item.description?.toLowerCase().includes(searchQuery.toLowerCase()) || '')
   );
 
   const fetchTop100 = async (category) => {
     try {
+      setLoading(true);
+      
+      if (category === 'sportsmen') {
+        const processedData = sportsmen.map(person => ({
+          name: `${person.name} ${' '} $${(person.contract_value_usd/1000000).toFixed(1)}M`,
+          description: `Sport: ${person.sport}, Contract: ${person.length_of_contract}`
+        }));
+        setItems(processedData);
+        setError(null);
+        setLoading(false);
+        return;
+      }
+      
+      if (category === 'brands') {
+        const processedData = brands.map(brand => ({
+          name: `${brand.Brand}`,
+          description: `Rank: ${brand.Rank}, Change: ${brand.Change}, Value: ${brand.Value}`,
+          value: `$${brand.Value}M`
+        }));
+        setItems(processedData);
+        setError(null);
+        setLoading(false);
+        return;
+      }
+      
       // console.log(`Fetching ${category} data...`);
       
       if (category === 'cars') {
@@ -181,6 +213,29 @@ const Top100Page = () => {
         
         setItems(processedData);
         setError(null);
+      } else if (category === 'movies') {
+        const options = {
+          method: 'GET',
+          headers: {
+            'x-rapidapi-key': 'ed98e198d3msha2890b3dde9a12dp1e7caejsnf255bf4ce34c',
+            'x-rapidapi-host': 'imdb-top-100-movies.p.rapidapi.com'
+          }
+        };
+        
+        const response = await fetch(APIs[category], options);
+        const data = await response.json();
+        
+        const processedData = data.map(movie => ({
+          name: movie.title,
+          description: `Year: ${movie.year}, Rating: ${movie.rating}`,
+          image: movie.image,
+          rating: movie.rating
+        }));
+        
+        setItems(processedData);
+        setError(null);
+        setLoading(false);
+        return;
       } else {
         const response = await fetch(APIs[category]);
         if (!response.ok) {
@@ -271,6 +326,7 @@ const Top100Page = () => {
   };
 
   useEffect(() => {
+    setLoading(true); // Set loading to true before fetching
     fetchTop100(category);
   }, [category, page]);
 
@@ -278,13 +334,59 @@ const Top100Page = () => {
     <Row gutter={[16, 16]}>
       {filteredItems.map((item) => (
         <Col xs={24} sm={12} lg={8} key={item.originalIndex}>
-          <Card
-            title={`${item.originalIndex + 1}. ${item.name}`}
-            bordered={true}
-            hoverable
-          >
-            {item.description}
-          </Card>
+          {category === 'movies' ? (
+            <Card
+              hoverable
+              cover={
+                <img
+                  alt={item.name}
+                  src={item.image}
+                  style={{ height: '300px', objectFit: 'cover' }}
+                />
+              }
+              actions={[
+                <PlayCircleOutlined key="watch" />,
+                <Rate disabled defaultValue={item.rating / 2} count={5} />
+              ]}
+            >
+              <Card.Meta
+                title={`${item.originalIndex + 1}. ${item.name}`}
+                description={item.description}
+              />
+            </Card>
+          ) : (
+            <Card
+              title={
+                category === 'brands' ? (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>{item.originalIndex + 1}. {item.name}</span>
+                    <span>{item.value}</span>
+                  </div>
+                ) : category === 'sportsmen' ? (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>{item.originalIndex + 1}. {item.name?.split('$')[0] || item.name}</span>
+                    <span>{item.name?.includes('$') ? `$${item.name.split('$')[1]}` : ''}</span>
+                  </div>
+                ) : category === 'billionaires' ? (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>{item.originalIndex + 1}. {item.name?.split(',')[0] || item.name}</span>
+                    <span>{item.description?.includes('$') ? item.description.split('$')[1]?.split(',')[0] : ''}</span>
+                  </div>
+                ) : category === 'crypto' ? (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>{item.originalIndex + 1}. {item.name}</span>
+                    <span>{item.description?.includes('Price: $') ? `$${item.description.split('Price: $')[1]?.split(',')[0]}` : ''}</span>
+                  </div>
+                ) : (
+                  `${item.originalIndex + 1}. ${item.name}`
+                )
+              }
+              bordered={true}
+              hoverable
+            >
+              {item.description}
+            </Card>
+          )}
         </Col>
       ))}
     </Row>
@@ -296,10 +398,53 @@ const Top100Page = () => {
       dataSource={filteredItems}
       renderItem={(item) => (
         <List.Item>
-          <List.Item.Meta
-            title={`${item.originalIndex + 1}. ${item.name}`}
-            description={item.description}
-          />
+          {category === 'movies' ? (
+            <List.Item.Meta
+              avatar={
+                <img 
+                  src={item.image} 
+                  alt={item.name}
+                  style={{ width: '100px', height: '150px', objectFit: 'cover' }}
+                />
+              }
+              title={
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>{item.originalIndex + 1}. {item.name}</span>
+                  <Rate disabled defaultValue={item.rating / 2} count={5} />
+                </div>
+              }
+              description={item.description}
+            />
+          ) : (
+            <List.Item.Meta
+              title={
+                category === 'brands' ? (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>{item.originalIndex + 1}. {item.name}</span>
+                    <span>{item.value}</span>
+                  </div>
+                ) : category === 'sportsmen' ? (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>{item.originalIndex + 1}. {item.name?.split('$')[0] || item.name}</span>
+                    <span>{item.name?.includes('$') ? `$${item.name.split('$')[1]}` : ''}</span>
+                  </div>
+                ) : category === 'billionaires' ? (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>{item.originalIndex + 1}. {item.name?.split(',')[0] || item.name}</span>
+                    <span>{item.description?.includes('$') ? item.description.split('$')[1]?.split(',')[0] : ''}</span>
+                  </div>
+                ) : category === 'crypto' ? (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>{item.originalIndex + 1}. {item.name}</span>
+                    <span>{item.description?.includes('Price: $') ? `$${item.description.split('Price: $')[1]?.split(',')[0]}` : ''}</span>
+                  </div>
+                ) : (
+                  `${item.originalIndex + 1}. ${item.name}`
+                )
+              }
+              description={item.description}
+            />
+          )}
         </List.Item>
       )}
     />
@@ -320,11 +465,14 @@ const Top100Page = () => {
             <Radio.Button value="stocks">Stocks</Radio.Button>
             <Radio.Button value="billionaires">Billionaires</Radio.Button>
             <Radio.Button value="banks">Banks</Radio.Button>
+            <Radio.Button value="sportsmen">Sports Person</Radio.Button>
+            <Radio.Button value="movies">Movies</Radio.Button>
+            <Radio.Button value="brands">Brands</Radio.Button>
           </Radio.Group>
         </div>
 
-        {/* Search and View Toggle - Only show if not banks */}
-        {category !== 'banks' && (
+        {/* Search and View Toggle - Only show if not loading and not banks */}
+        {!loading && category !== 'banks' && (
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Search
               placeholder="Search items..."
@@ -344,15 +492,30 @@ const Top100Page = () => {
         )}
       </Space>
 
-      {/* Show loading and error states */}
-      {loading && <div style={{ textAlign: 'center', margin: '2rem' }}><Spin size="large" /></div>}
-      {error && <Alert message={error} type="error" showIcon style={{ marginBottom: '2rem' }} />}
+      {/* Show loading state */}
+      {loading && (
+        <div style={{ textAlign: 'center', margin: '2rem' }}>
+          <Spin size="large" />
+        </div>
+      )}
 
-      {/* Render content based on category */}
-      {category === 'banks' ? (
-        <WikipediaBanks />
-      ) : (
-        !loading && !error && (viewMode === 'grid' ? renderGridView() : renderListView())
+      {/* Only render content when not loading */}
+      {!loading && (
+        <>
+          {error && <Alert message={error} type="error" showIcon style={{ marginBottom: '2rem' }} />}
+          {category === 'banks' ? (
+            <WikipediaBanks />
+          ) : (
+            <>
+              {category === 'sportsmen' && (
+                <Title level={2} style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                  Overview of largest sports contracts
+                </Title>
+              )}
+              {viewMode === 'grid' ? renderGridView() : renderListView()}
+            </>
+          )}
+        </>
       )}
     </div>
   );

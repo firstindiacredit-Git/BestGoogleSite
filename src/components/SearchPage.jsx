@@ -2,15 +2,15 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaArrowUp } from "react-icons/fa";
 import Header from "../components/Header";
-import AnimatedTooltipPreview from "./AnimatedTooltipPreview";
+import Shortcut from "./ShortCuts";
 import Anotherpage from "../components/Anotherpage";
 import PopularBookmarks from "../components/PopularBookmarks";
 import NotebookAndSheet from "../components/NotebookAndSheet";
 import PasswordGenerator from "../components/PasswordGenerater";
 import News from "../components/News";
 import Tool from "../components/Tool";
+import Sports from '../components/Sports'
 import Top100 from "../components/Top100";
-import Sports from "../components/Sports";
 import { FaHome } from "react-icons/fa";
 import { MdAddHomeWork } from "react-icons/md";
 import "./style.css";
@@ -108,12 +108,7 @@ function SearchPage() {
   return (
     <div
       className="bg-white dark:bg-gray-900 h-screen"
-      style={{
-        backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundAttachment: "fixed",
-      }}
+      
     >
       <Header
         isDarkMode={isDarkMode}
@@ -121,8 +116,13 @@ function SearchPage() {
         handleImageChange={handleImageChange}
       />
 
-      <div className="mt-6">
-        <div className="flex flex-col items-center  min-h-[23vw]">
+      <div className="-mt-20">
+        <div style={{
+        backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundAttachment: "fixed",
+      }} className="flex pt-24 flex-col items-center  min-h-[23vw]">
           <img
             src={isDarkMode ? "GoogleBlack.png" : "GoogleWhite.png"}
             alt="Google Logo"
@@ -133,14 +133,14 @@ function SearchPage() {
             data-resultsurl="https://www.google.com/search?client=ms-google-coop&qcx=80904074a37154829"
             data-defaulttoimagesearch="true"
           />
-          <AnimatedTooltipPreview />
+          <Shortcut />
           <div className="-mt-10">
             <Link to="/">
               <button className="h-10 w-10 rounded-2xl">
                 <FaHome className="text-green-700 h-10 w-7 text-center justify-center m-auto" />
               </button>
             </Link>
-            <Link to="/TodoComponent">
+            <Link to="/ShowLinks">
               <button className="h-10 w-10 rounded-2xl">
                 <MdAddHomeWork className="text-green-700 h-10 w-7 text-center justify-center m-auto" />
               </button>
@@ -230,7 +230,7 @@ function SearchPage() {
             </button>
           </div>
         </div>
-        <div className=" max-w-screen-2xl mx-auto   dark:bg-gray-900 bg-[#f8f9fa]">
+        <div className=" max-w-screen-2xl mx-auto   dark:bg-gray-900 bg-white">
           {activeComponent === "NotebookAndSheet" ? (
             <NotebookAndSheet />
           ) : activeComponent === "PopularBookmarks" ? (
@@ -239,17 +239,16 @@ function SearchPage() {
             <PasswordGenerator />
           ) : activeComponent === "News" ? (
             <News />
+          ) : activeComponent === "Sports" ? (
+            <Sports />
           ) : activeComponent === "Anotherpage" ? (
             <Anotherpage />
           ) : activeComponent === "Top100" ? (
             <Top100 />
           ) : activeComponent === "Tool" ? (
             <Tool />
-          ) : activeComponent === "Sports" ? (
-            <Sports />
           ) : (
             <Anotherpage
-              backgroundImage={backgroundImage}
               isDarkMode={isDarkMode}
             />
           )}
