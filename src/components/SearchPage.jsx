@@ -9,6 +9,7 @@ import NotebookAndSheet from "../components/NotebookAndSheet";
 import PasswordGenerator from "../components/PasswordGenerater";
 import News from "../components/News";
 import Tool from "../components/Tool";
+import Sports from '../components/Sports'
 import Top100 from "../components/Top100";
 import { FaHome } from "react-icons/fa";
 import { MdAddHomeWork } from "react-icons/md";
@@ -238,6 +239,8 @@ function SearchPage() {
             <PasswordGenerator />
           ) : activeComponent === "News" ? (
             <News />
+          ) : activeComponent === "Sports" ? (
+            <Sports />
           ) : activeComponent === "Anotherpage" ? (
             <Anotherpage />
           ) : activeComponent === "Top100" ? (

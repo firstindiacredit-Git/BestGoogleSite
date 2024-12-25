@@ -136,7 +136,7 @@ const SportsLeagues = () => {
 
   return (
     <Layout>
-      <Content style={{ padding: "2px", maxWidth: 1200, margin: "0 auto" }}>
+      <Content style={{ padding: "2px", margin: "5px" }}>
         <Space direction="vertical" size="large" style={{ width: "100%" }}>
           <div
             style={{
@@ -199,7 +199,14 @@ const SportsLeagues = () => {
 
           <Divider />
 
-          <Row gutter={[10, 10]}>
+          <Row
+            gutter={[10, 10]}
+            style={{
+              transition: "width 0.3s ease",
+              width: filteredLeagues.length > 0 ? "100%" : "80%",
+              margin: "0 auto",
+            }}
+          >
             {filteredLeagues.map((league) => (
               <Col
                 xs={24}
@@ -226,6 +233,21 @@ const SportsLeagues = () => {
                 </Card>
               </Col>
             ))}
+
+            {filteredLeagues.length === 0 && (
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "40px 0",
+                  width: "100%",
+                  transition: "width 0.3s ease",
+                }}
+              >
+                <Typography.Text type="secondary">
+                  No leagues found matching your criteria
+                </Typography.Text>
+              </div>
+            )}
           </Row>
 
           {filteredLeagues.length === 0 && (

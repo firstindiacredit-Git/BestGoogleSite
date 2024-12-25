@@ -12,11 +12,13 @@ import Calendar from "./Calendar.jsx";
 import Category from "./Category.jsx";
 import ImageUploader from "./ImageUploader.jsx";
 import Weather from "./Weather.jsx";
+import NotePage from "./NotePage.jsx";
 import {
   getPageLayout,
   updatePageLayout,
   getAvailableWidgets,
 } from "../firebase/widgetLayouts";
+import TodoComponent from "./TodoComponent.jsx";
 
 const Anotherpage = ({ backgroundImage }) => {
   const [grid, isGrid] = useState(true);
@@ -34,10 +36,11 @@ const Anotherpage = ({ backgroundImage }) => {
     clock: <Clock />,
     weather: <Weather />,
     calculator: <Calculator />,
-    notepad: <Notepad />,
+    notepad: <NotePage />,
     imageUploader: <ImageUploader />,
     calendar: <Calendar />,
     Bookmarks: <Category />,
+    Todo: <TodoComponent />,
   };
 
   // Load user and layout

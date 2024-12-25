@@ -198,11 +198,11 @@ const TodoComponent = () => {
             {showColorPicker && (
               <div
                 ref={colorPickerRef}
-                className="absolute z-10 grid grid-cols-7 gap-1 p-3 bg-white border rounded-md shadow-md"
+                className="absolute z-10 grid grid-cols-7 gap-2 p-3 bg-white border rounded-md shadow-md"
                 style={{ top: "-20px", left: "300px" }}
               >
                 {predefinedColors.map((color) => (
-                  <div
+                  <button
                     key={color}
                     onClick={() => {
                       setContainerColor(color);
@@ -210,24 +210,21 @@ const TodoComponent = () => {
                     }}
                     style={{
                       backgroundColor: color,
-                      cursor: "pointer",
                     }}
-                    className="h-5 w-5 border"
-                  ></div>
+                    className="h-5 w-5 border cursor-pointer focus:outline-none"
+                    aria-label={`Select color ${color}`}
+                  ></button>
                 ))}
-                <div className="flex items-center justify-center">
-                  {showColorPicker && (
-                      <input
-                        id="customColorPicker"
-                        type="color"
-                        className="w-full h-6 p-0 border border-gray-300 rounded-md cursor-pointer focus:outline-none"
-                        onChange={(e) => {
-                          setContainerColor(e.target.value);
-                          setShowColorPicker(false);
-                        }}
-                      />
-                    
-                  )}
+                <div className="col-span-full flex justify-center">
+                  <input
+                    id="customColorPicker"
+                    type="color"
+                    className="w-full h-6 p-0 border-gray-300 rounded-md cursor-pointer focus:outline-none"
+                    onChange={(e) => {
+                      setContainerColor(e.target.value);
+                      setShowColorPicker(false);
+                    }}
+                  />
                 </div>
               </div>
             )}
