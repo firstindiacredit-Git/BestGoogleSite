@@ -83,7 +83,7 @@ const ClockApp = () => {
       .format(clockStyle === "digital" ? "HH:mm:ss" : "h:mm A");
 
   return (
-    <div className="flex flex-col min-h-[10rem] items-center border  p-4 justify-center">
+    <div className="flex flex-col min-h-[10rem] items-center  p-4 justify-center">
       <StyledWrapper>
         <div className="flex text-[14px] gap-3">
           <select
