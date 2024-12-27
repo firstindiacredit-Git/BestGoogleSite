@@ -1,3 +1,375 @@
+// import React, { useState, useEffect } from "react";
+// import { Card, Button, Row, Col, Typography, Spin, Alert, Radio, Input, List, Space, Table, Rate } from 'antd';
+// import { AppstoreOutlined, UnorderedListOutlined, SearchOutlined, PlayCircleOutlined } from '@ant-design/icons';
+// import sportsmen from './sportsmen.json';
+// import brands from './brand.json';
+// import bikes from './bikes.json';
+
+// const { Title } = Typography;
+// const { Search } = Input;
+
+// function WikipediaBanks() {
+//   const [data, setData] = useState([]);
+//   const [loading, setLoading] = useState(true);
+//   const [viewMode, setViewMode] = useState('grid');
+//   const [searchQuery, setSearchQuery] = useState('');
+
+//   useEffect(() => {
+//     const fetchData = async () => {
+//       try {
+//         const response = await fetch(
+//           "https://en.wikipedia.org/w/api.php?action=parse&page=List_of_largest_banks&format=json&origin=*"
+//         );
+//         const result = await response.json();
+//         const htmlContent = result.parse.text["*"];
+        
+//         // Extract table data
+//         const tempDiv = document.createElement("div");
+//         tempDiv.innerHTML = htmlContent;
+//         const tableElement = tempDiv.querySelector(".wikitable");
+        
+//         // Convert HTML table to array of objects
+//         const rows = Array.from(tableElement.querySelectorAll("tr"));
+//         const headers = Array.from(rows[0].querySelectorAll("th")).map(th => th.textContent.trim());
+        
+//         const tableData = rows.slice(1).map((row, index) => {
+//           const cells = Array.from(row.querySelectorAll("td"));
+//           const rowData = cells.map(cell => cell.textContent.trim());
+//           const obj = {
+//             key: index,
+//           };
+//           headers.forEach((header, i) => {
+//             obj[header] = rowData[i];
+//           });
+//           return obj;
+//         });
+
+//         setData(tableData);
+//         // console.log(tableData);
+//       } catch (error) {
+//         console.error("Error fetching data:", error);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchData();
+//   }, []);
+
+//   const filteredData = data.filter(item =>
+//     item['Bank name']?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+//     item['Rank']?.toString().includes(searchQuery) ||
+//     item['Total assets(2023)(US$ billion)']?.toString().includes(searchQuery)
+//   );
+
+//   const renderGridView = () => (
+//     <Row gutter={[16, 16]}>
+//       {filteredData.map((item, index) => (
+//         <Col xs={24} sm={12} lg={8} key={index}>
+//           <Card
+//             title={`${index + 1}. ${item['Bank name'] || 'Unknown Bank'}`}
+//             bordered={true}
+//             hoverable
+//           >
+//             <p>Rank: {item['Rank'] || 'N/A'}</p>
+//             <p>Total Assets: {item['Total assets(2023)(US$ billion)'] || 'N/A'} billion USD</p>
+//           </Card>
+//         </Col>
+//       ))}
+//     </Row>
+//   );
+
+//   const renderListView = () => (
+//     <List
+//       itemLayout="horizontal"
+//       dataSource={filteredData}
+//       renderItem={(item, index) => (
+//         <List.Item>
+//           <List.Item.Meta
+//             title={`${index + 1}. ${item['Bank name'] || 'Unknown Bank'}`}
+//             description={`Rank: ${item['Rank'] || 'N/A'} | Total Assets: ${item['Total assets(2023)(US$ billion)'] || 'N/A'} billion USD`}
+//           />
+//         </List.Item>
+//       )}
+//     />
+//   );
+
+//   return (
+//     <div style={{ padding: '24px' }}>
+//       <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+//         <Search
+//           placeholder="Search banks..."
+//           allowClear
+//           onChange={(e) => setSearchQuery(e.target.value)}
+//           style={{ width: 300 }}
+//         />
+//         <Radio.Group value={viewMode} onChange={(e) => setViewMode(e.target.value)}>
+//           <Radio.Button value="grid">
+//             <AppstoreOutlined />
+//           </Radio.Button>
+//           <Radio.Button value="list">
+//             <UnorderedListOutlined />
+//           </Radio.Button>
+//         </Radio.Group>
+//       </div>
+
+//       {loading ? (
+//         <div style={{ textAlign: 'center', margin: '2rem' }}>
+//           <Spin size="large" />
+//         </div>
+//       ) : (
+//         viewMode === 'grid' ? renderGridView() : renderListView()
+//       )}
+//     </div>
+//   );
+// }
+
+// const Top100Page = () => {
+//   const [items, setItems] = useState([]);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState(null);
+//   const [category, setCategory] = useState('motorcycles');
+//   const [page, setPage] = useState(1);
+//   const [viewMode, setViewMode] = useState('grid');
+//   const [searchQuery, setSearchQuery] = useState('');
+//   const API_KEY = 'BTOsYx47SEw8rRDvct+x+g==SUy2ivypa6z9mOk1';
+//   const year = new Date().getFullYear();
+//   // Updated APIs with real free API endpoints
+//   const APIs = {
+//     motorcycles: 'local',
+//     cars: 'http://localhost:5000/api/cars',
+//     stocks: 'http://localhost:5000/api/stocks',
+//     crypto: 'http://localhost:5000/api/crypto',
+//     billionaires: 'http://localhost:5000/api/billionaires',
+//     banks: 'wikipedia',
+//     sportsmen: 'local',
+//     movies: 'http://localhost:5000/api/movies',
+//     brands: 'local'
+//   };
+
+//   const VIN_NUMBERS = [
+//     '5UXWX7C5*BA',
+//     '1HGCM82633A123456',
+//     'WDDUG7JB0FA123456',
+//     // Add more VIN numbers...
+//   ];
+
+//   // Update the filteredItems definition with null checks
+//   const filteredItems = items.map((item, index) => ({
+//     ...item,
+//     originalIndex: index
+//   })).filter(item =>
+//     (item.name?.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
+//     (item.description?.toLowerCase().includes(searchQuery.toLowerCase()) || '')
+//   );
+
+//   const fetchTop100 = async (category) => {
+//     try {
+//       setLoading(true);
+      
+//       // For banks category, use Wikipedia API directly
+//       if (category === 'banks') {
+//         // ... existing banks logic ...
+//         return;
+//       }
+      
+//       // Handle local data cases
+//       if (category === 'sportsmen' || category === 'brands' || category === 'motorcycles') {
+//         // ... existing local data logic ...
+//         return;
+//       }
+      
+//       // For API requests, use backend endpoint
+//       const backendUrl = 'http://localhost:5000'; // Add this to your environment variables
+//       const response = await fetch(`${backendUrl}/api/${category}`);
+      
+//       if (!response.ok) {
+//         throw new Error(`HTTP error! status: ${response.status}`);
+//       }
+      
+//       const data = await response.json();
+//       console.log(`📦 Received ${category} data from backend:`, data);
+//       setItems(data);
+//       setError(null);
+      
+//     } catch (err) {
+//       console.error(`Error fetching ${category} data:`, err);
+//       setError(`Failed to fetch ${category} data: ${err.message}`);
+//       setItems([]);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     setLoading(true); // Set loading to true before fetching
+//     fetchTop100(category);
+//   }, [category, page]);
+
+//   const renderGridView = () => (
+//     <Row gutter={[16, 16]}>
+//       {filteredItems.map((item) => (
+//         <Col xs={24} sm={12} lg={8} key={item.originalIndex}>
+//           <Card
+//             title={
+//               category === 'motorcycles' ? (
+//                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+//                   <span>{item.originalIndex + 1}. {item.name}</span>
+//                   <span>{item.description.split('Kmh Speed: ')[1]?.split('km/h')[0]} km/h</span>
+//                 </div>
+//               ) : category === 'brands' ? (
+//                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+//                   <span>{item.originalIndex + 1}. {item.name}</span>
+//                   <span>{item.value}</span>
+//                 </div>
+//               ) : category === 'sportsmen' ? (
+//                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+//                   <span>{item.originalIndex + 1}. {item.name?.split('$')[0] || item.name}</span>
+//                   <span>{item.name?.includes('$') ? `$${item.name.split('$')[1]}` : ''}</span>
+//                 </div>
+//               ) : category === 'billionaires' ? (
+//                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+//                   <span>{item.originalIndex + 1}. {item.name?.split(',')[0] || item.name}</span>
+//                   <span>{item.description?.includes('$') ? item.description.split('$')[1]?.split(',')[0] : ''}</span>
+//                 </div>
+//               ) : category === 'crypto' ? (
+//                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+//                   <span>{item.originalIndex + 1}. {item.name}</span>
+//                   <span>{item.description?.includes('Price: $') ? `$${item.description.split('Price: $')[1]?.split(',')[0]}` : ''}</span>
+//                 </div>
+//               ) : (
+//                 `${item.originalIndex + 1}. ${item.name}`
+//               )
+//             }
+//             bordered={true}
+//             hoverable
+//           >
+//             {item.description}
+//           </Card>
+//         </Col>
+//       ))}
+//     </Row>
+//   );
+
+//   const renderListView = () => (
+//     <List
+//       itemLayout="horizontal"
+//       dataSource={filteredItems}
+//       renderItem={(item) => (
+//         <List.Item>
+//           <List.Item.Meta
+//             title={
+//               category === 'motorcycles' ? (
+//                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+//                   <span>{item.originalIndex + 1}. {item.name}</span>
+//                   <span>{item.description.split('Kmh Speed: ')[1]?.split('km/h')[0]} km/h</span>
+//                 </div>
+//               ) : category === 'brands' ? (
+//                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+//                   <span>{item.originalIndex + 1}. {item.name}</span>
+//                   <span>{item.value}</span>
+//                 </div>
+//               ) : category === 'sportsmen' ? (
+//                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+//                   <span>{item.originalIndex + 1}. {item.name?.split('$')[0] || item.name}</span>
+//                   <span>{item.name?.includes('$') ? `$${item.name.split('$')[1]}` : ''}</span>
+//                 </div>
+//               ) : category === 'billionaires' ? (
+//                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+//                   <span>{item.originalIndex + 1}. {item.name?.split(',')[0] || item.name}</span>
+//                   <span>{item.description?.includes('$') ? item.description.split('$')[1]?.split(',')[0] : ''}</span>
+//                 </div>
+//               ) : category === 'crypto' ? (
+//                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+//                   <span>{item.originalIndex + 1}. {item.name}</span>
+//                   <span>{item.description?.includes('Price: $') ? `$${item.description.split('Price: $')[1]?.split(',')[0]}` : ''}</span>
+//                 </div>
+//               ) : (
+//                 `${item.originalIndex + 1}. ${item.name}`
+//               )
+//             }
+//             description={item.description}
+//           />
+//         </List.Item>
+//       )}
+//     />
+//   );
+
+//   return (
+//     <div className="max-w-screen-xl mx-auto p-4">
+//       <Title level={1} style={{ textAlign: 'center', marginBottom: '2rem' }}>
+//         Top {category.charAt(0).toUpperCase() + category.slice(1)}
+//       </Title>
+
+//       <Space direction="vertical" size="middle" style={{ width: '100%', marginBottom: '2rem' }}>
+//         {/* Category Selection */}
+//         <div style={{ textAlign: 'center' }}>
+//           <Radio.Group value={category} onChange={(e) => setCategory(e.target.value)} buttonStyle="solid">
+//             <Radio.Button value="motorcycles">Motorcycles</Radio.Button>
+//             <Radio.Button value="cars">Cars</Radio.Button>
+//             <Radio.Button value="crypto">Crypto</Radio.Button>
+//             <Radio.Button value="stocks">Stocks</Radio.Button>
+//             <Radio.Button value="billionaires">Billionaires</Radio.Button>
+//             <Radio.Button value="banks">Banks</Radio.Button>
+//             <Radio.Button value="sportsmen">Sports Person</Radio.Button>
+//             <Radio.Button value="movies">Movies</Radio.Button>
+//             <Radio.Button value="brands">Brands</Radio.Button>
+//           </Radio.Group>
+//         </div>
+
+//         {/* Search and View Toggle - Only show if not loading and not banks */}
+//         {!loading && category !== 'banks' && (
+//           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+//             <Search
+//               placeholder="Search items..."
+//               allowClear
+//               onChange={(e) => setSearchQuery(e.target.value)}
+//               style={{ width: 300 }}
+//             />
+//             <Radio.Group value={viewMode} onChange={(e) => setViewMode(e.target.value)}>
+//               <Radio.Button value="grid">
+//                 <AppstoreOutlined />
+//               </Radio.Button>
+//               <Radio.Button value="list">
+//                 <UnorderedListOutlined />
+//               </Radio.Button>
+//             </Radio.Group>
+//           </div>
+//         )}
+//       </Space>
+
+//       {/* Show loading state */}
+//       {loading && (
+//         <div style={{ textAlign: 'center', margin: '2rem' }}>
+//           <Spin size="large" />
+//         </div>
+//       )}
+
+//       {/* Only render content when not loading */}
+//       {!loading && (
+//         <>
+//           {error && <Alert message={error} type="error" showIcon style={{ marginBottom: '2rem' }} />}
+//           {category === 'banks' ? (
+//             <WikipediaBanks />
+//           ) : (
+//             <>
+//               {category === 'sportsmen' && (
+//                 <Title level={2} style={{ textAlign: 'center', marginBottom: '2rem' }}>
+//                   Overview of largest sports contracts
+//                 </Title>
+//               )}
+//               {viewMode === 'grid' ? renderGridView() : renderListView()}
+//             </>
+//           )}
+//         </>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default Top100Page;
+
+
 import React, { useState, useEffect } from "react";
 import { Card, Button, Row, Col, Typography, Spin, Alert, Radio, Input, List, Space, Table, Rate } from 'antd';
 import { AppstoreOutlined, UnorderedListOutlined, SearchOutlined, PlayCircleOutlined } from '@ant-design/icons';
