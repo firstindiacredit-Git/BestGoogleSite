@@ -196,8 +196,8 @@ const NotePage = () => {
     <div >
       <div className="">
         <div className="overflow-hidden" style={{ backgroundColor }}>
-          <div className="p-6" style={{ backgroundColor }}>
-            <div className="flex justify-between items-center mb-6">
+          <div className="p-2" style={{ backgroundColor }}>
+            <div className="flex justify-between items-center mb-1">
               <div className=" w-full flex justify-between">
                 <button
                   className="p-2 rounded-lg bg-opacity-20 bg-gray-500 hover:bg-opacity-30 transition duration-200"
