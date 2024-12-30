@@ -79,7 +79,10 @@ const TodoComponent = () => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (colorPickerRef.current && !colorPickerRef.current.contains(event.target)) {
+      if (
+        colorPickerRef.current &&
+        !colorPickerRef.current.contains(event.target)
+      ) {
         setShowColorPicker(false);
       }
     };
@@ -194,8 +197,8 @@ const TodoComponent = () => {
             {showColorPicker && (
               <div
                 ref={colorPickerRef}
-                className="absolute grid w-[10vw] grid-cols-7 gap-2 p-[0.8vw] bg-white border rounded-md shadow-md"
-                style={{ top: "-20px", left: "300px",zIndex:"999" }}
+                className="absolute z-50 right-1 grid w-[10vw] grid-cols-7 gap-2 p-[0.8vw] bg-white border rounded-md shadow-md"
+                style={{ top: "-20px", left: "224px", zIndex: "999" }}
               >
                 {predefinedColors.map((color) => (
                   <button

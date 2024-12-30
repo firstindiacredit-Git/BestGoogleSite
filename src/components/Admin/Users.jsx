@@ -4,7 +4,6 @@ import { db } from "../../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../firebase";
 import Header from "./Header";
-import { CiGrid31, CiCircleList } from "react-icons/ci";
 
 export default function Users() {
   const [users, setUsers] = useState([]);
@@ -12,9 +11,9 @@ export default function Users() {
   const [error, setError] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [viewType, setViewType] = useState("list");  
+  const [viewType, setViewType] = useState("list");
   const usersPerPage = 15;
- 
+
   const fetchUsers = async () => {
     try {
       const querySnapshot = await getDocs(collection(db, "users"));
@@ -32,29 +31,21 @@ export default function Users() {
   };
 
   useEffect(() => {
-    
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
       if (user) {
-        fetchUsers(); 
+        fetchUsers();
       }
     });
 
     return () => unsubscribe();
   }, []);
 
-  useEffect(() => {
-     
-    if (currentUser) {
-      fetchUsers();
-    }
-  }, [currentUser]); 
-
   const indexOfLastUser = currentPage * usersPerPage;
   const indexOfFirstUser = indexOfLastUser - usersPerPage;
   const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
   const totalPages = Math.ceil(users.length / usersPerPage);
- 
+
   const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   return (
@@ -66,23 +57,47 @@ export default function Users() {
         <>
           {/* View Type Toggle */}
           <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
-                <button
-                  onClick={() => setViewType('grid')}
-                  className={`p-2 rounded ${viewType === 'grid' ? 'bg-white dark:bg-gray-600 shadow-sm' : ''}`}
-                >
-                  <svg className="w-5 h-5 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => setViewType('list')}
-                  className={`p-2 rounded ${viewType === 'list' ? 'bg-white dark:bg-gray-600 shadow-sm' : ''}`}
-                >
-                  <svg className="w-5 h-5 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
-                </button>
-              </div>
+            <button
+              onClick={() => setViewType("grid")}
+              className={`p-2 rounded ${
+                viewType === "grid" ? "bg-white dark:bg-gray-600 shadow-sm" : ""
+              }`}
+            >
+              <svg
+                className="w-5 h-5 dark:text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                />
+              </svg>
+            </button>
+            <button
+              onClick={() => setViewType("list")}
+              className={`p-2 rounded ${
+                viewType === "list" ? "bg-white dark:bg-gray-600 shadow-sm" : ""
+              }`}
+            >
+              <svg
+                className="w-5 h-5 dark:text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+            </button>
+          </div>
 
           {/* Users Display */}
           <div
@@ -119,7 +134,15 @@ export default function Users() {
                     )}
                     <p className="text-sm mt-2">
                       <span className="font-semibold">Role:</span>{" "}
-                      {role || "User"}
+                      <span
+                        className={`${
+                          role === "admin"
+                            ? "text-red-500"
+                            : "text-black dark:text-gray-300"
+                        }`}
+                      >
+                        {role || "User"}
+                      </span>
                     </p>
                   </div>
                 </div>
