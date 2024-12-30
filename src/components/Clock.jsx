@@ -80,7 +80,7 @@ const ClockApp = () => {
   const getCurrentTime = (timezone) =>
     moment()
       .tz(timezone)
-      .format(clockStyle === "digital" ? "HH:mm:ss" : "h:mm A");
+      .format(clockStyle === "digital" ? "HH:mm" : "h:mm A");
 
   return (
     <div className="flex flex-col min-h-[10rem] items-center  p-4 justify-center">
@@ -157,7 +157,7 @@ const Clock = ({ clockStyle, timezone }) => {
 
 const DigitalClock = ({ time }) => (
   <DigitalClockWrapper>
-    <h2 className="digital-clock-text ">{time.format("HH:mm:ss")}</h2>
+    <h2 className="digital-clock-text ">{time.format("HH:mm")}</h2>
   </DigitalClockWrapper>
 );
 const AnalogClock = ({ time }) => {
