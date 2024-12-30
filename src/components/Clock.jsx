@@ -133,17 +133,21 @@ const ClockApp = () => {
           </Dropdown>
         </div>
 
-        <Row gutter={[16, 16]} justify="center">
+        <Row
+          gutter={[16, 16]}
+          justify="center"
+          style={{ marginLeft: "-25px", marginRight: "-8px", rowGap: "25px" }}
+        >
           {clocks.map((clock) => (
             <Col xs={24} sm={12} md={6} key={clock.label}>
               <div className="card flex flex-col justify-between relative group hover:opacity-100 transition-opacity duration-300">
                 <Clock clockStyle={clockStyle} timezone={clock.timezone} />
-                <div className="absolute top-2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="absolute top-2 left-1/2 transform -translate-x-1/2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <Button
                     onClick={() => handleRemoveClock(clock.label)}
                     icon={<IoCloseOutline />}
                     shape="circle"
-                    size="large"
+                    size="small"
                     style={{
                       opacity: 1,
                       zIndex: 10,
@@ -242,10 +246,10 @@ const AnalogClock = ({ time }) => {
 
 const StyledWrapper = styled.div`
   .card {
-    padding: 20px;
+    
     text-align: center;
-    width: 80px;
-    position: relative;
+    width: 100px;
+   
   }
 `;
 
