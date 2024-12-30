@@ -164,10 +164,10 @@ const TodoComponent = () => {
 
   return (
     <div
-      className="container mx-auto rounded-md"
+      className="container mx-auto"
       style={{ backgroundColor: containerColor, color: textColor }}
     >
-      <div className="bg-transparent w-full rounded-lg shadow-xl p-6 relative">
+      <div className="bg-transparent w-full rounded-lg  p-6 relative">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">Todo List</h2>
           <button
