@@ -10,7 +10,19 @@ const AVAILABLE_TIMEZONES = [
   "Asia/Dubai",
   "Pacific/Auckland",
   "America/Los_Angeles",
+  "Asia/Seoul",  
+  "Europe/Berlin", 
+  "Africa/Johannesburg", 
+  "Asia/Shanghai",  
+  "America/Chicago",  
+  "Europe/Moscow", 
+  "Africa/Nairobi",  
+  "America/Toronto", 
+  "Asia/Kolkata",  
+  "America/Mexico_City",  
+  "Asia/Singapore",  
 ];
+
 
 const formatTimeZoneName = (timeZone) => {
   return timeZone.replace("_", " ").split("/")[1];
@@ -99,7 +111,7 @@ const TimeZoneClock = ({ timeZone, isAnalog, onRemove }) => {
             style={{ transform: `rotate(${seconds}deg)` }}
           />
         </div>
-        <p className="text-center mt-1 text-[10px] font-medium">
+        <p className="text-center mt-1 text-white text-[10px] font-medium">
           {formatTimeZoneName(timeZone)}
         </p>
       </div>
@@ -107,14 +119,14 @@ const TimeZoneClock = ({ timeZone, isAnalog, onRemove }) => {
   }
 
   return (
-    <div className="relative dark:text-white  w-full mx-auto">
+    <div className="relative dark:text-white w-full mx-auto group">
       <button
         onClick={onRemove}
-        className="absolute -top-2 -right-2 bg-red-500 rounded-full p-1 text-white hover:bg-red-600"
+        className="absolute -top-2 -right-2 z-50 bg-red-500 rounded-full p-1 text-white opacity-0 group-hover:opacity-100 hover:bg-red-600 transition-opacity"
       >
         <X size={16} />
       </button>
-      <div className="bg-black/80 backdrop-blur-sm dark:text-white p-2 rounded-2xl">
+      <div className="dark:bg-black/80 bg-gray-200 backdrop-blur-sm dark:text-white p-2 rounded-2xl">
         <p className="text-[10px] opacity-80">{formatTimeZoneName(timeZone)}</p>
         <p className="text-[13px] font-light">
           {formatTimeForZone(time, timeZone)}
@@ -148,7 +160,7 @@ const ResponsiveWorldClock = () => {
 
   return (
     <div className="dark:bg-gradient-to-br from-gray-900 to-gray-800 dark:text-white p-4 flex justify-center items-center">
-      <div className="mx-auto w-full max-w-4xl">
+      <div className="mx-auto w-full max-w-sm">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-[14px] font-semibold flex items-center gap-1">
             <Clock className="w-5 h-5" />
@@ -157,7 +169,7 @@ const ResponsiveWorldClock = () => {
           <div className="flex items-center gap-4">
             <button
               onClick={() => setIsAnalog(!isAnalog)}
-              className="px-4 py-1 bg-white/10 rounded-full hover:bg-white/20 transition"
+              className="px-4 py-1 dark:bg-white/10  bg-gray-200 hover:bg-gray-300 rounded-full dark:hover:bg-white/20 transition"
             >
               Switch to {isAnalog ? "Digital" : "Analog"}
             </button>
@@ -166,7 +178,7 @@ const ResponsiveWorldClock = () => {
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 disabled={selectedTimezones.length >= 4}
-                className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-2 dark:bg-white/10 rounded-full dark:hover:bg-white/20 bg-gray-200 hover:bg-gray-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 title={
                   selectedTimezones.length >= 4
                     ? "Maximum timezones reached"
@@ -178,12 +190,12 @@ const ResponsiveWorldClock = () => {
 
               {isDropdownOpen && availableZones.length > 0 && (
                 <>
-                  <div className="absolute right-0 mt-2 w-48 bg-gray-800/95 backdrop-blur-sm rounded-lg shadow-lg py-1 z-50">
+                  <div className="absolute right-0 mt-2 w-48 dark:bg-gray-800/95 backdrop-blur-sm bg-gray-200  rounded-lg shadow-lg py-1 z-50">
                     {availableZones.map((timeZone) => (
                       <button
                         key={timeZone}
                         onClick={() => addTimeZone(timeZone)}
-                        className="w-full px-4 py-2 text-left text-sm text-white hover:bg-white/10 transition"
+                        className="w-full px-4 py-2 text-left text-sm hover:bg-white dark:text-white dark:hover:bg-white/10 transition"
                       >
                         {formatTimeZoneName(timeZone)}
                       </button>
@@ -199,7 +211,7 @@ const ResponsiveWorldClock = () => {
           </div>
         </div>
 
-        <div className="bg-black/40 backdrop-blur-md rounded-3xl p-6 shadow-2xl">
+        <div className="bg-black/40  backdrop-blur-md rounded-3xl p-6 shadow-2xl">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 justify-center mx-auto">
             {selectedTimezones.map((timeZone, index) => (
               <TimeZoneClock
