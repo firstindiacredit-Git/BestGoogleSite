@@ -21,23 +21,6 @@ function Calculator() {
     }
   }, []);
 
-  // // Handle keyboard input
-  // useEffect(() => {
-  //   const handleKeyPress = (event) => {
-  //     if (
-  //       document.activeElement.tagName !== "INPUT" &&
-  //       document.activeElement.tagName !== "TEXTAREA"
-  //     ) {
-  //       if (/[\d+\-*/.=()]/.test(event.key)) {
-  //         handleCalcInput(event.key === "Enter" ? "=" : event.key);
-  //       }
-  //     }
-  //   };
-  
-  //   window.addEventListener("keydown", handleKeyPress);
-  //   return () => window.removeEventListener("keydown", handleKeyPress);
-  // }, [calcInput]);
-
   const handleCalcInput = (value) => {
     if (value === "=") {
       try {
@@ -80,9 +63,9 @@ function Calculator() {
 
   return (
   <div className="flex items-center w-full min-h-[30vh] justify-center">
-  <div className="dark:bg-[#1f345f] bg-gray-200 h-full w-full p-[0.8vw]">
+  <div className="dark:bg-gray-900 bg-gray-200 h-full w-full p-[0.8vw]">
     {showHistory ? (
-      <div className="dark:bg-[#1f345f] text-white w-full h-full p-[2vw]">
+      <div className="dark:bg-gray-900 text-white w-full h-full p-[2vw]">
         <div className="flex justify-between items-center mb-[2vw]">
           <h3 className="font-bold text-[1.5vw]">History</h3>
           <button
@@ -136,7 +119,7 @@ function Calculator() {
           {["C", "%", "(", ")"].map((val, i) => (
             <button
               key={val}
-              className={`p-[1.4vw] rounded-md text-[1vw] font-bold bg-gray-300 dark:bg-[#4a5b8a] text-gray-500 hover:text-gray-100 transition-all dark:text-white hover:bg-gray-600`}
+              className={`p-[1.4vw]    text-[1vw]  font-bold bg-gray-100 text-blue-400 dark:text-blue-500  dark:bg-gray-800/50 dark:hover:bg-gray-800  hover:text-gray-800 transition-all  hover:bg-gray-50`}
               onClick={() => handleCalcInput(val)}
             >
               {val}
@@ -145,23 +128,23 @@ function Calculator() {
           {["7", "8", "9", "/"].map((val, i) => (
             <button
               key={val}
-              className={`p-[1.4vw] rounded-md text-[1vw] font-bold ${
+              className={`p-[1.4vw]    text-[1vw]  font-bold ${
                 i === 3
-                  ? "bg-gray-600 hover:bg-gray-800  dark:bg-[#ff9502] text-gray-100 hover:text-gray-100 transition-all dark:text-white"
-                  : "bg-gray-300 dark:bg-[#4a5b8a] text-gray-500 hover:text-gray-100 transition-all dark:text-white hover:bg-gray-600"
+                  ? "bg-blue-500 hover:bg-blue-400  dark:bg-blue-500 dark:hover:bg-blue-800 text-gray-100 hover:text-gray-100 transition-all dark:text-white"
+                  : "bg-gray-100 dark:bg-gray-800/50 dark:hover:bg-gray-800 text-gray-500 hover:text-gray-800 transition-all dark:text-white hover:bg-gray-50"
               }`}
               onClick={() => handleCalcInput(val)}
             >
               {val}
             </button>
           ))}
-          {["4", "5", "6", "*"].map((val, i) => (
+          {["4", "5", "6", "x"].map((val, i) => (
             <button
               key={val}
-              className={`p-[1.4vw] rounded-md text-[1vw] font-bold ${
+              className={`p-[1.4vw]    text-[1vw]  font-bold ${
                 i === 3
-                  ? "bg-gray-600 hover:bg-gray-800  dark:bg-[#ff9502] text-gray-100 hover:text-gray-100 transition-all dark:text-white"
-                  : "bg-gray-300 dark:bg-[#4a5b8a] text-gray-500 hover:text-gray-100 transition-all dark:text-white hover:bg-gray-600"
+                  ? "bg-blue-500 hover:bg-blue-400  dark:bg-blue-500 dark:hover:bg-blue-800 text-gray-100 hover:text-gray-100 transition-all dark:text-white"
+                  : "bg-gray-100 dark:bg-gray-800/50 dark:hover:bg-gray-800 text-gray-500 hover:text-gray-800 transition-all dark:text-white hover:bg-gray-50"
               }`}
               onClick={() => handleCalcInput(val)}
             >
@@ -171,10 +154,10 @@ function Calculator() {
           {["1", "2", "3", "-"].map((val, i) => (
             <button
               key={val}
-              className={`p-[1.4vw] rounded-md text-[1vw] font-bold ${
+              className={`p-[1.4vw]    text-[1vw]  font-bold ${
                 i === 3
-                  ? "bg-gray-600 hover:bg-gray-800 dark:bg-[#ff9502] text-gray-100 hover:text-gray-100 transition-all dark:text-white"
-                  : "bg-gray-300 dark:bg-[#4a5b8a] text-gray-500 hover:text-gray-100 transition-all dark:text-white hover:bg-gray-600"
+                  ? "bg-blue-500 hover:bg-blue-400 dark:bg-blue-500 dark:hover:bg-blue-800 text-gray-100 hover:text-gray-100 transition-all dark:text-white"
+                  : "bg-gray-100 dark:bg-gray-800/50 dark:hover:bg-gray-800 text-gray-500 hover:text-gray-800 transition-all dark:text-white hover:bg-gray-50"
               }`}
               onClick={() => handleCalcInput(val)}
             >
@@ -182,25 +165,25 @@ function Calculator() {
             </button>
           ))}
           <button
-            className="p-[1.4vw] rounded-md text-[1vw] font-bold flex justify-center bg-gray-300 dark:bg-[#4a5b8a] text-gray-500 hover:text-gray-100 transition-all dark:text-white hover:bg-gray-600"
+            className="p-[1.4vw]    text-[1vw]  font-bold flex justify-center bg-gray-100 dark:bg-gray-800/50 dark:hover:bg-gray-800 text-gray-500 hover:text-gray-800 transition-all dark:text-white hover:bg-gray-50"
             onClick={toggleHistory}
           >
-            <FaHistory className="mt-[0.5vw]" />
+            <FaHistory  className="mt-[0.3vw] text-blue-400 dark:text-blue-500 " />
           </button>
           <button
-            className="p-[1vw] col-span-1 rounded-md text-[1.5vw] font-bold bg-gray-300 dark:bg-[#4a5b8a] text-gray-500 hover:text-gray-100 transition-all dark:text-white hover:bg-gray-600"
+            className="p-[1vw] col-span-1    text-[1vw]   font-bold bg-gray-100 dark:bg-gray-800/50 dark:hover:bg-gray-800 text-gray-500 hover:text-gray-800 transition-all dark:text-white hover:bg-gray-50"
             onClick={() => handleCalcInput("0")}
           >
             0
           </button>
           <button
-            className="p-[1.4vw] rounded-md text-[1vw] font-bold bg-gray-300 dark:bg-[#4a5b8a] text-gray-500 hover:text-gray-100 transition-all dark:text-white hover:bg-gray-600"
+            className="p-[1.4vw]  text-blue-400 dark:text-blue-500   text-[1vw]  font-bold bg-gray-100 dark:bg-gray-800/50 dark:hover:bg-gray-800 hover:text-gray-800 transition-all  hover:bg-gray-50"
             onClick={() => handleCalcInput(".")}
           >
             .
           </button>
           <button
-            className="p-[1.4vw] rounded-md text-[1vw] font-bold bg-gray-600 hover:bg-gray-800 dark:bg-[#ff9502] text-gray-100 hover:text-gray-100 transition-all dark:text-white"
+            className="p-[1.4vw] text-[1vw] font-bold bg-blue-500 hover:bg-blue-400 dark:bg-blue-500 dark:hover:bg-blue-800 text-gray-100 hover:text-gray-100 transition-all dark:text-white"
             onClick={() => handleCalcInput("=")}
           >
             =
