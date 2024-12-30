@@ -226,7 +226,7 @@ const Top100Page = () => {
 
       // For API data, use the backend caching service
       // console.log(`Calling backend cache service for ${category}`);
-      const response = await fetch(`http://localhost:3001/api/top100/${category}?year=${year}`);
+      const response = await fetch(`https://bgs-backend.vercel.app/api/top100/${category}?year=${year}`);
       
       // Log the response status and headers
       // console.log('Response status:', response.status);
