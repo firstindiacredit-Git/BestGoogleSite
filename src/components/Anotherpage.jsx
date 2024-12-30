@@ -221,7 +221,9 @@ const Anotherpage = ({ backgroundImage }) => {
     });
     return columnsArray;
   };
-
+if(!user){
+  return <div className="text-gray-500 text-5xl  my-20"><h1 className="text-center font-bold">LOGIN TO UNLOCK MORE FEATURES</h1></div>
+}
   return (
     <div style={{ position: "relative" }}>
       <div className="flex items-center gap-2 w-fit mx-auto my-4 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
@@ -270,8 +272,9 @@ const Anotherpage = ({ backgroundImage }) => {
           </svg>
         </button>
       </div>
+      <div className="flex justify-center">
       <div
-        className={`bg-white dark:bg-gray-800 flex justify-center rounded-xl`}
+        className={`bg-white w-fit dark:bg-gray-800 flex justify-center rounded-xl`}
         style={{
           backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",
           backgroundSize: "cover",
@@ -279,7 +282,7 @@ const Anotherpage = ({ backgroundImage }) => {
           backgroundAttachment: "fixed",
         }}
       >
-        <div className="p-4 w-fit">
+        <div className="p-4 ">
           {loading ? (
             <div className="flex justify-center items-center min-h-screen">
               <Spin size="large" />
@@ -344,12 +347,12 @@ const Anotherpage = ({ backgroundImage }) => {
                                       transition={{ duration: 0.1 }}
                                     > 
                                        
-                                      <div className=" rounded-b-lg overflow-clip">{componentMap[item.id]}</div>
+                                      <div className=" rounded-b-lg overflow">{componentMap[item.id]}</div>
                                     </motion.div>
                                   </>
                                 ) : (
                                   <>
-                                    <motion.div className="w-full text-left py-2 px-4  dark:border-gray-500 rounded-lg bg-gray-100 dark:bg-gray-700 dark:text-white font-semibold flex items-center">
+                                    <motion.div className="w-full min-w-[20vw] text-left py-2 px-4  dark:border-gray-500 rounded-lg bg-gray-100 dark:bg-gray-700 dark:text-white font-semibold flex items-center">
                                       <div
                                         {...provided.dragHandleProps}
                                         className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
@@ -371,7 +374,7 @@ const Anotherpage = ({ backgroundImage }) => {
                                         exit={{ height: 0, opacity: 0 }}
                                         transition={{ duration: 0.3 }}
                                       >
-                                         <div className=" rounded-b-lg overflow-clip">{componentMap[item.id]}</div>
+                                         <div className=" rounded-b-lg overflow">{componentMap[item.id]}</div>
                                       </motion.div>
                                     )}
                                   </>
@@ -389,6 +392,7 @@ const Anotherpage = ({ backgroundImage }) => {
             </DragDropContext>
           )}
         </div>
+      </div>
       </div>
 
       {/* Floating Sort Button */}

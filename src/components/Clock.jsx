@@ -2,11 +2,14 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import moment from "moment-timezone";
 import { IoCloseOutline } from "react-icons/io5";
+import { CiEdit } from "react-icons/ci";
+import { Button, Row, Col, Select, Dropdown, Menu } from "antd";
 
 const ClockApp = () => {
   const [clockStyle, setClockStyle] = useState("digital");
   const [clocks, setClocks] = useState([]);
   const [selectedCountries, setSelectedCountries] = useState([]);
+  const [dropdownVisible, setDropdownVisible] = useState(false);
 
   const availableCountries = [
     { label: "USA", timezone: "America/New_York" },
@@ -63,9 +66,6 @@ const ClockApp = () => {
         "selectedCountries",
         JSON.stringify(updatedCountries)
       );
-      
-    } else if (selectedCountries.length >= 4) {
-  
     }
   };
 
@@ -82,58 +82,83 @@ const ClockApp = () => {
       .tz(timezone)
       .format(clockStyle === "digital" ? "HH:mm" : "h:mm A");
 
+  const menu = (
+    <Menu>
+      <Menu.Item>
+        <select
+          onChange={(e) => handleClockStyleChange(e.target.value)}
+          value={clockStyle}
+          className="px-4 py-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option className="text-[14px]" value="digital">
+            Digital
+          </option>
+          <option className="text-[14px]" value="analog">
+            Analog
+          </option>
+        </select>
+      </Menu.Item>
+      <Menu.Item>
+        <Select
+          onChange={(value) => handleAddClock(value)}
+          className="border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Select a country"
+          style={{ width: 100 }}
+        >
+          {availableCountries.map((country) => (
+            <Select.Option key={country.label} value={country.label}>
+              {country.label}
+            </Select.Option>
+          ))}
+        </Select>
+      </Menu.Item>
+    </Menu>
+  );
+
   return (
-    <div className="flex flex-col min-h-[10rem] items-center  p-4 justify-center">
+    <div className="flex flex-col min-h-[10rem] items-center p-4 justify-center">
       <StyledWrapper>
-        <div className="flex text-[14px] gap-3">
-          <select
-            onChange={(e) => handleClockStyleChange(e.target.value)}
-            value={clockStyle}
-            className="px-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        <div className=" right-0 flex justify-end">
+          <Dropdown
+            overlay={menu}
+            trigger={["click"]}
+            visible={dropdownVisible}
+            onVisibleChange={(visible) => setDropdownVisible(visible)}
           >
-            <option className="text-[14px]" value="digital">
-              Digital
-            </option>
-            <option className="text-[14px]" value="analog">
-              Analog
-            </option>
-          </select>
-          <select
-            onChange={(e) => handleAddClock(e.target.value)}
-            className="border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Select a country</option>
-            {availableCountries.map((country) => (
-              <option key={country.label} value={country.label}>
-                {country.label}
-              </option>
-            ))}
-          </select>
+            <Button
+              icon={<CiEdit />}
+              size="large"
+              className="hover:bg-blue-500"
+            />
+          </Dropdown>
         </div>
 
-        <div className="grid justify-items-between items-center grid-cols-1 sm:grid-cols-2 lg:grid-cols-4  ">
-          <div className="w-80 mx-auto -ml-7 justify-between">
-            <div className="justify-center flex flex-grow-0 w-full m-auto ">
-              {clocks.map((clock) => (
-                <div key={clock.label} className="card relative group">
-                  <Clock clockStyle={clockStyle} timezone={clock.timezone} />
-                  <h2 className="text-xs ml-2 font-mono text-center dark:text-white">
-                    {clock.label}
-                  </h2>
-                  <button
+        <Row gutter={[16, 16]} justify="center">
+          {clocks.map((clock) => (
+            <Col xs={24} sm={12} md={6} key={clock.label}>
+              <div className="card flex flex-col justify-between relative group hover:opacity-100 transition-opacity duration-300">
+                <Clock clockStyle={clockStyle} timezone={clock.timezone} />
+                <div className="absolute top-2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <Button
                     onClick={() => handleRemoveClock(clock.label)}
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-white  hover:bg-red-500 hover:text-black rounded-2xl transition-opacity"
-                  >
-                    <IoCloseOutline size={24} />
-                  </button>
+                    icon={<IoCloseOutline />}
+                    shape="circle"
+                    size="large"
+                    style={{
+                      opacity: 1,
+                      zIndex: 10,
+                    }}
+                    className="bg-white hover:bg-red-500 hover:text-black"
+                  />
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
+                <p className="country-name text-[12px] dark:text-white mt-1 text-center">
+                  {clock.label}
+                </p>
+              </div>
+            </Col>
+          ))}
+        </Row>
       </StyledWrapper>
-      {/* <ToastContainer /> */}
-      {/* <ToastContainer /> */}
     </div>
   );
 };
@@ -157,9 +182,10 @@ const Clock = ({ clockStyle, timezone }) => {
 
 const DigitalClock = ({ time }) => (
   <DigitalClockWrapper>
-    <h2 className="digital-clock-text ">{time.format("HH:mm")}</h2>
+    <h2 className="digital-clock-text">{time.format("HH:mm")}</h2>
   </DigitalClockWrapper>
 );
+
 const AnalogClock = ({ time }) => {
   const hours = time.hours() % 12;
   const minutes = time.minutes();
@@ -219,6 +245,7 @@ const StyledWrapper = styled.div`
     padding: 20px;
     text-align: center;
     width: 80px;
+    position: relative;
   }
 `;
 
@@ -228,7 +255,7 @@ const DigitalClockWrapper = styled.div`
   align-items: center;
   height: 25px;
   width: 69px;
-  margin-left: -5px;
+  // margin-left: px;
   background: #111;
   border-radius: 10%;
 

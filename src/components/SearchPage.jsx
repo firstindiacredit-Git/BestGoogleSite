@@ -107,7 +107,7 @@ function SearchPage() {
 
   return (
     <div
-      className="bg-white dark:bg-gray-900 min-h-screen pb-8"
+      className="bg-white dark:bg-gray-900 min-h-screen pb-10"
       
     >
       <Header
