@@ -107,12 +107,15 @@ function PopularBookmarks() {
     }
   };
 
-  if (loading) {
+  if (loading && user) {
     return (
       <div className="flex justify-center items-center h-screen">
         <Spin size="large" />
       </div>
     );
+  }
+  if(!user){
+    return <div className="text-gray-500 text-5xl  my-20"><h1 className="text-center font-bold">LOGIN TO UNLOCK MORE FEATURES</h1></div>
   }
 
   return (

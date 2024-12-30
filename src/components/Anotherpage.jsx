@@ -16,8 +16,6 @@ import {
   getPageLayout,
   updatePageLayout,
   getAvailableWidgets,
-  getAdminData,
-  getUserData
 } from "../firebase/widgetLayouts";
 import TodoComponent from "./TodoComponent.jsx";
 
@@ -32,77 +30,37 @@ const Anotherpage = ({ backgroundImage }) => {
   const [isApplying, setIsApplying] = useState(false);
   const [previewColumns, setPreviewColumns] = useState(3);
   const [availableWidgets, setAvailableWidgets] = useState([]);
-  const [widgetData, setWidgetData] = useState({
-    todos: [],
-    notes: [],
-    bookmarks: [],
-    images: []
-  });
-
-  useEffect(() => {
-    const authInstance = getAuth();
-    const unsubscribe = onAuthStateChanged(authInstance, async (currentUser) => {
-      setUser(currentUser);
-      setLoading(true);
-
-      try {
-        // Try to get data from localStorage first
-        const cachedData = localStorage.getItem('widgetData');
-        if (cachedData) {
-          setWidgetData(JSON.parse(cachedData));
-        }
-
-        let data;
-        if (currentUser) {
-          // If user is logged in, get their data
-          data = await getUserData(currentUser.uid);
-          if (!data) {
-            // If no user data, fall back to admin data
-            data = await getAdminData();
-          }
-        } else {
-          // If no user, get admin data
-          data = await getAdminData();
-        }
-
-        if (data) {
-          setWidgetData(data);
-          localStorage.setItem('widgetData', JSON.stringify(data));
-        }
-
-        // Load layout
-        const layout = currentUser
-          ? await getPageLayout(currentUser.uid, "home")
-          : defaultWidgets.home;
-
-        setItems(layout || defaultWidgets.home);
-        
-        if (currentUser) {
-          const available = getAvailableWidgets(layout || []);
-          setAvailableWidgets(available);
-        } else {
-          setAvailableWidgets(Object.values(allWidgets));
-        }
-      } catch (error) {
-        console.error('Error initializing data:', error);
-      } finally {
-        setLoading(false);
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
 
   const componentMap = {
     clock: <Clock />,
     weather: <Weather />,
     calculator: <Calculator />,
-    notepad: <NotePage data={widgetData.notes} />,
-    imageUploader: <ImageUploader data={widgetData.images} />,
+    notepad: <NotePage />,
+    imageUploader: <ImageUploader />,
     calendar: <Calendar />,
-    Bookmarks: <Category data={widgetData.bookmarks} />,
-    Todo: <TodoComponent data={widgetData.todos} />,
+    Bookmarks: <Category />,
+    Todo: <TodoComponent />,
   };
+
+  // Load user and layout
+  useEffect(() => {
+    const authInstance = getAuth();
+    const unsubscribe = onAuthStateChanged(
+      authInstance,
+      async (currentUser) => {
+        setUser(currentUser);
+        if (currentUser) {
+          const layout = await getPageLayout(currentUser.uid, "home");
+          setItems(layout.widgets);
+          setColumns(layout.columns);
+          setLoading(false);
+        } else {
+          setLoading(false);
+        }
+      }
+    );
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     if (isSorterOpen) {
@@ -263,7 +221,9 @@ const Anotherpage = ({ backgroundImage }) => {
     });
     return columnsArray;
   };
-
+if(!user){
+  return <div className="text-gray-500 text-5xl  my-20"><h1 className="text-center font-bold">LOGIN TO UNLOCK MORE FEATURES</h1></div>
+}
   return (
     <div style={{ position: "relative" }}>
       <div className="flex items-center gap-2 w-fit mx-auto my-4 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
@@ -368,9 +328,55 @@ const Anotherpage = ({ backgroundImage }) => {
                                 className=" bg-white dark:bg-gray-700 mb-4 border-collapse dark:border-gray-700 dark:drop-shadow-md border-1 border rounded-lg"
                               >
                                 {grid ? (
-                                  <></>
+                                  <>
+                                    <motion.div className="w-full text-left py-2 px-4  rounded-lg bg-gray-100 dark:bg-gray-700 dark:text-white font-semibold flex items-center">
+                                      <div
+                                        {...provided.dragHandleProps}
+                                        className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                                      >
+                                        ⋮⋮
+                                      </div>
+                                        {item.name}
+                                    </motion.div>
+                                    <motion.div
+                                      className=" bg-gray-50 dark:bg-gray-900 rounded-b-lg"
+                                      initial={{ height: 0, opacity: 0 }}
+                                      animate={{ height: "auto", opacity: 1 }}
+                                      exit={{ height: 0, opacity: 0 }}
+                                      transition={{ duration: 0.1 }}
+                                    > 
+                                       
+                                      <div className=" rounded-b-lg overflow-clip">{componentMap[item.id]}</div>
+                                    </motion.div>
+                                  </>
                                 ) : (
-                                  <></>
+                                  <>
+                                    <motion.div className="w-full text-left py-2 px-4  dark:border-gray-500 rounded-lg bg-gray-100 dark:bg-gray-700 dark:text-white font-semibold flex items-center">
+                                      <div
+                                        {...provided.dragHandleProps}
+                                        className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                                      >
+                                        ⋮⋮
+                                      </div>
+                                      <button
+                                        onClick={() => toggleDropdown(item.id)}
+                                        className="flex-grow text-left focus:outline-none"
+                                      >
+                                        {item.name}
+                                      </button>
+                                    </motion.div>
+                                    {item.isOpen && (
+                                      <motion.div
+                                        className=" bg-gray-50 dark:bg-gray-900 rounded-b-lg p-4"
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: "auto", opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        transition={{ duration: 0.3 }}
+                                      >
+                                         <div className=" rounded-b-lg overflow-clip">{componentMap[item.id]}</div>
+                                      </motion.div>
+                                    )}
+                                  </>
                                 )}
                               </div>
                             )}
@@ -471,7 +477,164 @@ const Anotherpage = ({ backgroundImage }) => {
             <Spin size="large" />
           </div>
         ) : (
-          <></>
+          <>
+            <div className="mb-6 flex items-center justify-between">
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                Select number of columns:
+              </div>
+              <div className="flex gap-2">
+                {[1, 2, 3, 4].map((num) => (
+                  <AntButton
+                    key={num}
+                    type={previewColumns === num ? "primary" : "default"}
+                    onClick={() => handleColumnChange(num)}
+                    className={
+                      previewColumns === num ? "" : "hover:border-primary"
+                    }
+                    size="small"
+                  >
+                    {num}
+                  </AntButton>
+                ))}
+              </div>
+            </div>
+            <DragDropContext onDragEnd={handleSortEnd}>
+              <div
+                className="sort-columns-container"
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: `repeat(${previewColumns}, 1fr)`,
+                  gap: "16px",
+                  marginBottom: "20px",
+                  maxHeight: "60vh",
+                  overflowY: "auto",
+                  padding: "8px",
+                }}
+              >
+                {Array.from({ length: previewColumns }).map(
+                  (_, columnIndex) => (
+                    <Droppable
+                      key={columnIndex}
+                      droppableId={String(columnIndex)}
+                    >
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.droppableProps}
+                          className="sort-column"
+                          style={{
+                            padding: "12px",
+                            backgroundColor: snapshot.isDraggingOver
+                              ? "rgba(24, 144, 255, 0.1)"
+                              : "rgba(0, 0, 0, 0.02)",
+                            borderRadius: "8px",
+                            minHeight: "150px",
+                            transition: "background-color 0.2s ease",
+                            border: snapshot.isDraggingOver
+                              ? "2px dashed #1890ff"
+                              : "2px solid transparent",
+                            display: "flex",
+                            flexDirection: "column",
+                          }}
+                        >
+                          <div
+                            className="column-header"
+                            style={{
+                              marginBottom: "12px",
+                              fontWeight: "bold",
+                              color: "#1890ff",
+                            }}
+                          >
+                            Column {columnIndex + 1}
+                          </div>
+                          <div
+                            className="items-container"
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: "8px",
+                              flexGrow: 1,
+                            }}
+                          >
+                            {sortedItems
+                              .filter((item) => item.column === columnIndex)
+                              .map((item, index) => (
+                                <Draggable
+                                  key={item.id}
+                                  draggableId={item.id}
+                                  index={index}
+                                >
+                                  {(provided, snapshot) => (
+                                    <div
+                                      ref={provided.innerRef}
+                                      {...provided.draggableProps}
+                                      className="bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600"
+                                      style={{
+                                        ...provided.draggableProps.style,
+                                        opacity: snapshot.isDragging ? 0.9 : 1,
+                                        transform: snapshot.isDragging
+                                          ? `${provided.draggableProps.style.transform} scale(1.05)`
+                                          : provided.draggableProps.style
+                                              .transform,
+                                      }}
+                                    >
+                                      <div className="flex items-center p-2 gap-2">
+                                        <div
+                                          {...provided.dragHandleProps}
+                                          className="cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                        >
+                                          ⋮⋮
+                                        </div>
+                                        <span className="text-gray-700 dark:text-gray-200 flex-grow">
+                                          {item.name}
+                                        </span>
+                                        <AntButton
+                                          type="text"
+                                          icon={<DeleteOutlined />}
+                                          onClick={() =>
+                                            handleRemoveWidget(item.id)
+                                          }
+                                          className="text-gray-400 hover:text-red-500"
+                                          size="small"
+                                        />
+                                      </div>
+                                    </div>
+                                  )}
+                                </Draggable>
+                              ))}
+                            {provided.placeholder}
+                          </div>
+                          {availableWidgets.length > 0 && (
+                            <div className="mt-4 p-2 border-t border-gray-200 dark:border-gray-600">
+                              <div className="text-sm text-gray-500 mb-2">
+                                Add Widget:
+                              </div>
+                              <div className="flex flex-wrap gap-2">
+                                {availableWidgets.map((widget) => (
+                                  <AntButton
+                                    key={widget.id}
+                                    onClick={() =>
+                                      handleAddWidget(columnIndex, widget)
+                                    }
+                                    icon={<PlusOutlined />}
+                                    size="small"
+                                    type="dashed"
+                                    className="flex items-center"
+                                  >
+                                    {widget.name}
+                                  </AntButton>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </Droppable>
+                  )
+                )}
+              </div>
+            </DragDropContext>
+          </>
         )}
       </Modal>
     </div>

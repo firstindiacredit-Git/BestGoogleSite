@@ -11,8 +11,8 @@ import {
 import { HiOutlineNumberedList } from "react-icons/hi2";
 import { RxHamburgerMenu } from "react-icons/rx";
 
-const NotePage = ({ data = [] }) => {
-  const [notes, setNotes] = useState(data);
+const NotePage = ({ data = "" }) => {
+  const [notes, setNotes] = useState(typeof data === 'string' ? data : '');
   const [isBold, setIsBold] = useState(false);
   const [isUnderline, setIsUnderline] = useState(false);
   const [fontSize, setFontSize] = useState(14);
@@ -75,10 +75,15 @@ const NotePage = ({ data = [] }) => {
     const savedBackground = localStorage.getItem("noteBackground");
     const savedLineColor = localStorage.getItem("lineColor");
 
-    if (data.length > 0) {
+    if (typeof data === 'string' && data.length > 0) {
       setNotes(data);
     } else if (savedNotes) {
-      setNotes(JSON.parse(savedNotes));
+      try {
+        const parsedNotes = JSON.parse(savedNotes);
+        setNotes(typeof parsedNotes === 'string' ? parsedNotes : '');
+      } catch (e) {
+        setNotes(savedNotes); // If parsing fails, use as-is
+      }
     }
 
     if (savedBackground) setBackgroundColor(savedBackground);
@@ -193,7 +198,7 @@ const NotePage = ({ data = [] }) => {
   };
 
   const getLineCount = () => {
-    return notes.split("\n").length;
+    return (typeof notes === 'string' ? notes : '').split("\n").length;
   };
 
   const textColor = getTextColor();
