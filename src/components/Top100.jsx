@@ -267,7 +267,7 @@ const Top100Page = () => {
         case 'billionaires':
           processedData = data.map(person => ({
             name: person.personName,
-            description: `Net Worth: $${person.finalWorth}B, Source: ${person.source}, Country: ${person.countryOfCitizenship}`,
+            description: `Net Worth: $${(parseInt(person.finalWorth) / 1000).toFixed(1)}B, Source: ${person.source}, Country: ${person.countryOfCitizenship}`,
             image: person.person?.squareImage || null
           }));
           break;
@@ -343,9 +343,9 @@ const Top100Page = () => {
                         }} 
                       />
                     )}
-                    <span>{item.originalIndex + 1}. {item.name?.split(',')[0] || item.name}</span>
+                    <span>{item.originalIndex + 1}. {item.name}</span>
                   </div>
-                  <span>{item.description?.includes('$') ? item.description.split('$')[1]?.split(',')[0] : ''}</span>
+                  <span>{item.description?.split('Net Worth: ')[1]?.split(',')[0]}</span>
                 </div>
               ) : category === 'crypto' ? (
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -490,9 +490,9 @@ const Top100Page = () => {
                         }} 
                       />
                     )}
-                    <span>{item.originalIndex + 1}. {item.name?.split(',')[0] || item.name}</span>
+                    <span>{item.originalIndex + 1}. {item.name}</span>
                   </div>
-                  <span>{item.description?.includes('$') ? item.description.split('$')[1]?.split(',')[0] : ''}</span>
+                  <span>{item.description?.split('Net Worth: ')[1]?.split(',')[0]}</span>
                 </div>
               ) : category === 'crypto' ? (
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -525,7 +525,7 @@ const Top100Page = () => {
         {/* Category Selection */}
         <div style={{ textAlign: 'center' }}>
           <Radio.Group value={category} onChange={(e) => setCategory(e.target.value)} buttonStyle="solid">
-            <Radio.Button value="motorcycles">Motorcycles</Radio.Button>
+            <Radio.Button value="motorcycles">Bikes</Radio.Button>
             <Radio.Button value="cars">Cars</Radio.Button>
             <Radio.Button value="crypto">Crypto</Radio.Button>
             <Radio.Button value="stocks">Stocks</Radio.Button>
