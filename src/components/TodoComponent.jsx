@@ -166,7 +166,7 @@ const TodoComponent = () => {
       className="container mx-auto rounded-md"
       style={{ backgroundColor: containerColor, color: textColor }}
     >
-      <div className="bg-transparent w-full rounded-lg shadow-xl p-6">
+      <div className="bg-transparent w-full rounded-lg shadow-xl p-6 relative">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">Todo List</h2>
           <button
@@ -177,6 +177,39 @@ const TodoComponent = () => {
             <Palette className="w-5 h-5" />
           </button>
         </div>
+
+        {showColorPicker && (
+          <div
+            ref={colorPickerRef}
+            className="absolute -mt-5 right-0 bg-white border rounded shadow-lg p-3 z-50 w-48 "
+          >
+            <div className="grid grid-cols-7 gap-1">
+              {predefinedColors.map((color) => (
+                <button
+                  key={color}
+                  onClick={() => {
+                    setContainerColor(color);  
+                  }}
+                  style={{
+                    backgroundColor: color,
+                  }}
+                  className="h-5 w-5 border cursor-pointer focus:outline-none"
+                  aria-label={`Select color ${color}`}
+                ></button>
+              ))}
+            </div>
+            <div className="col-span-full flex justify-center mt-1">
+              <input
+                id="customColorPicker"
+                type="color"
+                className="w-full h-6  rounded-md cursor-pointer "
+                onChange={(e) => {
+                  setContainerColor(e.target.value);  
+                }}
+              />
+            </div>
+          </div>
+        )}
 
         <form onSubmit={editingId ? submitEdit : addTodo} className="mb-6">
           <div className="flex gap-2 relative">
@@ -193,40 +226,6 @@ const TodoComponent = () => {
             >
               {editingId ? "Update" : "Add"}
             </button>
-
-            {showColorPicker && (
-              <div
-                ref={colorPickerRef}
-                className="absolute z-50 right-1 grid w-[10vw] grid-cols-7 gap-2 p-[0.8vw] bg-white border rounded-md shadow-md"
-                style={{ top: "-20px", left: "224px", zIndex: "999" }}
-              >
-                {predefinedColors.map((color) => (
-                  <button
-                    key={color}
-                    onClick={() => {
-                      setContainerColor(color);
-                      setShowColorPicker(false);
-                    }}
-                    style={{
-                      backgroundColor: color,
-                    }}
-                    className="h-[1vw] w-[1vw] border cursor-pointer focus:outline-none"
-                    aria-label={`Select color ${color}`}
-                  ></button>
-                ))}
-                <div className="col-span-full flex justify-center">
-                  <input
-                    id="customColorPicker"
-                    type="color"
-                    className="w-full h-[2vw] border-gray-300 rounded-md cursor-pointer focus:outline-none"
-                    onChange={(e) => {
-                      setContainerColor(e.target.value);
-                      setShowColorPicker(false);
-                    }}
-                  />
-                </div>
-              </div>
-            )}
           </div>
         </form>
 

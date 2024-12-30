@@ -21,7 +21,6 @@ const ProfilePage = () => {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
 
-  // PIN Change State
   const [userId, setUserId] = useState(null);
   const [userPin, setUserPin] = useState("");
   const [newPin, setNewPin] = useState(["", "", "", ""]);
@@ -29,7 +28,6 @@ const ProfilePage = () => {
 
   const navigate = useNavigate();
 
-  // Navigation handlers
   const handleGoBack = () => {
     navigate(-1);
   };
@@ -88,27 +86,21 @@ const ProfilePage = () => {
      const currentUser = auth.currentUser;
      if (!currentUser) throw new Error("No user logged in");
 
-     // Compress image before upload
      const compressedImage = await compressImage(file);
 
-     // Create storage path that matches our rules
      const timestamp = Date.now();
      const filename = `${timestamp}_${file.name}`;
      const storageRef = ref(storage, `avatars/${currentUser.uid}/${filename}`);
 
-     // Upload the file
      const uploadTask = await uploadBytes(storageRef, compressedImage);
      console.log("Upload successful:", uploadTask);
 
-     // Get download URL
      const downloadURL = await getDownloadURL(storageRef);
 
-     // Update user profile
      await updateProfile(currentUser, {
        photoURL: downloadURL,
      });
 
-     // Update Firestore document
      const userRef = doc(db, "users", currentUser.uid);
      await updateDoc(userRef, {
        avatarUrl: downloadURL,

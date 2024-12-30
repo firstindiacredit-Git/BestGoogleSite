@@ -92,7 +92,7 @@ const NotePage = () => {
       return () => {
         document.removeEventListener("mousedown", handleClickOutside);
       };
-    }, [colorPickerRef]);
+    }, []);
 
   useEffect(() => {
     localStorage.setItem("notes", notes);
@@ -193,7 +193,7 @@ const NotePage = () => {
   const lineColor = getLineColor();
 
   return (
-    <div >
+    <div>
       <div className="">
         <div className="overflow-hidden" style={{ backgroundColor }}>
           <div className="p-2" style={{ backgroundColor }}>
@@ -214,14 +214,16 @@ const NotePage = () => {
                 <div className="relative" ref={colorPickerRef}>
                   <button
                     className="p-2 rounded-lg hover:bg-opacity-20 hover:bg-gray-500 transition duration-200"
-                    onClick={() => setShowColorPicker(!showColorPicker)}
+                    onClick={() => setShowColorPicker((prev) => !prev)}
                     title="Change Background Color"
                     style={{ color: textColor }}
                   >
                     <Palette className="w-5 h-5" />
                   </button>
-                  {showColorPicker && ( // Render only if the color picker should be visible
-                    <div className="absolute w-48 right-0 z-50 -mt-2 bg-white border rounded shadow-lg p-3">
+                  {showColorPicker && (
+                    <div
+                     className="absolute w-48 right-0 z-50 -mt-2 bg-white border rounded shadow-lg p-3"
+                     >
                       {/* Predefined Colors */}
                       <div className="grid grid-cols-7 gap-1">
                         {predefinedColors.map((color) => (
@@ -229,10 +231,7 @@ const NotePage = () => {
                             key={color}
                             className="w-5 h-5 border border-gray-200 cursor-pointer transition duration-300 ease-in-out transform hover:scale-125 focus:outline-none"
                             style={{ backgroundColor: color }}
-                            onClick={() => {
-                              setBackgroundColor(color);
-                              setShowColorPicker(false);
-                            }}
+                            onClick={() => setBackgroundColor(color)} 
                           />
                         ))}
                       </div>
@@ -243,10 +242,8 @@ const NotePage = () => {
                           id="customColorPicker"
                           type="color"
                           className="w-full h-6 p-0 border border-gray-300 rounded-md cursor-pointer focus:outline-none"
-                          onChange={(e) => {
-                            setBackgroundColor(e.target.value);
-                            setShowColorPicker(false);
-                          }}
+                          value={backgroundColor}
+                          onChange={(e) => setBackgroundColor(e.target.value)} 
                         />
                       </div>
                     </div>
@@ -301,7 +298,7 @@ const NotePage = () => {
                   fontWeight: isBold ? "bold" : "normal",
                   textDecoration: isUnderline ? "underline" : "none",
                   backgroundImage: `linear-gradient(to bottom,transparent 30px,${lineColor} 31px,transparent 49px)`,
-                  placeholderColor:textColor
+                  placeholderColor: textColor,
                 }}
                 placeholder="Start typing your notes here..."
               />

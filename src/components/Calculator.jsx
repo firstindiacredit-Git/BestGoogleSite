@@ -34,8 +34,8 @@ function Calculator() {
       }
     };
   
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
+    // window.addEventListener("keydown", handleKeyPress);
+    // return () => window.removeEventListener("keydown", handleKeyPress);
   }, [calcInput]);
 
   const handleCalcInput = (value) => {
