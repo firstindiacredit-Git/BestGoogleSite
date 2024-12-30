@@ -1,13 +1,32 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Check, Edit, Trash2, Palette } from "lucide-react";
 
+const isLight = (color) => {
+  const r = parseInt(color.substr(1, 2), 16);
+  const g = parseInt(color.substr(3, 2), 16);
+  const b = parseInt(color.substr(5, 2), 16);
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+  return brightness > 128;
+};
+
 const TodoComponent = ({ data = [] }) => {
-  const [todos, setTodos] = useState(data);
+  // If data is provided (user logged in), use it. Otherwise check localStorage
+  const [todos, setTodos] = useState(() => {
+    if (data.length > 0) return data;
+    const savedTodos = localStorage.getItem("todos");
+    return savedTodos ? JSON.parse(savedTodos) : [];
+  });
+  
   const [inputValue, setInputValue] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
-  const [containerColor, setContainerColor] = useState("#f0f9ff");
-  const [textColor, setTextColor] = useState("#000");
+  const [containerColor, setContainerColor] = useState(() => {
+    return localStorage.getItem("containerColor") || "#f0f9ff";
+  });
+  const [textColor, setTextColor] = useState(() => {
+    const color = localStorage.getItem("containerColor") || "#f0f9ff";
+    return isLight(color) ? "#000" : "#fff";
+  });
   const [draggedItemIndex, setDraggedItemIndex] = useState(null);
   const [dragOverIndex, setDragOverIndex] = useState(null);
 
@@ -52,39 +71,25 @@ const TodoComponent = ({ data = [] }) => {
     "#FF69B4",
   ];
 
-  const isLight = (color) => {
-    const r = parseInt(color.substr(1, 2), 16);
-    const g = parseInt(color.substr(3, 2), 16);
-    const b = parseInt(color.substr(5, 2), 16);
-    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-    return brightness > 128;
-  };
+  // Only save to localStorage if no data prop (user not logged in)
+  useEffect(() => {
+    if (data.length === 0) {
+      localStorage.setItem("todos", JSON.stringify(todos));
+    }
+  }, [todos, data]);
 
   useEffect(() => {
-    const savedTodos = localStorage.getItem("todos");
-    const savedContainerColor = localStorage.getItem("containerColor");
-
-    if (data.length > 0) {
-      setTodos(data);
-    } else if (savedTodos) {
-      setTodos(JSON.parse(savedTodos));
-    }
-
-    if (savedContainerColor) {
-      setContainerColor(savedContainerColor);
-      setTextColor(isLight(savedContainerColor) ? "#000" : "#fff");
-    }
-  }, [data]);
-
-  useEffect(() => {
-    localStorage.setItem("todos", JSON.stringify(todos));
     localStorage.setItem("containerColor", containerColor);
     setTextColor(isLight(containerColor) ? "#000" : "#fff");
-  }, [todos, containerColor]);
+  }, [containerColor]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (colorPickerRef.current && !colorPickerRef.current.contains(event.target)) {
+      if (
+        colorPickerRef.current && 
+        !colorPickerRef.current.contains(event.target) &&
+        event.target.type !== 'color'  
+      ) {
         setShowColorPicker(false);
       }
     };
@@ -198,31 +203,31 @@ const TodoComponent = ({ data = [] }) => {
             {showColorPicker && (
               <div
                 ref={colorPickerRef}
-                className="absolute grid w-[10vw] grid-cols-7 gap-2 p-[0.8vw] bg-white border rounded-md shadow-md"
-                style={{ top: "-20px", left: "300px", zIndex: "999" }}
+                className="absolute w-48 right-0 z-50 bg-white border rounded shadow-lg p-3"
               >
-                {predefinedColors.map((color) => (
-                  <button
-                    key={color}
-                    onClick={() => {
-                      setContainerColor(color);
-                      setShowColorPicker(false);
-                    }}
-                    style={{
-                      backgroundColor: color,
-                    }}
-                    className="h-[1vw] w-[1vw] border cursor-pointer focus:outline-none"
-                    aria-label={`Select color ${color}`}
-                  ></button>
-                ))}
-                <div className="col-span-full flex justify-center">
+                <div className="grid grid-cols-7 gap-1">
+                  {predefinedColors.map((color) => (
+                    <button
+                      key={color}
+                      className="w-5 h-5 border border-gray-200 cursor-pointer transition duration-300 ease-in-out transform hover:scale-125 focus:outline-none"
+                      style={{ backgroundColor: color }}
+                      onClick={() => {
+                        setContainerColor(color);
+                        setShowColorPicker(false);
+                      }}
+                    />
+                  ))}
+                </div>
+
+                {/* Custom Color Picker */}
+                <div className="mt-1 flex items-center justify-center">
                   <input
                     id="customColorPicker"
                     type="color"
-                    className="w-full h-[2vw] border-gray-300 rounded-md cursor-pointer focus:outline-none"
+                    value={containerColor}
+                    className="w-full h-6 p-0 border border-gray-300 rounded-md cursor-pointer focus:outline-none"
                     onChange={(e) => {
                       setContainerColor(e.target.value);
-                      setShowColorPicker(false);
                     }}
                   />
                 </div>

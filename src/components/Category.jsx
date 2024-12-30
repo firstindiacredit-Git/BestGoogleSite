@@ -57,6 +57,7 @@ const Category = ({ data = [] }) => {
           id: doc.id,
           ...doc.data(),
         }));
+        console.log(bookmarksData)
         setBookmarks(bookmarksData);
       });
       return () => unsubscribe();
@@ -134,10 +135,10 @@ const Category = ({ data = [] }) => {
   };
 
   return (
-    <div className="dark:text-white">
+    <div className="dark:text-white  ">
       <Card
         title={
-          <div className="flex dark:bg-gray-800 dark:text-white justify-between items-center">
+          <div className="flex dark:bg-gray-800  dark:text-white justify-between items-center">
             <Title level={4} className="m-0">
               My Bookmarks
             </Title>

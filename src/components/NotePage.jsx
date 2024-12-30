@@ -91,20 +91,19 @@ const NotePage = ({ data = "" }) => {
   }, [data]);
 
   useEffect(() => {
-    function handleClickOutside(event) {
+    const handleClickOutside = (event) => {
       if (
-        colorPickerRef.current &&
-        !colorPickerRef.current.contains(event.target)
+        colorPickerRef.current && 
+        !colorPickerRef.current.contains(event.target) &&
+        event.target.type !== 'color'  
       ) {
         setShowColorPicker(false);
       }
-    }
+    };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [colorPickerRef]);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem("notes", JSON.stringify(notes));
@@ -150,6 +149,7 @@ const NotePage = ({ data = "" }) => {
       setFontSize(newSize);
     }
   };
+  
 
   const toggleSpeechToText = () => {
     if ("webkitSpeechRecognition" in window) {
@@ -208,9 +208,9 @@ const NotePage = ({ data = "" }) => {
     <div>
       <div>
         <div className="overflow-hidden" style={{ backgroundColor }}>
-          <div className="p-6" style={{ backgroundColor }}>
-            <div className="flex justify-between items-center mb-6">
-              <div className="w-full flex justify-between">
+          <div className="p-2" style={{ backgroundColor }}>
+            <div className="flex justify-between items-center mb-1">
+              <div className=" w-full flex justify-between">
                 <button
                   className="p-2 rounded-lg bg-opacity-20 bg-gray-500 hover:bg-opacity-30 transition duration-200"
                   onClick={toggleLineNumbers}
@@ -225,7 +225,7 @@ const NotePage = ({ data = "" }) => {
                 </button>
                 <div className="relative" ref={colorPickerRef}>
                   <button
-                    className="p-2 rounded-lg hover:bg-opacity-20 hover:bg-gray-500 transition duration-200"
+                    className="p-2 rounded-lg bg-opacity-20 bg-gray-500 hover:bg-opacity-30 transition duration-200"
                     onClick={() => setShowColorPicker(!showColorPicker)}
                     title="Change Background Color"
                     style={{ color: textColor }}
@@ -253,10 +253,10 @@ const NotePage = ({ data = "" }) => {
                         <input
                           id="customColorPicker"
                           type="color"
+                          value={backgroundColor}
                           className="w-full h-6 p-0 border border-gray-300 rounded-md cursor-pointer focus:outline-none"
                           onChange={(e) => {
                             setBackgroundColor(e.target.value);
-                            setShowColorPicker(false);
                           }}
                         />
                       </div>

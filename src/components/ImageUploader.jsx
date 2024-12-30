@@ -73,7 +73,7 @@ function ImageUploader() {
       />
 
       {!image && (
-        <div className="border bg-white/10 border-gray-300 rounded-lg h-80 m-auto  w-full">
+        <div className="border bg-white/10  h-80 m-auto  w-full">
           <label htmlFor="file-input" className="cursor-pointer mb-4">
             <MdAdd className="w-12  justify-center mx-auto my-28  h-12 text-blue-600 hover:text-blue-800 transition duration-300" />
           </label>
