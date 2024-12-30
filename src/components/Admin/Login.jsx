@@ -90,18 +90,21 @@ const SignInPage = () => {
           </button>
           <div className="bg-gradient-to-r from-transparent via-neutral-300 dark:via-neutral-700 to-transparent my-8 h-[1px] w-full" />
           <button
-            className="text-white border shadow-sm dark:text-green-500 text-lg text-center px-4 w-full rounded-md h-10 font-medium border-green-500 hover:bg-green-500 hover:text-white"
+            className="text-green-500 border shadow-sm hover:text-white text-lg text-center px-4 w-full rounded-md h-10 font-medium border-green-600 hover:bg-green-500"
             type="button"
             onClick={handleGoogleSignIn}
           >
             <div className="text-center justify-center gap-2 flex p-">
+              <div className="rounded-full p-1 bg-white">
               <img
                 src="/google.png"
-                className="w-5 h-5 mt-1"
+                className="w-5 h-5"
                 alt="Google logo"
               />
+              </div>
               Sign in with Google
             </div>
+
           </button>
         </form>
       </div>

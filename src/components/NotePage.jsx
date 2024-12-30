@@ -61,15 +61,14 @@ const NotePage = () => {
     "#FFC0CB",
     // Row 4
     "#DC143C",
-    "#DAA520",  
-    "#FFA500", 
+    "#DAA520",
+    "#FFA500",
     "#FFD700",
     "#20B2AA",
     "#4169E1",
     "#9370DB",
     "#FF69B4",
-];
-
+  ];
 
   useEffect(() => {
     const savedNotes = localStorage.getItem("notes");
@@ -78,21 +77,21 @@ const NotePage = () => {
     if (savedColor) setBackgroundColor(savedColor);
   }, []);
 
-    useEffect(() => {
-      function handleClickOutside(event) {
-        if (
-          colorPickerRef.current &&
-          !colorPickerRef.current.contains(event.target)
-        ) {
-          setShowColorPicker(false);
-        }
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        colorPickerRef.current &&
+        !colorPickerRef.current.contains(event.target)
+      ) {
+        setShowColorPicker(false);
       }
+    }
 
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-      };
-    }, []);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     localStorage.setItem("notes", notes);
@@ -221,9 +220,7 @@ const NotePage = () => {
                     <Palette className="w-5 h-5" />
                   </button>
                   {showColorPicker && (
-                    <div
-                     className="absolute w-48 right-0 z-50 -mt-2 bg-white border rounded shadow-lg p-3"
-                     >
+                    <div className="absolute w-48 right-0 z-50 -mt-2 bg-white border rounded shadow-lg p-3">
                       {/* Predefined Colors */}
                       <div className="grid grid-cols-7 gap-1">
                         {predefinedColors.map((color) => (
@@ -231,7 +228,7 @@ const NotePage = () => {
                             key={color}
                             className="w-5 h-5 border border-gray-200 cursor-pointer transition duration-300 ease-in-out transform hover:scale-125 focus:outline-none"
                             style={{ backgroundColor: color }}
-                            onClick={() => setBackgroundColor(color)} 
+                            onClick={() => setBackgroundColor(color)}
                           />
                         ))}
                       </div>
@@ -243,7 +240,7 @@ const NotePage = () => {
                           type="color"
                           className="w-full h-6 p-0 border border-gray-300 rounded-md cursor-pointer focus:outline-none"
                           value={backgroundColor}
-                          onChange={(e) => setBackgroundColor(e.target.value)} 
+                          onChange={(e) => setBackgroundColor(e.target.value)}
                         />
                       </div>
                     </div>

@@ -3,6 +3,7 @@ import Header from "./Header";
 import { db } from "../../firebase";
 import { collection, getDocs, onSnapshot } from "firebase/firestore";
 import { Bar, Doughnut } from "react-chartjs-2";
+import AdminRoute from "./AdminRoute";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -24,7 +25,7 @@ ChartJS.register(
   Legend
 );
 
-export default function Dashboard() {
+function Dashboard() {
   const [totalUsers, setTotalUsers] = useState(0);
   const [totalCategories, setTotalCategories] = useState(0);
   const [totalLinks, setTotalLinks] = useState(0);
@@ -41,7 +42,7 @@ export default function Dashboard() {
         const categoriesSnapshot = await getDocs(categoriesCollection);
         setTotalCategories(categoriesSnapshot.size);
 
-        const linksCollection = collection(db, "adminlinks");
+        const linksCollection = collection(db, "links");
         const linksSnapshot = await getDocs(linksCollection);
         setTotalLinks(linksSnapshot.size);
       } catch (error) {
@@ -180,5 +181,14 @@ export default function Dashboard() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Wrap Dashboard with AdminRoute
+export default function ProtectedDashboard() {
+  return (
+    <AdminRoute>
+      <Dashboard />
+    </AdminRoute>
   );
 }

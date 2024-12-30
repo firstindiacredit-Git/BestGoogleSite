@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Check, Edit, Trash2, Palette } from "lucide-react";
+import { color } from "framer-motion";
 
 const TodoComponent = () => {
   const [todos, setTodos] = useState([]);
@@ -188,7 +189,7 @@ const TodoComponent = () => {
                 <button
                   key={color}
                   onClick={() => {
-                    setContainerColor(color);  
+                    setContainerColor(color);
                   }}
                   style={{
                     backgroundColor: color,
@@ -204,7 +205,7 @@ const TodoComponent = () => {
                 type="color"
                 className="w-full h-6  rounded-md cursor-pointer "
                 onChange={(e) => {
-                  setContainerColor(e.target.value);  
+                  setContainerColor(e.target.value);
                 }}
               />
             </div>
@@ -218,7 +219,8 @@ const TodoComponent = () => {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder={editingId ? "Edit todo..." : "Add a new todo..."}
-              className="flex-1 p-3 rounded-lg border focus:ring-2 focus:ring-blue-500"
+              className={` text-black flex-1 p-3  rounded-lg border focus:ring-2 focus:ring-blue-500`}
+            
             />
             <button
               type="submit"

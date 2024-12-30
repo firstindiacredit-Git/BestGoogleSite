@@ -221,7 +221,9 @@ const Anotherpage = ({ backgroundImage }) => {
     });
     return columnsArray;
   };
-
+if(!user){
+  return <div className="text-gray-500 text-5xl  my-20"><h1 className="text-center font-bold">LOGIN TO UNLOCK MORE FEATURES</h1></div>
+}
   return (
     <div style={{ position: "relative" }}>
       <div className="flex items-center gap-2 w-fit mx-auto my-4 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
@@ -344,7 +346,7 @@ const Anotherpage = ({ backgroundImage }) => {
                                       transition={{ duration: 0.1 }}
                                     > 
                                        
-                                      <div className=" rounded-b-lg overflow-clip">{componentMap[item.id]}</div>
+                                      <div className=" rounded-b-lg overflow">{componentMap[item.id]}</div>
                                     </motion.div>
                                   </>
                                 ) : (
@@ -371,7 +373,7 @@ const Anotherpage = ({ backgroundImage }) => {
                                         exit={{ height: 0, opacity: 0 }}
                                         transition={{ duration: 0.3 }}
                                       >
-                                         <div className=" rounded-b-lg overflow-clip">{componentMap[item.id]}</div>
+                                         <div className=" rounded-b-lg overflow">{componentMap[item.id]}</div>
                                       </motion.div>
                                     )}
                                   </>

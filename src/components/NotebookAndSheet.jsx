@@ -258,13 +258,13 @@ const NotebookAndDocumentSheet = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6">
+    <div className="dark:bg-gray-900 ">
       <div className=" bg-white  dark:bg-gray-800 rounded-lg shadow-xl mx-auto">
-        <div className="flex gap-10 w-full">
-          <div className="w-[60%]"><NotePage /></div>
-          <div className="w-[40%]"><TodoComponent /></div>
+        <div className="flex gap-8 w-full">
+          <div className="w-[60%] overflow-clip rounded-lg"><NotePage /></div>
+          <div className="w-[40%] overflow-clip rounded-lg"><TodoComponent /></div>
         </div>
-        <Excel />
+        <div className="overflow-clip rounded-lg"><Excel /></div>
       </div>
     </div>
   );

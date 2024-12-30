@@ -161,13 +161,13 @@ const News = () => {
     <div className="body bg-[#f4f4f5] d-flex py-lg-3 py-md-2 flex-column">
       <div
         className="flex-grow-1"
-        style={{ minHeight: "85vh", overflow: "hidden" }}
+        style={{ minHeight: "120vh", overflow: "hidden" }}
       >
         <iframe
           src="https://news-app-sage-mu.vercel.app/"
           style={{
             width: "100%",
-            height: "80vh",
+            height: "120vh",
             border: "none",
             position: "relative",
             top: "-4.5rem",
