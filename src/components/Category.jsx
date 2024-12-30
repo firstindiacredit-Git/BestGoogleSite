@@ -7,7 +7,6 @@ import {
   doc,
   onSnapshot,
   updateDoc,
-  getDocs,
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import {
@@ -32,9 +31,9 @@ import {
 
 const { Title } = Typography;
 
-function Category() {
+const Category = ({ data = [] }) => {
   const [user, setUser] = useState(null);
-  const [bookmarks, setBookmarks] = useState([]);
+  const [bookmarks, setBookmarks] = useState(data);
   const [loading, setLoading] = useState(true);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingBookmark, setEditingBookmark] = useState(null);
@@ -63,6 +62,21 @@ function Category() {
       return () => unsubscribe();
     }
   }, [user]);
+
+  useEffect(() => {
+    const savedBookmarks = localStorage.getItem("bookmarks");
+    const savedContainerColor = localStorage.getItem("bookmarkContainerColor");
+
+    if (data.length > 0) {
+      setBookmarks(data);
+    } else if (savedBookmarks) {
+      setBookmarks(JSON.parse(savedBookmarks));
+    }
+
+    if (savedContainerColor) {
+      // setContainerColor(savedContainerColor); // This line was removed because setContainerColor is not defined
+    }
+  }, [data]);
 
   const handleAddBookmark = async (values) => {
     try {
@@ -119,16 +133,8 @@ function Category() {
     form.resetFields();
   };
 
-  if (!user) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <Title level={4}>Please sign in to view your bookmarks</Title>
-      </div>
-    );
-  }
-
   return (
-    <div className="dark:text-white" >
+    <div className="dark:text-white">
       <Card
         title={
           <div className="flex dark:bg-gray-800 dark:text-white justify-between items-center">
@@ -247,6 +253,6 @@ function Category() {
       </Modal>
     </div>
   );
-}
+};
 
 export default Category;

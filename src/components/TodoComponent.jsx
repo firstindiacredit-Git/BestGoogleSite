@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Check, Edit, Trash2, Palette } from "lucide-react";
 
-const TodoComponent = () => {
-  const [todos, setTodos] = useState([]);
+const TodoComponent = ({ data = [] }) => {
+  const [todos, setTodos] = useState(data);
   const [inputValue, setInputValue] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
@@ -64,12 +64,17 @@ const TodoComponent = () => {
     const savedTodos = localStorage.getItem("todos");
     const savedContainerColor = localStorage.getItem("containerColor");
 
-    if (savedTodos) setTodos(JSON.parse(savedTodos));
+    if (data.length > 0) {
+      setTodos(data);
+    } else if (savedTodos) {
+      setTodos(JSON.parse(savedTodos));
+    }
+
     if (savedContainerColor) {
       setContainerColor(savedContainerColor);
       setTextColor(isLight(savedContainerColor) ? "#000" : "#fff");
     }
-  }, []);
+  }, [data]);
 
   useEffect(() => {
     localStorage.setItem("todos", JSON.stringify(todos));
@@ -160,16 +165,15 @@ const TodoComponent = () => {
 
   return (
     <div
-      className="container mx-auto rounded-md"
+      className="container mx-auto"
       style={{ backgroundColor: containerColor, color: textColor }}
     >
       <div className="bg-transparent w-full rounded-lg shadow-xl p-6">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Todo List</h2>
           <button
             type="button"
             onClick={() => setShowColorPicker(!showColorPicker)}
-            className="px-4 py-3 bg-gray-200 text-black rounded-lg hover:bg-gray-300"
+            className="px-4 py-3 bg-black/20 text-black rounded-lg "
           >
             <Palette className="w-5 h-5" />
           </button>
@@ -195,7 +199,7 @@ const TodoComponent = () => {
               <div
                 ref={colorPickerRef}
                 className="absolute grid w-[10vw] grid-cols-7 gap-2 p-[0.8vw] bg-white border rounded-md shadow-md"
-                style={{ top: "-20px", left: "300px",zIndex:"999" }}
+                style={{ top: "-20px", left: "300px", zIndex: "999" }}
               >
                 {predefinedColors.map((color) => (
                   <button

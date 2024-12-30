@@ -11,8 +11,8 @@ import {
 import { HiOutlineNumberedList } from "react-icons/hi2";
 import { RxHamburgerMenu } from "react-icons/rx";
 
-const NotePage = () => {
-  const [notes, setNotes] = useState("");
+const NotePage = ({ data = [] }) => {
+  const [notes, setNotes] = useState(data);
   const [isBold, setIsBold] = useState(false);
   const [isUnderline, setIsUnderline] = useState(false);
   const [fontSize, setFontSize] = useState(14);
@@ -68,34 +68,41 @@ const NotePage = () => {
     "#4169E1",
     "#9370DB",
     "#FF69B4",
-];
-
+  ];
 
   useEffect(() => {
     const savedNotes = localStorage.getItem("notes");
-    const savedColor = localStorage.getItem("backgroundColor");
-    if (savedNotes) setNotes(savedNotes);
-    if (savedColor) setBackgroundColor(savedColor);
-  }, []);
+    const savedBackground = localStorage.getItem("noteBackground");
+    const savedLineColor = localStorage.getItem("lineColor");
 
-    useEffect(() => {
-      function handleClickOutside(event) {
-        if (
-          colorPickerRef.current &&
-          !colorPickerRef.current.contains(event.target)
-        ) {
-          setShowColorPicker(false);
-        }
-      }
+    if (data.length > 0) {
+      setNotes(data);
+    } else if (savedNotes) {
+      setNotes(JSON.parse(savedNotes));
+    }
 
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-      };
-    }, [colorPickerRef]);
+    if (savedBackground) setBackgroundColor(savedBackground);
+    if (savedLineColor) setLineColor(savedLineColor);
+  }, [data]);
 
   useEffect(() => {
-    localStorage.setItem("notes", notes);
+    function handleClickOutside(event) {
+      if (
+        colorPickerRef.current &&
+        !colorPickerRef.current.contains(event.target)
+      ) {
+        setShowColorPicker(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [colorPickerRef]);
+
+  useEffect(() => {
+    localStorage.setItem("notes", JSON.stringify(notes));
     localStorage.setItem("backgroundColor", backgroundColor);
   }, [notes, backgroundColor]);
 
@@ -193,12 +200,12 @@ const NotePage = () => {
   const lineColor = getLineColor();
 
   return (
-    <div >
-      <div className="">
+    <div>
+      <div>
         <div className="overflow-hidden" style={{ backgroundColor }}>
           <div className="p-6" style={{ backgroundColor }}>
             <div className="flex justify-between items-center mb-6">
-              <div className=" w-full flex justify-between">
+              <div className="w-full flex justify-between">
                 <button
                   className="p-2 rounded-lg bg-opacity-20 bg-gray-500 hover:bg-opacity-30 transition duration-200"
                   onClick={toggleLineNumbers}
@@ -220,9 +227,8 @@ const NotePage = () => {
                   >
                     <Palette className="w-5 h-5" />
                   </button>
-                  {showColorPicker && ( // Render only if the color picker should be visible
-                    <div className="absolute w-48 right-0 z-50 -mt-2 bg-white border rounded shadow-lg p-3">
-                      {/* Predefined Colors */}
+                  {showColorPicker && (
+                    <div className="absolute w-48 right-0 z-50 bg-white border rounded shadow-lg p-3">
                       <div className="grid grid-cols-7 gap-1">
                         {predefinedColors.map((color) => (
                           <button

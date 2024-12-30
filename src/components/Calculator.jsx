@@ -21,22 +21,22 @@ function Calculator() {
     }
   }, []);
 
-  // Handle keyboard input
-  useEffect(() => {
-    const handleKeyPress = (event) => {
-      if (
-        document.activeElement.tagName !== "INPUT" &&
-        document.activeElement.tagName !== "TEXTAREA"
-      ) {
-        if (/[\d+\-*/.=()]/.test(event.key)) {
-          handleCalcInput(event.key === "Enter" ? "=" : event.key);
-        }
-      }
-    };
+  // // Handle keyboard input
+  // useEffect(() => {
+  //   const handleKeyPress = (event) => {
+  //     if (
+  //       document.activeElement.tagName !== "INPUT" &&
+  //       document.activeElement.tagName !== "TEXTAREA"
+  //     ) {
+  //       if (/[\d+\-*/.=()]/.test(event.key)) {
+  //         handleCalcInput(event.key === "Enter" ? "=" : event.key);
+  //       }
+  //     }
+  //   };
   
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [calcInput]);
+  //   window.addEventListener("keydown", handleKeyPress);
+  //   return () => window.removeEventListener("keydown", handleKeyPress);
+  // }, [calcInput]);
 
   const handleCalcInput = (value) => {
     if (value === "=") {
@@ -79,7 +79,7 @@ function Calculator() {
   };
 
   return (
-  <div className="flex items-center w-full min-h-[30vh]  justify-center">
+  <div className="flex items-center w-full min-h-[30vh] justify-center">
   <div className="dark:bg-[#1f345f] bg-gray-200 h-full w-full p-[0.8vw]">
     {showHistory ? (
       <div className="dark:bg-[#1f345f] text-white w-full h-full p-[2vw]">
