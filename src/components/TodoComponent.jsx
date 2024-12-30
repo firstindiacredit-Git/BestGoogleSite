@@ -1,32 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Check, Edit, Trash2, Palette } from "lucide-react";
+import { color } from "framer-motion";
 
-const isLight = (color) => {
-  const r = parseInt(color.substr(1, 2), 16);
-  const g = parseInt(color.substr(3, 2), 16);
-  const b = parseInt(color.substr(5, 2), 16);
-  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-  return brightness > 128;
-};
-
-const TodoComponent = ({ data = [] }) => {
-  // If data is provided (user logged in), use it. Otherwise check localStorage
-  const [todos, setTodos] = useState(() => {
-    if (data.length > 0) return data;
-    const savedTodos = localStorage.getItem("todos");
-    return savedTodos ? JSON.parse(savedTodos) : [];
-  });
-  
+const TodoComponent = () => {
+  const [todos, setTodos] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
-  const [containerColor, setContainerColor] = useState(() => {
-    return localStorage.getItem("containerColor") || "#f0f9ff";
-  });
-  const [textColor, setTextColor] = useState(() => {
-    const color = localStorage.getItem("containerColor") || "#f0f9ff";
-    return isLight(color) ? "#000" : "#fff";
-  });
+  const [containerColor, setContainerColor] = useState("#f0f9ff");
+  const [textColor, setTextColor] = useState("#000");
   const [draggedItemIndex, setDraggedItemIndex] = useState(null);
   const [dragOverIndex, setDragOverIndex] = useState(null);
 
@@ -71,24 +53,36 @@ const TodoComponent = ({ data = [] }) => {
     "#FF69B4",
   ];
 
-  // Only save to localStorage if no data prop (user not logged in)
-  useEffect(() => {
-    if (data.length === 0) {
-      localStorage.setItem("todos", JSON.stringify(todos));
-    }
-  }, [todos, data]);
+  const isLight = (color) => {
+    const r = parseInt(color.substr(1, 2), 16);
+    const g = parseInt(color.substr(3, 2), 16);
+    const b = parseInt(color.substr(5, 2), 16);
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    return brightness > 128;
+  };
 
   useEffect(() => {
+    const savedTodos = localStorage.getItem("todos");
+    const savedContainerColor = localStorage.getItem("containerColor");
+
+    if (savedTodos) setTodos(JSON.parse(savedTodos));
+    if (savedContainerColor) {
+      setContainerColor(savedContainerColor);
+      setTextColor(isLight(savedContainerColor) ? "#000" : "#fff");
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("todos", JSON.stringify(todos));
     localStorage.setItem("containerColor", containerColor);
     setTextColor(isLight(containerColor) ? "#000" : "#fff");
-  }, [containerColor]);
+  }, [todos, containerColor]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
-        colorPickerRef.current && 
-        !colorPickerRef.current.contains(event.target) &&
-        event.target.type !== 'color'  
+        colorPickerRef.current &&
+        !colorPickerRef.current.contains(event.target)
       ) {
         setShowColorPicker(false);
       }
@@ -170,19 +164,53 @@ const TodoComponent = ({ data = [] }) => {
 
   return (
     <div
-      className="container mx-auto"
+      className="container mx-auto rounded-md"
       style={{ backgroundColor: containerColor, color: textColor }}
     >
-      <div className="bg-transparent w-full rounded-lg shadow-xl p-6">
+      <div className="bg-transparent w-full rounded-lg shadow-xl p-6 relative">
         <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">Todo List</h2>
           <button
             type="button"
             onClick={() => setShowColorPicker(!showColorPicker)}
-            className="px-4 py-3 bg-black/20 text-black rounded-lg "
+            className="px-4 py-3 bg-gray-200 text-black rounded-lg hover:bg-gray-300"
           >
             <Palette className="w-5 h-5" />
           </button>
         </div>
+
+        {showColorPicker && (
+          <div
+            ref={colorPickerRef}
+            className="absolute -mt-5 right-0 bg-white border rounded shadow-lg p-3 z-50 w-48 "
+          >
+            <div className="grid grid-cols-7 gap-1">
+              {predefinedColors.map((color) => (
+                <button
+                  key={color}
+                  onClick={() => {
+                    setContainerColor(color);
+                  }}
+                  style={{
+                    backgroundColor: color,
+                  }}
+                  className="h-5 w-5 border cursor-pointer focus:outline-none"
+                  aria-label={`Select color ${color}`}
+                ></button>
+              ))}
+            </div>
+            <div className="col-span-full flex justify-center mt-1">
+              <input
+                id="customColorPicker"
+                type="color"
+                className="w-full h-6  rounded-md cursor-pointer "
+                onChange={(e) => {
+                  setContainerColor(e.target.value);
+                }}
+              />
+            </div>
+          </div>
+        )}
 
         <form onSubmit={editingId ? submitEdit : addTodo} className="mb-6">
           <div className="flex gap-2 relative">
@@ -191,7 +219,8 @@ const TodoComponent = ({ data = [] }) => {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder={editingId ? "Edit todo..." : "Add a new todo..."}
-              className="flex-1 p-3 rounded-lg border focus:ring-2 focus:ring-blue-500"
+              className={` text-black flex-1 p-3  rounded-lg border focus:ring-2 focus:ring-blue-500`}
+            
             />
             <button
               type="submit"
@@ -199,40 +228,6 @@ const TodoComponent = ({ data = [] }) => {
             >
               {editingId ? "Update" : "Add"}
             </button>
-
-            {showColorPicker && (
-              <div
-                ref={colorPickerRef}
-                className="absolute w-48 right-0 z-50 bg-white border rounded shadow-lg p-3"
-              >
-                <div className="grid grid-cols-7 gap-1">
-                  {predefinedColors.map((color) => (
-                    <button
-                      key={color}
-                      className="w-5 h-5 border border-gray-200 cursor-pointer transition duration-300 ease-in-out transform hover:scale-125 focus:outline-none"
-                      style={{ backgroundColor: color }}
-                      onClick={() => {
-                        setContainerColor(color);
-                        setShowColorPicker(false);
-                      }}
-                    />
-                  ))}
-                </div>
-
-                {/* Custom Color Picker */}
-                <div className="mt-1 flex items-center justify-center">
-                  <input
-                    id="customColorPicker"
-                    type="color"
-                    value={containerColor}
-                    className="w-full h-6 p-0 border border-gray-300 rounded-md cursor-pointer focus:outline-none"
-                    onChange={(e) => {
-                      setContainerColor(e.target.value);
-                    }}
-                  />
-                </div>
-              </div>
-            )}
           </div>
         </form>
 

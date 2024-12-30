@@ -11,8 +11,8 @@ import {
 import { HiOutlineNumberedList } from "react-icons/hi2";
 import { RxHamburgerMenu } from "react-icons/rx";
 
-const NotePage = ({ data = "" }) => {
-  const [notes, setNotes] = useState(typeof data === 'string' ? data : '');
+const NotePage = () => {
+  const [notes, setNotes] = useState("");
   const [isBold, setIsBold] = useState(false);
   const [isUnderline, setIsUnderline] = useState(false);
   const [fontSize, setFontSize] = useState(14);
@@ -61,8 +61,8 @@ const NotePage = ({ data = "" }) => {
     "#FFC0CB",
     // Row 4
     "#DC143C",
-    "#DAA520",  
-    "#FFA500", 
+    "#DAA520",
+    "#FFA500",
     "#FFD700",
     "#20B2AA",
     "#4169E1",
@@ -72,41 +72,29 @@ const NotePage = ({ data = "" }) => {
 
   useEffect(() => {
     const savedNotes = localStorage.getItem("notes");
-    const savedBackground = localStorage.getItem("noteBackground");
-    const savedLineColor = localStorage.getItem("lineColor");
-
-    if (typeof data === 'string' && data.length > 0) {
-      setNotes(data);
-    } else if (savedNotes) {
-      try {
-        const parsedNotes = JSON.parse(savedNotes);
-        setNotes(typeof parsedNotes === 'string' ? parsedNotes : '');
-      } catch (e) {
-        setNotes(savedNotes); // If parsing fails, use as-is
-      }
-    }
-
-    if (savedBackground) setBackgroundColor(savedBackground);
-    if (savedLineColor) setLineColor(savedLineColor);
-  }, [data]);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        colorPickerRef.current && 
-        !colorPickerRef.current.contains(event.target) &&
-        event.target.type !== 'color'  
-      ) {
-        setShowColorPicker(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    const savedColor = localStorage.getItem("backgroundColor");
+    if (savedNotes) setNotes(savedNotes);
+    if (savedColor) setBackgroundColor(savedColor);
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("notes", JSON.stringify(notes));
+    function handleClickOutside(event) {
+      if (
+        colorPickerRef.current &&
+        !colorPickerRef.current.contains(event.target)
+      ) {
+        setShowColorPicker(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("notes", notes);
     localStorage.setItem("backgroundColor", backgroundColor);
   }, [notes, backgroundColor]);
 
@@ -149,7 +137,6 @@ const NotePage = ({ data = "" }) => {
       setFontSize(newSize);
     }
   };
-  
 
   const toggleSpeechToText = () => {
     if ("webkitSpeechRecognition" in window) {
@@ -198,7 +185,7 @@ const NotePage = ({ data = "" }) => {
   };
 
   const getLineCount = () => {
-    return (typeof notes === 'string' ? notes : '').split("\n").length;
+    return notes.split("\n").length;
   };
 
   const textColor = getTextColor();
@@ -206,7 +193,7 @@ const NotePage = ({ data = "" }) => {
 
   return (
     <div>
-      <div>
+      <div className="">
         <div className="overflow-hidden" style={{ backgroundColor }}>
           <div className="p-2" style={{ backgroundColor }}>
             <div className="flex justify-between items-center mb-1">
@@ -225,25 +212,23 @@ const NotePage = ({ data = "" }) => {
                 </button>
                 <div className="relative" ref={colorPickerRef}>
                   <button
-                    className="p-2 rounded-lg bg-opacity-20 bg-gray-500 hover:bg-opacity-30 transition duration-200"
-                    onClick={() => setShowColorPicker(!showColorPicker)}
+                    className="p-2 rounded-lg hover:bg-opacity-20 hover:bg-gray-500 transition duration-200"
+                    onClick={() => setShowColorPicker((prev) => !prev)}
                     title="Change Background Color"
                     style={{ color: textColor }}
                   >
                     <Palette className="w-5 h-5" />
                   </button>
                   {showColorPicker && (
-                    <div className="absolute w-48 right-0 z-50 bg-white border rounded shadow-lg p-3">
+                    <div className="absolute w-48 right-0 z-50 -mt-2 bg-white border rounded shadow-lg p-3">
+                      {/* Predefined Colors */}
                       <div className="grid grid-cols-7 gap-1">
                         {predefinedColors.map((color) => (
                           <button
                             key={color}
                             className="w-5 h-5 border border-gray-200 cursor-pointer transition duration-300 ease-in-out transform hover:scale-125 focus:outline-none"
                             style={{ backgroundColor: color }}
-                            onClick={() => {
-                              setBackgroundColor(color);
-                              setShowColorPicker(false);
-                            }}
+                            onClick={() => setBackgroundColor(color)}
                           />
                         ))}
                       </div>
@@ -253,11 +238,9 @@ const NotePage = ({ data = "" }) => {
                         <input
                           id="customColorPicker"
                           type="color"
-                          value={backgroundColor}
                           className="w-full h-6 p-0 border border-gray-300 rounded-md cursor-pointer focus:outline-none"
-                          onChange={(e) => {
-                            setBackgroundColor(e.target.value);
-                          }}
+                          value={backgroundColor}
+                          onChange={(e) => setBackgroundColor(e.target.value)}
                         />
                       </div>
                     </div>
@@ -312,7 +295,7 @@ const NotePage = ({ data = "" }) => {
                   fontWeight: isBold ? "bold" : "normal",
                   textDecoration: isUnderline ? "underline" : "none",
                   backgroundImage: `linear-gradient(to bottom,transparent 30px,${lineColor} 31px,transparent 49px)`,
-                  placeholderColor:textColor
+                  placeholderColor: textColor,
                 }}
                 placeholder="Start typing your notes here..."
               />

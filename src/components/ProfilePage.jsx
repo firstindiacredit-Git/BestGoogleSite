@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { updatePassword, updateProfile } from "firebase/auth";
-import { auth, db } from "../firebase";
+import { auth, db, storage } from "../firebase";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
-import { FaEye, FaEyeSlash, FaPen } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaPen, FaCamera } from "react-icons/fa";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import imageCompression from "browser-image-compression";
 
 const ProfilePage = () => {
   const [username, setUsername] = useState("");
@@ -16,14 +18,23 @@ const ProfilePage = () => {
   const [isEditingPin, setIsEditingPin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef(null);
 
-  // PIN Change State
   const [userId, setUserId] = useState(null);
   const [userPin, setUserPin] = useState("");
   const [newPin, setNewPin] = useState(["", "", "", ""]);
   const [showPin, setShowPin] = useState(false);
 
   const navigate = useNavigate();
+
+  const handleGoBack = () => {
+    navigate(-1);
+  };
+
+  const handleUpgrade = () => {
+    navigate("/premiumPage");
+  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -38,6 +49,78 @@ const ProfilePage = () => {
 
     return () => unsubscribe();
   }, []);
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const compressImage = async (file) => {
+    const options = {
+      maxSizeMB: 1,
+      maxWidthOrHeight: 800,
+      useWebWorker: true,
+      fileType: file.type,
+    };
+
+    try {
+      const compressedFile = await imageCompression(file, options);
+      return compressedFile;
+    } catch (error) {
+      console.error("Error compressing image:", error);
+      throw error;
+    }
+  };
+
+ const handleFileChange = async (e) => {
+   const file = e.target.files?.[0];
+   if (!file) return;
+
+   // Validate file type
+   if (!file.type.startsWith("image/")) {
+     alert("Please upload an image file");
+     return;
+   }
+
+   try {
+     setIsUploading(true);
+     const currentUser = auth.currentUser;
+     if (!currentUser) throw new Error("No user logged in");
+
+     const compressedImage = await compressImage(file);
+
+     const timestamp = Date.now();
+     const filename = `${timestamp}_${file.name}`;
+     const storageRef = ref(storage, `avatars/${currentUser.uid}/${filename}`);
+
+     const uploadTask = await uploadBytes(storageRef, compressedImage);
+     console.log("Upload successful:", uploadTask);
+
+     const downloadURL = await getDownloadURL(storageRef);
+
+     await updateProfile(currentUser, {
+       photoURL: downloadURL,
+     });
+
+     const userRef = doc(db, "users", currentUser.uid);
+     await updateDoc(userRef, {
+       avatarUrl: downloadURL,
+     });
+
+     setAvatarUrl(downloadURL);
+     alert("Profile picture updated successfully!");
+   } catch (error) {
+     console.error("Error uploading avatar:", error);
+     if (error.code === "storage/unauthorized") {
+       alert("Error: Permission denied. Please make sure you are logged in.");
+     } else if (error.code === "storage/quota-exceeded") {
+       alert("Error: Storage quota exceeded. Please contact support.");
+     } else {
+       alert("Failed to upload profile picture. Please try again.");
+     }
+   } finally {
+     setIsUploading(false);
+   }
+ };
 
   const fetchUserPin = async (userId) => {
     try {
@@ -61,8 +144,10 @@ const ProfilePage = () => {
       });
       setUserPin(newPin);
       alert("PIN updated successfully!");
+      setIsEditingPin(false);
     } catch (error) {
       console.error("Error saving new pin:", error);
+      alert("Failed to update PIN. Please try again.");
     }
   };
 
@@ -77,6 +162,7 @@ const ProfilePage = () => {
 
   const handleInputChange = (e, index) => {
     const value = e.target.value;
+    if (!/^\d*$/.test(value)) return; // Only allow digits
     if (value.length > 1) return;
 
     const updatedPin = [...newPin];
@@ -89,43 +175,50 @@ const ProfilePage = () => {
   };
 
   const handleSaveName = async () => {
+    if (!username.trim()) {
+      alert("Name cannot be empty");
+      return;
+    }
+
     try {
       const currentUser = auth.currentUser;
       if (currentUser) {
         await updateProfile(currentUser, { displayName: username });
         const userDoc = doc(db, "users", currentUser.uid);
         await setDoc(userDoc, { username }, { merge: true });
+        setIsEditingName(false);
+        alert("Name updated successfully!");
       }
-      setIsEditingName(false);
     } catch (error) {
       console.error("Error saving name:", error);
+      alert("Failed to update name. Please try again.");
     }
   };
 
   const handleSavePassword = async () => {
+    if (password.length < 6) {
+      alert("Password must be at least 6 characters long");
+      return;
+    }
+
     try {
       const currentUser = auth.currentUser;
-      if (currentUser && password.length >= 6) {
+      if (currentUser) {
         await updatePassword(currentUser, password);
+        setIsEditingPassword(false);
+        setPassword("");
+        alert("Password updated successfully!");
       }
-      setIsEditingPassword(false);
     } catch (error) {
       console.error("Error saving password:", error);
+      alert("Failed to update password. Please try again.");
     }
   };
-
-  const handleUpgrade = () => {
-    navigate("/premiumPage");
-  };
-
-   const goBack = () => {
-     navigate(-1); 
-   };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:text-white dark:bg-gray-900 p-6">
       <button
-        onClick={goBack}
+        onClick={handleGoBack}
         className="absolute top-4 left-4 text-blue-600 border border-blue-600 px-6 py-1 rounded hover:text-white hover:bg-blue-600"
       >
         Back
@@ -134,15 +227,30 @@ const ProfilePage = () => {
         USER ACCOUNT
       </h1>
 
-      {/* Account Details Section */}
       <div className="bg-white dark:bg-gray-800 w-[60%] m-auto rounded-lg shadow-lg p-6 space-y-4">
-        {/* Avatar Section */}
+        {/* Avatar Section with Upload */}
         <div className="flex items-center space-x-4">
-          <img
-            src={avatarUrl}
-            alt="Avatar"
-            className="w-16 h-16 rounded-full border-2 border-gray-300 dark:border-gray-700"
-          />
+          <div className="relative">
+            <img
+              src={avatarUrl}
+              alt="Avatar"
+              className="w-16 h-16 rounded-full border-2 border-gray-300 dark:border-gray-700 object-cover"
+            />
+            <button
+              onClick={handleAvatarClick}
+              className="absolute bottom-0 right-0 bg-blue-600 rounded-full p-1.5 text-white hover:bg-blue-700"
+              disabled={isUploading}
+            >
+              <FaCamera size={12} />
+            </button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept="image/*"
+              className="hidden"
+            />
+          </div>
           <div>
             <h2 className="font-semibold">{username}</h2>
             <p className="text-sm text-gray-500">{email}</p>
@@ -186,8 +294,12 @@ const ProfilePage = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="border rounded dark:text-black p-2 w-full"
+                  placeholder="Enter new password"
                 />
-                <button onClick={() => setShowPassword(!showPassword)}>
+                <button
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="text-gray-500"
+                >
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
                 <button
@@ -205,7 +317,7 @@ const ProfilePage = () => {
         </div>
 
         {/* Account Type */}
-        <div className="flex justify-between border-b  items-center">
+        <div className="flex justify-between border-b items-center">
           <div>
             <h2 className="font-semibold">Account</h2>
             <p className="text-green-500">{accountType}</p>
@@ -242,7 +354,7 @@ const ProfilePage = () => {
                     onClick={() => setShowPin(!showPin)}
                     className="flex items-center text-gray-500 dark:text-gray-400"
                   >
-                    {showPin ? <FaEye /> : <FaEyeSlash />}
+                    {showPin ? <FaEyeSlash /> : <FaEye />}
                   </button>
                   <button
                     onClick={handleChangePin}

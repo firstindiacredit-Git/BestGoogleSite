@@ -346,7 +346,7 @@ if(!user){
                                       transition={{ duration: 0.1 }}
                                     > 
                                        
-                                      <div className=" rounded-b-lg overflow-clip">{componentMap[item.id]}</div>
+                                      <div className=" rounded-b-lg overflow">{componentMap[item.id]}</div>
                                     </motion.div>
                                   </>
                                 ) : (
@@ -373,7 +373,7 @@ if(!user){
                                         exit={{ height: 0, opacity: 0 }}
                                         transition={{ duration: 0.3 }}
                                       >
-                                         <div className=" rounded-b-lg overflow-clip">{componentMap[item.id]}</div>
+                                         <div className=" rounded-b-lg overflow">{componentMap[item.id]}</div>
                                       </motion.div>
                                     )}
                                   </>
