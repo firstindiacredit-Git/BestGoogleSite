@@ -376,6 +376,7 @@ import { AppstoreOutlined, UnorderedListOutlined, SearchOutlined, PlayCircleOutl
 import sportsmen from './sportsmen.json';
 import brands from './brand.json';
 import bikes from './bikes.json';
+import gdp from './gdp.json';
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -500,7 +501,7 @@ const Top100Page = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [category, setCategory] = useState('cars');
+  const [category, setCategory] = useState('motorcycles');
   const [page, setPage] = useState(1);
   const [viewMode, setViewMode] = useState('grid');
   const [searchQuery, setSearchQuery] = useState('');
@@ -516,7 +517,8 @@ const Top100Page = () => {
     banks: 'wikipedia',
     sportsmen: 'local',
     movies: 'https://imdb-top-100-movies.p.rapidapi.com/',
-    brands: 'local'
+    brands: 'local',
+    gdp: 'local'
   };
 
   const VIN_NUMBERS = [
@@ -566,6 +568,20 @@ const Top100Page = () => {
         const processedData = bikes.motorcycles.map(bike => ({
           name: bike.motorcycle,
           description: `Year: ${bike.model_year}, Time: ${bike.time_seconds}s, Mph Speed: ${bike.speed_mph}mph, Kmh Speed: ${bike.speed_kmh}km/h`
+        }));
+        setItems(processedData);
+        setError(null);
+        setLoading(false);
+        return;
+      }
+      
+      if (category === 'gdp') {
+        const processedData = gdp.GDP_by_country.map(country => ({
+          name: country.Country,
+          description: `IMF Forecast (${country.IMF?.Year || 'N/A'}): $${(country.IMF?.Forecast/1000).toFixed(2)}T
+                        World Bank (${country.World_Bank?.Year || 'N/A'}): $${(country.World_Bank?.Estimate/1000).toFixed(2)}T
+                        UN (${country.United_Nations?.Year || 'N/A'}): $${(country.United_Nations?.Estimate/1000).toFixed(2)}T`,
+          value: country.IMF?.Forecast ? `$${(country.IMF.Forecast/1000).toFixed(2)}T` : 'N/A'
         }));
         setItems(processedData);
         setError(null);
@@ -746,6 +762,11 @@ const Top100Page = () => {
                   <span>{item.originalIndex + 1}. {item.name}</span>
                   <span>{item.description?.includes('Price: $') ? `$${item.description.split('Price: $')[1]?.split(',')[0]}` : ''}</span>
                 </div>
+              ) : category === 'gdp' ? (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>{item.originalIndex + 1}. {item.name}</span>
+                  <span>{item.value}</span>
+                </div>
               ) : (
                 `${item.originalIndex + 1}. ${item.name}`
               )
@@ -793,6 +814,11 @@ const Top100Page = () => {
                   <span>{item.originalIndex + 1}. {item.name}</span>
                   <span>{item.description?.includes('Price: $') ? `$${item.description.split('Price: $')[1]?.split(',')[0]}` : ''}</span>
                 </div>
+              ) : category === 'gdp' ? (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>{item.originalIndex + 1}. {item.name}</span>
+                  <span>{item.value}</span>
+                </div>
               ) : (
                 `${item.originalIndex + 1}. ${item.name}`
               )
@@ -823,6 +849,7 @@ const Top100Page = () => {
             <Radio.Button value="sportsmen">Sports Person</Radio.Button>
             <Radio.Button value="movies">Movies</Radio.Button>
             <Radio.Button value="brands">Brands</Radio.Button>
+            <Radio.Button value="gdp">GDP</Radio.Button>
           </Radio.Group>
         </div>
 
