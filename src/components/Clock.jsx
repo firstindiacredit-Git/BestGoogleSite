@@ -1,362 +1,231 @@
 import React, { useState, useEffect } from "react";
-import styled from "styled-components";
-import moment from "moment-timezone";
-import { IoCloseOutline } from "react-icons/io5";
-import { CiEdit } from "react-icons/ci";
-import { Button, Row, Col, Select, Dropdown, Menu } from "antd";
+import { Clock, Plus, X } from "lucide-react";
 
-const ClockApp = () => {
-  const [clockStyle, setClockStyle] = useState("digital");
-  const [clocks, setClocks] = useState([]);
-  const [selectedCountries, setSelectedCountries] = useState([]);
-  const [dropdownVisible, setDropdownVisible] = useState(false);
+const AVAILABLE_TIMEZONES = [
+  "America/New_York",
+  "Europe/London",
+  "Asia/Tokyo",
+  "Australia/Sydney",
+  "Europe/Paris",
+  "Asia/Dubai",
+  "Pacific/Auckland",
+  "America/Los_Angeles",
+  "Asia/Seoul",  
+  "Europe/Berlin", 
+  "Africa/Johannesburg", 
+  "Asia/Shanghai",  
+  "America/Chicago",  
+  "Europe/Moscow", 
+  "Africa/Nairobi",  
+  "America/Toronto", 
+  "Asia/Kolkata",  
+  "America/Mexico_City",  
+  "Asia/Singapore",  
+];
 
-  const availableCountries = [
-    { label: "USA", timezone: "America/New_York" },
-    { label: "India", timezone: "Asia/Kolkata" },
-    { label: "UK", timezone: "Europe/London" },
-    { label: "Japan", timezone: "Asia/Tokyo" },
-    { label: "Canada", timezone: "America/Toronto" },
-    { label: "Australia", timezone: "Australia/Sydney" },
-    { label: "Germany", timezone: "Europe/Berlin" },
-    { label: "China", timezone: "Asia/Shanghai" },
-    { label: "Brazil", timezone: "America/Sao_Paulo" },
-    { label: "South Africa", timezone: "Africa/Johannesburg" },
-    { label: "Russia", timezone: "Europe/Moscow" },
-    { label: "France", timezone: "Europe/Paris" },
-    { label: "Italy", timezone: "Europe/Rome" },
-    { label: "Mexico", timezone: "America/Mexico_City" },
-    { label: "Argentina", timezone: "America/Argentina/Buenos_Aires" },
-    { label: "Saudi Arabia", timezone: "Asia/Riyadh" },
-    { label: "South Korea", timezone: "Asia/Seoul" },
-    { label: "Turkey", timezone: "Europe/Istanbul" },
-    { label: "Singapore", timezone: "Asia/Singapore" },
-    { label: "New Zealand", timezone: "Pacific/Auckland" },
-  ];
+
+const formatTimeZoneName = (timeZone) => {
+  return timeZone.replace("_", " ").split("/")[1];
+};
+
+const formatTimeForZone = (time, timeZone) => {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  }).format(time);
+};
+
+const getClockHandDegrees = (time) => {
+  const hours = time.getHours() % 12;
+  const minutes = time.getMinutes();
+  const seconds = time.getSeconds();
+
+  const hourDegrees = hours * 30 + minutes / 2;
+  const minuteDegrees = minutes * 6 + seconds / 10;
+  const secondDegrees = seconds * 6;
+
+  return {
+    hours: hourDegrees,
+    minutes: minuteDegrees,
+    seconds: secondDegrees,
+  };
+};
+
+const TimeZoneClock = ({ timeZone, isAnalog, onRemove }) => {
+  const [time, setTime] = useState(new Date());
 
   useEffect(() => {
-    const savedClockStyle = localStorage.getItem("clockStyle") || "digital";
-    const savedSelectedCountries = JSON.parse(
-      localStorage.getItem("selectedCountries")
-    ) || ["USA", "India", "UK", "Japan"];
-    setClockStyle(savedClockStyle);
-    setSelectedCountries(savedSelectedCountries);
+    const timer = setInterval(() => {
+      setTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
   }, []);
 
-  useEffect(() => {
-    const updatedClocks = availableCountries.filter((country) =>
-      selectedCountries.includes(country.label)
-    );
-    setClocks(updatedClocks);
-  }, [selectedCountries]);
+  const { hours, minutes, seconds } = getClockHandDegrees(time);
 
-  const handleClockStyleChange = (style) => {
-    setClockStyle(style);
-    localStorage.setItem("clockStyle", style);
-  };
-
-  const handleAddClock = (countryLabel) => {
-    if (
-      selectedCountries.length < 4 &&
-      !selectedCountries.includes(countryLabel)
-    ) {
-      const updatedCountries = [...selectedCountries, countryLabel];
-      setSelectedCountries(updatedCountries);
-      localStorage.setItem(
-        "selectedCountries",
-        JSON.stringify(updatedCountries)
-      );
-    }
-  };
-
-  const handleRemoveClock = (label) => {
-    const updatedCountries = selectedCountries.filter(
-      (country) => country !== label
-    );
-    setSelectedCountries(updatedCountries);
-    localStorage.setItem("selectedCountries", JSON.stringify(updatedCountries));
-  };
-
-  const getCurrentTime = (timezone) =>
-    moment()
-      .tz(timezone)
-      .format(clockStyle === "digital" ? "HH:mm" : "h:mm A");
-
-  const menu = (
-    <Menu>
-      <Menu.Item>
-        <select
-          onChange={(e) => handleClockStyleChange(e.target.value)}
-          value={clockStyle}
-          className="px-4 py-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+  if (isAnalog) {
+    return (
+      <div className="relative w-16 h-16 mx-auto">
+        <button
+          onClick={onRemove}
+          className="absolute -top-2 -right-2 z-10 bg-red-500 rounded-full p-1 text-white hover:bg-red-600"
         >
-          <option className="text-[14px]" value="digital">
-            Digital
-          </option>
-          <option className="text-[14px]" value="analog">
-            Analog
-          </option>
-        </select>
-      </Menu.Item>
-      <Menu.Item>
-        <Select
-          onChange={(value) => handleAddClock(value)}
-          className="border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Select a country"
-          style={{ width: 100 }}
-        >
-          {availableCountries.map((country) => (
-            <Select.Option key={country.label} value={country.label}>
-              {country.label}
-            </Select.Option>
-          ))}
-        </Select>
-      </Menu.Item>
-    </Menu>
-  );
+          <X size={16} />
+        </button>
+        <div className="w-full h-full rounded-full border-4 text-white border-gray-200 relative flex items-center justify-center">
+          {/* Numbers */}
+          {[...Array(12)].map((_, index) => {
+            const angle = (index + 1) * 30;
+            const radian = (angle * Math.PI) / 180;
+            const x = Math.sin(radian) * 24;
+            const y = -Math.cos(radian) * 24;
+
+            return (
+              <span
+                key={index}
+                className="absolute text-[7px] mt-2.5 ml-1.5 font-medium"
+                style={{
+                  transform: `translate(-50%, -50%) translate(${x}px, ${y}px)`,
+                }}
+              >
+                {index + 1}
+              </span>
+            );
+          })}
+
+          {/* Clock hands */}
+          <div className="absolute  w-1 h-1 bg-white dark:bg-white rounded-full"></div>
+          <div
+            className="absolute -mt-5 w-0.5 h-5 bg-blue-600 origin-bottom rounded-full"
+            style={{ transform: `rotate(${hours}deg)` }}
+          />
+          <div
+            className="absolute -mt-7 w-0.5 h-7 bg-black dark:bg-white origin-bottom rounded-full"
+            style={{ transform: `rotate(${minutes}deg)` }}
+          />
+          <div
+            className="absolute -mt-7 w-0.5 h-7 bg-red-500 origin-bottom rounded-full"
+            style={{ transform: `rotate(${seconds}deg)` }}
+          />
+        </div>
+        <p className="text-center mt-1 text-white text-[10px] font-medium">
+          {formatTimeZoneName(timeZone)}
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col min-h-[10rem] items-center p-4 justify-center">
-      <StyledWrapper>
-        <div className=" right-0 flex justify-end">
-          <Dropdown
-            overlay={menu}
-            trigger={["click"]}
-            visible={dropdownVisible}
-            onVisibleChange={(visible) => setDropdownVisible(visible)}
-          >
-            <Button
-              icon={<CiEdit />}
-              size="large"
-              className="hover:bg-blue-500"
-            />
-          </Dropdown>
-        </div>
-
-        <Row gutter={[16, 16]} justify="center">
-          {clocks.map((clock) => (
-            <Col xs={24} sm={12} md={6} key={clock.label}>
-              <div className="card flex flex-col justify-between relative group hover:opacity-100 transition-opacity duration-300">
-                <Clock clockStyle={clockStyle} timezone={clock.timezone} />
-                <div className="absolute top-2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <Button
-                    onClick={() => handleRemoveClock(clock.label)}
-                    icon={<IoCloseOutline />}
-                    shape="circle"
-                    size="large"
-                    style={{
-                      opacity: 1,
-                      zIndex: 10,
-                    }}
-                    className="bg-white hover:bg-red-500 hover:text-black"
-                  />
-                </div>
-                <p className="country-name text-[12px] dark:text-white mt-1 text-center">
-                  {clock.label}
-                </p>
-              </div>
-            </Col>
-          ))}
-        </Row>
-      </StyledWrapper>
+    <div className="relative dark:text-white w-full mx-auto group">
+      <button
+        onClick={onRemove}
+        className="absolute -top-2 -right-2 z-50 bg-red-500 rounded-full p-1 text-white opacity-0 group-hover:opacity-100 hover:bg-red-600 transition-opacity"
+      >
+        <X size={16} />
+      </button>
+      <div className="dark:bg-black/80 bg-gray-200 backdrop-blur-sm dark:text-white p-2 rounded-2xl">
+        <p className="text-[10px] opacity-80">{formatTimeZoneName(timeZone)}</p>
+        <p className="text-[13px] font-light">
+          {formatTimeForZone(time, timeZone)}
+        </p>
+      </div>
     </div>
   );
 };
 
-const Clock = ({ clockStyle, timezone }) => {
-  const [time, setTime] = useState(moment().tz(timezone));
+const ResponsiveWorldClock = () => {
+  const [isAnalog, setIsAnalog] = useState(false);
+  const [selectedTimezones, setSelectedTimezones] = useState([
+    "America/New_York",
+  ]);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTime(moment().tz(timezone));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [timezone]);
+  const addTimeZone = (timeZone) => {
+    if (selectedTimezones.length < 4) {
+      setSelectedTimezones([...selectedTimezones, timeZone]);
+      setIsDropdownOpen(false);
+    }
+  };
 
-  return clockStyle === "analog" ? (
-    <AnalogClock time={time} />
-  ) : (
-    <DigitalClock time={time} />
+  const removeTimeZone = (index) => {
+    setSelectedTimezones(selectedTimezones.filter((_, i) => i !== index));
+  };
+
+  const availableZones = AVAILABLE_TIMEZONES.filter(
+    (tz) => !selectedTimezones.includes(tz)
   );
-};
-
-const DigitalClock = ({ time }) => (
-  <DigitalClockWrapper>
-    <h2 className="digital-clock-text">{time.format("HH:mm")}</h2>
-  </DigitalClockWrapper>
-);
-
-const AnalogClock = ({ time }) => {
-  const hours = time.hours() % 12;
-  const minutes = time.minutes();
-  const seconds = time.seconds();
-
-  const hourDegrees = (hours + minutes / 60) * 30;
-  const minuteDegrees = (minutes + seconds / 60) * 6;
-  const secondDegrees = seconds * 6;
 
   return (
-    <AnalogClockWrapper size="60px">
-      <div className="realistic-clock">
-        <div className="clock-face">
-          <div className="glass-cover" />
-          <div
-            className="hour hand"
-            style={{ transform: `rotate(${hourDegrees}deg)` }}
-          />
-          <div
-            className="minute hand"
-            style={{ transform: `rotate(${minuteDegrees}deg)` }}
-          />
-          <div
-            className="second hand"
-            style={{ transform: `rotate(${secondDegrees}deg)` }}
-          />
-          <div className="center-circle" />
-          <div className="clock-numbers">
-            {[...Array(12)].map((_, i) => {
-              const angle = (i + 1) * (360 / 12);
-              const radius = 23;
-              const x = Math.cos((angle - 90) * (Math.PI / 180)) * radius + 29;
-              const y = Math.sin((angle - 90) * (Math.PI / 180)) * radius + 29;
-              return (
-                <p
-                  key={i}
-                  style={{
-                    top: `${y}px`,
-                    left: `${x}px`,
-                    transform: "translate(-50%, -50%)",
-                  }}
-                  className="number"
-                >
-                  {i + 1}
-                </p>
-              );
-            })}
+    <div className="dark:bg-gradient-to-br from-gray-900 to-gray-800 dark:text-white p-4 flex justify-center items-center">
+      <div className="mx-auto w-full max-w-sm">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-[14px] font-semibold flex items-center gap-1">
+            <Clock className="w-5 h-5" />
+            World Clock
+          </h1>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setIsAnalog(!isAnalog)}
+              className="px-4 py-1 dark:bg-white/10  bg-gray-200 hover:bg-gray-300 rounded-full dark:hover:bg-white/20 transition"
+            >
+              Switch to {isAnalog ? "Digital" : "Analog"}
+            </button>
+
+            <div className="relative">
+              <button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                disabled={selectedTimezones.length >= 4}
+                className="p-2 dark:bg-white/10 rounded-full dark:hover:bg-white/20 bg-gray-200 hover:bg-gray-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                title={
+                  selectedTimezones.length >= 4
+                    ? "Maximum timezones reached"
+                    : "Add timezone"
+                }
+              >
+                <Plus className="w-5 h-5" />
+              </button>
+
+              {isDropdownOpen && availableZones.length > 0 && (
+                <>
+                  <div className="absolute right-0 mt-2 w-48 dark:bg-gray-800/95 backdrop-blur-sm bg-gray-200  rounded-lg shadow-lg py-1 z-50">
+                    {availableZones.map((timeZone) => (
+                      <button
+                        key={timeZone}
+                        onClick={() => addTimeZone(timeZone)}
+                        className="w-full px-4 py-2 text-left text-sm hover:bg-white dark:text-white dark:hover:bg-white/10 transition"
+                      >
+                        {formatTimeZoneName(timeZone)}
+                      </button>
+                    ))}
+                  </div>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setIsDropdownOpen(false)}
+                  />
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-black/40  backdrop-blur-md rounded-3xl p-6 shadow-2xl">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 justify-center mx-auto">
+            {selectedTimezones.map((timeZone, index) => (
+              <TimeZoneClock
+                key={timeZone}
+                timeZone={timeZone}
+                isAnalog={isAnalog}
+                onRemove={() => removeTimeZone(index)}
+              />
+            ))}
           </div>
         </div>
       </div>
-    </AnalogClockWrapper>
+    </div>
   );
 };
 
-const StyledWrapper = styled.div`
-  .card {
-    padding: 20px;
-    text-align: center;
-    width: 80px;
-    position: relative;
-  }
-`;
-
-const DigitalClockWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 25px;
-  width: 69px;
-  // margin-left: px;
-  background: #111;
-  border-radius: 10%;
-
-  .digital-clock-text {
-    font-size: 12px;
-    color: #fff;
-    font-family: "Courier New", monospace;
-    text-align: center;
-    padding: 10px;
-  }
-`;
-
-const AnalogClockWrapper = styled.div`
-  .realistic-clock {
-    position: relative;
-    width: ${(props) => props.size || "60px"};
-    height: ${(props) => props.size || "60px"};
-    margin: 10px auto;
-  }
-
-  .clock-face {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle, #333, #111);
-    border-radius: 50%;
-    border: 1px solid #cec5c5;
-    box-shadow: 0 0 0px rgba(0, 0, 0, 0.5),
-      inset 0 0 5px rgba(255, 255, 255, 0.1);
-  }
-
-  .glass-cover {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 100%;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-    z-index: 2;
-    transform: translate(-50%, -50%);
-  }
-
-  .hand {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 2px;
-    height: 50%;
-    background: #fff;
-    transform-origin: 50% 100%;
-    transition: transform 0.1s ease;
-  }
-
-  .hour {
-    height: 23%;
-    top: 30%;
-    background-color: #ff6600;
-  }
-
-  .minute {
-    height: 34%;
-    top: 17%;
-    background-color: #66ccff;
-  }
-
-  .second {
-    height: 34%;
-    top: 17%;
-    width: 1px;
-    background-color: red;
-  }
-
-  .center-circle {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 8px;
-    height: 8px;
-    background-color: #fff;
-    border-radius: 50%;
-    z-index: 3;
-    transform: translate(-50%, -50%);
-  }
-
-  .clock-numbers {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 100%;
-    height: 100%;
-    transform: translate(-50%, -50%);
-  }
-
-  .number {
-    position: absolute;
-    font-size: 10px;
-    font-weight: bold;
-    color: #fff;
-    transition: all 0.3s ease;
-  }
-`;
-
-export default ClockApp;
+export default ResponsiveWorldClock;
