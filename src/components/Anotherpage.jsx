@@ -272,8 +272,9 @@ if(!user){
           </svg>
         </button>
       </div>
+      <div className="flex justify-center">
       <div
-        className={`bg-white dark:bg-gray-800 flex justify-center rounded-xl`}
+        className={`bg-white w-fit dark:bg-gray-800 flex justify-center rounded-xl`}
         style={{
           backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",
           backgroundSize: "cover",
@@ -281,7 +282,7 @@ if(!user){
           backgroundAttachment: "fixed",
         }}
       >
-        <div className="p-4 w-fit">
+        <div className="p-4 ">
           {loading ? (
             <div className="flex justify-center items-center min-h-screen">
               <Spin size="large" />
@@ -391,6 +392,7 @@ if(!user){
             </DragDropContext>
           )}
         </div>
+      </div>
       </div>
 
       {/* Floating Sort Button */}
