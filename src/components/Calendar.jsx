@@ -15,43 +15,27 @@ const FullCalendar = () => {
     "July", "August", "September", "October", "November", "December"
   ];
 
-  const daysInMonth = currentDate.daysInMonth();
-  const firstDayOfMonth = currentDate.startOf('month').day();
-  const lastDayOfMonth = currentDate.endOf('month').day();
-
-  // Get days from previous month to fill the first week
-  const prevMonthDays = [];
-  for (let i = firstDayOfMonth - 1; i >= 0; i--) {
-    prevMonthDays.push({
-      date: currentDate.subtract(1, 'month').endOf('month').subtract(i, 'day'),
-      isCurrentMonth: false
-    });
-  }
-
-  // Get days of current month
-  const currentMonthDays = [];
-  for (let i = 1; i <= daysInMonth; i++) {
-    currentMonthDays.push({
-      date: currentDate.date(i),
-      isCurrentMonth: true
-    });
-  }
-
-  // Get days from next month to fill the last week
-  const nextMonthDays = [];
-  for (let i = 1; i < 7 - lastDayOfMonth; i++) {
-    nextMonthDays.push({
-      date: currentDate.add(1, 'month').startOf('month').add(i - 1, 'day'),
-      isCurrentMonth: false
-    });
-  }
-
-  const allDays = [...prevMonthDays, ...currentMonthDays, ...nextMonthDays];
-
-  const weeks = [];
-  for (let i = 0; i < allDays.length; i += 7) {
-    weeks.push(allDays.slice(i, i + 7));
-  }
+  const generateCalendarDays = () => {
+    const firstDayOfMonth = dayjs(new Date(currentDate.year(), currentDate.month(), 1));
+    const lastDayOfMonth = firstDayOfMonth.endOf('month');
+    const startDate = firstDayOfMonth.startOf('week');
+    
+    // Always show 6 weeks (42 days)
+    const totalDays = 42;
+    const days = [];
+    
+    for (let i = 0; i < totalDays; i++) {
+      const currentDate = startDate.add(i, 'day');
+      days.push({
+        date: currentDate,
+        dayOfMonth: currentDate.date(),
+        isCurrentMonth: currentDate.month() === currentDate.month(),
+        isToday: currentDate.isSame(dayjs(), 'day'),
+      });
+    }
+    
+    return days;
+  };
 
   const isToday = (date) => {
     return date.format('YYYY-MM-DD') === dayjs().format('YYYY-MM-DD');
@@ -177,55 +161,53 @@ const FullCalendar = () => {
         ))}
 
         {/* Calendar days */}
-        {weeks.map((week, weekIndex) => (
-          week.map((day, dayIndex) => {
-            const isCurrentDay = isToday(day.date);
-            const isSelectedDay = isSelected(day.date);
-            const dayHoliday = getHolidayDetails(day.date);
-            const isSunday = day.date.day() === 0;
+        {generateCalendarDays().map((day, index) => {
+          const isCurrentDay = isToday(day.date);
+          const isSelectedDay = isSelected(day.date);
+          const dayHoliday = getHolidayDetails(day.date);
+          const isSunday = day.date.day() === 0;
 
-            return (
-              <div
-                key={`${weekIndex}-${dayIndex}`}
-                className="relative"
-                onMouseEnter={() => dayHoliday && setShowTooltip(`${weekIndex}-${dayIndex}`)}
-                onMouseLeave={() => setShowTooltip(null)}
+          return (
+            <div
+              key={index}
+              className="relative"
+              onMouseEnter={() => dayHoliday && setShowTooltip(index)}
+              onMouseLeave={() => setShowTooltip(null)}
+            >
+              <button
+                onClick={() => setSelectedDate(day.date)}
+                className={`
+                  relative h-10 w-full text-center rounded-lg transition-colors
+                  ${!day.isCurrentMonth ? 'text-gray-300 dark:text-gray-600 pointer-events-none opacity-50' : ''}
+                  ${isSunday && day.isCurrentMonth ? 'bg-gray-100/80 dark:bg-gray-800/80' : ''}
+                  ${dayHoliday && day.isCurrentMonth ? 'text-blue-600 dark:text-blue-400' : ''}
+                  ${isCurrentDay ? 'bg-blue-500 text-white' : ''}
+                  ${isSelectedDay && !isCurrentDay ? 'border-2 border-blue-500 dark:border-white' : ''}
+                  ${!isCurrentDay && !isSelectedDay && day.isCurrentMonth ? 'hover:bg-gray-100 dark:hover:bg-gray-800' : ''}
+                `}
               >
-                <button
-                  onClick={() => setSelectedDate(day.date)}
-                  className={`
-                    relative h-10 w-full text-center rounded-lg transition-colors
-                    ${!day.isCurrentMonth ? 'text-gray-400 dark:text-gray-600' : ''}
-                    ${isSunday ? 'text-yellow-600 dark:text-yellow-600' : ''}
-                    ${dayHoliday ? 'text-blue-600 dark:text-blue-400' : ''}
-                    ${isCurrentDay ? 'bg-blue-500 text-white' : ''}
-                    ${isSelectedDay && !isCurrentDay ? 'border-2 border-blue-500 dark:border-white' : ''}
-                    ${!isCurrentDay && !isSelectedDay ? 'hover:bg-gray-100 dark:hover:bg-gray-800' : ''}
-                  `}
+                <span className="absolute inset-0 flex items-center justify-center">
+                  {day.dayOfMonth}
+                </span>
+              </button>
+              {showTooltip === index && dayHoliday && (
+                <div 
+                  style={{zIndex:"999"}} 
+                  className="absolute w-48 p-2 mb-1 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700"
                 >
-                  <span className="absolute inset-0 flex items-center justify-center">
-                    {day.date.date()}
-                  </span>
-                </button>
-                {showTooltip === `${weekIndex}-${dayIndex}` && dayHoliday && (
-                  <div 
-                    style={{zIndex:"999"}} 
-                    className="absolute w-48 p-2 mb-1 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700"
-                  >
-                    <div className="font-bold">{dayHoliday.name}</div>
-                    <div className="text-xs mt-1">{dayHoliday.description}</div>
-                    <div className="text-xs mt-1 text-gray-500 dark:text-gray-400">
-                      Type: {dayHoliday.type.join(", ")}
-                    </div>
+                  <div className="font-bold">{dayHoliday.name}</div>
+                  <div className="text-xs mt-1">{dayHoliday.description}</div>
+                  <div className="text-xs mt-1 text-gray-500 dark:text-gray-400">
+                    Type: {dayHoliday.type.join(", ")}
                   </div>
-                )}
-              </div>
-            );
-          })
-        ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
-      {/* Today button
+      {/* Today button */}
       <div className="mt-4 flex justify-end">
         <button
           onClick={goToToday}
@@ -233,7 +215,7 @@ const FullCalendar = () => {
         >
           Today
         </button>
-      </div> */}
+      </div>
     </div>
   );
 };

@@ -368,7 +368,7 @@ if(!user){
                                     </motion.div>
                                     {item.isOpen && (
                                       <motion.div
-                                        className=" bg-gray-50 dark:bg-gray-900 rounded-b-lg p-4"
+                                        className=" bg-gray-50 dark:bg-gray-900 rounded-b-lg "
                                         initial={{ height: 0, opacity: 0 }}
                                         animate={{ height: "auto", opacity: 1 }}
                                         exit={{ height: 0, opacity: 0 }}
