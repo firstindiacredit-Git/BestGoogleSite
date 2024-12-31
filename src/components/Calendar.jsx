@@ -178,7 +178,7 @@ const FullCalendar = () => {
                 onClick={() => setSelectedDate(day.date)}
                 className={`
                   relative h-10 w-full text-center rounded-lg transition-colors
-                  ${!day.isCurrentMonth ? 'text-gray-300 dark:text-gray-600 pointer-events-none opacity-50' : ''}
+                  ${!day.isCurrentMonth ? 'pointer-events-none' : ''}
                   ${isSunday && day.isCurrentMonth ? 'bg-gray-100/80 dark:bg-gray-800/80' : ''}
                   ${dayHoliday && day.isCurrentMonth ? 'text-blue-600 dark:text-blue-400' : ''}
                   ${isCurrentDay ? 'bg-blue-500 text-white' : ''}
@@ -187,7 +187,7 @@ const FullCalendar = () => {
                 `}
               >
                 <span className="absolute inset-0 flex items-center justify-center">
-                  {day.dayOfMonth}
+                  {day.isCurrentMonth ? day.dayOfMonth : ''}
                 </span>
               </button>
               {showTooltip === index && dayHoliday && (
