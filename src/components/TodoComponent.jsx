@@ -1,20 +1,28 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect,useRef } from "react";
+import { auth, db } from "./../firebase";
+import {
+  collection,
+  doc,
+  setDoc,
+  deleteDoc,
+  getDocs,
+  query,
+  orderBy,
+  onSnapshot,
+} from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
 import { Check, Edit, Trash2, Palette } from "lucide-react";
-import { color } from "framer-motion";
 
-const TodoComponent = () => {
+const TodoComponent = ({ containerColor, textColor }) => {
   const [todos, setTodos] = useState([]);
+  const [newTodo, setNewTodo] = useState("");
+  const [draggedItemIndex, setDraggedItemIndex] = useState(null);
+  const [dragOverIndex, setDragOverIndex] = useState(null);
+  const [user, setUser] = useState(null);
   const [inputValue, setInputValue] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
-  const [containerColor, setContainerColor] = useState("#f0f9ff");
-  const [textColor, setTextColor] = useState("#000");
-  const [draggedItemIndex, setDraggedItemIndex] = useState(null);
-  const [dragOverIndex, setDragOverIndex] = useState(null);
-
-  const colorPickerRef = useRef(null);
-
-  const predefinedColors = [
+  const [predefinedColors, setPredefinedColors] = useState([
     "#000000",
     "#424242",
     "#666666",
@@ -51,7 +59,7 @@ const TodoComponent = () => {
     "#4169E1",
     "#9370DB",
     "#FF69B4",
-  ];
+  ]);
 
   const isLight = (color) => {
     const r = parseInt(color.substr(1, 2), 16);
@@ -61,61 +69,126 @@ const TodoComponent = () => {
     return brightness > 128;
   };
 
-  useEffect(() => {
-    const savedTodos = localStorage.getItem("todos");
-    const savedContainerColor = localStorage.getItem("containerColor");
+  const colorPickerRef = useRef(null);
 
-    if (savedTodos) setTodos(JSON.parse(savedTodos));
-    if (savedContainerColor) {
-      setContainerColor(savedContainerColor);
-      setTextColor(isLight(savedContainerColor) ? "#000" : "#fff");
-    }
-  }, []);
-
+  // Load todos on component mount and auth state change
   useEffect(() => {
-    localStorage.setItem("todos", JSON.stringify(todos));
-    localStorage.setItem("containerColor", containerColor);
-    setTextColor(isLight(containerColor) ? "#000" : "#fff");
-  }, [todos, containerColor]);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        colorPickerRef.current &&
-        !colorPickerRef.current.contains(event.target)
-      ) {
-        setShowColorPicker(false);
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+      if (user) {
+        // Load todos from Firestore for authenticated users
+        loadFirestoreTodos(user.uid);
+      } else {
+        // Load todos from localStorage for non-authenticated users
+        const localTodos = JSON.parse(localStorage.getItem("todos") || "[]");
+        setTodos(localTodos);
       }
-    };
+    });
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () => unsubscribeAuth();
   }, []);
 
-  const addTodo = (e) => {
-    e.preventDefault();
-    if (!inputValue.trim()) return;
+  // Save todos whenever they change
+  useEffect(() => {
+    if (user) {
+      // Only save positions to localStorage for authenticated users
+      const todoPositions = todos.map((todo, index) => ({
+        id: todo.id,
+        position: index,
+      }));
+      localStorage.setItem(`todoPositions_${user.uid}`, JSON.stringify(todoPositions));
+    } else {
+      // Save everything to localStorage for non-authenticated users
+      localStorage.setItem("todos", JSON.stringify(todos));
+    }
+  }, [todos, user]);
 
-    const newTodo = {
-      id: Date.now(),
-      text: inputValue,
+  const loadFirestoreTodos = async (userId) => {
+    const todosRef = collection(db, `users/${userId}/TodoList`);
+    const q = query(todosRef, orderBy("timestamp", "desc"));
+    
+    // Set up real-time listener
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const firestoreTodos = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      
+      // Get positions from localStorage
+      const positions = JSON.parse(localStorage.getItem(`todoPositions_${userId}`) || "[]");
+      
+      // Sort todos based on saved positions
+      const sortedTodos = [...firestoreTodos].sort((a, b) => {
+        const posA = positions.find(p => p.id === a.id)?.position || 0;
+        const posB = positions.find(p => p.id === b.id)?.position || 0;
+        return posA - posB;
+      });
+      
+      setTodos(sortedTodos);
+    });
+
+    return unsubscribe;
+  };
+
+  const addTodo = async (text) => {
+    if (!text || text.trim() === "") return;
+
+    const newTodoItem = {
+      text: text.trim(),
       completed: false,
+      timestamp: new Date().toISOString(),
+      id: Date.now().toString(),
     };
 
-    setTodos([...todos, newTodo]);
-    setInputValue("");
+    if (user) {
+      // Add to Firestore for authenticated users
+      try {
+        const todoRef = doc(db, `users/${user.uid}/TodoList/${newTodoItem.id}`);
+        await setDoc(todoRef, newTodoItem);
+      } catch (error) {
+        console.error("Error adding todo:", error);
+      }
+    } else {
+      // Add to local state for non-authenticated users
+      setTodos(prev => [newTodoItem, ...prev]);
+    }
   };
 
-  const toggleComplete = (id) => {
-    setTodos(
-      todos.map((todo) =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      )
-    );
+  const toggleTodo = async (id) => {
+    const todoToToggle = todos.find(todo => todo.id === id);
+    if (!todoToToggle) return;
+
+    const updatedTodo = { ...todoToToggle, completed: !todoToToggle.completed };
+
+    if (user) {
+      // Update in Firestore for authenticated users
+      try {
+        const todoRef = doc(db, `users/${user.uid}/TodoList/${id}`);
+        await setDoc(todoRef, updatedTodo);
+      } catch (error) {
+        console.error("Error updating todo:", error);
+      }
+    } else {
+      // Update in local state for non-authenticated users
+      setTodos(prev => prev.map(todo => 
+        todo.id === id ? updatedTodo : todo
+      ));
+    }
   };
 
-  const deleteTodo = (id) => {
-    setTodos(todos.filter((todo) => todo.id !== id));
+  const deleteTodo = async (id) => {
+    if (user) {
+      // Delete from Firestore for authenticated users
+      try {
+        const todoRef = doc(db, `users/${user.uid}/TodoList/${id}`);
+        await deleteDoc(todoRef);
+      } catch (error) {
+        console.error("Error deleting todo:", error);
+      }
+    } else {
+      // Delete from local state for non-authenticated users
+      setTodos(prev => prev.filter(todo => todo.id !== id));
+    }
   };
 
   const startEditing = (id, text) => {
@@ -127,17 +200,30 @@ const TodoComponent = () => {
     e.preventDefault();
     if (!inputValue.trim()) return;
 
-    setTodos(
-      todos.map((todo) =>
-        todo.id === editingId ? { ...todo, text: inputValue } : todo
-      )
-    );
+    const updatedTodo = { ...todos.find(todo => todo.id === editingId), text: inputValue };
+
+    if (user) {
+      // Update in Firestore for authenticated users
+      try {
+        const todoRef = doc(db, `users/${user.uid}/TodoList/${editingId}`);
+        setDoc(todoRef, updatedTodo);
+      } catch (error) {
+        console.error("Error updating todo:", error);
+      }
+    } else {
+      // Update in local state for non-authenticated users
+      setTodos(prev => prev.map(todo => 
+        todo.id === editingId ? updatedTodo : todo
+      ));
+    }
+
     setEditingId(null);
     setInputValue("");
   };
 
-  const handleDragStart = (index) => {
+  const handleDragStart = (e, index) => {
     setDraggedItemIndex(index);
+    e.dataTransfer.effectAllowed = "move";
   };
 
   const handleDragOver = (e, index) => {
@@ -145,16 +231,14 @@ const TodoComponent = () => {
     setDragOverIndex(index);
   };
 
-  const handleDrop = () => {
+  const handleDrop = (e) => {
+    e.preventDefault();
     if (draggedItemIndex === null || dragOverIndex === null) return;
 
-    const updatedTodos = [...todos];
-    const [movedItem] = updatedTodos.splice(draggedItemIndex, 1);
-    updatedTodos.splice(dragOverIndex, 0, movedItem);
-
-    setTodos(updatedTodos);
-    setDraggedItemIndex(null);
-    setDragOverIndex(null);
+    const newTodos = [...todos];
+    const [draggedItem] = newTodos.splice(draggedItemIndex, 1);
+    newTodos.splice(dragOverIndex, 0, draggedItem);
+    setTodos(newTodos);
   };
 
   const handleDragEnd = () => {
@@ -162,9 +246,23 @@ const TodoComponent = () => {
     setDragOverIndex(null);
   };
 
+  const handleClickOutside = (event) => {
+    if (
+      colorPickerRef.current &&
+      !colorPickerRef.current.contains(event.target)
+    ) {
+      setShowColorPicker(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
     <div
-      className="container mx-auto"
+      className="container mx-auto rounded-b-lg"
       style={{ backgroundColor: containerColor, color: textColor }}
     >
       <div className="bg-transparent w-full rounded-lg  p-6 relative">
@@ -212,15 +310,25 @@ const TodoComponent = () => {
           </div>
         )}
 
-        <form onSubmit={editingId ? submitEdit : addTodo} className="mb-6">
+        <form 
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (editingId) {
+              submitEdit(e);
+            } else {
+              addTodo(newTodo);
+              setNewTodo("");
+            }
+          }} 
+          className="mb-6"
+        >
           <div className="flex gap-2 relative">
             <input
               type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
+              value={editingId ? inputValue : newTodo}
+              onChange={(e) => editingId ? setInputValue(e.target.value) : setNewTodo(e.target.value)}
               placeholder={editingId ? "Edit todo..." : "Add a new todo..."}
-              className={` text-black flex-1 p-3  rounded-lg border focus:ring-2 focus:ring-blue-500`}
-            
+              className="text-black flex-1 p-3 rounded-lg border focus:ring-2 focus:ring-blue-500"
             />
             <button
               type="submit"
@@ -236,17 +344,17 @@ const TodoComponent = () => {
             <li
               key={todo.id}
               draggable
-              onDragStart={() => handleDragStart(index)}
+              onDragStart={(e) => handleDragStart(e, index)}
               onDragOver={(e) => handleDragOver(e, index)}
               onDrop={handleDrop}
               onDragEnd={handleDragEnd}
-              className={`flex items-center justify-between p-4 rounded-lg cursor-move bg-transparent shadow-sm transition-shadow ${
+              className={`flex items-center justify-between p-4 rounded-lg cursor-move bg-white/50 shadow-sm transition-shadow ${
                 draggedItemIndex === index ? "opacity-50" : ""
               } ${dragOverIndex === index ? "bg-blue-100" : ""}`}
             >
               <div className="flex items-center gap-3 flex-1">
                 <button
-                  onClick={() => toggleComplete(todo.id)}
+                  onClick={() => toggleTodo(todo.id)}
                   className={`p-2 rounded-full ${
                     todo.completed ? "bg-green-500 text-white" : "bg-gray-200"
                   }`}

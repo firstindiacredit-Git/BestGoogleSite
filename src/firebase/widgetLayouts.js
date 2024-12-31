@@ -11,6 +11,7 @@ const defaultWidgets = {
     { id: "imageUploader", name: "Image Uploader", isOpen: false, column: 2, position: 0 },
     { id: "calendar", name: "Calendar", isOpen: false, column: 2, position: 1 },
     { id: "Bookmarks", name: "Bookmarks", isOpen: false, column: 2, position: 2 }, 
+    { id: "NewsFeed", name: "News Feed", isOpen: false, column: 0, position: 3 }, 
   ],
 };
 
@@ -23,7 +24,8 @@ export const allWidgets = {
   imageUploader: { id: "imageUploader", name: "Image Uploader" },
   calendar: { id: "calendar", name: "Calendar" },
   Bookmarks: { id: "Bookmarks", name: "Bookmarks" },
-  Todo: { id: "Todo", name: "Todo List" }
+  Todo: { id: "Todo", name: "Todo List" },
+  NewsFeed: { id: "NewsFeed", name: "News Feed" }
 };
 
 // Get available widgets that aren't already in use

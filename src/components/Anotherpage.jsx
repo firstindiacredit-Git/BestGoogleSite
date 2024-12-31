@@ -18,6 +18,7 @@ import {
   getAvailableWidgets,
 } from "../firebase/widgetLayouts";
 import TodoComponent from "./TodoComponent.jsx";
+import NewsFeed from "./NewsFeed.jsx";
 
 const Anotherpage = ({ backgroundImage }) => {
   const [grid, isGrid] = useState(true);
@@ -40,6 +41,7 @@ const Anotherpage = ({ backgroundImage }) => {
     calendar: <Calendar />,
     Bookmarks: <Category />,
     Todo: <TodoComponent />,
+    NewsFeed:<NewsFeed/>
   };
 
   // Load user and layout
@@ -347,7 +349,7 @@ if(!user){
                                       transition={{ duration: 0.1 }}
                                     > 
                                        
-                                      <div className=" rounded-b-lg overflow">{componentMap[item.id]}</div>
+                                      <div className=" rounded-b-lg">{componentMap[item.id]}</div>
                                     </motion.div>
                                   </>
                                 ) : (
@@ -374,7 +376,7 @@ if(!user){
                                         exit={{ height: 0, opacity: 0 }}
                                         transition={{ duration: 0.3 }}
                                       >
-                                         <div className=" rounded-b-lg overflow">{componentMap[item.id]}</div>
+                                         <div className=" rounded-b-lg ">{componentMap[item.id]}</div>
                                       </motion.div>
                                     )}
                                   </>
