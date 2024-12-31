@@ -20,6 +20,7 @@ import {
   message,
   Typography,
   Tooltip,
+  Empty,
 } from "antd";
 import {
   DeleteOutlined,
@@ -28,6 +29,8 @@ import {
   LinkOutlined,
   GlobalOutlined,
 } from "@ant-design/icons";
+
+import styles from '../styles/Category.module.css';
 
 const { Title } = Typography;
 
@@ -57,7 +60,7 @@ const Category = ({ data = [] }) => {
           id: doc.id,
           ...doc.data(),
         }));
-        console.log(bookmarksData)
+        // console.log(bookmarksData)
         setBookmarks(bookmarksData);
       });
       return () => unsubscribe();
@@ -135,34 +138,52 @@ const Category = ({ data = [] }) => {
   };
 
   return (
-    <div className="dark:text-white  ">
+    <div
+    style={{borderRadius:"0px 0px 7px 7px"}}
+    className="dark:text-white bg-white dark:bg-gray-900">
       <Card
         title={
-          <div className="flex dark:bg-gray-800  dark:text-white justify-between items-center">
-            <Title level={4} className="m-0">
+          <div className="flex dark:bg-gray-900 justify-between items-center">
+            <Title level={4} className="dark:text-white m-0">
               My Bookmarks
             </Title>
             <Button
               type="primary"
               icon={<PlusOutlined />}
               onClick={() => setIsModalVisible(true)}
+              className="flex items-center bg-blue-500 text-white hover:bg-blue-600"
             >
             </Button>
           </div>
         }
-        className="shadow-md dark:bg-gray-800 dark:text-white"
+        style={{borderRadius:"0px 0px 7px 7px"}}
+        className="dark:bg-gray-900 border-none"
       >
         <List
           loading={loading}
           dataSource={bookmarks}
+          locale={{
+            emptyText: (
+              <div className="flex flex-col items-center justify-center py-12">
+                <button
+                  onClick={() => setIsModalVisible(true)}
+                  className="p-4 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <PlusOutlined className="text-2xl text-gray-600 dark:text-gray-400" />
+                </button>
+                <p className="mt-4 text-gray-600 dark:text-gray-400">Add your first bookmark</p>
+              </div>
+            )
+          }}
           renderItem={(bookmark) => (
             <List.Item
               key={bookmark.id}
+              className="dark:bg-gray-900"
               actions={[
                 <Tooltip title="Edit">
                   <Button
                     type="text"
-                    icon={<EditOutlined />}
+                    icon={<EditOutlined className="dark:text-gray-600 hover:dark:text-gray-400" />}
                     onClick={() => showEditModal(bookmark)}
                   />
                 </Tooltip>,
@@ -170,14 +191,14 @@ const Category = ({ data = [] }) => {
                   <Button
                     type="text"
                     danger
-                    icon={<DeleteOutlined />}
+                    icon={<DeleteOutlined className="dark:text-gray-600 hover:dark:text-gray-400" />}
                     onClick={() => handleDeleteBookmark(bookmark.id)}
                   />
                 </Tooltip>,
                 <Tooltip title="Open in new tab">
                   <Button
                     type="text"
-                    icon={<GlobalOutlined />}
+                    icon={<GlobalOutlined className="dark:text-gray-600 hover:dark:text-gray-400" />}
                     onClick={() => window.open(bookmark.link, "_blank")}
                   />
                 </Tooltip>,
@@ -204,11 +225,12 @@ const Category = ({ data = [] }) => {
                     {bookmark.name}
                   </a>
                 }
-                description={bookmark.link}
+                description={<span className="dark:text-gray-600">{bookmark.link}</span>}
               />
             </List.Item>
           )}
         />
+        
       </Card>
 
       <Modal
@@ -253,7 +275,9 @@ const Category = ({ data = [] }) => {
         </Form>
       </Modal>
     </div>
+    
   );
+  
 };
 
 export default Category;

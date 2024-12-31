@@ -153,12 +153,12 @@ function SearchPage() {
             </Link>
           </div>
         </div>
-        <div className="backdrop-blur-md bg-black/40 border-gray-400 p-2 flex justify-center w-full text-white font-semibold text-center shadow-lg">
-          <div className="grid grid-cols-4 lg:grid-cols-8 w-[80vw] gap-4">
+        <div className="bg-blue-500 dark:bg-gray-800 border-gray-400 p-2 flex justify-center w-full text-white dark:text-white font-semibold text-center ">
+          <div className="grid grid-cols-4 lg:grid-cols-8   w-[80vw] gap-4">
             <div>
               <button
-                className={`w-full hover:text-white hover:bg-black/40 rounded-sm transition-all text-shadow ${
-                  activeComponent === "Anotherpage" ? "bg-black/50" : ""
+                className={` w-full hover:text-white  hover:bg-blue-600 rounded-sm transition-all ${
+                  activeComponent === "Anotherpage" ? "bg-blue-800" : ""
                 }`}
                 onClick={() => handleToggleComponent("Anotherpage")}
               >
@@ -176,48 +176,48 @@ function SearchPage() {
             )}
 
             <button
-              className={`w-full hover:text-white hover:bg-white/20 rounded-sm transition-all ${
-                activeComponent === "PopularBookmarks" ? "bg-white/30" : ""
+              className={`w-full hover:text-white  hover:bg-blue-600 rounded-sm transition-all ${
+                activeComponent === "PopularBookmarks" ? "bg-blue-800" : ""
               }`}
               onClick={() => handleToggleComponent("PopularBookmarks")}
             >
               BOOKMARKS
             </button>
             <button
-              className={`w-full hover:text-white hover:bg-white/20 rounded-sm transition-all ${
-                activeComponent === "NotebookAndSheet" ? "bg-white/30" : ""
+              className={`w-full hover:text-white hover:bg-blue-600 rounded-sm transition-all ${
+                activeComponent === "NotebookAndSheet" ? "bg-blue-800" : ""
               }`}
               onClick={() => handleToggleComponent("NotebookAndSheet")}
             >
               NOTES
             </button>
             <button
-              className={`w-full hover:text-white hover:bg-white/20 rounded-sm transition-all ${
-                activeComponent === "PasswordGenerator" ? "bg-white/30" : ""
+              className={`w-full hover:text-white hover:bg-blue-600 rounded-sm transition-all ${
+                activeComponent === "PasswordGenerator" ? "bg-blue-800" : ""
               }`}
               onClick={() => handleToggleComponent("PasswordGenerator")}
             >
               PASSWORD
             </button>
             <button
-              className={`w-full hover:text-white hover:bg-white/20 rounded-sm transition-all ${
-                activeComponent === "News" ? "bg-white/30" : ""
+              className={`w-full hover:text-white hover:bg-blue-600 rounded-sm transition-all ${
+                activeComponent === "News" ? "bg-blue-800" : ""
               }`}
               onClick={() => handleToggleComponent("News")}
             >
               NEWS
             </button>
             <button
-              className={`w-full hover:text-white hover:bg-white/20 rounded-sm transition-all ${
-                activeComponent === "Sports" ? "bg-white/30" : ""
+              className={`w-full hover:text-white hover:bg-blue-600 rounded-sm transition-all ${
+                activeComponent === "Sports" ? "bg-blue-800" : ""
               }`}
               onClick={() => handleToggleComponent("Sports")}
             >
               SPORTS
             </button>
             <button
-              className={`w-full hover:text-white hover:bg-white/20 rounded-sm transition-all ${
-                activeComponent === "Top100" ? "bg-white/30" : ""
+              className={`w-full hover:text-white hover:bg-blue-600 rounded-sm transition-all ${
+                activeComponent === "Top100" ? "bg-blue-800" : ""
               }`}
               onClick={() => {
                 handleToggleComponent("Top100");
@@ -227,8 +227,8 @@ function SearchPage() {
               TOP100
             </button>
             <button
-              className={`w-full hover:text-white hover:bg-white/20 rounded-sm transition-all ${
-                activeComponent === "Tool" ? "bg-white/30" : ""
+              className={`w-full hover:text-white hover:bg-blue-600 rounded-sm transition-all ${
+                activeComponent === "Tool" ? "bg-blue-800" : ""
               }`}
               onClick={() => handleToggleComponent("Tool")}
             >

@@ -228,7 +228,7 @@ if(!user){
     <div style={{ position: "relative" }}>
       <div className="flex items-center gap-2 w-fit mx-auto my-4 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
         <button
-          onClick={() => {isGrid(true); console.log("workingGrid")}}
+          onClick={() => {isGrid(true); }}
           className={`p-2 rounded ${
             grid
               ? "bg-white dark:bg-gray-700 shadow-sm"
@@ -250,7 +250,7 @@ if(!user){
           </svg>
         </button>
         <button
-          onClick={() => {isGrid(false); console.log("workingList")}}
+          onClick={() => {isGrid(false); }}
           className={`p-2 rounded ${
             !grid
               ? "bg-white dark:bg-gray-700 shadow-sm"
@@ -330,7 +330,7 @@ if(!user){
                               >
                                 {grid ? (
                                   <>
-                                    <motion.div className="w-full text-left py-2 px-4  rounded-lg bg-gray-100 dark:bg-gray-700 dark:text-white font-semibold flex items-center">
+                                    <motion.div className="w-full min-w-[20vw] text-left py-2 px-4  rounded-lg bg-gray-100 dark:bg-gray-700 dark:text-white font-semibold flex items-center">
                                       <div
                                         {...provided.dragHandleProps}
                                         className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"

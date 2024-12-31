@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Clock, Plus, X } from "lucide-react";
-
+import { Button, } from "antd";
+import {
+  PlusOutlined,
+} from "@ant-design/icons";
 const AVAILABLE_TIMEZONES = [
   "America/New_York",
   "Europe/London",
@@ -37,7 +40,7 @@ const formatTimeForZone = (time, timeZone) => {
       timeZone: timeZone,
       hour: 'numeric',
       minute: '2-digit',
-      second: '2-digit',
+      // second: '2-digit',
       hour12: true
     });
   } catch (error) {
@@ -78,24 +81,24 @@ const TimeZoneClock = ({ timeZone, isAnalog, onRemove }) => {
   if (isAnalog) {
     return (
       <div className="relative w-16 h-16">
-        <button
+        {/* <button
           onClick={onRemove}
           className="absolute -top-2 -right-2 z-10 bg-red-500 rounded-full p-1 text-white hover:bg-red-600"
         >
           <X size={16} />
-        </button>
-        <div className="w-16 h-16 mx-auto rounded-full border-4 text-white border-gray-200 relative flex items-center justify-center">
+        </button> */}
+        <div className="w-24 h-24 mx-auto rounded-full border-4 text-white border-gray-200 relative flex items-center justify-center bg-gray-800">
           {/* Numbers */}
           {[...Array(12)].map((_, index) => {
             const angle = (index + 1) * 30;
             const radian = (angle * Math.PI) / 180;
-            const x = Math.sin(radian) * 24;
-            const y = -Math.cos(radian) * 24;
+            const x = Math.sin(radian) * 35;
+            const y = -Math.cos(radian) * 35;
 
             return (
               <span
                 key={index}
-                className="absolute text-[7px] mt-2.5 ml-1.5 font-medium"
+                className="absolute text-[10px] mt-2.5 ml-1.5 font-medium"
                 style={{
                   transform: `translate(-50%, -50%) translate(${x}px, ${y}px)`,
                 }}
@@ -120,7 +123,7 @@ const TimeZoneClock = ({ timeZone, isAnalog, onRemove }) => {
             style={{ transform: `rotate(${seconds}deg)` }}
           />
         </div>
-        <p className="text-center mt-1 text-white text-[10px] font-medium">
+        <p className="text-center mt-1 dark:text-white text-black text-[10px] font-medium">
           {formatTimeZoneName(timeZone)}
         </p>
       </div>
@@ -128,7 +131,7 @@ const TimeZoneClock = ({ timeZone, isAnalog, onRemove }) => {
   }
 
   return (
-    <div className="relative dark:text-white w-20 h-16">
+    <div className="relative dark:text-white w-16 h-16">
       <button
         onClick={onRemove}
         className="absolute -top-2 -right-2 z-50 bg-red-500 rounded-full p-1 text-white opacity-0 group-hover:opacity-100 hover:bg-red-600 transition-opacity"
@@ -170,7 +173,7 @@ const ResponsiveWorldClock = () => {
   return (
     <div className="dark:bg-gradient-to-br from-gray-900 to-gray-800 dark:text-white p-4 flex justify-center items-center">
       <div className="mx-auto w-full max-w-sm">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setIsAnalog(!isAnalog)}
@@ -213,8 +216,8 @@ const ResponsiveWorldClock = () => {
           </div>
         </div>
 
-        <div className="bg-black/40  backdrop-blur-md rounded-3xl p-6 shadow-2xl">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 justify-center mx-auto">
+        {/* <div className="bg-gray-100 backdrop-blur-md rounded-md px-2 py-4"> */}
+          <div className="grid grid-cols-3 gap-8 justify-center px-2 py-10">
             {selectedTimezones.map((timeZone, index) => (
               <TimeZoneClock
                 key={timeZone}
@@ -224,7 +227,7 @@ const ResponsiveWorldClock = () => {
               />
             ))}
           </div>
-        </div>
+        {/* </div> */}
       </div>
     </div>
   );
