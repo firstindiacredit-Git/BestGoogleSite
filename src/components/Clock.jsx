@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Clock, Plus, X } from "lucide-react";
-
+import { Button, } from "antd";
+import {
+  PlusOutlined,
+} from "@ant-design/icons";
 const AVAILABLE_TIMEZONES = [
   "America/New_York",
   "Europe/London",
@@ -75,7 +78,7 @@ const TimeZoneClock = ({ timeZone, isAnalog, onRemove }) => {
         >
           <X size={16} />
         </button>
-        <div className="w-full h-full rounded-full border-4 text-white border-gray-200 relative flex items-center justify-center">
+        <div className="w-full h-full bg-gray-500 rounded-full border-4 text-white border-gray-200 relative flex items-center justify-center">
           {/* Numbers */}
           {[...Array(12)].map((_, index) => {
             const angle = (index + 1) * 30;
@@ -175,8 +178,9 @@ const ResponsiveWorldClock = () => {
             </button>
 
             <div className="relative">
-              <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                 <Button
+              type="primary"
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 disabled={selectedTimezones.length >= 4}
                 className="p-2 dark:bg-white/10 rounded-full dark:hover:bg-white/20 bg-gray-200 hover:bg-gray-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 title={
@@ -184,9 +188,10 @@ const ResponsiveWorldClock = () => {
                     ? "Maximum timezones reached"
                     : "Add timezone"
                 }
-              >
-                <Plus className="w-5 h-5" />
-              </button>
+              icon={<PlusOutlined />}
+              
+            >
+            </Button>
 
               {isDropdownOpen && availableZones.length > 0 && (
                 <>
@@ -211,7 +216,7 @@ const ResponsiveWorldClock = () => {
           </div>
         </div>
 
-        <div className="bg-black/40  backdrop-blur-md rounded-3xl p-6 shadow-2xl">
+        <div className="bg-gray-100  backdrop-blur-md rounded-md p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 justify-center mx-auto">
             {selectedTimezones.map((timeZone, index) => (
               <TimeZoneClock
