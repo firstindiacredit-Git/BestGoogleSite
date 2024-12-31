@@ -17,9 +17,7 @@ const NewsFeed = () => {
 
   const fetchNews = async () => {
     try {
-      const response = await fetch(
-        'https://newsdata.io/api/1/news?apikey=pub_63909ffdc676cafdb2b6287a51da5f0e581ff&country=in&language=en'
-      );
+      const response = await fetch('https://bgs-backend.vercel.app/api/top100/news');
 
       if (!response.ok) {
         throw new Error('Failed to fetch news');
@@ -27,8 +25,8 @@ const NewsFeed = () => {
 
       const data = await response.json();
       
-      if (data.results) {
-        setNews(data.results.filter(item => item.title && item.description));
+      if (data && Array.isArray(data)) {
+        setNews(data.filter(item => item.title && item.description));
       } else {
         throw new Error('No news items found');
       }
