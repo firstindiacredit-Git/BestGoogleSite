@@ -134,7 +134,13 @@ function SearchPage() {
             data-defaulttoimagesearch="true"
           />
           <Shortcut />
-          <div className="-mt-10">
+          <div className="-mt-10" style={{
+            backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundAttachment: "fixed",
+            
+          }}>
             <Link to="/">
               <button className="h-10 w-10 rounded-2xl">
                 <FaHome className="text-green-700 h-10 w-7 text-center justify-center m-auto" />
