@@ -1,14 +1,25 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Check, Edit, Trash2, Palette } from "lucide-react";
 import { color } from "framer-motion";
+import { Popconfirm } from "antd";
+import { db, auth } from "../firebase";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  updateDoc,
+  doc,
+  deleteDoc,
+} from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
 
 const TodoComponent = () => {
+  const [user, setUser] = useState(null);
   const [todos, setTodos] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [containerColor, setContainerColor] = useState("#f0f9ff");
-  const [textColor, setTextColor] = useState("#000");
   const [draggedItemIndex, setDraggedItemIndex] = useState(null);
   const [dragOverIndex, setDragOverIndex] = useState(null);
 
@@ -60,23 +71,37 @@ const TodoComponent = () => {
     const brightness = (r * 299 + g * 587 + b * 114) / 1000;
     return brightness > 128;
   };
+  const calculateProgress = () => {
+    if (todos.length === 0) return 0;
+    const completedTodos = todos.filter(todo => todo.completed).length;
+    return Math.round((completedTodos / todos.length) * 100);
+  };
 
   useEffect(() => {
-    const savedTodos = localStorage.getItem("todos");
-    const savedContainerColor = localStorage.getItem("containerColor");
-
-    if (savedTodos) setTodos(JSON.parse(savedTodos));
-    if (savedContainerColor) {
-      setContainerColor(savedContainerColor);
-      setTextColor(isLight(savedContainerColor) ? "#000" : "#fff");
-    }
+    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribeAuth();
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("todos", JSON.stringify(todos));
-    localStorage.setItem("containerColor", containerColor);
-    setTextColor(isLight(containerColor) ? "#000" : "#fff");
-  }, [todos, containerColor]);
+    const fetchTodos = async () => {
+      if (!user) return;
+      
+      try {
+        const querySnapshot = await getDocs(collection(db, "users", user.uid, "TodoList"));
+        const todosList = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setTodos(todosList);
+      } catch (error) {
+        console.error("Error fetching todos:", error);
+      }
+    };
+
+    fetchTodos();
+  }, [user]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -92,30 +117,55 @@ const TodoComponent = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const addTodo = (e) => {
+  const addTodo = async (e) => {
     e.preventDefault();
-    if (!inputValue.trim()) return;
+    if (!inputValue.trim() || !user) return;
 
-    const newTodo = {
-      id: Date.now(),
-      text: inputValue,
-      completed: false,
-    };
+    try {
+      const docRef = await addDoc(collection(db, "users", user.uid, "TodoList"), {
+        text: inputValue,
+        completed: false,
+        createdAt: new Date()
+      });
 
-    setTodos([...todos, newTodo]);
-    setInputValue("");
+      const newTodo = {
+        id: docRef.id,
+        text: inputValue,
+        completed: false
+      };
+
+      setTodos([...todos, newTodo]);
+      setInputValue("");
+    } catch (error) {
+      console.error("Error adding todo:", error);
+    }
   };
 
-  const toggleComplete = (id) => {
-    setTodos(
-      todos.map((todo) =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      )
-    );
+  const toggleComplete = async (id) => {
+    try {
+      const todoRef = doc(db, "users", user.uid, "TodoList", id);
+      const todo = todos.find(t => t.id === id);
+      await updateDoc(todoRef, {
+        completed: !todo.completed
+      });
+
+      setTodos(
+        todos.map((todo) =>
+          todo.id === id ? { ...todo, completed: !todo.completed } : todo
+        )
+      );
+    } catch (error) {
+      console.error("Error updating todo:", error);
+    }
   };
 
-  const deleteTodo = (id) => {
-    setTodos(todos.filter((todo) => todo.id !== id));
+  const deleteTodo = async (id) => {
+    try {
+      await deleteDoc(doc(db, "users", user.uid, "TodoList", id));
+      setTodos(todos.filter((todo) => todo.id !== id));
+    } catch (error) {
+      console.error("Error deleting todo:", error);
+    }
   };
 
   const startEditing = (id, text) => {
@@ -123,17 +173,26 @@ const TodoComponent = () => {
     setInputValue(text);
   };
 
-  const submitEdit = (e) => {
+  const submitEdit = async (e) => {
     e.preventDefault();
     if (!inputValue.trim()) return;
 
-    setTodos(
-      todos.map((todo) =>
-        todo.id === editingId ? { ...todo, text: inputValue } : todo
-      )
-    );
-    setEditingId(null);
-    setInputValue("");
+    try {
+      const todoRef = doc(db, "users", user.uid, "TodoList", editingId);
+      await updateDoc(todoRef, {
+        text: inputValue
+      });
+
+      setTodos(
+        todos.map((todo) =>
+          todo.id === editingId ? { ...todo, text: inputValue } : todo
+        )
+      );
+      setEditingId(null);
+      setInputValue("");
+    } catch (error) {
+      console.error("Error updating todo:", error);
+    }
   };
 
   const handleDragStart = (index) => {
@@ -145,135 +204,147 @@ const TodoComponent = () => {
     setDragOverIndex(index);
   };
 
-  const handleDrop = () => {
+  const handleDrop = (e) => {
+    e.preventDefault();
     if (draggedItemIndex === null || dragOverIndex === null) return;
 
-    const updatedTodos = [...todos];
-    const [movedItem] = updatedTodos.splice(draggedItemIndex, 1);
-    updatedTodos.splice(dragOverIndex, 0, movedItem);
+    const newTodos = [...todos];
+    const [draggedItem] = newTodos.splice(draggedItemIndex, 1);
+    newTodos.splice(dragOverIndex, 0, draggedItem);
 
-    setTodos(updatedTodos);
-    setDraggedItemIndex(null);
-    setDragOverIndex(null);
-  };
-
-  const handleDragEnd = () => {
+    setTodos(newTodos);
     setDraggedItemIndex(null);
     setDragOverIndex(null);
   };
 
   return (
-    <div
-      className="max-w-lg rounded-b-lg"
-      style={{ backgroundColor: containerColor, color: textColor }}
-    >
-      <div className="bg-transparent w-full rounded-lg  p-6 relative">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Todo List</h2>
-          <button
-            type="button"
-            onClick={() => setShowColorPicker(!showColorPicker)}
-            className="px-4 py-3 bg-gray-200 text-black rounded-lg hover:bg-gray-300"
-          >
-            <Palette className="w-5 h-5" />
-          </button>
-        </div>
+    <div className="max-w-lg rounded-lg shadow-md p-6" style={{ backgroundColor: containerColor }}>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className={`text-xl font-medium ${isLight(containerColor) ? 'text-gray-700' : 'text-white'}`}>
+          Todo list
+        </h2>
+        <button
+          onClick={() => setShowColorPicker(!showColorPicker)}
+          className={`p-2 rounded ${isLight(containerColor) ? 'hover:bg-gray-100' : 'hover:bg-gray-700'}`}
+        >
+          <Palette className={`w-5 h-5 ${isLight(containerColor) ? 'text-gray-600' : 'text-white'}`} />
+        </button>
+      </div>
 
-        {showColorPicker && (
-          <div
-            ref={colorPickerRef}
-            className="absolute -mt-5 right-0 bg-white border rounded shadow-lg p-3 z-50 w-48 "
-          >
-            <div className="grid grid-cols-7 gap-1">
-              {predefinedColors.map((color) => (
-                <button
-                  key={color}
-                  onClick={() => {
-                    setContainerColor(color);
-                  }}
-                  style={{
-                    backgroundColor: color,
-                  }}
-                  className="h-5 w-5 border cursor-pointer focus:outline-none"
-                  aria-label={`Select color ${color}`}
-                ></button>
-              ))}
-            </div>
-            <div className="col-span-full flex justify-center mt-1">
-              <input
-                id="customColorPicker"
-                type="color"
-                className="w-full h-6  rounded-md cursor-pointer "
-                onChange={(e) => {
-                  setContainerColor(e.target.value);
+      {showColorPicker && (
+        <div
+          ref={colorPickerRef}
+          className="absolute w-48 right-8 mt-2 bg-white border rounded shadow-lg p-3 z-10"
+        >
+          <div className="grid grid-cols-7 gap-1">
+            {predefinedColors.map((color) => (
+              <button
+                key={color}
+                className="w-5 h-5 border border-gray-200 cursor-pointer transition duration-300 ease-in-out transform hover:scale-125 focus:outline-none"
+                style={{ backgroundColor: color }}
+                onClick={() => {
+                  setContainerColor(color);
+                  setShowColorPicker(false);
                 }}
               />
-            </div>
+            ))}
           </div>
-        )}
 
-        <form onSubmit={editingId ? submitEdit : addTodo} className="mb-6">
-          <div className="flex gap-2 relative">
+          <div className="mt-1 flex items-center justify-center">
             <input
-              type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              placeholder={editingId ? "Edit todo..." : "Add a new todo..."}
-              className={`text-black flex-1 p-3 rounded-lg border focus:ring-2 focus:ring-blue-500`}
+              type="color"
+              className="w-full h-6 p-0 border border-gray-300 rounded-md cursor-pointer focus:outline-none"
+              value={containerColor}
+              onChange={(e) => setContainerColor(e.target.value)}
             />
-            <button
-              type="submit"
-              className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-            >
-              {editingId ? "Save" : "Add"}
-            </button>
           </div>
-        </form>
+        </div>
+      )}
 
-        <ul className={`space-y-2 ${todos.length > 5 ? 'max-h-[400px] overflow-y-auto pr-2' : ''}`}>
-          {todos.map((todo, index) => (
-            <li
-              key={todo.id}
-              draggable
-              onDragStart={() => handleDragStart(index)}
-              onDragOver={(e) => handleDragOver(e, index)}
-              onDrop={handleDrop}
-              onDragEnd={handleDragEnd}
-              className={`flex items-center justify-between p-4 bg-white rounded-lg cursor-move bg-transparent shadow-sm transition-shadow ${
-                draggedItemIndex === index ? "opacity-50" : ""
-              } ${dragOverIndex === index ? "bg-blue-100" : ""}`}
-            >
-              <div className="flex items-center gap-3 flex-1">
+      <div className="mb-4">
+        <div className={`text-sm ${isLight(containerColor) ? 'text-gray-600' : 'text-gray-200'} mb-1`}>
+          {calculateProgress()}%
+        </div>
+        <div className="w-full bg-gray-200 rounded-full h-2">
+          <div 
+            className="bg-blue-400 h-2 rounded-full transition-all duration-300"
+            style={{ width: `${calculateProgress()}%` }}
+          ></div>
+        </div>
+      </div>
+
+      <ul className="space-y-2 mb-4">
+        {todos.map((todo, index) => (
+          
+          <li
+            key={todo.id}
+            draggable
+            onDragStart={() => handleDragStart(index)}
+            onDragOver={(e) => handleDragOver(e, index)}
+            onDrop={handleDrop}
+            className={`flex items-center gap-3 p-2 rounded ${
+              dragOverIndex === index ? 'border-2 border-blue-300' : ''
+            }`}
+          >
+            <span className={`min-w-[20px] text-sm ${
+              isLight(containerColor) ? 'text-gray-500' : 'text-gray-300'
+            }`}>
+              {index + 1}.
+            </span>
+            <input
+              type="checkbox"
+              checked={todo.completed}
+              onChange={() => toggleComplete(todo.id)}
+              className="w-5 h-5 border-2 rounded-sm focus:ring-0 text-blue-500"
+            />
+            <span className={`flex-1 ${
+              isLight(containerColor) 
+                ? (todo.completed ? 'text-gray-400' : 'text-gray-700')
+                : (todo.completed ? 'text-gray-400' : 'text-white')
+            } ${todo.completed ? 'line-through' : ''}`}>
+              {todo.text}
+            </span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => startEditing(todo.id, todo.text)}
+                className={`${isLight(containerColor) ? 'text-gray-400 hover:text-gray-600' : 'text-gray-300 hover:text-white'}`}
+              >
+                <Edit className="w-4 h-4" />
+              </button>
+              <Popconfirm
+                title="Delete task"
+                description="Are you sure you want to delete this task?"
+                onConfirm={() => deleteTodo(todo.id)}
+                okText="Yes"
+                cancelText="No"
+                placement="leftTop"
+              >
                 <button
-                  onClick={() => toggleComplete(todo.id)}
-                  className={`p-2 rounded-full ${
-                    todo.completed ? "bg-green-500 text-white" : "bg-gray-200"
-                  }`}
-                >
-                  <Check className="w-4 h-4" />
-                </button>
-                <span className={todo.completed ? "line-through" : ""}>
-                  {todo.text}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => startEditing(todo.id, todo.text)}
-                  className="p-2 hover:bg-blue-50 rounded-lg"
-                >
-                  <Edit className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => deleteTodo(todo.id)}
-                  className="p-2 hover:bg-red-50 rounded-lg"
+                  className={`${isLight(containerColor) ? 'text-gray-400 hover:text-gray-600' : 'text-gray-300 hover:text-white'}`}
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
+              </Popconfirm>
+            </div>
+          </li>
+        ))}
+      </ul>
+
+      <form onSubmit={editingId ? submitEdit : addTodo} className="relative">
+        <input
+          type="text"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          placeholder="Add new task"
+          className="w-full p-3 pr-12 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
+        <button
+          type="submit"
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+        >
+          <span className="text-2xl">+</span>
+        </button>
+      </form>
     </div>
   );
 };
