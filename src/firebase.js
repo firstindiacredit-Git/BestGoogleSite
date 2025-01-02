@@ -41,6 +41,7 @@ onAuthStateChanged(auth, async (user) => {
             theme: "light",
             notifications: true,
           },
+          savedTimezones: ["Asia/Kolkata"],
           bookmarks: [],
           profile: {},
           role: "user",
