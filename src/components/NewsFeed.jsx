@@ -73,7 +73,10 @@ const NewsFeed = () => {
           beforeChange={(current, next) => setCurrentSlide(next)}
         >
           {news.map((item, index) => (
-            <div key={index} className="p-4">
+            <div key={index} className="pb-4 pt-2 px-4">
+              <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                Source: {item.source_name}
+              </div>
               <a
                 href={item.link}
                 target="_blank"
@@ -84,7 +87,7 @@ const NewsFeed = () => {
                   {item.image_url && (
                     <div className="w-24 h-24 flex-shrink-0">
                       <img
-                        src={item.image_url}
+                        src={item.image_url ? item.image_url: "https://kvaser.com/wp-content/themes/kvaser/assets/images/new-homepage/blog/no-image.jpg" }
                         alt={item.title}
                         className="w-full h-full object-cover rounded"
                       />
@@ -95,11 +98,8 @@ const NewsFeed = () => {
                       {item.title}
                     </h3>
                     <p className="text-sm text-gray-600 dark:text-gray-300 mb-2 line-clamp-2">
-                      {item.description?.slice(0, 150)}...
+                      {item.description?.slice(0, 350)}...
                     </p>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                      {new Date(item.pubDate).toLocaleString()}
-                    </div>
                   </div>
                 </div>
               </a>
