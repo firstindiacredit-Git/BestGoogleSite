@@ -41,7 +41,7 @@ const Anotherpage = ({ backgroundImage }) => {
     calendar: <Calendar />,
     Bookmarks: <Category />,
     Todo: <TodoComponent />,
-    NewsFeed:<NewsFeed/>
+    NewsFeed: <NewsFeed />,
   };
 
   // Load user and layout
@@ -76,9 +76,10 @@ const Anotherpage = ({ backgroundImage }) => {
     setAvailableWidgets(getAvailableWidgets(sortedItems));
   }, [sortedItems]);
 
-  const onDragEnd = (result) => {
+  const onDragEnd = async (result) => {
     const { source, destination } = result;
-    if (!destination) return;
+    if (!destination || !user) return;
+
     const columnsArray = distributeItems();
     const sourceColumnIndex = parseInt(source.droppableId);
     const destColumnIndex = parseInt(destination.droppableId);
@@ -88,7 +89,21 @@ const Anotherpage = ({ backgroundImage }) => {
     draggedItem.column = destColumnIndex;
     destItems.splice(destination.index, 0, draggedItem);
     const updatedItems = columnsArray.flat();
+
+    // Update local state
     setItems(updatedItems);
+
+    // Update database
+    try {
+      await updatePageLayout(user.uid, "home", {
+        widgets: updatedItems,
+        columns: columns,
+      });
+    } catch (error) {
+      console.error("Error updating layout:", error);
+      // Optionally revert the local state if the database update fails
+      setItems(columnsArray.flat());
+    }
   };
 
   const handleSortEnd = (result) => {
@@ -223,14 +238,24 @@ const Anotherpage = ({ backgroundImage }) => {
     });
     return columnsArray;
   };
-if(!user){
-  return <div className="text-gray-500 text-5xl  my-20"><h1 className="text-center font-bold">LOGIN TO UNLOCK MORE FEATURES</h1></div>
-}
+
+  if (!user) {
+    return (
+      <div className="text-gray-500 text-5xl  my-20">
+        <h1 className="text-center font-bold">
+          LOGIN TO UNLOCK MORE FEATURES
+        </h1>
+      </div>
+    );
+  }
+
   return (
     <div style={{ position: "relative" }}>
       <div className="flex items-center gap-2 w-fit mx-auto my-4 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
         <button
-          onClick={() => {isGrid(true); }}
+          onClick={() => {
+            isGrid(true);
+          }}
           className={`p-2 rounded ${
             grid
               ? "bg-white dark:bg-gray-700 shadow-sm"
@@ -252,7 +277,9 @@ if(!user){
           </svg>
         </button>
         <button
-          onClick={() => {isGrid(false); }}
+          onClick={() => {
+            isGrid(false);
+          }}
           className={`p-2 rounded ${
             !grid
               ? "bg-white dark:bg-gray-700 shadow-sm"
@@ -275,126 +302,129 @@ if(!user){
         </button>
       </div>
       <div className="flex justify-center">
-      <div
-        className={`bg-white w-fit dark:bg-gray-800 flex justify-center rounded-xl`}
-        style={{
-          backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundAttachment: "fixed",
-        }}
-      >
-        <div className="p-4 ">
-          {loading ? (
-            <div className="flex justify-center items-center min-h-screen">
-              <Spin size="large" />
-            </div>
-          ) : (
-            <DragDropContext onDragEnd={onDragEnd}>
-              <div
-                style={{
-                  display: "grid",
-                  maxWidth: "90vw",
-                  gridTemplateColumns: `repeat(${columns}, 1fr)`,
-                  gap: "16px",
-                }}
-              >
-                {distributeItems().map((columnItems, columnIndex) => (
-                  <Droppable
-                    key={columnIndex}
-                    droppableId={String(columnIndex)}
-                    direction="vertical"
-                  >
-                    {(provided, snapshot) => (
-                      <div
-                        {...provided.droppableProps}
-                        ref={provided.innerRef}
-                        style={{
-                          backgroundColor: snapshot.isDraggingOver
-                            ? "#f0f0f080"
-                            : "transparent",
-                          padding: "8px",
-                          minHeight: "200px",
-                          borderRadius: "0.5rem",
-                        }}
-                      >
-                        {columnItems.map((item, index) => (
-                          <Draggable
-                            key={item.id}
-                            draggableId={item.id}
-                            index={index}
-                          >
-                            {(provided) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                className=" bg-white dark:bg-gray-700 mb-4 border-collapse dark:border-gray-700 dark:drop-shadow-md border-1 border rounded-lg"
-                              >
-                                {grid ? (
-                                  <>
-                                    <motion.div className="w-full min-w-[20vw] text-left py-2 px-4  rounded-lg bg-gray-100 dark:bg-gray-700 dark:text-white font-semibold flex items-center">
-                                      <div
-                                        {...provided.dragHandleProps}
-                                        className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-                                      >
-                                        ⋮⋮
-                                      </div>
+        <div
+          className={`bg-white w-fit dark:bg-gray-800 flex justify-center rounded-xl`}
+          style={{
+            backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundAttachment: "fixed",
+          }}
+        >
+          <div className="p-4 ">
+            {loading ? (
+              <div className="flex justify-center items-center min-h-screen">
+                <Spin size="large" />
+              </div>
+            ) : (
+              <DragDropContext onDragEnd={onDragEnd}>
+                <div
+                  style={{
+                    display: "grid",
+                    maxWidth: "90vw",
+                    gridTemplateColumns: `repeat(${columns}, 1fr)`,
+                    gap: "16px",
+                  }}
+                >
+                  {distributeItems().map((columnItems, columnIndex) => (
+                    <Droppable
+                      key={columnIndex}
+                      droppableId={String(columnIndex)}
+                      direction="vertical"
+                    >
+                      {(provided, snapshot) => (
+                        <div
+                          {...provided.droppableProps}
+                          ref={provided.innerRef}
+                          style={{
+                            backgroundColor: snapshot.isDraggingOver
+                              ? "#f0f0f080"
+                              : "transparent",
+                            padding: "8px",
+                            minHeight: "200px",
+                            borderRadius: "0.5rem",
+                          }}
+                        >
+                          {columnItems.map((item, index) => (
+                            <Draggable
+                              key={item.id}
+                              draggableId={item.id}
+                              index={index}
+                            >
+                              {(provided) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  className=" bg-white dark:bg-gray-700 mb-4 border-collapse dark:border-gray-700 dark:drop-shadow-md border-1 border rounded-lg"
+                                >
+                                  {grid ? (
+                                    <>
+                                      <motion.div className="w-full min-w-[20vw] text-left py-2 px-4  rounded-lg bg-gray-100 dark:bg-gray-700 dark:text-white font-semibold flex items-center">
+                                        <div
+                                          {...provided.dragHandleProps}
+                                          className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                                        >
+                                          ⋮⋮
+                                        </div>
                                         {item.name}
-                                    </motion.div>
-                                    <motion.div
-                                      className=" bg-gray-50 dark:bg-gray-900 rounded-b-lg"
-                                      initial={{ height: 0, opacity: 0 }}
-                                      animate={{ height: "auto", opacity: 1 }}
-                                      exit={{ height: 0, opacity: 0 }}
-                                      transition={{ duration: 0.1 }}
-                                    > 
-                                       
-                                      <div className=" rounded-b-lg">{componentMap[item.id]}</div>
-                                    </motion.div>
-                                  </>
-                                ) : (
-                                  <>
-                                    <motion.div className="w-full min-w-[20vw] text-left py-2 px-4  dark:border-gray-500 rounded-lg bg-gray-100 dark:bg-gray-700 dark:text-white font-semibold flex items-center">
-                                      <div
-                                        {...provided.dragHandleProps}
-                                        className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-                                      >
-                                        ⋮⋮
-                                      </div>
-                                      <button
-                                        onClick={() => toggleDropdown(item.id)}
-                                        className="flex-grow text-left focus:outline-none"
-                                      >
-                                        {item.name}
-                                      </button>
-                                    </motion.div>
-                                    {item.isOpen && (
+                                      </motion.div>
                                       <motion.div
-                                        className=" bg-gray-50 dark:bg-gray-900 rounded-b-lg "
+                                        className=" bg-gray-50 dark:bg-gray-900 rounded-b-lg"
                                         initial={{ height: 0, opacity: 0 }}
                                         animate={{ height: "auto", opacity: 1 }}
                                         exit={{ height: 0, opacity: 0 }}
-                                        transition={{ duration: 0.3 }}
+                                        transition={{ duration: 0.1 }}
                                       >
-                                         <div className=" rounded-b-lg ">{componentMap[item.id]}</div>
+                                        <div className=" rounded-b-lg">
+                                          {componentMap[item.id]}
+                                        </div>
                                       </motion.div>
-                                    )}
-                                  </>
-                                )}
-                              </div>
-                            )}
-                          </Draggable>
-                        ))}
-                        {provided.placeholder}
-                      </div>
-                    )}
-                  </Droppable>
-                ))}
-              </div>
-            </DragDropContext>
-          )}
+                                    </>
+                                  ) : (
+                                    <>
+                                      <motion.div className="w-full min-w-[20vw] text-left py-2 px-4  dark:border-gray-500 rounded-lg bg-gray-100 dark:bg-gray-700 dark:text-white font-semibold flex items-center">
+                                        <div
+                                          {...provided.dragHandleProps}
+                                          className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                                        >
+                                          ⋮⋮
+                                        </div>
+                                        <button
+                                          onClick={() => toggleDropdown(item.id)}
+                                          className="flex-grow text-left focus:outline-none"
+                                        >
+                                          {item.name}
+                                        </button>
+                                      </motion.div>
+                                      {item.isOpen && (
+                                        <motion.div
+                                          className=" bg-gray-50 dark:bg-gray-900 rounded-b-lg "
+                                          initial={{ height: 0, opacity: 0 }}
+                                          animate={{ height: "auto", opacity: 1 }}
+                                          exit={{ height: 0, opacity: 0 }}
+                                          transition={{ duration: 0.3 }}
+                                        >
+                                          <div className=" rounded-b-lg ">
+                                            {componentMap[item.id]}
+                                          </div>
+                                        </motion.div>
+                                      )}
+                                    </>
+                                  )}
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
+                          {provided.placeholder}
+                        </div>
+                      )}
+                    </Droppable>
+                  ))}
+                </div>
+              </DragDropContext>
+            )}
+          </div>
         </div>
-      </div>
       </div>
 
       {/* Floating Sort Button */}
@@ -434,197 +464,196 @@ if(!user){
 
       {/* Widget Sorter Modal */}
       <Modal
-  title="Sort Widgets"
-  open={isSorterOpen}
-  onCancel={() => {
-    if (!isApplying) {
-      setIsSorterOpen(false);
-      // Reset preview state when closing
-      setSortedItems([...items]);
-      setPreviewColumns(columns);
-    }
-  }}
-  footer={[
-    <AntButton
-      key="cancel"
-      onClick={() => {
-        setIsSorterOpen(false);
-        // Reset preview state when canceling
-        setSortedItems([...items]);
-        setPreviewColumns(columns);
-      }}
-      disabled={isApplying}
-    >
-      Cancel
-    </AntButton>,
-    <AntButton
-      key="apply"
-      type="primary"
-      onClick={handleApplySorting}
-      disabled={isApplying}
-      loading={isApplying}
-    >
-      Apply Changes
-    </AntButton>,
-  ]}
-  width={800}
-  centered
-  className="dark:bg-gray-700" // Add this class to make it gray in dark mode
->
-  {isApplying ? (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        padding: "40px",
-      }}
-    >
-      <Spin size="large" />
-    </div>
-  ) : (
-    <>
-      <div className="mb-6 flex items-center justify-between">
-        <div className="text-sm text-gray-600 dark:text-gray-400">
-          Select number of columns:
-        </div>
-        <div className="flex gap-2">
-          {[1, 2, 3, 4].map((num) => (
-            <AntButton
-              key={num}
-              type={previewColumns === num ? "primary" : "default"}
-              onClick={() => handleColumnChange(num)}
-              className={previewColumns === num ? "" : "hover:border-primary"}
-              size="small"
-            >
-              {num}
-            </AntButton>
-          ))}
-        </div>
-      </div>
-      <DragDropContext onDragEnd={handleSortEnd}>
-        <div
-          className="sort-columns-container"
-          style={{
-            display: "grid",
-            gridTemplateColumns: `repeat(${previewColumns}, 1fr)`,
-            gap: "16px",
-            marginBottom: "20px",
-            maxHeight: "60vh",
-            overflowY: "auto",
-            padding: "8px",
-          }}
-        >
-          {Array.from({ length: previewColumns }).map((_, columnIndex) => (
-            <Droppable key={columnIndex} droppableId={String(columnIndex)}>
-              {(provided, snapshot) => (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  className="sort-column"
-                  style={{
-                    padding: "12px",
-                    backgroundColor: snapshot.isDraggingOver
-                      ? "rgba(24, 144, 255, 0.1)"
-                      : "rgba(0, 0, 0, 0.02)",
-                    borderRadius: "8px",
-                    minHeight: "150px",
-                    transition: "background-color 0.2s ease",
-                    border: snapshot.isDraggingOver
-                      ? "2px dashed #1890ff"
-                      : "2px solid transparent",
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                >
-                  <div
-                    className="column-header"
-                    style={{
-                      marginBottom: "12px",
-                      fontWeight: "bold",
-                      color: "#1890ff",
-                    }}
+        title="Sort Widgets"
+        open={isSorterOpen}
+        onCancel={() => {
+          if (!isApplying) {
+            setIsSorterOpen(false);
+            // Reset preview state when closing
+            setSortedItems([...items]);
+            setPreviewColumns(columns);
+          }
+        }}
+        footer={[
+          <AntButton
+            key="cancel"
+            onClick={() => {
+              setIsSorterOpen(false);
+              // Reset preview state when canceling
+              setSortedItems([...items]);
+              setPreviewColumns(columns);
+            }}
+            disabled={isApplying}
+          >
+            Cancel
+          </AntButton>,
+          <AntButton
+            key="apply"
+            type="primary"
+            onClick={handleApplySorting}
+            disabled={isApplying}
+            loading={isApplying}
+          >
+            Apply Changes
+          </AntButton>,
+        ]}
+        width={800}
+        centered
+        className="dark:bg-gray-700" // Add this class to make it gray in dark mode
+      >
+        {isApplying ? (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              padding: "40px",
+            }}
+          >
+            <Spin size="large" />
+          </div>
+        ) : (
+          <>
+            <div className="mb-6 flex items-center justify-between">
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                Select number of columns:
+              </div>
+              <div className="flex gap-2">
+                {[1, 2, 3, 4].map((num) => (
+                  <AntButton
+                    key={num}
+                    type={previewColumns === num ? "primary" : "default"}
+                    onClick={() => handleColumnChange(num)}
+                    className={previewColumns === num ? "" : "hover:border-primary"}
+                    size="small"
                   >
-                    Column {columnIndex + 1}
-                  </div>
-                  <div
-                    className="items-container"
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "8px",
-                      flexGrow: 1,
-                    }}
-                  >
-                    {sortedItems
-                      .filter((item) => item.column === columnIndex)
-                      .map((item, index) => (
-                        <Draggable key={item.id} draggableId={item.id} index={index}>
-                          {(provided, snapshot) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              className="bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600"
-                              style={{
-                                ...provided.draggableProps.style,
-                                opacity: snapshot.isDragging ? 0.9 : 1,
-                                transform: snapshot.isDragging
-                                  ? `${provided.draggableProps.style.transform} scale(1.05)`
-                                  : provided.draggableProps.style.transform,
-                              }}
-                            >
-                              <div className="flex items-center p-2 gap-2">
-                                <div
-                                  {...provided.dragHandleProps}
-                                  className="cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                                >
-                                  ⋮⋮
-                                </div>
-                                <span className="text-gray-700 dark:text-gray-200 flex-grow">
-                                  {item.name}
-                                </span>
+                    {num}
+                  </AntButton>
+                ))}
+              </div>
+            </div>
+            <DragDropContext onDragEnd={handleSortEnd}>
+              <div
+                className="sort-columns-container"
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: `repeat(${previewColumns}, 1fr)`,
+                  gap: "16px",
+                  marginBottom: "20px",
+                  maxHeight: "60vh",
+                  overflowY: "auto",
+                  padding: "8px",
+                }}
+              >
+                {Array.from({ length: previewColumns }).map((_, columnIndex) => (
+                  <Droppable key={columnIndex} droppableId={String(columnIndex)}>
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                        className="sort-column"
+                        style={{
+                          padding: "12px",
+                          backgroundColor: snapshot.isDraggingOver
+                            ? "rgba(24, 144, 255, 0.1)"
+                            : "rgba(0, 0, 0, 0.02)",
+                          borderRadius: "8px",
+                          minHeight: "150px",
+                          transition: "background-color 0.2s ease",
+                          border: snapshot.isDraggingOver
+                            ? "2px dashed #1890ff"
+                            : "2px solid transparent",
+                          display: "flex",
+                          flexDirection: "column",
+                        }}
+                      >
+                        <div
+                          className="column-header"
+                          style={{
+                            marginBottom: "12px",
+                            fontWeight: "bold",
+                            color: "#1890ff",
+                          }}
+                        >
+                          Column {columnIndex + 1}
+                        </div>
+                        <div
+                          className="items-container"
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "8px",
+                            flexGrow: 1,
+                          }}
+                        >
+                          {sortedItems
+                            .filter((item) => item.column === columnIndex)
+                            .map((item, index) => (
+                              <Draggable key={item.id} draggableId={item.id} index={index}>
+                                {(provided, snapshot) => (
+                                  <div
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    className="bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600"
+                                    style={{
+                                      ...provided.draggableProps.style,
+                                      opacity: snapshot.isDragging ? 0.9 : 1,
+                                      transform: snapshot.isDragging
+                                        ? `${provided.draggableProps.style.transform} scale(1.05)`
+                                        : provided.draggableProps.style.transform,
+                                    }}
+                                  >
+                                    <div className="flex items-center p-2 gap-2">
+                                      <div
+                                        {...provided.dragHandleProps}
+                                        className="cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                      >
+                                        ⋮⋮
+                                      </div>
+                                      <span className="text-gray-700 dark:text-gray-200 flex-grow">
+                                        {item.name}
+                                      </span>
+                                      <AntButton
+                                        type="text"
+                                        icon={<DeleteOutlined />}
+                                        onClick={() => handleRemoveWidget(item.id)}
+                                        className="text-gray-400 hover:text-red-500"
+                                        size="small"
+                                      />
+                                    </div>
+                                  </div>
+                                )}
+                              </Draggable>
+                            ))}
+                          {provided.placeholder}
+                        </div>
+                        {availableWidgets.length > 0 && (
+                          <div className="mt-4 p-2 border-t border-gray-200 dark:border-gray-600">
+                            <div className="text-sm text-gray-500 mb-2">Add Widget:</div>
+                            <div className="flex flex-wrap gap-2">
+                              {availableWidgets.map((widget) => (
                                 <AntButton
-                                  type="text"
-                                  icon={<DeleteOutlined />}
-                                  onClick={() => handleRemoveWidget(item.id)}
-                                  className="text-gray-400 hover:text-red-500"
+                                  key={widget.id}
+                                  onClick={() => handleAddWidget(columnIndex, widget)}
+                                  icon={<PlusOutlined />}
                                   size="small"
-                                />
-                              </div>
+                                  type="dashed"
+                                  className="flex items-center"
+                                >
+                                  {widget.name}
+                                </AntButton>
+                              ))}
                             </div>
-                          )}
-                        </Draggable>
-                      ))}
-                    {provided.placeholder}
-                  </div>
-                  {availableWidgets.length > 0 && (
-                    <div className="mt-4 p-2 border-t border-gray-200 dark:border-gray-600">
-                      <div className="text-sm text-gray-500 mb-2">Add Widget:</div>
-                      <div className="flex flex-wrap gap-2">
-                        {availableWidgets.map((widget) => (
-                          <AntButton
-                            key={widget.id}
-                            onClick={() => handleAddWidget(columnIndex, widget)}
-                            icon={<PlusOutlined />}
-                            size="small"
-                            type="dashed"
-                            className="flex items-center"
-                          >
-                            {widget.name}
-                          </AntButton>
-                        ))}
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </Droppable>
-          ))}
-        </div>
-      </DragDropContext>
-    </>
-  )}
-</Modal>;
-
+                    )}
+                  </Droppable>
+                ))}
+              </div>
+            </DragDropContext>
+          </>
+        )}
+      </Modal>
     </div>
   );
 };
