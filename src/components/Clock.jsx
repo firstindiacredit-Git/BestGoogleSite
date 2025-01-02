@@ -10,21 +10,24 @@ const AVAILABLE_TIMEZONES = [
   "Asia/Dubai",
   "Pacific/Auckland",
   "America/Los_Angeles",
-  "Asia/Seoul",  
-  "Europe/Berlin", 
-  "Africa/Johannesburg", 
-  "Asia/Shanghai",  
-  "America/Chicago",  
-  "Europe/Moscow", 
-  "Africa/Nairobi",  
-  "America/Toronto", 
-  "Asia/Kolkata",  
-  "America/Mexico_City",  
-  "Asia/Singapore",  
+  "Asia/Seoul",
+  "Europe/Berlin",
+  "Africa/Johannesburg",
+  "Asia/Shanghai",
+  "America/Chicago",
+  "Europe/Moscow",
+  "Africa/Nairobi",
+  "America/Toronto",
+  "Asia/Kolkata",
+  "America/Mexico_City",
+  "Asia/Singapore",
 ];
 
 
 const formatTimeZoneName = (timeZone) => {
+  if (timeZone === "Asia/Kolkata") {
+    return "India"; // Display "India" instead of "Asia/Kolkata"
+  }
   return timeZone.replace("_", " ").split("/")[1];
 };
 
@@ -38,20 +41,21 @@ const formatTimeForZone = (time, timeZone) => {
   }).format(time);
 };
 
-const getClockHandDegrees = (time) => {
-  const hours = time.getHours() % 12;
-  const minutes = time.getMinutes();
-  const seconds = time.getSeconds();
+const getClockHandDegrees = (timeZone) => {
+  const time = new Date();
+  const zoneTime = new Date(
+    time.toLocaleString("en-US", { timeZone }) // Get the time in the selected timezone
+  );
 
-  const hourDegrees = hours * 30 + minutes / 2;
-  const minuteDegrees = minutes * 6 + seconds / 10;
-  const secondDegrees = seconds * 6;
+  const hours = zoneTime.getHours() % 12; // Get hours in 12-hour format
+  const minutes = zoneTime.getMinutes();
+  const seconds = zoneTime.getSeconds();
 
-  return {
-    hours: hourDegrees,
-    minutes: minuteDegrees,
-    seconds: secondDegrees,
-  };
+  const hourDegrees = (hours + minutes / 60) * 30;  
+  const minuteDegrees = (minutes + seconds / 60) * 6; // 360° / 60 minutes
+  const secondDegrees = seconds * 6; // 360° / 60 seconds
+
+  return { hourDegrees, minuteDegrees, secondDegrees };
 };
 
 const TimeZoneClock = ({ timeZone, isAnalog, onRemove }) => {
@@ -64,14 +68,15 @@ const TimeZoneClock = ({ timeZone, isAnalog, onRemove }) => {
     return () => clearInterval(timer);
   }, []);
 
-  const { hours, minutes, seconds } = getClockHandDegrees(time);
+  const { hourDegrees, minuteDegrees, secondDegrees } =
+    getClockHandDegrees(timeZone);
 
   if (isAnalog) {
     return (
-      <div className="relative w-16 h-16 mx-auto">
+      <div className="relative w-16 h-16 mx-auto group">
         <button
           onClick={onRemove}
-          className="absolute -top-2 -right-2 z-10 bg-red-500 rounded-full p-1 text-white hover:bg-red-600"
+          className="absolute -top-2 -right-2 z-10 bg-red-500 rounded-full p-1 text-white opacity-0 group-hover:opacity-100 hover:bg-red-600 transition-opacity"
         >
           <X size={16} />
         </button>
@@ -97,18 +102,18 @@ const TimeZoneClock = ({ timeZone, isAnalog, onRemove }) => {
           })}
 
           {/* Clock hands */}
-          <div className="absolute  w-1 h-1 bg-white dark:bg-white rounded-full"></div>
+          <div className="absolute w-1 h-1 bg-white dark:bg-white rounded-full"></div>
           <div
             className="absolute -mt-5 w-0.5 h-5 bg-blue-600 origin-bottom rounded-full"
-            style={{ transform: `rotate(${hours}deg)` }}
+            style={{ transform: `rotate(${hourDegrees}deg)` }}
           />
           <div
             className="absolute -mt-7 w-0.5 h-7 bg-black dark:bg-white origin-bottom rounded-full"
-            style={{ transform: `rotate(${minutes}deg)` }}
+            style={{ transform: `rotate(${minuteDegrees}deg)` }}
           />
           <div
             className="absolute -mt-7 w-0.5 h-7 bg-red-500 origin-bottom rounded-full"
-            style={{ transform: `rotate(${seconds}deg)` }}
+            style={{ transform: `rotate(${secondDegrees}deg)` }}
           />
         </div>
         <p className="text-center mt-1 text-white text-[10px] font-medium">
@@ -190,7 +195,7 @@ const ResponsiveWorldClock = () => {
 
               {isDropdownOpen && availableZones.length > 0 && (
                 <>
-                  <div className="absolute right-0 mt-2 w-48 dark:bg-gray-800/95 backdrop-blur-sm bg-gray-200  rounded-lg shadow-lg py-1 z-50">
+                  <div className="absolute right-0 mt-2 w-48 max-h-60 overflow-y-auto dark:bg-gray-800/95 backdrop-blur-sm bg-gray-200 rounded-lg shadow-lg py-1 z-50">
                     {availableZones.map((timeZone) => (
                       <button
                         key={timeZone}
