@@ -156,11 +156,18 @@ const Category = ({ data = [] }) => {
     setIsModalVisible(true);
   };
 
+  const [gridColumns, setGridColumns] = useState(5); // Default column count
+
+  const handleGridColumnChange = (columns) => {
+    setGridColumns(columns);
+  };
+
+
   const { SubMenu } = Menu;
   
 
  const viewMenu = (
-   <Menu className="dark:bg-gray-900 w-40">
+   <Menu className=" w-40 ">
      <SubMenu key="view" title="Display">
        <Menu.Item
          key="list"
@@ -276,6 +283,7 @@ const Category = ({ data = [] }) => {
                     href={bookmark.link}
                     target="_blank"
                     rel="noopener noreferrer"
+                    className="dark:text-white"
                   >
                     {bookmark.name}
                   </a>
@@ -332,7 +340,9 @@ const Category = ({ data = [] }) => {
                   e.target.src = "https://www.google.com/favicon.ico";
                 }}
               />
-              <p style={{ margin: "0" }}>{bookmark.name}</p>
+              <p className="dark:text-white" style={{ margin: "0" }}>
+                {bookmark.name}
+              </p>
             </div>
           ))}
         </div>
@@ -383,7 +393,7 @@ const Category = ({ data = [] }) => {
             flexWrap: "wrap",
             gap: "4px",
             justifyContent: "center",
-            alignItems: "center",  
+            alignItems: "center",
           }}
         >
           {bookmarks.map((bookmark) => (
@@ -416,7 +426,10 @@ const Category = ({ data = [] }) => {
                   e.target.src = "https://www.google.com/favicon.ico";
                 }}
               />
-              <p style={{ marginTop: "-1px", marginLeft: "2px" }}>
+              <p
+                className="dark:text-white"
+                style={{ marginTop: "-1px", marginLeft: "2px" }}
+              >
                 {bookmark.name}
               </p>
             </div>
