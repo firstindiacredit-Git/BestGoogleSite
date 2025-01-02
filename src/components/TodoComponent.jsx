@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Check, Edit, Trash2, Palette } from "lucide-react";
-import { color } from "framer-motion";
 import { Popconfirm } from "antd";
 import { db, auth } from "../firebase";
 import {
@@ -13,13 +12,29 @@ import {
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 
+// Helper function to determine if a color is light or dark
+const isLight = (color) => {
+  // Convert hex to RGB
+  let hex = color.replace('#', '');
+  if (hex.length === 3) {
+    hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+  }
+  const r = parseInt(hex.substr(0, 2), 16);
+  const g = parseInt(hex.substr(2, 2), 16);
+  const b = parseInt(hex.substr(4, 2), 16);
+  
+  // Calculate relative luminance
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.5;
+};
+
 const TodoComponent = () => {
   const [user, setUser] = useState(null);
   const [todos, setTodos] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
-  const [containerColor, setContainerColor] = useState("#fff");
+  const [containerColor, setContainerColor] = useState("#ffffff");
   const [draggedItemIndex, setDraggedItemIndex] = useState(null);
   const [dragOverIndex, setDragOverIndex] = useState(null);
 
@@ -64,13 +79,6 @@ const TodoComponent = () => {
     "#FF69B4",
   ];
 
-  const isLight = (color) => {
-    const r = parseInt(color.substr(1, 2), 16);
-    const g = parseInt(color.substr(3, 2), 16);
-    const b = parseInt(color.substr(5, 2), 16);
-    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-    return brightness > 128;
-  };
   const calculateProgress = () => {
     if (todos.length === 0) return 0;
     const completedTodos = todos.filter(todo => todo.completed).length;
@@ -218,16 +226,16 @@ const TodoComponent = () => {
   };
 
   return (
-    <div className="max-w-sm   rounded-lg p-6" style={{ backgroundColor: containerColor }}>
+    <div className="max-w-sm rounded-lg p-6" style={{ backgroundColor: containerColor }}>
       <div className="flex justify-between items-center mb-4">
-        <h2 className={`text-xl font-medium ${isLight(containerColor) ? 'text-gray-700' : 'text-white'}`}>
+        <h2 className={`text-xl font-medium ${isLight(containerColor) ? 'text-gray-800' : 'text-gray-100'}`}>
           Todo list
         </h2>
         <button
           onClick={() => setShowColorPicker(!showColorPicker)}
-          className={`p-2 rounded ${isLight(containerColor) ? 'hover:bg-gray-100' : 'hover:bg-gray-700'}`}
+          className={`p-2 rounded ${isLight(containerColor) ? 'hover:bg-gray-100' : 'hover:bg-opacity-20 hover:bg-white'}`}
         >
-          <Palette className={`w-5 h-5 ${isLight(containerColor) ? 'text-gray-600' : 'text-white'}`} />
+          <Palette className={`w-5 h-5 ${isLight(containerColor) ? 'text-gray-700' : 'text-gray-100'}`} />
         </button>
       </div>
 
@@ -262,7 +270,7 @@ const TodoComponent = () => {
       )}
 
       <div className="mb-4">
-        <div className={`text-sm ${isLight(containerColor) ? 'text-gray-600' : 'text-gray-200'} mb-1`}>
+        <div className={`text-sm ${isLight(containerColor) ? 'text-gray-700' : 'text-gray-200'} mb-1`}>
           {calculateProgress()}%
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2">
@@ -275,7 +283,6 @@ const TodoComponent = () => {
 
       <ul className="space-y-2 mb-4">
         {todos.map((todo, index) => (
-          
           <li
             key={todo.id}
             draggable
@@ -287,7 +294,7 @@ const TodoComponent = () => {
             }`}
           >
             <span className={`min-w-[20px] text-sm ${
-              isLight(containerColor) ? 'text-gray-500' : 'text-gray-300'
+              isLight(containerColor) ? 'text-gray-600' : 'text-gray-300'
             }`}>
               {index + 1}.
             </span>
@@ -299,15 +306,15 @@ const TodoComponent = () => {
             />
             <span className={`flex-1 ${
               isLight(containerColor) 
-                ? (todo.completed ? 'text-gray-400' : 'text-gray-700')
-                : (todo.completed ? 'text-gray-400' : 'text-white')
+                ? (todo.completed ? 'text-gray-400' : 'text-gray-800')
+                : (todo.completed ? 'text-gray-400' : 'text-gray-100')
             } ${todo.completed ? 'line-through' : ''}`}>
               {todo.text}
             </span>
             <div className="flex gap-2">
               <button
                 onClick={() => startEditing(todo.id, todo.text)}
-                className={`${isLight(containerColor) ? 'text-gray-400 hover:text-gray-600' : 'text-gray-300 hover:text-white'}`}
+                className={`${isLight(containerColor) ? 'text-gray-500 hover:text-gray-700' : 'text-gray-300 hover:text-white'}`}
               >
                 <Edit className="w-4 h-4" />
               </button>
@@ -320,7 +327,7 @@ const TodoComponent = () => {
                 placement="leftTop"
               >
                 <button
-                  className={`${isLight(containerColor) ? 'text-gray-400 hover:text-gray-600' : 'text-gray-300 hover:text-white'}`}
+                  className={`${isLight(containerColor) ? 'text-gray-500 hover:text-gray-700' : 'text-gray-300 hover:text-white'}`}
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -336,11 +343,15 @@ const TodoComponent = () => {
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           placeholder="Add new task"
-          className="w-full p-3 pr-12 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className={`w-full p-3 pr-12 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+            isLight(containerColor) ? 'bg-white text-gray-800' : 'bg-gray-800 text-white placeholder-gray-400 border-gray-700'
+          }`}
         />
         <button
           type="submit"
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+          className={`absolute right-3 top-1/2 -translate-y-1/2 ${
+            isLight(containerColor) ? 'text-gray-500 hover:text-gray-700' : 'text-gray-400 hover:text-white'
+          }`}
         >
           <span className="text-2xl">+</span>
         </button>

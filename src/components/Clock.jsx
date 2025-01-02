@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Plus, X } from "lucide-react";
-import { Popconfirm } from "antd";
+import { Popconfirm, Menu, Dropdown } from "antd";
 import { auth, db } from "../firebase";
 import { doc, updateDoc, onSnapshot } from "firebase/firestore";
 
@@ -81,7 +81,76 @@ const getTimeDifference = (baseTimeZone, targetTimeZone) => {
   return `Today: (${signToday}${diffHoursToday}h)`;
 };
 
-const TimeZoneClock = ({ timeZone, isAnalog, onRemove, baseTimeZone }) => {
+const CLOCK_THEMES = {
+  classic: {
+    name: "Classic",
+    analog: {
+      border: "border-gray-200 dark:border-gray-700",
+      background: "bg-white dark:bg-gray-950",
+      hourHand: "bg-blue-500",
+      minuteHand: "bg-gray-900 dark:bg-white",
+      numbers: "text-gray-900 dark:text-white",
+    },
+    digital: {
+      container: "dark:bg-gray-950 bg-gray-100",
+      time: "dark:bg-black bg-white border-gray-800 dark:border-white",
+      text: "text-gray-800 dark:text-white",
+    },
+  },
+  neon: {
+    name: "Neon",
+    analog: {
+      border: "border-purple-500 dark:border-purple-400",
+      background: "bg-black",
+      hourHand: "bg-pink-500",
+      minuteHand: "bg-purple-500",
+      numbers: "text-purple-400",
+    },
+    digital: {
+      container: "bg-black",
+      time: "bg-black border-purple-500",
+      text: "text-purple-400",
+    },
+  },
+  minimal: {
+    name: "Minimal",
+    analog: {
+      border: "border-gray-300 dark:border-gray-600",
+      background: "bg-gray-50 dark:bg-gray-900",
+      hourHand: "bg-gray-600 dark:bg-gray-400",
+      minuteHand: "bg-gray-800 dark:bg-gray-200",
+      numbers: "text-gray-600 dark:text-gray-400",
+    },
+    digital: {
+      container: "bg-gray-50 dark:bg-gray-900",
+      time: "bg-transparent border-gray-300 dark:border-gray-600",
+      text: "text-gray-800 dark:text-gray-200",
+    },
+  },
+  ocean: {
+    name: "Ocean",
+    analog: {
+      border: "border-blue-400 dark:border-blue-500",
+      background: "bg-blue-50 dark:bg-blue-900",
+      hourHand: "bg-blue-600",
+      minuteHand: "bg-teal-500",
+      numbers: "text-blue-800 dark:text-blue-200",
+    },
+    digital: {
+      container: "bg-blue-50 dark:bg-blue-900",
+      time: "bg-white/80 dark:bg-blue-800 border-blue-400 dark:border-blue-300",
+      text: "text-blue-900 dark:text-blue-100",
+    },
+  },
+};
+
+const TimeZoneClock = ({
+  timeZone,
+  isAnalog,
+  onRemove,
+  baseTimeZone,
+  theme = CLOCK_THEMES.classic,
+}) => {
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
@@ -91,13 +160,12 @@ const TimeZoneClock = ({ timeZone, isAnalog, onRemove, baseTimeZone }) => {
     return () => clearInterval(timer);
   }, []);
 
-  const { hours, minutes, seconds } = getClockHandDegrees(time, timeZone);
-
+  const { hours, minutes } = getClockHandDegrees(time, timeZone);
   const timeDiff = getTimeDifference(baseTimeZone, timeZone);
 
   if (isAnalog) {
     return (
-      <div className="relative w-fit px-2  h-fit flex flex-col items-center group">
+      <div className="relative w-fit px-2 h-fit flex flex-col items-center group">
         <Popconfirm
           title="Remove timezone"
           description="Are you sure you want to remove this timezone?"
@@ -110,7 +178,9 @@ const TimeZoneClock = ({ timeZone, isAnalog, onRemove, baseTimeZone }) => {
             <X size={16} />
           </button>
         </Popconfirm>
-        <div className="w-24 h-24 rounded-full border-4 dark:text-white text-gray-900 border-gray-200 dark:border-gray-700 relative flex items-center justify-center bg-white dark:bg-gray-950">
+        <div
+          className={`w-24 h-24 rounded-full border-4 relative flex items-center justify-center ${theme.analog.border} ${theme.analog.background}`}
+        >
           {/* Numbers */}
           {[...Array(12)].map((_, index) => {
             const angle = (index + 1) * 30;
@@ -121,7 +191,7 @@ const TimeZoneClock = ({ timeZone, isAnalog, onRemove, baseTimeZone }) => {
             return (
               <span
                 key={index}
-                className="absolute text-[10px] mt-[1rem] ml-1.5 font-medium"
+                className={`absolute text-[10px] mt-[1rem] ml-1.5 font-medium ${theme.analog.numbers}`}
                 style={{
                   transform: `translate(-50%, -50%) translate(${x}px, ${y}px)`,
                 }}
@@ -132,18 +202,22 @@ const TimeZoneClock = ({ timeZone, isAnalog, onRemove, baseTimeZone }) => {
           })}
 
           {/* Clock hands */}
-          <div className="absolute z-50  w-1 h-1 bg-gray-800 dark:bg-white rounded-full"></div>
           <div
-            className="absolute -mt-5 w-0.5 h-5 bg-blue-500 origin-bottom rounded-full"
+            className={`absolute z-50 w-1 h-1 ${theme.analog.numbers} rounded-full`}
+          ></div>
+          <div
+            className={`absolute -mt-5 w-0.5 h-5 ${theme.analog.hourHand} origin-bottom rounded-full`}
             style={{ transform: `rotate(${hours}deg)` }}
           />
           <div
-            className="absolute -mt-7 w-0.5 h-7 bg-gray-900 dark:bg-white origin-bottom rounded-full"
+            className={`absolute -mt-7 w-0.5 h-7 ${theme.analog.minuteHand} origin-bottom rounded-full`}
             style={{ transform: `rotate(${minutes}deg)` }}
           />
         </div>
-        <div className="text-center dark:text-white text-black text-[10px] font-medium mt-1">
-          <p className="mb-0">{formatTimeZoneName(timeZone)}</p>
+        <div className="text-center text-[10px] font-medium mt-1">
+          <p className={`mb-0 ${theme.analog.numbers}`}>
+            {formatTimeZoneName(timeZone)}
+          </p>
           {timeDiff && (
             <p className="text-gray-500 whitespace-pre-line">{timeDiff}</p>
           )}
@@ -166,12 +240,14 @@ const TimeZoneClock = ({ timeZone, isAnalog, onRemove, baseTimeZone }) => {
           <X size={16} />
         </button>
       </Popconfirm>
-      <div className="h-full dark:bg-gray-950 bg-gray-100 backdrop-blur-sm min-w-28 rounded-xl shadow-lg flex flex-col items-center justify-center p-2">
-        <p className="text-[10px] font-medium mb-0.5 dark:text-blue-500 text-gray-600">
+      <div
+        className={`h-full backdrop-blur-sm min-w-28 rounded-xl  flex flex-col items-center justify-center p-2 ${theme.digital.container}`}
+      >
+        <p className="text-[10px] font-medium mb-0.5 text-blue-500">
           {formatTimeZoneName(timeZone)}
         </p>
-        <div className="dark:bg-black bg-white border px-1 rounded-md text-nowrap border-bg-gray-800 dark:border-white">
-          <p className="text-base font-bold tracking-wider dark:text-white text-gray-800">
+        <div className={`border px-1 rounded-md text-nowrap ${theme.digital.time}`}>
+          <p className={`text-base font-bold tracking-wider ${theme.digital.text}`}>
             {formatTimeForZone(time, timeZone)}
           </p>
         </div>
@@ -189,6 +265,21 @@ const ResponsiveWorldClock = () => {
   const [isAnalog, setIsAnalog] = useState(true);
   const [selectedTimezones, setSelectedTimezones] = useState(["Asia/Kolkata"]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [currentTheme, setCurrentTheme] = useState(CLOCK_THEMES.classic);
+
+  const themeMenu = (
+    <Menu className="dark:bg-gray-900">
+      {Object.entries(CLOCK_THEMES).map(([key, theme]) => (
+        <Menu.Item
+          key={key}
+          onClick={() => setCurrentTheme(theme)}
+          className="dark:hover:bg-gray-800 dark:text-white"
+        >
+          {theme.name}
+        </Menu.Item>
+      ))}
+    </Menu>
+  );
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -247,17 +338,22 @@ const ResponsiveWorldClock = () => {
   );
 
   return (
-    <div className="dark:bg-gray-900 w-full max-w-sm dark:text-white p-4  bg-white rounded-lg flex justify-center items-center">
+    <div className="dark:bg-gray-900 w-full max-w-sm dark:text-white p-4 bg-white rounded-lg flex justify-center items-center">
       <div className="mx-auto w-full">
         <div className="flex items-center">
-          <div className="flex w-full  justify-between items-center">
-            <div>
+          <div className="flex w-full justify-between items-center">
+            <div className="flex gap-2">
               <button
                 onClick={() => setIsAnalog(!isAnalog)}
-                className="px-4 py-1 dark:bg-white/10  bg-gray-200 hover:bg-gray-300 rounded-full dark:hover:bg-white/20 transition"
+                className="px-4 py-1 dark:bg-white/10 bg-gray-200 hover:bg-gray-300 rounded-full dark:hover:bg-white/20 transition"
               >
                 {isAnalog ? "Digital" : "Analog"}
               </button>
+              <Dropdown overlay={themeMenu} trigger={["click"]}>
+                <button className="px-4 py-1 dark:bg-white/10 bg-gray-200 hover:bg-gray-300 rounded-full dark:hover:bg-white/20 transition">
+                  {currentTheme.name}
+                </button>
+              </Dropdown>
             </div>
             <div>
               {selectedTimezones.length < 4 && (
@@ -294,16 +390,16 @@ const ResponsiveWorldClock = () => {
             </div>
           </div>
         </div>
-        <div className="flex justify-center ">
-          <div className="flex flex-wrap  justify-between  w-full h-fit px-2 py-5 ">
+        <div className="flex justify-center">
+          <div className="flex flex-wrap justify-between w-full h-fit px-2 py-5">
             {selectedTimezones.map((timeZone, index) => (
-              <div className="mt-4">
+              <div key={timeZone} className="mt-4">
                 <TimeZoneClock
-                  key={timeZone}
                   timeZone={timeZone}
                   isAnalog={isAnalog}
                   onRemove={() => removeTimeZone(index)}
                   baseTimeZone={selectedTimezones[0]}
+                  theme={currentTheme}
                 />
               </div>
             ))}
@@ -315,5 +411,3 @@ const ResponsiveWorldClock = () => {
 };
 
 export default ResponsiveWorldClock;
-
-// jasa ImageUploader me popconfirm laga h vasa hi same clock ke remove pe laga do

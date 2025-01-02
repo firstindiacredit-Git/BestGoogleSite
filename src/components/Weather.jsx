@@ -14,30 +14,28 @@ const API_KEY = "78a1522c5ec67352674263eaaa54bffa";
 
 const WeatherIcon = ({ condition }) => {
   const iconStyles = {
-    clear: "text-yellow-400 drop-shadow-md hover:drop-shadow-400/50",
-    rain: "text-blue-400 shadow-blue-400/50",
-    drizzle: "text-teal-300 drop-shadow-teal-300/50",
-    snow: "text-gray-200 shadow-gray-200/50",
-    thunderstorm: "text-purple-500 shadow-purple-500/50",
+    clear: "text-yellow-400",
+    rain: "text-blue-400",
+    drizzle: "text-blue-300",
+    snow: "text-white",
+    thunderstorm: "text-purple-400",
     default: "text-gray-400",
   };
 
   const getIcon = () => {
     switch (condition?.toLowerCase()) {
       case "clear":
-        return <Sun className={`w-10 h-10  ${iconStyles.clear}`} />;
+        return <Sun className={`w-16 h-16 ${iconStyles.clear}`} />;
       case "rain":
-        return <CloudRain className={`w-10 h-10  ${iconStyles.rain}`} />;
+        return <CloudRain className={`w-16 h-16 ${iconStyles.rain}`} />;
       case "drizzle":
-        return <CloudDrizzle className={`w-10 h-10  ${iconStyles.drizzle}`} />;
+        return <CloudDrizzle className={`w-16 h-16 ${iconStyles.drizzle}`} />;
       case "snow":
-        return <CloudSnow className={`w-10 h-10  ${iconStyles.snow}`} />;
+        return <CloudSnow className={`w-16 h-16 ${iconStyles.snow}`} />;
       case "thunderstorm":
-        return (
-          <CloudLightning className={`w-10 h-10 ${iconStyles.thunderstorm}`} />
-        );
+        return <CloudLightning className={`w-16 h-16 ${iconStyles.thunderstorm}`} />;
       default:
-        return <Cloud className={`w-10 h-10  ${iconStyles.default}`} />;
+        return <Cloud className={`w-16 h-16 ${iconStyles.default}`} />;
     }
   };
 
@@ -54,15 +52,26 @@ const WeatherCard = ({
   condition,
   details,
   getTemperature,
+  isMain = false,
 }) => (
-  <div className="flex flex-col items-center dark:text-white p-1">
-    <p className="font-bold text-sm">{day}</p>
+  <div
+    className={`flex flex-col items-center text-gray-100 p-2 ${
+      isMain ? "bg-blue-500/10 rounded-lg" : ""
+    }`}
+  >
+    <p className={`font-medium ${isMain ? "text-lg" : "text-sm"}`}>{day}</p>
     <WeatherIcon condition={condition} />
-    <p className="text-xs mt-1">{getTemperature(temperature)}</p>
-    {details && (
-      <div className="mt-2 text-[10px] text-center">
-        <p className="border rounded">Humidity: {details.humidity}%</p>
-        <p className="border rounded mt-1">
+    <p
+      className={`mt-1 ${isMain ? "text-2xl font-bold" : "text-sm"}`}
+    >
+      {getTemperature(temperature)}
+    </p>
+    {details && isMain && (
+      <div className="mt-3 text-sm grid grid-cols-2 gap-3">
+        <p className="bg-blue-500/20 px-3 py-1 rounded">
+          Humidity: {details.humidity}%
+        </p>
+        <p className="bg-blue-500/20 px-3 py-1 rounded">
           Wind: {Math.round(details.wind)} m/s
         </p>
       </div>
@@ -148,7 +157,8 @@ const Weather = () => {
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
   }, [isVisible]);
 
   const handleUnitToggle = () => {
@@ -186,49 +196,49 @@ const Weather = () => {
   };
 
   return (
-    <div className="w-full max-w-sm rounded-b-lg mx-auto dark:text-white p-4 bg-white dark:bg-gray-900">
-      <div className="flex justify-between items-center mb-4">
-        <div className="text-center m-auto">
-          <h2 className="text-lg font-bold">Weather</h2>
-          <p className="text-sm">{city.toUpperCase()}</p>
+    <div className="w-full max-w-sm rounded-lg mx-auto text-gray-100 p-4 bg-gray-900">
+      <div className="flex justify-between items-center mb-6">
+        <div className="text-center flex-1">
+          <h2 className="text-xl font-bold text-blue-400">Weather</h2>
+          <p className="text-sm text-gray-400">{city.toUpperCase()}</p>
         </div>
         <div className="relative">
           <button
             ref={buttonRef}
-            className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
+            className="p-2 rounded-full hover:bg-gray-800"
             onClick={() => setIsVisible(!isVisible)}
           >
-            <CiEdit className="w-4 h-4" />
+            <CiEdit className="w-5 h-5" />
           </button>
 
           {isVisible && (
             <div
               ref={dropdownRef}
-              className="absolute border right-0 w-48 -mt-2 bg-white dark:bg-gray-800 shadow-lg rounded-md p-2 z-10"
+              className="absolute right-0 w-48 mt-2 bg-gray-800 border border-gray-700 shadow-lg rounded-lg p-3 z-10"
             >
               <button
                 onClick={handleUnitToggle}
-                className="block w-full border rounded  text-left px-2 py-1 text-[12px] hover:bg-gray-100 dark:hover:bg-gray-700"
+                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-700 rounded"
               >
-                {unit === "imperial" ? "Celsius .C" : "Fahrenheit .F"}
+                {unit === "imperial" ? "Switch to Celsius" : "Switch to Fahrenheit"}
               </button>
               <button
                 onClick={handleDetailsToggle}
-                className="block border rounded w-full mt-1 text-left px-2 py-1 text-[12px] hover:bg-gray-100 dark:hover:bg-gray-700"
+                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-700 rounded mt-1"
               >
                 {showDetails ? "Hide Details" : "Show Details"}
               </button>
-              <form onSubmit={handleCitySubmit} className="mt-1">
+              <form onSubmit={handleCitySubmit} className="mt-2">
                 <input
                   type="text"
                   placeholder="Enter city"
                   value={inputValue}
                   onChange={handleCityChange}
-                  className="w-full p-1 border h-7 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  className="w-full p-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <button
                   type="submit"
-                  className="mt-1 w-full bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                  className="mt-2 w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
                 >
                   Search
                 </button>
@@ -239,28 +249,29 @@ const Weather = () => {
       </div>
 
       {error ? (
-        <p className="text-center text-red-600 dark:text-red-400">{error}</p>
+        <p className="text-center text-red-400">{error}</p>
       ) : currentWeather && forecast.length > 0 ? (
-        <div>
-          <div className="flex justify-between space-x-2">
-            <WeatherCard
-              day="Today"
-              temperature={currentWeather.main.temp}
-              condition={currentWeather.weather[0].main}
-              details={showDetails ? currentWeather.main : null}
-              getTemperature={getTemperature}
-            />
+        <div className="space-y-6">
+          <WeatherCard
+            day="Today"
+            temperature={currentWeather.main.temp}
+            condition={currentWeather.weather[0].main}
+            details={showDetails ? {
+              humidity: currentWeather.main.humidity,
+              wind: currentWeather.wind.speed,
+            } : null}
+            getTemperature={getTemperature}
+            isMain={true}
+          />
+
+          <div className="grid grid-cols-3 gap-2 pt-4 border-t border-gray-800">
             {forecast.map((item, index) => (
               <WeatherCard
                 key={index}
                 day={getDayDifference(item.dt_txt)}
                 temperature={item.main.temp}
                 condition={item.weather[0].main}
-                details={
-                  showDetails
-                    ? { humidity: item.main.humidity, wind: item.wind.speed }
-                    : null
-                }
+                details={null}
                 getTemperature={getTemperature}
               />
             ))}
