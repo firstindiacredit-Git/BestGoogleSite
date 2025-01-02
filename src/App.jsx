@@ -7,7 +7,7 @@ import SearchPage from "./components/SearchPage.jsx";
 import AddList from "./components/Calculator.jsx";
 import Signin from "./components/Signup/signin.jsx";
 import Signup from "./components/Signup.jsx";
-import NewSearchPage from "./components/NewSearchPage.jsx";
+// import NewSearchPage from "./components/NewSearchPage.jsx";
 import ProfilePage from "./components/ProfilePage.jsx";
 import Forgotpassword from "./components/Signup/Forgotpassword.jsx";
 import AddLinks from "./components/Admin/AddLinks.jsx";
@@ -217,7 +217,7 @@ const App = () => {
               <Route path="/AddList" element={<AddList />} />
               <Route path="/Signin" element={<Signin />} />
               <Route path="/Signup" element={<Signup />} />
-              <Route path="/NewSearchPage" element={<NewSearchPage />} />
+              {/* <Route path="/NewSearchPage" element={<NewSearchPage />} /> */}
               <Route path="/Forgotpassword" element={<Forgotpassword />} />
               <Route path="/ProfilePage" element={<ProfilePage />} />
               <Route path="/PremiumPage" element={<PremiumPage />} />
