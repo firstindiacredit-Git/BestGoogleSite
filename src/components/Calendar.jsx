@@ -70,7 +70,7 @@ const FullCalendar = () => {
   };
 
   return (
-    <div className="w-full mx-auto bg-white dark:bg-gray-900 rounded-xl p-4 text-gray-900 dark:text-gray-100">
+    <div className="w-full max-w-sm mx-auto bg-white dark:bg-gray-900 rounded-xl p-4 text-gray-900 dark:text-gray-100">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">

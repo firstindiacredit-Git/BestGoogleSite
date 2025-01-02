@@ -40,7 +40,7 @@ function ImageUploader() {
   };
 
   return (
-    <div className="container rounded-md w-full">
+    <div className="container rounded-b-lg   w-full">
       <input
         type="file"
         accept="image/*"
@@ -50,7 +50,7 @@ function ImageUploader() {
       />
 
       {!image && (
-        <div className="border bg-white/10 h-80 m-auto w-full">
+        <div classNamse="border bg-white/10 h-80 m-auto rounded-b-lg  w-full">
           <label htmlFor="file-input" className="cursor-pointer mb-4">
             <MdAdd className="w-12 justify-center mx-auto my-28 h-12 text-blue-600 hover:text-blue-800 transition duration-300" />
           </label>
@@ -58,18 +58,18 @@ function ImageUploader() {
       )}
 
       {imageUrl && (
-        <div className="relative group h-80">
+        <div className="relative rounded-b-lg   group h-80">
           <Image
             src={imageUrl}
             alt="Uploaded"
             preview={true}
-            className="!h-full !w-full"
+            className="!h-full !w-full rounded-b-lg "
             style={{ 
               objectFit: 'cover',
               height: '100%',
               width: '100%'
             }}
-            wrapperClassName="!h-full !w-full"
+            wrapperClassName="!h-full !w-full rounded-b-lg "
           />
           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <Popconfirm
@@ -86,7 +86,6 @@ function ImageUploader() {
                 icon={<MdDelete className="text-lg" />}
                 className="flex items-center gap-1"
               >
-                Delete
               </Button>
             </Popconfirm>
           </div>

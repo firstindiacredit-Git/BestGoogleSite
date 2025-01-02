@@ -427,25 +427,24 @@ const Category = ({ data = [] }) => {
   };
 
   return (
-    <div className="dark:text-white bg-white dark:bg-gray-900">
+    <div className="dark:text-white max-w-sm rounded-lg bg-white dark:bg-gray-900">
       <Card
         title={
           <div className="flex justify-between items-center">
             <Title level={4} className="dark:text-white m-0">
               My Bookmarks
             </Title>
-            <div>
-              <Dropdown overlay={viewMenu} trigger={["click"]}>
-                <Button>
-                  <EllipsisOutlined className="rotate-90" />
-                </Button>
-              </Dropdown>
-
+            <div className="space-x-1">
               <Button
                 type="primary"
                 icon={<PlusOutlined />}
                 onClick={() => setIsModalVisible(true)}
               ></Button>
+              <Dropdown overlay={viewMenu} trigger={["click"]}>
+                <Button className="w-1.5 h-8.5">
+                  <EllipsisOutlined className="rotate-90" />
+                </Button>
+              </Dropdown>
             </div>
           </div>
         }

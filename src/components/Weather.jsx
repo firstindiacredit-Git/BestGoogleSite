@@ -25,19 +25,19 @@ const WeatherIcon = ({ condition }) => {
   const getIcon = () => {
     switch (condition?.toLowerCase()) {
       case "clear":
-        return <Sun className={`w-10 h-10 ${iconStyles.clear}`} />;
+        return <Sun className={`w-10 h-10  ${iconStyles.clear}`} />;
       case "rain":
-        return <CloudRain className={`w-10 h-10 ${iconStyles.rain}`} />;
+        return <CloudRain className={`w-10 h-10  ${iconStyles.rain}`} />;
       case "drizzle":
-        return <CloudDrizzle className={`w-10 h-10 ${iconStyles.drizzle}`} />;
+        return <CloudDrizzle className={`w-10 h-10  ${iconStyles.drizzle}`} />;
       case "snow":
-        return <CloudSnow className={`w-10 h-10 ${iconStyles.snow}`} />;
+        return <CloudSnow className={`w-10 h-10  ${iconStyles.snow}`} />;
       case "thunderstorm":
         return (
           <CloudLightning className={`w-10 h-10 ${iconStyles.thunderstorm}`} />
         );
       default:
-        return <Cloud className={`w-10 h-10 ${iconStyles.default}`} />;
+        return <Cloud className={`w-10 h-10  ${iconStyles.default}`} />;
     }
   };
 
@@ -186,7 +186,7 @@ const Weather = () => {
   };
 
   return (
-    <div className="w-full mx-auto dark:text-white p-4 bg-white dark:bg-gray-900">
+    <div className="w-full max-w-sm rounded-b-lg mx-auto dark:text-white p-4 bg-white dark:bg-gray-900">
       <div className="flex justify-between items-center mb-4">
         <div className="text-center m-auto">
           <h2 className="text-lg font-bold">Weather</h2>

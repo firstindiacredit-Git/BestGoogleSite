@@ -7,7 +7,7 @@ import SearchPage from "./components/SearchPage.jsx";
 import AddList from "./components/Calculator.jsx";
 import Signin from "./components/Signup/signin.jsx";
 import Signup from "./components/Signup.jsx";
-import NewSearchPage from "./components/NewSearchPage.jsx";
+// import NewSearchPage from "./components/NewSearchPage.jsx";
 import ProfilePage from "./components/ProfilePage.jsx";
 import Forgotpassword from "./components/Signup/Forgotpassword.jsx";
 import AddLinks from "./components/Admin/AddLinks.jsx";
@@ -119,14 +119,15 @@ const ContextMenuWrapper = ({ children }) => {
 
   const menu = (
     <Menu
+    className="dark:text-white dark:bg-gray-700"
       items={menuItems.flatMap((group) => [
         ...group.children.map((item) => ({
           key: item.key,
           label: (
-            <div className="flex justify-between items-center w-full">
+            <div className="flex justify-between dark:text-white dark:bg-gray-700 items-center w-full">
               <span>{item.label}</span>
               {item.shortcut && (
-                <span className="text-gray-500 ml-2">{item.shortcut}</span>
+                <span className="text-gray-500 dark:text-gray-100 ml-2">{item.shortcut}</span>
               )}
             </div>
           ),
@@ -155,8 +156,8 @@ const ContextMenuWrapper = ({ children }) => {
 
   return (
     <>
-      <Dropdown overlay={menu} trigger={["contextMenu"]}>
-        <div className="w-full min-h-screen">{children}</div>
+      <Dropdown  overlay={menu} trigger={["contextMenu"]}>
+        <div className="w-full min-h-screen  ">{children}</div>
       </Dropdown>
       <Modal
         title="Change Background"
@@ -216,7 +217,7 @@ const App = () => {
               <Route path="/AddList" element={<AddList />} />
               <Route path="/Signin" element={<Signin />} />
               <Route path="/Signup" element={<Signup />} />
-              <Route path="/NewSearchPage" element={<NewSearchPage />} />
+              {/* <Route path="/NewSearchPage" element={<NewSearchPage />} /> */}
               <Route path="/Forgotpassword" element={<Forgotpassword />} />
               <Route path="/ProfilePage" element={<ProfilePage />} />
               <Route path="/PremiumPage" element={<PremiumPage />} />
