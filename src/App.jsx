@@ -119,14 +119,15 @@ const ContextMenuWrapper = ({ children }) => {
 
   const menu = (
     <Menu
+    className="dark:text-white dark:bg-gray-700"
       items={menuItems.flatMap((group) => [
         ...group.children.map((item) => ({
           key: item.key,
           label: (
-            <div className="flex justify-between items-center w-full">
+            <div className="flex justify-between dark:text-white dark:bg-gray-700 items-center w-full">
               <span>{item.label}</span>
               {item.shortcut && (
-                <span className="text-gray-500 ml-2">{item.shortcut}</span>
+                <span className="text-gray-500 dark:text-gray-100 ml-2">{item.shortcut}</span>
               )}
             </div>
           ),
@@ -155,8 +156,8 @@ const ContextMenuWrapper = ({ children }) => {
 
   return (
     <>
-      <Dropdown overlay={menu} trigger={["contextMenu"]}>
-        <div className="w-full min-h-screen">{children}</div>
+      <Dropdown  overlay={menu} trigger={["contextMenu"]}>
+        <div className="w-full min-h-screen  ">{children}</div>
       </Dropdown>
       <Modal
         title="Change Background"

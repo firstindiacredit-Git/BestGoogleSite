@@ -48,7 +48,7 @@ const NewsFeed = () => {
 
   if (loading) {
     return (
-      <div className="w-full h-[300px] flex items-center justify-center">
+      <div className=" h-[300px] flex items-center justify-center">
         <Spin size="large" />
       </div>
     );
@@ -56,14 +56,14 @@ const NewsFeed = () => {
 
   if (error) {
     return (
-      <div className="w-full p-4 text-center">
+      <div className=" p-4 text-center">
         <p className="text-red-500">{error}</p>
       </div>
     );
   }
 
   return (
-    <div className="w-full max-w-lg bg-white dark:bg-gray-900 rounded-lg overflow-hidden">
+    <div className=" max-w-sm bg-white dark:bg-gray-900 rounded-lg overflow-hidden">
       <div className="news-carousel">
         <Carousel
           ref={carouselRef}

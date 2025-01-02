@@ -434,213 +434,197 @@ if(!user){
 
       {/* Widget Sorter Modal */}
       <Modal
-        title="Sort Widgets"
-        open={isSorterOpen}
-        onCancel={() => {
-          if (!isApplying) {
-            setIsSorterOpen(false);
-            // Reset preview state when closing
-            setSortedItems([...items]);
-            setPreviewColumns(columns);
-          }
-        }}
-        footer={[
-          <AntButton
-            key="cancel"
-            onClick={() => {
-              setIsSorterOpen(false);
-              // Reset preview state when canceling
-              setSortedItems([...items]);
-              setPreviewColumns(columns);
-            }}
-            disabled={isApplying}
-          >
-            Cancel
-          </AntButton>,
-          <AntButton
-            key="apply"
-            type="primary"
-            onClick={handleApplySorting}
-            disabled={isApplying}
-            loading={isApplying}
-          >
-            Apply Changes
-          </AntButton>,
-        ]}
-        width={800}
-        centered
-      >
-        {isApplying ? (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              padding: "40px",
-            }}
-          >
-            <Spin size="large" />
-          </div>
-        ) : (
-          <>
-            <div className="mb-6 flex items-center justify-between">
-              <div className="text-sm text-gray-600 dark:text-gray-400">
-                Select number of columns:
-              </div>
-              <div className="flex gap-2">
-                {[1, 2, 3, 4].map((num) => (
-                  <AntButton
-                    key={num}
-                    type={previewColumns === num ? "primary" : "default"}
-                    onClick={() => handleColumnChange(num)}
-                    className={
-                      previewColumns === num ? "" : "hover:border-primary"
-                    }
-                    size="small"
+  title="Sort Widgets"
+  open={isSorterOpen}
+  onCancel={() => {
+    if (!isApplying) {
+      setIsSorterOpen(false);
+      // Reset preview state when closing
+      setSortedItems([...items]);
+      setPreviewColumns(columns);
+    }
+  }}
+  footer={[
+    <AntButton
+      key="cancel"
+      onClick={() => {
+        setIsSorterOpen(false);
+        // Reset preview state when canceling
+        setSortedItems([...items]);
+        setPreviewColumns(columns);
+      }}
+      disabled={isApplying}
+    >
+      Cancel
+    </AntButton>,
+    <AntButton
+      key="apply"
+      type="primary"
+      onClick={handleApplySorting}
+      disabled={isApplying}
+      loading={isApplying}
+    >
+      Apply Changes
+    </AntButton>,
+  ]}
+  width={800}
+  centered
+  className="dark:bg-gray-700" // Add this class to make it gray in dark mode
+>
+  {isApplying ? (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        padding: "40px",
+      }}
+    >
+      <Spin size="large" />
+    </div>
+  ) : (
+    <>
+      <div className="mb-6 flex items-center justify-between">
+        <div className="text-sm text-gray-600 dark:text-gray-400">
+          Select number of columns:
+        </div>
+        <div className="flex gap-2">
+          {[1, 2, 3, 4].map((num) => (
+            <AntButton
+              key={num}
+              type={previewColumns === num ? "primary" : "default"}
+              onClick={() => handleColumnChange(num)}
+              className={previewColumns === num ? "" : "hover:border-primary"}
+              size="small"
+            >
+              {num}
+            </AntButton>
+          ))}
+        </div>
+      </div>
+      <DragDropContext onDragEnd={handleSortEnd}>
+        <div
+          className="sort-columns-container"
+          style={{
+            display: "grid",
+            gridTemplateColumns: `repeat(${previewColumns}, 1fr)`,
+            gap: "16px",
+            marginBottom: "20px",
+            maxHeight: "60vh",
+            overflowY: "auto",
+            padding: "8px",
+          }}
+        >
+          {Array.from({ length: previewColumns }).map((_, columnIndex) => (
+            <Droppable key={columnIndex} droppableId={String(columnIndex)}>
+              {(provided, snapshot) => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  className="sort-column"
+                  style={{
+                    padding: "12px",
+                    backgroundColor: snapshot.isDraggingOver
+                      ? "rgba(24, 144, 255, 0.1)"
+                      : "rgba(0, 0, 0, 0.02)",
+                    borderRadius: "8px",
+                    minHeight: "150px",
+                    transition: "background-color 0.2s ease",
+                    border: snapshot.isDraggingOver
+                      ? "2px dashed #1890ff"
+                      : "2px solid transparent",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <div
+                    className="column-header"
+                    style={{
+                      marginBottom: "12px",
+                      fontWeight: "bold",
+                      color: "#1890ff",
+                    }}
                   >
-                    {num}
-                  </AntButton>
-                ))}
-              </div>
-            </div>
-            <DragDropContext onDragEnd={handleSortEnd}>
-              <div
-                className="sort-columns-container"
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: `repeat(${previewColumns}, 1fr)`,
-                  gap: "16px",
-                  marginBottom: "20px",
-                  maxHeight: "60vh",
-                  overflowY: "auto",
-                  padding: "8px",
-                }}
-              >
-                {Array.from({ length: previewColumns }).map(
-                  (_, columnIndex) => (
-                    <Droppable
-                      key={columnIndex}
-                      droppableId={String(columnIndex)}
-                    >
-                      {(provided, snapshot) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.droppableProps}
-                          className="sort-column"
-                          style={{
-                            padding: "12px",
-                            backgroundColor: snapshot.isDraggingOver
-                              ? "rgba(24, 144, 255, 0.1)"
-                              : "rgba(0, 0, 0, 0.02)",
-                            borderRadius: "8px",
-                            minHeight: "150px",
-                            transition: "background-color 0.2s ease",
-                            border: snapshot.isDraggingOver
-                              ? "2px dashed #1890ff"
-                              : "2px solid transparent",
-                            display: "flex",
-                            flexDirection: "column",
-                          }}
-                        >
-                          <div
-                            className="column-header"
-                            style={{
-                              marginBottom: "12px",
-                              fontWeight: "bold",
-                              color: "#1890ff",
-                            }}
-                          >
-                            Column {columnIndex + 1}
-                          </div>
-                          <div
-                            className="items-container"
-                            style={{
-                              display: "flex",
-                              flexDirection: "column",
-                              gap: "8px",
-                              flexGrow: 1,
-                            }}
-                          >
-                            {sortedItems
-                              .filter((item) => item.column === columnIndex)
-                              .map((item, index) => (
-                                <Draggable
-                                  key={item.id}
-                                  draggableId={item.id}
-                                  index={index}
+                    Column {columnIndex + 1}
+                  </div>
+                  <div
+                    className="items-container"
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "8px",
+                      flexGrow: 1,
+                    }}
+                  >
+                    {sortedItems
+                      .filter((item) => item.column === columnIndex)
+                      .map((item, index) => (
+                        <Draggable key={item.id} draggableId={item.id} index={index}>
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              className="bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600"
+                              style={{
+                                ...provided.draggableProps.style,
+                                opacity: snapshot.isDragging ? 0.9 : 1,
+                                transform: snapshot.isDragging
+                                  ? `${provided.draggableProps.style.transform} scale(1.05)`
+                                  : provided.draggableProps.style.transform,
+                              }}
+                            >
+                              <div className="flex items-center p-2 gap-2">
+                                <div
+                                  {...provided.dragHandleProps}
+                                  className="cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                                 >
-                                  {(provided, snapshot) => (
-                                    <div
-                                      ref={provided.innerRef}
-                                      {...provided.draggableProps}
-                                      className="bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600"
-                                      style={{
-                                        ...provided.draggableProps.style,
-                                        opacity: snapshot.isDragging ? 0.9 : 1,
-                                        transform: snapshot.isDragging
-                                          ? `${provided.draggableProps.style.transform} scale(1.05)`
-                                          : provided.draggableProps.style
-                                              .transform,
-                                      }}
-                                    >
-                                      <div className="flex items-center p-2 gap-2">
-                                        <div
-                                          {...provided.dragHandleProps}
-                                          className="cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                                        >
-                                          ⋮⋮
-                                        </div>
-                                        <span className="text-gray-700 dark:text-gray-200 flex-grow">
-                                          {item.name}
-                                        </span>
-                                        <AntButton
-                                          type="text"
-                                          icon={<DeleteOutlined />}
-                                          onClick={() =>
-                                            handleRemoveWidget(item.id)
-                                          }
-                                          className="text-gray-400 hover:text-red-500"
-                                          size="small"
-                                        />
-                                      </div>
-                                    </div>
-                                  )}
-                                </Draggable>
-                              ))}
-                            {provided.placeholder}
-                          </div>
-                          {availableWidgets.length > 0 && (
-                            <div className="mt-4 p-2 border-t border-gray-200 dark:border-gray-600">
-                              <div className="text-sm text-gray-500 mb-2">
-                                Add Widget:
-                              </div>
-                              <div className="flex flex-wrap gap-2">
-                                {availableWidgets.map((widget) => (
-                                  <AntButton
-                                    key={widget.id}
-                                    onClick={() =>
-                                      handleAddWidget(columnIndex, widget)
-                                    }
-                                    icon={<PlusOutlined />}
-                                    size="small"
-                                    type="dashed"
-                                    className="flex items-center"
-                                  >
-                                    {widget.name}
-                                  </AntButton>
-                                ))}
+                                  ⋮⋮
+                                </div>
+                                <span className="text-gray-700 dark:text-gray-200 flex-grow">
+                                  {item.name}
+                                </span>
+                                <AntButton
+                                  type="text"
+                                  icon={<DeleteOutlined />}
+                                  onClick={() => handleRemoveWidget(item.id)}
+                                  className="text-gray-400 hover:text-red-500"
+                                  size="small"
+                                />
                               </div>
                             </div>
                           )}
-                        </div>
-                      )}
-                    </Droppable>
-                  )
-                )}
-              </div>
-            </DragDropContext>
-          </>
-        )}
-      </Modal>
+                        </Draggable>
+                      ))}
+                    {provided.placeholder}
+                  </div>
+                  {availableWidgets.length > 0 && (
+                    <div className="mt-4 p-2 border-t border-gray-200 dark:border-gray-600">
+                      <div className="text-sm text-gray-500 mb-2">Add Widget:</div>
+                      <div className="flex flex-wrap gap-2">
+                        {availableWidgets.map((widget) => (
+                          <AntButton
+                            key={widget.id}
+                            onClick={() => handleAddWidget(columnIndex, widget)}
+                            icon={<PlusOutlined />}
+                            size="small"
+                            type="dashed"
+                            className="flex items-center"
+                          >
+                            {widget.name}
+                          </AntButton>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </Droppable>
+          ))}
+        </div>
+      </DragDropContext>
+    </>
+  )}
+</Modal>;
+
     </div>
   );
 };
