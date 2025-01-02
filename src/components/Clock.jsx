@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Clock, Plus, X } from "lucide-react";
-import { Button, Popconfirm } from "antd";
-import {
-  PlusOutlined,
-} from "@ant-design/icons";
+import {  Plus, X } from "lucide-react";
+import {  Popconfirm } from "antd";
 import { auth, db } from "../firebase";
 import { doc, updateDoc, onSnapshot } from "firebase/firestore";
 
@@ -43,7 +40,6 @@ const formatTimeForZone = (time, timeZone) => {
       timeZone: timeZone,
       hour: 'numeric',
       minute: '2-digit',
-      // second: '2-digit',
       hour12: true
     });
   } catch (error) {
@@ -98,7 +94,7 @@ const TimeZoneClock = ({ timeZone, isAnalog, onRemove, baseTimeZone }) => {
 
   if (isAnalog) {
     return (
-      <div className="relative w-24 h-36 flex flex-col items-center group">
+      <div className="relative w-fit  h-fit flex flex-col items-center group">
         <Popconfirm
           title="Remove timezone"
           description="Are you sure you want to remove this timezone?"
@@ -137,16 +133,12 @@ const TimeZoneClock = ({ timeZone, isAnalog, onRemove, baseTimeZone }) => {
           {/* Clock hands */}
           <div className="absolute  w-1 h-1 bg-white dark:bg-white rounded-full"></div>
           <div
-            className="absolute -mt-5 w-0.5 h-5 bg-blue-600 origin-bottom rounded-full"
+            className="absolute -mt-5 w-0.5 h-5 bg-blue-500 origin-bottom rounded-full"
             style={{ transform: `rotate(${hours}deg)` }}
           />
           <div
-            className="absolute -mt-7 w-0.5 h-7 bg-black dark:bg-white origin-bottom rounded-full"
+            className="absolute -mt-7 w-0.5 h-7 bg-gray-900 dark:bg-white origin-bottom rounded-full"
             style={{ transform: `rotate(${minutes}deg)` }}
-          />
-          <div
-            className="absolute -mt-7 w-0.5 h-7 bg-red-500 origin-bottom rounded-full"
-            style={{ transform: `rotate(${seconds}deg)` }}
           />
         </div>
         <div className="text-center dark:text-white text-black text-[10px] font-medium mt-1">
@@ -175,8 +167,8 @@ const TimeZoneClock = ({ timeZone, isAnalog, onRemove, baseTimeZone }) => {
           <X size={16} />
         </button>
       </Popconfirm>
-      <div className="h-full dark:bg-black/80 bg-gray-100 backdrop-blur-sm rounded-xl shadow-lg flex flex-col items-center justify-center p-2">
-        <p className="text-[10px] font-medium mb-0.5 dark:text-gray-400 text-gray-600">
+      <div className="h-full dark:bg-gray-950 bg-gray-100 backdrop-blur-sm rounded-xl shadow-lg flex flex-col items-center justify-center p-2">
+        <p className="text-[10px] font-medium mb-0.5 dark:text-blue-500 text-gray-600">
           {formatTimeZoneName(timeZone)}
         </p>
         <p className="text-base font-bold tracking-wider dark:text-white text-gray-800">
@@ -255,9 +247,9 @@ const ResponsiveWorldClock = () => {
 
   return (
     <div className="dark:bg-gray-900 dark:text-white p-4 flex justify-center items-center">
-      <div className="mx-auto w-full max-w-4xl">
+      <div className="mx-auto w-full max-w-sm">
         <div className="flex justify-between items-center">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center">
             <button
               onClick={() => setIsAnalog(!isAnalog)}
               className="px-4 py-1 dark:bg-white/10  bg-gray-200 hover:bg-gray-300 rounded-full dark:hover:bg-white/20 transition"
@@ -299,7 +291,7 @@ const ResponsiveWorldClock = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 justify-items-center px-2 py-10">
+        <div className="flex flex-wrap  justify-evenly basis-2 gap-[5vw] h-fit px-2 py-5 ">
           {selectedTimezones.map((timeZone, index) => (
             <TimeZoneClock
               key={timeZone}
