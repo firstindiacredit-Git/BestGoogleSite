@@ -32,7 +32,66 @@ function BookmarkPage() {
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === "Enter") handleAddBookmark(e);
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addBookmark({ name, link });
+    }
+  };
+
+  const addBookmark = async (values) => {
+    const bookmarkName = values.name || name;
+    const bookmarkLink = values.link || link;
+
+    if (!bookmarkName || !bookmarkLink) {
+      setErrorMessage("Both name and link fields are required!");
+      return;
+    }
+
+    if (!validateURL(bookmarkLink)) {
+      setErrorMessage("Please enter a valid URL.");
+      return;
+    }
+
+    try {
+      if (!user || !user.uid) {
+        alert("You must be logged in to add bookmarks.");
+        return;
+      }
+
+      const docRef = await addDoc(
+        collection(db, "users", user.uid, "shortcut"),
+        {
+          name: bookmarkName,
+          link: bookmarkLink,
+          category: "Popular",
+          createdAt: new Date(),
+        }
+      );
+
+      setUserBookmarks((prev) => [
+        ...prev,
+        {
+          id: docRef.id,
+          name: bookmarkName,
+          link: bookmarkLink,
+          category: "Popular",
+          createdAt: new Date(),
+          createdByUser: true,
+        },
+      ]);
+
+      setSuccessMessage("Bookmark added successfully!");
+      setName("");
+      setLink("");
+      setShowModal(false);
+    } catch (error) {
+      console.error("Error adding bookmark:", error);
+      setErrorMessage("Failed to add bookmark. Please try again.");
+    }
+  };
+
+  const handleAddBookmark = (values) => {
+    addBookmark(values);
   };
 
   // Fetch user and global bookmarks on mount
@@ -97,56 +156,6 @@ function BookmarkPage() {
       return `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=64`? `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=64` : "https://www.freeiconspng.com/uploads/web-icon-black-png-planet-web-world-icon-17.png";
     } catch (error) {
       return "https://www.freeiconspng.com/uploads/web-icon-black-png-planet-web-world-icon-17.png"; // Fallback favicon
-    }
-  };
-
-  const handleAddBookmark = async (e) => {
-    e.preventDefault();
-
-    if (!name || !link) {
-      setErrorMessage("Both name and link fields are required!");
-      return;
-    }
-
-    if (!validateURL(link)) {
-      setErrorMessage("Please enter a valid URL.");
-      return;
-    }
-
-    try {
-      if (!user || !user.uid) {
-        alert("You must be logged in to add bookmarks.");
-        return;
-      }
-
-      const docRef = await addDoc(
-        collection(db, "users", user.uid, "shortcut"),
-        {
-          name,
-          link,
-          category: "Popular",
-          createdAt: new Date(),
-        }
-      );
-
-      setUserBookmarks((prev) => [
-        ...prev,
-        {
-          id: docRef.id,
-          name,
-          link,
-          category: "Popular",
-          createdAt: new Date(),
-          createdByUser: true,
-        },
-      ]);
-
-      setSuccessMessage("Bookmark added successfully!");
-      setName("");
-      setLink("");
-    } catch (error) {
-      console.error("Error adding bookmark:", error);
-      setErrorMessage("Failed to add bookmark. Please try again.");
     }
   };
 
@@ -321,15 +330,14 @@ function BookmarkPage() {
         <Form
           onFinish={editingBookmark ? handleUpdateBookmark : handleAddBookmark}
           layout="vertical"
-          initialValues={{ name, link }}
         >
           <Form.Item
             label={<span className="dark:text-white">Name</span>}
             name="name"
             rules={[{ required: true, message: 'Please enter bookmark name' }]}
+            initialValue={name}
           >
             <Input
-              value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter bookmark name"
               className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
@@ -342,9 +350,9 @@ function BookmarkPage() {
               { required: true, message: 'Please enter URL' },
               { type: 'url', message: 'Please enter a valid URL' }
             ]}
+            initialValue={link}
           >
             <Input
-              value={link}
               onChange={(e) => setLink(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Enter URL"
