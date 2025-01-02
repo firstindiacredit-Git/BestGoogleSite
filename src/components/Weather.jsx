@@ -186,7 +186,7 @@ const Weather = () => {
   };
 
   return (
-    <div className="w-full rounded-b-lg mx-auto dark:text-white p-4 bg-white dark:bg-gray-900">
+    <div className="w-full max-w-sm rounded-b-lg mx-auto dark:text-white p-4 bg-white dark:bg-gray-900">
       <div className="flex justify-between items-center mb-4">
         <div className="text-center m-auto">
           <h2 className="text-lg font-bold">Weather</h2>

@@ -140,7 +140,7 @@ const Category = ({ data = [] }) => {
   return (
     <div
     style={{borderRadius:"0px 0px 7px 7px"}}
-    className="dark:text-white bg-white dark:bg-gray-900">
+    className= "max-w-sm dark:text-white bg-white dark:bg-gray-900">
       <Card
         title={
           <div className="flex dark:bg-gray-900 justify-between items-center">

@@ -124,7 +124,7 @@ function Calculator() {
   };
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full max-w-sm h-full">
       <div className="dark:bg-gray-900 rounded-lg bg-white h-full w-full p-3">
         {showHistory ? (
           <div className="dark:bg-gray-900 text-white w-full h-full p-6">

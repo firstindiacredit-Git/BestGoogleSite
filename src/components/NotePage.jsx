@@ -192,7 +192,7 @@ const NotePage = () => {
   const lineColor = getLineColor();
 
   return (
-    <div>
+    <div className="w-full max-w-sm">
       <div className="">
         <div className="overflow-hidden" style={{ backgroundColor }}>
           <div className="p-2" style={{ backgroundColor }}>

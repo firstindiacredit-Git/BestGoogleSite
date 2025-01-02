@@ -19,7 +19,7 @@ const TodoComponent = () => {
   const [inputValue, setInputValue] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
-  const [containerColor, setContainerColor] = useState("#f0f9ff");
+  const [containerColor, setContainerColor] = useState("#fff");
   const [draggedItemIndex, setDraggedItemIndex] = useState(null);
   const [dragOverIndex, setDragOverIndex] = useState(null);
 
@@ -218,7 +218,7 @@ const TodoComponent = () => {
   };
 
   return (
-    <div className="max-w-lg rounded-lg shadow-md p-6" style={{ backgroundColor: containerColor }}>
+    <div className="max-w-sm   rounded-lg p-6" style={{ backgroundColor: containerColor }}>
       <div className="flex justify-between items-center mb-4">
         <h2 className={`text-xl font-medium ${isLight(containerColor) ? 'text-gray-700' : 'text-white'}`}>
           Todo list
@@ -267,7 +267,7 @@ const TodoComponent = () => {
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div 
-            className="bg-blue-400 h-2 rounded-full transition-all duration-300"
+            className="bg-blue-500 h-2 rounded-full transition-all duration-300"
             style={{ width: `${calculateProgress()}%` }}
           ></div>
         </div>
