@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Clock, Plus, X } from "lucide-react";
-import { Button, } from "antd";
+import { Button, Popconfirm } from "antd";
 import {
   PlusOutlined,
 } from "@ant-design/icons";
+import { auth, db } from "../firebase";
+import { doc, updateDoc, onSnapshot } from "firebase/firestore";
+
 const AVAILABLE_TIMEZONES = [
   "America/New_York",
   "Europe/London",
@@ -13,17 +16,17 @@ const AVAILABLE_TIMEZONES = [
   "Asia/Dubai",
   "Pacific/Auckland",
   "America/Los_Angeles",
-  "Asia/Seoul",  
-  "Europe/Berlin", 
-  "Africa/Johannesburg", 
-  "Asia/Shanghai",  
-  "America/Chicago",  
-  "Europe/Moscow", 
-  "Africa/Nairobi",  
-  "America/Toronto", 
+  "Asia/Seoul",
+  "Europe/Berlin",
+  "Africa/Johannesburg",
+  "Asia/Shanghai",
+  "America/Chicago",
+  "Europe/Moscow",
+  "Africa/Nairobi",
+  "America/Toronto",
   "Asia/Kolkata",
-  "America/Mexico_City",  
-  "Asia/Singapore",  
+  "America/Mexico_City",
+  "Asia/Singapore",
 ];
 
 
@@ -66,7 +69,20 @@ const getClockHandDegrees = (time, timeZone) => {
   };
 };
 
-const TimeZoneClock = ({ timeZone, isAnalog, onRemove }) => {
+const getTimeDifference = (baseTimeZone, targetTimeZone) => {
+  const now = new Date();
+
+  // Calculate today's difference
+  const baseTimeToday = new Date(now.toLocaleString('en-US', { timeZone: baseTimeZone }));
+  const targetTimeToday = new Date(now.toLocaleString('en-US', { timeZone: targetTimeZone }));
+  const diffHoursToday = (targetTimeToday - baseTimeToday) / (1000 * 60 * 60);
+  
+  const signToday = diffHoursToday > 0 ? '+' : '';
+  
+  return `Today: (${signToday}${diffHoursToday}h)`;
+};
+
+const TimeZoneClock = ({ timeZone, isAnalog, onRemove, baseTimeZone }) => {
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
@@ -78,16 +94,26 @@ const TimeZoneClock = ({ timeZone, isAnalog, onRemove }) => {
 
   const { hours, minutes, seconds } = getClockHandDegrees(time, timeZone);
 
+  const timeDiff = getTimeDifference(baseTimeZone, timeZone);
+
   if (isAnalog) {
     return (
-      <div className="relative w-16 h-16">
-        {/* <button
-          onClick={onRemove}
-          className="absolute -top-2 -right-2 z-10 bg-red-500 rounded-full p-1 text-white hover:bg-red-600"
+      <div className="relative w-24 h-36 flex flex-col items-center group">
+        <Popconfirm
+          title="Remove timezone"
+          description="Are you sure you want to remove this timezone?"
+          onConfirm={onRemove}
+          okText="Yes"
+          cancelText="No"
+          placement="topRight"
         >
-          <X size={16} />
-        </button> */}
-        <div className="w-24 h-24 mx-auto rounded-full border-4 text-white border-gray-200 relative flex items-center justify-center bg-gray-800">
+          <button
+            className="absolute -top-2 -right-2 z-50 text-red-500 rounded-full p-1 opacity-0 group-hover:opacity-100 hover:text-white hover:bg-red-600 transition-opacity"
+          >
+            <X size={16} />
+          </button>
+        </Popconfirm>
+        <div className="w-24 h-24 rounded-full border-4 text-white border-gray-200 relative flex items-center justify-center bg-gray-800">
           {/* Numbers */}
           {[...Array(12)].map((_, index) => {
             const angle = (index + 1) * 30;
@@ -123,47 +149,104 @@ const TimeZoneClock = ({ timeZone, isAnalog, onRemove }) => {
             style={{ transform: `rotate(${seconds}deg)` }}
           />
         </div>
-        <p className="text-center mt-1 dark:text-white text-black text-[10px] font-medium">
-          {formatTimeZoneName(timeZone)}
-        </p>
+        <div className="text-center dark:text-white text-black text-[10px] font-medium mt-1">
+          <p className="mb-0">{formatTimeZoneName(timeZone)}</p>
+          {timeDiff && (
+            <p className="text-gray-500 whitespace-pre-line">{timeDiff}</p>
+          )}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="relative dark:text-white w-16 h-16">
-      <button
-        onClick={onRemove}
-        className="absolute -top-2 -right-2 z-50 bg-red-500 rounded-full p-1 text-white opacity-0 group-hover:opacity-100 hover:bg-red-600 transition-opacity"
+    <div className="relative w-24 h-24 group">
+      <Popconfirm
+        title="Remove timezone"
+        description="Are you sure you want to remove this timezone?"
+        onConfirm={onRemove}
+        okText="Yes"
+        cancelText="No"
+        placement="topRight"
       >
-        <X size={16} />
-      </button>
-      <div className="dark:bg-black/80 bg-gray-200 backdrop-blur-sm dark:text-white p-2 rounded-2xl h-full flex flex-col justify-center">
-        <p className="text-[10px] opacity-80">{formatTimeZoneName(timeZone)}</p>
-        <p className="text-[13px] font-light">
+        <button
+          className="absolute -top-2 -right-2 z-50 text-red-500 rounded-full p-1 opacity-0 group-hover:opacity-100 hover:text-white hover:bg-red-600 transition-opacity"
+        >
+          <X size={16} />
+        </button>
+      </Popconfirm>
+      <div className="h-full dark:bg-black/80 bg-gray-100 backdrop-blur-sm rounded-xl shadow-lg flex flex-col items-center justify-center p-2">
+        <p className="text-[10px] font-medium mb-0.5 dark:text-gray-400 text-gray-600">
+          {formatTimeZoneName(timeZone)}
+        </p>
+        <p className="text-base font-bold tracking-wider dark:text-white text-gray-800">
           {formatTimeForZone(time, timeZone)}
         </p>
+        {timeDiff && (
+          <p className="text-[10px] text-gray-500 whitespace-pre-line text-center">
+            {timeDiff}
+          </p>
+        )}
       </div>
     </div>
   );
 };
 
 const ResponsiveWorldClock = () => {
-  const [isAnalog, setIsAnalog] = useState(false);
-  const [selectedTimezones, setSelectedTimezones] = useState([
-    "Asia/Kolkata"
-  ]);
+  const [isAnalog, setIsAnalog] = useState(true);
+  const [selectedTimezones, setSelectedTimezones] = useState(["Asia/Kolkata"]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const addTimeZone = (timeZone) => {
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        const userDocRef = doc(db, "users", user.uid);
+        onSnapshot(userDocRef, (doc) => {
+          if (doc.exists() && doc.data().savedTimezones) {
+            setSelectedTimezones(doc.data().savedTimezones);
+          }
+        });
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const addTimeZone = async (timeZone) => {
     if (selectedTimezones.length < 4) {
-      setSelectedTimezones([...selectedTimezones, timeZone]);
+      const newTimezones = [...selectedTimezones, timeZone];
+      setSelectedTimezones(newTimezones);
       setIsDropdownOpen(false);
+
+      const user = auth.currentUser;
+      if (user) {
+        const userDocRef = doc(db, "users", user.uid);
+        try {
+          await updateDoc(userDocRef, {
+            savedTimezones: newTimezones
+          });
+        } catch (error) {
+          console.error("Error saving timezones:", error);
+        }
+      }
     }
   };
 
-  const removeTimeZone = (index) => {
-    setSelectedTimezones(selectedTimezones.filter((_, i) => i !== index));
+  const removeTimeZone = async (index) => {
+    const newTimezones = selectedTimezones.filter((_, i) => i !== index);
+    setSelectedTimezones(newTimezones);
+
+    const user = auth.currentUser;
+    if (user) {
+      const userDocRef = doc(db, "users", user.uid);
+      try {
+        await updateDoc(userDocRef, {
+          savedTimezones: newTimezones
+        });
+      } catch (error) {
+        console.error("Error removing timezone:", error);
+      }
+    }
   };
 
   const availableZones = AVAILABLE_TIMEZONES.filter(
@@ -171,8 +254,8 @@ const ResponsiveWorldClock = () => {
   );
 
   return (
-    <div className="dark:bg-gradient-to-br from-gray-900 to-gray-800 dark:text-white p-4 flex justify-center items-center">
-      <div className="mx-auto w-full max-w-sm">
+    <div className="dark:bg-gray-900 dark:text-white p-4 flex justify-center items-center">
+      <div className="mx-auto w-full max-w-4xl">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-4">
             <button
@@ -216,21 +299,33 @@ const ResponsiveWorldClock = () => {
           </div>
         </div>
 
-        {/* <div className="bg-gray-100 backdrop-blur-md rounded-md px-2 py-4"> */}
-          <div className="grid grid-cols-3 gap-8 justify-center px-2 py-10">
-            {selectedTimezones.map((timeZone, index) => (
-              <TimeZoneClock
-                key={timeZone}
-                timeZone={timeZone}
-                isAnalog={isAnalog}
-                onRemove={() => removeTimeZone(index)}
-              />
-            ))}
-          </div>
-        {/* </div> */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 justify-items-center px-2 py-10">
+          {selectedTimezones.map((timeZone, index) => (
+            <TimeZoneClock
+              key={timeZone}
+              timeZone={timeZone}
+              isAnalog={isAnalog}
+              onRemove={() => removeTimeZone(index)}
+              baseTimeZone={selectedTimezones[0]}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
 };
 
 export default ResponsiveWorldClock;
+
+
+
+
+
+
+
+
+
+
+
+
+// jasa ImageUploader me popconfirm laga h vasa hi same clock ke remove pe laga do
