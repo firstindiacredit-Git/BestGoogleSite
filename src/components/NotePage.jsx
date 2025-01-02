@@ -212,7 +212,7 @@ const NotePage = () => {
                 </button>
                 <div className="relative" ref={colorPickerRef}>
                   <button
-                    className="p-2 rounded-lg hover:bg-opacity-20 hover:bg-gray-500 transition duration-200"
+                    className="p-2 rounded-lg bg-opacity-20 bg-gray-500 hover:bg-gray-600 transition duration-200"
                     onClick={() => setShowColorPicker((prev) => !prev)}
                     title="Change Background Color"
                     style={{ color: textColor }}

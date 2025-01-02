@@ -20,6 +20,8 @@ import {
   message,
   Typography,
   Tooltip,
+  Dropdown,
+  Menu,
 } from "antd";
 import {
   DeleteOutlined,
@@ -27,6 +29,13 @@ import {
   PlusOutlined,
   LinkOutlined,
   GlobalOutlined,
+  AppstoreOutlined,
+  UnorderedListOutlined,
+  PictureOutlined,
+  CloudOutlined,
+  EllipsisOutlined,
+  ArrowsAltOutlined,
+  FullscreenOutlined,  
 } from "@ant-design/icons";
 
 const { Title } = Typography;
@@ -37,9 +46,21 @@ const Category = ({ data = [] }) => {
   const [loading, setLoading] = useState(true);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingBookmark, setEditingBookmark] = useState(null);
+  const [viewMode, setViewMode] = useState(
+    localStorage.getItem("viewMode") || "list"
+  );
+  const [iconSize, setIconSize] = useState(
+    parseInt(localStorage.getItem("iconSize")) || 24
+  );
+  const [showUrl, setShowUrl] = useState(false);
   const [form] = Form.useForm();
 
-  // Auth listener
+  const handleCancel = () => {
+    form.resetFields();
+    setIsModalVisible(false);
+    setEditingBookmark(null);
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -48,7 +69,6 @@ const Category = ({ data = [] }) => {
     return () => unsubscribe();
   }, []);
 
-  // Fetch bookmarks for the current user
   useEffect(() => {
     if (user) {
       const bookmarksRef = collection(db, "users", user.uid, "bookmarks");
@@ -57,27 +77,11 @@ const Category = ({ data = [] }) => {
           id: doc.id,
           ...doc.data(),
         }));
-        console.log(bookmarksData)
         setBookmarks(bookmarksData);
       });
       return () => unsubscribe();
     }
   }, [user]);
-
-  useEffect(() => {
-    const savedBookmarks = localStorage.getItem("bookmarks");
-    const savedContainerColor = localStorage.getItem("bookmarkContainerColor");
-
-    if (data.length > 0) {
-      setBookmarks(data);
-    } else if (savedBookmarks) {
-      setBookmarks(JSON.parse(savedBookmarks));
-    }
-
-    if (savedContainerColor) {
-      // setContainerColor(savedContainerColor); // This line was removed because setContainerColor is not defined
-    }
-  }, [data]);
 
   const handleAddBookmark = async (values) => {
     try {
@@ -90,7 +94,9 @@ const Category = ({ data = [] }) => {
         name: values.title,
         link: values.url,
         createdAt: new Date().toISOString(),
-        logoUrl: `https://www.google.com/s2/favicons?domain=${new URL(values.url).hostname}`,
+        logoUrl: `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${encodeURIComponent(
+          values.url
+        )}&size=32`,
       };
 
       if (editingBookmark) {
@@ -100,7 +106,10 @@ const Category = ({ data = [] }) => {
         );
         message.success("Bookmark updated successfully!");
       } else {
-        await addDoc(collection(db, "users", user.uid, "bookmarks"), bookmarkData);
+        await addDoc(
+          collection(db, "users", user.uid, "bookmarks"),
+          bookmarkData
+        );
         message.success("Bookmark added successfully!");
       }
 
@@ -119,6 +128,25 @@ const Category = ({ data = [] }) => {
     }
   };
 
+  const handleViewChange = (mode) => {
+    setViewMode(mode);
+    localStorage.setItem("viewMode", mode);
+  };
+
+  const handleShowUrlClick = () => {
+    const newShowUrl = !showUrl;
+    setShowUrl(newShowUrl);
+    if (newShowUrl) {
+      setViewMode("list");
+      localStorage.setItem("viewMode", "list");
+    }
+  };
+
+  const handleIconSizeChange = (size) => {
+    setIconSize(size);
+    localStorage.setItem("iconSize", size);
+  };
+
   const showEditModal = (bookmark) => {
     setEditingBookmark(bookmark);
     form.setFieldsValue({
@@ -128,32 +156,81 @@ const Category = ({ data = [] }) => {
     setIsModalVisible(true);
   };
 
-  const handleCancel = () => {
-    setIsModalVisible(false);
-    setEditingBookmark(null);
-    form.resetFields();
-  };
+  const { SubMenu } = Menu;
+  
 
-  return (
-    <div className="dark:text-white  ">
-      <Card
-        title={
-          <div className="flex dark:bg-gray-800  dark:text-white justify-between items-center">
-            <Title level={4} className="m-0">
-              My Bookmarks
-            </Title>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => setIsModalVisible(true)}
-            >
-            </Button>
-          </div>
-        }
-        className="shadow-md dark:bg-gray-800 dark:text-white"
-      >
+ const viewMenu = (
+   <Menu className="dark:bg-gray-900 w-40">
+     <SubMenu key="view" title="Display">
+       <Menu.Item
+         key="list"
+         icon={<UnorderedListOutlined />}
+         onClick={() => handleViewChange("list")}
+       >
+         List View
+       </Menu.Item>
+       <Menu.Item
+         key="grid"
+         icon={<AppstoreOutlined />}
+         onClick={() => handleViewChange("grid")}
+       >
+         Grid View
+       </Menu.Item>
+       <Menu.Item
+         key="icon"
+         icon={<PictureOutlined />}
+         onClick={() => handleViewChange("icon")}
+       >
+         Icon-Only View
+       </Menu.Item>
+       <Menu.Item
+         key="cloud"
+         icon={<CloudOutlined />}
+         onClick={() => handleViewChange("cloud")}
+       >
+         Cloud View
+       </Menu.Item>
+     </SubMenu>
+     <Menu.Divider />
+     <SubMenu key="details" title="Details">
+       <Menu.Item key="toggle-url" type="text" onClick={handleShowUrlClick}>
+         <div className="flex items-center justify-between w-full gap-2 -mb-2">
+           <img src="/link.png" alt="" className="h-10 " />
+           <span className="-mt-1.5 ">{showUrl ? "Hide URL" : "Show URL"}</span>
+         </div>
+       </Menu.Item>
+     </SubMenu>
+     <Menu.Divider />
+     <SubMenu key="space-options" title="Size">
+       <Menu.Item
+         key="icon-sizes-small"
+         onClick={() => handleIconSizeChange(20)}
+         icon={<FullscreenOutlined />}
+       >
+         Small
+       </Menu.Item>
+       <Menu.Item
+         key="icon-sizes-medium"
+         onClick={() => handleIconSizeChange(28)}
+         icon={<FullscreenOutlined />}
+       >
+         Medium
+       </Menu.Item>
+       <Menu.Item
+         key="icon-sizes-large"
+         onClick={() => handleIconSizeChange(38)}
+         icon={<FullscreenOutlined />}
+       >
+         Large
+       </Menu.Item>
+     </SubMenu>
+   </Menu>
+ );
+
+  const renderBookmarks = () => {
+    if (viewMode === "list") {
+      return (
         <List
-          loading={loading}
           dataSource={bookmarks}
           renderItem={(bookmark) => (
             <List.Item
@@ -187,8 +264,8 @@ const Category = ({ data = [] }) => {
                 avatar={
                   <img
                     src={bookmark.logoUrl}
-                    alt="Links"
-                    className="w-4 h-4"
+                    alt="Logo"
+                    style={{ width: `${iconSize}px`, height: `${iconSize}px` }}
                     onError={(e) => {
                       e.target.src = "https://www.google.com/favicon.ico";
                     }}
@@ -199,16 +276,182 @@ const Category = ({ data = [] }) => {
                     href={bookmark.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-600 dark:text-blue-400 hover:underline"
                   >
                     {bookmark.name}
                   </a>
                 }
-                description={bookmark.link}
+                description={showUrl ? bookmark.link : ""}
               />
             </List.Item>
           )}
         />
+      );
+    } else if (viewMode === "grid") {
+      return (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(5, 1fr)",
+            gap: "15px",
+            padding: "15px",
+          }}
+        >
+          {bookmarks.map((bookmark) => (
+            <div
+              key={bookmark.id}
+              style={{
+                borderRadius: "5px",
+                transition:
+                  "transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out",
+                cursor: "pointer",
+                padding: "5px",
+                textAlign: "center",
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.transform = "scale(1.05)";
+                e.currentTarget.style.boxShadow =
+                  "0 4px 16px rgba(0, 0, 0, 0.2)";
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.transform = "scale(1)";
+                e.currentTarget.style.boxShadow =
+                  "0 2px 8px rgba(0, 0, 0, 0.1)";
+              }}
+            >
+              <img
+                src={bookmark.logoUrl}
+                alt={bookmark.name}
+                style={{
+                  width: `${iconSize}px`,
+                  height: `${iconSize}px`,
+                  marginBottom: "1px",
+                  objectFit: "contain",
+                  margin: "auto",
+                }}
+                onError={(e) => {
+                  e.target.src = "https://www.google.com/favicon.ico";
+                }}
+              />
+              <p style={{ margin: "0" }}>{bookmark.name}</p>
+            </div>
+          ))}
+        </div>
+      );
+    } else if (viewMode === "icon") {
+      return (
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          {bookmarks.map((bookmark) => (
+            <div
+              key={bookmark.id}
+              style={{
+                width: "auto",
+                padding: "10px",
+                borderRadius: "5px",
+                textAlign: "center",
+                cursor: "pointer",
+                margin: "5px",
+              }}
+              onMouseOver={(e) =>
+                (e.currentTarget.style.transform = "scale(1.1)")
+              }
+              onMouseOut={(e) => (e.currentTarget.style.transform = "scale(1)")}
+            >
+              <img
+                src={bookmark.logoUrl}
+                alt={bookmark.name}
+                style={{ width: `${iconSize}px`, height: `${iconSize}px` }}
+                onError={(e) => {
+                  e.target.src = "https://www.google.com/favicon.ico";
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      );
+    } else if (viewMode === "cloud") {
+      return (
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "4px",
+            justifyContent: "center",
+            alignItems: "center",  
+          }}
+        >
+          {bookmarks.map((bookmark) => (
+            <div
+              key={bookmark.id}
+              style={{
+                width: "auto",
+                maxWidth: "150px",
+                padding: "1px",
+                borderRadius: "5px",
+                border: "1px solid #ccc",
+                transition: "transform 0.3s ease-in-out",
+                cursor: "pointer",
+                margin: "1px",
+
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+              onMouseOver={(e) =>
+                (e.currentTarget.style.transform = "scale(1.1)")
+              }
+              onMouseOut={(e) => (e.currentTarget.style.transform = "scale(1)")}
+            >
+              <img
+                src={bookmark.logoUrl}
+                alt={bookmark.name}
+                style={{ width: iconSize, height: iconSize }}
+                onError={(e) => {
+                  e.target.src = "https://www.google.com/favicon.ico";
+                }}
+              />
+              <p style={{ marginTop: "-1px", marginLeft: "2px" }}>
+                {bookmark.name}
+              </p>
+            </div>
+          ))}
+        </div>
+      );
+    }
+  };
+
+  return (
+    <div className="dark:text-white bg-white dark:bg-gray-900">
+      <Card
+        title={
+          <div className="flex justify-between items-center">
+            <Title level={4} className="dark:text-white m-0">
+              My Bookmarks
+            </Title>
+            <div>
+              <Dropdown overlay={viewMenu} trigger={["click"]}>
+                <Button>
+                  <EllipsisOutlined className="rotate-90" />
+                </Button>
+              </Dropdown>
+
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => setIsModalVisible(true)}
+              ></Button>
+            </div>
+          </div>
+        }
+        className="dark:bg-gray-900 border-none"
+      >
+        {renderBookmarks()}
       </Card>
 
       <Modal
@@ -217,20 +460,14 @@ const Category = ({ data = [] }) => {
         onCancel={handleCancel}
         footer={null}
       >
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleAddBookmark}
-          initialValues={editingBookmark}
-        >
+        <Form form={form} layout="vertical" onFinish={handleAddBookmark}>
           <Form.Item
             name="title"
             label="Title"
             rules={[{ required: true, message: "Please enter a title" }]}
           >
-            <Input prefix={<EditOutlined />} placeholder="Enter bookmark title" />
+            <Input placeholder="Enter bookmark title" />
           </Form.Item>
-
           <Form.Item
             name="url"
             label="URL"
@@ -239,10 +476,9 @@ const Category = ({ data = [] }) => {
               { type: "url", message: "Please enter a valid URL" },
             ]}
           >
-            <Input prefix={<LinkOutlined />} placeholder="https://example.com" />
+            <Input placeholder="https://example.com" />
           </Form.Item>
-
-          <Form.Item className="mb-0 text-right">
+          <Form.Item className="text-right">
             <Space>
               <Button onClick={handleCancel}>Cancel</Button>
               <Button type="primary" htmlType="submit">
