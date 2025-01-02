@@ -518,17 +518,42 @@ const Anotherpage = ({ backgroundImage }) => {
                 Select number of columns:
               </div>
               <div className="flex gap-2">
-                {[1, 2, 3, 4].map((num) => (
-                  <AntButton
-                    key={num}
-                    type={previewColumns === num ? "primary" : "default"}
-                    onClick={() => handleColumnChange(num)}
-                    className={previewColumns === num ? "" : "hover:border-primary"}
-                    size="small"
-                  >
-                    {num}
-                  </AntButton>
-                ))}
+                <AntButton
+                  key={1}
+                  type={previewColumns === 1 ? "primary" : "default"}
+                  onClick={() => handleColumnChange(1)}
+                  className={previewColumns === 1 ? "" : "hover:border-primary"}
+                  size="small"
+                >
+                  1
+                </AntButton>
+                <AntButton
+                  key={2}
+                  type={previewColumns === 2 ? "primary" : "default"}
+                  onClick={() => handleColumnChange(2)}
+                  className={previewColumns === 2 ? "" : "hover:border-primary"}
+                  size="small"
+                >
+                  2
+                </AntButton>
+                <AntButton
+                  key={3}
+                  type={previewColumns === 3 ? "primary" : "default"}
+                  onClick={() => handleColumnChange(3)}
+                  className={previewColumns === 3 ? "" : "hover:border-primary"}
+                  size="small"
+                >
+                  3
+                </AntButton>
+                <AntButton
+                  key={4}
+                  type={previewColumns === 4 ? "primary" : "default"}
+                  onClick={() => handleColumnChange(4)}
+                  className={previewColumns === 4 ? "" : "hover:border-primary"}
+                  size="small"
+                >
+                  4
+                </AntButton>
               </div>
             </div>
             <DragDropContext onDragEnd={handleSortEnd}>
