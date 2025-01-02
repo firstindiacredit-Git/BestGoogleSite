@@ -1,19 +1,28 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { signOut, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase";
-import { FaSun, FaMoon } from "react-icons/fa";
+import { FaSun, FaMoon, FaHome } from "react-icons/fa";
 import { TbGridDots } from "react-icons/tb";
 import galleryupload from "/galleryupload.png";
 import layers from "/layers.png";
 import remove from "/remove.png";
 import { IoIosLogOut } from "react-icons/io";
 import { RiUserLine } from "react-icons/ri";
+import { MdAddHomeWork } from "react-icons/md";
+import { Modal, Input } from 'antd';
+import { CiEdit } from "react-icons/ci";
 
-const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
+const Header = ({ isDarkMode, toggleTheme, handleImageChange, onPageNameChange }) => {
   const [showButtons, setShowButtons] = useState(false);
   const [user, setUser] = useState(null);
   const [panel, setPanel] = useState(false);
+  const [showHomeDropdown, setShowHomeDropdown] = useState(false);
+  const [pages, setPages] = useState(() => {
+    const savedPages = localStorage.getItem('customPages');
+    return savedPages ? JSON.parse(savedPages) : [];
+  });
+  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -46,6 +55,76 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
     }
   };
 
+  const createNewPage = () => {
+    const newPageNumber = pages.length + 1;
+    const newPage = {
+      id: Date.now(),
+      name: `Page ${newPageNumber}`,
+      widgets: []
+    };
+    
+    const updatedPages = [...pages, newPage];
+    setPages(updatedPages);
+    localStorage.setItem('customPages', JSON.stringify(updatedPages));
+    
+    navigate(`/NewSearchPage?pageId=${newPage.id}`);
+    setShowHomeDropdown(false);
+  };
+
+  const handlePageClick = (pageId) => {
+    navigate(`/NewSearchPage?pageId=${pageId}`);
+    setShowHomeDropdown(false);
+  };
+
+  const deletePage = (pageId, event) => {
+    event.stopPropagation();
+    const pageToDelete = pages.find(page => page.id === pageId);
+    
+    Modal.confirm({
+      title: 'Delete Page',
+      content: `Are you sure you want to delete "${pageToDelete.name}"?`,
+      okText: 'Yes',
+      okType: 'danger',
+      cancelText: 'No',
+      onOk() {
+        const updatedPages = pages.filter(page => page.id !== pageId);
+        setPages(updatedPages);
+        localStorage.setItem('customPages', JSON.stringify(updatedPages));
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentPageId = urlParams.get('pageId');
+        if (currentPageId === pageId.toString()) {
+          navigate('/');
+        }
+      }
+    });
+  };
+
+  const handlePageNameEdit = (pageId, currentName, event) => {
+    event.stopPropagation();
+    Modal.confirm({
+      title: 'Edit Page Name',
+      content: (
+        <Input
+          defaultValue={currentName}
+          id="pageNameInput"
+          placeholder="Enter new page name"
+        />
+      ),
+      onOk() {
+        const newName = document.getElementById('pageNameInput').value;
+        if (newName.trim()) {
+          const updatedPages = pages.map(page =>
+            page.id === pageId ? { ...page, name: newName.trim() } : page
+          );
+          setPages(updatedPages);
+          localStorage.setItem('customPages', JSON.stringify(updatedPages));
+          onPageNameChange && onPageNameChange(pageId, newName.trim());
+        }
+      }
+    });
+  };
+
   useEffect(() => {
     const handleOutsideClick = (event) => {
       if (
@@ -60,6 +139,10 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
         !event.target.closest(".user-avatar")
       ) {
         setPanel(false);
+      }
+
+      if (!event.target.closest(".home-dropdown") && !event.target.closest(".home-button")) {
+        setShowHomeDropdown(false);
       }
     };
 
@@ -78,8 +161,64 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange }) => {
   }, []);
 
   return (
-    <header className="p-2 bg-white/10 dark:bg-black/10 backdrop-blur-lg flex justify-between items-center sticky top-0 z-50">
+    <header className="p-2 bg-white/70 dark:bg-black/70 backdrop-blur-lg flex justify-between items-center sticky top-0 z-50">
       <div className="flex items-center space-x-2">
+        <div className="relative">
+          <button 
+            className="h-10 w-10 rounded-2xl home-button"
+            onClick={() => setShowHomeDropdown(!showHomeDropdown)}
+          >
+            <FaHome className="text-red-500 h-10 w-7 text-center justify-center m-auto" />
+          </button>
+          
+          {showHomeDropdown && (
+            <div className="absolute left-0 mt-2 w-40 bg-white shadow-lg rounded-lg text-sm dark:bg-gray-700 home-dropdown">
+              <Link to="/">
+                <button className="w-full flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600 rounded transition-colors duration-200">
+                  <FaHome />
+                  <span>Home</span>
+                </button>
+              </Link>
+              <button 
+                onClick={createNewPage}
+                className="w-full flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600 rounded transition-colors duration-200"
+              >
+                <MdAddHomeWork />
+                <span>Add New Page</span>
+              </button>
+              
+              {pages.map(page => (
+                <button
+                  key={page.id}
+                  onClick={() => handlePageClick(page.id)}
+                  className="w-full flex items-center justify-between px-4 py-2 text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600 rounded transition-colors duration-200 group"
+                >
+                  <div className="flex items-center gap-2">
+                    <MdAddHomeWork />
+                    <span className="hover:cursor-text" onClick={(e) => handlePageNameEdit(page.id, page.name, e)}>
+                      {page.name}
+                    </span>
+                  </div>
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
+                    <button
+                      onClick={(e) => handlePageNameEdit(page.id, page.name, e)}
+                      className="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-600"
+                    >
+                      <CiEdit className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={(e) => deletePage(page.id, e)}
+                      className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-600"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        
         <Link to="/">
           <span className="text-green-500 dark:text-green-300">Best</span>
           <span className="text-red-500 dark:text-red-300">Google</span>

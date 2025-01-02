@@ -20,7 +20,7 @@ import {
 import TodoComponent from "./TodoComponent.jsx";
 import NewsFeed from "./NewsFeed.jsx";
 
-const Anotherpage = ({ backgroundImage }) => {
+const Anotherpage = ({ backgroundImage, pageId = 'home' }) => {
   const [grid, isGrid] = useState(true);
   const [user, setUser] = useState(null);
   const [items, setItems] = useState([]);
@@ -52,7 +52,7 @@ const Anotherpage = ({ backgroundImage }) => {
       async (currentUser) => {
         setUser(currentUser);
         if (currentUser) {
-          const layout = await getPageLayout(currentUser.uid, "home");
+          const layout = await getPageLayout(currentUser.uid, pageId);
           setItems(layout.widgets);
           setColumns(layout.columns);
           setLoading(false);
@@ -62,7 +62,7 @@ const Anotherpage = ({ backgroundImage }) => {
       }
     );
     return () => unsubscribe();
-  }, []);
+  }, [pageId]);
 
   useEffect(() => {
     if (isSorterOpen) {
@@ -95,7 +95,7 @@ const Anotherpage = ({ backgroundImage }) => {
 
     // Update database
     try {
-      await updatePageLayout(user.uid, "home", {
+      await updatePageLayout(user.uid, pageId, {
         widgets: updatedItems,
         columns: columns,
       });
@@ -203,7 +203,7 @@ const Anotherpage = ({ backgroundImage }) => {
     setItems(sortedItems);
     setColumns(previewColumns);
 
-    await updatePageLayout(user.uid, "home", {
+    await updatePageLayout(user.uid, pageId, {
       widgets: sortedItems,
       columns: previewColumns,
     });

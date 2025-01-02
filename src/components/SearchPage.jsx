@@ -11,8 +11,6 @@ import News from "../components/News";
 import Tool from "../components/Tool";
 import Sports from '../components/Sports'
 import Top100 from "../components/Top100";
-import { FaHome } from "react-icons/fa";
-import { MdAddHomeWork } from "react-icons/md";
 import "./style.css";
 
 function SearchPage() {
@@ -141,16 +139,6 @@ function SearchPage() {
             backgroundAttachment: "fixed",
             
           }}>
-            <Link to="/">
-              <button className="h-10 w-10 rounded-2xl">
-                <FaHome className="text-green-700 h-10 w-7 text-center justify-center m-auto" />
-              </button>
-            </Link>
-            <Link to="/ShowLinks">
-              <button className="h-10 w-10 rounded-2xl">
-                <MdAddHomeWork className="text-green-700 h-10 w-7 text-center justify-center m-auto" />
-              </button>
-            </Link>
           </div>
         </div>
         <div className="bg-blue-500 dark:bg-gray-800 border-gray-400 p-2 flex justify-center w-full text-white dark:text-white font-semibold text-center ">
