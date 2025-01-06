@@ -11,7 +11,7 @@ import {
 import { HiOutlineNumberedList } from "react-icons/hi2";
 import { RxHamburgerMenu } from "react-icons/rx";
 
-const NotePage = () => {
+const NotePage = ({ inNotebookSheet = false }) => {
   const [notes, setNotes] = useState("");
   const [isBold, setIsBold] = useState(false);
   const [isUnderline, setIsUnderline] = useState(false);
@@ -239,17 +239,19 @@ const NotePage = () => {
   const lineColor = getLineColor();
 
   return (
-    <div className="w-full max-w-sm rounded-lg">
-      <div className="rounded-lg">
-        <div className={`overflow-hidden rounded-lg ${
+    <div className={`${inNotebookSheet ? 'w-full h-full ' : ' h-full max-w-sm mx-auto'}`}>
+      <div className="rounded-lg h-full">
+        <div className={`overflow-hidden h-full rounded-b-lg ${
           isAutoColor ? 'bg-white dark:bg-gray-900' : ''
         }`} style={{ backgroundColor: isAutoColor ? 'transparent' : backgroundColor }}>
-          <div className={`p-2 ${
+          <div className={`p-2 h-full bg flex flex-col justify-between ${
             isAutoColor ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white' : ''
           }`} style={{ backgroundColor: isAutoColor ? 'transparent' : backgroundColor }}>
+            
             <div className="flex justify-between items-center mb-1">
-              <div className="w-full flex justify-between">
-                <button
+              <div className="w-full  flex justify-between">
+                
+                <div><button
                   className={`p-2 rounded-lg transition duration-200 ${
                     isAutoColor ? 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700' : 'bg-opacity-20 bg-gray-500 hover:bg-opacity-30'
                   }`}
@@ -259,6 +261,8 @@ const NotePage = () => {
                 >
                   {lineNumbers ? <RxHamburgerMenu /> : <HiOutlineNumberedList />}
                 </button>
+                </div>
+                {inNotebookSheet && <h2 className="font-semibold text-2xl">NotePad</h2>}
                 <div className="relative" ref={colorPickerRef}>
                   <button
                     className={`p-2 rounded-lg transition duration-200 ${
@@ -320,7 +324,7 @@ const NotePage = () => {
               </div>
             </div>
 
-            <div className="flex">
+            <div className="flex ">
               {lineNumbers && (
                 <div
                   ref={lineNumberRef}
@@ -410,7 +414,7 @@ const NotePage = () => {
               </style>
             </div>
 
-            <div className="flex flex-wrap justify-between items-center gap-4 mt-6">
+            <div className="flex  flex-wrap justify-between items-center gap-4 mt-6">
               <div className="flex items-center space-x-3">
                 <button
                   className={`p-3 rounded-lg transition duration-200 ${

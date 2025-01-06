@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Check, Edit, Trash2, Palette } from "lucide-react";
+import { Edit, Trash2, Palette } from "lucide-react";
 import { Popconfirm } from "antd";
 import { db, auth } from "../firebase";
 import {
@@ -15,29 +15,31 @@ import { onAuthStateChanged } from "firebase/auth";
 // Helper function to determine if a color is light or dark
 const isLight = (color) => {
   // Convert hex to RGB
-  let hex = color.replace('#', '');
+  let hex = color.replace("#", "");
   if (hex.length === 3) {
     hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
   }
   const r = parseInt(hex.substr(0, 2), 16);
   const g = parseInt(hex.substr(2, 2), 16);
   const b = parseInt(hex.substr(4, 2), 16);
-  
+
   // Calculate relative luminance
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
   return luminance > 0.5;
 };
 
-const TodoComponent = () => {
+const TodoComponent = ({ inNotebookSheet = false }) => {
   const [user, setUser] = useState(null);
   const [todos, setTodos] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [containerColor, setContainerColor] = useState("#ffffff");
-  const [isAutoColor, setIsAutoColor] = useState(false);
+  const [textColor, setTextColor] = useState("#000000");
+  const [isAutoColor, setIsAutoColor] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [draggedItemIndex, setDraggedItemIndex] = useState(null);
+  const [backgroundColor, setBackgroundColor] = useState("#ffffff");
   const [dragOverIndex, setDragOverIndex] = useState(null);
 
   const colorPickerRef = useRef(null);
@@ -83,7 +85,7 @@ const TodoComponent = () => {
 
   const calculateProgress = () => {
     if (todos.length === 0) return 0;
-    const completedTodos = todos.filter(todo => todo.completed).length;
+    const completedTodos = todos.filter((todo) => todo.completed).length;
     return Math.round((completedTodos / todos.length) * 100);
   };
 
@@ -97,12 +99,14 @@ const TodoComponent = () => {
   useEffect(() => {
     const fetchTodos = async () => {
       if (!user) return;
-      
+
       try {
-        const querySnapshot = await getDocs(collection(db, "users", user.uid, "TodoList"));
-        const todosList = querySnapshot.docs.map(doc => ({
+        const querySnapshot = await getDocs(
+          collection(db, "users", user.uid, "TodoList")
+        );
+        const todosList = querySnapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         }));
         setTodos(todosList);
       } catch (error) {
@@ -128,32 +132,67 @@ const TodoComponent = () => {
   }, []);
 
   useEffect(() => {
-    const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    setIsDarkMode(darkModeMediaQuery.matches);
-
+    const darkModeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleThemeChange = (e) => {
       setIsDarkMode(e.matches);
+      if (isAutoColor) {
+        setContainerColor(e.matches ? "#1f2937" : "#ffffff");
+        setTextColor(e.matches ? "#ffffff" : "#000000");
+      }
     };
 
-    darkModeMediaQuery.addEventListener('change', handleThemeChange);
-    return () => darkModeMediaQuery.removeEventListener('change', handleThemeChange);
-  }, []);
+    setIsDarkMode(darkModeMediaQuery.matches);
+    handleThemeChange(darkModeMediaQuery);
+
+    darkModeMediaQuery.addEventListener("change", handleThemeChange);
+    return () =>
+      darkModeMediaQuery.removeEventListener("change", handleThemeChange);
+  }, [isAutoColor]);
+
+  const handleColorChange = (color) => {
+    setContainerColor(color);
+    setIsAutoColor(false);
+    // Calculate text color based on background color brightness
+    const r = parseInt(color.slice(1, 3), 16);
+    const g = parseInt(color.slice(3, 5), 16);
+    const b = parseInt(color.slice(5, 7), 16);
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    setTextColor(brightness > 128 ? "#000000" : "#ffffff");
+  };
+
+  const isColorDark = (hexColor) => {
+    const r = parseInt(hexColor.slice(1, 3), 16);
+    const g = parseInt(hexColor.slice(3, 5), 16);
+    const b = parseInt(hexColor.slice(5, 7), 16);
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    return brightness < 128;
+  };
+
+  const getTextColor = () => {
+    if (isAutoColor) {
+      return isDarkMode ? "#ffffff" : "#000000";
+    }
+    return isColorDark(backgroundColor) ? "#ffffff" : "#000000";
+  };
 
   const addTodo = async (e) => {
     e.preventDefault();
     if (!inputValue.trim() || !user) return;
 
     try {
-      const docRef = await addDoc(collection(db, "users", user.uid, "TodoList"), {
-        text: inputValue,
-        completed: false,
-        createdAt: new Date()
-      });
+      const docRef = await addDoc(
+        collection(db, "users", user.uid, "TodoList"),
+        {
+          text: inputValue,
+          completed: false,
+          createdAt: new Date(),
+        }
+      );
 
       const newTodo = {
         id: docRef.id,
         text: inputValue,
-        completed: false
+        completed: false,
       };
 
       setTodos([...todos, newTodo]);
@@ -166,9 +205,9 @@ const TodoComponent = () => {
   const toggleComplete = async (id) => {
     try {
       const todoRef = doc(db, "users", user.uid, "TodoList", id);
-      const todo = todos.find(t => t.id === id);
+      const todo = todos.find((t) => t.id === id);
       await updateDoc(todoRef, {
-        completed: !todo.completed
+        completed: !todo.completed,
       });
 
       setTodos(
@@ -202,7 +241,7 @@ const TodoComponent = () => {
     try {
       const todoRef = doc(db, "users", user.uid, "TodoList", editingId);
       await updateDoc(todoRef, {
-        text: inputValue
+        text: inputValue,
       });
 
       setTodos(
@@ -239,70 +278,53 @@ const TodoComponent = () => {
     setDragOverIndex(null);
   };
 
-  // Function to get theme-based auto color
-  const getAutoColor = (isDark) => {
-    return isDark ? "bg-gray-900" : "bg-white";
-  };
-
-  // Function to handle auto color toggle
-  const handleAutoColorToggle = () => {
-    setIsAutoColor(prev => !prev);
-    setShowColorPicker(false);
-  };
-
-  // Get container classes based on color settings
-  const getContainerClasses = (isDark) => {
-    if (isAutoColor) {
-      return `${getAutoColor(isDark)} ${isDark ? 'dark:bg-gray-900' : ''}`;
-    }
-    return ``;
-  };
-
   return (
-    <div 
-      className={`max-w-sm rounded-lg p-6 relative ${
-        isAutoColor 
-          ? 'bg-white dark:bg-gray-900' 
-          : ''
-      }`}
-      style={{ backgroundColor: isAutoColor ? 'transparent' : containerColor }}
+    <div
+      className={`p-4 min-h-[400px] transition-colors duration-200 ${
+        inNotebookSheet ? "w-full" : "max-w-sm mx-auto"
+      } rounded-b-lg relative ${isAutoColor ? "dark:bg-gray-900" : ""}`}
+      style={{
+        backgroundColor: isAutoColor ? undefined : containerColor,
+        color: isAutoColor ? undefined : textColor,
+      }}
     >
-      <div className="flex justify-between items-center mb-4">
-        <h2 className={`text-xl font-medium ${
-          isAutoColor 
-            ? 'text-gray-900 dark:text-gray-100' 
-            : (isLight(containerColor) ? 'text-gray-800' : 'text-gray-100')
-        }`}>
-          Todo list
-        </h2>
-        <div className="relative">
+      <div className="flex w-full  justify-between">
+        <div className="w-8"></div>
+        <div>
+          {inNotebookSheet && (
+            <h2
+              className={`text-2xl font-bold ${isAutoColor ? "dark:text-white" : ""}`}
+              style={{ color: isAutoColor ? undefined : textColor }}
+            >
+              Todo List
+            </h2>
+          )}
+        </div>
+        <div className="relative w-8">
           <button
             onClick={() => setShowColorPicker(!showColorPicker)}
-            className={`p-2 rounded ${
-              isAutoColor 
-                ? 'hover:bg-gray-100 dark:hover:bg-opacity-20 dark:hover:bg-white' 
-                : (isLight(containerColor) ? 'hover:bg-gray-100' : 'hover:bg-opacity-20 hover:bg-white')
+            className={`p-2 rounded-lg transition duration-200 ${
+              isAutoColor
+                ? "dark:hover:bg-gray-700 dark:text-white hover:bg-gray-100"
+                : "hover:bg-opacity-20 hover:bg-white"
             }`}
+            style={{ color: isAutoColor ? undefined : textColor }}
           >
-            <Palette className={`w-5 h-5 ${
-              isAutoColor 
-                ? 'text-gray-900 dark:text-gray-100' 
-                : (isLight(containerColor) ? 'text-gray-700' : 'text-gray-100')
-            }`} />
+            <Palette className="w-5 h-5" />
           </button>
 
           {showColorPicker && (
             <div
               ref={colorPickerRef}
-              className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg p-3 z-10"
+              className="absolute right-0 mt-2 w-48 dark:bg-gray-800 bg-white dark:border-gray-700 border rounded shadow-lg p-3 z-10"
             >
-               <div className="mb-2 flex items-center justify-center">
+              <div className="mb-2 flex items-center justify-center">
                 <button
                   onClick={() => {
                     setIsAutoColor(true);
                     setShowColorPicker(false);
                   }}
-                  className="w-full py-1 px-2 text-sm bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+                  className="w-full py-1 px-2 text-sm dark:bg-gray-600 dark:text-white bg-gray-100 hover:bg-gray-200 rounded transition-colors"
                 >
                   Auto Theme Color
                 </button>
@@ -311,48 +333,45 @@ const TodoComponent = () => {
                 {predefinedColors.map((color) => (
                   <button
                     key={color}
-                    className="w-5 h-5 border border-gray-200 cursor-pointer transition duration-300 ease-in-out transform hover:scale-125 focus:outline-none"
+                    className="w-5 h-5 border dark:border-gray-600 border-gray-200 cursor-pointer transition duration-300 ease-in-out transform hover:scale-125 focus:outline-none"
                     style={{ backgroundColor: color }}
-                    onClick={() => {
-                      setIsAutoColor(false);
-                      setContainerColor(color);
-                      setShowColorPicker(false);
-                    }}
+                    onClick={() => handleColorChange(color)}
                   />
                 ))}
               </div>
 
-             
-
               <div className="mt-2 flex items-center justify-center">
                 <input
                   type="color"
-                  className="w-full h-6 p-0 border border-gray-300 rounded-md cursor-pointer focus:outline-none"
+                  className="w-full h-6 p-0 border dark:border-gray-600 border-gray-300 rounded-md cursor-pointer focus:outline-none"
                   value={containerColor}
-                  onChange={(e) => {
-                    setIsAutoColor(false);
-                    setContainerColor(e.target.value);
-                  }}
+                  onChange={(e) => handleColorChange(e.target.value)}
                 />
               </div>
             </div>
           )}
         </div>
       </div>
-
-      <div className="mb-4">
-        <div className={`text-sm ${
-          isAutoColor 
-            ? 'text-gray-900 dark:text-gray-200' 
-            : (isLight(containerColor) ? 'text-gray-700' : 'text-gray-200')
-        } mb-1`}>
-          {calculateProgress()}%
-        </div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
-          <div 
-            className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-            style={{ width: `${calculateProgress()}%` }}
-          ></div>
+      <div className="flex justify-between gap-4 items-center mb-4">
+        <div className="mb-4 w-full">
+          <div
+            className={`text-sm flex justify-between ${
+              isAutoColor
+                ? "text-gray-900 dark:text-gray-200"
+                : isLight(containerColor)
+                ? "text-gray-700"
+                : "text-gray-200"
+            } mb-1`}
+          >
+            <div>Progress</div>
+            <div>{calculateProgress()}%</div>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div
+              className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${calculateProgress()}%` }}
+            ></div>
+          </div>
         </div>
       </div>
 
@@ -365,14 +384,18 @@ const TodoComponent = () => {
             onDragOver={(e) => handleDragOver(e, index)}
             onDrop={handleDrop}
             className={`flex items-center gap-3 p-2 rounded ${
-              dragOverIndex === index ? 'border-2 border-blue-300' : ''
+              dragOverIndex === index ? "border-2 border-blue-300" : ""
             }`}
           >
-            <span className={`min-w-[20px] text-sm ${
-              isAutoColor 
-                ? 'text-gray-700 dark:text-gray-300' 
-                : (isLight(containerColor) ? 'text-gray-600' : 'text-gray-300')
-            }`}>
+            <span
+              className={`min-w-[20px] text-sm ${
+                isAutoColor
+                  ? "text-gray-700 dark:text-gray-300"
+                  : isLight(containerColor)
+                  ? "text-gray-600"
+                  : "text-gray-300"
+              }`}
+            >
               {index + 1}.
             </span>
             <input
@@ -381,24 +404,32 @@ const TodoComponent = () => {
               onChange={() => toggleComplete(todo.id)}
               className="w-5 h-5 border-2 rounded-sm focus:ring-0 text-blue-500"
             />
-            <span className={`flex-1 ${
-              isAutoColor 
-                ? (todo.completed 
-                    ? 'text-gray-400' 
-                    : 'text-gray-900 dark:text-gray-100')
-                : (isLight(containerColor) 
-                    ? (todo.completed ? 'text-gray-400' : 'text-gray-800')
-                    : (todo.completed ? 'text-gray-400' : 'text-gray-100'))
-            } ${todo.completed ? 'line-through' : ''}`}>
+            <span
+              className={`flex-1 ${
+                isAutoColor
+                  ? todo.completed
+                    ? "text-gray-400"
+                    : "text-gray-900 dark:text-gray-100"
+                  : isLight(containerColor)
+                  ? todo.completed
+                    ? "text-gray-400"
+                    : "text-gray-800"
+                  : todo.completed
+                  ? "text-gray-400"
+                  : "text-gray-100"
+              } ${todo.completed ? "line-through" : ""}`}
+            >
               {todo.text}
             </span>
             <div className="flex gap-2">
               <button
                 onClick={() => startEditing(todo.id, todo.text)}
                 className={`${
-                  isAutoColor 
-                    ? 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white' 
-                    : (isLight(containerColor) ? 'text-gray-500 hover:text-gray-700' : 'text-gray-300 hover:text-white')
+                  isAutoColor
+                    ? "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                    : isLight(containerColor)
+                    ? "text-gray-500 hover:text-gray-700"
+                    : "text-gray-300 hover:text-white"
                 }`}
               >
                 <Edit className="w-4 h-4" />
@@ -413,9 +444,11 @@ const TodoComponent = () => {
               >
                 <button
                   className={`${
-                    isAutoColor 
-                      ? 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white' 
-                      : (isLight(containerColor) ? 'text-gray-500 hover:text-gray-700' : 'text-gray-300 hover:text-white')
+                    isAutoColor
+                      ? "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                      : isLight(containerColor)
+                      ? "text-gray-500 hover:text-gray-700"
+                      : "text-gray-300 hover:text-white"
                   }`}
                 >
                   <Trash2 className="w-4 h-4" />
@@ -433,18 +466,30 @@ const TodoComponent = () => {
           onChange={(e) => setInputValue(e.target.value)}
           placeholder="Add new task"
           className={`w-full p-3 pr-12 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-            isAutoColor 
-              ? 'bg-white text-gray-900 border-gray-200 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 dark:border-gray-700' 
-              : (isLight(containerColor) ? 'bg-white text-gray-800' : 'bg-gray-800 text-white placeholder-gray-400 border-gray-700')
+            isAutoColor
+              ? "bg-white text-gray-900 border-gray-200 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 dark:border-gray-700"
+              : isLight(containerColor)
+              ? "bg-white text-gray-800"
+              : "bg-gray-800 text-white placeholder-gray-400 border-gray-700"
           }`}
+          style={{
+            backgroundColor: isAutoColor ? undefined : containerColor,
+            color: isAutoColor ? undefined : textColor,
+          }}
         />
         <button
           type="submit"
           className={`absolute right-3 top-1/2 -translate-y-1/2 ${
-            isAutoColor 
-              ? 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white' 
-              : (isLight(containerColor) ? 'text-gray-500 hover:text-gray-700' : 'text-gray-300 hover:text-white')
+            isAutoColor
+              ? "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+              : isLight(containerColor)
+              ? "text-gray-500 hover:text-gray-700"
+              : "text-gray-300 hover:text-white"
           }`}
+          style={{
+            backgroundColor: isAutoColor ? undefined : containerColor,
+            color: isAutoColor ? undefined : textColor,
+          }}
         >
           <span className="text-2xl">+</span>
         </button>

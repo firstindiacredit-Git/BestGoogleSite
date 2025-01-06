@@ -15,6 +15,8 @@ import { toast } from "react-toastify";
 import CustomColorPicker from "./CustomColorPicker";
 import debounce from "lodash/debounce";
 import ExcelJS from "exceljs";
+import { Palette } from "lucide-react";
+
 
 const Excel = () => {
   const [userId, setUserId] = useState(null);
@@ -851,7 +853,7 @@ const Excel = () => {
     return <div className="text-center py-4">Please sign in to use Excel</div>;
 
   return (
-    <div className=" mx-auto relative py-8 px-4">
+    <div className=" mx-auto relative py-4 px-4">
       {tables.map((table, tableIndex) => (
         <div
           key={table.id}
@@ -864,12 +866,10 @@ const Excel = () => {
                 type="text"
                 value={tableNames[table.id] || `Table ${tableIndex + 1}`}
                 onChange={(e) => updateTableName(table.id, e.target.value)}
-                className="text-lg bg-gray-100 font-semibold   focus:border-blue-500 focus:outline-none px-2"
+                className="text-lg bg-transparent dark:text-white focus:bg-gray-100 font-semibold   focus:border-blue-500 focus:outline-none px-2"
               />
             </div>
-            <h1 className="text-2xl w-1/3 font-bold text-center mb-6">
-              Excel Sheet
-            </h1>
+            
             <div className="w-1/3 flex justify-end">
               <button
                 onClick={() => deleteTable(table.id)}
@@ -921,7 +921,7 @@ const Excel = () => {
                   <th className="border bg-gray-50 px-4 py-2 w-12 sticky left-0 z-10">
                     #
                   </th>
-                  {table.data[0]?.map((_, colIndex) => (
+                  {table.data[0].map((_, colIndex) => (
                     <th
                       key={colIndex}
                       className="border bg-gray-50 px-4 py-2 relative"
@@ -1119,7 +1119,7 @@ const Excel = () => {
                 }}
                 className="flex items-center gap-2 bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700"
               >
-                Color
+                <Palette className="w-5 h-5"/>
               </button>
               {exportButton(tableIndex)}
               {showColorPicker && activeTableIndex === tableIndex && (

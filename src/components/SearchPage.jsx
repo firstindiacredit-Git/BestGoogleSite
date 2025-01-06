@@ -102,14 +102,14 @@ function SearchPage() {
   }, [navigate]);
 
   return (
-    <div className="bg-white dark:bg-gray-900 min-h-screen pb-10">
+    <div className="bg-white dark:bg-gray-900 min-h-screen">
       <Header
         isDarkMode={isDarkMode}
         toggleTheme={toggleTheme}
         handleImageChange={handleImageChange}
       />
 
-      <div className="-mt-20">
+      <>
         <div
           style={{
             backgroundImage: backgroundImage
@@ -252,7 +252,7 @@ function SearchPage() {
             <Anotherpage isDarkMode={isDarkMode} />
           )}
         </div>
-      </div>
+      </>
     </div>
   );
 }
