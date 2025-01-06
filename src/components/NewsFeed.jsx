@@ -24,7 +24,7 @@ const NewsFeed = () => {
       }
 
       const data = await response.json();
-      console.log(data)
+      // console.log(data)
       
       if (data && Array.isArray(data)) {
         setNews(data.filter(item => item.title && item.description));

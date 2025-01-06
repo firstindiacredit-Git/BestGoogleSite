@@ -9,7 +9,7 @@ import NotebookAndSheet from "../components/NotebookAndSheet";
 import PasswordGenerator from "../components/PasswordGenerater";
 import News from "../components/News";
 import Tool from "../components/Tool";
-import Sports from '../components/Sports'
+import Sports from "../components/Sports";
 import Top100 from "../components/Top100";
 import "./style.css";
 
@@ -80,10 +80,8 @@ function SearchPage() {
     });
   };
 
-  const handleToggleComponent = (componentName) => {
-    setActiveComponent((prevComponent) =>
-      prevComponent === componentName ? null : componentName
-    );
+  const handleToggleComponent = (component) => {
+    setActiveComponent(component); // Always set the component, don't toggle
   };
 
   const scrollToTop = () => {
@@ -104,10 +102,7 @@ function SearchPage() {
   }, [navigate]);
 
   return (
-    <div
-      className="bg-white dark:bg-gray-900 min-h-screen pb-10"
-      
-    >
+    <div className="bg-white dark:bg-gray-900 min-h-screen pb-10">
       <Header
         isDarkMode={isDarkMode}
         toggleTheme={toggleTheme}
@@ -115,12 +110,17 @@ function SearchPage() {
       />
 
       <div className="-mt-20">
-        <div style={{
-        backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundAttachment: "fixed",
-      }} className="flex pt-24 flex-col items-center  min-h-[23vw]">
+        <div
+          style={{
+            backgroundImage: backgroundImage
+              ? `url(${backgroundImage})`
+              : "none",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundAttachment: "fixed",
+          }}
+          className="flex pt-24 flex-col items-center  min-h-[23vw]"
+        >
           <img
             src={isDarkMode ? "GoogleBlack.png" : "GoogleWhite.png"}
             alt="Google Logo"
@@ -132,99 +132,106 @@ function SearchPage() {
             data-defaulttoimagesearch="true"
           />
           <Shortcut />
-          <div className="-mt-10" style={{
-            backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundAttachment: "fixed",
-            
-          }}>
-          </div>
-        </div>
-        <div className="bg-blue-500 dark:bg-gray-800 border-gray-400 p-2 flex justify-center w-full text-white dark:text-white font-semibold text-center ">
-          <div className="grid grid-cols-4 lg:grid-cols-8   w-[80vw] gap-4">
+          <div
+            className="-mt-10"
+            style={{
+              backgroundImage: backgroundImage
+                ? `url(${backgroundImage})`
+                : "none",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundAttachment: "fixed",
+            }}
+          >
             <div>
-              <button
-                className={` w-full hover:text-white  hover:bg-blue-600 rounded-sm transition-all ${
-                  activeComponent === "Anotherpage" ? "bg-blue-800" : ""
-                }`}
-                onClick={() => handleToggleComponent("Anotherpage")}
-              >
-                HOME
-              </button>
+              <div className="flex justify-center mx-auto">
+                <div className="flex space-x-1 p-1 bg-white dark:bg-gray-800 rounded-lg w-fit">
+                  <button
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                      activeComponent === "Anotherpage"
+                        ? "bg-blue-500 text-white dark:bg-gray-700"
+                        : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}
+                    onClick={() => handleToggleComponent("Anotherpage")}
+                  >
+                    HOME
+                  </button>
+                  <button
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                      activeComponent === "PopularBookmarks"
+                        ? "bg-blue-500 text-white dark:bg-gray-700"
+                        : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}
+                    onClick={() => handleToggleComponent("PopularBookmarks")}
+                  >
+                    BOOKMARKS
+                  </button>
+                  <button
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                      activeComponent === "NotebookAndSheet"
+                        ? "bg-blue-500 text-white dark:bg-gray-700"
+                        : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}
+                    onClick={() => handleToggleComponent("NotebookAndSheet")}
+                  >
+                    NOTES
+                  </button>
+                  <button
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                      activeComponent === "PasswordGenerator"
+                        ? "bg-blue-500 text-white dark:bg-gray-700"
+                        : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}
+                    onClick={() => handleToggleComponent("PasswordGenerator")}
+                  >
+                    PASSWORD
+                  </button>
+                  <button
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                      activeComponent === "News"
+                        ? "bg-blue-500 text-white dark:bg-gray-700"
+                        : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}
+                    onClick={() => handleToggleComponent("News")}
+                  >
+                    NEWS
+                  </button>
+                  <button
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                      activeComponent === "Sports"
+                        ? "bg-blue-500 text-white dark:bg-gray-700"
+                        : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}
+                    onClick={() => handleToggleComponent("Sports")}
+                  >
+                    SPORTS
+                  </button>
+                  <button
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                      activeComponent === "Top100"
+                        ? "bg-blue-500 text-white dark:bg-gray-700"
+                        : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}
+                    onClick={() => handleToggleComponent("Top100")}
+                  >
+                    TOP100
+                  </button>
+                  <button
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                      activeComponent === "Tool"
+                        ? "bg-blue-500 text-white dark:bg-gray-700"
+                        : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}
+                    onClick={() => handleToggleComponent("Tool")}
+                  >
+                    TOOLS
+                  </button>
+                </div>
+              </div>
             </div>
-
-            {showButton && (
-              <button
-                onClick={scrollToTop}
-                className="fixed bottom-6 right-6 p-3 rounded-full bg-blue-500 text-white shadow-lg hover:bg-blue-600 transition-all"
-              >
-                <FaArrowUp size={20} />
-              </button>
-            )}
-
-            <button
-              className={`w-full hover:text-white  hover:bg-blue-600 rounded-sm transition-all ${
-                activeComponent === "PopularBookmarks" ? "bg-blue-800" : ""
-              }`}
-              onClick={() => handleToggleComponent("PopularBookmarks")}
-            >
-              BOOKMARKS
-            </button>
-            <button
-              className={`w-full hover:text-white hover:bg-blue-600 rounded-sm transition-all ${
-                activeComponent === "NotebookAndSheet" ? "bg-blue-800" : ""
-              }`}
-              onClick={() => handleToggleComponent("NotebookAndSheet")}
-            >
-              NOTES
-            </button>
-            <button
-              className={`w-full hover:text-white hover:bg-blue-600 rounded-sm transition-all ${
-                activeComponent === "PasswordGenerator" ? "bg-blue-800" : ""
-              }`}
-              onClick={() => handleToggleComponent("PasswordGenerator")}
-            >
-              PASSWORD
-            </button>
-            <button
-              className={`w-full hover:text-white hover:bg-blue-600 rounded-sm transition-all ${
-                activeComponent === "News" ? "bg-blue-800" : ""
-              }`}
-              onClick={() => handleToggleComponent("News")}
-            >
-              NEWS
-            </button>
-            <button
-              className={`w-full hover:text-white hover:bg-blue-600 rounded-sm transition-all ${
-                activeComponent === "Sports" ? "bg-blue-800" : ""
-              }`}
-              onClick={() => handleToggleComponent("Sports")}
-            >
-              SPORTS
-            </button>
-            <button
-              className={`w-full hover:text-white hover:bg-blue-600 rounded-sm transition-all ${
-                activeComponent === "Top100" ? "bg-blue-800" : ""
-              }`}
-              onClick={() => {
-                handleToggleComponent("Top100");
-                console.log("click Top");
-              }}
-            >
-              TOP100
-            </button>
-            <button
-              className={`w-full hover:text-white hover:bg-blue-600 rounded-sm transition-all ${
-                activeComponent === "Tool" ? "bg-blue-800" : ""
-              }`}
-              onClick={() => handleToggleComponent("Tool")}
-            >
-              TOOLS
-            </button>
           </div>
         </div>
-        <div className=" max-w-screen-2xl mx-auto   dark:bg-gray-900 bg-white">
+        <div className=" max-w-screen-4xl mx-auto ">
           {activeComponent === "NotebookAndSheet" ? (
             <NotebookAndSheet />
           ) : activeComponent === "PopularBookmarks" ? (
@@ -242,9 +249,7 @@ function SearchPage() {
           ) : activeComponent === "Tool" ? (
             <Tool />
           ) : (
-            <Anotherpage
-              isDarkMode={isDarkMode}
-            />
+            <Anotherpage isDarkMode={isDarkMode} />
           )}
         </div>
       </div>

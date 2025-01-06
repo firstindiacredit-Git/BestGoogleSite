@@ -273,9 +273,10 @@ const ResponsiveWorldClock = () => {
         <Menu.Item
           key={key}
           onClick={() => setCurrentTheme(theme)}
-          className="dark:hover:bg-gray-800 dark:text-white"
         >
-          {theme.name}
+          <span className="dark:text-white">
+            {theme.name}
+            </span>
         </Menu.Item>
       ))}
     </Menu>
@@ -351,7 +352,7 @@ const ResponsiveWorldClock = () => {
               </button>
               <Dropdown overlay={themeMenu} trigger={["click"]}>
                 <button className="px-4 py-1 dark:bg-white/10 bg-gray-200 hover:bg-gray-300 rounded-full dark:hover:bg-white/20 transition">
-                  {currentTheme.name}
+                  Theme
                 </button>
               </Dropdown>
             </div>
@@ -368,7 +369,7 @@ const ResponsiveWorldClock = () => {
 
                   {isDropdownOpen && availableZones.length > 0 && (
                     <>
-                      <div className="absolute right-0 mt-2 w-48 dark:bg-gray-800/95 backdrop-blur-sm bg-gray-200 rounded-lg shadow-lg py-1 z-50 max-h-[250px] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-400 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 dark:[&::-webkit-scrollbar-track]:bg-gray-800">
+                      <div className="absolute right-0 mt-2 w-48 dark:text-white dark:bg-gray-800 backdrop-blur-sm bg-gray-200 rounded-lg shadow-lg py-1 z-50 max-h-[250px] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-400 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 dark:[&::-webkit-scrollbar-track]:bg-gray-800">
                         {availableZones.map((timeZone) => (
                           <button
                             key={timeZone}

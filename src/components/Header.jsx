@@ -161,7 +161,7 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange, onPageNameChange }
   }, []);
 
   return (
-    <header className="p-2 bg-white/70 dark:bg-black/70 backdrop-blur-lg flex justify-between items-center sticky top-0 z-50">
+    <header className="p-2 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg flex justify-between items-center sticky top-0 z-50">
       <div className="flex items-center space-x-2">
         <div className="relative">
           <button 

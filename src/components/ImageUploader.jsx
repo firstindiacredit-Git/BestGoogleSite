@@ -40,19 +40,21 @@ function ImageUploader() {
   };
 
   return (
-    <div className="container rounded-b-lg   w-full">
-      <input
-        type="file"
-        accept="image/*"
-        onChange={handleImageUpload}
-        className="hidden"
-        id="file-input"
-      />
+    <div className="max-w-sm    rounded-b-lg w-full">
+      
 
       {!image && (
-        <div classNamse="border bg-white/10 h-80 m-auto rounded-b-lg  w-full">
-          <label htmlFor="file-input" className="cursor-pointer mb-4">
-            <MdAdd className="w-12 justify-center mx-auto my-28 h-12 text-blue-600 hover:text-blue-800 transition duration-300" />
+        <div className="h-72 flex items-center justify-center bg-white dark:bg-gray-900 rounded-lg w-full">
+          <label htmlFor="file-input" className="cursor-pointer flex flex-col items-center">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="hidden"
+              id="file-input"
+            />
+            <MdAdd className="w-12 h-12 text-blue-600 hover:text-blue-800 transition duration-300" />
+            <span className="mt-2 text-sm text-gray-600 dark:text-gray-400">Click to upload image</span>
           </label>
         </div>
       )}

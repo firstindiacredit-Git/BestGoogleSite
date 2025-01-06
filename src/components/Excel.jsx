@@ -921,7 +921,7 @@ const Excel = () => {
                   <th className="border bg-gray-50 px-4 py-2 w-12 sticky left-0 z-10">
                     #
                   </th>
-                  {table.data[0].map((_, colIndex) => (
+                  {table.data[0]?.map((_, colIndex) => (
                     <th
                       key={colIndex}
                       className="border bg-gray-50 px-4 py-2 relative"

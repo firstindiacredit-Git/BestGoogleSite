@@ -9,73 +9,106 @@ import {
   Sun,
 } from "lucide-react";
 import { CiEdit } from "react-icons/ci";
+import { Droplets, Wind, Settings } from "lucide-react";
 
 const API_KEY = "78a1522c5ec67352674263eaaa54bffa";
 
-const WeatherIcon = ({ condition }) => {
-  const iconStyles = {
-    clear: "text-yellow-400",
-    rain: "text-blue-400",
-    drizzle: "text-blue-300",
-    snow: "text-white",
-    thunderstorm: "text-purple-400",
-    default: "text-gray-400",
-  };
-
-  const getIcon = () => {
-    switch (condition?.toLowerCase()) {
-      case "clear":
-        return <Sun className={`w-16 h-16 ${iconStyles.clear}`} />;
-      case "rain":
-        return <CloudRain className={`w-16 h-16 ${iconStyles.rain}`} />;
-      case "drizzle":
-        return <CloudDrizzle className={`w-16 h-16 ${iconStyles.drizzle}`} />;
-      case "snow":
-        return <CloudSnow className={`w-16 h-16 ${iconStyles.snow}`} />;
-      case "thunderstorm":
-        return <CloudLightning className={`w-16 h-16 ${iconStyles.thunderstorm}`} />;
-      default:
-        return <Cloud className={`w-16 h-16 ${iconStyles.default}`} />;
-    }
-  };
-
-  return (
-    <div className="transform transition-transform hover:scale-105 duration-300">
-      {getIcon()}
-    </div>
-  );
+const themes = {
+  default: {
+    background: "bg-white dark:bg-gray-900",
+    text: "text-gray-700 dark:text-white",
+    card: "bg-gray-50 dark:bg-gray-800",
+    accent: "text-blue-500",
+    hover: "hover:bg-gray-100 dark:hover:bg-gray-800",
+    border: "border-gray-200 dark:border-gray-700",
+  },
+  blue: {
+    background: "bg-blue-50 dark:bg-blue-900",
+    text: "text-blue-700 dark:text-blue-50",
+    card: "bg-blue-100/50 dark:bg-blue-800/50",
+    accent: "text-blue-600 dark:text-blue-400",
+    hover: "hover:bg-blue-100 dark:hover:bg-blue-800",
+    border: "border-blue-200 dark:border-blue-700",
+  },
+  green: {
+    background: "bg-green-50 dark:bg-green-900",
+    text: "text-green-700 dark:text-green-50",
+    card: "bg-green-100/50 dark:bg-green-800/50",
+    accent: "text-green-600 dark:text-green-400",
+    hover: "hover:bg-green-100 dark:hover:bg-green-800",
+    border: "border-green-200 dark:border-green-700",
+  },
+  purple: {
+    background: "bg-purple-50 dark:bg-purple-900",
+    text: "text-purple-700 dark:text-purple-50",
+    card: "bg-purple-100/50 dark:bg-purple-800/50",
+    accent: "text-purple-600 dark:text-purple-400",
+    hover: "hover:bg-purple-100 dark:hover:bg-purple-800",
+    border: "border-purple-200 dark:border-purple-700",
+  },
+  orange: {
+    background: "bg-orange-50 dark:bg-orange-900",
+    text: "text-orange-700 dark:text-orange-50",
+    card: "bg-orange-100/50 dark:bg-orange-800/50",
+    accent: "text-orange-600 dark:text-orange-400",
+    hover: "hover:bg-orange-100 dark:hover:bg-orange-800",
+    border: "border-orange-200 dark:border-orange-700",
+  },
 };
 
+
+
 const WeatherCard = ({
-  day,
   temperature,
-  condition,
   details,
   getTemperature,
   isMain = false,
+  theme = "default",
 }) => (
-  <div
-    className={`flex flex-col items-center text-gray-100 p-2 ${
-      isMain ? "bg-blue-500/10 rounded-lg" : ""
-    }`}
-  >
-    <p className={`font-medium ${isMain ? "text-lg" : "text-sm"}`}>{day}</p>
-    <WeatherIcon condition={condition} />
-    <p
-      className={`mt-1 ${isMain ? "text-2xl font-bold" : "text-sm"}`}
-    >
-      {getTemperature(temperature)}
-    </p>
+  <div className="space-y-3 my-2 ">
+    <div className=" flex justify-center">
+      <div className="w-full  mb-6">
+      <p className={`text-7xl text-center font-bold tracking-tight ${themes[theme].text}`}>
+        {getTemperature(temperature)}
+      </p>
+      </div>
+    </div>
+
     {details && isMain && (
-      <div className="mt-3 text-sm grid grid-cols-2 gap-3">
-        <p className="bg-blue-500/20 px-3 py-1 rounded">
-          Humidity: {details.humidity}%
-        </p>
-        <p className="bg-blue-500/20 px-3 py-1 rounded">
-          Wind: {Math.round(details.wind)} m/s
-        </p>
+      <div className="grid grid-cols-2 gap-4">
+        <div
+          className={`flex items-center gap-3 p-3 rounded-lg ${themes[theme].card} ${themes[theme].text}`}
+        >
+          <Droplets className={`w-5 h-5 ${themes[theme].accent}`} />
+          <span className="text-base">{details.humidity}%</span>
+        </div>
+        <div
+          className={`flex items-center gap-3 p-3 rounded-lg ${themes[theme].card} ${themes[theme].text}`}
+        >
+          <Wind className={`w-5 h-5 ${themes[theme].accent}`} />
+          <span className="text-base">{Math.round(details.wind)} m/s</span>
+        </div>
       </div>
     )}
+  </div>
+);
+
+const ThemeSelector = ({ currentTheme, onThemeChange }) => (
+  <div className="p-2 grid grid-cols-5 gap-2">
+    {Object.keys(themes).map((themeName) => (
+      <button
+        key={themeName}
+        onClick={() => onThemeChange(themeName)}
+        className={`w-6 h-6 rounded-full border-2 transition-transform ${
+          currentTheme === themeName
+            ? "scale-125 border-blue-500"
+            : "border-gray-300"
+        } ${themes[themeName].background}`}
+        title={`${
+          themeName.charAt(0).toUpperCase() + themeName.slice(1)
+        } theme`}
+      />
+    ))}
   </div>
 );
 
@@ -92,24 +125,12 @@ const Weather = () => {
     () => JSON.parse(localStorage.getItem("showDetails")) ?? true
   );
   const [isVisible, setIsVisible] = useState(false);
+  const [currentTheme, setCurrentTheme] = useState(
+    () => localStorage.getItem("weatherTheme") || "default"
+  );
 
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
-
-  const getDayName = (dateString) => {
-    const date = new Date(dateString);
-    const options = { weekday: "long" };
-    return new Intl.DateTimeFormat("en-US", options).format(date);
-  };
-
-  const getDayDifference = (dateString) => {
-    const today = new Date();
-    const date = new Date(dateString);
-    const diff = (date - today) / (1000 * 3600 * 24);
-    if (diff === 0) return "Today";
-    if (diff === 1) return "Tomorrow";
-    return getDayName(dateString);
-  };
 
   const fetchWeather = async (cityName) => {
     try {
@@ -157,8 +178,7 @@ const Weather = () => {
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () =>
-      document.removeEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isVisible]);
 
   const handleUnitToggle = () => {
@@ -173,21 +193,21 @@ const Weather = () => {
       : `${Math.round(temp)}°F`;
   };
 
-  const handleCityChange = (e) => {
-    setInputValue(e.target.value);
-    if (!e.target.value) setError(null);
-  };
+  // const handleCityChange = (e) => {
+  //   setInputValue(e.target.value);
+  //   if (!e.target.value) setError(null);
+  // };
 
-  const handleCitySubmit = (e) => {
-    e.preventDefault();
-    if (inputValue.trim()) {
-      setCity(inputValue.trim());
-      setInputValue("");
-      setIsVisible(false);
-    } else {
-      setError("Please enter a valid city name.");
-    }
-  };
+  // const handleCitySubmit = (e) => {
+  //   e.preventDefault();
+  //   if (inputValue.trim()) {
+  //     setCity(inputValue.trim());
+  //     setInputValue("");
+  //     setIsVisible(false);
+  //   } else {
+  //     setError("Please enter a valid city name.");
+  //   }
+  // };
 
   const handleDetailsToggle = () => {
     const newShowDetails = !showDetails;
@@ -195,91 +215,93 @@ const Weather = () => {
     localStorage.setItem("showDetails", JSON.stringify(newShowDetails));
   };
 
+  const handleLocationToggle = () => {
+    setIsVisible(false);
+  };
+
+  const handleThemeChange = (theme) => {
+    setCurrentTheme(theme);
+    localStorage.setItem("weatherTheme", theme);
+  };
+
   return (
-    <div className="w-full max-w-sm rounded-lg mx-auto text-gray-100 p-4 bg-gray-900">
-      <div className="flex justify-between items-center mb-6">
-        <div className="text-center flex-1">
-          <h2 className="text-xl font-bold text-blue-400">Weather</h2>
-          <p className="text-sm text-gray-400">{city.toUpperCase()}</p>
-        </div>
-        <div className="relative">
-          <button
-            ref={buttonRef}
-            className="p-2 rounded-full hover:bg-gray-800"
-            onClick={() => setIsVisible(!isVisible)}
-          >
-            <CiEdit className="w-5 h-5" />
-          </button>
-
-          {isVisible && (
-            <div
-              ref={dropdownRef}
-              className="absolute right-0 w-48 mt-2 bg-gray-800 border border-gray-700 shadow-lg rounded-lg p-3 z-10"
+    <div
+      className={`w-full max-w-sm rounded-b-lg  transition-colors ${themes[currentTheme].background} ${themes[currentTheme].text}`}
+    >
+      <div className="px-4 py-2">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-semibold">{city}</h2>
+          <div className="relative">
+            <button
+              ref={buttonRef}
+              className={`p-2 rounded-lg transition-colors ${themes[currentTheme].hover}`}
+              onClick={() => setIsVisible(!isVisible)}
             >
-              <button
-                onClick={handleUnitToggle}
-                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-700 rounded"
+              <Settings className="w-5 h-5" />
+            </button>
+            {isVisible && (
+              <div
+                ref={dropdownRef}
+                className={`absolute right-0 mt-2 w-48 rounded-lg shadow-lg ${themes[currentTheme].background} border ${themes[currentTheme].border} z-50`}
               >
-                {unit === "imperial" ? "Switch to Celsius" : "Switch to Fahrenheit"}
-              </button>
-              <button
-                onClick={handleDetailsToggle}
-                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-700 rounded mt-1"
-              >
-                {showDetails ? "Hide Details" : "Show Details"}
-              </button>
-              <form onSubmit={handleCitySubmit} className="mt-2">
-                <input
-                  type="text"
-                  placeholder="Enter city"
-                  value={inputValue}
-                  onChange={handleCityChange}
-                  className="w-full p-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <div className="p-2 border-b border-gray-200 dark:border-gray-700">
+                  <p className="text-sm font-medium mb-1">Theme</p>
+                  <ThemeSelector
+                    currentTheme={currentTheme}
+                    onThemeChange={handleThemeChange}
+                  />
+                </div>
                 <button
-                  type="submit"
-                  className="mt-2 w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+                  onClick={handleUnitToggle}
+                  className={`w-full text-left px-4 py-2 text-sm ${themes[currentTheme].hover}`}
                 >
-                  Search
+                  {unit === "imperial"
+                    ? "Switch to Celsius"
+                    : "Switch to Fahrenheit"}
                 </button>
-              </form>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {error ? (
-        <p className="text-center text-red-400">{error}</p>
-      ) : currentWeather && forecast.length > 0 ? (
-        <div className="space-y-6">
-          <WeatherCard
-            day="Today"
-            temperature={currentWeather.main.temp}
-            condition={currentWeather.weather[0].main}
-            details={showDetails ? {
-              humidity: currentWeather.main.humidity,
-              wind: currentWeather.wind.speed,
-            } : null}
-            getTemperature={getTemperature}
-            isMain={true}
-          />
-
-          <div className="grid grid-cols-3 gap-2 pt-4 border-t border-gray-800">
-            {forecast.map((item, index) => (
-              <WeatherCard
-                key={index}
-                day={getDayDifference(item.dt_txt)}
-                temperature={item.main.temp}
-                condition={item.weather[0].main}
-                details={null}
-                getTemperature={getTemperature}
-              />
-            ))}
+                <button
+                  onClick={handleDetailsToggle}
+                  className={`w-full text-left px-4 py-2 text-sm ${themes[currentTheme].hover}`}
+                >
+                  {showDetails ? "Hide Details" : "Show Details"}
+                </button>
+                <button
+                  onClick={handleLocationToggle}
+                  className={`w-full text-left px-4 py-2 text-sm ${themes[currentTheme].hover}`}
+                >
+                  Change Location
+                </button>
+              </div>
+            )}
           </div>
         </div>
-      ) : (
-        <p className="text-center">Loading weather data...</p>
-      )}
+
+        {error ? (
+          <p className="text-center text-red-500">{error}</p>
+        ) : currentWeather && forecast.length > 0 ? (
+          <WeatherCard
+            temperature={currentWeather.main.temp}
+            condition={currentWeather.weather[0].main}
+            details={
+              showDetails
+                ? {
+                    humidity: currentWeather.main.humidity,
+                    wind: currentWeather.wind.speed,
+                  }
+                : null
+            }
+            getTemperature={getTemperature}
+            isMain={true}
+            theme={currentTheme}
+          />
+        ) : (
+          <div className="flex justify-center items-center h-32">
+            <div
+              className={`animate-spin rounded-full h-8 w-8 border-b-2 ${themes[currentTheme].text}`}
+            ></div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
