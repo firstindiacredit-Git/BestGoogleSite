@@ -337,8 +337,8 @@ const CredentialManager = () => {
   return (
     <>
       {isLocked ? (
-        <div className="w-full bg-gray-50 dark:bg-gray-900 min-h-[40vh] bg-opacity-50 py-[5vh] flex items-center justify-center">
-          <div className="p-8  dark:bg-gray-800 border  border-gray-500/5 text-center rounded-lg shadow-lg w-fit">
+        <div className="w-full bg-white/50 dark:bg-gray-900/50 rounded-t-lg max-w-6xl  h-[80vh] max-screen-lg mx-auto  flex items-center justify-center">
+          <div className="p-8  border bg-white dark:bg-gray-900  border-gray-500/5 text-center rounded-lg shadow-lg w-fit">
             <div className="flex text-blue-500 text-6xl items-center justify-center">
               <FaLock />
             </div>
@@ -379,7 +379,7 @@ const CredentialManager = () => {
           </div>
         </div>
       ) : (
-        <div className="mx-auto min-h-[20vh] p-12 pb-14 dark:bg-gray-900 bg-[#f8f9fa]">
+        <div className="mx-auto min-h-[20vh] max-w-[90vw]  p-12 pb-14 dark:bg-gray-900/50 bg-white/50">
           <div className="flex justify-between w-[68%] xl:w-[79.2%] items-center">
             <button
               className="transition-all bg-blue-500 text-white lg:text-lg text-sm lg:px-4 px-2 py-2 rounded-md mb-4"

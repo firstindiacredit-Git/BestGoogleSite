@@ -161,7 +161,7 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange, onPageNameChange }
   }, []);
 
   return (
-    <header className="p-2 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg flex justify-between items-center sticky top-0 z-50">
+    <header className="p-2 bg-gray-200/50 dark:bg-gray-800/50 backdrop-blur-lg border-b border dark:border-gray-800 border-gray-200 flex justify-between items-center sticky top-0 z-50">
       <div className="flex items-center space-x-2">
         <div className="relative">
           <button 
@@ -226,80 +226,10 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange, onPageNameChange }
         </Link>
       </div>
 
-      <div className="flex items-center space-x-4">
-        <div className="flex items-center">
-          <span className="text-sm mr-2 dark:text-white">
-            {isDarkMode ? <FaSun /> : <FaMoon />}
-          </span>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={isDarkMode}
-              onChange={toggleTheme}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:bg-blue-600"></div>
-            <div className="absolute left-1 top-1 w-4 h-4 bg-white border border-gray-300 rounded-full transition-transform peer-checked:translate-x-5 dark:border-gray-600"></div>
-          </label>
+      <div className="flex items-center justify-between w-fit  gap-4 space-x-4">
+        <div onClick={toggleTheme} className="flex items-center text-sm  dark:hover:bg-gray-800/20 transition-all hover:bg-gray-200/80 p-2 cursor-pointer rounded-md  dark:text-white">
+            {isDarkMode ? <FaMoon className="w-5 h-5" />: <FaSun className="w-5 h-5" /> }
         </div>
-
-        <div className="-mb-2 -mt-2">
-          <div
-            onClick={toggleMenu}
-            className="cursor-pointer flex justify-end menu-icon"
-          >
-            <TbGridDots className="w-8 h-8 hover:border dark:text-white border-slate-400 p-1 m-2 rounded-full" />
-          </div>
-
-          {showButtons && (
-            <div className="absolute right-1 top-14 bg-white/10 p-3 w-70 mr-2 shadow-lg rounded-2xl menu-buttons">
-              <div className="grid grid-cols-2 gap-1">
-                <label
-                  className="cursor-pointer text-xs p-1 rounded items-center justify-center"
-                  htmlFor="image-upload"
-                >
-                  <img
-                    src={galleryupload}
-                    alt="Upload"
-                    className="h-9 w-9 m-auto"
-                  />
-                  <span className="text-xs dark:text-white p-1 w-28 rounded grid items-center justify-center">
-                    Change Image
-                  </span>
-                </label>
-                <input
-                  id="image-upload"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="hidden"
-                />
-                <button
-                  onClick={() => {
-                    localStorage.removeItem("backgroundImage");
-                    setShowButtons(false);
-                    window.location.reload();
-                  }}
-                  className="text-xs -mr-4 p-1 w-32 rounded grid items-center justify-center"
-                >
-                  <img src={remove} alt="Remove" className="h-9 w-9 m-auto" />
-                  <span className="dark:text-white">Remove Image</span>
-                </button>
-                <Link to="/NewSearchPage">
-                  <img
-                    src={layers}
-                    alt="Customize"
-                    className="h-9 w-9 m-auto"
-                  />
-                  <span className="text-xs p-1 dark:text-white w-28 rounded m-auto grid items-center justify-center">
-                    Customize Widgets
-                  </span>
-                </Link>
-              </div>
-            </div>
-          )}
-        </div>
-
         {user ? (
           <div className="relative">
             <div

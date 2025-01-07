@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { FaArrowUp } from "react-icons/fa";
+import {useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Shortcut from "./ShortCuts";
 import Anotherpage from "../components/Anotherpage";
@@ -102,23 +101,23 @@ function SearchPage() {
   }, [navigate]);
 
   return (
-    <div className="bg-white dark:bg-gray-900 min-h-screen">
+    <div className="bg-white dark:bg-gray-900 min-h-screen" style={{
+      backgroundImage: backgroundImage
+        ? `url(${backgroundImage})`
+        : "none",
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      backgroundAttachment: "fixed",
+    }}>
       <Header
         isDarkMode={isDarkMode}
         toggleTheme={toggleTheme}
         handleImageChange={handleImageChange}
       />
 
-      <>
+      <div>
         <div
-          style={{
-            backgroundImage: backgroundImage
-              ? `url(${backgroundImage})`
-              : "none",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundAttachment: "fixed",
-          }}
+          
           className="flex pt-24 flex-col items-center  min-h-[23vw]"
         >
           <img
@@ -133,7 +132,6 @@ function SearchPage() {
           />
           <Shortcut />
           <div
-            className="-mt-10"
             style={{
               backgroundImage: backgroundImage
                 ? `url(${backgroundImage})`
@@ -144,8 +142,8 @@ function SearchPage() {
             }}
           >
             <div>
-              <div className="flex justify-center mx-auto">
-                <div className="flex space-x-1 p-1 bg-white dark:bg-gray-800 rounded-lg w-fit">
+              <div className="flex justify-center max-w-[90vw]  w-full mx-auto">
+                <div className="flex space-x-1 p-1 justify-between bg-white/50 border border-gray-200 dark:border-gray-800 dark:bg-gray-800/50 rounded-lg w-full">
                   <button
                     className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
                       activeComponent === "Anotherpage"
@@ -231,7 +229,7 @@ function SearchPage() {
             </div>
           </div>
         </div>
-        <div className=" max-w-screen-4xl mx-auto ">
+        <div className=" max-w-[90vw]  mx-auto   " style={{transform: 'scale(0.9)'}}>
           {activeComponent === "NotebookAndSheet" ? (
             <NotebookAndSheet />
           ) : activeComponent === "PopularBookmarks" ? (
@@ -252,7 +250,7 @@ function SearchPage() {
             <Anotherpage isDarkMode={isDarkMode} />
           )}
         </div>
-      </>
+      </div>
     </div>
   );
 }

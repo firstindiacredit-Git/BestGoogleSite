@@ -250,66 +250,12 @@ const Anotherpage = ({ backgroundImage, pageId = 'home' }) => {
   }
 
   return (
-    <div style={{ position: "relative" }}>
-      <div className="flex items-center gap-2 w-fit mx-auto my-4 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
-        <button
-          onClick={() => {
-            isGrid(true);
-          }}
-          className={`p-2 rounded ${
-            grid
-              ? "bg-white dark:bg-gray-700 shadow-sm"
-              : "hover:bg-white/50 dark:hover:bg-gray-700/50"
-          }`}
-        >
-          <svg
-            className="w-5 h-5 dark:text-white"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
-            />
-          </svg>
-        </button>
-        <button
-          onClick={() => {
-            isGrid(false);
-          }}
-          className={`p-2 rounded ${
-            !grid
-              ? "bg-white dark:bg-gray-700 shadow-sm"
-              : "hover:bg-white/50 dark:hover:bg-gray-700/50"
-          }`}
-        >
-          <svg
-            className="w-5 h-5 dark:text-white"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-          </svg>
-        </button>
-      </div>
-      <div className="flex justify-center">
+    <div style={{ position: "relative" }} >
+      
+      <div className=" flex justify-center bg-white/50 dark:bg-gray-800/50 pt-4 max-w-[90vw]   border dark:border-gray-800 border-gray-200 w-fit mx-auto rounded-t-lg">
         <div
-          className={`bg-white w-fit dark:bg-gray-800 flex justify-center rounded-xl`}
-          style={{
-            backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundAttachment: "fixed",
-          }}
+          className={` w-fit  flex justify-center rounded-xl`}
+        
         >
           <div className="p-4 ">
             {loading ? (

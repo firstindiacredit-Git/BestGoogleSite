@@ -7,7 +7,7 @@ import Excel from "./Excel";
 
 const NotebookAndDocumentSheet = () => {
   return (
-    <div className="dark:bg-gray-900 min-h-screen p-4">
+    <div className="dark:bg-gray-900/50 bg-gray-200/50 w-fit mx-auto rounded-t-lg border border-gray-200 dark:border-gray-800 min-h-screen p-4">
       <div className="max-w-[1600px] mx-auto space-y-4">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Main NotePage section - 8 columns on large screens */}
