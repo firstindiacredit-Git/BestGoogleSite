@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiSearch, FiLock, FiBook, FiEdit3, FiCalendar, FiGrid, FiCloud, FiAward, FiCheck, FiPlus, FiMinus, 
-         FiGithub, FiTwitter, FiInstagram, FiLinkedin, FiArrowRight, FiStar, FiUsers, FiGlobe, FiZap, FiShield, FiCpu, FiMenu, FiX } from 'react-icons/fi';
+import { FiSearch, FiLock, FiBook, FiEdit3, FiCheck, FiPlus, FiMinus, 
+         FiGithub, FiTwitter, FiInstagram, FiLinkedin, FiMenu, FiX } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
-import SearchPage from './SearchPage';
-import Header from './Header';
+import { FaClock, FaExclamationCircle, FaHandSparkles,  FaPizzaSlice, FaShieldVirus } from 'react-icons/fa';
+import { FlashlightOnOutlined } from '@mui/icons-material';
+import { Chrome } from 'lucide-react';
 
 const FeatureCard = ({ icon: Icon, title, description }) => (
   <motion.div
@@ -34,31 +35,45 @@ const LandingPage = () => {
     <div className="min-h-screen bg-white relative">
       {/* Background Pattern */}
       <div className="fixed inset-0 -z-10 overflow-hidden">
-        {/* Gradient Background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-blue-50 to-blue-100/50" />
-        
-        {/* Dotted Grid Pattern */}
-        <div className="absolute inset-0">
-          <div 
-            className="absolute inset-0" 
-            style={{
-              backgroundImage: `
-                radial-gradient(circle at center, rgba(99, 102, 241, 0.15) 1.5px, transparent 1.5px),
-                radial-gradient(circle at center, rgba(99, 102, 241, 0.1) 1.5px, transparent 1.5px)
-              `,
-              backgroundSize: '60px 60px, 120px 120px',
-              backgroundPosition: '0 0, 30px 30px'
-            }}
-          />
-        </div>
+        {/* Grid Pattern */}
+        <div 
+          className="absolute inset-0 bg-white"
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, rgba(99, 102, 241, 0.05) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(99, 102, 241, 0.05) 1px, transparent 1px)
+            `,
+            backgroundSize: '64px 64px',
+            maskImage: 'radial-gradient(ellipse at center, transparent 20%, black 90%)'
+          }}
+        />
 
-        {/* White Circles */}
-        <div className="absolute inset-0">
-          <div className="absolute top-20 left-1/4 w-4 h-4 rounded-full bg-white/40 backdrop-blur-sm border border-white/50" />
-          <div className="absolute top-40 right-1/3 w-4 h-4 rounded-full bg-white/40 backdrop-blur-sm border border-white/50" />
-          <div className="absolute bottom-60 left-1/3 w-4 h-4 rounded-full bg-white/40 backdrop-blur-sm border border-white/50" />
-          <div className="absolute bottom-40 right-1/4 w-4 h-4 rounded-full bg-white/40 backdrop-blur-sm border border-white/50" />
-        </div>
+        {/* Dots Pattern */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `
+              radial-gradient(circle at center, rgba(99, 102, 241, 0.15) 2px, transparent 2px)
+            `,
+            backgroundSize: '48px 48px',
+            backgroundPosition: '0 0',
+            maskImage: 'radial-gradient(ellipse at center, transparent 10%, black 80%)'
+          }}
+        />
+
+        {/* Moving Gradient Orbs */}
+        <div className="absolute top-0 left-0 w-[800px] h-[800px] bg-indigo-500/30 rounded-full blur-[128px] animate-pulse" 
+             style={{ animation: 'orbit 20s linear infinite' }} />
+        <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-purple-500/20 rounded-full blur-[96px] animate-pulse" 
+             style={{ animation: 'orbit 15s linear infinite reverse' }} />
+
+        {/* Noise Texture */}
+        <div 
+          className="absolute inset-0 opacity-[0.015]"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+          }}
+        />
 
         {/* Blur Overlay */}
         <div className="absolute inset-0 backdrop-blur-[100px]" />
@@ -96,14 +111,17 @@ const LandingPage = () => {
                 </Link>
               </div>
 
-              {/* CTA Buttons */}
+              {/* Auth Buttons */}
               <div className="hidden md:flex items-center space-x-4">
-                <Link to="/login" className="px-4 py-2 text-gray-700 font-medium hover:text-indigo-600 transition-colors rounded-lg border border-transparent hover:border-indigo-100 hover:bg-white/60">
-                  Log in
-                </Link>
-                <Link to="/signup" className="px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-all shadow-md shadow-indigo-500/20 hover:shadow-lg hover:shadow-indigo-500/30 border border-indigo-500/50">
-                  Sign up
-                </Link>
+                <a 
+                  href="https://chrome.google.com/webstore"
+                  target="_blank"
+                  rel="noopener noreferrer" 
+                  className="px-6 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-all shadow-md shadow-indigo-500/20 hover:shadow-lg hover:shadow-indigo-500/30 border border-indigo-500/50 flex items-center gap-2"
+                >
+                  <Chrome />
+                  Add to Chrome
+                </a>
               </div>
 
               {/* Mobile Menu Button */}
@@ -135,12 +153,15 @@ const LandingPage = () => {
                   <Link to="#about" className="block text-gray-600 hover:text-indigo-600 transition-colors">About</Link>
                   <Link to="#contact" className="block text-gray-600 hover:text-indigo-600 transition-colors">Contact</Link>
                   <div className="pt-4 space-y-2">
-                    <Link to="/login" className="block w-full px-4 py-2 text-center text-gray-600 font-medium hover:bg-indigo-50 rounded-lg transition-colors">
-                      Log in
-                    </Link>
-                    <Link to="/signup" className="block w-full px-4 py-2 text-center bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30 transform hover:-translate-y-0.5 border border-indigo-500/50">
-                      Sign up
-                    </Link>
+                    <a
+                      href="https://chrome.google.com/webstore"
+                      target="_blank"
+                      rel="noopener noref errer"
+                      className="block w-full px-4 py-2 text-center bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30 transform hover:-translate-y-0.5 border border-indigo-500/50 flex items-center justify-center gap-2"
+                    >
+                    <Chrome />
+                      Add to Chrome
+                    </a>
                   </div>
                 </div>
               </motion.div>
@@ -158,7 +179,7 @@ const LandingPage = () => {
               animate={{ opacity: 1, y: 0 }}
               className="text-6xl md:text-7xl font-bold text-gray-900 mb-8 tracking-tight"
             >
-              Your Ultimate Digital{' '}
+              Your Ultimate Browser{' '}
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-500">
                 Toolkit
               </span>
@@ -179,9 +200,15 @@ const LandingPage = () => {
               transition={{ delay: 0.2 }}
               className="flex justify-center gap-4 mb-20"
             >
-              <button className="px-8 py-4 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30 transform hover:-translate-y-0.5 border border-indigo-500/50">
-                Get Started
-              </button>
+              <a
+                href="https://chrome.google.com/webstore"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-8 py-4 bg-indigo-600 text-white rounded-xl font-semibold text-lg hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30 transform hover:-translate-y-0.5 border border-indigo-500/50 flex items-center gap-3"
+              >
+                <Chrome />
+                Add to Chrome - It's Free
+              </a>
               <button className="px-8 py-4 rounded-xl bg-white/50 backdrop-blur-sm text-gray-900 font-semibold hover:bg-white/60 transition-all shadow-lg shadow-indigo-500/10 hover:shadow-xl hover:shadow-indigo-500/20 transform hover:-translate-y-0.5 border border-white/40">
                 Learn More
               </button>
@@ -252,57 +279,141 @@ const LandingPage = () => {
       {/* Divider Line */}
       <div className="w-full h-px bg-gradient-to-r from-transparent via-indigo-200/20 to-transparent" />
 
-      {/* Problem & Solution Section */}
-      <div className="container mx-auto px-4 py-20">
+      {/* Problem Section */}
+      <div className="container mx-auto px-4 py-20 bg-gradient-to-b from-transparent to-indigo-50/30">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          className="text-center mb-16"
+          className="max-w-4xl mx-auto text-center mb-16"
         >
-          <h2 className="text-4xl font-bold text-gray-900 mb-4 drop-shadow-md">Problems We Solve</h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">Transforming common digital challenges into seamless solutions</p>
+          <h2 className="text-4xl font-bold text-gray-900 mb-6">
+            The Challenge Today's{' '}
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-500">
+              Digital Generation
+            </span>{' '}
+            Faces
+          </h2>
+          <p className="text-xl text-gray-600 mb-12">
+            In today's fast-paced digital world, Gen Z struggles with information overload, scattered resources, and complex digital tools.
+          </p>
         </motion.div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          {/* Problems */}
-          <div className="space-y-6">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6 drop-shadow-sm">Common Challenges</h3>
-            {[
-              { icon: FiZap, text: "Scattered digital tools and resources" },
-              { icon: FiShield, text: "Weak and insecure passwords" },
-              { icon: FiCpu, text: "Complex data management" },
-            ].map((problem, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.2 }}
-                className="flex items-start gap-4 backdrop-blur-lg bg-white/30 p-4 rounded-xl border border-white/40 shadow-lg shadow-indigo-500/10 hover:shadow-xl hover:shadow-indigo-500/20 transition-all"
-              >
-                <problem.icon className="w-6 h-6 text-red-500 mt-1" />
-                <p className="text-gray-600">{problem.text}</p>
-              </motion.div>
-            ))}
-          </div>
-          {/* Solutions */}
-          <div className="space-y-6">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6 drop-shadow-sm">Our Solutions</h3>
-            {[
-              { icon: FiZap, text: "All-in-one integrated platform" },
-              { icon: FiShield, text: "Advanced password generation & management" },
-              { icon: FiCpu, text: "Intuitive data organization tools" },
-            ].map((solution, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.2 }}
-                className="flex items-start gap-4 backdrop-blur-lg bg-white/30 p-4 rounded-xl border border-white/40 shadow-lg shadow-indigo-500/10 hover:shadow-xl hover:shadow-indigo-500/20 transition-all"
-              >
-                <solution.icon className="w-6 h-6 text-green-500 mt-1" />
-                <p className="text-gray-600">{solution.text}</p>
-              </motion.div>
-            ))}
-          </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="p-6 rounded-2xl bg-white/60 backdrop-blur-lg border border-white/40 shadow-lg"
+          >
+            <div className="text-red-500 mb-4">
+              <FaExclamationCircle className="w-12 h-12" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-3">Information Overload</h3>
+            <p className="text-gray-600">Overwhelmed by the sheer volume of digital content and tools available online.</p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="p-6 rounded-2xl bg-white/60 backdrop-blur-lg border border-white/40 shadow-lg"
+          >
+            <div className="text-orange-500 mb-4">
+              <FaClock className="w-12 h-12" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-3">Time Wastage</h3>
+            <p className="text-gray-600">Hours lost switching between different apps and platforms to accomplish tasks.</p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="p-6 rounded-2xl bg-white/60 backdrop-blur-lg border border-white/40 shadow-lg"
+          >
+            <div className="text-yellow-500 mb-4">
+              <FaPizzaSlice className="w-12 h-12" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-3">Fragmented Experience</h3>
+            <p className="text-gray-600">Disconnected tools and platforms creating a disjointed digital experience.</p>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Divider Line */}
+      <div className="w-full h-px bg-gradient-to-r from-transparent via-indigo-200/20 to-transparent" />
+
+      {/* Solution Section */}
+      <div className="container mx-auto px-4 py-20 bg-gradient-to-b from-indigo-50/30 to-transparent">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          className="max-w-4xl mx-auto text-center mb-16"
+        >
+          <h2 className="text-4xl font-bold text-gray-900 mb-6">
+            Introducing Your{' '}
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-500">
+              All-in-One Solution
+            </span>
+          </h2>
+          <p className="text-xl text-gray-600 mb-12">
+            Best Google Site brings together everything you need in one seamless platform, designed specifically for the digital generation.
+          </p>
+        </motion.div>
+
+        <div className='max-w-7xl mx-auto'>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            className=" w-full flex justify-between"
+          >
+            <div className="flex  max-w-xs flex-col items-start gap-4">
+              <div className="p-2 bg-indigo-100 rounded-lg">
+                <FaHandSparkles className="w-6 h-6 text-indigo-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Smart Integration</h3>
+                <p className="text-gray-600">All your favorite tools and services, unified in one intelligent platform.</p>
+              </div>
+            </div>
+
+            <div className="flex max-w-xs  flex-col items-start gap-4">
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <FlashlightOnOutlined className="w-6 h-6 text-purple-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Lightning Fast</h3>
+                <p className="text-gray-600">Get things done quickly with our intuitive interface and powerful features.</p>
+              </div>
+            </div>
+
+            <div className="flex max-w-xs flex-col  items-start gap-4">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <FaShieldVirus className="w-6 h-6 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Secure & Private</h3>
+                <p className="text-gray-600">Your data is protected with enterprise-grade security measures.</p>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            className="relative"
+          >
+            <div className="relative rounded-2xl overflow-hidden border border-white/40 shadow-2xl bg-white/80">
+              <img 
+                src="/solution-preview.png" 
+                alt="Solution Preview" 
+                className="w-full h-auto"
+                style={{ borderRadius: "24px" }}
+              />
+            </div>
+            <div className="absolute -top-6 -right-6 w-12 h-12 bg-indigo-500/10 rounded-full blur-xl" />
+            <div className="absolute -bottom-6 -left-6 w-12 h-12 bg-purple-500/10 rounded-full blur-xl" />
+          </motion.div> */}
         </div>
       </div>
 
@@ -310,7 +421,7 @@ const LandingPage = () => {
       <div className="w-full h-px bg-gradient-to-r from-transparent via-indigo-200/20 to-transparent" />
 
       {/* Pricing Section */}
-      <div className="backdrop-blur-lg bg-white/30 border-y border-white/40 py-20">
+      <div className="backdrop-blur-lg bg-gradient-to-b from-indigo-200/30 to-transparent  border-y border-white/40 py-20">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -320,7 +431,7 @@ const LandingPage = () => {
             <h2 className="text-4xl font-bold text-gray-900 mb-4 drop-shadow-md">Simple, Transparent Pricing</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">Choose the plan that works best for you</p>
           </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="flex justify-center gap-10">
             {[
               {
                 title: "Free",
@@ -335,7 +446,7 @@ const LandingPage = () => {
               },
               {
                 title: "Pro",
-                price: "9.99",
+                price: "04.99",
                 features: [
                   "Advanced search",
                   "Unlimited storage",
@@ -344,27 +455,16 @@ const LandingPage = () => {
                 ],
                 popular: true
               },
-              {
-                title: "Enterprise",
-                price: "29.99",
-                features: [
-                  "Custom solutions",
-                  "Dedicated support",
-                  "API access",
-                  "Team management"
-                ],
-                popular: false
-              }
             ].map((plan, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.2 }}
-                className={`backdrop-blur-lg ${
-                  plan.popular ? 'bg-indigo-600/90' : 'bg-white/30'
+                className={`backdrop-blur-lg  ${
+                  plan.popular ? 'bg-indigo-600/90 border-indigo-800/50 hover:border-indigo-800 border ' : 'bg-white/30 border-indigo-500/50 hover:border-indigo-500 border'
                 } rounded-2xl p-8 border ${
-                  plan.popular ? 'border-indigo-400' : 'border-white/40'
+                  plan.popular ? ' border-indigo-500/50 hover:border-indigo-500 border' : ' border-white/40'
                 } relative shadow-lg shadow-indigo-500/10 hover:shadow-xl hover:shadow-indigo-500/20 transition-all`}
               >
                 {plan.popular && (
@@ -536,51 +636,49 @@ const LandingPage = () => {
 
       {/* CTA Section */}
       <div className="relative overflow-hidden">
-        <div className="backdrop-blur-lg bg-indigo-600/90 border-y border-white/20">
-          <div className="relative container mx-auto px-4 py-20">
-            <div className="max-w-4xl mx-auto text-center">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                className="space-y-8"
+        <div className="container mx-auto px-4 py-20">
+          <div className="relative z-10 max-w-4xl mx-auto text-center">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              className="text-4xl md:text-5xl font-bold text-gray-900 mb-8"
+            >
+              Ready to Transform Your{' '}
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-500">
+                Digital Experience?
+              </span>
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-xl text-gray-600 mb-12"
+            >
+              Join thousands of users who have already enhanced their browsing experience with Best Google Site
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="flex flex-col items-center gap-6"
+            >
+              <a
+                href="https://chrome.google.com/webstore"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-8 py-4 bg-indigo-600 text-white rounded-xl font-semibold text-lg hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30 transform hover:-translate-y-0.5 border border-indigo-500/50 flex items-center gap-3"
               >
-                <h2 className="text-4xl md:text-5xl font-bold text-white drop-shadow-md">
-                  Ready to Transform Your Digital Experience?
-                </h2>
-                <p className="text-xl text-white/80">
-                  Join thousands of satisfied users who have already revolutionized their workflow with our platform.
-                </p>
-                <div className="flex flex-wrap justify-center gap-4">
-                  <Link
-                    to="/signup"
-                    className="bg-white text-indigo-600 px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-100 transition-colors shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30 transform hover:-translate-y-0.5 border border-indigo-500/50"
-                  >
-                    Get Started Free
-                  </Link>
-                  <Link
-                    to="/contact"
-                    className="bg-transparent text-white px-8 py-4 rounded-full font-semibold text-lg border-2 border-white hover:bg-white/10 transition-colors shadow-lg shadow-indigo-500/10 hover:shadow-xl hover:shadow-indigo-500/20 transform hover:-translate-y-0.5"
-                  >
-                    Contact Sales
-                  </Link>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-12">
-                  <div className="text-center">
-                    <h3 className="text-3xl font-bold text-white">100+</h3>
-                    <p className="text-white/80">Tools & Features</p>
-                  </div>
-                  <div className="text-center">
-                    <h3 className="text-3xl font-bold text-white">24/7</h3>
-                    <p className="text-white/80">Customer Support</p>
-                  </div>
-                  <div className="text-center">
-                    <h3 className="text-3xl font-bold text-white">99.9%</h3>
-                    <p className="text-white/80">Uptime</p>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
+                <Chrome/>
+                Add to Chrome - It's Free
+              </a>
+              <span className="text-sm text-gray-500">Works with all Chromium-based browsers</span>
+            </motion.div>
           </div>
+          
+          {/* Decorative Elements */}
+          <div className="absolute inset-0 bg-gradient-to-b from-indigo-50/30 to-transparent -z-10" />
+          <div className="absolute -top-8 -right-8 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl" />
+          <div className="absolute -bottom-8 -left-8 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl" />
         </div>
       </div>
 
@@ -615,7 +713,7 @@ const LandingPage = () => {
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-white">BGS</h2>
               <p className="text-gray-400">
-                Your ultimate digital toolkit for a more productive online experience.
+                Your ultimate Chrome extension for a more productive online experience.
               </p>
               <div className="flex gap-4">
                 <a href="#" className="text-gray-400 hover:text-white transition-colors">
@@ -677,3 +775,14 @@ const LandingPage = () => {
 };
 
 export default LandingPage;
+
+<style jsx>{`
+  @keyframes orbit {
+    0% {
+      transform: translate(-50%, -50%) rotate(0deg) translateX(200px) rotate(0deg);
+    }
+    100% {
+      transform: translate(-50%, -50%) rotate(360deg) translateX(200px) rotate(-360deg);
+    }
+  }
+`}</style>
