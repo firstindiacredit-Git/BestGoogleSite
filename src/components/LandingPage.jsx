@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiSearch, FiLock, FiBook, FiEdit3, FiCheck, FiPlus, FiMinus, 
          FiGithub, FiTwitter, FiInstagram, FiLinkedin, FiMenu, FiX } from 'react-icons/fi';
@@ -6,182 +6,149 @@ import { Link } from 'react-router-dom';
 import { FaClock, FaExclamationCircle, FaHandSparkles,  FaPizzaSlice, FaShieldVirus } from 'react-icons/fa';
 import { FlashlightOnOutlined } from '@mui/icons-material';
 import { Chrome } from 'lucide-react';
-
+import "./Landing.css"
 const FeatureCard = ({ icon: Icon, title, description }) => (
   <motion.div
     whileHover={{ scale: 1.02 }}
-    className="p-6 rounded-2xl bg-white/60 backdrop-blur-lg border border-white/40 shadow-lg shadow-indigo-500/5 hover:shadow-xl hover:shadow-indigo-500/10 transition-all group"
+    className="p-6 rounded-2xl bg-white hover:border-indigo-600 cursor-default backdrop-blur-lg border border-gray-200/50 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-lg transition-all group"
   >
-    <div className="bg-white/50 w-14 h-14 rounded-xl flex items-center justify-center mb-6">
+    <div className="bg-gray-50 w-14 h-14 rounded-xl flex items-center justify-center mb-6 group-hover:bg-indigo-50">
       <Icon className="w-7 h-7 text-indigo-600" />
     </div>
-    <h3 className="text-xl font-bold mb-3 text-gray-900 drop-shadow-md">
-      {title}
-    </h3>
-    <p className="text-gray-600 drop-shadow-sm">{description}</p>
+    <h3 className="text-xl font-semibold mb-2 text-gray-900">{title}</h3>
+    <p className="text-gray-600">{description}</p>
   </motion.div>
 );
 
 const LandingPage = () => {
   const [openFaq, setOpenFaq] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-  };
+  useEffect(() => {
+    const onScroll = () => {
+      const scrolled = window.scrollY > 10;
+      setIsScrolled(scrolled);
+      console.log('Scroll position:', window.scrollY, 'isScrolled:', scrolled);
+    };
+
+    // Add event listener
+    window.addEventListener('scroll', onScroll);
+    
+    // Initial check
+    onScroll();
+
+    // Cleanup
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   return (
-    <div className="min-h-screen bg-white relative">
-      {/* Background Pattern */}
-      <div className="fixed inset-0 -z-10 overflow-hidden">
-        {/* Grid Pattern */}
-        <div 
-          className="absolute inset-0 bg-white"
-          style={{
-            backgroundImage: `
-              linear-gradient(to right, rgba(99, 102, 241, 0.05) 1px, transparent 1px),
-              linear-gradient(to bottom, rgba(99, 102, 241, 0.05) 1px, transparent 1px)
-            `,
-            backgroundSize: '64px 64px',
-            maskImage: 'radial-gradient(ellipse at center, transparent 20%, black 90%)'
-          }}
-        />
-
-        {/* Dots Pattern */}
-        <div 
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `
-              radial-gradient(circle at center, rgba(99, 102, 241, 0.15) 2px, transparent 2px)
-            `,
-            backgroundSize: '48px 48px',
-            backgroundPosition: '0 0',
-            maskImage: 'radial-gradient(ellipse at center, transparent 10%, black 80%)'
-          }}
-        />
-
-        {/* Moving Gradient Orbs */}
-        <div className="absolute top-0 left-0 w-[800px] h-[800px] bg-indigo-500/30 rounded-full blur-[128px] animate-pulse" 
-             style={{ animation: 'orbit 20s linear infinite' }} />
-        <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-purple-500/20 rounded-full blur-[96px] animate-pulse" 
-             style={{ animation: 'orbit 15s linear infinite reverse' }} />
-
-        {/* Noise Texture */}
-        <div 
-          className="absolute inset-0 opacity-[0.015]"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-          }}
-        />
-
-        {/* Blur Overlay */}
-        <div className="absolute inset-0 backdrop-blur-[100px]" />
-      </div>
-
-      {/* Modern Header */}
+    <div className="min-h-[200vh] relative">
       <motion.header
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="fixed top-0 left-0 right-0 z-50"
+        className={`fixed top-0 left-0 right-0 w-full z-50 transition-all duration-300 bg-white/20 backdrop-blur-md  border-b border-gray-200/50`}
       >
-        <nav className="mx-auto border border-white/20 bg-white/70 backdrop-blur-lg shadow-lg shadow-indigo-500/5">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between h-16">
-              {/* Logo */}
-              <Link to="/" className="flex items-center space-x-2">
-                <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-500 bg-clip-text text-transparent">
-                  BGS
-                </span>
+        <nav className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <Link to="/" className="flex items-center space-x-2">
+              <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-500 bg-clip-text text-transparent">
+                BGS
+              </span>
+            </Link>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-8">
+              <Link to="#features" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-lg hover:bg-white/60">
+                Features
               </Link>
-
-              {/* Desktop Navigation */}
-              <div className="hidden md:flex items-center space-x-8">
-                <Link to="#features" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-lg hover:bg-white/60">
-                  Features
-                </Link>
-                <Link to="#pricing" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-lg hover:bg-white/60">
-                  Pricing
-                </Link>
-                <Link to="#about" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-lg hover:bg-white/60">
-                  About
-                </Link>
-                <Link to="#contact" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-lg hover:bg-white/60">
-                  Contact
-                </Link>
-              </div>
-
-              {/* Auth Buttons */}
-              <div className="hidden md:flex items-center space-x-4">
-                <a 
-                  href="https://chrome.google.com/webstore"
-                  target="_blank"
-                  rel="noopener noreferrer" 
-                  className="px-6 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-all shadow-md shadow-indigo-500/20 hover:shadow-lg hover:shadow-indigo-500/30 border border-indigo-500/50 flex items-center gap-2"
-                >
-                  <Chrome />
-                  Add to Chrome
-                </a>
-              </div>
-
-              {/* Mobile Menu Button */}
-              <button
-                className="md:hidden p-2 rounded-lg hover:bg-white/50 transition-colors shadow-lg shadow-indigo-500/10 hover:shadow-xl hover:shadow-indigo-500/20 transform hover:-translate-y-0.5"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-              >
-                {isMenuOpen ? (
-                  <FiX className="w-6 h-6 text-gray-600" />
-                ) : (
-                  <FiMenu className="w-6 h-6 text-gray-600" />
-                )}
-              </button>
+              <Link to="#pricing" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-lg hover:bg-white/60">
+                Pricing
+              </Link>
+              <Link to="#about" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-lg hover:bg-white/60">
+                About
+              </Link>
+              <Link to="#contact" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-lg hover:bg-white/60">
+                Contact
+              </Link>
             </div>
-          </div>
 
-          {/* Mobile Menu */}
-          <AnimatePresence>
-            {isMenuOpen && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                className="md:hidden backdrop-blur-lg bg-white/70 border-b border-white/40 shadow-lg shadow-indigo-500/10"
+            {/* Auth Buttons */}
+            <div className="hidden md:flex items-center space-x-4">
+              <a 
+                href="https://chrome.google.com/webstore"
+                target="_blank"
+                rel="noopener noreferrer" 
+                className="px-6 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-all shadow-md shadow-indigo-500/20 hover:shadow-lg hover:shadow-indigo-500/30 border border-indigo-500/50 flex items-center gap-2"
               >
-                <div className="container mx-auto px-4 py-4 space-y-4">
-                  <Link to="#features" className="block text-gray-600 hover:text-indigo-600 transition-colors">Features</Link>
-                  <Link to="#pricing" className="block text-gray-600 hover:text-indigo-600 transition-colors">Pricing</Link>
-                  <Link to="#about" className="block text-gray-600 hover:text-indigo-600 transition-colors">About</Link>
-                  <Link to="#contact" className="block text-gray-600 hover:text-indigo-600 transition-colors">Contact</Link>
-                  <div className="pt-4 space-y-2">
-                    <a
-                      href="https://chrome.google.com/webstore"
-                      target="_blank"
-                      rel="noopener noref errer"
-                      className="block w-full px-4 py-2 text-center bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30 transform hover:-translate-y-0.5 border border-indigo-500/50 flex items-center justify-center gap-2"
-                    >
-                    <Chrome />
-                      Add to Chrome
-                    </a>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                <Chrome />
+                Add to Chrome
+              </a>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              className="md:hidden p-2 rounded-lg hover:bg-white/50 transition-colors shadow-lg shadow-indigo-500/10 hover:shadow-xl hover:shadow-indigo-500/20 transform hover:-translate-y-0.5"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              {isMenuOpen ? (
+                <FiX className="w-6 h-6 text-gray-600" />
+              ) : (
+                <FiMenu className="w-6 h-6 text-gray-600" />
+              )}
+            </button>
+          </div>
         </nav>
+
+        {/* Mobile Menu */}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="md:hidden backdrop-blur-lg bg-white/70 border-b border-indigo-500/50 shadow-lg shadow-indigo-500/10"
+            >
+              <div className="container mx-auto px-4 py-4 space-y-4">
+                <Link to="#features" className="block text-gray-600 hover:text-indigo-600 transition-colors">Features</Link>
+                <Link to="#pricing" className="block text-gray-600 hover:text-indigo-600 transition-colors">Pricing</Link>
+                <Link to="#about" className="block text-gray-600 hover:text-indigo-600 transition-colors">About</Link>
+                <Link to="#contact" className="block text-gray-600 hover:text-indigo-600 transition-colors">Contact</Link>
+                <div className="pt-4 space-y-2">
+                  <a
+                    href="https://chrome.google.com/webstore"
+                    target="_blank"
+                    rel="noopener noref errer"
+                    className="block w-full px-4 py-2 text-center bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30 transform hover:-translate-y-0.5 border border-indigo-500 border-indigo-500/50 flex items-center justify-center gap-2"
+                  >
+                  <Chrome />
+                    Add to Chrome
+                  </a>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.header>
 
       {/* Hero Section */}
-      <div className="relative">
-        <div className="container mx-auto px-4 pt-40 pb-32">
-          <div className="max-w-4xl mx-auto text-center mb-20">
+       {/* <div className="relative overflow-hidden bg-gradient-to-b from-indigo-50 via-white to-white pt-20 pb-16 sm:pb-24"> */}
+       <div className="relative overflow-hidden bg-gradient-to-b from-indigo-50 via-white to-white pt-20 pb-16 sm:pb-24">
+      <div className="absolute inset-y-0 w-full h-full">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]" />
+      </div>
+        <div className="container mx-auto px-4 pt-40  pb-32 ">
+          <div className="max-w-4xl mx-auto text-center z-20 mb-20">
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className="text-6xl md:text-7xl font-bold text-gray-900 mb-8 tracking-tight"
             >
-              Your Ultimate Browser{' '}
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-500">
-                Toolkit
+              Your Ultimate
+              <br />
+              <span className="wavy-underline mt-3 text-indigo-600 bg-indigo-50 px-2 pb-2 rounded-lg">
+                Browser Toolkit
               </span>
             </motion.h1>
             <motion.p
@@ -209,7 +176,7 @@ const LandingPage = () => {
                 <Chrome />
                 Add to Chrome - It's Free
               </a>
-              <button className="px-8 py-4 rounded-xl bg-white/50 backdrop-blur-sm text-gray-900 font-semibold hover:bg-white/60 transition-all shadow-lg shadow-indigo-500/10 hover:shadow-xl hover:shadow-indigo-500/20 transform hover:-translate-y-0.5 border border-white/40">
+              <button className="px-8 py-4 rounded-xl bg-white/50 backdrop-blur-sm text-gray-900 font-semibold hover:bg-white/60 transition-all shadow-lg shadow-indigo-500/10 hover:shadow-xl hover:shadow-indigo-500/20 transform hover:-translate-y-0.5 border hover:border-indigo-500 border-indigo-500/20">
                 Learn More
               </button>
             </motion.div>
@@ -222,8 +189,9 @@ const LandingPage = () => {
               className="relative mx-auto"
             >
               <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/20 to-white/40 backdrop-blur-sm rounded-2xl transform -skew-y-1" />              
-                <img src={"/DashBoardPreview.png"} style={{borderRadius: "32px"}} className='block relative pointer-events-none shadow-2xl overflow-hidden border border-white/40 bg-white/80 ring-1 ring-indigo-500/10' alt="Search Page" />
-              {/* Decorative Elements */}
+                
+                <img src={"/DashBoardPreview.png"} style={{borderRadius: "32px"}} className='block  border-indigo-500/50 relative  shadow-2xl overflow-hidden border  hover:scale-105 transition-all ring-1 ring-indigo-500/10' alt="Search Page" />
+            
               <div className="absolute -top-8 -left-8 w-16 h-16 bg-indigo-500/10 rounded-full blur-2xl" />
               <div className="absolute -bottom-8 -right-8 w-16 h-16 bg-purple-500/10 rounded-full blur-2xl" />
             </motion.div>
@@ -238,13 +206,6 @@ const LandingPage = () => {
             ))}
           </div>
         </div> */}
-        <div className="absolute bottom-40 right-10 w-24 h-24 opacity-20">
-          <div className="grid grid-cols-3 gap-2">
-            {[...Array(9)].map((_, i) => (
-              <div key={i} className="w-2 h-2 rounded-full bg-purple-500" />
-            ))}
-          </div>
-        </div>
       </div>
 
       {/* Divider Line */}
@@ -303,12 +264,12 @@ const LandingPage = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="p-6 rounded-2xl bg-white/60 backdrop-blur-lg border border-white/40 shadow-lg"
+            className="p-6 rounded-2xl bg-white backdrop-blur-lg border border-gray-200/50 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-lg transition-all"
           >
-            <div className="text-red-500 mb-4">
-              <FaExclamationCircle className="w-12 h-12" />
+            <div className="bg-gray-50 w-14 h-14 rounded-xl flex items-center justify-center mb-6">
+              <FaExclamationCircle className="w-7 h-7 text-indigo-600" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-3">Information Overload</h3>
+            <h3 className="text-xl font-semibold mb-2 text-gray-900">Information Overload</h3>
             <p className="text-gray-600">Overwhelmed by the sheer volume of digital content and tools available online.</p>
           </motion.div>
 
@@ -316,12 +277,12 @@ const LandingPage = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="p-6 rounded-2xl bg-white/60 backdrop-blur-lg border border-white/40 shadow-lg"
+            className="p-6 rounded-2xl bg-white backdrop-blur-lg border border-gray-200/50 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-lg transition-all"
           >
-            <div className="text-orange-500 mb-4">
-              <FaClock className="w-12 h-12" />
+            <div className="bg-gray-50 w-14 h-14 rounded-xl flex items-center justify-center mb-6">
+              <FaClock className="w-7 h-7 text-indigo-600" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-3">Time Wastage</h3>
+            <h3 className="text-xl font-semibold mb-2 text-gray-900">Time Wastage</h3>
             <p className="text-gray-600">Hours lost switching between different apps and platforms to accomplish tasks.</p>
           </motion.div>
 
@@ -329,12 +290,12 @@ const LandingPage = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="p-6 rounded-2xl bg-white/60 backdrop-blur-lg border border-white/40 shadow-lg"
+            className="p-6 rounded-2xl bg-white backdrop-blur-lg border border-gray-200/50 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-lg transition-all"
           >
-            <div className="text-yellow-500 mb-4">
-              <FaPizzaSlice className="w-12 h-12" />
+            <div className="bg-gray-50 w-14 h-14 rounded-xl flex items-center justify-center mb-6">
+              <FaPizzaSlice className="w-7 h-7 text-indigo-600" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-3">Fragmented Experience</h3>
+            <h3 className="text-xl font-semibold mb-2 text-gray-900">Fragmented Experience</h3>
             <p className="text-gray-600">Disconnected tools and platforms creating a disjointed digital experience.</p>
           </motion.div>
         </div>
@@ -403,7 +364,7 @@ const LandingPage = () => {
             whileInView={{ opacity: 1, x: 0 }}
             className="relative"
           >
-            <div className="relative rounded-2xl overflow-hidden border border-white/40 shadow-2xl bg-white/80">
+            <div className="relative rounded-2xl overflow-hidden border border-indigo-500/50 shadow-2xl bg-white/80">
               <img 
                 src="/solution-preview.png" 
                 alt="Solution Preview" 
@@ -421,7 +382,7 @@ const LandingPage = () => {
       <div className="w-full h-px bg-gradient-to-r from-transparent via-indigo-200/20 to-transparent" />
 
       {/* Pricing Section */}
-      <div className="backdrop-blur-lg bg-gradient-to-b from-indigo-200/30 to-transparent  border-y border-white/40 py-20">
+      <div className="backdrop-blur-lg bg-gradient-to-b from-indigo-200/30 to-transparent  border-y border-indigo-500/50 py-20">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -464,7 +425,7 @@ const LandingPage = () => {
                 className={`backdrop-blur-lg  ${
                   plan.popular ? 'bg-indigo-600/90 border-indigo-800/50 hover:border-indigo-800 border ' : 'bg-white/30 border-indigo-500/50 hover:border-indigo-500 border'
                 } rounded-2xl p-8 border ${
-                  plan.popular ? ' border-indigo-500/50 hover:border-indigo-500 border' : ' border-white/40'
+                  plan.popular ? ' border-indigo-500/50 hover:border-indigo-500 border' : ' border-indigo-500/50'
                 } relative shadow-lg shadow-indigo-500/10 hover:shadow-xl hover:shadow-indigo-500/20 transition-all`}
               >
                 {plan.popular && (
@@ -543,7 +504,7 @@ const LandingPage = () => {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.2 }}
-              className="backdrop-blur-lg bg-white/30 p-6 rounded-2xl border border-white/40 shadow-lg shadow-indigo-500/10 hover:shadow-xl hover:shadow-indigo-500/20 transition-all"
+              className="backdrop-blur-lg bg-white/30 p-6 rounded-2xl border border-indigo-500/50 shadow-lg shadow-indigo-500/10 hover:shadow-xl hover:shadow-indigo-500/20 transition-all"
             >
               <div className="flex items-center gap-4 mb-6">
                 <img
@@ -566,7 +527,7 @@ const LandingPage = () => {
       <div className="w-full h-px bg-gradient-to-r from-transparent via-indigo-200/20 to-transparent" />
 
       {/* FAQ Accordion */}
-      <div className="backdrop-blur-lg bg-white/30 border-y border-white/40 py-20">
+      <div className="backdrop-blur-lg bg-white/30 border-y border-indigo-500/50 py-20">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -600,7 +561,7 @@ const LandingPage = () => {
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="backdrop-blur-lg bg-white/50 rounded-xl border border-white/40 overflow-hidden shadow-lg shadow-indigo-500/10 hover:shadow-xl hover:shadow-indigo-500/20 transition-all"
+                className="backdrop-blur-lg bg-white/50 rounded-xl border border-indigo-500/50 overflow-hidden shadow-lg shadow-indigo-500/10 hover:shadow-xl hover:shadow-indigo-500/20 transition-all"
               >
                 <button
                   onClick={() => setOpenFaq(openFaq === index ? null : index)}
@@ -683,7 +644,7 @@ const LandingPage = () => {
       </div>
 
       {/* Stats Section */}
-      <div className="backdrop-blur-lg bg-white/30 border-y border-white/40">
+      <div className="backdrop-blur-lg bg-white/30 border-y border-indigo-500/50">
         <div className="container mx-auto px-4 py-20">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="text-center">
@@ -775,14 +736,3 @@ const LandingPage = () => {
 };
 
 export default LandingPage;
-
-<style jsx>{`
-  @keyframes orbit {
-    0% {
-      transform: translate(-50%, -50%) rotate(0deg) translateX(200px) rotate(0deg);
-    }
-    100% {
-      transform: translate(-50%, -50%) rotate(360deg) translateX(200px) rotate(-360deg);
-    }
-  }
-`}</style>
