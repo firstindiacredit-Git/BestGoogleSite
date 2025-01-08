@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiSearch, FiLock, FiBook, FiEdit3, FiCheck, FiPlus, FiMinus, 
-         FiGithub, FiTwitter, FiInstagram, FiLinkedin, FiMenu, FiX } from 'react-icons/fi';
+         FiGithub, FiTwitter, FiInstagram, FiLinkedin, FiMenu, FiX, 
+         FiUserCheck,
+         FiLink,
+         FiBookmark} from 'react-icons/fi';
 import { Link } from 'react-router-dom';
-import { FaClock, FaExclamationCircle, FaHandSparkles,  FaPizzaSlice, FaShieldVirus } from 'react-icons/fa';
-import { FlashlightOnOutlined } from '@mui/icons-material';
-import { Chrome } from 'lucide-react';
+import { FaChrome, FaChromecast, FaClock, FaExclamationCircle, FaHandSparkles,  FaPizzaSlice, FaSearch, FaShieldVirus, FaUserLock } from 'react-icons/fa';
+import { FlashlightOnOutlined, Web, WebStories } from '@mui/icons-material';
+import { Chrome, ChromeIcon } from 'lucide-react';
 import "./Landing.css"
 const FeatureCard = ({ icon: Icon, title, description }) => (
   <motion.div
@@ -23,25 +26,6 @@ const FeatureCard = ({ icon: Icon, title, description }) => (
 const LandingPage = () => {
   const [openFaq, setOpenFaq] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => {
-      const scrolled = window.scrollY > 10;
-      setIsScrolled(scrolled);
-      console.log('Scroll position:', window.scrollY, 'isScrolled:', scrolled);
-    };
-
-    // Add event listener
-    window.addEventListener('scroll', onScroll);
-    
-    // Initial check
-    onScroll();
-
-    // Cleanup
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
   return (
     <div className="min-h-[200vh] relative">
       <motion.header
@@ -50,28 +34,30 @@ const LandingPage = () => {
         className={`fixed top-0 left-0 right-0 w-full z-50 transition-all duration-300 bg-white/20 backdrop-blur-md  border-b border-gray-200/50`}
       >
         <nav className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between   h-16">
             {/* Logo */}
-            <Link to="/" className="flex items-center space-x-2">
-              <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-500 bg-clip-text text-transparent">
+            <Link to="/" className="flex px-6 w-44 items-center space-x-2">
+              <span className="text-2xl  font-bold bg-gradient-to-r from-indigo-600 to-purple-500 bg-clip-text text-transparent">
                 BGS
               </span>
             </Link>
 
-            {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
-              <Link to="#features" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-lg hover:bg-white/60">
+              {/* <Link to="#features" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-lg hover:bg-white/60">
                 Features
-              </Link>
-              <Link to="#pricing" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-lg hover:bg-white/60">
+              </Link> */}
+              <Link to="/pricing" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-lg hover:bg-white/60">
                 Pricing
               </Link>
-              <Link to="#about" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-lg hover:bg-white/60">
+              <Link to="/about" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-lg hover:bg-white/60">
                 About
               </Link>
-              <Link to="#contact" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-lg hover:bg-white/60">
-                Contact
+              <Link to="/faq" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-lg hover:bg-white/60">
+                FAQ
               </Link>
+              {/* <Link to="#contact" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-lg hover:bg-white/60">
+                Contact
+              </Link> */}
             </div>
 
             {/* Auth Buttons */}
@@ -133,12 +119,78 @@ const LandingPage = () => {
       </motion.header>
 
       {/* Hero Section */}
-       {/* <div className="relative overflow-hidden bg-gradient-to-b from-indigo-50 via-white to-white pt-20 pb-16 sm:pb-24"> */}
-       <div className="relative overflow-hidden bg-gradient-to-b from-indigo-50 via-white to-white pt-20 pb-16 sm:pb-24">
-      <div className="absolute inset-y-0 w-full h-full">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]" />
-      </div>
-        <div className="container mx-auto px-4 pt-40  pb-32 ">
+      <div className="relative overflow-hidden bg-gradient-to-b from-indigo-50 via-white to-white pt-20 pb-16 sm:pb-24">
+        <div className="absolute inset-y-0 w-full h-full">
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]" />
+        </div>
+
+        {/* Floating Icons */}
+        <div className="absolute inset-0 overflow-hidden">
+          {/* Google Icon */}
+          <motion.div
+            initial={{ y: 0 }}
+            animate={{ y: [-10, 10, -10] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-28 left-[28%]  p-3 bg-white rounded-xl shadow-[0_0_15px_2px_rgba(99,102,241,0.2)] backdrop-blur-sm"
+
+          >
+            <ChromeIcon className="w-6 h-6 text-indigo-600" />
+
+          </motion.div>
+
+          {/* Search Icon */}
+          <motion.div
+            initial={{ y: 0 }}
+            animate={{ y: [-15, 5, -15] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+            className="absolute top-40 right-[20%] p-3 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-xl shadow-[0_0_15px_2px_rgba(99,102,241,0.2)] backdrop-blur-sm"
+          >
+            <FaSearch className="w-6 h-6 text-white" />
+          </motion.div>
+
+          {/* Search Icon */}
+          <motion.div
+            initial={{ y: 0 }}
+            animate={{ y: [-12, 8, -12] }}
+            transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
+            className="absolute top-72 left-[25%] p-3 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-xl shadow-[0_0_15px_2px_rgba(99,102,241,0.2)] backdrop-blur-sm"
+            // className="absolute top-24 right-[15%] p-3 bg-white rounded-xl shadow-[0_0_15px_2px_rgba(99,102,241,0.2)] backdrop-blur-sm"
+          >
+            <FiLink className="w-6 h-6 text-white" />
+          </motion.div>
+
+          {/* Lock Icon */}
+          <motion.div
+            initial={{ y: 0 }}
+            animate={{ y: [-12, 8, -12] }}
+            transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
+            className="absolute top-72 right-[25%] p-3 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-xl shadow-[0_0_15px_2px_rgba(99,102,241,0.2)] backdrop-blur-sm"
+            // className="absolute top-24 right-[15%] p-3 bg-white rounded-xl shadow-[0_0_15px_2px_rgba(99,102,241,0.2)] backdrop-blur-sm"
+          >
+            <FiUserCheck className="w-6 h-6 text-white" />
+          </motion.div>
+          <motion.div
+            initial={{ y: 0 }}
+            animate={{ y: [-12, 8, -12] }}
+            transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
+            className="absolute top-48 left-[18%] p-3 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-xl shadow-[0_0_15px_2px_rgba(99,102,241,0.2)] backdrop-blur-sm"
+            // className="absolute top-24 right-[15%] p-3 bg-white rounded-xl shadow-[0_0_15px_2px_rgba(99,102,241,0.2)] backdrop-blur-sm"
+          >
+            <FiBookmark className="w-6 h-6 text-white" />
+          </motion.div>
+
+          {/* Note Icon */}
+          <motion.div
+            initial={{ y: 0 }}
+            animate={{ y: [-10, 10, -10] }}
+            transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+            className="absolute top-32 right-[30%] p-3 bg-white rounded-xl shadow-[0_0_15px_2px_rgba(99,102,241,0.2)] backdrop-blur-sm"
+          >
+            <FiBook className="w-6 h-6 text-indigo-600" />
+          </motion.div>
+        </div>
+
+        <div className="container mx-auto px-4 pt-20  pb-8 relative z-10">
           <div className="max-w-4xl mx-auto text-center z-20 mb-20">
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
@@ -147,7 +199,7 @@ const LandingPage = () => {
             >
               Your Ultimate
               <br />
-              <span className="wavy-underline mt-3 text-indigo-600 bg-indigo-50 px-2 pb-2 rounded-lg">
+              <span className="wavy-underline mt-3 text-indigo-600  px-2 pb-2 rounded-lg">
                 Browser Toolkit
               </span>
             </motion.h1>
@@ -188,9 +240,9 @@ const LandingPage = () => {
               transition={{ delay: 0.3 }}
               className="relative mx-auto"
             >
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/20 to-white/40 backdrop-blur-sm rounded-2xl transform -skew-y-1" />              
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/20 to-white/40 backdrop-blur-sm rounded-2xl transform hover:-skew-y-1" />              
                 
-                <img src={"/DashBoardPreview.png"} style={{borderRadius: "32px"}} className='block  border-indigo-500/50 relative  shadow-2xl overflow-hidden border  hover:scale-105 transition-all ring-1 ring-indigo-500/10' alt="Search Page" />
+                <img src={"/DashBoardPreview.png"} style={{borderRadius: "32px"}} className='block  border-indigo-500/50 relative  shadow-2xl overflow-hidden border  hover:-translate-y-1 scale-100 hover:scale-105 transition-all ring-1 ring-indigo-500/10' alt="Search Page" />
             
               <div className="absolute -top-8 -left-8 w-16 h-16 bg-indigo-500/10 rounded-full blur-2xl" />
               <div className="absolute -bottom-8 -right-8 w-16 h-16 bg-purple-500/10 rounded-full blur-2xl" />
@@ -198,18 +250,12 @@ const LandingPage = () => {
           </div>
         </div>
 
-        {/* Decorative Dots */}
-        {/* <div className="absolute top-40 left-10 w-24 h-24 opacity-20">
-          <div className="grid grid-cols-3 gap-2">
-            {[...Array(9)].map((_, i) => (
-              <div key={i} className="w-2 h-2 rounded-full bg-indigo-500" />
-            ))}
-          </div>
-        </div> */}
       </div>
 
       {/* Divider Line */}
       <div className="w-full h-px bg-gradient-to-r from-transparent via-indigo-200/20 to-transparent" />
+
+    
 
       {/* Features Grid */}
       <div id="features" className="container mx-auto px-4 py-20">
@@ -358,23 +404,6 @@ const LandingPage = () => {
               </div>
             </div>
           </motion.div>
-
-          {/* <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            className="relative"
-          >
-            <div className="relative rounded-2xl overflow-hidden border border-indigo-500/50 shadow-2xl bg-white/80">
-              <img 
-                src="/solution-preview.png" 
-                alt="Solution Preview" 
-                className="w-full h-auto"
-                style={{ borderRadius: "24px" }}
-              />
-            </div>
-            <div className="absolute -top-6 -right-6 w-12 h-12 bg-indigo-500/10 rounded-full blur-xl" />
-            <div className="absolute -bottom-6 -left-6 w-12 h-12 bg-purple-500/10 rounded-full blur-xl" />
-          </motion.div> */}
         </div>
       </div>
 
@@ -440,7 +469,7 @@ const LandingPage = () => {
                   <span className={`text-4xl font-bold ${plan.popular ? 'text-white' : 'text-indigo-600'}`}>
                     ${plan.price}
                   </span>
-                  <span className={plan.popular ? 'text-white/80' : 'text-gray-600'}>/month</span>
+                  <span className={plan.popular ? 'text-white/80' : 'text-gray-600'}>{plan.popular?"/Month":"/Forever"}</span>
                 </div>
                 <ul className="space-y-4 mb-8">
                   {plan.features.map((feature, i) => (
@@ -455,7 +484,7 @@ const LandingPage = () => {
                     plan.popular
                       ? 'bg-white text-indigo-600 hover:bg-gray-100'
                       : 'bg-indigo-600 text-white hover:bg-indigo-700'
-                  } shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30 transform hover:-translate-y-0.5 border border-indigo-500/50`}
+                  } shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30 transform  border border-indigo-500/50`}
                 >
                   Get Started
                 </button>

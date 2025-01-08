@@ -40,18 +40,28 @@
   position: absolute;
   left: 0;
   bottom: -5px;
-  width: 100%;
+  width: 0;
   height: 3px;
-  background: rgb(99 102 241);
+  background: rgb(99, 102, 241);
   border-radius: 999px;
-  animation: wave 2s ease-in-out infinite;
+  animation: marker-draw-remove-forward 4s ease-in-out forwards infinite;
 }
 
-@keyframes wave {
-  0%, 100% {
-    transform: translateY(0) scaleX(1);
+@keyframes marker-draw-remove-forward {
+  0% {
+    width: 0;
+    left: 0;
   }
-  50% {
-    transform: translateY(3px) scaleX(0.95);
+  25% {
+    width: 100%; /* Grows the underline fully across the text */
+    left: 0;
+  }
+  75% {
+    width: 100%; /* Stays visible for a moment */
+    left: 0;
+  }
+  100% {
+    width: 0;
+    left: 100%; /* Moves completely out in the same direction */
   }
 }

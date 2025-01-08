@@ -20,6 +20,9 @@ import PasswordGenerator from "./components/PasswordGenerater.jsx";
 import PremiumForm from "./components/PremiumForm.jsx";
 import Sidebar from "./components/Admin/Sidebar.jsx";
 import LandingPage from "./components/LandingPage.jsx";
+import AboutPage from "./components/AboutPage.jsx";
+import PricingPage from "./components/PricingPage.jsx";
+import FAQPage from "./components/FAQPage.jsx";
 
 // Context Menu Items configuration
 const menuItems = [
@@ -208,36 +211,37 @@ const ContextMenuWrapper = ({ children }) => {
 
 // App Component
 const App = () => {
-
   return (
     <AuthProvider>
-  <Router>
-    <Routes>
-      {/* Public Routes */}
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/search" element={<ContextMenuWrapper><SearchPage /></ContextMenuWrapper>} />
-      <Route path="/calculator" element={<ContextMenuWrapper><AddList /></ContextMenuWrapper>} />
-      <Route path="/newsearch" element={<ContextMenuWrapper><NewSearchPage /></ContextMenuWrapper>} />
-      <Route path="/password-generator" element={<ContextMenuWrapper><PasswordGenerator /></ContextMenuWrapper>} />
-      <Route path="/signin" element={<Signin />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/profile" element={<ProfilePage />} />
-      <Route path="/forgot-password" element={<Forgotpassword />} />
-      <Route path="/premium" element={<PremiumPage />} />
-      <Route path="/premium-form" element={<PremiumForm />} />
+      <Router>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/faq" element={<FAQPage />} />
+          <Route path="/search" element={<ContextMenuWrapper><SearchPage /></ContextMenuWrapper>} />
+          <Route path="/calculator" element={<ContextMenuWrapper><AddList /></ContextMenuWrapper>} />
+          <Route path="/newsearch" element={<ContextMenuWrapper><NewSearchPage /></ContextMenuWrapper>} />
+          <Route path="/password-generator" element={<ContextMenuWrapper><PasswordGenerator /></ContextMenuWrapper>} />
+          <Route path="/signin" element={<Signin />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/forgot-password" element={<Forgotpassword />} />
+          <Route path="/premium" element={<PremiumPage />} />
+          <Route path="/premium-form" element={<PremiumForm />} />
 
-      {/* Admin Routes with Sidebar Layout */}
-      <Route element={<Sidebar />}>
-        <Route path="/admin/login" element={<Login />} />
-        <Route path="/admin/dashboard" element={<Dashboard />} />
-        <Route path="/admin/users" element={<Users />} />
-        <Route path="/admin/AddBookmark" element={<AddBookmark />} />
-        <Route path="/admin/addlinks" element={<AddLinks />} />
-      </Route>
-    </Routes>
-  </Router>
-</AuthProvider>
-
+          {/* Admin Routes with Sidebar Layout */}
+          <Route element={<Sidebar />}>
+            <Route path="/admin/login" element={<Login />} />
+            <Route path="/admin/dashboard" element={<Dashboard />} />
+            <Route path="/admin/users" element={<Users />} />
+            <Route path="/admin/AddBookmark" element={<AddBookmark />} />
+            <Route path="/admin/addlinks" element={<AddLinks />} />
+          </Route>
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 };
 
