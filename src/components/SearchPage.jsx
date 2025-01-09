@@ -229,7 +229,7 @@ function SearchPage() {
             </div>
           </div>
         </div>
-        <div className=" max-w-[90vw]  mx-auto   " style={{transform: 'scale(0.9)'}}>
+        <div className=" max-w-screen-2xl  mx-auto">
           {activeComponent === "NotebookAndSheet" ? (
             <NotebookAndSheet />
           ) : activeComponent === "PopularBookmarks" ? (

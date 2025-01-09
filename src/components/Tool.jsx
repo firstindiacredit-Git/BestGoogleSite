@@ -5,16 +5,17 @@ const IframePage = () => {
     <div className="mt-20">
       <div
         className="flex-grow-1"
-        style={{  background:"red", overflow: "hidden", }}
+        style={{ overflow: "clip",borderRadius:"1rem" }} // Removed the "red" background
       >
         <iframe
           src="https://pizeonflytools.vercel.app/"
           style={{
             width: "100%",
-            height: "60vh",
+            height: "290vh",
             border: "none",
             position: "relative",
             top: "-4.5rem",
+            borderRadius:"1rem"
           }}
           title="Tool"
         />

@@ -337,8 +337,9 @@ const CredentialManager = () => {
   return (
     <>
       {isLocked ? (
-        <div className="w-full bg-white/50 dark:bg-gray-900/50 rounded-t-lg max-w-6xl  h-[80vh] max-screen-lg mx-auto  flex items-center justify-center">
-          <div className="p-8  border bg-white dark:bg-gray-900  border-gray-500/5 text-center rounded-lg shadow-lg w-fit">
+        <div className="p-8 bg-white/50 dark:bg-gray-900/50 flex justify-center max-w-6xl w-full mx-auto rounded-xl ">
+        <div className="w-full bg-white dark:bg-gray-900 rounded-t-lg   h-[80vh]   flex items-center justify-center">
+          <div className="p-8  border bg-white dark:bg-gray-800  border-gray-500/5 text-center rounded-lg shadow-lg w-fit">
             <div className="flex text-blue-500 text-6xl items-center justify-center">
               <FaLock />
             </div>
@@ -378,9 +379,10 @@ const CredentialManager = () => {
             </div>
           </div>
         </div>
+        </div>
       ) : (
-        <div className="mx-auto min-h-[20vh] max-w-[90vw]  p-12 pb-14 dark:bg-gray-900/50 bg-white/50">
-          <div className="flex justify-between w-[68%] xl:w-[79.2%] items-center">
+        <div className="mx-auto min-h-[20vh] max-w-[90vw] rounded-xl  p-12 pb-14 dark:bg-gray-900/50 bg-white/50">
+          <div className="flex justify-between w-[68%] xl:w-[79.2%] dark:bg-gray-900 bg-white items-center">
             <button
               className="transition-all bg-blue-500 text-white lg:text-lg text-sm lg:px-4 px-2 py-2 rounded-md mb-4"
               onClick={() => showModal()}
@@ -442,7 +444,7 @@ const CredentialManager = () => {
             </div>
           </div>
 
-          <div className="flex justify-between space-x-4 w-full">
+          <div className="flex justify-between space-x-4 w-full dark:bg-gray-900 bg-white">
             {isGridView ? (
               filteredCredentials.length > 0 ? (
                 <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 p-5 dark:bg-gray-950/10 bg-gray-100 border h-fit border-black/5 rounded-lg gap-4 w-[70%] xl:w-[80%]">
@@ -749,11 +751,12 @@ const CredentialManager = () => {
                 )}
               </div>
             )}
-            <div className="w-[30%] xl:w-[20%] h-fit min-h-72">
+            <div className="w-[30%] dark:bg-gray-900 bg-white xl:w-[20%] ">
+            <div >
               <h2
-                className={`font-semibold ${
+                className={`font-semibold dark:bg-gray-900 bg-white ${
                   window.size < 1134 ? "-translate-y-8" : "-translate-y-14"
-                } text-center dark:text-gray-100 text-lg lg:text-2xl`}
+                } text-center dark:text-gray-100 text-lg lg:text-2xl `}
               >
                 Generate Password
               </h2>
@@ -825,6 +828,7 @@ const CredentialManager = () => {
                   </button>
                 </div>
               </div>
+            </div>
             </div>
           </div>
 

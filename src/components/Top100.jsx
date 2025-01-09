@@ -133,28 +133,28 @@ const Top100Page = () => {
   const [page, setPage] = useState(1);
   const [viewMode, setViewMode] = useState('grid');
   const [searchQuery, setSearchQuery] = useState('');
-  const API_KEY = 'BTOsYx47SEw8rRDvct+x+g==SUy2ivypa6z9mOk1';
+  // const API_KEY = 'BTOsYx47SEw8rRDvct+x+g==SUy2ivypa6z9mOk1';
   const year = new Date().getFullYear();
   // Updated APIs with real free API endpoints
-  const APIs = {
-    motorcycles: 'local',
-    cars: `https://api.api-ninjas.com/v1/cars?limit=100&year=${year}`,
-    stocks: 'https://finnhub.io/api/v1/stock/symbol?exchange=US&token=ctp4omhr01qhpppjiev0ctp4omhr01qhpppjievg',
-    crypto: 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100',
-    billionaires: `https://forbes400.onrender.com/api/forbes400?limit=100&year=${year}`,
-    banks: 'wikipedia',
-    sportsmen: 'local',
-    movies: 'https://imdb-top-100-movies.p.rapidapi.com/',
-    brands: 'local',
-    gdp: 'local'
-  };
+  // const APIs = {
+  //   motorcycles: 'local',
+  //   cars: `https://api.api-ninjas.com/v1/cars?limit=100&year=${year}`,
+  //   stocks: 'https://finnhub.io/api/v1/stock/symbol?exchange=US&token=ctp4omhr01qhpppjiev0ctp4omhr01qhpppjievg',
+  //   crypto: 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100',
+  //   billionaires: `https://forbes400.onrender.com/api/forbes400?limit=100&year=${year}`,
+  //   banks: 'wikipedia',
+  //   sportsmen: 'local',
+  //   movies: 'https://imdb-top-100-movies.p.rapidapi.com/',
+  //   brands: 'local',
+  //   gdp: 'local'
+  // };
 
-  const VIN_NUMBERS = [
-    '5UXWX7C5*BA',
-    '1HGCM82633A123456',
-    'WDDUG7JB0FA123456',
-    // Add more VIN numbers...
-  ];
+  // const VIN_NUMBERS = [
+  //   '5UXWX7C5*BA',
+  //   '1HGCM82633A123456',
+  //   'WDDUG7JB0FA123456',
+  //   // Add more VIN numbers...
+  // ];
 
   // Update the filteredItems definition with null checks
   const filteredItems = items.map((item, index) => ({
@@ -308,6 +308,7 @@ const Top100Page = () => {
       {filteredItems.map((item) => (
         <Col xs={24} sm={12} lg={8} key={item.originalIndex}>
           <Card
+          className="dark:bg-gray-900 border border-gray-200 dark:border-gray-800 dark:text"
             title={
               category === 'stocks' ? (
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -453,31 +454,31 @@ const Top100Page = () => {
       itemLayout="horizontal"
       dataSource={filteredItems}
       renderItem={(item) => (
-        <List.Item>
+        <List.Item className="bg-gray-200 dark:bg-gray-900 dark:text-white  rounded-lg mb-4">
           <List.Item.Meta
             title={
               category === 'stocks' ? (
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span>{item.originalIndex + 1}. {item.name}</span>
+                <div className="dark:text-white" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span className="dark:text-white">{item.originalIndex + 1}. {item.name}</span>
                 </div>
               ) : category === 'motorcycles' ? (
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span>{item.originalIndex + 1}. {item.name}</span>
-                  <span>{item.description.split('Kmh Speed: ')[1]?.split('km/h')[0]} km/h</span>
+                <div className="dark:text-white" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span className="dark:text-white">{item.originalIndex + 1}. {item.name}</span>
+                  <span className="dark:text-white">{item.description.split('Kmh Speed: ')[1]?.split('km/h')[0]} km/h</span>
                 </div>
               ) : category === 'brands' ? (
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span>{item.originalIndex + 1}. {item.name}</span>
-                  <span>{item.value}</span>
+                <div className="dark:text-white" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span className="dark:text-white">{item.originalIndex + 1}. {item.name}</span>
+                  <span className="dark:text-white">{item.value}</span>
                 </div>
               ) : category === 'sportsmen' ? (
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span>{item.originalIndex + 1}. {item.name?.split('$')[0] || item.name}</span>
-                  <span>{item.name?.includes('$') ? `$${item.name.split('$')[1]}` : ''}</span>
+                <div className="dark:text-white" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span className="dark:text-white">{item.originalIndex + 1}. {item.name?.split('$')[0] || item.name}</span>
+                  <span className="dark:text-white">{item.name?.includes('$') ? `$${item.name.split('$')[1]}` : ''}</span>
                 </div>
               ) : category === 'billionaires' ? (
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div className="dark:text-white" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div className="dark:text-white" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     {item.image && (
                       <img 
                         src={item.image} 
@@ -490,19 +491,19 @@ const Top100Page = () => {
                         }} 
                       />
                     )}
-                    <span>{item.originalIndex + 1}. {item.name}</span>
+                    <span className="dark:text-white">{item.originalIndex + 1}. {item.name}</span>
                   </div>
-                  <span>{item.description?.split('Net Worth: ')[1]?.split(',')[0]}</span>
+                  <span className="dark:text-white">{item.description?.split('Net Worth: ')[1]?.split(',')[0]}</span>
                 </div>
               ) : category === 'crypto' ? (
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span>{item.originalIndex + 1}. {item.name}</span>
-                  <span>{item.description?.includes('Price: $') ? `$${item.description.split('Price: $')[1]?.split(',')[0]}` : ''}</span>
+                <div className="dark:text-white" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span className="dark:text-white">{item.originalIndex + 1}. {item.name}</span>
+                  <span className="dark:text-white">{item.description?.includes('Price: $') ? `$${item.description.split('Price: $')[1]?.split(',')[0]}` : ''}</span>
                 </div>
               ) : category === 'gdp' ? (
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span>{item.originalIndex + 1}. {item.name}</span>
-                  <span>{item.value}</span>
+                <div className="dark:text-white" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span className="dark:text-white">{item.originalIndex + 1}. {item.name}</span>
+                  <span className="dark:text-white">{item.value}</span>
                 </div>
               ) : (
                 `${item.originalIndex + 1}. ${item.name}`
@@ -516,8 +517,8 @@ const Top100Page = () => {
   );
 
   return (
-    <div className="max-w-screen-xl mx-auto p-4">
-      <Title level={1} style={{ textAlign: 'center', marginBottom: '2rem' }}>
+    <div className="max-w-screen-2xl mx-auto p-4 bg-gray-200/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-800 rounded-xl">
+      <Title level={1} style={{ textAlign: 'center', marginBottom: '2rem', }} className="dark:text-white">
         Top 100 {category.charAt(0).toUpperCase() + category.slice(1)}
       </Title>
 
@@ -525,16 +526,16 @@ const Top100Page = () => {
         {/* Category Selection */}
         <div style={{ textAlign: 'center' }}>
           <Radio.Group value={category} onChange={(e) => setCategory(e.target.value)} buttonStyle="solid">
-            <Radio.Button value="motorcycles">Bikes</Radio.Button>
-            <Radio.Button value="cars">Cars</Radio.Button>
-            <Radio.Button value="crypto">Crypto</Radio.Button>
-            <Radio.Button value="stocks">Stocks</Radio.Button>
-            <Radio.Button value="billionaires">Billionaires</Radio.Button>
-            <Radio.Button value="banks">Banks</Radio.Button>
-            <Radio.Button value="sportsmen">Sports Person</Radio.Button>
-            <Radio.Button value="movies">Movies</Radio.Button>
-            <Radio.Button value="brands">Brands</Radio.Button>
-            <Radio.Button value="gdp">GDP</Radio.Button>
+            <Radio.Button className="dark:bg-gray-900 dark:text-white" value="motorcycles">Bikes</Radio.Button>
+            <Radio.Button className="dark:bg-gray-900 dark:text-white" value="cars">Cars</Radio.Button>
+            <Radio.Button className="dark:bg-gray-900 dark:text-white" value="crypto">Crypto</Radio.Button>
+            <Radio.Button className="dark:bg-gray-900 dark:text-white" value="stocks">Stocks</Radio.Button>
+            <Radio.Button className="dark:bg-gray-900 dark:text-white" value="billionaires">Billionaires</Radio.Button>
+            <Radio.Button className="dark:bg-gray-900 dark:text-white" value="banks">Banks</Radio.Button>
+            <Radio.Button className="dark:bg-gray-900 dark:text-white" value="sportsmen">Sports Person</Radio.Button>
+            <Radio.Button className="dark:bg-gray-900 dark:text-white" value="movies">Movies</Radio.Button>
+            <Radio.Button className="dark:bg-gray-900 dark:text-white" value="brands">Brands</Radio.Button>
+            <Radio.Button className="dark:bg-gray-900 dark:text-white" value="gdp">GDP</Radio.Button>
           </Radio.Group>
         </div>
 
