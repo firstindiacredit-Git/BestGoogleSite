@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { db, auth } from "../firebase";
 import {
   collection,
@@ -12,17 +12,15 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { toast } from "react-toastify";
-import CustomColorPicker from "./CustomColorPicker";
 import debounce from "lodash/debounce";
 import ExcelJS from "exceljs";
+import { BgColorsOutlined } from "@ant-design/icons";
+import { Tooltip, Button } from "antd";
 import { Palette } from "lucide-react";
-
 
 const Excel = () => {
   const [userId, setUserId] = useState(null);
   const [tables, setTables] = useState([]);
-  const [showColorPicker, setShowColorPicker] = useState(false);
-  const [activeTableIndex, setActiveTableIndex] = useState(null);
   const [selectedCell, setSelectedCell] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -35,6 +33,82 @@ const Excel = () => {
   const [editingCell, setEditingCell] = useState(null);
   const [deleteModel, setDeleteModel] = useState(false);
   const [deleteTableIndex, setDeleteTableIndex] = useState("");
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [activeTableIndex, setActiveTableIndex] = useState(null);
+  const [isAutoColor, setIsAutoColor] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const colorPickerRef = useRef(null);
+
+  const predefinedColors = [
+    "#000000",
+    "#424242",
+    "#666666",
+    "#808080",
+    "#999999",
+    "#B3B3B3",
+    "#CCCCCC",
+    "#E6E6E6",
+    "#F2F2F2",
+    "#FFFFFF",
+    "#FF0000",
+    "#FF4500",
+    "#FF8C00",
+    "#32CD32",
+    "#00FF00",
+    "#00CED1",
+    "#0000FF",
+    "#8A2BE2",
+    "#FF00FF",
+    "#FFB6C1",
+    "#FFA07A",
+    "#FFE4B5",
+    "#FFFACD",
+    "#98FB98",
+    "#AFEEEE",
+    "#87CEEB",
+    "#E6E6FA",
+    "#DDA0DD",
+    "#FFC0CB",
+    "#DC143C",
+    "#DAA520",
+    "#FFA500",
+    "#FFD700",
+    "#20B2AA",
+    "#4169E1",
+    "#9370DB",
+    "#FF69B4",
+  ];
+
+  useEffect(() => {
+    const darkModeMediaQuery = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    );
+    setIsDarkMode(darkModeMediaQuery.matches);
+
+    const handleThemeChange = (e) => {
+      setIsDarkMode(e.matches);
+    };
+
+    darkModeMediaQuery.addEventListener("change", handleThemeChange);
+    return () =>
+      darkModeMediaQuery.removeEventListener("change", handleThemeChange);
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        colorPickerRef.current &&
+        !colorPickerRef.current.contains(event.target)
+      ) {
+        setShowColorPicker(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // Get column label (A, B, C, etc.)
   const getColumnLabel = (index) => {
@@ -106,13 +180,20 @@ const Excel = () => {
 
     const updatedTables = [...tables];
     const table = updatedTables[tableIndex];
+
+    // Prevent deleting if only one row remains
+    if (table.data.length <= 1) {
+      toast.warning("Cannot delete the last row");
+      return;
+    }
+
     table.data.splice(rowIndex, 1);
     table.rows -= 1;
 
     try {
-      const transformedData = transformTableDataToObject(table.data);
+      const firebaseData = convertTableDataForFirebase(table.data);
       await updateDoc(doc(db, "users", userId, "excel", table.id), {
-        tableData: transformedData,
+        data: firebaseData,
         rows: table.rows,
       });
       setTables(updatedTables);
@@ -131,16 +212,20 @@ const Excel = () => {
 
     const updatedTables = [...tables];
     const table = updatedTables[tableIndex];
-    table.data = table.data.map((row) => {
-      row.splice(colIndex, 1);
-      return row;
-    });
+
+    // Prevent deleting if only one column remains
+    if (table.data[0].length <= 1) {
+      toast.warning("Cannot delete the last column");
+      return;
+    }
+
+    table.data.forEach((row) => row.splice(colIndex, 1));
     table.cols -= 1;
 
     try {
-      const transformedData = transformTableDataToObject(table.data);
+      const firebaseData = convertTableDataForFirebase(table.data);
       await updateDoc(doc(db, "users", userId, "excel", table.id), {
-        tableData: transformedData,
+        data: firebaseData,
         cols: table.cols,
       });
       setTables(updatedTables);
@@ -822,8 +907,8 @@ const Excel = () => {
     debouncedSaveTableName(tableId, newName);
   };
 
-  // Update card background color
-  const updateCardColor = async (tableIndex, color) => {
+  // Add color handling functions
+  const handleColorChange = async (tableIndex, color) => {
     if (!isAuthenticated) {
       toast.error("Please sign in to change colors");
       return;
@@ -838,13 +923,64 @@ const Excel = () => {
         cardStyle: { backgroundColor: color },
       });
       setTables(updatedTables);
-      setShowColorPicker(false);
-      setActiveTableIndex(null);
+
+      // Save to localStorage
+      const savedColors = JSON.parse(
+        localStorage.getItem("excelTableColors") || "{}"
+      );
+      savedColors[table.id] = { backgroundColor: color };
+      localStorage.setItem("excelTableColors", JSON.stringify(savedColors));
     } catch (error) {
-      console.error("Error updating card color:", error);
-      toast.error("Failed to update card color");
+      console.error("Error updating color:", error);
+      toast.error("Failed to update color");
     }
   };
+
+  const handleAutoTheme = async (tableIndex, colors) => {
+    if (!isAuthenticated) {
+      toast.error("Please sign in to apply theme");
+      return;
+    }
+
+    const updatedTables = [...tables];
+    const table = updatedTables[tableIndex];
+    const newStyle = {
+      background: `linear-gradient(135deg, ${colors.join(", ")})`,
+    };
+    table.cardStyle = newStyle;
+
+    try {
+      await updateDoc(doc(db, "users", userId, "excel", table.id), {
+        cardStyle: newStyle,
+      });
+      setTables(updatedTables);
+
+      // Save to localStorage
+      const savedColors = JSON.parse(
+        localStorage.getItem("excelTableColors") || "{}"
+      );
+      savedColors[table.id] = newStyle;
+      localStorage.setItem("excelTableColors", JSON.stringify(savedColors));
+    } catch (error) {
+      console.error("Error applying theme:", error);
+      toast.error("Failed to apply theme");
+    }
+  };
+
+  // Add localStorage effect after other useEffects
+  useEffect(() => {
+    // Load colors from localStorage
+    const savedColors = localStorage.getItem("excelTableColors");
+    if (savedColors) {
+      const parsedColors = JSON.parse(savedColors);
+      setTables((prevTables) =>
+        prevTables.map((table) => ({
+          ...table,
+          cardStyle: parsedColors[table.id] || table.cardStyle,
+        }))
+      );
+    }
+  }, []);
 
   if (loading) return <div className="text-center py-4">Loading...</div>;
   if (error)
@@ -857,8 +993,10 @@ const Excel = () => {
       {tables.map((table, tableIndex) => (
         <div
           key={table.id}
-          className="mb-8 bg-gray-100 border border-gray-500/10 rounded-lg p-4"
-          style={table.cardStyle}
+          className={`mb-8 border border-gray-500/10 rounded-lg p-4 ${
+            isAutoColor ? "bg-white dark:bg-gray-900" : "bg-gray-100"
+          }`}
+          style={isAutoColor ? {} : table.cardStyle}
         >
           <div className="flex items-center justify-between mb-4">
             <div className="w-1/3">
@@ -869,7 +1007,7 @@ const Excel = () => {
                 className="text-lg bg-transparent dark:text-white focus:bg-gray-100 font-semibold   focus:border-blue-500 focus:outline-none px-2"
               />
             </div>
-            
+
             <div className="w-1/3 flex justify-end">
               <button
                 onClick={() => deleteTable(table.id)}
@@ -921,7 +1059,7 @@ const Excel = () => {
                   <th className="border bg-gray-50 px-4 py-2 w-12 sticky left-0 z-10">
                     #
                   </th>
-                  {table.data[0].map((_, colIndex) => (
+                  {table.data[0]?.map((_, colIndex) => (
                     <th
                       key={colIndex}
                       className="border bg-gray-50 px-4 py-2 relative"
@@ -1112,29 +1250,78 @@ const Excel = () => {
 
           <div className="flex justify-between relative mt-4">
             <div className="w-1/3 flex gap-3">
-              <button
-                onClick={() => {
-                  setActiveTableIndex(tableIndex);
-                  setShowColorPicker(true);
-                }}
-                className="flex items-center gap-2 bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700"
-              >
-                <Palette className="w-5 h-5"/>
-              </button>
-              {exportButton(tableIndex)}
-              {showColorPicker && activeTableIndex === tableIndex && (
-                <div className="absolute top-0 left-0 w-full h-full z-50">
-                  <div className="p-4 rounded-lg">
-                    <CustomColorPicker
-                      onChange={(color) => updateCardColor(tableIndex, color)}
-                      onClose={() => {
-                        setShowColorPicker(false);
-                        setActiveTableIndex(null);
-                      }}
-                    />
+              <div className="relative" ref={colorPickerRef}>
+                <Tooltip title="Change Colors">
+                  <Button
+                    icon={<Palette className="w-5 h-5" />}
+                    onClick={() => {
+                      setActiveTableIndex(tableIndex);
+                      setShowColorPicker((prev) => !prev);
+                    }}
+                    className={`${
+                      isAutoColor
+                        ? "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700"
+                        : ""
+                    }`}
+                  >
+                    Colors
+                  </Button>
+                </Tooltip>
+                {showColorPicker && activeTableIndex === tableIndex && (
+                  <div className="absolute w-48 left-0 -top-24 z-50 -mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-lg p-3">
+                    {/* Auto Theme Button */}
+                    <div className="mb-2">
+                      <button
+                        onClick={() => {
+                          setIsAutoColor(true);
+                          setShowColorPicker(false);
+                          handleAutoTheme(tableIndex, [
+                            "#ffffff",
+                            "#f5f5f5",
+                            "#e0e0e0",
+                          ]);
+                        }}
+                        className="w-full py-1 px-2 text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors text-gray-900 dark:text-white"
+                      >
+                        Auto Theme Color
+                      </button>
+                    </div>
+
+                    {/* Predefined Colors */}
+                    <div className="grid grid-cols-7 gap-1">
+                      {predefinedColors.map((color) => (
+                        <button
+                          key={color}
+                          className="w-5 h-5 border border-gray-200 cursor-pointer transition duration-300 ease-in-out transform hover:scale-125 focus:outline-none"
+                          style={{ backgroundColor: color }}
+                          onClick={() => {
+                            setIsAutoColor(false);
+                            handleColorChange(tableIndex, color);
+                            setShowColorPicker(false);
+                          }}
+                        />
+                      ))}
+                    </div>
+
+                    {/* Custom Color Picker */}
+                    <div className="mt-2 flex items-center justify-center">
+                      <input
+                        type="color"
+                        className="w-full h-6 p-0 border border-gray-300 rounded-md cursor-pointer focus:outline-none"
+                        value={
+                          tables[tableIndex]?.cardStyle?.backgroundColor ||
+                          "#ffffff"
+                        }
+                        onChange={(e) => {
+                          setIsAutoColor(false);
+                          handleColorChange(tableIndex, e.target.value);
+                        }}
+                      />
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
+              {exportButton(tableIndex)}
             </div>
             <div className="w-1/3 flex justify-center gap-3">
               <button

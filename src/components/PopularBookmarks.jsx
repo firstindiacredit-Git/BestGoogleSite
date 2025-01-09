@@ -1037,7 +1037,18 @@ function PopularBookmarks() {
 
     return (
       <div className="mb-2 ">
-        <div className="flex justify-end mb-4">
+        <div className="flex justify-between mb-4">
+        <div style={{ marginBottom: "24px" }}>
+        <Space>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => setIsAddCategoryModalVisible(true)}
+          >
+            Add Hello Category
+          </Button>
+        </Space>
+      </div>
           <Radio.Group
             value={columnCount}
             onChange={(e) => handleColumnCountChange(e.target.value)}
@@ -1336,17 +1347,7 @@ function PopularBookmarks() {
 
   return (
     <div style={{ padding: "24px" }}>
-      <div style={{ marginBottom: "24px" }}>
-        <Space>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setIsAddCategoryModalVisible(true)}
-          >
-            Add Hello Category
-          </Button>
-        </Space>
-      </div>
+      
 
       {renderBookmarksByCategory()}
 

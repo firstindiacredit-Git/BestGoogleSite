@@ -13,6 +13,8 @@ import {
   Select,
   Radio,
   Alert,
+  Modal, // Added Modal import
+  Card,
 } from "antd";
 import {
   LoadingOutlined,
@@ -145,7 +147,7 @@ const SportsLeagues = () => {
 
   return (
     <Layout className="p-8 border dark:bg-gray-900/50 rounded-lg bg-gray-200/50 dark:border-gray-800 border-gray-200">
-      <Content style={{ padding: "2px", margin: "5px" }} className="dark:bg-gray-900/50">
+      <Content style={{ padding: "2px", margin: "5px" }} className="dark:bg-gray-900">
         <Space direction="vertical" size="large" style={{ width: "100%" }}>
           <div
             style={{
@@ -154,11 +156,12 @@ const SportsLeagues = () => {
               alignItems: "center",
               marginBottom: "16px",
             }}
+            className="p-4"
           >
             <Radio.Group
               value={viewMode}
               onChange={(e) => setViewMode(e.target.value)}
-              className="dark:bg-gray-900 dark:text-gray-300"
+              className="dark:bg-gray-900 rounded-lg dark:text-gray-300"
             >
               <Radio.Button value="grid" className="dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700">
                 <AppstoreOutlined />
@@ -184,7 +187,7 @@ const SportsLeagues = () => {
           ) : error ? (
             <Alert message={error} type="error" className="dark:bg-gray-800 dark:text-gray-300" />
           ) : (
-            <Row gutter={[16, 16]} className="dark:bg-gray-900/50">
+            <Row gutter={[16, 16]}>
               {filteredLeagues.map((league) => (
                 <Col
                   xs={24}
@@ -216,78 +219,62 @@ const SportsLeagues = () => {
           )}
 
           {/* Custom Modal */}
-          {isModalVisible && (
-            <div className="fixed inset-0 z-50 overflow-y-auto">
-              <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-                {/* Background overlay */}
-                <div 
-                  className="fixed inset-0 transition-opacity bg-gray-500 dark:bg-gray-900 bg-opacity-75 dark:bg-opacity-75" 
-                  onClick={() => setIsModalVisible(false)}
-                ></div>
-
-                {/* Modal panel */}
-                <div className="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white dark:bg-gray-900 rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                  <div className="px-4 pt-5 pb-4 bg-white dark:bg-gray-900 sm:p-6 sm:pb-4">
-                    <div className="flex justify-between items-center mb-4 border-b border-gray-200 dark:border-gray-700 pb-3">
-                      <h3 className="text-lg font-semibold leading-6 text-gray-900 dark:text-gray-100">
-                        Upcoming Events
-                      </h3>
-                      <button
-                        onClick={() => setIsModalVisible(false)}
-                        className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none"
-                      >
-                        <span className="sr-only">Close</span>
-                        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-
-                    <div className="max-h-[60vh] overflow-y-auto pr-1 space-y-4">
-                      {eventsLoading ? (
-                        <div className="flex justify-center items-center py-8">
-                          <Spin size="large" className="dark:text-gray-300" />
-                        </div>
-                      ) : events.length > 0 ? (
-                        events.map((event) => (
-                          <div
-                            key={event.idEvent}
-                            className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
-                          >
-                            <h4 className="text-base font-medium text-gray-900 dark:text-gray-100 mb-2">
-                              {event.strEvent}
-                            </h4>
-                            <div className="space-y-1">
-                              <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
-                                <span className="mr-2">
-                                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                  </svg>
-                                </span>
-                                {event.dateEvent}
-                              </p>
-                              <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
-                                <span className="mr-2">
-                                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                  </svg>
-                                </span>
-                                {event.strTime}
-                              </p>
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                          No upcoming events found
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
+          <Modal
+            title="Upcoming Events"
+            open={isModalVisible}
+            onCancel={() => {
+              setIsModalVisible(false);
+              setSelectedLeague(null);
+            }}
+            footer={[
+              <Button 
+                key="back" 
+                onClick={() => {
+                  setIsModalVisible(false);
+                  setSelectedLeague(null);
+                }}
+              >
+                Close
+              </Button>,
+            ]}
+            width={800}
+          >
+            {eventsLoading ? (
+              <div className="flex justify-center items-center p-8">
+                <Spin size="large" />
               </div>
-            </div>
-          )}
+            ) : events.length > 0 ? (
+              <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+                {events.map((event) => (
+                  <Card key={event.idEvent} className="w-full">
+                    {event.strThumb && (
+                      <img
+                        src={event.strThumb}
+                        alt="Event Thumbnail"
+                        style={{
+                          width: "100%",
+                          height: "200px",
+                          objectFit: "cover",
+                          borderRadius: "8px",
+                          marginBottom: "16px"
+                        }}
+                      />
+                    )}
+                    <h3 className="text-lg font-semibold mb-2">{event.strEvent}</h3>
+                    <p className="text-gray-600">Date: {event.dateEvent}</p>
+                    <p className="text-gray-600">Time: {event.strTime}</p>
+                    {event.strVenue && (
+                      <p className="text-gray-600">Venue: {event.strVenue}</p>
+                    )}
+                  </Card>
+                ))}
+              </Space>
+            ) : (
+              <div className="text-center p-8 text-gray-500">
+                No upcoming events found for this league
+              </div>
+            )}
+          </Modal>
 
           {/* Indian Leagues Section */}
           <Row gutter={[16, 16]}>
@@ -320,82 +307,6 @@ const SportsLeagues = () => {
               </Col>
             ))}
           </Row>
-
-          {/* INDIAN.VIEW */}
-          <Modal
-            title={selectedLeague?.strEvent || "Upcoming Event"} // Use selectedLeague here
-            open={!!selectedLeague} // Only open if there's a selected league
-            onCancel={() => setSelectedLeague(null)} // Reset selectedLeague to close the modal
-            footer={[
-              <Button key="back" onClick={() => setSelectedLeague(null)}>
-                Close
-              </Button>,
-            ]}
-            width={800}
-          >
-            {selectedLeague && (
-              <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-                {selectedLeague.strBanner && (
-                  <img
-                    src={selectedLeague.strBanner}
-                    alt="Event Thumbnail"
-                    style={{
-                      width: "100%",
-                      height: "200px",
-                      objectFit: "cover",
-                      borderRadius: "8px",
-                    }}
-                  />
-                )}
-
-                <Row gutter={[16, 16]}>
-                  <Col span={12}>
-                    <Space direction="vertical">
-                      <strong>League:</strong> {selectedLeague.strLeague}
-                      <strong>Sport:</strong> {selectedLeague.strSport}
-                      <strong>Teams:</strong> {selectedLeague.strHomeTeam} vs{" "}
-                      {selectedLeague.strAwayTeam}
-                      <strong>Venue:</strong> {selectedLeague.strVenue}
-                    </Space>
-                  </Col>
-                  <Col span={12}>
-                    <Space direction="vertical">
-                      <strong>Location:</strong> {selectedLeague.strCountry}
-                      <strong>Date:</strong>{" "}
-                      {new Date(selectedLeague.dateEvent).toLocaleString()}
-                      <strong>Round:</strong> {selectedLeague.intRound}
-                      <strong>Status:</strong> {selectedLeague.strStatus}
-                      <strong>Discription:</strong>{" "}
-                      {selectedLeague.strDescriptionEN}
-                    </Space>
-                  </Col>
-                </Row>
-
-                {selectedLeague.strHomeTeamBadge &&
-                  selectedLeague.strAwayTeamBadge && (
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        gap: "20px",
-                        marginTop: "16px",
-                      }}
-                    >
-                      <img
-                        src={selectedLeague.strLogo}
-                        alt={`${selectedLeague.strLogo} Badge`}
-                        style={{ width: "40px" }}
-                      />
-                      <img
-                        src={selectedLeague.strAwayTeamBadge}
-                        alt={`${selectedLeague.strAwayTeam} Badge`}
-                        style={{ width: "40px" }}
-                      />
-                    </div>
-                  )}
-              </Space>
-            )}
-          </Modal>
         </Space>
       </Content>
     </Layout>

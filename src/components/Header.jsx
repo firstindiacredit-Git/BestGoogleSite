@@ -3,17 +3,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { signOut, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase";
 import { FaSun, FaMoon, FaHome } from "react-icons/fa";
-import { TbGridDots } from "react-icons/tb";
-import galleryupload from "/galleryupload.png";
-import layers from "/layers.png";
-import remove from "/remove.png";
 import { IoIosLogOut } from "react-icons/io";
 import { RiUserLine } from "react-icons/ri";
 import { MdAddHomeWork } from "react-icons/md";
 import { Modal, Input } from 'antd';
 import { CiEdit } from "react-icons/ci";
 
-const Header = ({ isDarkMode, toggleTheme, handleImageChange, onPageNameChange }) => {
+const Header = ({ isDarkMode, toggleTheme, onPageNameChange }) => {
   const [showButtons, setShowButtons] = useState(false);
   const [user, setUser] = useState(null);
   const [panel, setPanel] = useState(false);
@@ -43,7 +39,7 @@ const Header = ({ isDarkMode, toggleTheme, handleImageChange, onPageNameChange }
 
   const togglePanel = () => setPanel(!panel);
 
-  const toggleMenu = () => setShowButtons(!showButtons);
+  // const toggleMenu = () => setShowButtons(!showButtons);
 
   const handleSignOut = async () => {
     try {
