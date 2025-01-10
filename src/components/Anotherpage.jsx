@@ -252,7 +252,7 @@ const Anotherpage = ({ backgroundImage, pageId = 'home' }) => {
   return (
     <div style={{ position: "relative" }} >
       
-      <div className=" flex justify-center bg-white/50 dark:bg-gray-800/50 pt-4 max-w-[90vw]   border dark:border-gray-800 border-gray-200 w-fit mx-auto rounded-t-lg">
+      <div className=" flex justify-center bg-white/50 dark:bg-gray-800/10 pt-4 max-w-[90vw]   border dark:border-gray-500/20 border-gray-200 w-fit mx-auto rounded-t-lg">
         <div
           className={` w-fit  flex justify-center rounded-xl`}
         

@@ -161,15 +161,15 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange }) => {
       <div className="flex items-center space-x-2">
         <div className="relative">
           <button 
-            className="h-10 w-10 rounded-2xl home-button"
+            className=" px-1 h-10 bg-gray-200/50 border border-gray-100 rounded-lg home-button flex items-center gap-3 dark:bg-gray-800"
             onClick={() => setShowHomeDropdown(!showHomeDropdown)}
           >
-            <FaHome className="text-red-500 h-10 w-7 text-center justify-center m-auto" />
+            <FaHome className="dark:text-gray-200 text-gray-800 h-10 w-7 text-center justify-center m-auto" /> <span className="dark:text-gray-200 text-xl">Home</span>
           </button>
           
           {showHomeDropdown && (
             <div className="absolute left-0 mt-2 w-40 bg-white shadow-lg rounded-lg text-sm dark:bg-gray-700 home-dropdown">
-              <Link to="/">
+              <Link to="/search">
                 <button className="w-full flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600 rounded transition-colors duration-200">
                   <FaHome />
                   <span>Home</span>
@@ -215,11 +215,6 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange }) => {
           )}
         </div>
         
-        <Link to="/">
-          <span className="text-green-500 dark:text-green-300">Best</span>
-          <span className="text-red-500 dark:text-red-300">Google</span>
-          <span className="text-yellow-500 dark:text-yellow-300">Sites</span>
-        </Link>
       </div>
 
       <div className="flex items-center justify-between w-fit  gap-4 space-x-4">

@@ -1,0 +1,52 @@
+/* Letter swap animation */
+.letter-container {
+  position: relative;
+  display: inline-block;
+  width: 12px;
+  height: 24px;
+  overflow: hidden;
+}
+
+.letter {
+  position: absolute;
+  left: 0;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+}
+
+.letter-up {
+  transform: translateY(-100%);
+  opacity: 0;
+}
+
+.letter-down {
+  transform: translateY(100%);
+  opacity: 0;
+}
+
+.letter-center {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+@keyframes letterSwap {
+  0%, 45% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  55% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  60%, 100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-letter {
+  animation: letterSwap 4s infinite;
+}

@@ -53,7 +53,7 @@ const Signup = () => {
       );
       const user = userCredential.user;
       await registerUserInFirestore(user);
-      navigate("/");
+      navigate("/search");
     } catch (error) {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -65,7 +65,7 @@ const Signup = () => {
     setError("");
     try {
       await signInWithPopup(auth, provider);
-      navigate("/");
+      navigate("/search");
     } catch (error) {
       setError("Something went wrong. Please try again.");
     }
@@ -74,7 +74,7 @@ const Signup = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
-        navigate("/");
+        navigate("/search");
       }
     });
 

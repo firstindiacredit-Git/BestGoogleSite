@@ -251,7 +251,7 @@ function BookmarkPage() {
         {combinedBookmarks.map((bookmark) => (
           <div
             key={bookmark.id}
-            className="text-center bg-transparent rounded-lg transition-transform transform hover:scale-105 group relative"
+            className="text-center dark:bg-gray-800/10 bg-gray-200/10 dark:border-gray-800/20 border-gray-200/20 cursor-pointer p-2 rounded-lg transition-transform transform hover:scale-105 group relative"
           >
             <a
               href={bookmark.link}
@@ -306,13 +306,14 @@ function BookmarkPage() {
           </div>
         ))}
       </div>
-
+<div>
       <button
         onClick={() => setShowModal(true)}
         className="bg-white/20 border dark:text-white border-gray-400 mb-10 ml-3 rounded-full w-10 h-10 flex items-center justify-center mt-5"
       >
         +
       </button>
+      </div>
       <Modal
         title={editMode ? "Edit Bookmark" : "Add Bookmark"}
         open={showModal}

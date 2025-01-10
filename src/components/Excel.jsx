@@ -14,10 +14,8 @@ import {
 import { toast } from "react-toastify";
 import debounce from "lodash/debounce";
 import ExcelJS from "exceljs";
-import { BgColorsOutlined } from "@ant-design/icons";
-import { Tooltip, Button } from "antd";
+import {  Button } from "antd";
 import { Palette } from "lucide-react";
-
 const Excel = () => {
   const [userId, setUserId] = useState(null);
   const [tables, setTables] = useState([]);
@@ -989,7 +987,7 @@ const Excel = () => {
     return <div className="text-center py-4">Please sign in to use Excel</div>;
 
   return (
-    <div className=" mx-auto relative py-4 px-4">
+    <div className=" mx-auto relative">
       {tables.map((table, tableIndex) => (
         <div
           key={table.id}
@@ -1004,14 +1002,14 @@ const Excel = () => {
                 type="text"
                 value={tableNames[table.id] || `Table ${tableIndex + 1}`}
                 onChange={(e) => updateTableName(table.id, e.target.value)}
-                className="text-lg bg-transparent dark:text-white focus:bg-gray-100 font-semibold   focus:border-blue-500 focus:outline-none px-2"
+                className="text-lg bg-transparent dark:text-white focus:bg-gray-100 focus:dark:bg-gray-800 font-semibold   focus:border-blue-500 focus:outline-none px-2"
               />
             </div>
-
+          <div className="font-Semibold text-2xl">Excel Sheet</div>
             <div className="w-1/3 flex justify-end">
               <button
                 onClick={() => deleteTable(table.id)}
-                className="bg-gray-500 text-white px-3 disabled:opacity-50 disabled:hover:bg-gray-500 disabled:cursor-not-allowed py-1 rounded hover:bg-gray-600"
+                className="bg-red-500 text-white px-3 disabled:opacity-50 disabled:hover:bg-gray-500 disabled:cursor-not-allowed py-1 rounded hover:bg-gray-600"
                 title={
                   tables.length > 1
                     ? `Delete ${tableNames[table.id]}`
@@ -1251,9 +1249,8 @@ const Excel = () => {
           <div className="flex justify-between relative mt-4">
             <div className="w-1/3 flex gap-3">
               <div className="relative" ref={colorPickerRef}>
-                <Tooltip title="Change Colors">
                   <Button
-                    icon={<Palette className="w-5 h-5" />}
+                    icon={<Palette className="p-1 w-8 h-8" />}
                     onClick={() => {
                       setActiveTableIndex(tableIndex);
                       setShowColorPicker((prev) => !prev);
@@ -1264,9 +1261,7 @@ const Excel = () => {
                         : ""
                     }`}
                   >
-                    Colors
                   </Button>
-                </Tooltip>
                 {showColorPicker && activeTableIndex === tableIndex && (
                   <div className="absolute w-48 left-0 -top-24 z-50 -mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-lg p-3">
                     {/* Auto Theme Button */}
@@ -1343,7 +1338,7 @@ const Excel = () => {
                   setDeleteTableIndex(tableIndex);
                   setDeleteModel(true);
                 }}
-                className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                className="bg-amber-500 text-white px-3 py-1 rounded hover:bg-red-600"
                 title="Clear table cells"
               >
                 Clear Table

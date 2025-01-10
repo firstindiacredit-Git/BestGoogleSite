@@ -44,7 +44,7 @@ const SignIn = () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       localStorage.setItem("imageTrue", true);
-      navigate("/");
+      navigate("/search");
     } catch (err) {
       if (err.code === "auth/user-not-found") {
         setError("No user found with this email.");
@@ -63,7 +63,7 @@ const SignIn = () => {
     try {
       await signInWithPopup(auth, provider);
       localStorage.setItem("imageTrue", true);
-      navigate("/");
+      navigate("/search");
     } catch (err) {
       if (err.code === "auth/network-request-failed") {
         setError(

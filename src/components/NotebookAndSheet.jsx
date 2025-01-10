@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React from "react";
 import NotePage from "./NotePage";
 import TodoComponent from "./TodoComponent";
 import "react-quill/dist/quill.snow.css";
@@ -11,7 +11,7 @@ const NotebookAndDocumentSheet = () => {
       <div className="max-w-[1600px] mx-auto space-y-4">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Main NotePage section - 8 columns on large screens */}
-          <div className="lg:col-span-8 border dark:border-gray-700 border-gray-200 dark:bg-gray-900 rounded-lg  overflow-hidden">
+          <div className="lg:col-span-8 border dark:border-gray-700 bg-white border-gray-200 dark:bg-gray-900 rounded-lg  overflow-hidden">
             <NotePage inNotebookSheet={true} />
           </div>
           
@@ -20,10 +20,7 @@ const NotebookAndDocumentSheet = () => {
             <TodoComponent inNotebookSheet={true} />
           </div>
         </div>
-        <div className="bg-white border dark:border-gray-700 border-gray-200 dark:bg-gray-800 rounded-lg  overflow-hidden">
-        <h1 className="dark:text-white text-2xl mt-4 font-bold text-center ">
-              Excel Sheet
-            </h1>
+        <div className="overflow-hidden">
           <Excel/>
         </div>
       </div>

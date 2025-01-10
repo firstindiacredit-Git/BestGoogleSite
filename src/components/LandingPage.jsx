@@ -23,6 +23,14 @@ const FeatureCard = ({ icon: Icon, title, description }) => (
   </motion.div>
 );
 
+const AnimatedText = () => {
+  return (
+    <span className="wavy-underline mt-3 text-indigo-600 px-2 pb-2 rounded-lg inline-flex items-center">
+      Browser Toolkit
+    </span>
+  );
+};
+
 const LandingPage = () => {
   const [openFaq, setOpenFaq] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -37,8 +45,8 @@ const LandingPage = () => {
           <div className="flex items-center justify-between   h-16">
             {/* Logo */}
             <Link to="/" className="flex px-6 w-44 items-center space-x-2">
-              <span className="text-2xl  font-bold bg-gradient-to-r from-indigo-600 to-purple-500 bg-clip-text text-transparent">
-                BGS
+              <span className="text-2xl  font-bold text-indigo-600">
+                Browsey
               </span>
             </Link>
 
@@ -125,7 +133,7 @@ const LandingPage = () => {
         </div>
 
         {/* Floating Icons */}
-        <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute 2xl:block hidden inset-0 overflow-hidden">
           {/* Google Icon */}
           <motion.div
             initial={{ y: 0 }}
@@ -199,9 +207,7 @@ const LandingPage = () => {
             >
               Your Ultimate
               <br />
-              <span className="wavy-underline mt-3 text-indigo-600  px-2 pb-2 rounded-lg">
-                Browser Toolkit
-              </span>
+              <AnimatedText />
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -228,9 +234,9 @@ const LandingPage = () => {
                 <Chrome />
                 Add to Chrome - It's Free
               </a>
-              <button className="px-8 py-4 rounded-xl bg-white/50 backdrop-blur-sm text-gray-900 font-semibold hover:bg-white/60 transition-all shadow-lg shadow-indigo-500/10 hover:shadow-xl hover:shadow-indigo-500/20 transform hover:-translate-y-0.5 border hover:border-indigo-500 border-indigo-500/20">
+              <div Link="/aboutPage" className="px-8 py-4 rounded-xl bg-white/50 backdrop-blur-sm text-gray-900 font-semibold hover:bg-white/60 transition-all shadow-lg shadow-indigo-500/10 hover:shadow-xl hover:shadow-indigo-500/20 transform hover:-translate-y-0.5 border hover:border-indigo-500 border-indigo-500/20">
                 Learn More
-              </button>
+              </div>
             </motion.div>
 
             {/* SearchPage Preview */}
@@ -640,7 +646,7 @@ const LandingPage = () => {
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
               className="text-xl text-gray-600 mb-12"
             >
