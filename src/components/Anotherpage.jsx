@@ -20,7 +20,7 @@ import {
 import TodoComponent from "./TodoComponent.jsx";
 import NewsFeed from "./NewsFeed.jsx";
 
-const Anotherpage = ({ backgroundImage, pageId = 'home' }) => {
+const Anotherpage = ({ backgroundImage, pageId = "home" }) => {
   const [grid, isGrid] = useState(true);
   const [user, setUser] = useState(null);
   const [items, setItems] = useState([]);
@@ -245,21 +245,68 @@ const Anotherpage = ({ backgroundImage, pageId = 'home' }) => {
   if (!user) {
     return (
       <div className="text-gray-500 text-5xl  my-20">
-        <h1 className="text-center font-bold">
-          LOGIN TO UNLOCK MORE FEATURES
-        </h1>
+        <h1 className="text-center font-bold">LOGIN TO UNLOCK MORE FEATURES</h1>
       </div>
     );
   }
 
   return (
-    <div style={{ position: "relative" }} >
-      
-      <div className=" flex justify-center bg-gray-200/10 dark:bg-indigo-800/10 pt-4 max-w-[90vw]   border dark:border-gray-800/20  backdrop-blur-xl border-gray-200/20 w-fit mx-auto rounded-t-lg">
-        <div
-          className={` w-fit  flex justify-center rounded-xl`}
-        
+    <div style={{ position: "relative" }}>
+      <div className="flex justify-center">
+        <div className={`bg-white/10 w-fit    border dark:border-black/5 border-white/5 dark:bg-black/10 rounded-xl` }
         >
+          <div
+            className={`flex items-center gap-2 w-fit mx-auto mt-4 bg-gray-100 dark:bg-gray-900 p-1 rounded-lg`}
+          >
+            <button
+              onClick={() => {
+                isGrid(true);
+              }}
+              className={`p-2 rounded ${
+                grid
+                  ? "bg-white dark:bg-gray-700 shadow-sm"
+                  : "hover:bg-white/50 dark:hover:bg-gray-700/50"
+              }`}
+            >
+              <svg
+                className="w-5 h-5 dark:text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                />
+              </svg>
+            </button>
+            <button
+              onClick={() => {
+                isGrid(false);
+              }}
+              className={`p-2 rounded ${
+                !grid
+                  ? "bg-white dark:bg-gray-700 shadow-sm"
+                  : "hover:bg-white/50 dark:hover:bg-gray-700/50"
+              }`}
+            >
+              <svg
+                className="w-5 h-5 dark:text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+            </button>
+          </div>
           <div className="p-4 ">
             {loading ? (
               <div className="flex justify-center items-center min-h-screen">
@@ -308,19 +355,22 @@ const Anotherpage = ({ backgroundImage, pageId = 'home' }) => {
                                 >
                                   {grid ? (
                                     <>
-                                      <motion.div className="w-full max-w-sm text-left py-1 px-4  rounded-t-lg bg-slate-200 dark:bg-gray-700  font-semibold flex items-center">
+                                      <motion.div className="w-full max-w-sm text-left py-2 px-4  rounded-lg bg-gray-100 dark:bg-gray-700 dark:text-white font-semibold flex items-center">
                                         <div
                                           {...provided.dragHandleProps}
-                                          className="cursor-grab mr-3 text-gray-100 hover:text-gray-700 dark:hover:text-gray-300"
+                                          className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
                                         >
                                           ⋮⋮
                                         </div>
                                         {item.name}
                                       </motion.div>
                                       <motion.div
-                                        className=" bg-white dark:bg-[#080318] rounded-b-lg"
+                                        className=" bg-white dark:bg-gray-900 rounded-b-lg"
                                         initial={{ height: 0, opacity: 0 }}
-                                        animate={{ height: "auto", opacity: 1 }}
+                                        animate={{
+                                          height: "auto",
+                                          opacity: 1,
+                                        }}
                                         exit={{ height: 0, opacity: 0 }}
                                         transition={{ duration: 0.1 }}
                                       >
@@ -339,7 +389,9 @@ const Anotherpage = ({ backgroundImage, pageId = 'home' }) => {
                                           ⋮⋮
                                         </div>
                                         <button
-                                          onClick={() => toggleDropdown(item.id)}
+                                          onClick={() =>
+                                            toggleDropdown(item.id)
+                                          }
                                           className="flex-grow text-left focus:outline-none"
                                         >
                                           {item.name}
@@ -347,9 +399,12 @@ const Anotherpage = ({ backgroundImage, pageId = 'home' }) => {
                                       </motion.div>
                                       {item.isOpen && (
                                         <motion.div
-                                          className=" bg-gray-50 dark:bg-[#080318] rounded-b-lg "
+                                          className=" bg-gray-50 dark:bg-gray-900 rounded-b-lg "
                                           initial={{ height: 0, opacity: 0 }}
-                                          animate={{ height: "auto", opacity: 1 }}
+                                          animate={{
+                                            height: "auto",
+                                            opacity: 1,
+                                          }}
                                           exit={{ height: 0, opacity: 0 }}
                                           transition={{ duration: 0.3 }}
                                         >
@@ -387,7 +442,7 @@ const Anotherpage = ({ backgroundImage, pageId = 'home' }) => {
           width: "50px",
           height: "50px",
           borderRadius: "50%",
-          backgroundColor: "#1890ff",
+          backgroundColor: "#4F46E5",
           color: "white",
           border: "none",
           cursor: "pointer",
@@ -518,111 +573,127 @@ const Anotherpage = ({ backgroundImage, pageId = 'home' }) => {
                   padding: "8px",
                 }}
               >
-                {Array.from({ length: previewColumns }).map((_, columnIndex) => (
-                  <Droppable key={columnIndex} droppableId={String(columnIndex)}>
-                    {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        className="sort-column"
-                        style={{
-                          padding: "12px",
-                          backgroundColor: snapshot.isDraggingOver
-                            ? "rgba(24, 144, 255, 0.1)"
-                            : "rgba(0, 0, 0, 0.02)",
-                          borderRadius: "8px",
-                          minHeight: "150px",
-                          transition: "background-color 0.2s ease",
-                          border: snapshot.isDraggingOver
-                            ? "2px dashed #1890ff"
-                            : "2px solid transparent",
-                          display: "flex",
-                          flexDirection: "column",
-                        }}
-                      >
+                {Array.from({ length: previewColumns }).map(
+                  (_, columnIndex) => (
+                    <Droppable
+                      key={columnIndex}
+                      droppableId={String(columnIndex)}
+                    >
+                      {(provided, snapshot) => (
                         <div
-                          className="column-header"
+                          ref={provided.innerRef}
+                          {...provided.droppableProps}
+                          className="sort-column"
                           style={{
-                            marginBottom: "12px",
-                            fontWeight: "bold",
-                            color: "#1890ff",
-                          }}
-                        >
-                          Column {columnIndex + 1}
-                        </div>
-                        <div
-                          className="items-container"
-                          style={{
+                            padding: "12px",
+                            backgroundColor: snapshot.isDraggingOver
+                              ? "rgba(24, 144, 255, 0.1)"
+                              : "rgba(0, 0, 0, 0.02)",
+                            borderRadius: "8px",
+                            minHeight: "150px",
+                            transition: "background-color 0.2s ease",
+                            border: snapshot.isDraggingOver
+                              ? "2px dashed #1890ff"
+                              : "2px solid transparent",
                             display: "flex",
                             flexDirection: "column",
-                            gap: "8px",
-                            flexGrow: 1,
                           }}
                         >
-                          {sortedItems
-                            .filter((item) => item.column === columnIndex)
-                            .map((item, index) => (
-                              <Draggable key={item.id} draggableId={item.id} index={index}>
-                                {(provided, snapshot) => (
-                                  <div
-                                    ref={provided.innerRef}
-                                    {...provided.draggableProps}
-                                    className="bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600"
-                                    style={{
-                                      ...provided.draggableProps.style,
-                                      opacity: snapshot.isDragging ? 0.9 : 1,
-                                      transform: snapshot.isDragging
-                                        ? `${provided.draggableProps.style.transform} scale(1.05)`
-                                        : provided.draggableProps.style.transform,
-                                    }}
-                                  >
-                                    <div className="flex items-center p-2 gap-2">
-                                      <div
-                                        {...provided.dragHandleProps}
-                                        className="cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                                      >
-                                        ⋮⋮
-                                      </div>
-                                      <span className="text-gray-700 dark:text-gray-200 flex-grow">
-                                        {item.name}
-                                      </span>
-                                      <AntButton
-                                        type="text"
-                                        icon={<DeleteOutlined />}
-                                        onClick={() => handleRemoveWidget(item.id)}
-                                        className="text-gray-400 hover:text-red-500"
-                                        size="small"
-                                      />
-                                    </div>
-                                  </div>
-                                )}
-                              </Draggable>
-                            ))}
-                          {provided.placeholder}
-                        </div>
-                        {availableWidgets.length > 0 && (
-                          <div className="mt-4 p-2 border-t border-gray-200 dark:border-gray-600">
-                            <div className="text-sm text-gray-500 mb-2">Add Widget:</div>
-                            <div className="flex flex-wrap gap-2">
-                              {availableWidgets.map((widget) => (
-                                <AntButton
-                                  key={widget.id}
-                                  onClick={() => handleAddWidget(columnIndex, widget)}
-                                  icon={<PlusOutlined />}
-                                  size="small"
-                                  type="dashed"
-                                  className="flex items-center"
-                                >
-                                  {widget.name}
-                                </AntButton>
-                              ))}
-                            </div>
+                          <div
+                            className="column-header"
+                            style={{
+                              marginBottom: "12px",
+                              fontWeight: "bold",
+                              color: "#1890ff",
+                            }}
+                          >
+                            Column {columnIndex + 1}
                           </div>
-                        )}
-                      </div>
-                    )}
-                  </Droppable>
-                ))}
+                          <div
+                            className="items-container"
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: "8px",
+                              flexGrow: 1,
+                            }}
+                          >
+                            {sortedItems
+                              .filter((item) => item.column === columnIndex)
+                              .map((item, index) => (
+                                <Draggable
+                                  key={item.id}
+                                  draggableId={item.id}
+                                  index={index}
+                                >
+                                  {(provided, snapshot) => (
+                                    <div
+                                      ref={provided.innerRef}
+                                      {...provided.draggableProps}
+                                      className="bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600"
+                                      style={{
+                                        ...provided.draggableProps.style,
+                                        opacity: snapshot.isDragging ? 0.9 : 1,
+                                        transform: snapshot.isDragging
+                                          ? `${provided.draggableProps.style.transform} scale(1.05)`
+                                          : provided.draggableProps.style
+                                              .transform,
+                                      }}
+                                    >
+                                      <div className="flex items-center p-2 gap-2">
+                                        <div
+                                          {...provided.dragHandleProps}
+                                          className="cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                        >
+                                          ⋮⋮
+                                        </div>
+                                        <span className="text-gray-700 dark:text-gray-200 flex-grow">
+                                          {item.name}
+                                        </span>
+                                        <AntButton
+                                          type="text"
+                                          icon={<DeleteOutlined />}
+                                          onClick={() =>
+                                            handleRemoveWidget(item.id)
+                                          }
+                                          className="text-gray-400 hover:text-red-500"
+                                          size="small"
+                                        />
+                                      </div>
+                                    </div>
+                                  )}
+                                </Draggable>
+                              ))}
+                            {provided.placeholder}
+                          </div>
+                          {availableWidgets.length > 0 && (
+                            <div className="mt-4 p-2 border-t border-gray-200 dark:border-gray-600">
+                              <div className="text-sm text-gray-500 mb-2">
+                                Add Widget:
+                              </div>
+                              <div className="flex flex-wrap gap-2">
+                                {availableWidgets.map((widget) => (
+                                  <AntButton
+                                    key={widget.id}
+                                    onClick={() =>
+                                      handleAddWidget(columnIndex, widget)
+                                    }
+                                    icon={<PlusOutlined />}
+                                    size="small"
+                                    type="dashed"
+                                    className="flex items-center"
+                                  >
+                                    {widget.name}
+                                  </AntButton>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </Droppable>
+                  )
+                )}
               </div>
             </DragDropContext>
           </>

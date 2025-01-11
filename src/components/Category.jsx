@@ -43,6 +43,7 @@ import {
   ArrowsAltOutlined,
 } from "@ant-design/icons";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { RxGear } from "react-icons/rx";
 
 const { Title } = Typography;
 
@@ -580,12 +581,16 @@ const Category = ({ data = [] }) => {
               <Space>
                 <Button.Group>
                   <Button
-                    type={panelViewMode === "list" ? "primary" : "default"}
+                    type={
+                      panelViewMode === "list" ? "bg-indigo-500" : "default"
+                    }
                     icon={<UnorderedListOutlined />}
                     onClick={() => setPanelViewMode("list")}
                   />
                   <Button
-                    type={panelViewMode === "grid" ? "primary" : "default"}
+                    type={
+                      panelViewMode === "grid" ? "bg-indigo-500" : "default"
+                    }
                     icon={<AppstoreOutlined />}
                     onClick={() => setPanelViewMode("grid")}
                   />
@@ -705,33 +710,7 @@ const Category = ({ data = [] }) => {
     if (isEditMode) {
       return (
         <div className="space-y-4">
-          <div className="flex justify-between items-center mb-4">
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => setIsModalVisible(true)}
-            >
-              Add Bookmark
-            </Button>
-            <Button
-              type="danger"
-              disabled={!selectedBookmarks.length}
-              onClick={handleBulkDelete}
-              icon={<DeleteOutlined />}
-            >
-              Delete Selected ({selectedBookmarks.length})
-            </Button>
-            <Checkbox
-              indeterminate={
-                selectedBookmarks.length > 0 &&
-                selectedBookmarks.length < bookmarks.length
-              }
-              checked={selectedBookmarks.length === bookmarks.length}
-              onChange={handleSelectAll}
-            >
-              Select All
-            </Checkbox>
-          </div>
+          
 
           <DragDropContext onDragEnd={handleDragEnd}>
             <Droppable droppableId="bookmarks">
@@ -833,34 +812,39 @@ const Category = ({ data = [] }) => {
                     onClick={() => handleDeleteBookmark(bookmark.id)}
                   />
                 </Tooltip>,
-                <Tooltip title="Open in new tab">
-                  <Button
-                    type="text"
-                    icon={<GlobalOutlined />}
-                    onClick={() => window.open(bookmark.link, "_blank")}
-                    className="dark:text-white"
-                  />
-                </Tooltip>,
+                // <Tooltip title="Open in new tab">
+                //   <Button
+                //     type="text"
+                //     icon={<GlobalOutlined />}
+                //     onClick={() => window.open(bookmark.link, "_blank")}
+                //     className="dark:text-white"
+                //   />
+                // </Tooltip>,
               ]}
             >
               <List.Item.Meta
                 avatar={
+                  <div className="flex gap-2 items-center ">
+                     
+                  
                   <img
                     src={bookmark.logoUrl}
                     alt="Logo"
                     style={{ width: `${iconSize}px`, height: `${iconSize}px` }}
                     onError={(e) => handleFaviconError(e, bookmark.link)}
                   />
-                }
-                title={
                   <a
                     href={bookmark.link}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <span className="dark:text-white">{bookmark.name}</span>
+                    <div className="dark:text-white">{bookmark.name}</div>
                   </a>
+                  </div>
                 }
+                // title={
+                 
+                // }
                 description={
                   showUrl ? (
                     <span className="dark:text-gray-500">{bookmark.link}</span>
@@ -1114,14 +1098,16 @@ const Category = ({ data = [] }) => {
       <Menu.Divider />
 
       <div className="">
-        <Button
+        <button
           type="text"
-          onClick={() => setIsEditMode(!isEditMode)}
-          className="flex justify-start w-full text-left"
+          onClick={() => {setIsEditMode(!isEditMode);
+             setIsModalVisible(false)}}
+          className={`flex justify-start px-3 py-1 hover:bg-zinc-400/10 rounded-[0.2rem] w-full text-left ${isEditMode?"text-red-500 hover:text-red-600":"text-indigo-500 hover:text-indigo-600"}`}
           icon={<EditOutlined />}
+          
         >
-          {isEditMode ? "Exit Edit Mode" : "Enter Edit Mode"}
-        </Button>
+          {isEditMode ? "Close" : "Edit"}
+        </button>
       </div>
     </Menu>
   );
@@ -1133,20 +1119,25 @@ const Category = ({ data = [] }) => {
         <Card
           title={
             <div className="flex justify-between items-center">
-              <Title level={4} className="dark:text-white m-0">
+              {/* <Title level={4} className="dark:text-white bg-gray-800 m-0">
                 My Bookmarks {isEditMode && "(Edit Mode)"}
-              </Title>
-              <div className="space-x-1">
-                <Button
-                  type="primary"
-                  icon={<PlusOutlined />}
-                  onClick={() => setIsModalVisible(true)}
-                />
-                <Dropdown overlay={viewMenu} trigger={["click"]}>
-                  <Button className="w-1.5 h-8.5">
-                    <EllipsisOutlined className="rotate-90" />
-                  </Button>
-                </Dropdown>
+              </Title> */}
+              <div className="flex justify-between w-full items-center">
+                <div>
+                  <button
+                    className=" px-2 py-1 w-fit rounded-md hover:text-indigo-500 hover:bg-gray-100 dark:bg-gray-800 dark:text-white"
+                    onClick={() => setIsModalVisible(true)}
+                  >
+                    <PlusOutlined className="w-7 h-7 px-2  transition-all  " />
+                  </button>
+                </div>
+                <div>
+                  <Dropdown overlay={viewMenu} trigger={["click"]}>
+                    <button className="hover:bg-gray-100  px-4 py-3 hover:text-indigo-500 rounded-md">
+                      <RxGear className=" w-4 h-4   transition-all " />
+                    </button>
+                  </Dropdown>
+                </div>
               </div>
             </div>
           }

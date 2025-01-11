@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Shortcut from "./ShortCuts";
 import Anotherpage from "../components/Anotherpage";
@@ -83,7 +83,6 @@ function SearchPage() {
     setActiveComponent(component); // Always set the component, don't toggle
   };
 
-
   useEffect(() => {
     const script = document.createElement("script");
     script.id = "google-cse";
@@ -98,28 +97,32 @@ function SearchPage() {
   }, [navigate]);
 
   return (
-    <div className="bg-white dark:bg-[#080318] min-h-screen" style={{
-      backgroundImage: backgroundImage
-        ? `url(${backgroundImage})`
-        : "none",
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-      backgroundAttachment: "fixed",
-    }}>
+    <div
+      className="bg-white dark:bg-[#080318] min-h-screen"
+      style={{
+        backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundAttachment: "fixed",
+      }}
+    >
       <Header
         isDarkMode={isDarkMode}
         toggleTheme={toggleTheme}
         handleImageChange={handleImageChange}
       />
 
-      <div>
-      <div className="mb-8 mt-24 flex justify-center">
-      <img src="/BrowseyFull.svg"  className="w-96 " alt="Browsey" /></div>
-        <div
-          
-          className="flex  flex-col items-center  "
-        >
-          
+      <div className="w-full">
+        <div className="mb-8 mt-24 flex relative w-fit  mx-auto justify-center">
+          <img src="/BrowseyFull.svg" className="w-96 " alt="Browsey" />{" "}
+          <span className="absolute -bottom-3  text-indigo-300 dark:text-indigo-300 right-0">
+           
+            <a href="https://google.com" target="_blank">
+               Enhanced by Google
+            </a>
+          </span>
+        </div>
+        <div className="flex  flex-col items-center  ">
           <div
             className="gcse-searchbox-only"
             data-resultsurl="https://www.google.com/search?client=ms-google-coop&qcx=80904074a37154829"
@@ -224,7 +227,7 @@ function SearchPage() {
             </div>
           </div>
         </div>
-        <div className=" max-w-screen-2xl  mx-auto">
+        <div className=" w-full">
           {activeComponent === "NotebookAndSheet" ? (
             <NotebookAndSheet />
           ) : activeComponent === "PopularBookmarks" ? (

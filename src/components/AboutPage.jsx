@@ -16,18 +16,18 @@ const AboutPage = () => {
       <motion.header
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="fixed top-0 left-0 right-0 w-full z-50 transition-all duration-300 bg-white/80 backdrop-blur-lg shadow-lg border-b border-gray-200/10"
+        className="fixed top-0 left-0 right-0 w-full z-50 transition-all duration-300 bg-white/80 backdrop-blur-lg shadow-lg border-b border-gray-200/50"
       >
         <nav className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            <Link to="/search" className="flex items-center space-x-2">
+            <Link to="/" className="flex items-center space-x-2">
               <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-500 bg-clip-text text-transparent">
                 BGS
               </span>
             </Link>
 
             <div className="hidden md:flex items-center space-x-8">
-              <Link to="/search" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-lg hover:bg-white/60">
+              <Link to="/" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-lg hover:bg-white/60">
                 Home
               </Link>
               <Link to="/about" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-lg hover:bg-white/60">
@@ -51,7 +51,7 @@ const AboutPage = () => {
             </div>
 
             <button
-              className="md:hidden p-2 rounded-lg hover:bg-gray-200/10 transition-colors"
+              className="md:hidden p-2 rounded-lg hover:bg-white/50 transition-colors"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? (
@@ -144,7 +144,7 @@ const AboutPage = () => {
             className="bg-indigo-50 rounded-2xl overflow-hidden shadow-lg"
           >
             <img 
-              src="https://images.unsplash.com/photo-1522071820081-1dda9a6c1d86" 
+              src="/Company.jpg" 
               alt="Team Working" 
               className="w-full h-full object-cover"
             />
@@ -185,7 +185,7 @@ const AboutPage = () => {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.2 }}
-              className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all border border-gray-200/10"
+              className="bg-white p-6 rounded-2xl hover:scale-105 transition-all border border-gray-200/50"
             >
               <div className="bg-indigo-50 w-16 h-16 rounded-xl flex items-center justify-center mb-4">
                 <value.icon className="w-8 h-8 text-indigo-600" />
