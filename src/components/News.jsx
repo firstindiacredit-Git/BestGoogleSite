@@ -2,7 +2,7 @@ import React from "react";
 
 const News = () => {
   return (
-    <div className="p-8 border border-gray-200 dark:border-gray-800 bg-gray-200/50 dark:bg-gray-800/50" style={{borderRadius:"1rem"}}>
+    <div className="p-8 border border-gray-200 dark:border-gray-800 bg-gray-200/10 dark:bg-indigo-800/10" style={{borderRadius:"1rem"}}>
       <div
         style={{ minHeight: "120vh", overflow: "clip",borderRadius:"1rem" }}
       >

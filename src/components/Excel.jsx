@@ -992,7 +992,7 @@ const Excel = () => {
         <div
           key={table.id}
           className={`mb-8 border border-gray-500/10 rounded-lg p-4 ${
-            isAutoColor ? "bg-white dark:bg-gray-900" : "bg-gray-100"
+            isAutoColor ? "bg-white dark:bg-[#080318]" : "bg-gray-100"
           }`}
           style={isAutoColor ? {} : table.cardStyle}
         >
@@ -1002,7 +1002,7 @@ const Excel = () => {
                 type="text"
                 value={tableNames[table.id] || `Table ${tableIndex + 1}`}
                 onChange={(e) => updateTableName(table.id, e.target.value)}
-                className="text-lg bg-transparent dark:text-white focus:bg-gray-100 focus:dark:bg-gray-800 font-semibold   focus:border-blue-500 focus:outline-none px-2"
+                className="text-lg bg-transparent dark:text-white focus:bg-gray-100 focus:dark:bg-indigo-800 font-semibold   focus:border-blue-500 focus:outline-none px-2"
               />
             </div>
           <div className="font-Semibold text-2xl">Excel Sheet</div>
@@ -1080,7 +1080,7 @@ const Excel = () => {
                       </div>
                       {/* Resize handle */}
                       <div
-                        className="absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-blue-500"
+                        className="absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-indigo-500"
                         onMouseDown={(e) => {
                           const startX = e.pageX;
                           const currentWidth =
@@ -1213,7 +1213,7 @@ const Excel = () => {
                               href={cell}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-blue-500 underline"
+                              className="text-indigo-500 underline"
                             >
                               {cell}
                             </a>
@@ -1257,13 +1257,13 @@ const Excel = () => {
                     }}
                     className={`${
                       isAutoColor
-                        ? "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700"
+                        ? "bg-gray-100 dark:bg-indigo-800 hover:bg-gray-200 dark:hover:bg-gray-700"
                         : ""
                     }`}
                   >
                   </Button>
                 {showColorPicker && activeTableIndex === tableIndex && (
-                  <div className="absolute w-48 left-0 -top-24 z-50 -mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-lg p-3">
+                  <div className="absolute w-48 left-0 -top-24 z-50 -mt-2 bg-white dark:bg-indigo-800 border border-gray-200 dark:border-gray-700 rounded shadow-lg p-3">
                     {/* Auto Theme Button */}
                     <div className="mb-2">
                       <button

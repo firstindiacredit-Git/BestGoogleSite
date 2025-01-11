@@ -68,8 +68,8 @@ const BookmarksPage = () => {
             onClick={() => handleCategoryChange(category)}
             className={`px-2 py-1 rounded-md font-semibold transition duration-200 ${
               selectedCategory === category
-                ? "bg-blue-600 text-white"
-                : "bg-gray-200 text-gray-700 hover:bg-blue-500 hover:text-white"
+                ? "bg-indigo-600 text-white"
+                : "bg-gray-200 text-gray-700 hover:bg-indigo-500 hover:text-white"
             }`}
           >
             {category.charAt(0).toUpperCase() + category.slice(1)}

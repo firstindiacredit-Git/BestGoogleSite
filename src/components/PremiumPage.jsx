@@ -56,7 +56,7 @@ const PremiumPage = () => {
       <Header isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
       <button
         onClick={goBack}
-        className="absolute top-16 left-4 text-blue-600 border border-blue-600 px-6 py-1 rounded hover:text-white hover:bg-blue-600"
+        className="absolute top-16 left-4 text-indigo-600 border border-blue-600 px-6 py-1 rounded hover:text-white hover:bg-indigo-600"
       >
         Back
       </button>
@@ -113,7 +113,7 @@ const PremiumPage = () => {
                 state: { selectedPlan: plan.tier },
               }}
             >
-              <button className="mt-4 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-500 transition">
+              <button className="mt-4 bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-500 transition">
                 Choose
               </button>
             </Link>

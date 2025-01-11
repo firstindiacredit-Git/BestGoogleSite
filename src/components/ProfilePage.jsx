@@ -216,10 +216,10 @@ const ProfilePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:text-white dark:bg-gray-900 p-6">
+    <div className="min-h-screen bg-gray-50 dark:text-white dark:bg-[#080318] p-6">
       <button
         onClick={handleGoBack}
-        className="absolute top-4 left-4 text-blue-600 border border-blue-600 px-6 py-1 rounded hover:text-white hover:bg-blue-600"
+        className="absolute top-4 left-4 text-indigo-600 border border-blue-600 px-6 py-1 rounded hover:text-white hover:bg-indigo-600"
       >
         Back
       </button>
@@ -227,7 +227,7 @@ const ProfilePage = () => {
         USER ACCOUNT
       </h1>
 
-      <div className="bg-white dark:bg-gray-800 w-[60%] m-auto rounded-lg shadow-lg p-6 space-y-4">
+      <div className="bg-white dark:bg-indigo-800 w-[60%] m-auto rounded-lg shadow-lg p-6 space-y-4">
         {/* Avatar Section with Upload */}
         <div className="flex items-center space-x-4">
           <div className="relative">
@@ -238,7 +238,7 @@ const ProfilePage = () => {
             />
             <button
               onClick={handleAvatarClick}
-              className="absolute bottom-0 right-0 bg-blue-600 rounded-full p-1.5 text-white hover:bg-blue-700"
+              className="absolute bottom-0 right-0 bg-indigo-600 rounded-full p-1.5 text-white hover:bg-indigo-700"
               disabled={isUploading}
             >
               <FaCamera size={12} />
@@ -271,7 +271,7 @@ const ProfilePage = () => {
                 />
                 <button
                   onClick={handleSaveName}
-                  className="bg-blue-600 text-white px-4 py-2 rounded"
+                  className="bg-indigo-600 text-white px-4 py-2 rounded"
                 >
                   Save
                 </button>
@@ -304,7 +304,7 @@ const ProfilePage = () => {
                 </button>
                 <button
                   onClick={handleSavePassword}
-                  className="bg-blue-600 text-white px-4 py-2 rounded"
+                  className="bg-indigo-600 text-white px-4 py-2 rounded"
                 >
                   Save
                 </button>
@@ -358,7 +358,7 @@ const ProfilePage = () => {
                   </button>
                   <button
                     onClick={handleChangePin}
-                    className="bg-blue-600 text-white py-1 px-10 rounded"
+                    className="bg-indigo-600 text-white py-1 px-10 rounded"
                   >
                     Update PIN
                   </button>

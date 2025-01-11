@@ -44,7 +44,7 @@ function ImageUploader() {
       
 
       {!image && (
-        <div className="h-72 flex items-center justify-center bg-white dark:bg-gray-900 rounded-lg w-full">
+        <div className="h-72 flex items-center justify-center bg-white dark:bg-[#080318] rounded-lg w-full">
           <label htmlFor="file-input" className="cursor-pointer flex flex-col items-center">
             <input
               type="file"
@@ -53,7 +53,7 @@ function ImageUploader() {
               className="hidden"
               id="file-input"
             />
-            <MdAdd className="w-12 h-12 text-blue-600 hover:text-blue-800 transition duration-300" />
+            <MdAdd className="w-12 h-12 text-indigo-600 hover:text-indigo-800 transition duration-300" />
             <span className="mt-2 text-sm text-gray-600 dark:text-gray-400">Click to upload image</span>
           </label>
         </div>

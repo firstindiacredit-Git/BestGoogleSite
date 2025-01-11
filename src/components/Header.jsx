@@ -157,11 +157,11 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange }) => {
   }, []);
 
   return (
-    <header className="p-2 bg-gray-200/50 dark:bg-gray-800/50 backdrop-blur-lg border-b border dark:border-gray-800 border-gray-200 flex justify-between items-center sticky top-0 z-50">
+    <header className="p-2 bg-gray-200/10 backdrop-blur-xl dark:bg-indigo-800/10 border-b border dark:border-gray-800/20 border-gray-200/20 flex justify-between items-center sticky top-0 z-50">
       <div className="flex items-center space-x-2">
         <div className="relative">
           <button 
-            className=" px-1 h-10 bg-gray-200/50 border border-gray-100 rounded-lg home-button flex items-center gap-3 dark:bg-gray-800"
+            className=" px-1 h-10 bg-gray-200/10 border border-gray-100 rounded-lg home-button flex items-center gap-3 dark:bg-indigo-800"
             onClick={() => setShowHomeDropdown(!showHomeDropdown)}
           >
             <FaHome className="dark:text-gray-200 text-gray-800 h-10 w-7 text-center justify-center m-auto" /> <span className="dark:text-gray-200 text-xl">Home</span>
@@ -198,7 +198,7 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange }) => {
                   <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
                     <button
                       onClick={(e) => handlePageNameEdit(page.id, page.name, e)}
-                      className="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-600"
+                      className="text-indigo-500 hover:text-indigo-700 dark:text-blue-400 dark:hover:text-indigo-600"
                     >
                       <CiEdit className="w-4 h-4" />
                     </button>
@@ -263,7 +263,7 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange }) => {
           <div className="flex space-x-4">
             <Link
               to="/signin"
-              className="px-2 py-1 border border-blue-500 text-blue-500 rounded hover:bg-blue-500 hover:text-white transition-colors duration-200 dark:border-blue-300 dark:text-blue-300 dark:hover:bg-blue-300"
+              className="px-2 py-1 border border-blue-500 text-indigo-500 rounded hover:bg-indigo-500 hover:text-white transition-colors duration-200 dark:border-blue-300 dark:text-blue-300 dark:hover:bg-blue-300"
             >
               Sign In
             </Link>

@@ -139,7 +139,7 @@ const FAQPage = () => {
       <motion.header
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="fixed top-0 left-0 right-0 w-full z-50 transition-all duration-300 bg-white/80 backdrop-blur-lg shadow-lg border-b border-gray-200/50"
+        className="fixed top-0 left-0 right-0 w-full z-50 transition-all duration-300 bg-white/80 backdrop-blur-lg shadow-lg border-b border-gray-200/10"
       >
         <nav className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
@@ -174,7 +174,7 @@ const FAQPage = () => {
             </div>
 
             <button
-              className="md:hidden p-2 rounded-lg hover:bg-white/50 transition-colors"
+              className="md:hidden p-2 rounded-lg hover:bg-gray-200/10 transition-colors"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? (
@@ -224,7 +224,7 @@ const FAQPage = () => {
             >
               {category.category}
             </motion.h2>
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-200/50 divide-y divide-gray-200">
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200/10 divide-y divide-gray-200">
               {category.questions.map((faq, faqIndex) => (
                 <FAQItem
                   key={faqIndex}

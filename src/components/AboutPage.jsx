@@ -16,7 +16,7 @@ const AboutPage = () => {
       <motion.header
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="fixed top-0 left-0 right-0 w-full z-50 transition-all duration-300 bg-white/80 backdrop-blur-lg shadow-lg border-b border-gray-200/50"
+        className="fixed top-0 left-0 right-0 w-full z-50 transition-all duration-300 bg-white/80 backdrop-blur-lg shadow-lg border-b border-gray-200/10"
       >
         <nav className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
@@ -51,7 +51,7 @@ const AboutPage = () => {
             </div>
 
             <button
-              className="md:hidden p-2 rounded-lg hover:bg-white/50 transition-colors"
+              className="md:hidden p-2 rounded-lg hover:bg-gray-200/10 transition-colors"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? (
@@ -185,7 +185,7 @@ const AboutPage = () => {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.2 }}
-              className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all border border-gray-200/50"
+              className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all border border-gray-200/10"
             >
               <div className="bg-indigo-50 w-16 h-16 rounded-xl flex items-center justify-center mb-4">
                 <value.icon className="w-8 h-8 text-indigo-600" />

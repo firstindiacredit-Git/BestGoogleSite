@@ -16,7 +16,7 @@ function SearchPage() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [backgroundImage, setBackgroundImage] = useState("");
 
-  const [activeComponent, setActiveComponent] = useState(null);
+  const [activeComponent, setActiveComponent] = useState("Anotherpage");
   const navigate = useNavigate();
   const [showButton, setShowButton] = useState(false);
 
@@ -83,9 +83,6 @@ function SearchPage() {
     setActiveComponent(component); // Always set the component, don't toggle
   };
 
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
 
   useEffect(() => {
     const script = document.createElement("script");
@@ -101,7 +98,7 @@ function SearchPage() {
   }, [navigate]);
 
   return (
-    <div className="bg-white dark:bg-gray-900 min-h-screen" style={{
+    <div className="bg-white dark:bg-[#080318] min-h-screen" style={{
       backgroundImage: backgroundImage
         ? `url(${backgroundImage})`
         : "none",
@@ -116,15 +113,13 @@ function SearchPage() {
       />
 
       <div>
+      <div className="mb-8 mt-24 flex justify-center">
+      <img src="/BrowseyFull.svg"  className="w-96 " alt="Browsey" /></div>
         <div
           
-          className="flex pt-24 flex-col items-center  min-h-[23vw]"
+          className="flex  flex-col items-center  "
         >
-          <img
-            src={isDarkMode ? "GoogleBlack.png" : "GoogleWhite.png"}
-            alt="Google Logo"
-            className="mb-4 filter bluescale contrast-700 h-20"
-          />
+          
           <div
             className="gcse-searchbox-only"
             data-resultsurl="https://www.google.com/search?client=ms-google-coop&qcx=80904074a37154829"
@@ -142,13 +137,13 @@ function SearchPage() {
             }}
           >
             <div>
-              <div className="flex justify-center max-w-[90vw]  w-full mx-auto">
-                <div className="flex space-x-1 p-1 justify-between bg-white/50 border border-gray-200 dark:border-gray-800 dark:bg-gray-800/50 rounded-lg w-full">
+              <div className="flex justify-center max-w-[90vw] mb-3  w-full mx-auto">
+                <div className="flex space-x-1 p-1 justify-between bg-gray-200/10 backdrop-blur-lg border border-gray-200/20 dark:border-gray-800/20 dark:bg-indigo-800/10 rounded-lg w-full">
                   <button
                     className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
                       activeComponent === "Anotherpage"
-                        ? "bg-blue-500 text-white dark:bg-gray-700"
-                        : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        ? "bg-indigo-500 text-white dark:bg-gray-700"
+                        : "text-indigo-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                     }`}
                     onClick={() => handleToggleComponent("Anotherpage")}
                   >
@@ -157,8 +152,8 @@ function SearchPage() {
                   <button
                     className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
                       activeComponent === "PopularBookmarks"
-                        ? "bg-blue-500 text-white dark:bg-gray-700"
-                        : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        ? "bg-indigo-500 text-white dark:bg-gray-700"
+                        : "text-indigo-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                     }`}
                     onClick={() => handleToggleComponent("PopularBookmarks")}
                   >
@@ -167,8 +162,8 @@ function SearchPage() {
                   <button
                     className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
                       activeComponent === "NotebookAndSheet"
-                        ? "bg-blue-500 text-white dark:bg-gray-700"
-                        : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        ? "bg-indigo-500 text-white dark:bg-gray-700"
+                        : "text-indigo-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                     }`}
                     onClick={() => handleToggleComponent("NotebookAndSheet")}
                   >
@@ -177,8 +172,8 @@ function SearchPage() {
                   <button
                     className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
                       activeComponent === "PasswordGenerator"
-                        ? "bg-blue-500 text-white dark:bg-gray-700"
-                        : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        ? "bg-indigo-500 text-white dark:bg-gray-700"
+                        : "text-indigo-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                     }`}
                     onClick={() => handleToggleComponent("PasswordGenerator")}
                   >
@@ -187,8 +182,8 @@ function SearchPage() {
                   <button
                     className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
                       activeComponent === "News"
-                        ? "bg-blue-500 text-white dark:bg-gray-700"
-                        : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        ? "bg-indigo-500 text-white dark:bg-gray-700"
+                        : "text-indigo-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                     }`}
                     onClick={() => handleToggleComponent("News")}
                   >
@@ -197,8 +192,8 @@ function SearchPage() {
                   <button
                     className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
                       activeComponent === "Sports"
-                        ? "bg-blue-500 text-white dark:bg-gray-700"
-                        : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        ? "bg-indigo-500 text-white dark:bg-gray-700"
+                        : "text-indigo-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                     }`}
                     onClick={() => handleToggleComponent("Sports")}
                   >
@@ -207,8 +202,8 @@ function SearchPage() {
                   <button
                     className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
                       activeComponent === "Top100"
-                        ? "bg-blue-500 text-white dark:bg-gray-700"
-                        : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        ? "bg-indigo-500 text-white dark:bg-gray-700"
+                        : "text-indigo-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                     }`}
                     onClick={() => handleToggleComponent("Top100")}
                   >
@@ -217,8 +212,8 @@ function SearchPage() {
                   <button
                     className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
                       activeComponent === "Tool"
-                        ? "bg-blue-500 text-white dark:bg-gray-700"
-                        : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        ? "bg-indigo-500 text-white dark:bg-gray-700"
+                        : "text-indigo-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                     }`}
                     onClick={() => handleToggleComponent("Tool")}
                   >

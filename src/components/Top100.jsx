@@ -308,7 +308,7 @@ const Top100Page = () => {
       {filteredItems.map((item) => (
         <Col xs={24} sm={12} lg={8} key={item.originalIndex}>
           <Card
-          className="dark:bg-gray-900 border border-gray-200 dark:border-gray-800 dark:text"
+          className="dark:bg-[#080318] border border-gray-200 dark:border-gray-800 dark:text"
             title={
               category === 'stocks' ? (
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -454,7 +454,7 @@ const Top100Page = () => {
       itemLayout="horizontal"
       dataSource={filteredItems}
       renderItem={(item) => (
-        <List.Item className="bg-gray-200 dark:bg-gray-900 dark:text-white  rounded-lg mb-4">
+        <List.Item className="bg-gray-200 dark:bg-[#080318] dark:text-white  rounded-lg mb-4">
           <List.Item.Meta
             title={
               category === 'stocks' ? (
@@ -517,7 +517,7 @@ const Top100Page = () => {
   );
 
   return (
-    <div className="max-w-screen-2xl mx-auto p-4 bg-gray-200/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-800 rounded-xl">
+    <div className="max-w-screen-2xl mx-auto p-4 bg-gray-200/10 dark:bg-indigo-800/10 border border-gray-200 dark:border-gray-800 rounded-xl">
       <Title level={1} style={{ textAlign: 'center', marginBottom: '2rem', }} className="dark:text-white">
         Top 100 {category.charAt(0).toUpperCase() + category.slice(1)}
       </Title>
@@ -526,16 +526,16 @@ const Top100Page = () => {
         {/* Category Selection */}
         <div style={{ textAlign: 'center' }}>
           <Radio.Group value={category} onChange={(e) => setCategory(e.target.value)} buttonStyle="solid">
-            <Radio.Button className="dark:bg-gray-900 dark:text-white" value="motorcycles">Bikes</Radio.Button>
-            <Radio.Button className="dark:bg-gray-900 dark:text-white" value="cars">Cars</Radio.Button>
-            <Radio.Button className="dark:bg-gray-900 dark:text-white" value="crypto">Crypto</Radio.Button>
-            <Radio.Button className="dark:bg-gray-900 dark:text-white" value="stocks">Stocks</Radio.Button>
-            <Radio.Button className="dark:bg-gray-900 dark:text-white" value="billionaires">Billionaires</Radio.Button>
-            <Radio.Button className="dark:bg-gray-900 dark:text-white" value="banks">Banks</Radio.Button>
-            <Radio.Button className="dark:bg-gray-900 dark:text-white" value="sportsmen">Sports Person</Radio.Button>
-            <Radio.Button className="dark:bg-gray-900 dark:text-white" value="movies">Movies</Radio.Button>
-            <Radio.Button className="dark:bg-gray-900 dark:text-white" value="brands">Brands</Radio.Button>
-            <Radio.Button className="dark:bg-gray-900 dark:text-white" value="gdp">GDP</Radio.Button>
+            <Radio.Button className="dark:bg-[#080318] dark:text-white" value="motorcycles">Bikes</Radio.Button>
+            <Radio.Button className="dark:bg-[#080318] dark:text-white" value="cars">Cars</Radio.Button>
+            <Radio.Button className="dark:bg-[#080318] dark:text-white" value="crypto">Crypto</Radio.Button>
+            <Radio.Button className="dark:bg-[#080318] dark:text-white" value="stocks">Stocks</Radio.Button>
+            <Radio.Button className="dark:bg-[#080318] dark:text-white" value="billionaires">Billionaires</Radio.Button>
+            <Radio.Button className="dark:bg-[#080318] dark:text-white" value="banks">Banks</Radio.Button>
+            <Radio.Button className="dark:bg-[#080318] dark:text-white" value="sportsmen">Sports Person</Radio.Button>
+            <Radio.Button className="dark:bg-[#080318] dark:text-white" value="movies">Movies</Radio.Button>
+            <Radio.Button className="dark:bg-[#080318] dark:text-white" value="brands">Brands</Radio.Button>
+            <Radio.Button className="dark:bg-[#080318] dark:text-white" value="gdp">GDP</Radio.Button>
           </Radio.Group>
         </div>
 

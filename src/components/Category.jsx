@@ -517,7 +517,7 @@ const Category = ({ data = [] }) => {
                 });
                 setIsModalVisible(true);
               }}
-              className="text-gray-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400"
+              className="text-gray-500 hover:text-indigo-500 dark:text-gray-400 dark:hover:text-blue-400"
             />
           </div>
           <span
@@ -561,7 +561,7 @@ const Category = ({ data = [] }) => {
           isEditMode ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
       >
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-[90%] max-w-2xl">
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-indigo-800 rounded-lg shadow-xl p-6 w-[90%] max-w-2xl">
           <div className="space-y-3">
             {/* Header */}
             <div className="flex justify-between items-center border-b dark:border-gray-600 pb-2">
@@ -751,7 +751,7 @@ const Category = ({ data = [] }) => {
                         <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
-                          className="p-3 border rounded-lg shadow-sm hover:shadow-md bg-white dark:bg-gray-800 flex items-center gap-3"
+                          className="p-3 border rounded-lg shadow-sm hover:shadow-md bg-white dark:bg-indigo-800 flex items-center gap-3"
                         >
                           <Checkbox
                             checked={selectedBookmarks.includes(bookmark.id)}
@@ -1129,7 +1129,7 @@ const Category = ({ data = [] }) => {
   return (
     <div className="relative">
       <EditModePanel />
-      <div className="dark:text-white max-w-sm rounded-lg bg-white dark:bg-gray-900">
+      <div className="dark:text-white max-w-sm rounded-lg bg-white dark:bg-[#080318]">
         <Card
           title={
             <div className="flex justify-between items-center">
@@ -1150,7 +1150,7 @@ const Category = ({ data = [] }) => {
               </div>
             </div>
           }
-          className="dark:bg-gray-900 border-none"
+          className="dark:bg-[#080318] border-none"
         >
           {renderBookmarks()}
         </Card>

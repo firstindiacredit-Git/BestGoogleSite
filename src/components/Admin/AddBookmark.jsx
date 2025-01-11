@@ -109,7 +109,7 @@ function BookmarkManager() {
   };
 
   return (
-    <div className="min-h-screen dark:bg-gray-900 bg-gray-50">
+    <div className="min-h-screen dark:bg-[#080318] bg-gray-50">
       {/* Top Bar with Search and Filters */}
       <div className="sticky top-0 z-9 dark:bg-white/5 bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -124,7 +124,7 @@ function BookmarkManager() {
                 placeholder="Search Shortcuts..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg border dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 rounded-lg border dark:border-gray-600 dark:bg-indigo-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
 
@@ -161,7 +161,7 @@ function BookmarkManager() {
             {filteredBookmarks.map((bookmark) => (
               <div
                 key={bookmark.id}
-                className="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow p-4"
+                className="bg-white dark:bg-indigo-800 rounded-lg shadow-sm hover:shadow-md transition-shadow p-4"
               >
                 {editing === bookmark.id ? (
                   // Edit Mode
@@ -190,7 +190,7 @@ function BookmarkManager() {
                       </button>
                       <button
                         onClick={() => saveEdit(bookmark.id)}
-                        className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md"
+                        className="px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md"
                       >
                         Save
                       </button>
@@ -212,7 +212,7 @@ function BookmarkManager() {
                         <div className="flex items-center gap-2 ml-2">
                           <button
                             onClick={() => startEditing(bookmark)}
-                            className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full"
+                            className="p-1.5 text-indigo-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -232,7 +232,7 @@ function BookmarkManager() {
                         href={bookmark.link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 truncate block mt-1"
+                        className="text-sm text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-blue-400 truncate block mt-1"
                       >
                         {bookmark.link}
                       </a>
@@ -248,7 +248,7 @@ function BookmarkManager() {
             {filteredBookmarks.map((bookmark) => (
               <div
                 key={bookmark.id}
-                className="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow p-4"
+                className="bg-white dark:bg-indigo-800 rounded-lg shadow-sm hover:shadow-md transition-shadow p-4"
               >
                 {editing === bookmark.id ? (
                   // Edit Mode
@@ -277,7 +277,7 @@ function BookmarkManager() {
                       </button>
                       <button
                         onClick={() => saveEdit(bookmark.id)}
-                        className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md"
+                        className="px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md"
                       >
                         Save
                       </button>
@@ -301,7 +301,7 @@ function BookmarkManager() {
                             href={bookmark.link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-sm text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+                            className="text-sm text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-blue-400"
                           >
                             {bookmark.link}
                           </a>
@@ -310,7 +310,7 @@ function BookmarkManager() {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => startEditing(bookmark)}
-                            className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full"
+                            className="p-1.5 text-indigo-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -378,7 +378,7 @@ function BookmarkManager() {
                   <h3 className="font-medium mb-2">Preview</h3>
                   <div className="bg-white p-4 rounded-lg shadow-sm">
                     <h4 className="font-medium">{newBookmark.name || 'Bookmark Name'}</h4>
-                    <a href="#" className="text-sm text-blue-600">
+                    <a href="#" className="text-sm text-indigo-600">
                       {newBookmark.link || 'https://example.com'}
                     </a>
                     
@@ -401,7 +401,7 @@ function BookmarkManager() {
                 </button>
                 <button
                   onClick={handleAddBookmark}
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md"
+                  className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md"
                 >
                   Add Bookmark
                 </button>
@@ -414,7 +414,7 @@ function BookmarkManager() {
       {/* Add Button */}
       <button
         onClick={() => setAdding(true)}
-        className="fixed bottom-8 right-8 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        className="fixed bottom-8 right-8 bg-indigo-600 text-white p-4 rounded-full shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

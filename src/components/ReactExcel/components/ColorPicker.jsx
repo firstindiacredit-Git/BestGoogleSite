@@ -31,7 +31,7 @@ const ColorPicker = ({ color = '#ffffff', onChange, onClose }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div
         ref={pickerRef}
-        className="bg-white dark:bg-gray-800 border dark:border-gray-700 border-gray-300 rounded-lg p-4 shadow-lg w-72"
+        className="bg-white dark:bg-indigo-800 border dark:border-gray-700 border-gray-300 rounded-lg p-4 shadow-lg w-72"
       >
         <div className="mb-4">
           <h3 className="text-lg font-semibold mb-2 dark:text-white">Choose Color</h3>
@@ -82,7 +82,7 @@ const ColorPicker = ({ color = '#ffffff', onChange, onClose }) => {
           </button>
           <button
             onClick={() => handleColorSelect(color)}
-            className="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+            className="px-4 py-2 text-sm bg-indigo-500 text-white rounded hover:bg-indigo-600"
           >
             Apply
           </button>

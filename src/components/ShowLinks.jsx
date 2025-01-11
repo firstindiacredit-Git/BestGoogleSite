@@ -620,7 +620,7 @@ function ShowLinks() {
     <div className="relative -space-y-12 min-h-screen">
       <button
         onClick={() => setLocked((prev) => !prev)} // Toggle global lock
-        className="absolute top-full mt-16 right-4 p-2 bg-blue-500 text-white rounded-full"
+        className="absolute top-full mt-16 right-4 p-2 bg-indigo-500 text-white rounded-full"
       >
         {locked ? <FaLock /> : <FaLockOpen />}
       </button>

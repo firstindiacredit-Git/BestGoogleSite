@@ -1126,8 +1126,8 @@ function PopularBookmarks() {
                                                 {...provided.dragHandleProps}
                                                 className={`cursor-move p-2 rounded-md transition-all duration-200 group ${
                                                   snapshot.isDragging
-                                                    ? "bg-blue-500"
-                                                    : "hover:bg-blue-500"
+                                                    ? "bg-indigo-500"
+                                                    : "hover:bg-indigo-500"
                                                 }`}
                                               >
                                                 <div className="flex flex-col gap-1">

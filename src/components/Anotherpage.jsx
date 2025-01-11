@@ -40,6 +40,9 @@ const Anotherpage = ({ backgroundImage, pageId = 'home' }) => {
     imageUploader: <ImageUploader />,
     calendar: <Calendar />,
     Bookmarks: <Category />,
+    Bookmarks1: <Category />,
+    Bookmarks2: <Category />,
+    Bookmarks3: <Category />,
     Todo: <TodoComponent />,
     NewsFeed: <NewsFeed />,
   };
@@ -252,7 +255,7 @@ const Anotherpage = ({ backgroundImage, pageId = 'home' }) => {
   return (
     <div style={{ position: "relative" }} >
       
-      <div className=" flex justify-center bg-white/50 dark:bg-gray-800/10 pt-4 max-w-[90vw]   border dark:border-gray-500/20 border-gray-200 w-fit mx-auto rounded-t-lg">
+      <div className=" flex justify-center bg-gray-200/10 dark:bg-indigo-800/10 pt-4 max-w-[90vw]   border dark:border-gray-800/20  backdrop-blur-xl border-gray-200/20 w-fit mx-auto rounded-t-lg">
         <div
           className={` w-fit  flex justify-center rounded-xl`}
         
@@ -305,17 +308,17 @@ const Anotherpage = ({ backgroundImage, pageId = 'home' }) => {
                                 >
                                   {grid ? (
                                     <>
-                                      <motion.div className="w-full max-w-sm text-left py-2 px-4  rounded-lg bg-gray-100 dark:bg-gray-700 dark:text-white font-semibold flex items-center">
+                                      <motion.div className="w-full max-w-sm text-left py-1 px-4  rounded-t-lg bg-slate-200 dark:bg-gray-700  font-semibold flex items-center">
                                         <div
                                           {...provided.dragHandleProps}
-                                          className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                                          className="cursor-grab mr-3 text-gray-100 hover:text-gray-700 dark:hover:text-gray-300"
                                         >
                                           ⋮⋮
                                         </div>
                                         {item.name}
                                       </motion.div>
                                       <motion.div
-                                        className=" bg-white dark:bg-gray-900 rounded-b-lg"
+                                        className=" bg-white dark:bg-[#080318] rounded-b-lg"
                                         initial={{ height: 0, opacity: 0 }}
                                         animate={{ height: "auto", opacity: 1 }}
                                         exit={{ height: 0, opacity: 0 }}
@@ -344,7 +347,7 @@ const Anotherpage = ({ backgroundImage, pageId = 'home' }) => {
                                       </motion.div>
                                       {item.isOpen && (
                                         <motion.div
-                                          className=" bg-gray-50 dark:bg-gray-900 rounded-b-lg "
+                                          className=" bg-gray-50 dark:bg-[#080318] rounded-b-lg "
                                           initial={{ height: 0, opacity: 0 }}
                                           animate={{ height: "auto", opacity: 1 }}
                                           exit={{ height: 0, opacity: 0 }}

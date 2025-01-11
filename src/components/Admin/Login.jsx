@@ -82,7 +82,7 @@ const SignInPage = () => {
             />
           </div>
           <button
-            className="border-blue-500 text-blue-500 rounded hover:bg-blue-500 hover:text-white w-full border h-10 font-medium "
+            className="border-blue-500 text-indigo-500 rounded hover:bg-indigo-500 hover:text-white w-full border h-10 font-medium "
             type="submit"
             disabled={loading}
           >

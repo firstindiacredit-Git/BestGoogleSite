@@ -64,7 +64,7 @@ const NewsFeed = () => {
   }
 
   return (
-    <div className=" max-w-sm bg-white dark:bg-gray-900 rounded-lg overflow-hidden">
+    <div className=" max-w-sm bg-white dark:bg-[#080318] rounded-lg overflow-hidden">
       <div className="news-carousel">
         <Carousel
           ref={carouselRef}
@@ -94,7 +94,7 @@ const NewsFeed = () => {
                     </div>
                   )}
                   <div className="flex-1">
-                    <h3 className="text-base font-medium text-blue-600 dark:text-blue-400 mb-2 line-clamp-2">
+                    <h3 className="text-base font-medium text-indigo-600 dark:text-blue-400 mb-2 line-clamp-2">
                       {item.title}
                     </h3>
                     <p className="text-sm text-gray-600 dark:text-gray-300 mb-2 line-clamp-2">
@@ -109,7 +109,7 @@ const NewsFeed = () => {
         <div className="flex items-center justify-center gap-4 p-2 border-t dark:border-gray-700">
           <button
             onClick={handlePrev}
-            className="text-gray-600 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 p-2"
+            className="text-gray-600 dark:text-gray-400 hover:text-indigo-500 dark:hover:text-blue-400 p-2"
           >
             <LeftOutlined />
           </button>
@@ -118,7 +118,7 @@ const NewsFeed = () => {
           </span>
           <button
             onClick={handleNext}
-            className="text-gray-600 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 p-2"
+            className="text-gray-600 dark:text-gray-400 hover:text-indigo-500 dark:hover:text-blue-400 p-2"
           >
             <RightOutlined />
           </button>

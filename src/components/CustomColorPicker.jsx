@@ -113,7 +113,7 @@ const CustomColorPicker = ({ color, onChange, onClose }) => {
                 onClose();
               }
             }}
-            className="px-3 py-1 bg-blue-500 text-white w-[30%] rounded hover:bg-blue-600 transition-colors"
+            className="px-3 py-1 bg-indigo-500 text-white w-[30%] rounded hover:bg-indigo-600 transition-colors"
           >
             Add
           </button>

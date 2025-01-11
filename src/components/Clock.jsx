@@ -52,10 +52,11 @@ const getClockHandDegrees = (time, timeZone) => {
   const hours = date.getHours() % 12;
   const minutes = date.getMinutes();
   const seconds = date.getSeconds();
+  const milliseconds = date.getMilliseconds();
 
   const hourDegrees = hours * 30 + minutes / 2;
   const minuteDegrees = minutes * 6 + seconds / 10;
-  const secondDegrees = seconds * 6;
+  const secondDegrees = (seconds + milliseconds / 1000) * 6;
 
   return {
     hours: hourDegrees,
@@ -87,8 +88,9 @@ const CLOCK_THEMES = {
     analog: {
       border: "border-gray-200 dark:border-gray-700",
       background: "bg-white dark:bg-gray-950",
-      hourHand: "bg-blue-500",
+      hourHand: "bg-indigo-500",
       minuteHand: "bg-gray-900 dark:bg-white",
+      secondHand: "bg-gray-200 dark:bg-gray-200",
       numbers: "text-gray-900 dark:text-white",
     },
     digital: {
@@ -104,6 +106,8 @@ const CLOCK_THEMES = {
       background: "bg-black",
       hourHand: "bg-pink-500",
       minuteHand: "bg-purple-500",
+      secondHand: "bg-gray-200 dark:bg-gray-200",
+
       numbers: "text-purple-400",
     },
     digital: {
@@ -116,13 +120,15 @@ const CLOCK_THEMES = {
     name: "Minimal",
     analog: {
       border: "border-gray-300 dark:border-gray-600",
-      background: "bg-gray-50 dark:bg-gray-900",
+      background: "bg-gray-50 dark:bg-[#080318]",
       hourHand: "bg-gray-600 dark:bg-gray-400",
       minuteHand: "bg-gray-800 dark:bg-gray-200",
+      secondHand: "bg-gray-200 dark:bg-gray-200",
+
       numbers: "text-gray-600 dark:text-gray-400",
     },
     digital: {
-      container: "bg-gray-50 dark:bg-gray-900",
+      container: "bg-gray-50 dark:bg-[#080318]",
       time: "bg-transparent border-gray-300 dark:border-gray-600",
       text: "text-gray-800 dark:text-gray-200",
     },
@@ -132,13 +138,15 @@ const CLOCK_THEMES = {
     analog: {
       border: "border-blue-400 dark:border-blue-500",
       background: "bg-blue-50 dark:bg-blue-900",
-      hourHand: "bg-blue-600",
+      hourHand: "bg-indigo-600",
       minuteHand: "bg-teal-500",
-      numbers: "text-blue-800 dark:text-blue-200",
+      secondHand: "bg-gray-200 dark:bg-gray-200",
+
+      numbers: "text-indigo-800 dark:text-blue-200",
     },
     digital: {
       container: "bg-blue-50 dark:bg-blue-900",
-      time: "bg-white/80 dark:bg-blue-800 border-blue-400 dark:border-blue-300",
+      time: "bg-white/80 dark:bg-indigo-800 border-blue-400 dark:border-blue-300",
       text: "text-blue-900 dark:text-blue-100",
     },
   },
@@ -156,11 +164,11 @@ const TimeZoneClock = ({
   useEffect(() => {
     const timer = setInterval(() => {
       setTime(new Date());
-    }, 1000);
+    }, 16);  // Update approximately 60 times per second for smooth animation
     return () => clearInterval(timer);
   }, []);
 
-  const { hours, minutes } = getClockHandDegrees(time, timeZone);
+  const { hours, minutes, seconds } = getClockHandDegrees(time, timeZone);
   const timeDiff = getTimeDifference(baseTimeZone, timeZone);
 
   if (isAnalog) {
@@ -213,6 +221,10 @@ const TimeZoneClock = ({
             className={`absolute -mt-7 w-0.5 h-7 ${theme.analog.minuteHand} origin-bottom rounded-full`}
             style={{ transform: `rotate(${minutes}deg)` }}
           />
+          <div
+            className={`absolute -mt-7 w-0.5 h-7 ${theme.analog.secondHand} origin-bottom rounded-full`}
+            style={{ transform: `rotate(${seconds}deg)` }}
+          />
         </div>
         <div className="text-center text-[10px] font-medium mt-1">
           <p className={`mb-0 ${theme.analog.numbers}`}>
@@ -243,7 +255,7 @@ const TimeZoneClock = ({
       <div
         className={`h-full backdrop-blur-sm min-w-28 rounded-xl  flex flex-col items-center justify-center p-2 ${theme.digital.container}`}
       >
-        <p className="text-[10px] font-medium mb-0.5 text-blue-500">
+        <p className="text-[10px] font-medium mb-0.5 text-indigo-500">
           {formatTimeZoneName(timeZone)}
         </p>
         <div className={`border px-1 rounded-md text-nowrap ${theme.digital.time}`}>
@@ -268,7 +280,7 @@ const ResponsiveWorldClock = () => {
   const [currentTheme, setCurrentTheme] = useState(CLOCK_THEMES.classic);
 
   const themeMenu = (
-    <Menu className="dark:bg-gray-900">
+    <Menu className="dark:bg-[#080318]">
       {Object.entries(CLOCK_THEMES).map(([key, theme]) => (
         <Menu.Item
           key={key}
@@ -276,7 +288,7 @@ const ResponsiveWorldClock = () => {
         >
           <span className="dark:text-white">
             {theme.name}
-            </span>
+          </span>
         </Menu.Item>
       ))}
     </Menu>
@@ -339,7 +351,7 @@ const ResponsiveWorldClock = () => {
   );
 
   return (
-    <div className="dark:bg-gray-900 w-full max-w-sm dark:text-white p-4 bg-white rounded-lg flex justify-center items-center">
+    <div className="dark:bg-[#080318] w-full max-w-sm dark:text-white p-4 bg-white rounded-lg flex justify-center items-center">
       <div className="mx-auto w-full">
         <div className="flex items-center">
           <div className="flex w-full justify-between items-center">
@@ -369,7 +381,7 @@ const ResponsiveWorldClock = () => {
 
                   {isDropdownOpen && availableZones.length > 0 && (
                     <>
-                      <div className="absolute right-0 mt-2 w-48 dark:text-white dark:bg-gray-800 backdrop-blur-sm bg-gray-200 rounded-lg shadow-lg py-1 z-50 max-h-[250px] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-400 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 dark:[&::-webkit-scrollbar-track]:bg-gray-800">
+                      <div className="absolute right-0 mt-2 w-48 dark:text-white dark:bg-indigo-800 backdrop-blur-sm bg-gray-200 rounded-lg shadow-lg py-1 z-50 max-h-[250px] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-400 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 dark:[&::-webkit-scrollbar-track]:bg-gray-800">
                         {availableZones.map((timeZone) => (
                           <button
                             key={timeZone}

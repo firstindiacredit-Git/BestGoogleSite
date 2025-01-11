@@ -246,11 +246,11 @@ function AddLinks() {
   
 
   if (loading) {
-    return <div className="min-h-screen bg-gray-50 dark:bg-gray-900"></div>;
+    return <div className="min-h-screen bg-gray-50 dark:bg-[#080318]"></div>;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#080318]">
       <div className="sticky top-0 z-10 bg-white dark:bg-white/5 shadow-sm border-b border-gray-200 dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col sm:flex-row gap-4">
@@ -271,13 +271,13 @@ function AddLinks() {
               </div>
               
               {/* View Toggle */}
-              <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
+              <div className="flex items-center gap-2 bg-gray-100 dark:bg-indigo-800 p-1 rounded-lg">
                 <button
                   onClick={() => setIsGridView(true)}
                   className={`p-2 rounded ${
                     isGridView
                       ? "bg-white dark:bg-gray-700 shadow-sm"
-                      : "hover:bg-white/50 dark:hover:bg-gray-700/50"
+                      : "hover:bg-gray-200/10 dark:hover:bg-gray-700/50"
                   }`}
                 >
                   <svg className="w-5 h-5 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -289,7 +289,7 @@ function AddLinks() {
                   className={`p-2 rounded ${
                     !isGridView
                       ? "bg-white dark:bg-gray-700 shadow-sm"
-                      : "hover:bg-white/50 dark:hover:bg-gray-700/50"
+                      : "hover:bg-gray-200/10 dark:hover:bg-gray-700/50"
                   }`}
                 >
                   <svg className="w-5 h-5 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -305,7 +305,7 @@ function AddLinks() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Add Bookmark Card */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="bg-white dark:bg-indigo-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -313,7 +313,7 @@ function AddLinks() {
                 </h2>
                 <button
                   onClick={() => setBookmarkModalOpen(!isBookmarkModalOpen)}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                 >
                   {isBookmarkModalOpen ? "Close Form" : "Add New Bookmark"}
                 </button>
@@ -321,7 +321,7 @@ function AddLinks() {
 
               {isBookmarkModalOpen && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                  <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full p-6 shadow-xl">
+                  <div className="bg-white dark:bg-indigo-800 rounded-lg max-w-md w-full p-6 shadow-xl">
                     <div className="flex justify-between items-center mb-4">
                       <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Add New Bookmark</h2>
                       <button
@@ -387,7 +387,7 @@ function AddLinks() {
                             handleAddLink();
                             setBookmarkModalOpen(false);
                           }}
-                          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
+                          className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md transition-colors"
                         >
                           Add Bookmark
                         </button>
@@ -400,7 +400,7 @@ function AddLinks() {
           </div>
 
           {/* Add Category Card */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="bg-white dark:bg-indigo-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -416,7 +416,7 @@ function AddLinks() {
 
               {isCategoryModalOpen && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                  <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full p-6 shadow-xl">
+                  <div className="bg-white dark:bg-indigo-800 rounded-lg max-w-md w-full p-6 shadow-xl">
                     <div className="flex justify-between items-center mb-4">
                       <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Add New Category</h2>
                       <button
@@ -469,7 +469,7 @@ function AddLinks() {
                             handleAddCategory();
                             setCategoryModalOpen(false);
                           }}
-                          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
+                          className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md transition-colors"
                         >
                           Add Category
                         </button>
@@ -494,7 +494,7 @@ function AddLinks() {
               {paginatedCategories.map((category) => (
                 <div
                   key={category.id}
-                  className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden h-fit"
+                  className="bg-white dark:bg-indigo-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden h-fit"
                 >
                   <div className="flex flex-col h-full">
                     <div className="p-4 flex justify-between font-medium text-gray-800 dark:text-white bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700">
@@ -526,14 +526,14 @@ function AddLinks() {
                                 href={link.link}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 truncate max-w-[70%]"
+                                className="text-sm text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-blue-400 truncate max-w-[70%]"
                               >
                                 {link.link}
                               </a>
                               <div className="flex items-center space-x-2">
                                 <button
                                   onClick={() => handleEdit(link.id, link.name, link.link, link.category)}
-                                  className="p-1 text-gray-400 hover:text-blue-500 transition-colors"
+                                  className="p-1 text-gray-400 hover:text-indigo-500 transition-colors"
                                 >
                                   <FaRegEdit size={16} />
                                 </button>
@@ -560,12 +560,12 @@ function AddLinks() {
               {paginatedCategories.map((category) => (
                 <div
                   key={category.id}
-                  className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
+                  className="bg-white dark:bg-indigo-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
                 >
                   {/* Category Header */}
                   <button
                     onClick={() => (category.links || []).length > 0 && toggleCategory(category.id)}
-                    className={`w-full flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 ${
+                    className={`w-full flex items-center justify-between p-4 bg-gray-100 dark:bg-indigo-800 border-b border-gray-200 dark:border-gray-700 ${
                       (category.links || []).length > 0 ? 'hover:bg-gray-100 dark:hover:bg-gray-700/50 cursor-pointer' : 'cursor-default'
                     } transition-colors`}
                   >
@@ -627,7 +627,7 @@ function AddLinks() {
                                 href={link.link}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 truncate block"
+                                className="text-sm text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-blue-400 truncate block"
                               >
                                 {link.link}
                               </a>
@@ -636,7 +636,7 @@ function AddLinks() {
                           <div className="flex items-center space-x-2 flex-shrink-0">
                             <button
                               onClick={() => handleEdit(link.id, link.name, link.link, link.category)}
-                              className="p-1 text-gray-400 hover:text-blue-500 transition-colors"
+                              className="p-1 text-gray-400 hover:text-indigo-500 transition-colors"
                             >
                               <FaRegEdit size={16} />
                             </button>
@@ -664,8 +664,8 @@ function AddLinks() {
                 disabled={currentPage === 1}
                 className={`px-3 py-1 rounded-lg border ${
                   currentPage === 1
-                    ? "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed"
-                    : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border-gray-300 dark:border-gray-600"
+                    ? "bg-gray-100 dark:bg-indigo-800 text-gray-400 dark:text-gray-600 cursor-not-allowed"
+                    : "bg-white dark:bg-indigo-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border-gray-300 dark:border-gray-600"
                 }`}
               >
                 Previous
@@ -676,8 +676,8 @@ function AddLinks() {
                   onClick={() => setCurrentPage(i + 1)}
                   className={`px-3 py-1 rounded-lg border ${
                     currentPage === i + 1
-                      ? "bg-blue-600 text-white border-blue-600"
-                      : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border-gray-300 dark:border-gray-600"
+                      ? "bg-indigo-600 text-white border-blue-600"
+                      : "bg-white dark:bg-indigo-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border-gray-300 dark:border-gray-600"
                   }`}
                 >
                   {i + 1}
@@ -688,8 +688,8 @@ function AddLinks() {
                 disabled={currentPage === totalPages}
                 className={`px-3 py-1 rounded-lg border ${
                   currentPage === totalPages
-                    ? "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed"
-                    : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    ? "bg-gray-100 dark:bg-indigo-800 text-gray-400 dark:text-gray-600 cursor-not-allowed"
+                    : "bg-white dark:bg-indigo-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                 } border-gray-300 dark:border-gray-600`}
               >
                 Next
@@ -700,7 +700,7 @@ function AddLinks() {
       </div>
       {isEditModalOpen && editBookmarkData && (
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-        <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full p-6 shadow-xl">
+        <div className="bg-white dark:bg-indigo-800 rounded-lg max-w-md w-full p-6 shadow-xl">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Edit Bookmark</h2>
             <button
@@ -769,7 +769,7 @@ function AddLinks() {
               </button>
               <button
                 onClick={handleUpdateBookmark}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
+                className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md transition-colors"
               >
                 Update Bookmark
               </button>

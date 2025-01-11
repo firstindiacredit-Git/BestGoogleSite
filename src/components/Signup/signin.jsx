@@ -122,7 +122,7 @@ const SignIn = () => {
 
               <button
                 type="submit"
-                className="w-full p-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500"
+                className="w-full p-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:ring-2 focus:ring-blue-500"
               >
                 Continue
               </button>
@@ -140,7 +140,7 @@ const SignIn = () => {
 
               <button
                 type="submit"
-                className={`w-full p-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 ${
+                className={`w-full p-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:ring-2 focus:ring-blue-500 ${
                   loading ? "opacity-50 cursor-not-allowed" : ""
                 }`}
                 disabled={loading}
@@ -153,7 +153,7 @@ const SignIn = () => {
               </button>
               <div className="text-center flex justify-center gap-2 mt-4">
                 <button
-                  className="text-blue-500 hover:text-blue-700 transition duration-200"
+                  className="text-indigo-500 hover:text-indigo-700 transition duration-200"
                   onClick={() => navigate("/forgotpassword")}
                 >
                   Forgot Password?
@@ -168,11 +168,11 @@ const SignIn = () => {
 
           <p className="text-xs text-gray-500 text-center mt-6">
             By continuing, you agree to our
-            <a href="/terms" className="text-blue-500 underline mx-1">
+            <a href="/terms" className="text-indigo-500 underline mx-1">
               Terms & Conditions
             </a>
             and
-            <a href="/privacy" className="text-blue-500 underline mx-1">
+            <a href="/privacy" className="text-indigo-500 underline mx-1">
               Privacy Policy
             </a>
             .

@@ -146,8 +146,8 @@ const SportsLeagues = () => {
   }
 
   return (
-    <Layout className="p-8 border dark:bg-gray-900/50 rounded-lg bg-gray-200/50 dark:border-gray-800 border-gray-200">
-      <Content style={{ padding: "2px", margin: "5px" }} className="dark:bg-gray-900">
+    <Layout className="p-8 border dark:bg-[#080318]/50 rounded-lg bg-gray-200/10 dark:border-gray-800 border-gray-200">
+      <Content style={{ padding: "2px", margin: "5px" }} className="dark:bg-[#080318]">
         <Space direction="vertical" size="large" style={{ width: "100%" }}>
           <div
             style={{
@@ -161,12 +161,12 @@ const SportsLeagues = () => {
             <Radio.Group
               value={viewMode}
               onChange={(e) => setViewMode(e.target.value)}
-              className="dark:bg-gray-900 rounded-lg dark:text-gray-300"
+              className="dark:bg-[#080318] rounded-lg dark:text-gray-300"
             >
-              <Radio.Button value="grid" className="dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700">
+              <Radio.Button value="grid" className="dark:bg-indigo-800 dark:text-gray-300 dark:border-gray-700">
                 <AppstoreOutlined />
               </Radio.Button>
-              <Radio.Button value="list" className="dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700">
+              <Radio.Button value="list" className="dark:bg-indigo-800 dark:text-gray-300 dark:border-gray-700">
                 <UnorderedListOutlined />
               </Radio.Button>
             </Radio.Group>
@@ -176,7 +176,7 @@ const SportsLeagues = () => {
               allowClear
               onChange={(e) => setSearchQuery(e.target.value)}
               style={{ width: 300 }}
-              className="dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700"
+              className="dark:bg-[#080318] dark:text-gray-300 dark:border-gray-700"
             />
           </div>
 
@@ -185,7 +185,7 @@ const SportsLeagues = () => {
               <Spin size="large" className="dark:text-gray-300" />
             </div>
           ) : error ? (
-            <Alert message={error} type="error" className="dark:bg-gray-800 dark:text-gray-300" />
+            <Alert message={error} type="error" className="dark:bg-indigo-800 dark:text-gray-300" />
           ) : (
             <Row gutter={[16, 16]}>
               {filteredLeagues.map((league) => (
@@ -195,7 +195,7 @@ const SportsLeagues = () => {
                   lg={viewMode === "grid" ? 6 : 24}
                   key={league.idLeague}
                 >
-                  <div className="relative group rounded-lg overflow-hidden transition-all duration-300 hover:shadow-lg dark:hover:shadow-gray-700/50 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
+                  <div className="relative group rounded-lg overflow-hidden transition-all duration-300 hover:shadow-lg dark:hover:shadow-gray-700/50 bg-white dark:bg-[#080318] border border-gray-200 dark:border-gray-800">
                     <div className="p-6">
                       <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">
                         {league.strLeague}
@@ -204,10 +204,10 @@ const SportsLeagues = () => {
                         {league.strSport} - {league.strCountry}
                       </p>
                     </div>
-                    <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-800">
+                    <div className="px-6 py-4 bg-gray-50 dark:bg-indigo-800/10 border-t border-gray-200 dark:border-gray-800">
                       <button
                         onClick={() => fetchEvents(league.idLeague)}
-                        className="w-full text-center py-2 px-4 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-200"
+                        className="w-full text-center py-2 px-4 text-sm font-medium text-indigo-600 dark:text-blue-400 hover:text-indigo-700 dark:hover:text-blue-300 transition-colors duration-200"
                       >
                         View Upcoming Event
                       </button>
@@ -286,7 +286,7 @@ const SportsLeagues = () => {
                 lg={viewMode === "grid" ? 6 : 24}
                 key={league.idLeague}
               >
-                <div className="relative group rounded-lg overflow-hidden transition-all duration-300 hover:shadow-lg dark:hover:shadow-gray-700/50 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
+                <div className="relative group rounded-lg overflow-hidden transition-all duration-300 hover:shadow-lg dark:hover:shadow-gray-700/50 bg-white dark:bg-[#080318] border border-gray-200 dark:border-gray-800">
                   <div className="p-6">
                     <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">
                       {league.strLeague}
@@ -295,10 +295,10 @@ const SportsLeagues = () => {
                       {league.strSport} - {league.strCountry}
                     </p>
                   </div>
-                  <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-800">
+                  <div className="px-6 py-4 bg-gray-50 dark:bg-indigo-800/10 border-t border-gray-200 dark:border-gray-800">
                     <button
                       onClick={() => fetchEvents(league.idLeague)}
-                      className="w-full text-center py-2 px-4 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-200"
+                      className="w-full text-center py-2 px-4 text-sm font-medium text-indigo-600 dark:text-blue-400 hover:text-indigo-700 dark:hover:text-blue-300 transition-colors duration-200"
                     >
                       View Upcoming Event
                     </button>

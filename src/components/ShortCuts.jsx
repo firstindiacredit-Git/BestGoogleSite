@@ -246,12 +246,12 @@ function BookmarkPage() {
   ];
 
   return (
-    <div className="flex items-center dark:text-white justify-center mb-10 w-full">
+    <div className="flex items-center max-w-4xl dark:text-white justify-center mb-10 w-full">
       <div className="flex gap-3  flex-wrap">
         {combinedBookmarks.map((bookmark) => (
           <div
             key={bookmark.id}
-            className="text-center dark:bg-gray-800/10 bg-gray-200/10 dark:border-gray-800/20 border-gray-200/20 cursor-pointer p-2 rounded-lg transition-transform transform hover:scale-105 group relative"
+            className="text-center dark:bg-indigo-800/10 bg-gray-200/10 dark:border-gray-800/20 border-gray-200/20 cursor-pointer p-2 rounded-lg transition-transform transform hover:scale-105 group relative"
           >
             <a
               href={bookmark.link}
@@ -262,7 +262,7 @@ function BookmarkPage() {
               <img
                 src={getFavicon(bookmark.link) }
                 alt={bookmark.name}
-                className="w-7 h-7 mx-auto rounded-full transition-transform duration-300 transform hover:scale-110 hover:shadow-lg"
+                className="w-7 h-7 mx-auto"
               />
             </a>
             <h3 className="text-xs font-semibold mt-1 w-16 truncate mx-auto">
@@ -276,7 +276,7 @@ function BookmarkPage() {
                 ⋮
               </button>
               {menuVisible === bookmark.id && (
-                <div className="absolute bg-white/30 right-0 top-6 backdrop-blur border rounded shadow-md text-left z-10">
+                <div className="absolute bg-white right-0 top-6 backdrop-blur border rounded shadow-md text-left z-10">
                   {bookmark.createdByUser && (
                     <button
                       onClick={() => handleEditBookmark(bookmark)}
@@ -326,7 +326,7 @@ function BookmarkPage() {
           setSuccessMessage("");
         }}
         footer={null}
-        className="dark:bg-gray-800"
+        className="dark:bg-indigo-800"
       >
         <Form
           onFinish={editingBookmark ? handleUpdateBookmark : handleAddBookmark}
@@ -377,7 +377,7 @@ function BookmarkPage() {
             </button>
             <button
               type="submit"
-              className="px-4 py-1.5 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+              className="px-4 py-1.5 text-sm bg-indigo-500 text-white rounded hover:bg-indigo-600 transition-colors"
             >
               {editMode ? "Update" : "Add"}
             </button>

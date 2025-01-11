@@ -13,7 +13,7 @@ import "./Landing.css"
 const FeatureCard = ({ icon: Icon, title, description }) => (
   <motion.div
     whileHover={{ scale: 1.02 }}
-    className="p-6 rounded-2xl bg-white hover:border-indigo-600 cursor-default backdrop-blur-lg border border-gray-200/50 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-lg transition-all group"
+    className="p-6 rounded-2xl bg-white hover:border-indigo-600 cursor-default backdrop-blur-lg border border-gray-200/10 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-lg transition-all group"
   >
     <div className="bg-gray-50 w-14 h-14 rounded-xl flex items-center justify-center mb-6 group-hover:bg-indigo-50">
       <Icon className="w-7 h-7 text-indigo-600" />
@@ -39,15 +39,16 @@ const LandingPage = () => {
       <motion.header
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className={`fixed top-0 left-0 right-0 w-full z-50 transition-all duration-300 bg-white/20 backdrop-blur-md  border-b border-gray-200/50`}
+        className={`fixed top-0 left-0 right-0 w-full z-50 transition-all duration-300 bg-white/20 backdrop-blur-md  border-b border-gray-200/10`}
       >
         <nav className="container mx-auto px-4">
           <div className="flex items-center justify-between   h-16">
             {/* Logo */}
             <Link to="/" className="flex px-6 w-44 items-center space-x-2">
-              <span className="text-2xl  font-bold text-indigo-600">
+              {/* <span className="text-2xl  font-bold text-indigo-600">
                 Browsey
-              </span>
+              </span> */}
+              <img src="/BrowseyFull.svg" alt="" />
             </Link>
 
             <div className="hidden md:flex items-center space-x-8">
@@ -83,7 +84,7 @@ const LandingPage = () => {
 
             {/* Mobile Menu Button */}
             <button
-              className="md:hidden p-2 rounded-lg hover:bg-white/50 transition-colors shadow-lg shadow-indigo-500/10 hover:shadow-xl hover:shadow-indigo-500/20 transform hover:-translate-y-0.5"
+              className="md:hidden p-2 rounded-lg hover:bg-gray-200/10 transition-colors shadow-lg shadow-indigo-500/10 hover:shadow-xl hover:shadow-indigo-500/20 transform hover:-translate-y-0.5"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? (
@@ -234,7 +235,7 @@ const LandingPage = () => {
                 <Chrome />
                 Add to Chrome - It's Free
               </a>
-              <div Link="/aboutPage" className="px-8 py-4 rounded-xl bg-white/50 backdrop-blur-sm text-gray-900 font-semibold hover:bg-white/60 transition-all shadow-lg shadow-indigo-500/10 hover:shadow-xl hover:shadow-indigo-500/20 transform hover:-translate-y-0.5 border hover:border-indigo-500 border-indigo-500/20">
+              <div Link="/aboutPage" className="px-8 py-4 rounded-xl bg-gray-200/10 backdrop-blur-sm text-gray-900 font-semibold hover:bg-white/60 transition-all shadow-lg shadow-indigo-500/10 hover:shadow-xl hover:shadow-indigo-500/20 transform hover:-translate-y-0.5 border hover:border-indigo-500 border-indigo-500/20">
                 Learn More
               </div>
             </motion.div>
@@ -316,7 +317,7 @@ const LandingPage = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="p-6 rounded-2xl bg-white backdrop-blur-lg border border-gray-200/50 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-lg transition-all"
+            className="p-6 rounded-2xl bg-white backdrop-blur-lg border border-gray-200/10 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-lg transition-all"
           >
             <div className="bg-gray-50 w-14 h-14 rounded-xl flex items-center justify-center mb-6">
               <FaExclamationCircle className="w-7 h-7 text-indigo-600" />
@@ -329,7 +330,7 @@ const LandingPage = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="p-6 rounded-2xl bg-white backdrop-blur-lg border border-gray-200/50 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-lg transition-all"
+            className="p-6 rounded-2xl bg-white backdrop-blur-lg border border-gray-200/10 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-lg transition-all"
           >
             <div className="bg-gray-50 w-14 h-14 rounded-xl flex items-center justify-center mb-6">
               <FaClock className="w-7 h-7 text-indigo-600" />
@@ -342,7 +343,7 @@ const LandingPage = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="p-6 rounded-2xl bg-white backdrop-blur-lg border border-gray-200/50 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-lg transition-all"
+            className="p-6 rounded-2xl bg-white backdrop-blur-lg border border-gray-200/10 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-lg transition-all"
           >
             <div className="bg-gray-50 w-14 h-14 rounded-xl flex items-center justify-center mb-6">
               <FaPizzaSlice className="w-7 h-7 text-indigo-600" />
@@ -402,7 +403,7 @@ const LandingPage = () => {
 
             <div className="flex max-w-xs flex-col  items-start gap-4">
               <div className="p-2 bg-blue-100 rounded-lg">
-                <FaShieldVirus className="w-6 h-6 text-blue-600" />
+                <FaShieldVirus className="w-6 h-6 text-indigo-600" />
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Secure & Private</h3>
@@ -596,7 +597,7 @@ const LandingPage = () => {
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="backdrop-blur-lg bg-white/50 rounded-xl border border-indigo-500/50 overflow-hidden shadow-lg shadow-indigo-500/10 hover:shadow-xl hover:shadow-indigo-500/20 transition-all"
+                className="backdrop-blur-lg bg-gray-200/10 rounded-xl border border-indigo-500/50 overflow-hidden shadow-lg shadow-indigo-500/10 hover:shadow-xl hover:shadow-indigo-500/20 transition-all"
               >
                 <button
                   onClick={() => setOpenFaq(openFaq === index ? null : index)}

@@ -337,10 +337,10 @@ const CredentialManager = () => {
   return (
     <>
       {isLocked ? (
-        <div className="p-8 bg-white/50 dark:bg-gray-900/50 flex justify-center max-w-6xl w-full mx-auto rounded-xl ">
-        <div className="w-full bg-white dark:bg-gray-900 rounded-t-lg   h-[80vh]   flex items-center justify-center">
-          <div className="p-8  border bg-white dark:bg-gray-800  border-gray-500/5 text-center rounded-lg shadow-lg w-fit">
-            <div className="flex text-blue-500 text-6xl items-center justify-center">
+        <div className="p-8 bg-gray-200/10 dark:bg-[#080318]/50 flex justify-center max-w-6xl w-full mx-auto rounded-xl ">
+        <div className="w-full bg-white dark:bg-[#080318] rounded-t-lg   h-[80vh]   flex items-center justify-center">
+          <div className="p-8  border bg-white dark:bg-indigo-800  border-gray-500/5 text-center rounded-lg shadow-lg w-fit">
+            <div className="flex text-indigo-500 text-6xl items-center justify-center">
               <FaLock />
             </div>
             <h2 className="text-2xl my-1 mt-4 font-semibold dark:text-gray-200">
@@ -365,13 +365,13 @@ const CredentialManager = () => {
             </div>
             <button
               onClick={handleUnlock}
-              className="bg-blue-500 w-full hover:bg-blue-600 transition-all text-white px-4 py-2 rounded-md"
+              className="bg-indigo-500 w-full hover:bg-indigo-600 transition-all text-white px-4 py-2 rounded-md"
             >
               Unlock
             </button>
             <div className="text-center flex justify-center gap-2 mt-3 -mb-3">
               <button
-                className="text-blue-500 hover:text-blue-700 text-xs transition duration-200"
+                className="text-indigo-500 hover:text-indigo-700 text-xs transition duration-200"
                 onClick={() => navigate("/ProfilePage")}
               >
                 Forgot Pin?
@@ -381,10 +381,10 @@ const CredentialManager = () => {
         </div>
         </div>
       ) : (
-        <div className="mx-auto min-h-[20vh] max-w-[90vw] rounded-xl  p-12 pb-14 dark:bg-gray-900/50 bg-white/50">
-          <div className="flex justify-between w-[68%] xl:w-[79.2%] dark:bg-gray-900 bg-white items-center">
+        <div className="mx-auto min-h-[20vh] max-w-[90vw] rounded-xl  p-12 pb-14 dark:bg-[#080318]/50 bg-gray-200/10">
+          <div className="flex justify-between w-[68%] xl:w-[79.2%] dark:bg-[#080318] bg-white items-center">
             <button
-              className="transition-all bg-blue-500 text-white lg:text-lg text-sm lg:px-4 px-2 py-2 rounded-md mb-4"
+              className="transition-all bg-indigo-500 text-white lg:text-lg text-sm lg:px-4 px-2 py-2 rounded-md mb-4"
               onClick={() => showModal()}
             >
               <FaPlus size={15} />
@@ -396,7 +396,7 @@ const CredentialManager = () => {
                 placeholder="Search credentials..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-2 dark:bg-gray-800 dark:border-gray-700 dark:text-white border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-800"
+                className="w-full px-4 py-2 dark:bg-indigo-800 dark:border-gray-700 dark:text-white border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-800"
               />
               <div className="flex items-center gap-2 bg-gray-200 dark:bg-gray-700 p-1 rounded-lg">
                 <button
@@ -444,7 +444,7 @@ const CredentialManager = () => {
             </div>
           </div>
 
-          <div className="flex justify-between space-x-4 w-full dark:bg-gray-900 bg-white">
+          <div className="flex justify-between space-x-4 w-full dark:bg-[#080318] bg-white">
             {isGridView ? (
               filteredCredentials.length > 0 ? (
                 <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 p-5 dark:bg-gray-950/10 bg-gray-100 border h-fit border-black/5 rounded-lg gap-4 w-[70%] xl:w-[80%]">
@@ -456,7 +456,7 @@ const CredentialManager = () => {
                     return (
                       <div
                         key={cred.id || index}
-                        className="bg-white dark:bg-gray-800 dark:text-gray-400 overflow-auto p-4 h-fit rounded-lg border border-black/10 relative"
+                        className="bg-white dark:bg-indigo-800 dark:text-gray-400 overflow-auto p-4 h-fit rounded-lg border border-black/10 relative"
                       >
                         {/* Title and Logo */}
                         <div className="flex items-center justify-between mb-4">
@@ -477,7 +477,7 @@ const CredentialManager = () => {
                             href={cred.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="truncate hover:underline transition-all text-xl text-blue-500"
+                            className="truncate hover:underline transition-all text-xl text-indigo-500"
                           >
                             {cred.url}
                           </a>
@@ -488,7 +488,7 @@ const CredentialManager = () => {
                           <span className="text-gray-600 w-[30%] font-bold dark:text-gray-400">
                             Username:
                           </span>
-                          <div className="flex dark:bg-gray-900 w-[70%] rounded-md justify-between bg-gray-50 px-3 items-center space-x-2">
+                          <div className="flex dark:bg-[#080318] w-[70%] rounded-md justify-between bg-gray-50 px-3 items-center space-x-2">
                             <span>{cred.username}</span>
                             <button
                               onClick={() => handleCopyText(cred.username)}
@@ -504,7 +504,7 @@ const CredentialManager = () => {
                           <span className="text-gray-600 w-[30%] font-bold dark:text-gray-400">
                             Password:
                           </span>
-                          <div className="flex dark:bg-gray-900 w-[70%] rounded-md bg-gray-50 px-3 items-center justify-between space-x-2">
+                          <div className="flex dark:bg-[#080318] w-[70%] rounded-md bg-gray-50 px-3 items-center justify-between space-x-2">
                             <span className="text-gray-800 dark:text-gray-400 overflow-hidden">
                               {showPasswords[cred.website]
                                 ? cred.password
@@ -563,7 +563,7 @@ const CredentialManager = () => {
                           </div>
                           <div>
                             <button
-                              className="text-blue-500 hover:bg-gray-100 p-[0.1rem] py-[0.12rem] transition-all rounded-sm -translate-x-1 -translate-y-[2px]"
+                              className="text-indigo-500 hover:bg-gray-100 p-[0.1rem] py-[0.12rem] transition-all rounded-sm -translate-x-1 -translate-y-[2px]"
                               onClick={() => showModal(cred)}
                             >
                               <MdEditSquare size={21} />
@@ -581,11 +581,11 @@ const CredentialManager = () => {
                   })}
                 </div>
               ) : (
-                <div className="flex flex-col w-[70%] xl:w-[80%] p-5 dark:bg-gray-800 bg-white rounded-lg border border-gray-800/10 min-h-72 justify-center items-center  text-gray-500">
+                <div className="flex flex-col w-[70%] xl:w-[80%] p-5 dark:bg-indigo-800 bg-white rounded-lg border border-gray-800/10 min-h-72 justify-center items-center  text-gray-500">
                   <FiPlusCircle
                     size={80}
                     onClick={() => showModal()}
-                    className="mb-4 text-blue-500 dark:text-gray-700 cursor-pointer transition-all hover:scale-105"
+                    className="mb-4 text-indigo-500 dark:text-gray-700 cursor-pointer transition-all hover:scale-105"
                   />
                   <h2 className="text-xl  text-gray-600 font-semibold">
                     Create Your First Credential
@@ -643,7 +643,7 @@ const CredentialManager = () => {
                                 </span>
                               </div>
                             </td>
-                            <td className="py-2 px-4 max-w-[15ch] overflow-hidden text-blue-500 cursor-pointer hover:underline">
+                            <td className="py-2 px-4 max-w-[15ch] overflow-hidden text-indigo-500 cursor-pointer hover:underline">
                               <a
                                 href={cred.url}
                                 target="_blank"
@@ -653,7 +653,7 @@ const CredentialManager = () => {
                               </a>
                             </td>
                             <td className="py-2 px-4 text-gray-700  max-w-12">
-                              <div className="flex  px-1 min-w-fit  dark:bg-gray-900 dark:text-gray-400  bg-gray-50 border border-gray-200/20 rounded-md justify-between items-center space-x-2 whitespace-nowrap">
+                              <div className="flex  px-1 min-w-fit  dark:bg-[#080318] dark:text-gray-400  bg-gray-50 border border-gray-200/20 rounded-md justify-between items-center space-x-2 whitespace-nowrap">
                                 <span
                                   className="overflow-hidden  lg:max-w-24 max-w-[14ch]"
                                   title={cred.username}
@@ -669,7 +669,7 @@ const CredentialManager = () => {
                               </div>
                             </td>
                             <td className="py-2 text-gray-500 px-4  max-w-12">
-                              <div className="flex dark:bg-gray-900 min-w-fit dark:text-gray-400 bg-gray-50 border border-gray-200/20 px-1 rounded-md justify-between items-center space-x-2 whitespace-nowrap">
+                              <div className="flex dark:bg-[#080318] min-w-fit dark:text-gray-400 bg-gray-50 border border-gray-200/20 px-1 rounded-md justify-between items-center space-x-2 whitespace-nowrap">
                                 <span
                                   className="overflow-hidden   lg:max-w-24 max-w-[14ch]"
                                   title={cred.password}
@@ -708,7 +708,7 @@ const CredentialManager = () => {
                             <td className="py-2 px-4   max-w-14 lg:max-w-24">
                               <div className="flex justify-center gap-4">
                                 <button
-                                  className="text-gray-300 dark:text-gray-600 dark:hover:text-blue-600 dark:hover:bg-gray-800 transition-all  hover:text-blue-500 hover:bg-white p-1 rounded-md "
+                                  className="text-gray-300 dark:text-gray-600 dark:hover:text-indigo-600 dark:hover:bg-gray-800 transition-all  hover:text-indigo-500 hover:bg-white p-1 rounded-md "
                                   onClick={() => {
                                     setSelectedCred(cred.id);
                                     showModal(cred);
@@ -735,7 +735,7 @@ const CredentialManager = () => {
                     <FiPlusCircle
                       size={80}
                       onClick={() => showModal()}
-                      className="mb-4 dark:text-gray-700 cursor-pointer transition-all hover:scale-105 text-blue-500"
+                      className="mb-4 dark:text-gray-700 cursor-pointer transition-all hover:scale-105 text-indigo-500"
                     />
 
                     {/* Title */}
@@ -751,21 +751,21 @@ const CredentialManager = () => {
                 )}
               </div>
             )}
-            <div className="w-[30%] dark:bg-gray-900 bg-white xl:w-[20%] ">
+            <div className="w-[30%] dark:bg-[#080318] bg-white xl:w-[20%] ">
             <div >
               <h2
-                className={`font-semibold dark:bg-gray-900 bg-white ${
+                className={`font-semibold dark:bg-[#080318] bg-white ${
                   window.size < 1134 ? "-translate-y-8" : "-translate-y-14"
                 } text-center dark:text-gray-100 text-lg lg:text-2xl `}
               >
                 Generate Password
               </h2>
               <div
-                className={`dark:bg-gray-800 bg-gray-100 ${
+                className={`dark:bg-indigo-800 bg-gray-100 ${
                   window.size < 1134 ? "-translate-y-8" : "-translate-y-16"
                 } border border-black/5 flex flex-col justify-between -translate-y-8 text-center space-y-5  w-full h-full   text-gray-700 rounded-md p-6`}
               >
-                <div className="text-gray-700 border border-black/10 dark:bg-gray-900 dark:text-gray-300 bg-white p-3 text-[1vw] font-mono rounded-md">
+                <div className="text-gray-700 border border-black/10 dark:bg-[#080318] dark:text-gray-300 bg-white p-3 text-[1vw] font-mono rounded-md">
                   {genPass || "Generate hackproof password"}
                 </div>
 
@@ -777,7 +777,7 @@ const CredentialManager = () => {
                       max="24"
                       value={length}
                       onChange={(e) => setLength(e.target.value)}
-                      className="mr-2 text-gray-700 dark:text-gray-300 text-center dark:bg-gray-900 px-3 py-2 rounded-md"
+                      className="mr-2 text-gray-700 dark:text-gray-300 text-center dark:bg-[#080318] px-3 py-2 rounded-md"
                     />
                     <span className="dark:text-gray-300">Length</span>
                   </label>
@@ -835,7 +835,7 @@ const CredentialManager = () => {
           {/* Modal Component */}
           {isModalVisible && (
             <div className="fixed inset-0 bg-black backdrop-blur-sm bg-opacity-50 flex items-center justify-center">
-              <div className="dark:bg-gray-800 bg-white p-8 rounded-lg w-96">
+              <div className="dark:bg-indigo-800 bg-white p-8 rounded-lg w-96">
                 <h2 className="text-2xl mb-4 dark:text-gray-100">
                   {currentCredential ? "Edit Credential" : "Add Credential"}
                 </h2>
@@ -851,7 +851,7 @@ const CredentialManager = () => {
                       value={formValues.website}
                       onChange={handleInputChange}
                       placeholder="Website"
-                      className="w-full p-2 dark:bg-gray-900 dark:text-gray-400 dark:border-gray-600 border rounded"
+                      className="w-full p-2 dark:bg-[#080318] dark:text-gray-400 dark:border-gray-600 border rounded"
                     />
                     <input
                       type="text"
@@ -859,7 +859,7 @@ const CredentialManager = () => {
                       value={formValues.url}
                       onChange={handleInputChange}
                       placeholder="URL"
-                      className="w-full p-2 dark:bg-gray-900 dark:text-gray-400 dark:border-gray-600 border rounded"
+                      className="w-full p-2 dark:bg-[#080318] dark:text-gray-400 dark:border-gray-600 border rounded"
                     />
                     <input
                       type="text"
@@ -867,7 +867,7 @@ const CredentialManager = () => {
                       value={formValues.username}
                       onChange={handleInputChange}
                       placeholder="Username"
-                      className="w-full p-2 dark:bg-gray-900 dark:text-gray-400 dark:border-gray-600 border rounded"
+                      className="w-full p-2 dark:bg-[#080318] dark:text-gray-400 dark:border-gray-600 border rounded"
                     />
                     <input
                       type="text"
@@ -875,14 +875,14 @@ const CredentialManager = () => {
                       value={formValues.password}
                       onChange={handleInputChange}
                       placeholder="Password"
-                      className="w-full p-2 dark:bg-gray-900 dark:text-gray-400 dark:border-gray-600 border rounded"
+                      className="w-full p-2 dark:bg-[#080318] dark:text-gray-400 dark:border-gray-600 border rounded"
                     />
                     <textarea
                       name="notes"
                       value={formValues.notes}
                       onChange={handleInputChange}
                       placeholder="Notes"
-                      className="w-full p-2 dark:bg-gray-900 dark:text-gray-400 dark:border-gray-600 border rounded"
+                      className="w-full p-2 dark:bg-[#080318] dark:text-gray-400 dark:border-gray-600 border rounded"
                     />
                   </div>
                   <div className="flex justify-end space-x-2 mt-4">
@@ -895,7 +895,7 @@ const CredentialManager = () => {
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-2 bg-blue-500 border dark:bg-blue-700 dark:border-blue-600 transition-all dark:text-gray-300 dark:hover:bg-blue-900 text-white rounded"
+                      className="px-4 py-2 bg-indigo-500 border dark:bg-indigo-700 dark:border-blue-600 transition-all dark:text-gray-300 dark:hover:bg-blue-900 text-white rounded"
                     >
                       Save
                     </button>

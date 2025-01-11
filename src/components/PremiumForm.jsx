@@ -109,7 +109,7 @@ const PremiumForm = () => {
   return (
     <div className={`min-h-screen ${isDarkMode ? "bg-gray-900" : "bg-white"}`}>
       <Header isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
-      <div className="max-w-3xl mx-auto p-3 mt-10 bg-white dark:bg-gray-900 border dark:text-white rounded-lg shadow-md">
+      <div className="max-w-3xl mx-auto p-3 mt-10 bg-white dark:bg-[#080318] border dark:text-white rounded-lg shadow-md">
         <h1 className="text-2xl font-bold mb-6 text-center">
           Premium Signup Form
         </h1>
@@ -218,7 +218,7 @@ const PremiumForm = () => {
           </div>
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 px-4 mt-5 rounded hover:bg-blue-500 transition"
+            className="w-full bg-indigo-600 text-white py-2 px-4 mt-5 rounded hover:bg-indigo-500 transition"
           >
             Complete Signup
           </button>

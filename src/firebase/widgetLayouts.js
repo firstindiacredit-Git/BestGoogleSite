@@ -4,14 +4,18 @@ import { doc, getDoc, setDoc, collection } from 'firebase/firestore';
 // Default widget configurations for different pages
 const defaultWidgets = {
   home: [
-    { id: "clock", name: "Clock", isOpen: false, column: 0, position: 0 },
-    { id: "weather", name: "Weather", isOpen: false, column: 0, position: 1 },
-    { id: "calculator", name: "Calculator", isOpen: false, column: 0, position: 2 },
-    { id: "notepad", name: "Notepad", isOpen: false, column: 1, position: 0 },
-    { id: "imageUploader", name: "Image Uploader", isOpen: false, column: 2, position: 0 },
-    { id: "calendar", name: "Calendar", isOpen: false, column: 2, position: 1 },
-    { id: "Bookmarks", name: "Bookmarks", isOpen: false, column: 2, position: 2 }, 
-    { id: "NewsFeed", name: "News Feed", isOpen: false, column: 0, position: 3 }, 
+    { id: "weather", name: "Weather", isOpen: true, column: 0, position: 0 },
+    { id: "clock", name: "Clock", isOpen: true, column: 0, position: 1 },
+    { id: "calendar", name: "Calendar", isOpen: true, column: 0, position: 2 },
+    { id: "calculator", name: "Calculator", isOpen: true, column: 0, position: 3},
+    { id: "Bookmarks", name: "Bookmarks", isOpen: true, column: 1, position: 0 }, 
+    { id: "Bookmarks1", name: "Bookmarks1", isOpen: true, column: 2, position: 0 }, 
+    { id: "Bookmarks2", name: "Bookmarks2", isOpen: true, column: 1, position: 1 }, 
+    { id: "Bookmarks3", name: "Bookmarks3", isOpen: true, column: 2, position: 1 }, 
+    { id: "NewsFeed", name: "News Feed", isOpen: true, column: 3, position: 0 }, 
+    { id: "imageUploader", name: "Image Uploader", isOpen: true, column: 3, position: 1 },
+    {id: "Todo", name: "Todo List", isOpen: true, column: 3, position: 2},
+    { id: "notepad", name: "Notepad", isOpen: true, column: 3, position: 3 },
   ],
 };
 
@@ -24,6 +28,9 @@ export const allWidgets = {
   imageUploader: { id: "imageUploader", name: "Image Uploader" },
   calendar: { id: "calendar", name: "Calendar" },
   Bookmarks: { id: "Bookmarks", name: "Bookmarks" },
+  Bookmarks1: { id: "Bookmarks1", name: "Bookmarks1" },
+  Bookmarks2: { id: "Bookmarks2", name: "Bookmarks2" },
+  Bookmarks3: { id: "Bookmarks3", name: "Bookmarks3" },
   Todo: { id: "Todo", name: "Todo List" },
   NewsFeed: { id: "NewsFeed", name: "News Feed" }
 };
@@ -44,12 +51,12 @@ export const initializeUserLayout = async (userId) => {
       await setDoc(userLayoutRef, {
         home: {
           widgets: defaultWidgets.home,
-          columns: 3
+          columns: 4
         },
-        popularBookmarks: {
-          widgets: defaultWidgets.popularBookmarks,
-          columns: 3
-        }
+        // popularBookmarks: {
+        //   widgets: defaultWidgets.popularBookmarks,
+        //   columns: 4
+        // }
       });
     }
   } catch (error) {

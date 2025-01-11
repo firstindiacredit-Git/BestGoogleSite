@@ -144,7 +144,7 @@ const TableComponent = ({
             const { key, ...headerGroupProps } = headerGroup.getHeaderGroupProps();
             return (
               <tr key={key} {...headerGroupProps} className="group">
-                <th className="w-10 px-2 py-1 bg-gray-100 dark:bg-gray-800 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="w-10 px-2 py-1 bg-gray-100 dark:bg-indigo-800 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   #
                 </th>
                 {headerGroup.headers.map((column, index) => {
@@ -153,7 +153,7 @@ const TableComponent = ({
                     <th
                       key={key}
                       {...columnProps}
-                      className="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider group relative"
+                      className="px-2 py-1 bg-gray-100 dark:bg-indigo-800 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider group relative"
                     >
                       <ResizableCell column={column} index={index} />
                     </th>
@@ -169,7 +169,7 @@ const TableComponent = ({
             const { key, ...rowProps } = row.getRowProps();
             return (
               <tr key={key} {...rowProps} className="group">
-                <td className="relative w-10 px-2 py-1 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800">
+                <td className="relative w-10 px-2 py-1 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-indigo-800">
                   <div className="flex items-center">
                     <span>{row.index + 1}</span>
                     <button

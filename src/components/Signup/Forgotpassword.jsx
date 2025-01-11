@@ -39,7 +39,7 @@ const ResetPassword = () => {
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <button
         onClick={goBack}
-        className="absolute top-4 left-4 text-blue-600 border border-blue-600 px-6 py-1 rounded hover:text-white hover:bg-blue-600"
+        className="absolute top-4 left-4 text-indigo-600 border border-blue-600 px-6 py-1 rounded hover:text-white hover:bg-indigo-600"
       >
         Back
       </button>
@@ -69,7 +69,7 @@ const ResetPassword = () => {
           <button
             type="submit"
             className={`w-full py-2 px-4 text-white font-medium rounded-md ${
-              isSubmitting ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
+              isSubmitting ? "bg-gray-400" : "bg-indigo-600 hover:bg-indigo-700"
             }`}
             disabled={isSubmitting}
           >

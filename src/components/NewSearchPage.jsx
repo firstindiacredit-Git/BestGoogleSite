@@ -153,7 +153,7 @@ function NewSearchPage() {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-900 min-h-screen pb-10">
+    <div className="bg-white dark:bg-[#080318] min-h-screen pb-10">
       <Header
         isDarkMode={isDarkMode}
         toggleTheme={toggleTheme}
@@ -189,7 +189,7 @@ function NewSearchPage() {
               onClick={handlePageNameEdit}
             >
               {pageData.name}
-              <span className="invisible group-hover:visible absolute -right-6 top-1 text-blue-500">
+              <span className="invisible group-hover:visible absolute -right-6 top-1 text-indigo-500">
                 <CiEdit className="w-4 h-4" />
               </span>
             </h2>

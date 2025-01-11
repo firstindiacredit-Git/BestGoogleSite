@@ -242,10 +242,10 @@ const NotePage = ({ inNotebookSheet = false }) => {
     <div className={`${inNotebookSheet ? 'w-full h-full ' : ' h-full max-w-sm mx-auto'}`}>
       <div className="rounded-lg h-full">
         <div className={`overflow-hidden h-full rounded-b-lg ${
-          isAutoColor ? 'bg-white dark:bg-gray-900' : ''
+          isAutoColor ? 'bg-white dark:bg-[#080318]' : ''
         }`} style={{ backgroundColor: isAutoColor ? 'transparent' : backgroundColor }}>
           <div className={`p-2 h-full bg flex flex-col justify-between ${
-            isAutoColor ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white' : ''
+            isAutoColor ? 'bg-white dark:bg-[#080318] text-gray-900 dark:text-white' : ''
           }`} style={{ backgroundColor: isAutoColor ? 'transparent' : backgroundColor }}>
             
             <div className="flex justify-between items-center mb-1">
@@ -253,7 +253,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
                 
                 <div><button
                   className={`p-2 rounded-lg transition duration-200 ${
-                    isAutoColor ? 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700' : 'bg-opacity-20 bg-gray-500 hover:bg-opacity-30'
+                    isAutoColor ? 'bg-gray-100 dark:bg-indigo-800 hover:bg-gray-200 dark:hover:bg-gray-700' : 'bg-opacity-20 bg-gray-500 hover:bg-opacity-30'
                   }`}
                   onClick={toggleLineNumbers}
                   title="Toggle Line Numbers"
@@ -266,7 +266,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
                 <div className="relative" ref={colorPickerRef}>
                   <button
                     className={`p-2 rounded-lg transition duration-200 ${
-                      isAutoColor ? 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700' : 'bg-opacity-20 bg-gray-500 hover:bg-opacity-30'
+                      isAutoColor ? 'bg-gray-100 dark:bg-indigo-800 hover:bg-gray-200 dark:hover:bg-gray-700' : 'bg-opacity-20 bg-gray-500 hover:bg-opacity-30'
                     }`}
                     onClick={() => setShowColorPicker((prev) => !prev)}
                     title="Change Background Color"
@@ -275,7 +275,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
                     <Palette className="w-5 h-5" />
                   </button>
                   {showColorPicker && (
-                    <div className="absolute w-48 right-0 z-50 -mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-lg p-3">
+                    <div className="absolute w-48 right-0 z-50 -mt-2 bg-white dark:bg-indigo-800 border border-gray-200 dark:border-gray-700 rounded shadow-lg p-3">
                       {/* Auto Theme Button */}
                       <div className="mb-2">
                         <button
@@ -420,10 +420,10 @@ const NotePage = ({ inNotebookSheet = false }) => {
                   className={`p-3 rounded-lg transition duration-200 ${
                     isAutoColor
                       ? isBold
-                        ? "bg-blue-500 text-white"
-                        : "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+                        ? "bg-indigo-500 text-white"
+                        : "bg-gray-100 dark:bg-indigo-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
                       : isBold
-                        ? "bg-blue-500 text-white"
+                        ? "bg-indigo-500 text-white"
                         : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
                   }`}
                   onClick={toggleBold}
@@ -436,10 +436,10 @@ const NotePage = ({ inNotebookSheet = false }) => {
                   className={`p-3 rounded-lg transition duration-200 ${
                     isAutoColor
                       ? isUnderline
-                        ? "bg-blue-500 text-white"
-                        : "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+                        ? "bg-indigo-500 text-white"
+                        : "bg-gray-100 dark:bg-indigo-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
                       : isUnderline
-                        ? "bg-blue-500 text-white"
+                        ? "bg-indigo-500 text-white"
                         : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
                   }`}
                   onClick={toggleUnderline}
@@ -453,7 +453,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
                     isAutoColor
                       ? isListening
                         ? "bg-red-500 text-white"
-                        : "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+                        : "bg-gray-100 dark:bg-indigo-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
                       : isListening
                         ? "bg-red-500 text-white"
                         : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
@@ -467,7 +467,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
                 <button
                   className={`p-3 rounded-lg transition duration-200 ${
                     isAutoColor
-                      ? "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+                      ? "bg-gray-100 dark:bg-indigo-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
                       : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
                   }`}
                   onClick={() => setShowHistory(!showHistory)}
@@ -480,7 +480,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
               <button
                 className={`p-3 rounded-lg transition duration-200 ${
                   isAutoColor
-                    ? "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+                    ? "bg-gray-100 dark:bg-indigo-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
                     : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
                 }`}
                 onClick={downloadNotes}
@@ -493,7 +493,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
 
             {showHistory && (
               <div className={`mt-4 p-4 rounded-lg shadow-md ${
-                isAutoColor ? 'bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100' : 'bg-gray-100'
+                isAutoColor ? 'bg-gray-50 dark:bg-indigo-800 text-gray-900 dark:text-gray-100' : 'bg-gray-100'
               }`}>
                 <h3 className="text-lg font-bold mb-2">History</h3>
                 <ul className="list-disc pl-6">
