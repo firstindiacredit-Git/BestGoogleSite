@@ -31,13 +31,13 @@ const ColorPicker = ({ color = '#ffffff', onChange, onClose }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div
         ref={pickerRef}
-        className="bg-white dark:bg-indigo-800 border dark:border-gray-700 border-gray-300 rounded-lg p-4 shadow-lg w-72"
+        className="bg-white dark:bg-[#513a7a] border dark:border-gray-700 border-gray-300 rounded-lg p-4 shadow-lg w-72"
       >
         <div className="mb-4">
           <h3 className="text-lg font-semibold mb-2 dark:text-white">Choose Color</h3>
           <button
             onClick={() => handleColorSelect('auto')}
-            className="w-full py-2 px-3 text-sm bg-gray-100 dark:bg-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
+            className="w-full py-2 px-3 text-sm bg-gray-100 dark:bg-[#513a7a] dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
           >
             Auto Theme Color
           </button>
@@ -76,7 +76,7 @@ const ColorPicker = ({ color = '#ffffff', onChange, onClose }) => {
         <div className="mt-4 flex justify-end">
           <button
             onClick={onClose}
-            className="mr-2 px-4 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+            className="mr-2 px-4 py-2 text-sm bg-gray-100 dark:bg-[#513a7a] text-gray-700 dark:text-white rounded hover:bg-gray-200 dark:hover:bg-gray-600"
           >
             Cancel
           </button>

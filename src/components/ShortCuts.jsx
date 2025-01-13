@@ -251,7 +251,7 @@ function BookmarkPage() {
         {combinedBookmarks.map((bookmark) => (
           <div
             key={bookmark.id}
-            className="text-center dark:bg-indigo-800/10 bg-gray-200/10 dark:border-gray-800/20 border-gray-200/20 cursor-pointer p-2 rounded-lg transition-transform transform hover:scale-105 group relative"
+            className="text-center dark:bg-[#28283a]/10 backdrop-blur-md border  bg-gray-200/10 dark:border-gray-800/20 border-gray-200/10 cursor-pointer p-2 rounded-lg transition-transform transform hover:scale-105 group relative"
           >
             <a
               href={bookmark.link}
@@ -326,7 +326,7 @@ function BookmarkPage() {
           setSuccessMessage("");
         }}
         footer={null}
-        className="dark:bg-indigo-800"
+        className="dark:bg-[#513a7a]"
       >
         <Form
           onFinish={editingBookmark ? handleUpdateBookmark : handleAddBookmark}
@@ -341,7 +341,7 @@ function BookmarkPage() {
             <Input
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter bookmark name"
-              className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              className="dark:bg-[#513a7a] dark:border-gray-600 dark:text-white"
             />
           </Form.Item>
           <Form.Item
@@ -357,7 +357,7 @@ function BookmarkPage() {
               onChange={(e) => setLink(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Enter URL"
-              className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              className="dark:bg-[#513a7a] dark:border-gray-600 dark:text-white"
             />
           </Form.Item>
           <div className="flex justify-end gap-2">
@@ -371,7 +371,7 @@ function BookmarkPage() {
                 setErrorMessage("");
                 setSuccessMessage("");
               }}
-              className="px-4 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white rounded transition-colors"
+              className="px-4 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 dark:bg-[#513a7a] dark:hover:bg-gray-600 dark:text-white rounded transition-colors"
             >
               Cancel
             </button>

@@ -138,12 +138,12 @@ function AddLinks() {
     try {
       await addDoc(collection(db, "category"), {
         newCategory: newCategory.trim(),
-        color: selectedColor,
+        // color: selectedColor,
         createdAt: new Date(),
       });
       
       setNewCategory("");
-      setSelectedColor("#3B82F6");
+      // setSelectedColor("#3B82F6");
       setCategoryModalOpen(false);
       // Fetch updated data
       fetchCategories();
@@ -246,11 +246,11 @@ function AddLinks() {
   
 
   if (loading) {
-    return <div className="min-h-screen bg-gray-50 dark:bg-[#080318]"></div>;
+    return <div className="min-h-screen bg-gray-50 dark:bg-[#28283A]"></div>;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#080318]">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#28283A]">
       <div className="sticky top-0 z-10 bg-white dark:bg-white/5 shadow-sm border-b border-gray-200 dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col sm:flex-row gap-4">
@@ -266,17 +266,17 @@ function AddLinks() {
                   placeholder="Search bookmarks..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#513a7a] text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
               
               {/* View Toggle */}
-              <div className="flex items-center gap-2 bg-gray-100 dark:bg-indigo-800 p-1 rounded-lg">
+              <div className="flex items-center gap-2 bg-gray-100 dark:bg-[#513a7a] p-1 rounded-lg">
                 <button
                   onClick={() => setIsGridView(true)}
                   className={`p-2 rounded ${
                     isGridView
-                      ? "bg-white dark:bg-gray-700 shadow-sm"
+                      ? "bg-white dark:bg-[#513a7a] shadow-sm"
                       : "hover:bg-gray-200/10 dark:hover:bg-gray-700/50"
                   }`}
                 >
@@ -288,7 +288,7 @@ function AddLinks() {
                   onClick={() => setIsGridView(false)}
                   className={`p-2 rounded ${
                     !isGridView
-                      ? "bg-white dark:bg-gray-700 shadow-sm"
+                      ? "bg-white dark:bg-[#513a7a] shadow-sm"
                       : "hover:bg-gray-200/10 dark:hover:bg-gray-700/50"
                   }`}
                 >
@@ -305,7 +305,7 @@ function AddLinks() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Add Bookmark Card */}
-          <div className="bg-white dark:bg-indigo-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="bg-white dark:bg-[#513a7a] rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -321,7 +321,7 @@ function AddLinks() {
 
               {isBookmarkModalOpen && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                  <div className="bg-white dark:bg-indigo-800 rounded-lg max-w-md w-full p-6 shadow-xl">
+                  <div className="bg-white dark:bg-[#513a7a] rounded-lg max-w-md w-full p-6 shadow-xl">
                     <div className="flex justify-between items-center mb-4">
                       <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Add New Bookmark</h2>
                       <button
@@ -342,7 +342,7 @@ function AddLinks() {
                           type="text"
                           value={newLink.name}
                           onChange={(e) => setNewLink({ ...newLink, name: e.target.value })}
-                          className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
                           placeholder="Enter bookmark name"
                         />
                       </div>
@@ -354,7 +354,7 @@ function AddLinks() {
                           type="text"
                           value={newLink.link}
                           onChange={(e) => setNewLink({ ...newLink, link: e.target.value })}
-                          className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
                           placeholder="Enter bookmark URL"
                         />
                       </div>
@@ -365,7 +365,7 @@ function AddLinks() {
                         <select
                           value={newLink.category}
                           onChange={(e) => setNewLink({ ...newLink, category: e.target.value })}
-                          className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
                         >
                           <option value="">Select a category</option>
                           {newCategories.map((category) => (
@@ -400,7 +400,7 @@ function AddLinks() {
           </div>
 
           {/* Add Category Card */}
-          <div className="bg-white dark:bg-indigo-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="bg-white dark:bg-[#513a7a] rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -416,7 +416,7 @@ function AddLinks() {
 
               {isCategoryModalOpen && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                  <div className="bg-white dark:bg-indigo-800 rounded-lg max-w-md w-full p-6 shadow-xl">
+                  <div className="bg-white dark:bg-[#513a7a] rounded-lg max-w-md w-full p-6 shadow-xl">
                     <div className="flex justify-between items-center mb-4">
                       <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Add New Category</h2>
                       <button
@@ -437,7 +437,7 @@ function AddLinks() {
                           type="text"
                           value={newCategory}
                           onChange={(e) => setNewCategory(e.target.value)}
-                          className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
                           placeholder="Enter category name"
                         />
                       </div>
@@ -494,10 +494,10 @@ function AddLinks() {
               {paginatedCategories.map((category) => (
                 <div
                   key={category.id}
-                  className="bg-white dark:bg-indigo-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden h-fit"
+                  className="bg-white dark:bg-[#513a7a] rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden h-fit"
                 >
                   <div className="flex flex-col h-full">
-                    <div className="p-4 flex justify-between font-medium text-gray-800 dark:text-white bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700">
+                    <div className="p-4 flex justify-between font-medium text-gray-800 dark:text-white bg-gray-100 dark:bg-[#513a7a] border-b border-gray-200 dark:border-gray-700">
                       <div>{category.newCategory}</div>
                       <div>{category.links?.length || 0}</div>
                     </div>
@@ -560,12 +560,12 @@ function AddLinks() {
               {paginatedCategories.map((category) => (
                 <div
                   key={category.id}
-                  className="bg-white dark:bg-indigo-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
+                  className="bg-white dark:bg-[#513a7a] rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
                 >
                   {/* Category Header */}
                   <button
                     onClick={() => (category.links || []).length > 0 && toggleCategory(category.id)}
-                    className={`w-full flex items-center justify-between p-4 bg-gray-100 dark:bg-indigo-800 border-b border-gray-200 dark:border-gray-700 ${
+                    className={`w-full flex items-center justify-between p-4 bg-gray-100 dark:bg-[#513a7a] border-b border-gray-200 dark:border-gray-700 ${
                       (category.links || []).length > 0 ? 'hover:bg-gray-100 dark:hover:bg-gray-700/50 cursor-pointer' : 'cursor-default'
                     } transition-colors`}
                   >
@@ -664,8 +664,8 @@ function AddLinks() {
                 disabled={currentPage === 1}
                 className={`px-3 py-1 rounded-lg border ${
                   currentPage === 1
-                    ? "bg-gray-100 dark:bg-indigo-800 text-gray-400 dark:text-gray-600 cursor-not-allowed"
-                    : "bg-white dark:bg-indigo-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border-gray-300 dark:border-gray-600"
+                    ? "bg-gray-100 dark:bg-[#513a7a] text-gray-400 dark:text-gray-600 cursor-not-allowed"
+                    : "bg-white dark:bg-[#513a7a] text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border-gray-300 dark:border-gray-600"
                 }`}
               >
                 Previous
@@ -677,7 +677,7 @@ function AddLinks() {
                   className={`px-3 py-1 rounded-lg border ${
                     currentPage === i + 1
                       ? "bg-indigo-600 text-white border-blue-600"
-                      : "bg-white dark:bg-indigo-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border-gray-300 dark:border-gray-600"
+                      : "bg-white dark:bg-[#513a7a] text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border-gray-300 dark:border-gray-600"
                   }`}
                 >
                   {i + 1}
@@ -688,8 +688,8 @@ function AddLinks() {
                 disabled={currentPage === totalPages}
                 className={`px-3 py-1 rounded-lg border ${
                   currentPage === totalPages
-                    ? "bg-gray-100 dark:bg-indigo-800 text-gray-400 dark:text-gray-600 cursor-not-allowed"
-                    : "bg-white dark:bg-indigo-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    ? "bg-gray-100 dark:bg-[#513a7a] text-gray-400 dark:text-gray-600 cursor-not-allowed"
+                    : "bg-white dark:bg-[#513a7a] text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                 } border-gray-300 dark:border-gray-600`}
               >
                 Next
@@ -700,7 +700,7 @@ function AddLinks() {
       </div>
       {isEditModalOpen && editBookmarkData && (
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-        <div className="bg-white dark:bg-indigo-800 rounded-lg max-w-md w-full p-6 shadow-xl">
+        <div className="bg-white dark:bg-[#513a7a] rounded-lg max-w-md w-full p-6 shadow-xl">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Edit Bookmark</h2>
             <button
@@ -724,7 +724,7 @@ function AddLinks() {
                 type="text"
                 value={editBookmarkData.name}
                 onChange={(e) => setEditBookmarkData({ ...editBookmarkData, name: e.target.value })}
-                className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter bookmark name"
               />
             </div>
@@ -736,7 +736,7 @@ function AddLinks() {
                 type="text"
                 value={editBookmarkData.link}
                 onChange={(e) => setEditBookmarkData({ ...editBookmarkData, link: e.target.value })}
-                className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter bookmark URL"
               />
             </div>
@@ -747,7 +747,7 @@ function AddLinks() {
               <select
                 value={editBookmarkData.category}
                 onChange={(e) => setEditBookmarkData({ ...editBookmarkData, category: e.target.value })}
-                className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Select a category</option>
                 {newCategories.map((category) => (

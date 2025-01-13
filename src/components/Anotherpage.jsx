@@ -12,6 +12,7 @@ import Category from "./Category.jsx";
 import ImageUploader from "./ImageUploader.jsx";
 import Weather from "./Weather.jsx";
 import NotePage from "./NotePage.jsx";
+import "./Anotherpage.css"
 import {
   getPageLayout,
   updatePageLayout,
@@ -31,7 +32,7 @@ const Anotherpage = ({ backgroundImage, pageId = "home" }) => {
   const [isApplying, setIsApplying] = useState(false);
   const [previewColumns, setPreviewColumns] = useState(3);
   const [availableWidgets, setAvailableWidgets] = useState([]);
-
+const isDarkMode = localStorage.getItem("themeMode") === "dark";
   const componentMap = {
     clock: <Clock />,
     weather: <Weather />,
@@ -39,10 +40,10 @@ const Anotherpage = ({ backgroundImage, pageId = "home" }) => {
     notepad: <NotePage />,
     imageUploader: <ImageUploader />,
     calendar: <Calendar />,
-    Bookmarks: <Category />,
-    Bookmarks1: <Category />,
-    Bookmarks2: <Category />,
-    Bookmarks3: <Category />,
+    Bookmarks: <Category categoryType="Popular" />,
+    Bookmarks1: <Category categoryType="Travel" />,
+    Bookmarks2: <Category categoryType="AI" />,
+    Bookmarks3: <Category categoryType="Favourite" />,
     Todo: <TodoComponent />,
     NewsFeed: <NewsFeed />,
   };
@@ -256,7 +257,7 @@ const Anotherpage = ({ backgroundImage, pageId = "home" }) => {
         <div className={`bg-white/10 w-fit    border dark:border-black/5 border-white/5 dark:bg-black/10 rounded-xl` }
         >
           <div
-            className={`flex items-center gap-2 w-fit mx-auto mt-4 bg-gray-100 dark:bg-gray-900 p-1 rounded-lg`}
+            className={`flex items-center gap-2 w-fit mx-auto mt-4 bg-gray-100 dark:bg-[#28283A] p-1 rounded-lg`}
           >
             <button
               onClick={() => {
@@ -264,7 +265,7 @@ const Anotherpage = ({ backgroundImage, pageId = "home" }) => {
               }}
               className={`p-2 rounded ${
                 grid
-                  ? "bg-white dark:bg-gray-700 shadow-sm"
+                  ? "bg-white dark:bg-[#513a7a] shadow-sm"
                   : "hover:bg-white/50 dark:hover:bg-gray-700/50"
               }`}
             >
@@ -288,7 +289,7 @@ const Anotherpage = ({ backgroundImage, pageId = "home" }) => {
               }}
               className={`p-2 rounded ${
                 !grid
-                  ? "bg-white dark:bg-gray-700 shadow-sm"
+                  ? "bg-white dark:bg-[#513a7a] shadow-sm"
                   : "hover:bg-white/50 dark:hover:bg-gray-700/50"
               }`}
             >
@@ -351,21 +352,24 @@ const Anotherpage = ({ backgroundImage, pageId = "home" }) => {
                                 <div
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
-                                  className=" bg-white dark:bg-gray-700 mb-4 border-collapse dark:border-gray-700 dark:drop-shadow-md border-1 border rounded-lg"
+                                  className=" bg-white dark:bg-[#513a7a] mb-4 border-collapse dark:border-gray-700 dark:drop-shadow-md border-1 border rounded-lg"
                                 >
                                   {grid ? (
                                     <>
-                                      <motion.div className="w-full max-w-sm text-left py-2 px-4  rounded-lg bg-gray-100 dark:bg-gray-700 dark:text-white font-semibold flex items-center">
+                                      <motion.div className="w-full max-w-sm text-left py-2 px-4  rounded-t-lg bg-gray-100 dark:bg-[#513a7a] dark:text-white font-semibold flex justify-between items-center">
                                         <div
                                           {...provided.dragHandleProps}
-                                          className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                                          className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 w-5 "
                                         >
                                           ⋮⋮
                                         </div>
+                                        <div className="text-center w-full">
                                         {item.name}
+                                        </div>
+                                        <div className="w-5 "></div>
                                       </motion.div>
                                       <motion.div
-                                        className=" bg-white dark:bg-gray-900 rounded-b-lg"
+                                        className=" bg-white dark:bg-[#28283A] rounded-b-lg"
                                         initial={{ height: 0, opacity: 0 }}
                                         animate={{
                                           height: "auto",
@@ -381,25 +385,21 @@ const Anotherpage = ({ backgroundImage, pageId = "home" }) => {
                                     </>
                                   ) : (
                                     <>
-                                      <motion.div className="w-full min-w-[20vw] text-left py-2 px-4  dark:border-gray-500 rounded-lg bg-gray-100 dark:bg-gray-700 dark:text-white font-semibold flex items-center">
+                                      <motion.div className="w-full max-w-sm text-left py-2 px-4  rounded-t-lg bg-gray-100 dark:bg-[#513a7a] dark:text-white font-semibold flex justify-between items-center">
                                         <div
                                           {...provided.dragHandleProps}
-                                          className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                                          className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 w-5 "
                                         >
                                           ⋮⋮
                                         </div>
-                                        <button
-                                          onClick={() =>
-                                            toggleDropdown(item.id)
-                                          }
-                                          className="flex-grow text-left focus:outline-none"
-                                        >
-                                          {item.name}
-                                        </button>
+                                        <div onClick={()=>toggleDropdown(item.id)} className="text-center w-full">
+                                        {item.name}
+                                        </div>
+                                        <div className="w-5 "></div>
                                       </motion.div>
                                       {item.isOpen && (
                                         <motion.div
-                                          className=" bg-gray-50 dark:bg-gray-900 rounded-b-lg "
+                                          className=" bg-gray-50 dark:bg-[#28283A] rounded-b-lg "
                                           initial={{ height: 0, opacity: 0 }}
                                           animate={{
                                             height: "auto",
@@ -442,8 +442,8 @@ const Anotherpage = ({ backgroundImage, pageId = "home" }) => {
           width: "50px",
           height: "50px",
           borderRadius: "50%",
-          backgroundColor: "#4F46E5",
-          color: "white",
+          backgroundColor: isDarkMode?"#513A7A":"#6366F1",
+          color: "#fff",
           border: "none",
           cursor: "pointer",
           display: "flex",
@@ -468,7 +468,8 @@ const Anotherpage = ({ backgroundImage, pageId = "home" }) => {
 
       {/* Widget Sorter Modal */}
       <Modal
-        title="Sort Widgets"
+
+        title={<div className="text-white dark:text-[#afafaf] mb-2 text-center">Widget Controller</div>}
         open={isSorterOpen}
         onCancel={() => {
           if (!isApplying) {
@@ -488,6 +489,7 @@ const Anotherpage = ({ backgroundImage, pageId = "home" }) => {
               setPreviewColumns(columns);
             }}
             disabled={isApplying}
+            className="mt-2"
           >
             Cancel
           </AntButton>,
@@ -497,14 +499,16 @@ const Anotherpage = ({ backgroundImage, pageId = "home" }) => {
             onClick={handleApplySorting}
             disabled={isApplying}
             loading={isApplying}
+            className="mt-2"
           >
             Apply Changes
           </AntButton>,
         ]}
         width={800}
         centered
-        className="dark:bg-gray-700" // Add this class to make it gray in dark mode
+        className={`custom-modal ${isDarkMode ? 'dark-mode' : 'light-mode'}`} // Add this class to make it gray in dark mode
       >
+        {/* {console.log(isDarkMode)} */}
         {isApplying ? (
           <div
             style={{
@@ -604,7 +608,7 @@ const Anotherpage = ({ backgroundImage, pageId = "home" }) => {
                             style={{
                               marginBottom: "12px",
                               fontWeight: "bold",
-                              color: "#1890ff",
+                              color: isDarkMode?"#afafaf":"#1890ff",
                             }}
                           >
                             Column {columnIndex + 1}
@@ -630,7 +634,7 @@ const Anotherpage = ({ backgroundImage, pageId = "home" }) => {
                                     <div
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
-                                      className="bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600"
+                                      className="bg-white dark:bg-[#462b75] rounded-lg shadow-sm border dark:border-[#462b75] border-gray-200"
                                       style={{
                                         ...provided.draggableProps.style,
                                         opacity: snapshot.isDragging ? 0.9 : 1,
@@ -643,11 +647,11 @@ const Anotherpage = ({ backgroundImage, pageId = "home" }) => {
                                       <div className="flex items-center p-2 gap-2">
                                         <div
                                           {...provided.dragHandleProps}
-                                          className="cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                          className="cursor-grab text-gray-400 hover:text-gray-600 "
                                         >
                                           ⋮⋮
                                         </div>
-                                        <span className="text-gray-700 dark:text-gray-200 flex-grow">
+                                        <span className="dark:text-white text-gray-700  flex-grow">
                                           {item.name}
                                         </span>
                                         <AntButton

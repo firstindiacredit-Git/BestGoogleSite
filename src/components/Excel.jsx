@@ -992,7 +992,7 @@ const Excel = () => {
         <div
           key={table.id}
           className={`mb-8 border border-gray-500/10 rounded-lg p-4 ${
-            isAutoColor ? "bg-white dark:bg-[#080318]" : "bg-gray-100"
+            isAutoColor ? "bg-white dark:bg-[#28283A]" : "bg-gray-100"
           }`}
           style={isAutoColor ? {} : table.cardStyle}
         >
@@ -1002,7 +1002,7 @@ const Excel = () => {
                 type="text"
                 value={tableNames[table.id] || `Table ${tableIndex + 1}`}
                 onChange={(e) => updateTableName(table.id, e.target.value)}
-                className="text-lg bg-transparent dark:text-white focus:bg-gray-100 focus:dark:bg-indigo-800 font-semibold   focus:border-blue-500 focus:outline-none px-2"
+                className="text-lg bg-transparent dark:text-white focus:bg-gray-100 focus:dark:bg-[#513a7a] font-semibold   focus:border-blue-500 focus:outline-none px-2"
               />
             </div>
           <div className="font-Semibold text-2xl">Excel Sheet</div>
@@ -1257,13 +1257,13 @@ const Excel = () => {
                     }}
                     className={`${
                       isAutoColor
-                        ? "bg-gray-100 dark:bg-indigo-800 hover:bg-gray-200 dark:hover:bg-gray-700"
+                        ? "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700"
                         : ""
                     }`}
                   >
                   </Button>
                 {showColorPicker && activeTableIndex === tableIndex && (
-                  <div className="absolute w-48 left-0 -top-24 z-50 -mt-2 bg-white dark:bg-indigo-800 border border-gray-200 dark:border-gray-700 rounded shadow-lg p-3">
+                  <div className="absolute w-48 left-0 -top-24 z-50 -mt-2 bg-white dark:bg-[#513a7a] border border-gray-200 dark:border-gray-700 rounded shadow-lg p-3">
                     {/* Auto Theme Button */}
                     <div className="mb-2">
                       <button
@@ -1276,7 +1276,7 @@ const Excel = () => {
                             "#e0e0e0",
                           ]);
                         }}
-                        className="w-full py-1 px-2 text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors text-gray-900 dark:text-white"
+                        className="w-full py-1 px-2 text-sm bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors text-gray-900 dark:text-white"
                       >
                         Auto Theme Color
                       </button>

@@ -282,7 +282,7 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
     <div
       className={`p-4 min-h-[400px] transition-colors duration-200 ${
         inNotebookSheet ? "w-full" : "max-w-sm mx-auto"
-      } rounded-b-lg relative ${isAutoColor ? "dark:bg-[#080318]" : ""}`}
+      } rounded-b-lg relative ${isAutoColor ? "dark:bg-[#28283A]" : ""}`}
       style={{
         backgroundColor: isAutoColor ? undefined : containerColor,
         color: isAutoColor ? undefined : textColor,
@@ -316,7 +316,7 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
           {showColorPicker && (
             <div
               ref={colorPickerRef}
-              className="absolute right-0 mt-2 w-48 dark:bg-indigo-800 bg-white dark:border-gray-700 border rounded shadow-lg p-3 z-10"
+              className="absolute right-0 mt-2 w-48 dark:bg-[#513a7a] bg-white dark:border-gray-700 border rounded shadow-lg p-3 z-10"
             >
               <div className="mb-2 flex items-center justify-center">
                 <button
@@ -467,7 +467,7 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
           placeholder="Add new task"
           className={`w-full p-3 pr-12 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
             isAutoColor
-              ? "bg-white text-gray-900 border-gray-200 dark:bg-indigo-800 dark:text-white dark:placeholder-gray-400 dark:border-gray-700"
+              ? "bg-white text-gray-900 border-gray-200 dark:bg-[#513a7a] dark:text-white dark:placeholder-gray-400 dark:border-gray-700"
               : isLight(containerColor)
               ? "bg-white text-gray-800"
               : "bg-gray-800 text-white placeholder-gray-400 border-gray-700"

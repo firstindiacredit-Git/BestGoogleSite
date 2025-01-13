@@ -120,7 +120,7 @@ const CLOCK_THEMES = {
     name: "Minimal",
     analog: {
       border: "border-gray-300 dark:border-gray-600",
-      background: "bg-gray-50 dark:bg-[#080318]",
+      background: "bg-gray-50 dark:bg-[#28283A]",
       hourHand: "bg-gray-600 dark:bg-gray-400",
       minuteHand: "bg-gray-800 dark:bg-gray-200",
       secondHand: "bg-gray-200 dark:bg-gray-200",
@@ -128,7 +128,7 @@ const CLOCK_THEMES = {
       numbers: "text-gray-600 dark:text-gray-400",
     },
     digital: {
-      container: "bg-gray-50 dark:bg-[#080318]",
+      container: "bg-gray-50 dark:bg-[#28283A]",
       time: "bg-transparent border-gray-300 dark:border-gray-600",
       text: "text-gray-800 dark:text-gray-200",
     },
@@ -146,7 +146,7 @@ const CLOCK_THEMES = {
     },
     digital: {
       container: "bg-blue-50 dark:bg-blue-900",
-      time: "bg-white/80 dark:bg-indigo-800 border-blue-400 dark:border-blue-300",
+      time: "bg-white/80 dark:bg-[#513a7a] border-blue-400 dark:border-blue-300",
       text: "text-blue-900 dark:text-blue-100",
     },
   },
@@ -280,7 +280,7 @@ const ResponsiveWorldClock = () => {
   const [currentTheme, setCurrentTheme] = useState(CLOCK_THEMES.classic);
 
   const themeMenu = (
-    <Menu className="dark:bg-[#080318]">
+    <Menu className="dark:bg-[#28283A]">
       {Object.entries(CLOCK_THEMES).map(([key, theme]) => (
         <Menu.Item
           key={key}
@@ -351,7 +351,7 @@ const ResponsiveWorldClock = () => {
   );
 
   return (
-    <div className="dark:bg-[#080318] w-full max-w-sm dark:text-white p-4 bg-white rounded-lg flex justify-center items-center">
+    <div className="dark:bg-[#28283A] w-full max-w-sm dark:text-white p-4 bg-white rounded-b-lg flex justify-center items-center">
       <div className="mx-auto w-full">
         <div className="flex items-center">
           <div className="flex w-full justify-between items-center">
@@ -381,7 +381,7 @@ const ResponsiveWorldClock = () => {
 
                   {isDropdownOpen && availableZones.length > 0 && (
                     <>
-                      <div className="absolute right-0 mt-2 w-48 dark:text-white dark:bg-indigo-800 backdrop-blur-sm bg-gray-200 rounded-lg shadow-lg py-1 z-50 max-h-[250px] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-400 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 dark:[&::-webkit-scrollbar-track]:bg-gray-800">
+                      <div className="absolute right-0 mt-2 w-48 dark:text-white dark:bg-[#513a7a] backdrop-blur-sm bg-gray-200 rounded-lg shadow-lg py-1 z-50 max-h-[250px] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-400 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 dark:[&::-webkit-scrollbar-track]:bg-gray-800">
                         {availableZones.map((timeZone) => (
                           <button
                             key={timeZone}

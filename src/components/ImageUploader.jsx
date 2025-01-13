@@ -44,7 +44,7 @@ function ImageUploader() {
       
 
       {!image && (
-        <div className="h-72 flex items-center justify-center bg-white dark:bg-[#080318] rounded-lg w-full">
+        <div className="h-72 flex items-center justify-center bg-white dark:bg-[#28283A] rounded-lg w-full">
           <label htmlFor="file-input" className="cursor-pointer flex flex-col items-center">
             <input
               type="file"

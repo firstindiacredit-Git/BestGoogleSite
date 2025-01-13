@@ -157,18 +157,18 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange }) => {
   }, []);
 
   return (
-    <header className="p-2 bg-gray-200/10 backdrop-blur-xl dark:bg-indigo-800/10 border-b border dark:border-gray-800/20 border-gray-200/20 flex justify-between items-center sticky top-0 z-50">
+    <header className="p-2 bg-gray-200/10 backdrop-blur-xl dark:bg-[#513a7a]/10 border-b border dark:border-gray-800/20 border-gray-200/20 flex justify-between items-center sticky top-0 z-50">
       <div className="flex items-center space-x-2">
         <div className="relative">
           <button 
-            className=" px-1 h-10 bg-gray-200/10 border border-gray-100 rounded-lg home-button flex items-center gap-3 dark:bg-indigo-800"
+            className=" px-1 h-10 bg-gray-200/10 border border-gray-100 rounded-lg home-button flex items-center gap-3 dark:bg-[#513a7a]"
             onClick={() => setShowHomeDropdown(!showHomeDropdown)}
           >
             <FaHome className="dark:text-gray-200 text-gray-800 h-10 w-7 text-center justify-center m-auto" /> <span className="dark:text-gray-200 text-xl">Home</span>
           </button>
           
           {showHomeDropdown && (
-            <div className="absolute left-0 mt-2 w-40 bg-white shadow-lg rounded-lg text-sm dark:bg-gray-700 home-dropdown">
+            <div className="absolute left-0 mt-2 w-40 bg-white shadow-lg rounded-lg text-sm dark:bg-[#513a7a] home-dropdown">
               <Link to="/search">
                 <button className="w-full flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600 rounded transition-colors duration-200">
                   <FaHome />
@@ -235,7 +235,7 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange }) => {
             </div>
 
             {panel && (
-              <div className="absolute right-0 mt-2 w-60 py-2 bg-white shadow-lg rounded-lg text-sm dark:bg-gray-700 user-panel">
+              <div className="absolute right-0 mt-2 w-60 py-2 bg-white shadow-lg rounded-lg text-sm dark:bg-[#513a7a] user-panel">
                 <div className="px-4 py-2 text-center dark:text-white">
                   <p className="font-bold">
                     {user.username || user.displayName || "User"}

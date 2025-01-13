@@ -109,7 +109,7 @@ function BookmarkManager() {
   };
 
   return (
-    <div className="min-h-screen dark:bg-[#080318] bg-gray-50">
+    <div className="min-h-screen dark:bg-[#28283A] bg-gray-50">
       {/* Top Bar with Search and Filters */}
       <div className="sticky top-0 z-9 dark:bg-white/5 bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -124,14 +124,14 @@ function BookmarkManager() {
                 placeholder="Search Shortcuts..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg border dark:border-gray-600 dark:bg-indigo-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 rounded-lg border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
 
             {/* Filters and View Toggle */}
             <div className="flex items-center gap-4">
 
-              <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
+              <div className="flex items-center gap-2 bg-gray-100 dark:bg-[#513a7a] p-1 rounded-lg">
                 <button
                   onClick={() => setViewMode('grid')}
                   className={`p-2 rounded ${viewMode === 'grid' ? 'bg-white dark:bg-gray-600 shadow-sm' : ''}`}
@@ -161,7 +161,7 @@ function BookmarkManager() {
             {filteredBookmarks.map((bookmark) => (
               <div
                 key={bookmark.id}
-                className="bg-white dark:bg-indigo-800 rounded-lg shadow-sm hover:shadow-md transition-shadow p-4"
+                className="bg-white dark:bg-[#513a7a] rounded-lg shadow-sm hover:shadow-md transition-shadow p-4"
               >
                 {editing === bookmark.id ? (
                   // Edit Mode
@@ -170,14 +170,14 @@ function BookmarkManager() {
                       type="text"
                       value={editValues.name}
                       onChange={(e) => setEditValues({ ...editValues, name: e.target.value })}
-                      className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
                       placeholder="Name"
                     />
                     <input
                       type="url"
                       value={editValues.link}
                       onChange={(e) => setEditValues({ ...editValues, link: e.target.value })}
-                      className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
                       placeholder="Link"
                     />
                     
@@ -248,7 +248,7 @@ function BookmarkManager() {
             {filteredBookmarks.map((bookmark) => (
               <div
                 key={bookmark.id}
-                className="bg-white dark:bg-indigo-800 rounded-lg shadow-sm hover:shadow-md transition-shadow p-4"
+                className="bg-white dark:bg-[#513a7a] rounded-lg shadow-sm hover:shadow-md transition-shadow p-4"
               >
                 {editing === bookmark.id ? (
                   // Edit Mode
@@ -257,14 +257,14 @@ function BookmarkManager() {
                       type="text"
                       value={editValues.name}
                       onChange={(e) => setEditValues({ ...editValues, name: e.target.value })}
-                      className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
                       placeholder="Name"
                     />
                     <input
                       type="url"
                       value={editValues.link}
                       onChange={(e) => setEditValues({ ...editValues, link: e.target.value })}
-                      className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
                       placeholder="Link"
                     />
                     

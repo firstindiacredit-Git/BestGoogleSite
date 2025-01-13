@@ -58,7 +58,7 @@ const ReactExcel = () => {
       {tables.map((table, index) => (
         <div
           key={table.id}
-          className={`bg-white dark:bg-indigo-800 rounded-lg shadow-md overflow-hidden ${
+          className={`bg-white dark:bg-[#513a7a] rounded-lg shadow-md overflow-hidden ${
             table.cardStyle?.backgroundColor
               ? ''
               : table.isAutoColor

@@ -17,7 +17,7 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white dark:bg-[#080318] dark:text-white shadow p-4 flex justify-between items-center">
+    <header className="bg-white dark:bg-[#28283A] dark:text-white shadow p-4 flex justify-between items-center">
       <div className="text-2xl font-semibold">Admin Dashboard</div>
       <div className="flex items-center">
         <span className="mr-4">Admin</span>

@@ -15,9 +15,9 @@ const API_KEY = "78a1522c5ec67352674263eaaa54bffa";
 
 const themes = {
   default: {
-    background: "bg-white dark:bg-[#080318]",
+    background: "bg-white dark:bg-[#28283A]",
     text: "text-gray-700 dark:text-white",
-    card: "bg-gray-50 dark:bg-indigo-800",
+    card: "bg-gray-50 dark:bg-[#513a7a]",
     accent: "text-indigo-500",
     hover: "hover:bg-gray-100 dark:hover:bg-gray-800",
     border: "border-gray-200 dark:border-gray-700",
@@ -25,7 +25,7 @@ const themes = {
   blue: {
     background: "bg-blue-50 dark:bg-blue-900",
     text: "text-indigo-700 dark:text-blue-50",
-    card: "bg-blue-100/50 dark:bg-indigo-800/50",
+    card: "bg-blue-100/50 dark:bg-[#513a7a]/50",
     accent: "text-indigo-600 dark:text-blue-400",
     hover: "hover:bg-blue-100 dark:hover:bg-indigo-800",
     border: "border-blue-200 dark:border-blue-700",

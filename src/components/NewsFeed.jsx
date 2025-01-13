@@ -64,7 +64,7 @@ const NewsFeed = () => {
   }
 
   return (
-    <div className=" max-w-sm bg-white dark:bg-[#080318] rounded-lg overflow-hidden">
+    <div className=" max-w-sm bg-white dark:bg-[#28283A] rounded-b-lg overflow-hidden">
       <div className="news-carousel">
         <Carousel
           ref={carouselRef}

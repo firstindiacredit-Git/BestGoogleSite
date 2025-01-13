@@ -98,7 +98,7 @@ export default function Sidebar() {
 
   return (
     <div className="flex">
-      <div className="w-[18rem] fixed left-0 top-0 h-screen bg-white dark:bg-[#080318] border-r border-gray-200 dark:border-gray-800 flex flex-col">
+      <div className="w-[18rem] fixed left-0 top-0 h-screen bg-white dark:bg-[#28283A] border-r border-gray-200 dark:border-gray-800 flex flex-col">
         {/* Header */}
         <div className="p-6 border-b border-gray-200 dark:border-gray-800">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white text-center">Admin Panel</h1>
@@ -133,7 +133,7 @@ export default function Sidebar() {
                 className={`
                   flex items-center px-4 py-3 rounded-lg transition-all duration-200
                   ${isActive 
-                    ? 'bg-gray-100 dark:bg-indigo-800 text-gray-900 dark:text-white'
+                    ? 'bg-gray-100 dark:bg-[#513a7a] text-gray-900 dark:text-white'
                     : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white'
                   }
                 `}
@@ -166,7 +166,7 @@ export default function Sidebar() {
               </button>
 
               {showDropdown && (
-                <div className="absolute bottom-full right-0 mb-2 w-48 bg-white dark:bg-indigo-800 rounded-lg shadow-lg overflow-hidden">
+                <div className="absolute bottom-full right-0 mb-2 w-48 bg-white dark:bg-[#513a7a] rounded-lg shadow-lg overflow-hidden">
                   <div className="py-1">
                     <button
                       onClick={toggleTheme}
@@ -191,7 +191,7 @@ export default function Sidebar() {
           </div>
         </div>
       </div>
-      <div className="flex-1 ml-[18rem] bg-gray-100 dark:bg-[#080318]">
+      <div className="flex-1 ml-[18rem] bg-gray-100 dark:bg-[#28283A]">
         <Outlet />
       </div>
     </div>

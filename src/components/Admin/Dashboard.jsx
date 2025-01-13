@@ -133,26 +133,26 @@ function Dashboard() {
   };
 
   return (
-    <div className="p-6 bg-gray-100 dark:bg-[#080318] min-h-screen">
+    <div className="p-6 bg-gray-100 dark:bg-[#28283A] min-h-screen">
       <Header />
       {/* Card Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white dark:bg-gray-700 dark:text-white shadow rounded-lg p-4">
+        <div className="bg-white dark:bg-[#513a7a] dark:text-white shadow rounded-lg p-4">
           <h3 className="text-xl font-semibold">Total Users</h3>
           <p className="mt-2 text-3xl font-bold">{totalUsers}</p>
         </div>
 
-        <div className="bg-white dark:bg-gray-700 dark:text-white shadow rounded-lg p-4">
+        <div className="bg-white dark:bg-[#513a7a] dark:text-white shadow rounded-lg p-4">
           <h3 className="text-xl font-semibold">Revenue</h3>
           <p className="mt-2 text-3xl font-bold">$12,345</p>
         </div>
 
-        <div className="bg-white dark:bg-gray-700 dark:text-white shadow rounded-lg p-4">
+        <div className="bg-white dark:bg-[#513a7a] dark:text-white shadow rounded-lg p-4">
           <h3 className="text-xl font-semibold">Category</h3>
           <p className="mt-2 text-3xl font-bold">{totalCategories}</p>
         </div>
 
-        <div className="bg-white dark:bg-gray-700 dark:text-white shadow rounded-lg p-4">
+        <div className="bg-white dark:bg-[#513a7a] dark:text-white shadow rounded-lg p-4">
           <h3 className="text-xl font-semibold">Total Links</h3>
           <p className="mt-2 text-3xl font-bold">{totalLinks}</p>
         </div>
@@ -161,7 +161,7 @@ function Dashboard() {
       {/* Charts Section */}
       <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Bar Chart */}
-        <div className="bg-white dark:bg-gray-700 dark:text-white shadow rounded-lg p-6">
+        <div className="bg-white dark:bg-[#513a7a] dark:text-white shadow rounded-lg p-6">
           <h3 className="text-xl font-semibold mb-4">
             Analytics Overview (Bar Chart)
           </h3>
@@ -171,7 +171,7 @@ function Dashboard() {
         </div>
 
         {/* Doughnut Chart */}
-        <div className="bg-white dark:bg-gray-700 dark:text-white shadow rounded-lg p-6">
+        <div className="bg-white dark:bg-[#513a7a] dark:text-white shadow rounded-lg p-6">
           <h3 className="text-xl font-semibold mb-4">
             Data Distribution (Doughnut Chart)
           </h3>
