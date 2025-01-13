@@ -17,16 +17,9 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white dark:bg-[#28283A] dark:text-white shadow p-4 flex justify-between items-center">
-      <div className="text-2xl font-semibold">Admin Dashboard</div>
-      <div className="flex items-center">
-        <span className="mr-4">Admin</span>
-        <button
-          onClick={handleLogout}
-          className="bg-red-500 text-white px-4 py-2 rounded"
-        >
-          Logout
-        </button>
+    <header className="bg-white dark:bg-[#37375d] dark:text-white shadow p-5 flex justify-between items-center">
+      <div className="text-2xl font-semibold text-gray-900 dark:text-white">
+        Admin Dashboard
       </div>
     </header>
   );

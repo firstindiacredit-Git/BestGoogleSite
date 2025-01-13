@@ -251,16 +251,15 @@ function AddLinks() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#28283A]">
-      <div className="sticky top-0 z-10 bg-white dark:bg-white/5 shadow-sm border-b border-gray-200 dark:border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div className="sticky top-0 z-10 bg-white dark:bg-[#37375d] shadow-sm border-b border-gray-200 dark:border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
           <div className="flex flex-col sm:flex-row gap-4">
-            
             <div className="flex-1 flex items-center w-full  justify-between  space-x-4">
-            <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-              Add Bookmarks
-            </h1>
-            {/* Search Bar */}
-            <div className="flex-1 max-w-lg">
+              <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                Add Bookmarks
+              </h1>
+              {/* Search Bar */}
+              <div className="flex-1 max-w-lg">
                 <input
                   type="text"
                   placeholder="Search bookmarks..."
@@ -269,9 +268,9 @@ function AddLinks() {
                   className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#513a7a] text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
-              
+
               {/* View Toggle */}
-              <div className="flex items-center gap-2 bg-gray-100 dark:bg-[#513a7a] p-1 rounded-lg">
+              <div className="flex items-center gap-2 bg-gray-100 dark:bg-[#38394c] p-1 rounded-lg">
                 <button
                   onClick={() => setIsGridView(true)}
                   className={`p-2 rounded ${
@@ -280,8 +279,18 @@ function AddLinks() {
                       : "hover:bg-gray-200/10 dark:hover:bg-gray-700/50"
                   }`}
                 >
-                  <svg className="w-5 h-5 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                  <svg
+                    className="w-5 h-5 dark:text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                    />
                   </svg>
                 </button>
                 <button
@@ -292,8 +301,18 @@ function AddLinks() {
                       : "hover:bg-gray-200/10 dark:hover:bg-gray-700/50"
                   }`}
                 >
-                  <svg className="w-5 h-5 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  <svg
+                    className="w-5 h-5 dark:text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
                   </svg>
                 </button>
               </div>
@@ -302,12 +321,12 @@ function AddLinks() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-5 py-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Add Bookmark Card */}
           <div className="bg-white dark:bg-[#513a7a] rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
             <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                   Add Bookmark
                 </h2>
@@ -320,16 +339,28 @@ function AddLinks() {
               </div>
 
               {isBookmarkModalOpen && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
                   <div className="bg-white dark:bg-[#513a7a] rounded-lg max-w-md w-full p-6 shadow-xl">
                     <div className="flex justify-between items-center mb-4">
-                      <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Add New Bookmark</h2>
+                      <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                        Add New Bookmark
+                      </h2>
                       <button
                         onClick={() => setBookmarkModalOpen(false)}
                         className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
                       >
-                        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        <svg
+                          className="h-6 w-6"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
                         </svg>
                       </button>
                     </div>
@@ -341,7 +372,9 @@ function AddLinks() {
                         <input
                           type="text"
                           value={newLink.name}
-                          onChange={(e) => setNewLink({ ...newLink, name: e.target.value })}
+                          onChange={(e) =>
+                            setNewLink({ ...newLink, name: e.target.value })
+                          }
                           className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
                           placeholder="Enter bookmark name"
                         />
@@ -353,7 +386,9 @@ function AddLinks() {
                         <input
                           type="text"
                           value={newLink.link}
-                          onChange={(e) => setNewLink({ ...newLink, link: e.target.value })}
+                          onChange={(e) =>
+                            setNewLink({ ...newLink, link: e.target.value })
+                          }
                           className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
                           placeholder="Enter bookmark URL"
                         />
@@ -364,7 +399,9 @@ function AddLinks() {
                         </label>
                         <select
                           value={newLink.category}
-                          onChange={(e) => setNewLink({ ...newLink, category: e.target.value })}
+                          onChange={(e) =>
+                            setNewLink({ ...newLink, category: e.target.value })
+                          }
                           className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
                         >
                           <option value="">Select a category</option>
@@ -402,7 +439,7 @@ function AddLinks() {
           {/* Add Category Card */}
           <div className="bg-white dark:bg-[#513a7a] rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
             <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                   Add Category
                 </h2>
@@ -418,13 +455,25 @@ function AddLinks() {
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
                   <div className="bg-white dark:bg-[#513a7a] rounded-lg max-w-md w-full p-6 shadow-xl">
                     <div className="flex justify-between items-center mb-4">
-                      <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Add New Category</h2>
+                      <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                        Add New Category
+                      </h2>
                       <button
                         onClick={() => setCategoryModalOpen(false)}
                         className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
                       >
-                        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        <svg
+                          className="h-6 w-6"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
                         </svg>
                       </button>
                     </div>
@@ -487,14 +536,14 @@ function AddLinks() {
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
             Categories ({filteredCategories.length})
           </h2>
-          
+
           {isGridView ? (
             // Grid View
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-auto items-start">
               {paginatedCategories.map((category) => (
                 <div
                   key={category.id}
-                  className="bg-white dark:bg-[#513a7a] rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden h-fit"
+                  className="bg-white dark:bg-[#38394c] rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden h-fit"
                 >
                   <div className="flex flex-col h-full">
                     <div className="p-4 flex justify-between font-medium text-gray-800 dark:text-white bg-gray-100 dark:bg-[#513a7a] border-b border-gray-200 dark:border-gray-700">
@@ -514,7 +563,8 @@ function AddLinks() {
                                 alt=""
                                 className="w-5 h-5 flex-shrink-0"
                                 onError={(e) => {
-                                  e.target.src = 'https://www.google.com/s2/favicons?domain=default'; // Fallback favicon
+                                  e.target.src =
+                                    "https://www.google.com/s2/favicons?domain=default"; // Fallback favicon
                                 }}
                               />
                               <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
@@ -532,7 +582,14 @@ function AddLinks() {
                               </a>
                               <div className="flex items-center space-x-2">
                                 <button
-                                  onClick={() => handleEdit(link.id, link.name, link.link, link.category)}
+                                  onClick={() =>
+                                    handleEdit(
+                                      link.id,
+                                      link.name,
+                                      link.link,
+                                      link.category
+                                    )
+                                  }
                                   className="p-1 text-gray-400 hover:text-indigo-500 transition-colors"
                                 >
                                   <FaRegEdit size={16} />
@@ -550,7 +607,6 @@ function AddLinks() {
                       </div>
                     )}
                   </div>
-                  
                 </div>
               ))}
             </div>
@@ -564,9 +620,14 @@ function AddLinks() {
                 >
                   {/* Category Header */}
                   <button
-                    onClick={() => (category.links || []).length > 0 && toggleCategory(category.id)}
+                    onClick={() =>
+                      (category.links || []).length > 0 &&
+                      toggleCategory(category.id)
+                    }
                     className={`w-full flex items-center justify-between p-4 bg-gray-100 dark:bg-[#513a7a] border-b border-gray-200 dark:border-gray-700 ${
-                      (category.links || []).length > 0 ? 'hover:bg-gray-100 dark:hover:bg-gray-700/50 cursor-pointer' : 'cursor-default'
+                      (category.links || []).length > 0
+                        ? "hover:bg-gray-100 dark:hover:bg-gray-700/50 cursor-pointer"
+                        : "cursor-default"
                     } transition-colors`}
                   >
                     <div className="flex items-center space-x-2">
@@ -590,67 +651,83 @@ function AddLinks() {
                       {(category.links || []).length > 0 && (
                         <svg
                           className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
-                            expandedCategories[category.id] ? 'transform rotate-180' : ''
+                            expandedCategories[category.id]
+                              ? "transform rotate-180"
+                              : ""
                           }`}
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
                         >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 9l-7 7-7-7"
+                          />
                         </svg>
                       )}
                     </div>
                   </button>
 
                   {/* Links List */}
-                  {expandedCategories[category.id] && (category.links || []).length > 0 && (
-                    <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                      {(category.links || []).map((link) => (
-                        <div
-                          key={link.id}
-                          className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-                        >
-                          <div className="flex items-center space-x-3 min-w-0 flex-1">
-                            <img
-                              src={getFaviconUrl(link.link)}
-                              alt=""
-                              className="w-5 h-5 flex-shrink-0"
-                              onError={(e) => {
-                                e.target.src = 'https://www.google.com/s2/favicons?domain=default'; // Fallback favicon
-                              }}
-                            />
-                            <div className="min-w-0 flex-1">
-                              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                                {link.name}
-                              </p>
-                              <a
-                                href={link.link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-sm text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-blue-400 truncate block"
+                  {expandedCategories[category.id] &&
+                    (category.links || []).length > 0 && (
+                      <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                        {(category.links || []).map((link) => (
+                          <div
+                            key={link.id}
+                            className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                          >
+                            <div className="flex items-center space-x-3 min-w-0 flex-1">
+                              <img
+                                src={getFaviconUrl(link.link)}
+                                alt=""
+                                className="w-5 h-5 flex-shrink-0"
+                                onError={(e) => {
+                                  e.target.src =
+                                    "https://www.google.com/s2/favicons?domain=default"; // Fallback favicon
+                                }}
+                              />
+                              <div className="min-w-0 flex-1">
+                                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                  {link.name}
+                                </p>
+                                <a
+                                  href={link.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-sm text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-blue-400 truncate block"
+                                >
+                                  {link.link}
+                                </a>
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-2 flex-shrink-0">
+                              <button
+                                onClick={() =>
+                                  handleEdit(
+                                    link.id,
+                                    link.name,
+                                    link.link,
+                                    link.category
+                                  )
+                                }
+                                className="p-1 text-gray-400 hover:text-indigo-500 transition-colors"
                               >
-                                {link.link}
-                              </a>
+                                <FaRegEdit size={16} />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(link.id)}
+                                className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                              >
+                                <MdOutlineDeleteOutline size={20} />
+                              </button>
                             </div>
                           </div>
-                          <div className="flex items-center space-x-2 flex-shrink-0">
-                            <button
-                              onClick={() => handleEdit(link.id, link.name, link.link, link.category)}
-                              className="p-1 text-gray-400 hover:text-indigo-500 transition-colors"
-                            >
-                              <FaRegEdit size={16} />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(link.id)}
-                              className="p-1 text-gray-400 hover:text-red-500 transition-colors"
-                            >
-                              <MdOutlineDeleteOutline size={20} />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                        ))}
+                      </div>
+                    )}
                 </div>
               ))}
             </div>
@@ -684,7 +761,9 @@ function AddLinks() {
                 </button>
               ))}
               <button
-                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                onClick={() =>
+                  setCurrentPage(Math.min(totalPages, currentPage + 1))
+                }
                 disabled={currentPage === totalPages}
                 className={`px-3 py-1 rounded-lg border ${
                   currentPage === totalPages
@@ -699,85 +778,112 @@ function AddLinks() {
         </div>
       </div>
       {isEditModalOpen && editBookmarkData && (
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-        <div className="bg-white dark:bg-[#513a7a] rounded-lg max-w-md w-full p-6 shadow-xl">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Edit Bookmark</h2>
-            <button
-              onClick={() => {
-                setEditModalOpen(false);
-                setEditBookmarkData(null);
-              }}
-              className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
-            >
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Name
-              </label>
-              <input
-                type="text"
-                value={editBookmarkData.name}
-                onChange={(e) => setEditBookmarkData({ ...editBookmarkData, name: e.target.value })}
-                className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter bookmark name"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Link
-              </label>
-              <input
-                type="text"
-                value={editBookmarkData.link}
-                onChange={(e) => setEditBookmarkData({ ...editBookmarkData, link: e.target.value })}
-                className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter bookmark URL"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Category
-              </label>
-              <select
-                value={editBookmarkData.category}
-                onChange={(e) => setEditBookmarkData({ ...editBookmarkData, category: e.target.value })}
-                className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select a category</option>
-                {newCategories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.newCategory}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="flex justify-end space-x-3 mt-6">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-[#513a7a] rounded-lg max-w-md w-full p-6 shadow-xl">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                Edit Bookmark
+              </h2>
               <button
                 onClick={() => {
                   setEditModalOpen(false);
                   setEditBookmarkData(null);
                 }}
-                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
               >
-                Cancel
+                <svg
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
               </button>
-              <button
-                onClick={handleUpdateBookmark}
-                className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md transition-colors"
-              >
-                Update Bookmark
-              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  value={editBookmarkData.name}
+                  onChange={(e) =>
+                    setEditBookmarkData({
+                      ...editBookmarkData,
+                      name: e.target.value,
+                    })
+                  }
+                  className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter bookmark name"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Link
+                </label>
+                <input
+                  type="text"
+                  value={editBookmarkData.link}
+                  onChange={(e) =>
+                    setEditBookmarkData({
+                      ...editBookmarkData,
+                      link: e.target.value,
+                    })
+                  }
+                  className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter bookmark URL"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Category
+                </label>
+                <select
+                  value={editBookmarkData.category}
+                  onChange={(e) =>
+                    setEditBookmarkData({
+                      ...editBookmarkData,
+                      category: e.target.value,
+                    })
+                  }
+                  className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select a category</option>
+                  {newCategories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.newCategory}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  onClick={() => {
+                    setEditModalOpen(false);
+                    setEditBookmarkData(null);
+                  }}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleUpdateBookmark}
+                  className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md transition-colors"
+                >
+                  Update Bookmark
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    )}
+      )}
     </div>
   );
 }

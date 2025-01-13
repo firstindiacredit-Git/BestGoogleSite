@@ -98,14 +98,14 @@ export default function Sidebar() {
 
   return (
     <div className="flex">
-      <div className="w-[18rem] fixed left-0 top-0 h-screen bg-white dark:bg-[#28283A] border-r border-gray-200 dark:border-gray-800 flex flex-col">
+      <div className="w-[18rem] fixed left-0 top-0 h-screen bg-white dark:bg-[#37375d] border-r border-gray-200 dark:border-gray-800 flex flex-col">
         {/* Header */}
-        <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+        <div className="p-5 border-b border-gray-200 dark:border-gray-800">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white text-center">Admin Panel</h1>
         </div>
 
         {/* Profile Section */}
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800">
+        <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-800">
           <div className="flex flex-col items-center">
             <div className="relative">
               <img
