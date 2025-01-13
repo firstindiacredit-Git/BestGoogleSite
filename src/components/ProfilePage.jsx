@@ -29,11 +29,11 @@ const ProfilePage = () => {
   const navigate = useNavigate();
 
   const handleGoBack = () => {
-    navigate(-1);
+    navigate("/search");
   };
 
   const handleUpgrade = () => {
-    navigate("/premiumPage");
+    navigate("/premium");
   };
 
   useEffect(() => {

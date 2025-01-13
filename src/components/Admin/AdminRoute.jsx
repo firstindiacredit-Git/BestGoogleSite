@@ -57,8 +57,7 @@ const AdminRoute = ({ children }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // Add your admin check logic here if needed
-        // For example: check user.email === 'admin@example.com'
+        user.role === "admin"
         setIsAdmin(true);
       } else {
         setIsAdmin(false);

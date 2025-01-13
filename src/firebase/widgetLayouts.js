@@ -8,10 +8,10 @@ const defaultWidgets = {
     { id: "clock", name: "Clock", isOpen: true, column: 0, position: 1 },
     { id: "calendar", name: "Calendar", isOpen: true, column: 0, position: 2 },
     { id: "calculator", name: "Calculator", isOpen: true, column: 0, position: 3},
-    { id: "Bookmarks", name: "Bookmarks", isOpen: true, column: 1, position: 0 }, 
-    { id: "Bookmarks1", name: "Bookmarks1", isOpen: true, column: 2, position: 0 }, 
-    { id: "Bookmarks2", name: "Bookmarks2", isOpen: true, column: 1, position: 1 }, 
-    { id: "Bookmarks3", name: "Bookmarks3", isOpen: true, column: 2, position: 1 }, 
+    { id: "Bookmarks", name: "Popular Bookmarks", isOpen: true, column: 1, position: 0 }, 
+    { id: "Bookmarks1", name: "AI", isOpen: true, column: 2, position: 0 }, 
+    { id: "Bookmarks2", name: "Travel", isOpen: true, column: 1, position: 1 }, 
+    { id: "Bookmarks3", name: "Sports", isOpen: true, column: 2, position: 1 }, 
     { id: "NewsFeed", name: "News Feed", isOpen: true, column: 3, position: 0 }, 
     { id: "imageUploader", name: "Image Uploader", isOpen: true, column: 3, position: 1 },
     {id: "Todo", name: "Todo List", isOpen: true, column: 3, position: 2},
@@ -27,10 +27,10 @@ export const allWidgets = {
   notepad: { id: "notepad", name: "Notepad" },
   imageUploader: { id: "imageUploader", name: "Image Uploader" },
   calendar: { id: "calendar", name: "Calendar" },
-  Bookmarks: { id: "Bookmarks", name: "Bookmarks" },
-  Bookmarks1: { id: "Bookmarks1", name: "Bookmarks1" },
-  Bookmarks2: { id: "Bookmarks2", name: "Bookmarks2" },
-  Bookmarks3: { id: "Bookmarks3", name: "Bookmarks3" },
+  Bookmarks: { id: "Bookmarks", name: "Popular Bookmarks" },
+  Bookmarks1: { id: "Bookmarks1", name: "AI" },
+  Bookmarks2: { id: "Bookmarks2", name: "Travel" },
+  Bookmarks3: { id: "Bookmarks3", name: "Sports" },
   Todo: { id: "Todo", name: "Todo List" },
   NewsFeed: { id: "NewsFeed", name: "News Feed" }
 };
@@ -74,19 +74,19 @@ export const getPageLayout = async (userId, pageName) => {
       const data = layoutDoc.data();
       return data[pageName] || {
         widgets: defaultWidgets[pageName] || [],
-        columns: 3
+        columns: 4
       };
     }
 
     return {
       widgets: defaultWidgets[pageName] || [],
-      columns: 3
+      columns: 4
     };
   } catch (error) {
     console.error('Error getting page layout:', error);
     return {
       widgets: defaultWidgets[pageName] || [],
-      columns: 3
+      columns: 4
     };
   }
 };

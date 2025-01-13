@@ -8,7 +8,6 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import Calculator from "./Calculator.jsx";
 import Clock from "./Clock.jsx";
 import Calendar from "./Calendar.jsx";
-import Category from "./Category.jsx";
 import ImageUploader from "./ImageUploader.jsx";
 import Weather from "./Weather.jsx";
 import NotePage from "./NotePage.jsx";
@@ -20,6 +19,7 @@ import {
 } from "../firebase/widgetLayouts";
 import TodoComponent from "./TodoComponent.jsx";
 import NewsFeed from "./NewsFeed.jsx";
+import CategoryHome from "./CategoryHome.jsx";
 
 const Anotherpage = ({ backgroundImage, pageId = "home" }) => {
   const [grid, isGrid] = useState(true);
@@ -40,10 +40,11 @@ const isDarkMode = localStorage.getItem("themeMode") === "dark";
     notepad: <NotePage />,
     imageUploader: <ImageUploader />,
     calendar: <Calendar />,
-    Bookmarks: <Category categoryType="Popular" />,
-    Bookmarks1: <Category categoryType="Travel" />,
-    Bookmarks2: <Category categoryType="AI" />,
-    Bookmarks3: <Category categoryType="Favourite" />,
+    Bookmarks: <CategoryHome categoryType="Popular Bookmarks"
+ />,
+    Bookmarks1: <CategoryHome categoryType="Travel" />,
+    Bookmarks2: <CategoryHome categoryType="AI" />,
+    Bookmarks3: <CategoryHome categoryType="Sports" />,
     Todo: <TodoComponent />,
     NewsFeed: <NewsFeed />,
   };

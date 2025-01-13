@@ -373,7 +373,7 @@ const ResponsiveWorldClock = () => {
                 <div className="relative">
                   <button
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="p-2 dark:bg-white/10 rounded-full dark:hover:bg-white/20 bg-gray-200 hover:bg-gray-300 transition"
+                    className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-sm"
                     title="Add timezone"
                   >
                     <Plus className="w-5 h-5" />
