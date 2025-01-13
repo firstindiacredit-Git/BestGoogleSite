@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
-import { auth } from '../../firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+import React, { useState, useEffect } from "react";
+import { Navigate } from "react-router-dom";
+import { auth, db } from "../../firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 
 const AdminSkeleton = () => (
   <div className="fixed inset-0 bg-white z-50 flex items-center justify-center">
@@ -57,8 +58,18 @@ const AdminRoute = ({ children }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        user.role === "admin"
-        setIsAdmin(true);
+        try {
+          // Get user document from Firestore
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists() && userDoc.data().role === "admin") {
+            setIsAdmin(true);
+          } else {
+            setIsAdmin(false);
+          }
+        } catch (error) {
+          console.error("Error checking admin status:", error);
+          setIsAdmin(false);
+        }
       } else {
         setIsAdmin(false);
       }

@@ -220,10 +220,38 @@ const App = () => {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/faq" element={<FAQPage />} />
-          <Route path="/search" element={<ContextMenuWrapper><SearchPage /></ContextMenuWrapper>} />
-          <Route path="/calculator" element={<ContextMenuWrapper><AddList /></ContextMenuWrapper>} />
-          <Route path="/newsearch" element={<ContextMenuWrapper><NewSearchPage /></ContextMenuWrapper>} />
-          <Route path="/password-generator" element={<ContextMenuWrapper><PasswordGenerator /></ContextMenuWrapper>} />
+          <Route
+            path="/search"
+            element={
+              <ContextMenuWrapper>
+                <SearchPage />
+              </ContextMenuWrapper>
+            }
+          />
+          <Route
+            path="/calculator"
+            element={
+              <ContextMenuWrapper>
+                <AddList />
+              </ContextMenuWrapper>
+            }
+          />
+          <Route
+            path="/NewSearchPage"
+            element={
+              <ContextMenuWrapper>
+                <NewSearchPage />
+              </ContextMenuWrapper>
+            }
+          />
+          <Route
+            path="/password-generator"
+            element={
+              <ContextMenuWrapper>
+                <PasswordGenerator />
+              </ContextMenuWrapper>
+            }
+          />
           <Route path="/signin" element={<Signin />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/profile" element={<ProfilePage />} />
@@ -232,8 +260,8 @@ const App = () => {
           <Route path="/premium-form" element={<PremiumForm />} />
 
           {/* Admin Routes with Sidebar Layout */}
+          <Route path="/admin/login" element={<Login />} />
           <Route element={<Sidebar />}>
-            <Route path="/admin/login" element={<Login />} />
             <Route path="/admin/dashboard" element={<Dashboard />} />
             <Route path="/admin/users" element={<Users />} />
             <Route path="/admin/AddBookmark" element={<AddBookmark />} />
