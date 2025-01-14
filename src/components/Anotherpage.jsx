@@ -11,7 +11,7 @@ import Calendar from "./Calendar.jsx";
 import ImageUploader from "./ImageUploader.jsx";
 import Weather from "./Weather.jsx";
 import NotePage from "./NotePage.jsx";
-import "./Anotherpage.css"
+import "./Anotherpage.css";
 import {
   getPageLayout,
   updatePageLayout,
@@ -21,7 +21,7 @@ import TodoComponent from "./TodoComponent.jsx";
 import NewsFeed from "./NewsFeed.jsx";
 import CategoryHome from "./CategoryHome.jsx";
 
-const Anotherpage = ({visibleHandle, pageId = "home" }) => {
+const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
   const [grid, isGrid] = useState(true);
   const [user, setUser] = useState(null);
   const [items, setItems] = useState([]);
@@ -40,10 +40,16 @@ const Anotherpage = ({visibleHandle, pageId = "home" }) => {
     notepad: <NotePage />,
     imageUploader: <ImageUploader />,
     calendar: <Calendar />,
-    Bookmarks: <CategoryHome categoryType="Popular Bookmarks" itemName="Popular Bookmarks "/>,
-    Bookmarks1: <CategoryHome categoryType="Travel"  itemName="Travel" />,
-    Bookmarks2: <CategoryHome categoryType="AI"  itemName="AI" />,
-    Bookmarks3: <CategoryHome categoryType="Sports"  itemName="Sports" />,
+    Bookmarks: (
+      <CategoryHome
+        categoryType="Popular Bookmarks"
+        itemName="Popular Bookmarks "
+      />
+    ),
+    Bookmarks1: <CategoryHome categoryType="Travel" itemName="Travel" />,
+    Bookmarks2: <CategoryHome categoryType="AI" itemName="AI" />,
+    Bookmarks3: <CategoryHome categoryType="Sports" itemName="Sports" />,
+    Bookmarks4: <CategoryHome categoryType="Shopping" itemName="Shopping" />,
     Todo: <TodoComponent />,
     NewsFeed: <NewsFeed />,
   };
@@ -254,8 +260,7 @@ const Anotherpage = ({visibleHandle, pageId = "home" }) => {
   return (
     <div style={{ position: "relative" }}>
       <div className="flex justify-center">
-        <div className={`flex flex-col items-center w-full    rounded-xl` }
-        >
+        <div className={`flex flex-col items-center w-full    rounded-xl`}>
           <div
             className={`flex items-center gap-2 w-fit mx-auto mt-4 bg-gray-100 dark:bg-[#28283A] p-1 rounded-sm`}
           >
@@ -355,18 +360,24 @@ const Anotherpage = ({visibleHandle, pageId = "home" }) => {
                                   className=" bg-white dark:bg-[#513a7a] mb-4 border-collapse dark:border-gray-700 dark:drop-shadow-md border-1 border rounded-sm"
                                 >
                                   {grid ? (
-                                    < >
-                                      {visibleHandle && <motion.div className="w-full max-w-xl text-left py-2 px-4  rounded-t-sm bg-gray-100 dark:bg-[#513a7a] dark:text-white font-semibold flex justify-between items-center">
-                                        <div
-                                          {...provided.dragHandleProps}
-                                          className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 w-5 "
-                                        >
-                                          ⋮⋮
-                                        </div>
-                                        <div className="w-5 "></div>
-                                      </motion.div>}
+                                    <>
+                                      {visibleHandle && (
+                                        <motion.div className="w-full max-w-xl text-left py-2 px-4  rounded-t-sm bg-gray-100 dark:bg-[#513a7a] dark:text-white font-semibold flex justify-between items-center">
+                                          <div
+                                            {...provided.dragHandleProps}
+                                            className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 w-5 "
+                                          >
+                                            ⋮⋮
+                                          </div>
+                                          <div className="w-5 "></div>
+                                        </motion.div>
+                                      )}
                                       <motion.div
-                                        className={`bg-white dark:bg-[#28283A] ${visibleHandle ? 'rounded-b-sm' : 'rounded-sm'}`}
+                                        className={`bg-white dark:bg-[#28283A] ${
+                                          visibleHandle
+                                            ? "rounded-b-sm"
+                                            : "rounded-sm"
+                                        }`}
                                         initial={{ height: 0, opacity: 0 }}
                                         animate={{
                                           height: "auto",
@@ -375,28 +386,45 @@ const Anotherpage = ({visibleHandle, pageId = "home" }) => {
                                         exit={{ height: 0, opacity: 0 }}
                                         transition={{ duration: 0.1 }}
                                       >
-                                        <div className={`${visibleHandle ? 'rounded-b-sm' : 'rounded-sm'}`}>
+                                        <div
+                                          className={`${
+                                            visibleHandle
+                                              ? "rounded-b-sm"
+                                              : "rounded-sm"
+                                          }`}
+                                        >
                                           {componentMap[item.id]}
                                         </div>
                                       </motion.div>
-                                    </ >
+                                    </>
                                   ) : (
-                                    < >
-                                      {visibleHandle && <motion.div className="w-full max-w-xl text-left py-2 px-4  rounded-t-sm bg-gray-100 dark:bg-[#513a7a] dark:text-white font-semibold flex justify-between items-center">
-                                        <div
-                                          {...provided.dragHandleProps}
-                                          className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 w-5 "
-                                        >
-                                          ⋮⋮
-                                        </div>
-                                        <div onClick={() => toggleDropdown(item.id)} className="text-center w-full">
-                                          {item.name}
-                                        </div>
-                                        <div className="w-5 "></div>
-                                      </motion.div>}
+                                    <>
+                                      {visibleHandle && (
+                                        <motion.div className="w-full max-w-xl text-left py-2 px-4  rounded-t-sm bg-gray-100 dark:bg-[#513a7a] dark:text-white font-semibold flex justify-between items-center">
+                                          <div
+                                            {...provided.dragHandleProps}
+                                            className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 w-5 "
+                                          >
+                                            ⋮⋮
+                                          </div>
+                                          <div
+                                            onClick={() =>
+                                              toggleDropdown(item.id)
+                                            }
+                                            className="text-center w-full"
+                                          >
+                                            {item.name}
+                                          </div>
+                                          <div className="w-5 "></div>
+                                        </motion.div>
+                                      )}
                                       {item.isOpen && (
                                         <motion.div
-                                          className={`bg-gray-50 dark:bg-[#28283A] ${visibleHandle ? 'rounded-b-sm' : 'rounded-sm'}`}
+                                          className={`bg-gray-50 dark:bg-[#28283A] ${
+                                            visibleHandle
+                                              ? "rounded-b-sm"
+                                              : "rounded-sm"
+                                          }`}
                                           initial={{ height: 0, opacity: 0 }}
                                           animate={{
                                             height: "auto",
@@ -405,12 +433,18 @@ const Anotherpage = ({visibleHandle, pageId = "home" }) => {
                                           exit={{ height: 0, opacity: 0 }}
                                           transition={{ duration: 0.3 }}
                                         >
-                                          <div className={`${visibleHandle ? 'rounded-b-sm' : 'rounded-sm'}`}>
+                                          <div
+                                            className={`${
+                                              visibleHandle
+                                                ? "rounded-b-sm"
+                                                : "rounded-sm"
+                                            }`}
+                                          >
                                             {componentMap[item.id]}
                                           </div>
                                         </motion.div>
                                       )}
-                                    </ >
+                                    </>
                                   )}
                                 </div>
                               )}
@@ -465,8 +499,11 @@ const Anotherpage = ({visibleHandle, pageId = "home" }) => {
 
       {/* Widget Sorter Modal */}
       <Modal
-
-        title={<div className="text-white dark:text-[#afafaf] mb-2 text-center">Widget Controller</div>}
+        title={
+          <div className="text-white dark:text-[#afafaf] mb-2 text-center">
+            Widget Controller
+          </div>
+        }
         open={isSorterOpen}
         onCancel={() => {
           if (!isApplying) {
@@ -503,7 +540,7 @@ const Anotherpage = ({visibleHandle, pageId = "home" }) => {
         ]}
         width={800}
         centered
-        className={`custom-modal ${isDarkMode ? 'dark-mode' : 'light-mode'}`} // Add this class to make it gray in dark mode
+        className={`custom-modal ${isDarkMode ? "dark-mode" : "light-mode"}`} // Add this class to make it gray in dark mode
       >
         {/* {console.log(isDarkMode)} */}
         {isApplying ? (
@@ -517,7 +554,7 @@ const Anotherpage = ({visibleHandle, pageId = "home" }) => {
             <Spin size="large" />
           </div>
         ) : (
-          < >
+          <>
             <div className="mb-6 flex items-center justify-between">
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 Select number of columns:
@@ -697,7 +734,7 @@ const Anotherpage = ({visibleHandle, pageId = "home" }) => {
                 )}
               </div>
             </DragDropContext>
-          </ >
+          </>
         )}
       </Modal>
     </div>

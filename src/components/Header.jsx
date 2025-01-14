@@ -2,23 +2,33 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { signOut, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase";
-import { FaSun, FaMoon, FaHome } from "react-icons/fa";
+import { FaSun, FaMoon, FaHome, FaArrowLeft } from "react-icons/fa";
 import { IoIosLogOut } from "react-icons/io";
 import { RiUserLine } from "react-icons/ri";
 import { MdAddHomeWork } from "react-icons/md";
-import { Modal, Input } from 'antd';
+import { Modal, Input } from "antd";
+import { MenuOutlined } from "@ant-design/icons";
 import { CiEdit } from "react-icons/ci";
 
-const Header = ({ isDarkMode, toggleTheme, onPageNameChange }) => {
+const Header = ({
+  isDarkMode,
+  toggleTheme,
+  onPageNameChange,
+  textColor,
+  goBack,
+}) => {
   const [showButtons, setShowButtons] = useState(false);
   const [user, setUser] = useState(null);
   const [panel, setPanel] = useState(false);
   const [showHomeDropdown, setShowHomeDropdown] = useState(false);
   const [pages, setPages] = useState(() => {
-    const savedPages = localStorage.getItem('customPages');
+    const savedPages = localStorage.getItem("customPages");
     return savedPages ? JSON.parse(savedPages) : [];
   });
   const navigate = useNavigate();
+  const Back = () => {
+    navigate("/search");
+  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -56,13 +66,13 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange }) => {
     const newPage = {
       id: Date.now(),
       name: `Page ${newPageNumber}`,
-      widgets: []
+      widgets: [],
     };
-    
+
     const updatedPages = [...pages, newPage];
     setPages(updatedPages);
-    localStorage.setItem('customPages', JSON.stringify(updatedPages));
-    
+    localStorage.setItem("customPages", JSON.stringify(updatedPages));
+
     navigate(`/NewSearchPage?pageId=${newPage.id}`);
     setShowHomeDropdown(false);
   };
@@ -74,32 +84,32 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange }) => {
 
   const deletePage = (pageId, event) => {
     event.stopPropagation();
-    const pageToDelete = pages.find(page => page.id === pageId);
-    
+    const pageToDelete = pages.find((page) => page.id === pageId);
+
     Modal.confirm({
-      title: 'Delete Page',
+      title: "Delete Page",
       content: `Are you sure you want to delete "${pageToDelete.name}"?`,
-      okText: 'Yes',
-      okType: 'danger',
-      cancelText: 'No',
+      okText: "Yes",
+      okType: "danger",
+      cancelText: "No",
       onOk() {
-        const updatedPages = pages.filter(page => page.id !== pageId);
+        const updatedPages = pages.filter((page) => page.id !== pageId);
         setPages(updatedPages);
-        localStorage.setItem('customPages', JSON.stringify(updatedPages));
-        
+        localStorage.setItem("customPages", JSON.stringify(updatedPages));
+
         const urlParams = new URLSearchParams(window.location.search);
-        const currentPageId = urlParams.get('pageId');
+        const currentPageId = urlParams.get("pageId");
         if (currentPageId === pageId.toString()) {
-          navigate('/');
+          navigate("/");
         }
-      }
+      },
     });
   };
 
   const handlePageNameEdit = (pageId, currentName, event) => {
     event.stopPropagation();
     Modal.confirm({
-      title: 'Edit Page Name',
+      title: "Edit Page Name",
       content: (
         <Input
           defaultValue={currentName}
@@ -108,16 +118,16 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange }) => {
         />
       ),
       onOk() {
-        const newName = document.getElementById('pageNameInput').value;
+        const newName = document.getElementById("pageNameInput").value;
         if (newName.trim()) {
-          const updatedPages = pages.map(page =>
+          const updatedPages = pages.map((page) =>
             page.id === pageId ? { ...page, name: newName.trim() } : page
           );
           setPages(updatedPages);
-          localStorage.setItem('customPages', JSON.stringify(updatedPages));
+          localStorage.setItem("customPages", JSON.stringify(updatedPages));
           onPageNameChange && onPageNameChange(pageId, newName.trim());
         }
-      }
+      },
     });
   };
 
@@ -137,7 +147,10 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange }) => {
         setPanel(false);
       }
 
-      if (!event.target.closest(".home-dropdown") && !event.target.closest(".home-button")) {
+      if (
+        !event.target.closest(".home-dropdown") &&
+        !event.target.closest(".home-button")
+      ) {
         setShowHomeDropdown(false);
       }
     };
@@ -159,67 +172,107 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange }) => {
   return (
     <header className="p-2 bg-gray-200/10 backdrop-blur-xl dark:bg-[#513a7a]/10 border-b border dark:border-gray-800/20 border-gray-200/20 flex justify-between items-center sticky top-0 z-50">
       <div className="flex items-center space-x-2">
-        <div className="relative">
-          <button 
-            className=" px-1 h-10 bg-gray-200/10 border border-gray-100 rounded-sm home-button flex items-center gap-3 dark:bg-[#513a7a]"
-            onClick={() => setShowHomeDropdown(!showHomeDropdown)}
-          >
-            <FaHome className="dark:text-gray-200 text-gray-800 h-10 w-7 text-center justify-center m-auto" /> <span className="dark:text-gray-200 text-xl">Home</span>
-          </button>
-          
-          {showHomeDropdown && (
-            <div className="absolute left-0 mt-2 w-40 bg-white shadow-lg rounded-sm text-sm dark:bg-[#513a7a] home-dropdown">
-              <Link to="/search">
-                <button className="w-full flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600 rounded transition-colors duration-200">
-                  <FaHome />
-                  <span>Home</span>
-                </button>
-              </Link>
-              <button 
-                onClick={createNewPage}
-                className="w-full flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600 rounded transition-colors duration-200"
+        {user && (
+          <div className="relative">
+            {goBack ? (
+              <button
+                className="bg-indigo-500 py-1.5 px-4 flex items-center gap-2 rounded home-button"
+                onClick={Back}
               >
-                <MdAddHomeWork />
-                <span>Add New Page</span>
+                <FaArrowLeft className="h-2 w-3 text-white" />
+                <span className="text-white">Back</span>
               </button>
-              
-              {pages.map(page => (
+            ) : (
+              <button
+                className="bg-indigo-500 py-1.5 px-2.5 rounded home-button"
+                onClick={() => setShowHomeDropdown(!showHomeDropdown)}
+              >
+                <MenuOutlined className="h-2 w-3 text-white" />{" "}
+                <span className="text-white">Pages</span>
+              </button>
+            )}
+
+            {showHomeDropdown && (
+              <div className="absolute left-0 mt-2 w-40 bg-white shadow-lg rounded-lg text-sm dark:bg-[#513a7a] home-dropdown">
+                <Link to="/search">
+                  <button
+                    className="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors duration-200"
+                    style={{ color: textColor }}
+                  >
+                    <FaHome style={{ color: textColor }} />
+                    <span style={{ color: textColor }}>Home</span>
+                  </button>
+                </Link>
                 <button
-                  key={page.id}
-                  onClick={() => handlePageClick(page.id)}
-                  className="w-full flex items-center justify-between px-4 py-2 text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600 rounded transition-colors duration-200 group"
+                  onClick={createNewPage}
+                  className="w-full flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600 rounded transition-colors duration-200"
                 >
-                  <div className="flex items-center gap-2">
-                    <MdAddHomeWork />
-                    <span className="hover:cursor-text" onClick={(e) => handlePageNameEdit(page.id, page.name, e)}>
-                      {page.name}
-                    </span>
-                  </div>
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
-                    <button
-                      onClick={(e) => handlePageNameEdit(page.id, page.name, e)}
-                      className="text-indigo-500 hover:text-indigo-700 dark:text-blue-400 dark:hover:text-indigo-600"
-                    >
-                      <CiEdit className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={(e) => deletePage(page.id, e)}
-                      className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-600"
-                    >
-                      ✕
-                    </button>
-                  </div>
+                  <MdAddHomeWork />
+                  <span>Add New Page</span>
                 </button>
-              ))}
-            </div>
-          )}
-        </div>
-        
+
+                {pages.map((page) => (
+                  <button
+                    key={page.id}
+                    onClick={() => handlePageClick(page.id)}
+                    className="w-full flex items-center justify-between px-4 py-2 text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600 rounded transition-colors duration-200 group"
+                  >
+                    <div className="flex items-center gap-2">
+                      <MdAddHomeWork />
+                      <span
+                        className="hover:cursor-text"
+                        onClick={(e) =>
+                          handlePageNameEdit(page.id, page.name, e)
+                        }
+                      >
+                        {page.name}
+                      </span>
+                    </div>
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
+                      <button
+                        onClick={(e) =>
+                          handlePageNameEdit(page.id, page.name, e)
+                        }
+                        className="text-indigo-500 hover:text-indigo-700 dark:text-blue-400 dark:hover:text-indigo-600"
+                      >
+                        <CiEdit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={(e) => deletePage(page.id, e)}
+                        className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-600"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      <div className="flex items-center justify-between w-fit  gap-4 space-x-4">
-        <div onClick={toggleTheme} className="flex items-center text-sm  dark:hover:bg-gray-800/20 transition-all hover:bg-gray-200/80 p-2 cursor-pointer rounded-xs  dark:text-white">
-            {isDarkMode ? <FaMoon className="w-5 h-5" />: <FaSun className="w-5 h-5" /> }
+      <div className="flex relative mx-auto justify-center">
+        <img
+          src={`${
+            isDarkMode ? "/BrowseyFullDark2.svg" : "/BrowseyFullDark.svg"
+          }`}
+          className="w-40 drop-shadow-sm"
+          alt="Browsey"
+        />
+      </div>
+
+      <div className="flex items-center justify-between w-fit gap-4 space-x-4">
+        <div
+          onClick={toggleTheme}
+          className="flex items-center text-sm dark:hover:bg-gray-800/20 transition-all hover:bg-gray-200/80 p-2 cursor-pointer rounded-md"
+          style={{ color: textColor }}
+        >
+          {isDarkMode ? (
+            <FaMoon className="w-5 h-5" style={{ color: textColor }} />
+          ) : (
+            <FaSun className="w-5 h-5" style={{ color: textColor }} />
+          )}
         </div>
         {user ? (
           <div className="relative">
@@ -235,7 +288,7 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange }) => {
             </div>
 
             {panel && (
-              <div className="absolute right-0 mt-2 w-60 py-2 bg-white shadow-lg rounded-sm text-sm dark:bg-[#513a7a] user-panel">
+              <div className="absolute right-0 mt-2 w-60 py-2 bg-white shadow-lg rounded-lg text-sm dark:bg-[#513a7a] user-panel">
                 <div className="px-4 py-2 text-center dark:text-white">
                   <p className="font-bold">
                     {user.username || user.displayName || "User"}
@@ -260,16 +313,16 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange }) => {
             )}
           </div>
         ) : (
-          <div className="flex space-x-4">
+          <div className="flex space-x-2">
             <Link
               to="/signin"
-              className="px-2 py-1 border border-blue-500 text-indigo-500 rounded hover:bg-indigo-500 hover:text-white transition-colors duration-200 dark:border-blue-300 dark:text-blue-300 dark:hover:bg-blue-300"
+              className="px-2 py-1 border  text-white bg-green-500 border-green-500 dark:border-green-500 rounded hover:bg-green-600  transition-colors duration-200"
             >
-              Sign In
+              Login
             </Link>
             <Link
               to="/signup"
-              className="px-2 py-1 border border-green-500 text-green-500 rounded hover:bg-green-500 hover:text-white transition-colors duration-200 dark:border-green-300 dark:text-green-300 dark:hover:bg-green-300"
+              className="px-2 py-1 border text-white bg-blue-500 border-blue-500 dark:border-gray-500 rounded hover:bg-blue-600 transition-colors duration-200"
             >
               Sign Up
             </Link>
