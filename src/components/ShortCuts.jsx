@@ -247,7 +247,7 @@ function BookmarkPage() {
         {combinedBookmarks.map((bookmark) => (
           <div
             key={bookmark.id}
-            className="text-center shadow-sm dark:bg-[#28283a]/10 backdrop-blur-md border  bg-gray-200/10 dark:border-gray-800/20 border-gray-200/10 cursor-pointer p-2 rounded-sm  group relative"
+            className="text-center shadow-sm dark:bg-[#28283a]/10 backdrop-blur-lg border  bg-gray-200/10 dark:border-gray-800/20 border-gray-200/10 cursor-pointer p-2 rounded-sm  group relative"
           >
             <a
               href={bookmark.link}

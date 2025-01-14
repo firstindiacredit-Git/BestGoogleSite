@@ -1,46 +1,45 @@
 /* Default modal customization */
 .custom-modal .ant-modal-content {
-    background-color: white; /* Light mode */
-    color: #000; /* Light text color */
-  }
-  
-  /* Dark mode styling */
-  .custom-modal.dark-mode .ant-modal-content {
-    background-color: #323344; /* Dark background */
-    color: #fff; /* Light text color */
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
-  }
-  
-  /* Header for dark mode */
-  .custom-modal.dark-mode .ant-modal-header {
-    background-color: #323344; /* Dark header background */
-    border-bottom: 1px solid #444;
-  }
-  
-  /* Footer for dark mode */
-  .custom-modal.dark-mode .ant-modal-footer {
-    background-color: #323344;
-    border-top: 1px solid #444;
-    display: flex;
-    justify-content: space-between;
-  }
-  .custom-modal.light-mode .ant-modal-footer {
-    border-top: 1px solid #dfdfdf;
-    display: flex;
-    justify-content: space-between;
-  }
-  
-  /* Button in footer for dark mode */
-  .custom-modal.dark-mode .ant-btn {
-    color: #ddd;
-    background: #513A7A;
-    border: 1px solid #513A7A;
-  }
-  
-  .custom-modal.dark-mode .ant-btn:hover {
-    color: #fff;
-    background: #513A7A;
-    border-color: #513A7A;
-  }
-  
+  background-color: white; /* Light mode */
+  color: #000; /* Light text color */
+}
+
+/* Dark mode styling */
+.custom-modal.dark-mode .ant-modal-content {
+  background-color: #323344; /* Dark background */
+  color: #fff; /* Light text color */
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
+}
+
+/* Header for dark mode */
+.custom-modal.dark-mode .ant-modal-header {
+  background-color: #323344; /* Dark header background */
+  border-bottom: 1px solid #444;
+}
+
+/* Footer for dark mode */
+.custom-modal.dark-mode .ant-modal-footer {
+  background-color: #323344;
+  border-top: 1px solid #444;
+  display: flex;
+  justify-content: space-between;
+}
+.custom-modal.light-mode .ant-modal-footer {
+  border-top: 1px solid #dfdfdf;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Button in footer for dark mode */
+.custom-modal.dark-mode .ant-btn {
+  color: #ddd;
+  background: #513a7a;
+  border: 1px solid #513a7a;
+}
+
+.custom-modal.dark-mode .ant-btn:hover {
+  color: #fff;
+  background: #513a7a;
+  border-color: #513a7a;
+}

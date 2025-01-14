@@ -261,58 +261,60 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
     <div style={{ position: "relative" }}>
       <div className="flex justify-center">
         <div className={`flex flex-col items-center w-full    rounded-xl`}>
-          <div
-            className={`flex items-center gap-2 w-fit mx-auto mt-4 bg-gray-100 dark:bg-[#28283A] p-1 rounded-sm`}
-          >
-            <button
-              onClick={() => {
-                isGrid(true);
-              }}
-              className={`p-2 rounded ${
-                grid
-                  ? "bg-white dark:bg-[#513a7a] shadow-sm"
-                  : "hover:bg-white/50 dark:hover:bg-gray-700/50"
-              }`}
+          {visibleHandle && (
+            <div
+              className={`flex items-center  w-fit mx-auto mt-4 bg-white/10 backdrop-blur-lg dark:bg-[#28283A] p-1 rounded-sm`}
             >
-              <svg
-                className="w-5 h-5 dark:text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+              <button
+                onClick={() => {
+                  isGrid(true);
+                }}
+                className={`p-2 rounded ${
+                  grid
+                    ? "bg-white dark:bg-[#513a7a] shadow-sm"
+                    : "hover:bg-white/50 dark:hover:bg-gray-700/50"
+                }`}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
-                />
-              </svg>
-            </button>
-            <button
-              onClick={() => {
-                isGrid(false);
-              }}
-              className={`p-2 rounded ${
-                !grid
-                  ? "bg-white dark:bg-[#513a7a] shadow-sm"
-                  : "hover:bg-white/50 dark:hover:bg-gray-700/50"
-              }`}
-            >
-              <svg
-                className="w-5 h-5 dark:text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+                <svg
+                  className="w-5 h-5 dark:text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                  />
+                </svg>
+              </button>
+              <button
+                onClick={() => {
+                  isGrid(false);
+                }}
+                className={`p-2 rounded ${
+                  !grid
+                    ? "bg-white dark:bg-[#513a7a] shadow-sm"
+                    : "hover:bg-white/50 dark:hover:bg-gray-700/50"
+                }`}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-            </button>
-          </div>
+                <svg
+                  className="w-5 h-5 dark:text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                </svg>
+              </button>
+            </div>
+          )}
           <div className="p-4   ">
             {loading ? (
               <div className="flex justify-center items-center min-h-screen">
@@ -400,7 +402,7 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
                                   ) : (
                                     <>
                                       {visibleHandle && (
-                                        <motion.div className="w-full max-w-xl text-left py-2 px-4  rounded-t-sm bg-gray-100 dark:bg-[#513a7a] dark:text-white font-semibold flex justify-between items-center">
+                                        <motion.div className="w-full max-w-xl min-w-[21vw] text-left py-2 px-4  rounded-t-sm bg-gray-100 dark:bg-[#513a7a] dark:text-white font-semibold flex justify-between items-center">
                                           <div
                                             {...provided.dragHandleProps}
                                             className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 w-5 "
