@@ -146,7 +146,7 @@ const SportsLeagues = () => {
   }
 
   return (
-    <Layout className="p-8 border dark:bg-[#28283A]/50 rounded-lg bg-gray-200/10 dark:border-gray-800 border-gray-200">
+    <Layout className="p-8 border dark:bg-[#28283A]/50 rounded-sm bg-gray-200/10 dark:border-gray-800 border-gray-200">
       <Content style={{ padding: "2px", margin: "5px" }} className="dark:bg-[#28283A]">
         <Space direction="vertical" size="large" style={{ width: "100%" }}>
           <div
@@ -161,7 +161,7 @@ const SportsLeagues = () => {
             <Radio.Group
               value={viewMode}
               onChange={(e) => setViewMode(e.target.value)}
-              className="dark:bg-[#28283A] rounded-lg dark:text-gray-300"
+              className="dark:bg-[#28283A] rounded-sm dark:text-gray-300"
             >
               <Radio.Button value="grid" className="dark:bg-[#513a7a] dark:text-gray-300 dark:border-gray-700">
                 <AppstoreOutlined />
@@ -195,7 +195,7 @@ const SportsLeagues = () => {
                   lg={viewMode === "grid" ? 6 : 24}
                   key={league.idLeague}
                 >
-                  <div className="relative group rounded-lg overflow-hidden transition-all duration-300 hover:shadow-lg dark:hover:shadow-gray-700/50 bg-white dark:bg-[#28283A] border border-gray-200 dark:border-gray-800">
+                  <div className="relative group rounded-sm overflow-hidden transition-all duration-300 hover:shadow-lg dark:hover:shadow-gray-700/50 bg-white dark:bg-[#28283A] border border-gray-200 dark:border-gray-800">
                     <div className="p-6">
                       <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">
                         {league.strLeague}
@@ -286,7 +286,7 @@ const SportsLeagues = () => {
                 lg={viewMode === "grid" ? 6 : 24}
                 key={league.idLeague}
               >
-                <div className="relative group rounded-lg overflow-hidden transition-all duration-300 hover:shadow-lg dark:hover:shadow-gray-700/50 bg-white dark:bg-[#28283A] border border-gray-200 dark:border-gray-800">
+                <div className="relative group rounded-sm overflow-hidden transition-all duration-300 hover:shadow-lg dark:hover:shadow-gray-700/50 bg-white dark:bg-[#28283A] border border-gray-200 dark:border-gray-800">
                   <div className="p-6">
                     <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">
                       {league.strLeague}

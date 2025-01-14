@@ -59,14 +59,14 @@ const BookmarksPage = () => {
   );
 
   return (
-    <div className="container bg-transparent mx-auto p-4 border mt-5 rounded-lg">
+    <div className="container bg-transparent mx-auto p-4 border mt-5 rounded-sm">
       {/* Category Tabs */}
       <div className="flex justify-center space-x-4 mb-6">
         {categories.map((category) => (
           <button
             key={category}
             onClick={() => handleCategoryChange(category)}
-            className={`px-2 py-1 rounded-md font-semibold transition duration-200 ${
+            className={`px-2 py-1 rounded-xs font-semibold transition duration-200 ${
               selectedCategory === category
                 ? "bg-indigo-600 text-white"
                 : "bg-gray-200 text-gray-700 hover:bg-indigo-500 hover:text-white"
@@ -82,7 +82,7 @@ const BookmarksPage = () => {
         {filteredBookmarks.map((bookmark) => (
           <div
             key={bookmark.id}
-            className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition duration-300"
+            className="bg-white rounded-sm shadow-lg overflow-hidden hover:shadow-xl transition duration-300"
           >
             <div className="p-3 flex flex-col items-center">
               <a href={bookmark.url} className="text-center">

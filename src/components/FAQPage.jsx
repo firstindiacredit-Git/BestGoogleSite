@@ -150,13 +150,13 @@ const FAQPage = () => {
             </Link>
 
             <div className="hidden md:flex items-center space-x-8">
-              <Link to="/" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-lg hover:bg-white/60">
+              <Link to="/" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-sm hover:bg-white/60">
                 Home
               </Link>
-              <Link to="/about" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-lg hover:bg-white/60">
+              <Link to="/about" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-sm hover:bg-white/60">
                 About
               </Link>
-              <Link to="/pricing" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-lg hover:bg-white/60">
+              <Link to="/pricing" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-sm hover:bg-white/60">
                 Pricing
               </Link>
             </div>
@@ -166,7 +166,7 @@ const FAQPage = () => {
                 href="https://chrome.google.com/webstore"
                 target="_blank"
                 rel="noopener noreferrer" 
-                className="px-6 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-all shadow-md shadow-indigo-500/20 hover:shadow-lg hover:shadow-indigo-500/30 border border-indigo-500/50 flex items-center gap-2"
+                className="px-6 py-2.5 bg-indigo-600 text-white font-medium rounded-sm hover:bg-indigo-700 transition-all shadow-md shadow-indigo-500/20 hover:shadow-lg hover:shadow-indigo-500/30 border border-indigo-500/50 flex items-center gap-2"
               >
                 <Chrome />
                 Add to Chrome
@@ -174,7 +174,7 @@ const FAQPage = () => {
             </div>
 
             <button
-              className="md:hidden p-2 rounded-lg hover:bg-gray-200/10 transition-colors"
+              className="md:hidden p-2 rounded-sm hover:bg-gray-200/10 transition-colors"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? (
@@ -252,7 +252,7 @@ const FAQPage = () => {
           </p>
           <a
             href="mailto:support@bestgooglesite.com"
-            className="px-8 py-3 bg-white text-indigo-600 font-semibold rounded-lg hover:bg-indigo-50 transition-all shadow-lg hover:shadow-xl inline-flex items-center gap-2"
+            className="px-8 py-3 bg-white text-indigo-600 font-semibold rounded-sm hover:bg-indigo-50 transition-all shadow-lg hover:shadow-xl inline-flex items-center gap-2"
           >
             Contact Support
           </a>

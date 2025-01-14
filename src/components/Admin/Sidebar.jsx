@@ -131,7 +131,7 @@ export default function Sidebar() {
                 key={index}
                 to={item.path}
                 className={`
-                  flex items-center px-4 py-3 rounded-lg transition-all duration-200
+                  flex items-center px-4 py-3 rounded-sm transition-all duration-200
                   ${isActive 
                     ? 'bg-gray-100 dark:bg-[#513a7a] text-gray-900 dark:text-white'
                     : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white'
@@ -150,7 +150,7 @@ export default function Sidebar() {
           <div className="flex items-center justify-between">
             <button
               onClick={handleLogout}
-              className="w-full flex items-center  px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/20 rounded-lg transition-colors duration-200"
+              className="w-full flex items-center  px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/20 rounded-sm transition-colors duration-200"
             >
               <span><IoLogOut/></span>
               
@@ -166,7 +166,7 @@ export default function Sidebar() {
               </button>
 
               {showDropdown && (
-                <div className="absolute bottom-full right-0 mb-2 w-48 bg-white dark:bg-[#513a7a] rounded-lg shadow-lg overflow-hidden">
+                <div className="absolute bottom-full right-0 mb-2 w-48 bg-white dark:bg-[#513a7a] rounded-sm shadow-lg overflow-hidden">
                   <div className="py-1">
                     <button
                       onClick={toggleTheme}

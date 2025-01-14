@@ -83,7 +83,7 @@ const SignIn = () => {
   return (
     isModalOpen && (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg w-full max-w-md p-6 relative shadow-xl transform transition-all duration-300 scale-100 hover:scale-105">
+        <div className="bg-white rounded-sm w-full max-w-md p-6 relative shadow-xl transform transition-all duration-300 scale-100 hover:scale-105">
           <button
             className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
             onClick={() => navigate(-1)}
@@ -96,7 +96,7 @@ const SignIn = () => {
           </h2>
 
           <button
-            className="w-full flex items-center justify-center gap-2 p-3 border rounded-md bg-gray-100 hover:bg-gray-200 focus:ring-2 focus:ring-gray-300"
+            className="w-full flex items-center justify-center gap-2 p-3 border rounded-xs bg-gray-100 hover:bg-gray-200 focus:ring-2 focus:ring-gray-300"
             onClick={handleGoogleSignIn}
           >
             <img src="/google.png" alt="Google" className="w-5 h-5" />
@@ -116,13 +116,13 @@ const SignIn = () => {
                 placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500"
+                className="w-full p-3 border rounded-xs focus:ring-2 focus:ring-blue-500"
                 required
               />
 
               <button
                 type="submit"
-                className="w-full p-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:ring-2 focus:ring-blue-500"
+                className="w-full p-3 bg-indigo-600 text-white rounded-xs hover:bg-indigo-700 focus:ring-2 focus:ring-blue-500"
               >
                 Continue
               </button>
@@ -134,13 +134,13 @@ const SignIn = () => {
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500"
+                className="w-full p-3 border rounded-xs focus:ring-2 focus:ring-blue-500"
                 required
               />
 
               <button
                 type="submit"
-                className={`w-full p-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:ring-2 focus:ring-blue-500 ${
+                className={`w-full p-3 bg-indigo-600 text-white rounded-xs hover:bg-indigo-700 focus:ring-2 focus:ring-blue-500 ${
                   loading ? "opacity-50 cursor-not-allowed" : ""
                 }`}
                 disabled={loading}

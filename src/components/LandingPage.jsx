@@ -148,7 +148,7 @@ const LandingPage = () => {
       >
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <div className="p-2 bg-indigo-100 rounded-lg group-hover:bg-indigo-200 transition-colors duration-300">
+            <div className="p-2 bg-indigo-100 rounded-sm group-hover:bg-indigo-200 transition-colors duration-300">
               {stat.icon}
             </div>
             <motion.span
@@ -286,28 +286,28 @@ const LandingPage = () => {
             </Link>
 
             <div className="hidden md:flex items-center space-x-8">
-              {/* <Link to="#features" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-lg hover:bg-white/60">
+              {/* <Link to="#features" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-sm hover:bg-white/60">
                 Features
               </Link> */}
               <Link
                 to="/pricing"
-                className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-lg hover:bg-white/60 link-hover"
+                className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-sm hover:bg-white/60 link-hover"
               >
                 Pricing
               </Link>
               <Link
                 to="/about"
-                className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-lg hover:bg-white/60"
+                className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-sm hover:bg-white/60"
               >
                 About
               </Link>
               <Link
                 to="/faq"
-                className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-lg hover:bg-white/60"
+                className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-sm hover:bg-white/60"
               >
                 FAQ
               </Link>
-              {/* <Link to="#contact" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-lg hover:bg-white/60">
+              {/* <Link to="#contact" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-sm hover:bg-white/60">
                 Contact
               </Link> */}
             </div>
@@ -318,7 +318,7 @@ const LandingPage = () => {
                 href="https://chrome.google.com/webstore"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-6 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-all shadow-md shadow-indigo-500/20 hover:shadow-lg hover:shadow-indigo-500/30 border border-indigo-500/50 flex items-center gap-2"
+                className="px-6 py-2.5 bg-indigo-600 text-white font-medium rounded-sm hover:bg-indigo-700 transition-all shadow-md shadow-indigo-500/20 hover:shadow-lg hover:shadow-indigo-500/30 border border-indigo-500/50 flex items-center gap-2"
               >
                 <Chrome />
                 Add to Chrome
@@ -327,7 +327,7 @@ const LandingPage = () => {
 
             {/* Mobile Menu Button */}
             <button
-              className="md:hidden p-2 rounded-lg hover:bg-white/50 transition-colors shadow-lg shadow-indigo-500/10 hover:shadow-xl hover:shadow-indigo-500/20 transform hover:-translate-y-0.5"
+              className="md:hidden p-2 rounded-sm hover:bg-white/50 transition-colors shadow-lg shadow-indigo-500/10 hover:shadow-xl hover:shadow-indigo-500/20 transform hover:-translate-y-0.5"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? (
@@ -378,7 +378,7 @@ const LandingPage = () => {
                     href="https://chrome.google.com/webstore"
                     target="_blank"
                     rel="noopener noref errer"
-                    className="block w-full px-4 py-2 text-center bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30 transform hover:-translate-y-0.5 border border-indigo-500 border-indigo-500/50 flex items-center justify-center gap-2"
+                    className="block w-full px-4 py-2 text-center bg-indigo-600 text-white font-medium rounded-sm hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30 transform hover:-translate-y-0.5 border border-indigo-500 border-indigo-500/50 flex items-center justify-center gap-2"
                   >
                     <Chrome />
                     Add to Chrome
@@ -494,7 +494,7 @@ const LandingPage = () => {
             >
               Your Ultimate
               <br />
-              <span className="wavy-underline mt-3 text-indigo-600  px-2 pb-2 rounded-lg">
+              <span className="wavy-underline mt-3 text-indigo-600  px-2 pb-2 rounded-sm">
                 Browser Toolkit
               </span>
             </motion.h1>
@@ -691,7 +691,7 @@ const LandingPage = () => {
             className=" w-full flex justify-between"
           >
             <div className="flex  max-w-xs flex-col items-start gap-4">
-              <div className="p-2 bg-indigo-100 rounded-lg">
+              <div className="p-2 bg-indigo-100 rounded-sm">
                 <FaHandSparkles className="w-6 h-6 text-indigo-600" />
               </div>
               <div>
@@ -706,7 +706,7 @@ const LandingPage = () => {
             </div>
 
             <div className="flex max-w-xs  flex-col items-start gap-4">
-              <div className="p-2 bg-purple-100 rounded-lg">
+              <div className="p-2 bg-purple-100 rounded-sm">
                 <FlashlightOnOutlined className="w-6 h-6 text-purple-600" />
               </div>
               <div>
@@ -721,7 +721,7 @@ const LandingPage = () => {
             </div>
 
             <div className="flex max-w-xs flex-col  items-start gap-4">
-              <div className="p-2 bg-blue-100 rounded-lg">
+              <div className="p-2 bg-blue-100 rounded-sm">
                 <FaShieldVirus className="w-6 h-6 text-blue-600" />
               </div>
               <div>

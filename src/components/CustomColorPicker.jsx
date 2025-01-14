@@ -66,7 +66,7 @@ const CustomColorPicker = ({ color, onChange, onClose }) => {
   return (
     <div 
       ref={pickerRef} 
-      className="absolute z-50 bg-white border border-gray-300 rounded-lg p-4 shadow-lg w-64 bottom-full mb-2"
+      className="absolute z-50 bg-white border border-gray-300 rounded-sm p-4 shadow-lg w-64 bottom-full mb-2"
     >
       <div className="mb-4">
         <div className="font-bold mb-2">STANDARD</div>

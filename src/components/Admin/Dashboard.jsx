@@ -155,22 +155,22 @@ function Dashboard() {
       <Header />
       {/* Card Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 p-5">
-        <div className="bg-white dark:bg-[#513a7a] dark:text-white shadow rounded-lg p-4">
+        <div className="bg-white dark:bg-[#513a7a] dark:text-white shadow rounded-sm p-4">
           <h3 className="text-xl font-semibold">Users</h3>
           <p className="mt-2 text-3xl font-bold">{totalUsers}</p>
         </div>
 
-        <div className="bg-white dark:bg-[#513a7a] dark:text-white shadow rounded-lg p-4">
+        <div className="bg-white dark:bg-[#513a7a] dark:text-white shadow rounded-sm p-4">
           <h3 className="text-xl font-semibold">Shortcuts</h3>
           <p className="mt-2 text-3xl font-bold">{totalBookmarks}</p>
         </div>
 
-        <div className="bg-white dark:bg-[#513a7a] dark:text-white shadow rounded-lg p-4">
+        <div className="bg-white dark:bg-[#513a7a] dark:text-white shadow rounded-sm p-4">
           <h3 className="text-xl font-semibold">Categories</h3>
           <p className="mt-2 text-3xl font-bold">{totalCategories}</p>
         </div>
 
-        <div className="bg-white dark:bg-[#513a7a] dark:text-white shadow rounded-lg p-4">
+        <div className="bg-white dark:bg-[#513a7a] dark:text-white shadow rounded-sm p-4">
           <h3 className="text-xl font-semibold">Bookmarks</h3>
           <p className="mt-2 text-3xl font-bold">{totalLinks}</p>
         </div>
@@ -179,7 +179,7 @@ function Dashboard() {
       {/* Charts Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 p-5">
         {/* Bar Chart */}
-        <div className="bg-white dark:bg-[#513a7a] dark:text-white shadow rounded-lg p-6">
+        <div className="bg-white dark:bg-[#513a7a] dark:text-white shadow rounded-sm p-6">
           <h3 className="text-xl font-semibold">
             Analytics Overview (Bar Chart)
           </h3>
@@ -189,7 +189,7 @@ function Dashboard() {
         </div>
 
         {/* Doughnut Chart */}
-        <div className="bg-white dark:bg-[#513a7a] dark:text-white shadow rounded-lg p-6">
+        <div className="bg-white dark:bg-[#513a7a] dark:text-white shadow rounded-sm p-6">
           <h3 className="text-xl font-semibold">
             Data Distribution (Doughnut Chart)
           </h3>

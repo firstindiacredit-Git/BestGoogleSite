@@ -77,13 +77,13 @@ const WeatherCard = ({
     {details && isMain && (
       <div className="grid grid-cols-2 gap-4">
         <div
-          className={`flex items-center gap-3 p-3 rounded-lg ${themes[theme].card} ${themes[theme].text}`}
+          className={`flex items-center gap-3 p-3 rounded-sm ${themes[theme].card} ${themes[theme].text}`}
         >
           <Droplets className={`w-5 h-5 ${themes[theme].accent}`} />
           <span className="text-base">{details.humidity}%</span>
         </div>
         <div
-          className={`flex items-center gap-3 p-3 rounded-lg ${themes[theme].card} ${themes[theme].text}`}
+          className={`flex items-center gap-3 p-3 rounded-sm ${themes[theme].card} ${themes[theme].text}`}
         >
           <Wind className={`w-5 h-5 ${themes[theme].accent}`} />
           <span className="text-base">{Math.round(details.wind)} m/s</span>
@@ -226,15 +226,16 @@ const Weather = () => {
 
   return (
     <div
-      className={`w-full max-w-sm rounded-b-lg  transition-colors ${themes[currentTheme].background} ${themes[currentTheme].text}`}
+      className={`w-full max-w-xl rounded-b-sm  transition-colors ${themes[currentTheme].background} ${themes[currentTheme].text}`}
     >
       <div className="px-4 py-2">
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-semibold">{city}</h2>
+          <span>Weather</span>
           <div className="relative">
             <button
               ref={buttonRef}
-              className={`p-2 rounded-lg transition-colors ${themes[currentTheme].hover}`}
+              className={`p-2 rounded-sm transition-colors ${themes[currentTheme].hover}`}
               onClick={() => setIsVisible(!isVisible)}
             >
               <Settings className="w-5 h-5" />
@@ -242,7 +243,7 @@ const Weather = () => {
             {isVisible && (
               <div
                 ref={dropdownRef}
-                className={`absolute right-0 mt-2 w-48 rounded-lg shadow-lg ${themes[currentTheme].background} border ${themes[currentTheme].border} z-50`}
+                className={`absolute right-0 mt-2 w-48 rounded-sm shadow-lg ${themes[currentTheme].background} border ${themes[currentTheme].border} z-50`}
               >
                 <div className="p-2 border-b border-gray-200 dark:border-gray-700">
                   <p className="text-sm font-medium mb-1">Theme</p>

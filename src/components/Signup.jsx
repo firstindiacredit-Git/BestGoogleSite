@@ -83,7 +83,7 @@ const Signup = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <div className="bg-white rounded-lg shadow-md p-8 w-full max-w-md relative">
+      <div className="bg-white rounded-sm shadow-md p-8 w-full max-w-md relative">
         <button
           className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
           onClick={() => navigate(-1)}
@@ -101,7 +101,7 @@ const Signup = () => {
               placeholder="First name"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              className="w-full border border-gray-300 rounded-md p-2 focus:ring focus:ring-blue-200"
+              className="w-full border border-gray-300 rounded-xs p-2 focus:ring focus:ring-blue-200"
               required
             />
             <input
@@ -109,7 +109,7 @@ const Signup = () => {
               placeholder="Last name"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
-              className="w-full border border-gray-300 rounded-md p-2 focus:ring focus:ring-blue-200"
+              className="w-full border border-gray-300 rounded-xs p-2 focus:ring focus:ring-blue-200"
               required
             />
           </div>
@@ -118,7 +118,7 @@ const Signup = () => {
             placeholder="Work Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full border border-gray-300 rounded-md p-2 mb-4 focus:ring focus:ring-blue-200"
+            className="w-full border border-gray-300 rounded-xs p-2 mb-4 focus:ring focus:ring-blue-200"
             required
           />
           <div className="mb-4 relative">
@@ -127,7 +127,7 @@ const Signup = () => {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-gray-300 rounded-md p-2 focus:ring focus:ring-blue-200"
+              className="w-full border border-gray-300 rounded-xs p-2 focus:ring focus:ring-blue-200"
               required
             />
             <button
@@ -141,7 +141,7 @@ const Signup = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-indigo-500 text-white py-2 rounded-md hover:bg-indigo-600 focus:outline-none"
+            className="w-full bg-indigo-500 text-white py-2 rounded-xs hover:bg-indigo-600 focus:outline-none"
           >
             {loading ? "Creating account..." : "Create account"}
           </button>
@@ -157,7 +157,7 @@ const Signup = () => {
           <button
             onClick={handleGoogleSignIn}
             disabled={loading}
-            className="flex items-center justify-center w-full border border-gray-300 py-2 rounded-md hover:bg-gray-100 focus:outline-none"
+            className="flex items-center justify-center w-full border border-gray-300 py-2 rounded-xs hover:bg-gray-100 focus:outline-none"
           >
             <img src="/google.png" alt="Google" className="w-5 h-5 mr-2" />
             Sign up with Google

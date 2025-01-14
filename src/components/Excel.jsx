@@ -991,7 +991,7 @@ const Excel = () => {
       {tables.map((table, tableIndex) => (
         <div
           key={table.id}
-          className={`mb-8 border border-gray-500/10 rounded-lg p-4 ${
+          className={`mb-8 border border-gray-500/10 rounded-sm p-4 ${
             isAutoColor ? "bg-white dark:bg-[#28283A]" : "bg-gray-100"
           }`}
           style={isAutoColor ? {} : table.cardStyle}
@@ -1302,7 +1302,7 @@ const Excel = () => {
                     <div className="mt-2 flex items-center justify-center">
                       <input
                         type="color"
-                        className="w-full h-6 p-0 border border-gray-300 rounded-md cursor-pointer focus:outline-none"
+                        className="w-full h-6 p-0 border border-gray-300 rounded-xs cursor-pointer focus:outline-none"
                         value={
                           tables[tableIndex]?.cardStyle?.backgroundColor ||
                           "#ffffff"

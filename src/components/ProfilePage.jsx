@@ -227,7 +227,7 @@ const ProfilePage = () => {
         USER ACCOUNT
       </h1>
 
-      <div className="bg-white dark:bg-[#513a7a] w-[60%] m-auto rounded-lg shadow-lg p-6 space-y-4">
+      <div className="bg-white dark:bg-[#513a7a] w-[60%] m-auto rounded-sm shadow-lg p-6 space-y-4">
         {/* Avatar Section with Upload */}
         <div className="flex items-center space-x-4">
           <div className="relative">

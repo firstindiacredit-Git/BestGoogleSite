@@ -18,11 +18,12 @@ function SearchPage() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [backgroundImage, setBackgroundImage] = useState("");
   const [transparency, setTransparency] = useState(() =>
-    parseInt(localStorage.getItem("bgTransparency") || "85")
+    parseInt(localStorage.getItem("bgTransparency"))
   );
   const [activeComponent, setActiveComponent] = useState("Anotherpage");
   const navigate = useNavigate();
   const [showButton, setShowButton] = useState(false);
+  const [visibleHandle, setVisibleHandle] = useState(false);
 
   useEffect(() => {
     const storedThemeMode = localStorage.getItem("themeMode");
@@ -30,6 +31,9 @@ function SearchPage() {
       setIsDarkMode(storedThemeMode === "dark");
     }
   }, []);
+  const changeVisible = ()=>{
+    setVisibleHandle(!visibleHandle)
+  }
 
   console.log(localStorage.getItem("backgroundImage"))
   useEffect(() => {
@@ -39,21 +43,21 @@ function SearchPage() {
     }
   }, []);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 300) {
-        setShowButton(true);
-      } else {
-        setShowButton(false);
-      }
-    };
+  // useEffect(() => {
+  //   const handleScroll = () => {
+  //     if (window.scrollY > 300) {
+  //       setShowButton(true);
+  //     } else {
+  //       setShowButton(false);
+  //     }
+  //   };
 
-    window.addEventListener("scroll", handleScroll);
+  //   window.addEventListener("scroll", handleScroll);
 
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
+  //   return () => {
+  //     window.removeEventListener("scroll", handleScroll);
+  //   };
+  // }, []);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -138,7 +142,7 @@ function SearchPage() {
         />
 
         <div className="w-full">
-          <div className="mb-8 mt-24 flex  relative  w-fit  mx-auto justify-center">
+          <div className="mb-8 mt-10 flex  relative  w-fit  mx-auto justify-center">
             <img
               src={`${isDarkMode ? "/BrowseyFullDark2.svg" : "/BrowseyFullDark.svg"}`}
               className="w-96 drop-shadow-sm "
@@ -159,9 +163,9 @@ function SearchPage() {
             <Shortcut />
             <div>
               <div className="flex justify-center max-w-[90vw] mb-3  w-full mx-auto">
-                <div className="flex space-x-1 p-1 justify-between bg-gray-200/10 backdrop-blur-lg border border-gray-200/20 dark:border-gray-800/20 dark:bg-[#513a7a]/10 rounded-lg w-full">
+                <div className="flex space-x-1 p-1 justify-between bg-gray-200/10 backdrop-blur-lg border border-gray-200/20 dark:border-gray-800/20 dark:bg-[#513a7a]/10 rounded-sm w-full">
                   <button
-                    className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                    className={`px-4 py-2 text-sm font-medium rounded-xs transition-all ${
                       activeComponent === "Anotherpage"
                         ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
                         : "dark:text-white  hover:bg-gray-100 dark:hover:bg-[#28283A]"
@@ -171,7 +175,7 @@ function SearchPage() {
                     <span className="drop-shadow-md">HOME </span>
                   </button>
                   <button
-                    className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                    className={`px-4 py-2 text-sm font-medium rounded-xs transition-all ${
                       activeComponent === "PopularBookmarks"
                         ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
                         : "dark:text-white  hover:bg-gray-100 dark:hover:bg-[#28283A]"
@@ -181,7 +185,7 @@ function SearchPage() {
                     <span className="drop-shadow-md">BOOKMARKS </span>
                   </button>
                   <button
-                    className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                    className={`px-4 py-2 text-sm font-medium rounded-xs transition-all ${
                       activeComponent === "NotebookAndSheet"
                         ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
                         : "dark:text-white  hover:bg-gray-100 dark:hover:bg-[#28283A]"
@@ -191,7 +195,7 @@ function SearchPage() {
                     <span className="drop-shadow-md">NOTES </span>
                   </button>
                   <button
-                    className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                    className={`px-4 py-2 text-sm font-medium rounded-xs transition-all ${
                       activeComponent === "PasswordGenerator"
                         ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
                         : "dark:text-white  hover:bg-gray-100 dark:hover:bg-[#28283A]"
@@ -201,7 +205,7 @@ function SearchPage() {
                     <span className="drop-shadow-md">PASSWORD </span>
                   </button>
                   <button
-                    className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                    className={`px-4 py-2 text-sm font-medium rounded-xs transition-all ${
                       activeComponent === "News"
                         ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
                         : "dark:text-white  hover:bg-gray-100 dark:hover:bg-[#28283A]"
@@ -211,7 +215,7 @@ function SearchPage() {
                     <span className="drop-shadow-md">NEWS </span>
                   </button>
                   <button
-                    className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                    className={`px-4 py-2 text-sm font-medium rounded-xs transition-all ${
                       activeComponent === "Sports"
                         ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
                         : "dark:text-white  hover:bg-gray-100 dark:hover:bg-[#28283A]"
@@ -221,7 +225,7 @@ function SearchPage() {
                     <span className="drop-shadow-md">SPORTS </span>
                   </button>
                   <button
-                    className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                    className={`px-4 py-2 text-sm font-medium rounded-xs transition-all ${
                       activeComponent === "Top100"
                         ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
                         : "dark:text-white  hover:bg-gray-100 dark:hover:bg-[#28283A]"
@@ -231,7 +235,7 @@ function SearchPage() {
                     <span className="drop-shadow-md">TOP100 </span>
                   </button>
                   <button
-                    className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                    className={`px-4 py-2 text-sm font-medium rounded-xs transition-all ${
                       activeComponent === "Tool"
                         ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
                         : "dark:text-white  hover:bg-gray-100 dark:hover:bg-[#28283A]"
@@ -240,9 +244,9 @@ function SearchPage() {
                   >
                     <span className="drop-shadow-md">TOOLS </span>
                   </button>
-                  {localStorage.getItem("backgroundImage") && <Dropdown
+                  <Dropdown
                     overlay={
-                      <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-lg min-w-[200px]">
+                      <div className="bg-white dark:bg-gray-800 p-3 rounded-sm shadow-lg min-w-[200px]">
                         <div className="flex flex-col gap-2">
                           <span className="text-sm text-gray-600 dark:text-gray-300">
                             Background Opacity
@@ -253,22 +257,30 @@ function SearchPage() {
                             max="100"
                             value={transparency}
                             onChange={(e) => handleTransparencyChange(parseInt(e.target.value))}
-                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+                            className="w-full h-2 bg-gray-200 rounded-sm appearance-none cursor-pointer dark:bg-gray-700"
                           />
                           <span className="text-sm text-gray-600 dark:text-gray-300 text-right">
                             {transparency}%
                           </span>
                         </div>
+                        <div className="flex flex-col gap-2">
+                        <span className="text-sm text-gray-600 dark:text-gray-300">
+                           Card UI
+                          </span>
+                          <button className="text-center bg-black/5 dark:bg-white/5 dark:text-white hover:bg-gray-50 w-full rounded-sm" onClick={changeVisible}>{visibleHandle?"Classic":"Modern"}
+                        </button>
+                        </div>
+                        
                       </div>
                     }
                     trigger={['click']}
                   >
                     <button
-                      className="px-4 py-2 text-sm font-medium rounded-md transition-all dark:text-white hover:bg-gray-100 bg-[#513A7A10] dark:hover:bg-[#513A7A]"
+                      className="px-4 py-2 text-sm font-medium rounded-xs transition-all dark:text-white hover:bg-gray-100 bg-[#513A7A10] dark:hover:bg-[#513A7A]"
                     >
                       <Settings className="w-5"/>
                     </button>
-                  </Dropdown>}
+                  </Dropdown>
                 </div>
               </div>
             </div>
@@ -287,13 +299,13 @@ function SearchPage() {
             ) : activeComponent === "Sports" ? (
               <Sports />
             ) : activeComponent === "Anotherpage" ? (
-              <Anotherpage />
+              <Anotherpage visibleHandle={visibleHandle} isDarkMode={isDarkMode} />
             ) : activeComponent === "Top100" ? (
               <Top100 />
             ) : activeComponent === "Tool" ? (
               <Tool />
             ) : (
-              <Anotherpage isDarkMode={isDarkMode} />
+              <Anotherpage visibleHandle={visibleHandle} isDarkMode={isDarkMode} />
             )}
           </div>
         </div>

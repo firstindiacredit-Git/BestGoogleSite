@@ -153,7 +153,9 @@ function BookmarkPage() {
   const getFavicon = (url) => {
     try {
       // const domain = new URL(url).hostname;
-      return `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=64`? `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=64` : "https://www.freeiconspng.com/uploads/web-icon-black-png-planet-web-world-icon-17.png";
+      return `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=64`
+        ? `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=64`
+        : "https://www.freeiconspng.com/uploads/web-icon-black-png-planet-web-world-icon-17.png";
     } catch (error) {
       return "https://www.freeiconspng.com/uploads/web-icon-black-png-planet-web-world-icon-17.png"; // Fallback favicon
     }
@@ -173,13 +175,7 @@ function BookmarkPage() {
     if (!editingBookmark) return;
 
     try {
-      const docRef = doc(
-        db,
-        "users",
-        user.uid,
-        "shortcut",
-        editingBookmark.id
-      );
+      const docRef = doc(db, "users", user.uid, "shortcut", editingBookmark.id);
       await updateDoc(docRef, { name, link });
 
       setUserBookmarks((prev) =>
@@ -246,12 +242,12 @@ function BookmarkPage() {
   ];
 
   return (
-    <div className="flex items-center max-w-4xl dark:text-white justify-center mb-10 w-full">
-      <div className="flex gap-3  flex-wrap">
+    <div className="flex items-center gap-2 max-w-7xl dark:text-white justify-center mb-10 w-full">
+      <div className="flex gap-1  flex-wrap">
         {combinedBookmarks.map((bookmark) => (
           <div
             key={bookmark.id}
-            className="text-center dark:bg-[#28283a]/10 backdrop-blur-md border  bg-gray-200/10 dark:border-gray-800/20 border-gray-200/10 cursor-pointer p-2 rounded-lg transition-transform transform hover:scale-105 group relative"
+            className="text-center shadow-sm dark:bg-[#28283a]/10 backdrop-blur-md border  bg-gray-200/10 dark:border-gray-800/20 border-gray-200/10 cursor-pointer p-2 rounded-sm  group relative"
           >
             <a
               href={bookmark.link}
@@ -260,7 +256,7 @@ function BookmarkPage() {
               className="block"
             >
               <img
-                src={getFavicon(bookmark.link) }
+                src={getFavicon(bookmark.link)}
                 alt={bookmark.name}
                 className="w-7 h-7 mx-auto"
               />
@@ -306,13 +302,13 @@ function BookmarkPage() {
           </div>
         ))}
       </div>
-<div>
-      <button
-        onClick={() => setShowModal(true)}
-        className="bg-white/20 border dark:text-white border-gray-400 mb-10 ml-3 rounded-full w-10 h-10 flex items-center justify-center mt-5"
-      >
-        +
-      </button>
+      <div className="text-center shadow-sm dark:bg-[#28283a]/10 backdrop-blur-md border  bg-gray-200/10 dark:border-gray-800/20 border-gray-200/10 cursor-pointer p-2 rounded-sm">
+        <button
+          onClick={() => setShowModal(true)}
+          className=" dark:text-white   w-12 h-12 flex items-center justify-center "
+        >
+          +
+        </button>
       </div>
       <Modal
         title={editMode ? "Edit Bookmark" : "Add Bookmark"}
@@ -335,7 +331,7 @@ function BookmarkPage() {
           <Form.Item
             label={<span className="dark:text-white">Name</span>}
             name="name"
-            rules={[{ required: true, message: 'Please enter bookmark name' }]}
+            rules={[{ required: true, message: "Please enter bookmark name" }]}
             initialValue={name}
           >
             <Input
@@ -348,8 +344,8 @@ function BookmarkPage() {
             label={<span className="dark:text-white">URL</span>}
             name="link"
             rules={[
-              { required: true, message: 'Please enter URL' },
-              { type: 'url', message: 'Please enter a valid URL' }
+              { required: true, message: "Please enter URL" },
+              { type: "url", message: "Please enter a valid URL" },
             ]}
             initialValue={link}
           >

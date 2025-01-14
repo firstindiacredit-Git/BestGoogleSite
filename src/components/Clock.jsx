@@ -187,25 +187,25 @@ const TimeZoneClock = ({
           </button>
         </Popconfirm>
         <div
-          className={`w-24 h-24 rounded-full border-4 relative flex items-center justify-center ${theme.analog.border} ${theme.analog.background}`}
+          className={`w-[5.5rem] h-[5.4rem] rounded-full border-2 relative flex items-center justify-center ${theme.analog.border} ${theme.analog.background}`}
         >
           {/* Numbers */}
           {[...Array(12)].map((_, index) => {
             const angle = (index + 1) * 30;
             const radian = (angle * Math.PI) / 180;
-            const x = Math.sin(radian) * 36;
-            const y = -Math.cos(radian) * 36;
+            const x = Math.sin(radian) * 29;
+            const y = -Math.cos(radian) * 28;
 
             return (
-              <span
+              <div
                 key={index}
-                className={`absolute text-[10px] mt-[1rem] ml-1.5 font-medium ${theme.analog.numbers}`}
+                className={`absolute text-[8px] mt-[1rem] ml-[0.48rem] font-medium ${theme.analog.numbers}`}
                 style={{
                   transform: `translate(-50%, -50%) translate(${x}px, ${y}px)`,
                 }}
               >
                 {index + 1}
-              </span>
+              </div>
             );
           })}
 
@@ -258,7 +258,7 @@ const TimeZoneClock = ({
         <p className="text-[10px] font-medium mb-0.5 text-indigo-500">
           {formatTimeZoneName(timeZone)}
         </p>
-        <div className={`border px-1 rounded-md text-nowrap ${theme.digital.time}`}>
+        <div className={`border px-1 rounded-xs text-nowrap ${theme.digital.time}`}>
           <p className={`text-base font-bold tracking-wider ${theme.digital.text}`}>
             {formatTimeForZone(time, timeZone)}
           </p>
@@ -351,7 +351,7 @@ const ResponsiveWorldClock = () => {
   );
 
   return (
-    <div className="dark:bg-[#28283A] w-full max-w-sm dark:text-white p-4 bg-white rounded-b-lg flex justify-center items-center">
+    <div className="dark:bg-[#28283A] w-full max-w-xl dark:text-white p-4 bg-white rounded-b-sm flex justify-center items-center">
       <div className="mx-auto w-full">
         <div className="flex items-center">
           <div className="flex w-full justify-between items-center">
@@ -373,7 +373,7 @@ const ResponsiveWorldClock = () => {
                 <div className="relative">
                   <button
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-sm"
+                    className="flex items-center gap-2 p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-sm"
                     title="Add timezone"
                   >
                     <Plus className="w-5 h-5" />
@@ -381,7 +381,7 @@ const ResponsiveWorldClock = () => {
 
                   {isDropdownOpen && availableZones.length > 0 && (
                     <>
-                      <div className="absolute right-0 mt-2 w-48 dark:text-white dark:bg-[#513a7a] backdrop-blur-sm bg-gray-200 rounded-lg shadow-lg py-1 z-50 max-h-[250px] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-400 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 dark:[&::-webkit-scrollbar-track]:bg-gray-800">
+                      <div className="absolute right-0 mt-2 w-48 dark:text-white dark:bg-[#513a7a] backdrop-blur-sm bg-gray-200 rounded-sm shadow-lg py-1 z-50 max-h-[250px] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-400 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 dark:[&::-webkit-scrollbar-track]:bg-gray-800">
                         {availableZones.map((timeZone) => (
                           <button
                             key={timeZone}

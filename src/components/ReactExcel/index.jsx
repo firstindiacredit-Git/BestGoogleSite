@@ -58,7 +58,7 @@ const ReactExcel = () => {
       {tables.map((table, index) => (
         <div
           key={table.id}
-          className={`bg-white dark:bg-[#513a7a] rounded-lg shadow-md overflow-hidden ${
+          className={`bg-white dark:bg-[#513a7a] rounded-sm shadow-md overflow-hidden ${
             table.cardStyle?.backgroundColor
               ? ''
               : table.isAutoColor
@@ -115,7 +115,7 @@ const ReactExcel = () => {
       ))}
       <button
         onClick={handleAddTable}
-        className="w-full py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors"
+        className="w-full py-2 bg-indigo-500 text-white rounded-sm hover:bg-indigo-600 transition-colors"
       >
         Add Table
       </button>

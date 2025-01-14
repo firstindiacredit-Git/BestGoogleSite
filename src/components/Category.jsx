@@ -27,6 +27,7 @@ import {
   Row,
   Col,
   Badge,
+  Radio,
 } from "antd";
 import {
   PlusOutlined,
@@ -63,6 +64,33 @@ const Category = ({ data = [] }) => {
   const [gridColumns, setGridColumns] = useState(5);
   const [editModeBookmarks, setEditModeBookmarks] = useState([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [columnCount, setColumnCount] = useState(3);
+  const [categoryColumns, setCategoryColumns] = useState({});
+
+  useEffect(() => {
+    // Initialize category columns when bookmarks change
+    const initializeColumns = () => {
+      const newColumns = {};
+      for (let i = 1; i <= columnCount; i++) {
+        newColumns[`column${i}`] = [];
+      }
+
+      // Distribute bookmarks across columns
+      bookmarks.forEach((bookmark, index) => {
+        const columnIndex = (index % columnCount) + 1;
+        newColumns[`column${columnIndex}`].push(bookmark.id);
+      });
+
+      setCategoryColumns(newColumns);
+    };
+
+    initializeColumns();
+  }, [bookmarks, columnCount]);
+
+  const handleColumnCountChange = (value) => {
+    setColumnCount(value);
+    message.success(`Column count updated to ${value}`);
+  };
 
   const getFaviconUrl = (url) => {
     try {
@@ -195,13 +223,16 @@ const Category = ({ data = [] }) => {
     }
   }, [isEditMode, bookmarks]);
 
-  const handleDragEnd = (result) => {
-    if (!result.destination) return;
+  const handleDragEnd = async (result) => {
+    const { source, destination, draggableId } = result;
+
+    if (!destination || !user) return;
 
     if (isEditMode) {
+      // Handle drag in edit mode
       const items = Array.from(editModeBookmarks);
-      const [reorderedItem] = items.splice(result.source.index, 1);
-      items.splice(result.destination.index, 0, reorderedItem);
+      const [reorderedItem] = items.splice(source.index, 1);
+      items.splice(destination.index, 0, reorderedItem);
 
       // Update positions for all items in edit mode
       const updatedItems = items.map((item, index) => ({
@@ -209,24 +240,15 @@ const Category = ({ data = [] }) => {
         position: index,
       }));
 
-      setEditModeBookmarks(updatedItems);
-      setHasUnsavedChanges(true);
-    } else {
-      const items = Array.from(bookmarks);
-      const [reorderedItem] = items.splice(result.source.index, 1);
-      items.splice(result.destination.index, 0, reorderedItem);
+      try {
+        // Update local state first
+        setEditModeBookmarks(updatedItems);
+        setHasUnsavedChanges(true);
 
-      // Update positions for immediate visual feedback
-      const updatedItems = items.map((item, index) => ({
-        ...item,
-        position: index,
-      }));
-
-      setBookmarks(updatedItems);
-
-      // Update database immediately if not in edit mode
-      if (user) {
+        // Create a batch for all updates
         const batch = writeBatch(db);
+
+        // Update each bookmark's position
         updatedItems.forEach((bookmark) => {
           const bookmarkRef = doc(
             db,
@@ -235,13 +257,99 @@ const Category = ({ data = [] }) => {
             "bookmarks",
             bookmark.id
           );
-          batch.update(bookmarkRef, { position: bookmark.position });
+          batch.update(bookmarkRef, {
+            position: bookmark.position,
+            lastUpdated: new Date().toISOString(),
+          });
         });
-        batch.commit().catch((error) => {
-          console.error("Error updating positions:", error);
-          message.error("Failed to update order");
-          setBookmarks(bookmarks); // Revert on error
+
+        // Save the order in the user's document
+        const userDocRef = doc(db, "users", user.uid);
+        batch.update(userDocRef, {
+          bookmarkOrder: {
+            items: updatedItems.map((item) => ({
+              id: item.id,
+              position: item.position,
+            })),
+            lastUpdated: new Date().toISOString(),
+          },
         });
+
+        await batch.commit();
+        setBookmarks(updatedItems); // Update the main bookmarks state
+        message.success("Bookmark order updated");
+      } catch (error) {
+        console.error("Error updating bookmark positions:", error);
+        message.error("Failed to update bookmark positions");
+        // Revert the local state on error
+        setEditModeBookmarks(editModeBookmarks);
+        setHasUnsavedChanges(false);
+      }
+    } else {
+      // Handle drag in column mode
+      const sourceColId = source.droppableId;
+      const destColId = destination.droppableId;
+      const newColumns = { ...categoryColumns };
+
+      // Remove from source column
+      const [movedBookmarkId] = newColumns[sourceColId].splice(source.index, 1);
+
+      // Add to destination column
+      newColumns[destColId].splice(destination.index, 0, movedBookmarkId);
+
+      try {
+        // Update local state first
+        setCategoryColumns(newColumns);
+
+        const batch = writeBatch(db);
+        const updates = {};
+
+        // Update positions for all bookmarks in affected columns
+        Object.entries(newColumns).forEach(([columnId, bookmarkIds]) => {
+          bookmarkIds.forEach((bookmarkId, index) => {
+            const bookmark = bookmarks.find((b) => b.id === bookmarkId);
+            if (bookmark) {
+              const columnIndex = parseInt(columnId.replace("column", ""));
+              updates[bookmarkId] = {
+                columnIndex,
+                order: index,
+                lastUpdated: new Date().toISOString(),
+              };
+
+              const bookmarkRef = doc(
+                db,
+                "users",
+                user.uid,
+                "bookmarks",
+                bookmarkId
+              );
+              batch.update(bookmarkRef, {
+                columnIndex,
+                order: index,
+                lastUpdated: new Date().toISOString(),
+              });
+            }
+          });
+        });
+
+        // Save all positions in user document
+        const userDocRef = doc(db, "users", user.uid);
+        batch.update(userDocRef, {
+          bookmarkPositions: {
+            columns: newColumns,
+            columnCount,
+            positions: updates,
+            lastUpdated: new Date().toISOString(),
+          },
+        });
+
+        await batch.commit();
+        message.success("Bookmark position updated");
+      } catch (error) {
+        console.error("Error updating bookmark positions:", error);
+        message.error("Failed to update bookmark position");
+        // Revert local state on error
+        setCategoryColumns(categoryColumns);
       }
     }
   };
@@ -495,7 +603,7 @@ const Category = ({ data = [] }) => {
             panelViewMode === "list"
               ? "flex items-center space-x-2 w-full"
               : "flex flex-col items-center p-1"
-          } border-b rounded-lg cursor-move transition-all
+          } border-b rounded-sm cursor-move transition-all
             ${
               selectedBookmarks.includes(bookmark.id)
                 ? "bg-blue-50 dark:bg-blue-900 border-blue-200 dark:border-blue-700"
@@ -521,11 +629,15 @@ const Category = ({ data = [] }) => {
               className="text-gray-500 hover:text-indigo-500 dark:text-gray-400 dark:hover:text-blue-400"
             />
           </div>
-          <span
-            {...provided.dragHandleProps}
-            className="cursor-move text-gray-400"
-          >
-            ⋮⋮
+          <span className="cursor-move text-gray-400 flex flex-col gap-1 p-1">
+            <div className="flex gap-1">
+              <div className="w-1 h-1 rounded-full bg-gray-400"></div>
+              <div className="w-1 h-1 rounded-full bg-gray-400"></div>
+            </div>
+            <div className="flex gap-1">
+              <div className="w-1 h-1 rounded-full bg-gray-400"></div>
+              <div className="w-1 h-1 rounded-full bg-gray-400"></div>
+            </div>
           </span>
           <Checkbox
             checked={selectedBookmarks.includes(bookmark.id)}
@@ -548,9 +660,11 @@ const Category = ({ data = [] }) => {
             <div className="truncate text-sm dark:text-white">
               {bookmark.name}
             </div>
-            {/* <div className="text-[12px] text-gray-500 dark:text-gray-400 truncate">
-              {bookmark.link}
-            </div> */}
+            {showUrl && (
+              <div className="text-[12px] text-gray-500 dark:text-gray-400 truncate">
+                {bookmark.link}
+              </div>
+            )}
           </div>
         </div>
       );
@@ -562,7 +676,7 @@ const Category = ({ data = [] }) => {
           isEditMode ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
       >
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-[#513a7a] rounded-lg shadow-xl p-6 w-[90%] max-w-2xl">
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-[#513a7a] rounded-sm shadow-xl p-6 w-[90%] max-w-2xl">
           <div className="space-y-3">
             {/* Header */}
             <div className="flex justify-between items-center border-b dark:border-gray-600 pb-2">
@@ -581,16 +695,12 @@ const Category = ({ data = [] }) => {
               <Space>
                 <Button.Group>
                   <Button
-                    type={
-                      panelViewMode === "list" ? "bg-indigo-500" : "default"
-                    }
+                    type={panelViewMode === "list" ? "primary" : "default"}
                     icon={<UnorderedListOutlined />}
                     onClick={() => setPanelViewMode("list")}
                   />
                   <Button
-                    type={
-                      panelViewMode === "grid" ? "bg-indigo-500" : "default"
-                    }
+                    type={panelViewMode === "grid" ? "primary" : "default"}
                     icon={<AppstoreOutlined />}
                     onClick={() => setPanelViewMode("grid")}
                   />
@@ -665,355 +775,197 @@ const Category = ({ data = [] }) => {
   const { SubMenu } = Menu;
 
   const renderBookmarks = () => {
-    const renderActions = (bookmark) => (
-      <Dropdown
-        overlay={
-          <Menu>
-            <Menu.Item key="edit" icon={<EditOutlined />}>
+    return (
+      <div className="mb-2">
+        <div className="flex justify-between mb-4">
+          <div style={{ marginBottom: "24px" }}>
+            <Space>
               <Button
-                type="text"
-                onClick={() => showEditModal(bookmark)}
-                className="dark:text-white w-full text-left"
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => setIsModalVisible(true)}
               >
-                Edit
+                Add Bookmark
               </Button>
-            </Menu.Item>
-
-            <Menu.Item key="delete" icon={<DeleteOutlined />} danger>
-              <Button
-                type="text"
-                danger
-                onClick={() => handleDeleteBookmark(bookmark.id)}
-                className="w-full text-left"
-              >
-                Delete
-              </Button>
-            </Menu.Item>
-
-            <Menu.Item key="open" icon={<GlobalOutlined />}>
-              <Button
-                type="text"
-                onClick={() => window.open(bookmark.link, "_blank")}
-                className="dark:text-white w-full text-left"
-              >
-                Open
-              </Button>
-            </Menu.Item>
-          </Menu>
-        }
-        trigger={["click"]}
-      >
-        <Button type="text" icon={<EllipsisOutlined />} className="absolute" />
-      </Dropdown>
-    );
-
-    if (isEditMode) {
-      return (
-        <div className="space-y-4">
-          
-
-          <DragDropContext onDragEnd={handleDragEnd}>
-            <Droppable droppableId="bookmarks">
-              {(provided) => (
-                <div
-                  className="space-y-2"
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                >
-                  {bookmarks.map((bookmark, index) => (
-                    <Draggable
-                      key={bookmark.id}
-                      draggableId={bookmark.id}
-                      index={index}
-                    >
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          className="p-3 border rounded-lg shadow-sm hover:shadow-md bg-white dark:bg-[#513a7a] flex items-center gap-3"
-                        >
-                          <Checkbox
-                            checked={selectedBookmarks.includes(bookmark.id)}
-                            onChange={() => handleSelect(bookmark.id)}
-                          />
-                          <img
-                            src={bookmark.logoUrl}
-                            alt={bookmark.name}
-                            style={{ width: iconSize, height: iconSize }}
-                            className="object-contain"
-                            onError={(e) =>
-                              handleFaviconError(e, bookmark.link)
-                            }
-                          />
-                          <div className="flex-grow">
-                            <div className="font-medium dark:text-white">
-                              {bookmark.name}
-                            </div>
-                            {showUrl && (
-                              <div className="text-sm text-gray-500 dark:text-gray-400">
-                                {bookmark.link}
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex gap-2">
-                            <Button
-                              type="text"
-                              icon={<EditOutlined />}
-                              onClick={() => showEditModal(bookmark)}
-                              className="dark:text-white"
-                            />
-                            <Button
-                              type="text"
-                              danger
-                              icon={<DeleteOutlined />}
-                              onClick={() => handleDeleteBookmark(bookmark.id)}
-                            />
-                            <Button
-                              type="text"
-                              icon={<GlobalOutlined />}
-                              onClick={() =>
-                                window.open(bookmark.link, "_blank")
-                              }
-                              className="dark:text-white"
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </DragDropContext>
+            </Space>
+          </div>
+          <Radio.Group
+            value={columnCount}
+            onChange={(e) => handleColumnCountChange(e.target.value)}
+            buttonStyle="solid"
+          >
+            <Radio.Button value={1}>1</Radio.Button>
+            <Radio.Button value={2}>2</Radio.Button>
+            <Radio.Button value={3}>3</Radio.Button>
+            <Radio.Button value={4}>4</Radio.Button>
+          </Radio.Group>
         </div>
-      );
-    } else if (viewMode === "list") {
-      return (
-        <List
-          dataSource={bookmarks}
-          renderItem={(bookmark) => (
-            <List.Item
-              key={bookmark.id}
-              actions={[
-                <Tooltip title="Edit">
-                  <Button
-                    type="text"
-                    icon={<EditOutlined />}
-                    onClick={() => showEditModal(bookmark)}
-                    className="dark:text-white"
-                  />
-                </Tooltip>,
-                <Tooltip title="Delete">
-                  <Button
-                    type="text"
-                    danger
-                    icon={<DeleteOutlined />}
-                    onClick={() => handleDeleteBookmark(bookmark.id)}
-                  />
-                </Tooltip>,
-                // <Tooltip title="Open in new tab">
-                //   <Button
-                //     type="text"
-                //     icon={<GlobalOutlined />}
-                //     onClick={() => window.open(bookmark.link, "_blank")}
-                //     className="dark:text-white"
-                //   />
-                // </Tooltip>,
-              ]}
-            >
-              <List.Item.Meta
-                avatar={
-                  <div className="flex gap-2 items-center ">
-                     
-                  
-                  <img
-                    src={bookmark.logoUrl}
-                    alt="Logo"
-                    style={{ width: `${iconSize}px`, height: `${iconSize}px` }}
-                    onError={(e) => handleFaviconError(e, bookmark.link)}
-                  />
-                  <a
-                    href={bookmark.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <div className="dark:text-white">{bookmark.name}</div>
-                  </a>
-                  </div>
-                }
-                // title={
-                 
-                // }
-                description={
-                  showUrl ? (
-                    <span className="dark:text-gray-500">{bookmark.link}</span>
-                  ) : (
-                    ""
-                  )
-                }
-              />
-            </List.Item>
-          )}
-        />
-      );
-    } else if (viewMode === "grid") {
-      return (
-        <div>
-          <div className="">
-            {viewMode === "grid" && (
-              <div
-                className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4`}
-              >
-                {bookmarks.map((bookmark) => (
-                  <div
-                    key={bookmark.id}
-                    className="rounded-lg transition-transform duration-300 ease-in-out p-2 cursor-pointer text-center transform hover:scale-105 relative"
-                  >
-                    <img
-                      src={bookmark.logoUrl}
-                      alt={bookmark.name}
-                      style={{
-                        width: `${iconSize}px`,
-                        height: `${iconSize}px`,
-                      }}
-                      className="mb-1 object-contain"
-                      onError={(e) => handleFaviconError(e, bookmark.link)}
-                    />
 
-                    <a
-                      href={bookmark.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <p
-                        className="dark:text-white text-sm truncate"
-                        style={{
-                          maxWidth: `${iconSize * 2}px`,
-                        }}
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Row gutter={[16, 16]}>
+            {Array.from({ length: columnCount }, (_, i) => i + 1).map(
+              (colNum) => (
+                <Col
+                  key={`column${colNum}`}
+                  xs={24}
+                  sm={columnCount <= 2 ? 12 : 24}
+                  lg={24 / columnCount}
+                >
+                  <Droppable droppableId={`column${colNum}`}>
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                        className={`p-2 rounded transition-colors duration-200 ${
+                          snapshot.isDraggingOver
+                            ? "bg-blue-200 border-2 border-dashed border-blue-500"
+                            : "bg-gray-700 border-2 border-dashed border-transparent"
+                        }`}
                       >
-                        <span className="sm:max-w-[15ch] md:max-w-[25ch] text-[12px] lg:max-w-[35ch] block overflow-hidden text-ellipsis">
-                          {bookmark.name.length > 10
-                            ? `${bookmark.name.slice(0, 10)}...`
-                            : bookmark.name}
-                        </span>
-                      </p>
-                    </a>
-                  </div>
-                ))}
-              </div>
+                        <div className="text-center text-gray-400 text-sm mb-4"></div>
+                        {categoryColumns[`column${colNum}`]?.map(
+                          (bookmarkId, index) => {
+                            const bookmark = bookmarks.find(
+                              (b) => b.id === bookmarkId
+                            );
+                            if (!bookmark) return null;
+
+                            return (
+                              <Draggable
+                                key={bookmark.id}
+                                draggableId={bookmark.id}
+                                index={index}
+                              >
+                                {(provided, snapshot) => (
+                                  <div
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    className={`mb-4 transition-all duration-200 ${
+                                      snapshot.isDragging
+                                        ? "shadow-2xl rotate-1 scale-105"
+                                        : "shadow-none rotate-0 scale-100"
+                                    }`}
+                                  >
+                                    <Card
+                                      className="max-w-xl mx-auto"
+                                      title={
+                                        <div className="bg-gradient-to-r rounded-sm from-blue-700 via-blue-600 to-blue-800 p-1 relative overflow-hidden">
+                                          <div className="absolute left-0 w-full h-full">
+                                            <div className="absolute inset-0 bg-white opacity-10 transform rotate-45 translate-x-[-50%] translate-y-[-50%] w-[200%] h-[200%]"></div>
+                                          </div>
+                                          <div className="relative z-10 flex justify-between items-center">
+                                            <div className="flex items-center flex-1">
+                                              <div
+                                                {...provided.dragHandleProps}
+                                                className={`cursor-move p-2 rounded-xs transition-all duration-200 group ${
+                                                  snapshot.isDragging
+                                                    ? "bg-indigo-500"
+                                                    : "hover:bg-indigo-500"
+                                                }`}
+                                              >
+                                                <div className="flex flex-col gap-1">
+                                                  <div className="flex gap-1">
+                                                    <div className="w-1 h-1 rounded-full bg-white"></div>
+                                                    <div className="w-1 h-1 rounded-full bg-white"></div>
+                                                  </div>
+                                                  <div className="flex gap-1">
+                                                    <div className="w-1 h-1 rounded-full bg-white"></div>
+                                                    <div className="w-1 h-1 rounded-full bg-white"></div>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                              <div className="ml-2 text-white">
+                                                {bookmark.name}
+                                              </div>
+                                            </div>
+                                            <div className="flex gap-2">
+                                              <Button
+                                                type="text"
+                                                icon={<EditOutlined />}
+                                                onClick={() =>
+                                                  showEditModal(bookmark)
+                                                }
+                                                className="text-white hover:text-blue-200"
+                                              />
+                                              <Button
+                                                type="text"
+                                                danger
+                                                icon={<DeleteOutlined />}
+                                                onClick={() =>
+                                                  handleDeleteBookmark(
+                                                    bookmark.id
+                                                  )
+                                                }
+                                                className="hover:text-red-300"
+                                              />
+                                            </div>
+                                          </div>
+                                        </div>
+                                      }
+                                      bodyStyle={{
+                                        padding: "16px",
+                                        maxHeight: "400px",
+                                        overflowY: "auto",
+                                      }}
+                                      style={{
+                                        borderRadius: "8px",
+                                        height: "100%",
+                                        transition: "all 0.3s ease",
+                                        transform: snapshot.isDragging
+                                          ? "rotate(1deg)"
+                                          : "rotate(0deg)",
+                                        boxShadow: snapshot.isDragging
+                                          ? "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
+                                          : "none",
+                                      }}
+                                    >
+                                      <div className="flex items-center gap-3">
+                                        <img
+                                          src={bookmark.logoUrl}
+                                          alt={bookmark.name}
+                                          style={{
+                                            width: iconSize,
+                                            height: iconSize,
+                                          }}
+                                          className="object-contain"
+                                          onError={(e) =>
+                                            handleFaviconError(e, bookmark.link)
+                                          }
+                                        />
+                                        <div className="flex-grow">
+                                          <a
+                                            href={bookmark.link}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                                          >
+                                            {bookmark.name}
+                                          </a>
+                                          {showUrl && (
+                                            <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                              {bookmark.link}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </Card>
+                                  </div>
+                                )}
+                              </Draggable>
+                            );
+                          }
+                        )}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                </Col>
+              )
             )}
-          </div>
-        </div>
-      );
-    } else if (viewMode === "icon") {
-      return (
-        <div>
-          {/* Edit Button and Dropdown */}
-
-          <div
-            style={{
-              display: "flex",
-
-              flexWrap: "wrap",
-
-              justifyContent: "center",
-
-              alignItems: "center",
-            }}
-          >
-            {bookmarks.map((bookmark) => (
-              <div
-                key={bookmark.id}
-                style={{
-                  width: "auto",
-
-                  padding: "10px",
-
-                  borderRadius: "5px",
-
-                  textAlign: "center",
-
-                  cursor: "pointer",
-
-                  margin: "5px",
-                }}
-                onMouseOver={(e) =>
-                  (e.currentTarget.style.transform = "scale(1.1)")
-                }
-                onMouseOut={(e) =>
-                  (e.currentTarget.style.transform = "scale(1)")
-                }
-              >
-                <img
-                  src={bookmark.logoUrl}
-                  alt={bookmark.name}
-                  style={{ width: `${iconSize}px`, height: `${iconSize}px` }}
-                  onError={(e) => handleFaviconError(e, bookmark.link)}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-    } else if (viewMode === "cloud") {
-      return (
-        <div>
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "3px",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            {bookmarks.map((bookmark) => (
-              <div
-                key={bookmark.id}
-                style={{
-                  width: "auto",
-                  maxWidth: "150px",
-                  padding: "1.5px",
-                  borderRadius: "3px",
-                  border: "1px solid #ccc",
-                  transition: "transform 0.3s ease-in-out",
-                  cursor: "pointer",
-                  margin: "1px",
-                  display: "flex",
-                  flexDirection: "row",
-                  alignItems: "center",
-                }}
-                onMouseOver={(e) =>
-                  (e.currentTarget.style.transform = "scale(1.1)")
-                }
-                onMouseOut={(e) =>
-                  (e.currentTarget.style.transform = "scale(1)")
-                }
-              >
-                <img
-                  src={bookmark.logoUrl}
-                  alt={bookmark.name}
-                  style={{ width: iconSize, height: iconSize }}
-                  className="ml-0.5"
-                  onError={(e) => handleFaviconError(e, bookmark.link)}
-                />
-                <p
-                  className="dark:text-white"
-                  style={{
-                    marginTop: "-1px",
-                    marginLeft: "3px",
-                    marginRight: "3px",
-                  }}
-                >
-                  {bookmark.name}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-    }
+          </Row>
+        </DragDropContext>
+      </div>
+    );
   };
 
   const viewMenu = (
@@ -1100,11 +1052,16 @@ const Category = ({ data = [] }) => {
       <div className="">
         <button
           type="text"
-          onClick={() => {setIsEditMode(!isEditMode);
-             setIsModalVisible(false)}}
-          className={`flex justify-start px-3 py-1 hover:bg-zinc-400/10 rounded-[0.2rem] w-full text-left ${isEditMode?"text-red-500 hover:text-red-600":"text-indigo-500 hover:text-indigo-600"}`}
+          onClick={() => {
+            setIsEditMode(!isEditMode);
+            setIsModalVisible(false);
+          }}
+          className={`flex justify-start px-3 py-1 hover:bg-zinc-400/10 rounded-[0.2rem] w-full text-left ${
+            isEditMode
+              ? "text-red-500 hover:text-red-600"
+              : "text-indigo-500 hover:text-indigo-600"
+          }`}
           icon={<EditOutlined />}
-          
         >
           {isEditMode ? "Close" : "Edit"}
         </button>
@@ -1115,26 +1072,23 @@ const Category = ({ data = [] }) => {
   return (
     <div className="relative">
       <EditModePanel />
-      <div className="dark:text-white max-w-sm rounded-lg bg-white dark:bg-[#28283A]">
+      <div className="dark:text-white rounded-sm bg-white dark:bg-[#28283A]">
         <Card
           title={
             <div className="flex justify-between items-center">
-              {/* <Title level={4} className="dark:text-white bg-gray-800 m-0">
-                My Bookmarks {isEditMode && "(Edit Mode)"}
-              </Title> */}
               <div className="flex justify-between w-full items-center">
                 <div>
                   <button
-                    className=" px-2 py-1 w-fit rounded-md hover:text-indigo-500 hover:bg-gray-100 dark:bg-gray-800 dark:text-white"
+                    className="px-2 py-1 w-fit rounded-xs hover:text-indigo-500 hover:bg-gray-100 dark:bg-gray-800 dark:text-white"
                     onClick={() => setIsModalVisible(true)}
                   >
-                    <PlusOutlined className="w-7 h-7 px-2  transition-all  " />
+                    <PlusOutlined className="w-7 h-7 px-2 transition-all" />
                   </button>
                 </div>
                 <div>
                   <Dropdown overlay={viewMenu} trigger={["click"]}>
-                    <button className="hover:bg-gray-100  px-4 py-3 hover:text-indigo-500 rounded-md">
-                      <RxGear className=" w-4 h-4   transition-all " />
+                    <button className="hover:bg-gray-100 px-4 py-3 hover:text-indigo-500 rounded-xs">
+                      <RxGear className="w-4 h-4 transition-all" />
                     </button>
                   </Dropdown>
                 </div>

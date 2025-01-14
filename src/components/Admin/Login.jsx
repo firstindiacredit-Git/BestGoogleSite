@@ -48,7 +48,7 @@ const SignInPage = () => {
     <div className="flex items-center justify-center h-screen">
       <div className="max-w-md w-full mt-4 shadow-xl rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-neutral-50">
         <h2 className="font-bold text-xl text-neutral-800">Admin Sign In</h2>
-        <p className="text-neutral-600 text-sm max-w-sm mt-2">
+        <p className="text-neutral-600 text-sm max-w-xl mt-2">
           Sign in to access BEST GOOGLE SITE
         </p>
 
@@ -88,7 +88,7 @@ const SignInPage = () => {
           </button>
           <div className="bg-gradient-to-r from-transparent via-neutral-300 dark:via-neutral-700 to-transparent my-8 h-[1px] w-full" />
           <button
-            className="text-green-500 border shadow-sm hover:text-white text-lg text-center px-4 w-full rounded-md h-10 font-medium border-green-600 hover:bg-green-500"
+            className="text-green-500 border shadow-sm hover:text-white text-lg text-center px-4 w-full rounded-xs h-10 font-medium border-green-600 hover:bg-green-500"
             type="button"
             onClick={handleGoogleSignIn}
           >

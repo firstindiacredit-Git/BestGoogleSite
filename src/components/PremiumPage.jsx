@@ -36,7 +36,7 @@ const PricingCard = ({ plan, popular }) => (
       ))}
     </ul>
     <button
-      className={`w-full py-3 rounded-lg font-semibold transition-all ${
+      className={`w-full py-3 rounded-sm font-semibold transition-all ${
         popular
           ? 'bg-white text-indigo-600 hover:bg-indigo-50'
           : 'bg-indigo-600 text-white hover:bg-indigo-700'

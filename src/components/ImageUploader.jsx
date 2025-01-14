@@ -40,11 +40,11 @@ function ImageUploader() {
   };
 
   return (
-    <div className="max-w-sm    rounded-b-lg w-full">
+    <div className="max-w-xl    rounded-b-sm w-full">
       
 
       {!image && (
-        <div className="h-72 flex items-center justify-center bg-white dark:bg-[#28283A] rounded-lg w-full">
+        <div className="h-72 flex items-center justify-center bg-white dark:bg-[#28283A] rounded-sm w-full">
           <label htmlFor="file-input" className="cursor-pointer flex flex-col items-center">
             <input
               type="file"
@@ -60,18 +60,18 @@ function ImageUploader() {
       )}
 
       {imageUrl && (
-        <div className="relative rounded-b-lg   group h-80">
+        <div className="relative rounded-b-sm   group h-80">
           <Image
             src={imageUrl}
             alt="Uploaded"
             preview={true}
-            className="!h-full !w-full rounded-b-lg "
+            className="!h-full !w-full rounded-b-sm "
             style={{ 
               objectFit: 'cover',
               height: '100%',
               width: '100%'
             }}
-            wrapperClassName="!h-full !w-full rounded-b-lg "
+            wrapperClassName="!h-full !w-full rounded-b-sm "
           />
           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <Popconfirm

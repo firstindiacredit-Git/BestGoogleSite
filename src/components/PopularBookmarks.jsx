@@ -963,7 +963,7 @@ function PopularBookmarks() {
           {categoryLinks.map((link) => (
             <div
               key={link.id}
-              className="flex flex-col items-center p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 group relative"
+              className="flex flex-col items-center p-1 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 group relative"
             >
               <div className="relative w-full flex justify-center">
                 <a
@@ -1114,9 +1114,9 @@ function PopularBookmarks() {
                                         : "shadow-none rotate-0 scale-100"
                                     }`}
                                   >
-                                    <Card className="max-w-sm mx-auto"
+                                    <Card className="max-w-xl mx-auto"
                                       title={
-                                        <div className="bg-gradient-to-r rounded-lg from-blue-700 via-blue-600 to-blue-800 p-1 relative overflow-hidden">
+                                        <div className="bg-gradient-to-r rounded-sm from-blue-700 via-blue-600 to-blue-800 p-1 relative overflow-hidden">
                                           <div className="absolute left-0 w-full h-full">
                                             <div className="absolute inset-0 bg-white opacity-10 transform rotate-45 translate-x-[-50%] translate-y-[-50%] w-[200%] h-[200%]"></div>
                                           </div>
@@ -1124,7 +1124,7 @@ function PopularBookmarks() {
                                             <div className="flex items-center flex-1">
                                               <div
                                                 {...provided.dragHandleProps}
-                                                className={`cursor-move p-2 rounded-md transition-all duration-200 group ${
+                                                className={`cursor-move p-2 rounded-xs transition-all duration-200 group ${
                                                   snapshot.isDragging
                                                     ? "bg-indigo-500"
                                                     : "hover:bg-indigo-500"

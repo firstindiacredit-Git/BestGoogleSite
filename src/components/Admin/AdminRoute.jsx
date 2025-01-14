@@ -16,7 +16,7 @@ const AdminSkeleton = () => (
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-gray-100 p-6 rounded-lg">
+            <div key={i} className="bg-gray-100 p-6 rounded-sm">
               <div className="w-16 h-3 bg-gray-200 rounded mb-4"></div>
               <div className="w-24 h-6 bg-gray-200 rounded"></div>
             </div>
@@ -24,7 +24,7 @@ const AdminSkeleton = () => (
         </div>
 
         {/* Main Content Area */}
-        <div className="bg-gray-100 rounded-lg p-6">
+        <div className="bg-gray-100 rounded-sm p-6">
           <div className="w-48 h-4 bg-gray-200 rounded mb-6"></div>
           <div className="space-y-4">
             {[1, 2, 3, 4].map((i) => (
@@ -40,7 +40,7 @@ const AdminSkeleton = () => (
         </div>
 
         {/* Bottom Section */}
-        <div className="bg-gray-100 rounded-lg p-6">
+        <div className="bg-gray-100 rounded-sm p-6">
           <div className="space-y-3">
             {[1, 2].map((i) => (
               <div key={i} className="w-full h-4 bg-gray-200 rounded"></div>

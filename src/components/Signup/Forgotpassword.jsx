@@ -43,7 +43,7 @@ const ResetPassword = () => {
       >
         Back
       </button>
-      <div className="relative bg-white p-6 rounded-lg shadow-md w-full max-w-md">
+      <div className="relative bg-white p-6 rounded-sm shadow-md w-full max-w-md">
               <h2 className="text-2xl font-bold text-center mb-4">Reset Password</h2>
         <p className="text-sm text-gray-600 text-center mb-6">
           Enter your email address to receive a password reset link.
@@ -59,7 +59,7 @@ const ResetPassword = () => {
             <input
               type="email"
               id="email"
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-xs focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -68,7 +68,7 @@ const ResetPassword = () => {
           </div>
           <button
             type="submit"
-            className={`w-full py-2 px-4 text-white font-medium rounded-md ${
+            className={`w-full py-2 px-4 text-white font-medium rounded-xs ${
               isSubmitting ? "bg-gray-400" : "bg-indigo-600 hover:bg-indigo-700"
             }`}
             disabled={isSubmitting}

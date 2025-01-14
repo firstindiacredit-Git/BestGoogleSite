@@ -118,12 +118,12 @@ export default function Users() {
                   placeholder="Search users..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#513a7a] text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-4 py-2 rounded-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#513a7a] text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
 
               {/* Role Filter Buttons */}
-              <div className="flex items-center gap-2 bg-gray-100 dark:bg-[#513a7a] p-1 rounded-lg">
+              <div className="flex items-center gap-2 bg-gray-100 dark:bg-[#513a7a] p-1 rounded-sm">
                 <button
                   onClick={() => setRoleFilter("all")}
                   className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
@@ -157,7 +157,7 @@ export default function Users() {
               </div>
 
               {/* View Toggle */}
-              <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-600 p-1 rounded-lg">
+              <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-600 p-1 rounded-sm">
                 <button
                   onClick={() => setViewType("grid")}
                   className={`p-2 rounded ${
@@ -215,7 +215,7 @@ export default function Users() {
       )}
 
       {error && (
-        <div className="text-red-500 text-center mt-8 bg-red-100 dark:bg-red-900/20 p-4 rounded-lg">
+        <div className="text-red-500 text-center mt-8 bg-red-100 dark:bg-red-900/20 p-4 rounded-sm">
           {error}
         </div>
       )}
@@ -247,7 +247,7 @@ export default function Users() {
                             viewType === "grid"
                               ? "flex flex-col items-center"
                               : "flex items-center justify-between"
-                          } p-2 bg-white dark:bg-[#513a7a] shadow-md rounded-lg ${
+                          } p-2 bg-white dark:bg-[#513a7a] shadow-md rounded-sm ${
                             role === "admin" ? "border-l-4 border-red-500" : ""
                           } relative`}
                         >
@@ -379,7 +379,7 @@ export default function Users() {
                             viewType === "grid"
                               ? "flex flex-col items-center"
                               : "flex items-center justify-between"
-                          } p-2 bg-white dark:bg-[#513a7a] shadow-md rounded-lg ${
+                          } p-2 bg-white dark:bg-[#513a7a] shadow-md rounded-sm ${
                             role === "admin" ? "border-l-4 border-red-500" : ""
                           } relative`}
                         >

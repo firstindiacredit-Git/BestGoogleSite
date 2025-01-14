@@ -31,7 +31,7 @@ const ColorPicker = ({ color = '#ffffff', onChange, onClose }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div
         ref={pickerRef}
-        className="bg-white dark:bg-[#513a7a] border dark:border-gray-700 border-gray-300 rounded-lg p-4 shadow-lg w-72"
+        className="bg-white dark:bg-[#513a7a] border dark:border-gray-700 border-gray-300 rounded-sm p-4 shadow-lg w-72"
       >
         <div className="mb-4">
           <h3 className="text-lg font-semibold mb-2 dark:text-white">Choose Color</h3>

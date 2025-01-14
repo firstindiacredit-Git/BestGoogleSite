@@ -454,7 +454,7 @@ const Top100Page = () => {
       itemLayout="horizontal"
       dataSource={filteredItems}
       renderItem={(item) => (
-        <List.Item className="bg-gray-200 dark:bg-[#28283A] dark:text-white  rounded-lg mb-4">
+        <List.Item className="bg-gray-200 dark:bg-[#28283A] dark:text-white  rounded-sm mb-4">
           <List.Item.Meta
             title={
               category === 'stocks' ? (

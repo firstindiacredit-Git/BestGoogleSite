@@ -21,7 +21,7 @@ import TodoComponent from "./TodoComponent.jsx";
 import NewsFeed from "./NewsFeed.jsx";
 import CategoryHome from "./CategoryHome.jsx";
 
-const Anotherpage = ({ backgroundImage, pageId = "home" }) => {
+const Anotherpage = ({visibleHandle, pageId = "home" }) => {
   const [grid, isGrid] = useState(true);
   const [user, setUser] = useState(null);
   const [items, setItems] = useState([]);
@@ -32,7 +32,7 @@ const Anotherpage = ({ backgroundImage, pageId = "home" }) => {
   const [isApplying, setIsApplying] = useState(false);
   const [previewColumns, setPreviewColumns] = useState(3);
   const [availableWidgets, setAvailableWidgets] = useState([]);
-const isDarkMode = localStorage.getItem("themeMode") === "dark";
+  const isDarkMode = localStorage.getItem("themeMode") === "dark";
   const componentMap = {
     clock: <Clock />,
     weather: <Weather />,
@@ -40,11 +40,10 @@ const isDarkMode = localStorage.getItem("themeMode") === "dark";
     notepad: <NotePage />,
     imageUploader: <ImageUploader />,
     calendar: <Calendar />,
-    Bookmarks: <CategoryHome categoryType="Popular Bookmarks"
- />,
-    Bookmarks1: <CategoryHome categoryType="Travel" />,
-    Bookmarks2: <CategoryHome categoryType="AI" />,
-    Bookmarks3: <CategoryHome categoryType="Sports" />,
+    Bookmarks: <CategoryHome categoryType="Popular Bookmarks" itemName="Popular Bookmarks "/>,
+    Bookmarks1: <CategoryHome categoryType="Travel"  itemName="Travel" />,
+    Bookmarks2: <CategoryHome categoryType="AI"  itemName="AI" />,
+    Bookmarks3: <CategoryHome categoryType="Sports"  itemName="Sports" />,
     Todo: <TodoComponent />,
     NewsFeed: <NewsFeed />,
   };
@@ -255,10 +254,10 @@ const isDarkMode = localStorage.getItem("themeMode") === "dark";
   return (
     <div style={{ position: "relative" }}>
       <div className="flex justify-center">
-        <div className={`bg-white/10 w-fit    border dark:border-black/5 border-white/5 dark:bg-black/10 rounded-xl` }
+        <div className={`flex flex-col items-center w-full    rounded-xl` }
         >
           <div
-            className={`flex items-center gap-2 w-fit mx-auto mt-4 bg-gray-100 dark:bg-[#28283A] p-1 rounded-lg`}
+            className={`flex items-center gap-2 w-fit mx-auto mt-4 bg-gray-100 dark:bg-[#28283A] p-1 rounded-sm`}
           >
             <button
               onClick={() => {
@@ -309,7 +308,7 @@ const isDarkMode = localStorage.getItem("themeMode") === "dark";
               </svg>
             </button>
           </div>
-          <div className="p-4 ">
+          <div className="p-4   ">
             {loading ? (
               <div className="flex justify-center items-center min-h-screen">
                 <Spin size="large" />
@@ -353,24 +352,21 @@ const isDarkMode = localStorage.getItem("themeMode") === "dark";
                                 <div
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
-                                  className=" bg-white dark:bg-[#513a7a] mb-4 border-collapse dark:border-gray-700 dark:drop-shadow-md border-1 border rounded-lg"
+                                  className=" bg-white dark:bg-[#513a7a] mb-4 border-collapse dark:border-gray-700 dark:drop-shadow-md border-1 border rounded-sm"
                                 >
                                   {grid ? (
-                                    <>
-                                      <motion.div className="w-full max-w-sm text-left py-2 px-4  rounded-t-lg bg-gray-100 dark:bg-[#513a7a] dark:text-white font-semibold flex justify-between items-center">
+                                    < >
+                                      {visibleHandle && <motion.div className="w-full max-w-xl text-left py-2 px-4  rounded-t-sm bg-gray-100 dark:bg-[#513a7a] dark:text-white font-semibold flex justify-between items-center">
                                         <div
                                           {...provided.dragHandleProps}
                                           className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 w-5 "
                                         >
                                           ⋮⋮
                                         </div>
-                                        <div className="text-center w-full">
-                                        {item.name}
-                                        </div>
                                         <div className="w-5 "></div>
-                                      </motion.div>
+                                      </motion.div>}
                                       <motion.div
-                                        className=" bg-white dark:bg-[#28283A] rounded-b-lg"
+                                        className={`bg-white dark:bg-[#28283A] ${visibleHandle ? 'rounded-b-sm' : 'rounded-sm'}`}
                                         initial={{ height: 0, opacity: 0 }}
                                         animate={{
                                           height: "auto",
@@ -379,28 +375,28 @@ const isDarkMode = localStorage.getItem("themeMode") === "dark";
                                         exit={{ height: 0, opacity: 0 }}
                                         transition={{ duration: 0.1 }}
                                       >
-                                        <div className=" rounded-b-lg">
+                                        <div className={`${visibleHandle ? 'rounded-b-sm' : 'rounded-sm'}`}>
                                           {componentMap[item.id]}
                                         </div>
                                       </motion.div>
-                                    </>
+                                    </ >
                                   ) : (
-                                    <>
-                                      <motion.div className="w-full max-w-sm text-left py-2 px-4  rounded-t-lg bg-gray-100 dark:bg-[#513a7a] dark:text-white font-semibold flex justify-between items-center">
+                                    < >
+                                      {visibleHandle && <motion.div className="w-full max-w-xl text-left py-2 px-4  rounded-t-sm bg-gray-100 dark:bg-[#513a7a] dark:text-white font-semibold flex justify-between items-center">
                                         <div
                                           {...provided.dragHandleProps}
                                           className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 w-5 "
                                         >
                                           ⋮⋮
                                         </div>
-                                        <div onClick={()=>toggleDropdown(item.id)} className="text-center w-full">
-                                        {item.name}
+                                        <div onClick={() => toggleDropdown(item.id)} className="text-center w-full">
+                                          {item.name}
                                         </div>
                                         <div className="w-5 "></div>
-                                      </motion.div>
+                                      </motion.div>}
                                       {item.isOpen && (
                                         <motion.div
-                                          className=" bg-gray-50 dark:bg-[#28283A] rounded-b-lg "
+                                          className={`bg-gray-50 dark:bg-[#28283A] ${visibleHandle ? 'rounded-b-sm' : 'rounded-sm'}`}
                                           initial={{ height: 0, opacity: 0 }}
                                           animate={{
                                             height: "auto",
@@ -409,12 +405,12 @@ const isDarkMode = localStorage.getItem("themeMode") === "dark";
                                           exit={{ height: 0, opacity: 0 }}
                                           transition={{ duration: 0.3 }}
                                         >
-                                          <div className=" rounded-b-lg ">
+                                          <div className={`${visibleHandle ? 'rounded-b-sm' : 'rounded-sm'}`}>
                                             {componentMap[item.id]}
                                           </div>
                                         </motion.div>
                                       )}
-                                    </>
+                                    </ >
                                   )}
                                 </div>
                               )}
@@ -443,7 +439,7 @@ const isDarkMode = localStorage.getItem("themeMode") === "dark";
           width: "50px",
           height: "50px",
           borderRadius: "50%",
-          backgroundColor: isDarkMode?"#513A7A":"#6366F1",
+          backgroundColor: isDarkMode ? "#513A7A" : "#6366F1",
           color: "#fff",
           border: "none",
           cursor: "pointer",
@@ -521,7 +517,7 @@ const isDarkMode = localStorage.getItem("themeMode") === "dark";
             <Spin size="large" />
           </div>
         ) : (
-          <>
+          < >
             <div className="mb-6 flex items-center justify-between">
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 Select number of columns:
@@ -609,7 +605,7 @@ const isDarkMode = localStorage.getItem("themeMode") === "dark";
                             style={{
                               marginBottom: "12px",
                               fontWeight: "bold",
-                              color: isDarkMode?"#afafaf":"#1890ff",
+                              color: isDarkMode ? "#afafaf" : "#1890ff",
                             }}
                           >
                             Column {columnIndex + 1}
@@ -635,7 +631,7 @@ const isDarkMode = localStorage.getItem("themeMode") === "dark";
                                     <div
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
-                                      className="bg-white dark:bg-[#462b75] rounded-lg shadow-sm border dark:border-[#462b75] border-gray-200"
+                                      className="bg-white dark:bg-[#462b75] rounded-sm shadow-sm border dark:border-[#462b75] border-gray-200"
                                       style={{
                                         ...provided.draggableProps.style,
                                         opacity: snapshot.isDragging ? 0.9 : 1,
@@ -701,7 +697,7 @@ const isDarkMode = localStorage.getItem("themeMode") === "dark";
                 )}
               </div>
             </DragDropContext>
-          </>
+          </ >
         )}
       </Modal>
     </div>

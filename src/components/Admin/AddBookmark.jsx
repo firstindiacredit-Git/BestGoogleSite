@@ -124,13 +124,13 @@ function BookmarkManager() {
                 placeholder="Search Shortcuts..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 rounded-sm border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
 
             {/* Filters and View Toggle */}
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-600  p-1 rounded-lg">
+              <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-600  p-1 rounded-sm">
                 <button
                   onClick={() => setViewMode("grid")}
                   className={`p-2 rounded ${
@@ -188,7 +188,7 @@ function BookmarkManager() {
             {filteredBookmarks.map((bookmark) => (
               <div
                 key={bookmark.id}
-                className="bg-white dark:bg-[#513a7a] rounded-lg shadow-sm hover:shadow-md transition-shadow p-4"
+                className="bg-white dark:bg-[#513a7a] rounded-sm shadow-sm hover:shadow-md transition-shadow p-4"
               >
                 {editing === bookmark.id ? (
                   // Edit Mode
@@ -199,7 +199,7 @@ function BookmarkManager() {
                       onChange={(e) =>
                         setEditValues({ ...editValues, name: e.target.value })
                       }
-                      className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded-xs focus:ring-2 focus:ring-blue-500"
                       placeholder="Name"
                     />
                     <input
@@ -208,20 +208,20 @@ function BookmarkManager() {
                       onChange={(e) =>
                         setEditValues({ ...editValues, link: e.target.value })
                       }
-                      className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded-xs focus:ring-2 focus:ring-blue-500"
                       placeholder="Link"
                     />
 
                     <div className="flex justify-end gap-2">
                       <button
                         onClick={() => setEditing(null)}
-                        className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+                        className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xs"
                       >
                         Cancel
                       </button>
                       <button
                         onClick={() => saveEdit(bookmark.id)}
-                        className="px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md"
+                        className="px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-xs"
                       >
                         Save
                       </button>
@@ -298,7 +298,7 @@ function BookmarkManager() {
             {filteredBookmarks.map((bookmark) => (
               <div
                 key={bookmark.id}
-                className="bg-white dark:bg-[#513a7a] rounded-lg shadow-sm hover:shadow-md transition-shadow p-4"
+                className="bg-white dark:bg-[#513a7a] rounded-sm shadow-sm hover:shadow-md transition-shadow p-4"
               >
                 {editing === bookmark.id ? (
                   // Edit Mode
@@ -309,7 +309,7 @@ function BookmarkManager() {
                       onChange={(e) =>
                         setEditValues({ ...editValues, name: e.target.value })
                       }
-                      className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded-xs focus:ring-2 focus:ring-blue-500"
                       placeholder="Name"
                     />
                     <input
@@ -318,20 +318,20 @@ function BookmarkManager() {
                       onChange={(e) =>
                         setEditValues({ ...editValues, link: e.target.value })
                       }
-                      className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded-md focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded-xs focus:ring-2 focus:ring-blue-500"
                       placeholder="Link"
                     />
 
                     <div className="flex justify-end gap-2">
                       <button
                         onClick={() => setEditing(null)}
-                        className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+                        className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xs"
                       >
                         Cancel
                       </button>
                       <button
                         onClick={() => saveEdit(bookmark.id)}
-                        className="px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md"
+                        className="px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-xs"
                       >
                         Save
                       </button>
@@ -411,7 +411,7 @@ function BookmarkManager() {
       {/* Add Bookmark Modal */}
       {adding && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
+          <div className="bg-white rounded-sm max-w-md w-full p-6">
             <h2 className="text-xl font-semibold mb-4">Add New Shortcut</h2>
             <div className="space-y-4">
               <div>
@@ -424,7 +424,7 @@ function BookmarkManager() {
                   onChange={(e) =>
                     setNewBookmark({ ...newBookmark, name: e.target.value })
                   }
-                  className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border rounded-xs focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
@@ -437,16 +437,16 @@ function BookmarkManager() {
                   onChange={(e) =>
                     setNewBookmark({ ...newBookmark, link: e.target.value })
                   }
-                  className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border rounded-xs focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div></div>
 
               {/* Preview */}
               {showPreview && (
-                <div className="mt-4 p-4 border rounded-lg bg-gray-50">
+                <div className="mt-4 p-4 border rounded-sm bg-gray-50">
                   <h3 className="font-medium mb-2">Preview</h3>
-                  <div className="bg-white p-4 rounded-lg shadow-sm">
+                  <div className="bg-white p-4 rounded-sm shadow-sm">
                     <h4 className="font-medium">
                       {newBookmark.name || "Bookmark Name"}
                     </h4>
@@ -460,19 +460,19 @@ function BookmarkManager() {
               <div className="flex justify-end gap-3 mt-6">
                 <button
                   onClick={() => setShowPreview(!showPreview)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-xs"
                 >
                   {showPreview ? "Hide Preview" : "Show Preview"}
                 </button>
                 <button
                   onClick={() => setAdding(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-xs"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleAddBookmark}
-                  className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md"
+                  className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-xs"
                 >
                   Add Bookmark
                 </button>

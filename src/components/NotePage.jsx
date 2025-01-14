@@ -239,9 +239,9 @@ const NotePage = ({ inNotebookSheet = false }) => {
   const lineColor = getLineColor();
 
   return (
-    <div className={`${inNotebookSheet ? 'w-full h-full ' : ' h-full max-w-sm mx-auto'}`}>
-      <div className="rounded-lg h-full">
-        <div className={`overflow-hidden h-full rounded-b-lg ${
+    <div className={`${inNotebookSheet ? 'w-full h-full ' : ' h-full max-w-xl mx-auto'}`}>
+      <div className="rounded-sm h-full">
+        <div className={`overflow-hidden h-full rounded-b-sm ${
           isAutoColor ? 'bg-white dark:bg-[#28283A]' : ''
         }`} style={{ backgroundColor: isAutoColor ? 'transparent' : backgroundColor }}>
           <div className={`p-2 h-full bg flex flex-col justify-between ${
@@ -252,7 +252,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
               <div className="w-full  flex justify-between">
                 
                 <div><button
-                  className={`p-2 rounded-lg transition duration-200 ${
+                  className={`p-2 rounded-sm transition duration-200 ${
                     isAutoColor ? 'bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700' : 'bg-opacity-20 bg-gray-500 hover:bg-opacity-30'
                   }`}
                   onClick={toggleLineNumbers}
@@ -265,7 +265,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
                 {inNotebookSheet && <h2 className="font-semibold text-2xl">NotePad</h2>}
                 <div className="relative" ref={colorPickerRef}>
                   <button
-                    className={`p-2 rounded-lg transition duration-200 ${
+                    className={`p-2 rounded-sm transition duration-200 ${
                       isAutoColor ? 'bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700' : 'bg-opacity-20 bg-gray-500 hover:bg-opacity-30'
                     }`}
                     onClick={() => setShowColorPicker((prev) => !prev)}
@@ -310,7 +310,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
                         <input
                           id="customColorPicker"
                           type="color"
-                          className="w-full h-6 p-0 border border-gray-300 rounded-md cursor-pointer focus:outline-none"
+                          className="w-full h-6 p-0 border border-gray-300 rounded-xs cursor-pointer focus:outline-none"
                           value={backgroundColor}
                           onChange={(e) => {
                             setIsAutoColor(false);
@@ -417,7 +417,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
             <div className="flex  flex-wrap justify-between items-center gap-4 mt-6">
               <div className="flex items-center space-x-3">
                 <button
-                  className={`p-3 rounded-lg transition duration-200 ${
+                  className={`p-3 rounded-sm transition duration-200 ${
                     isAutoColor
                       ? isBold
                         ? "bg-indigo-500 text-white"
@@ -433,7 +433,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
                   <Bold className="w-5 h-5" />
                 </button>
                 <button
-                  className={`p-3 rounded-lg transition duration-200 ${
+                  className={`p-3 rounded-sm transition duration-200 ${
                     isAutoColor
                       ? isUnderline
                         ? "bg-indigo-500 text-white"
@@ -449,7 +449,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
                   <Underline className="w-5 h-5" />
                 </button>
                 <button
-                  className={`p-3 rounded-lg transition duration-200 ${
+                  className={`p-3 rounded-sm transition duration-200 ${
                     isAutoColor
                       ? isListening
                         ? "bg-red-500 text-white"
@@ -465,7 +465,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
                   {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
                 </button>
                 <button
-                  className={`p-3 rounded-lg transition duration-200 ${
+                  className={`p-3 rounded-sm transition duration-200 ${
                     isAutoColor
                       ? "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
                       : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
@@ -478,7 +478,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
                 </button>
               </div>
               <button
-                className={`p-3 rounded-lg transition duration-200 ${
+                className={`p-3 rounded-sm transition duration-200 ${
                   isAutoColor
                     ? "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
                     : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
@@ -492,7 +492,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
             </div>
 
             {showHistory && (
-              <div className={`mt-4 p-4 rounded-lg shadow-md ${
+              <div className={`mt-4 p-4 rounded-sm shadow-md ${
                 isAutoColor ? 'bg-gray-50 dark:bg-[#513a7a] text-gray-900 dark:text-gray-100' : 'bg-gray-100'
               }`}>
                 <h3 className="text-lg font-bold mb-2">History</h3>

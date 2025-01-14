@@ -17,19 +17,21 @@ const NewsFeed = () => {
 
   const fetchNews = async () => {
     try {
-      const response = await fetch('https://bgs-backend.vercel.app/api/top100/news');
+      const response = await fetch(
+        "https://bgs-backend.vercel.app/api/top100/news"
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to fetch news');
+        throw new Error("Failed to fetch news");
       }
 
       const data = await response.json();
       // console.log(data)
-      
+
       if (data && Array.isArray(data)) {
-        setNews(data.filter(item => item.title && item.description));
+        setNews(data.filter((item) => item.title && item.description));
       } else {
-        throw new Error('No news items found');
+        throw new Error("No news items found");
       }
     } catch (err) {
       console.error("Error fetching news:", err);
@@ -64,7 +66,7 @@ const NewsFeed = () => {
   }
 
   return (
-    <div className=" max-w-sm bg-white dark:bg-[#28283A] rounded-b-lg overflow-hidden">
+    <div className=" max-w-sm bg-white dark:bg-[#28283A] rounded-b-sm overflow-hidden">
       <div className="news-carousel">
         <Carousel
           ref={carouselRef}
@@ -87,7 +89,11 @@ const NewsFeed = () => {
                   {item.image_url && (
                     <div className="w-24 h-24 flex-shrink-0">
                       <img
-                        src={item.image_url ? item.image_url: "https://kvaser.com/wp-content/themes/kvaser/assets/images/new-homepage/blog/no-image.jpg" }
+                        src={
+                          item.image_url
+                            ? item.image_url
+                            : "https://kvaser.com/wp-content/themes/kvaser/assets/images/new-homepage/blog/no-image.jpg"
+                        }
                         alt={item.title}
                         className="w-full h-full object-cover rounded"
                       />

@@ -281,8 +281,8 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
   return (
     <div
       className={`p-4 min-h-[400px] transition-colors duration-200 ${
-        inNotebookSheet ? "w-full" : "max-w-sm mx-auto"
-      } rounded-b-lg relative ${isAutoColor ? "dark:bg-[#28283A]" : ""}`}
+        inNotebookSheet ? "w-full" : "max-w-xl mx-auto"
+      } rounded-b-sm relative ${isAutoColor ? "dark:bg-[#28283A]" : ""}`}
       style={{
         backgroundColor: isAutoColor ? undefined : containerColor,
         color: isAutoColor ? undefined : textColor,
@@ -303,7 +303,7 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
         <div className="relative w-8">
           <button
             onClick={() => setShowColorPicker(!showColorPicker)}
-            className={`p-2 rounded-lg transition duration-200 ${
+            className={`p-2 rounded-sm transition duration-200 ${
               isAutoColor
                 ? "dark:hover:bg-gray-700 dark:text-white hover:bg-gray-100"
                 : "hover:bg-opacity-20 hover:bg-white"
@@ -343,7 +343,7 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
               <div className="mt-2 flex items-center justify-center">
                 <input
                   type="color"
-                  className="w-full h-6 p-0 border dark:border-gray-600 border-gray-300 rounded-md cursor-pointer focus:outline-none"
+                  className="w-full h-6 p-0 border dark:border-gray-600 border-gray-300 rounded-xs cursor-pointer focus:outline-none"
                   value={containerColor}
                   onChange={(e) => handleColorChange(e.target.value)}
                 />
@@ -465,7 +465,7 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           placeholder="Add new task"
-          className={`w-full p-3 pr-12 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+          className={`w-full p-3 pr-12 border rounded-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
             isAutoColor
               ? "bg-white text-gray-900 border-gray-200 dark:bg-[#513a7a] dark:text-white dark:placeholder-gray-400 dark:border-gray-700"
               : isLight(containerColor)
