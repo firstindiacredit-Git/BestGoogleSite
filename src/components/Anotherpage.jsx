@@ -542,7 +542,7 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
         ]}
         width={800}
         centered
-        className={`custom-modal ${isDarkMode ? "dark-mode" : "light-mode"}`} // Add this class to make it gray in dark mode
+        className={`custom-modal  ${isDarkMode ? "dark-mode" : "light-mode"}`} // Add this class to make it gray in dark mode
       >
         {/* {console.log(isDarkMode)} */}
         {isApplying ? (

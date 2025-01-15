@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import { Edit, Trash2, Palette } from "lucide-react";
 import { Popconfirm } from "antd";
 import { db, auth } from "../firebase";
@@ -11,6 +11,7 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
+import { WidgetTransparencyContext } from "../App";
 
 // Helper function to determine if a color is light or dark
 const isLight = (color) => {
@@ -84,7 +85,9 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
     "#9370DB",
     "#FF69B4",
   ];
-
+  const { widgetTransparent, setWidgetTransparent } = useContext(
+    WidgetTransparencyContext
+  );
   const collapse = () => {
     setIsCollapsed(!isCollapsed);
   };
@@ -159,7 +162,7 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
   const handleColorChange = (color) => {
     setContainerColor(color);
     setIsAutoColor(false);
-    // Calculate text color based on background color brightness
+
     const r = parseInt(color.slice(1, 3), 16);
     const g = parseInt(color.slice(3, 5), 16);
     const b = parseInt(color.slice(5, 7), 16);
@@ -362,7 +365,7 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
         )}
       </div>
       {!isCollapsed && (
-        <>
+        <div className="p-3">
           <div className="flex justify-between gap-4 items-center mb-4">
             <div className="mb-4 w-full">
               <div
@@ -508,7 +511,7 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
               <span className="text-2xl">+</span>
             </button>
           </form>
-        </>
+        </div>
       )}
     </div>
   );

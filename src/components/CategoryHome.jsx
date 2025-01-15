@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
+
 import { createPortal } from "react-dom";
 import { db, auth } from "../firebase";
 import {
@@ -14,6 +15,7 @@ import {
 import { onAuthStateChanged } from "firebase/auth";
 import { Settings, Edit, Plus, Trash2 } from "lucide-react";
 import { Modal, message, Input } from "antd";
+import { WidgetTransparencyContext } from "../App";
 
 const CategoryHome = ({ categoryType, itemName }) => {
   const [user, setUser] = useState(null);
@@ -38,6 +40,7 @@ const CategoryHome = ({ categoryType, itemName }) => {
   const collapse = () => {
     setCollapsed(!collapsed);
   };
+  const { widgetTransparent } = useContext(WidgetTransparencyContext);
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
@@ -251,7 +254,7 @@ const CategoryHome = ({ categoryType, itemName }) => {
   const renderSettingsMenu = () => {
     const dropdownContent = showSettings && (
       <div
-        className="fixed w-48 bg-white dark:text-white dark:bg-[#28283A] rounded-sm shadow-lg border border-gray-200 dark:border-gray-700 z-[9999]"
+        className={`fixed w-48 bg-[rgba(255,255,255,${widgetTransparent})] dark:text-white dark:bg-[#28283A] rounded-sm shadow-lg border border-gray-200 dark:border-gray-700 z-[9999]`}
         style={{
           top: `${dropdownPosition.top}px`,
           right: `${dropdownPosition.right}px`,

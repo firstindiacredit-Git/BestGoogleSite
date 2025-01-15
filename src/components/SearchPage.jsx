@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Shortcut from "./ShortCuts";
+import { WidgetTransparencyContext } from "../App";
 import Anotherpage from "../components/Anotherpage";
 import PopularBookmarks from "../components/PopularBookmarks";
 import NotebookAndSheet from "../components/NotebookAndSheet";
@@ -23,10 +24,16 @@ function SearchPage() {
   const [textColor, setTextColor] = useState(() =>
     parseInt(localStorage.getItem("textColorValue") || "100")
   );
+  const { widgetTransparent, setWidgetTransparent } = useContext(
+    WidgetTransparencyContext
+  );
   const [activeComponent, setActiveComponent] = useState("Anotherpage");
   const navigate = useNavigate();
   // const [showButton, setShowButton] = useState(false);
   const [visibleHandle, setVisibleHandle] = useState(false);
+  const [widgetTransparency, setWidgetTransparency] = useState(() =>
+    parseInt(localStorage.getItem("widgetTransparency") || "100")
+  );
 
   useEffect(() => {
     const storedThemeMode = localStorage.getItem("themeMode");
@@ -74,6 +81,16 @@ function SearchPage() {
   const handleTransparencyChange = (newValue) => {
     setTransparency(newValue);
     localStorage.setItem("bgTransparency", newValue.toString());
+  };
+
+  useEffect(() => {
+    setWidgetTransparent(widgetTransparency);
+  }, [widgetTransparency, setWidgetTransparent]);
+
+  const handleWidgetTransparencyChange = (newValue) => {
+    setWidgetTransparency(newValue);
+    setWidgetTransparent(newValue);
+    localStorage.setItem("widgetTransparency", newValue.toString());
   };
 
   const handleImageChange = (e) => {
@@ -278,6 +295,26 @@ function SearchPage() {
                               />
                               <span className="text-sm text-gray-600 dark:text-gray-300 text-right">
                                 {transparency}%
+                              </span>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                              <span className="text-sm text-gray-600 dark:text-gray-300">
+                                Widget Opacity
+                              </span>
+                              <input
+                                type="range"
+                                min="0"
+                                max="100"
+                                value={widgetTransparency}
+                                onChange={(e) =>
+                                  handleWidgetTransparencyChange(
+                                    parseInt(e.target.value)
+                                  )
+                                }
+                                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+                              />
+                              <span className="text-sm text-gray-600 dark:text-gray-300 text-right">
+                                {widgetTransparency}%
                               </span>
                             </div>
                             <div className="flex flex-col gap-2">
