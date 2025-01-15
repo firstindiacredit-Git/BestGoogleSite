@@ -243,7 +243,7 @@ function BookmarkPage() {
 
   return (
     <div className="flex items-center gap-2 max-w-7xl dark:text-white justify-center mb-10 w-full">
-      <div className="flex gap-1  flex-wrap">
+      <div className="flex gap-2  flex-wrap">
         {combinedBookmarks.map((bookmark) => (
           <div
             key={bookmark.id}

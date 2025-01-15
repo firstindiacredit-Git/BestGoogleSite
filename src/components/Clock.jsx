@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Plus, X } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Plus, X, Settings } from "lucide-react";
 import { Popconfirm, Menu, Dropdown } from "antd";
 import { auth, db } from "../firebase";
 import { doc, updateDoc, onSnapshot } from "firebase/firestore";
@@ -164,7 +164,7 @@ const TimeZoneClock = ({
   useEffect(() => {
     const timer = setInterval(() => {
       setTime(new Date());
-    }, 16);  // Update approximately 60 times per second for smooth animation
+    }, 16); // Update approximately 60 times per second for smooth animation
     return () => clearInterval(timer);
   }, []);
 
@@ -258,8 +258,12 @@ const TimeZoneClock = ({
         <p className="text-[10px] font-medium mb-0.5 text-indigo-500">
           {formatTimeZoneName(timeZone)}
         </p>
-        <div className={`border px-1 rounded-xs text-nowrap ${theme.digital.time}`}>
-          <p className={`text-base font-bold tracking-wider ${theme.digital.text}`}>
+        <div
+          className={`border px-1 rounded-xs text-nowrap ${theme.digital.time}`}
+        >
+          <p
+            className={`text-base font-bold tracking-wider ${theme.digital.text}`}
+          >
             {formatTimeForZone(time, timeZone)}
           </p>
         </div>
@@ -278,21 +282,19 @@ const ResponsiveWorldClock = () => {
   const [selectedTimezones, setSelectedTimezones] = useState(["Asia/Kolkata"]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [currentTheme, setCurrentTheme] = useState(CLOCK_THEMES.classic);
+  const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
+  const settingsRef = useRef(null);
 
-  const themeMenu = (
-    <Menu className="dark:bg-[#28283A]">
-      {Object.entries(CLOCK_THEMES).map(([key, theme]) => (
-        <Menu.Item
-          key={key}
-          onClick={() => setCurrentTheme(theme)}
-        >
-          <span className="dark:text-white">
-            {theme.name}
-          </span>
-        </Menu.Item>
-      ))}
-    </Menu>
-  );
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (settingsRef.current && !settingsRef.current.contains(event.target)) {
+        setShowSettingsDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -310,7 +312,7 @@ const ResponsiveWorldClock = () => {
   }, []);
 
   const addTimeZone = async (timeZone) => {
-    if (selectedTimezones.length < 4) {
+    if (selectedTimezones.length < 10) {
       const newTimezones = [...selectedTimezones, timeZone];
       setSelectedTimezones(newTimezones);
       setIsDropdownOpen(false);
@@ -355,21 +357,46 @@ const ResponsiveWorldClock = () => {
       <div className="mx-auto w-full">
         <div className="flex items-center">
           <div className="flex w-full justify-between items-center">
-            <div className="flex gap-2">
+            <div className="relative" ref={settingsRef}>
               <button
-                onClick={() => setIsAnalog(!isAnalog)}
-                className="px-4 py-1 dark:bg-white/10 bg-gray-200 hover:bg-gray-300 rounded-full dark:hover:bg-white/20 transition"
+                onClick={() => setShowSettingsDropdown(!showSettingsDropdown)}
+                className="px-4 py-1 dark:bg-white/10 bg-gray-200 hover:bg-gray-300 rounded-full dark:hover:bg-white/20 transition flex items-center gap-2"
               >
-                {isAnalog ? "Digital" : "Analog"}
+                <Settings className="w-4 h-4" />
               </button>
-              <Dropdown overlay={themeMenu} trigger={["click"]}>
-                <button className="px-4 py-1 dark:bg-white/10 bg-gray-200 hover:bg-gray-300 rounded-full dark:hover:bg-white/20 transition">
-                  Theme
-                </button>
-              </Dropdown>
+
+              {showSettingsDropdown && (
+                <div className="absolute left-0 mt-2 w-48 dark:text-white dark:bg-[#513a7a] backdrop-blur-sm bg-gray-200 rounded-sm shadow-lg py-1 z-50">
+                  <button
+                    onClick={() => {
+                      setIsAnalog(!isAnalog);
+                      setShowSettingsDropdown(false);
+                    }}
+                    className="w-full text-left px-4 py-2 hover:bg-white/10 transition"
+                  >
+                    {isAnalog ? "Switch to Digital" : "Switch to Analog"}
+                  </button>
+
+                  <div className="border-t border-gray-700 my-1"></div>
+
+                  {Object.entries(CLOCK_THEMES).map(([key, theme]) => (
+                    <button
+                      key={key}
+                      onClick={() => {
+                        setCurrentTheme(theme);
+                        setShowSettingsDropdown(false);
+                      }}
+                      className="w-full text-left px-4 py-2 hover:bg-white/10 transition"
+                    >
+                      {theme.name} Theme
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
+
             <div>
-              {selectedTimezones.length < 4 && (
+              {selectedTimezones.length < 10 && (
                 <div className="relative">
                   <button
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}

@@ -1,15 +1,13 @@
 #___gcse_0 {
   /* background-color: !important; */
   /* background-color: rgba(255, 255, 255, 0.1) !important; */
-  
+
   transition: all 300ms !important;
   /* border-radius: 5rem !important; */
   width: 55% !important;
-  filter: drop-shadow(0px 0px 5px rgba(0, 0, 0, 0.05));
+  margin-bottom: 5px !important;
   filter: drop-shadow(0px 0px 1px rgba(0, 0, 0, 0.3));
   /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2)  !important; */
-  
-   
 
   &:focus {
     background-color: white !important;
@@ -19,12 +17,11 @@
   /* background-color: rgba(255, 255, 255, 0.1) !important; */
   filter: drop-shadow(0px 0px 5px rgba(0, 0, 0, 0.05));
   filter: drop-shadow(0px 0px 1px rgba(0, 0, 0, 0.3));
-  
+
   transition: all 300ms !important;
-  border-radius: 5rem !important;
+  /* border-radius: 5rem !important; */
   width: 55% !important;
-   /* box-shadow: 1px 2px 5px 0.2px #050505  !important; */
-   
+  /* box-shadow: 1px 2px 5px 0.2px #050505  !important; */
 
   &:focus {
     background-color: white !important;
@@ -40,11 +37,10 @@
 .dark .gsc-completion-container {
   background-color: white !important;
   color: black !important;
-  border-radius: 0.5rem !important;
+  /* border-radius: 0.5rem !important; */
   border: none !important;
   padding: 1rem 1rem !important;
-   border-radius: 0px 0px 25px 25px !important;
-  
+  /* border-radius: 0px 0px 25px 25px !important; */
 
   &:hover {
     background-color: white !important;
@@ -54,18 +50,13 @@
 .gsc-completion-container {
   background-color: white !important;
   color: black !important;
-  border-radius: 0px 0px 25px 25px !important;
+  /* border-radius: 0px 0px 25px 25px !important; */
   border: none !important;
   padding: 1rem 1rem !important;
   width: 115.3% !important;
   margin-left: -14px !important;
   margin-top: -10px !important;
   padding-top: 50px !important;
- 
-  
-  
-
-  
 
   &:hover {
     background-color: white !important;
@@ -74,11 +65,11 @@
 }
 
 .gsc-input-box {
-  border-radius: 50px 0 0 50px !important;
-  background-color:white !important;
+  /* border-radius: 50px 0 0 50px !important; */
+  background-color: white !important;
   padding: 8px 1rem !important;
   border: none !important;
- 
+
   /* color: black; */
 }
 
@@ -89,7 +80,6 @@
 .dark #gs_tti50 input {
   background-color: white !important;
   color: black !important;
-  
 }
 
 #gs_tti50 input {
@@ -102,14 +92,12 @@
   padding-bottom: 18px !important;
  background-repeat: no-repeat !important;
  outline: none !important; */
-  
 }
-
 
 .gsc-search-button .gsc-search-button-v2 {
   background-color: white !important;
   padding: 18px 1.8rem !important;
-  border-radius: 0 50px 50px 0 !important;
+  /* border-radius: 0 50px 50px 0 !important; */
   border: none !important;
   transition: all 300ms !important;
 
@@ -146,17 +134,13 @@
   margin-left: -12px !important;
 }
 
-.gssb_a, .gssb_a td {
-    
-    line-height: 25px !important;
-    margin-top: 12px !important;
-    
-  
+.gssb_a,
+.gssb_a td {
+  line-height: 25px !important;
+  margin-top: 12px !important;
 }
-.gssb_a, .gssb_a td:hover {
-    
-   border-radius: 0 50px 50px 0 !important;
-   width: 20% !important;
-    
-  
+.gssb_a,
+.gssb_a td:hover {
+  /* border-radius: 0 50px 50px 0 !important; */
+  width: 20% !important;
 }

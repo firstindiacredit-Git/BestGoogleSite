@@ -359,12 +359,12 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
                                 <div
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
-                                  className=" bg-white dark:bg-[#513a7a] mb-4 border-collapse dark:border-gray-700 dark:drop-shadow-md border-1 border rounded-sm"
+                                  className=" bg-white dark:bg-[#513a7a] mb-4 border-collapse dark:border-gray-700 drop-shadow-sm border-1 border border-gray-100 rounded-sm"
                                 >
                                   {grid ? (
                                     <>
                                       {visibleHandle && (
-                                        <motion.div className="w-full max-w-xl text-left py-2 px-4  rounded-t-sm bg-gray-100 dark:bg-[#513a7a] dark:text-white font-semibold flex justify-between items-center">
+                                        <motion.div className="w-full max-w-xl min-w-[21vw] text-left py-2 px-4  rounded-t-sm bg-gray-100 dark:bg-[#513a7a] dark:text-white font-semibold flex justify-between items-center">
                                           <div
                                             {...provided.dragHandleProps}
                                             className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 w-5 "
@@ -375,7 +375,7 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
                                         </motion.div>
                                       )}
                                       <motion.div
-                                        className={`bg-white dark:bg-[#28283A] ${
+                                        className={`bg-white w-full max-w-xl min-w-[21vw] dark:bg-[#28283A] ${
                                           visibleHandle
                                             ? "rounded-b-sm"
                                             : "rounded-sm"
@@ -670,7 +670,7 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
                                     <div
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
-                                      className="bg-white dark:bg-[#462b75] rounded-sm shadow-sm border dark:border-[#462b75] border-gray-200"
+                                      className="bg-white dark:bg-[#462b75] rounded-sm shadow-sm border dark:border-[#462b75] border-gray-100"
                                       style={{
                                         ...provided.draggableProps.style,
                                         opacity: snapshot.isDragging ? 0.9 : 1,

@@ -1,6 +1,13 @@
 import React, { useState } from "react";
 import dayjs from "dayjs";
 import holidays from "./holidays";
+import {
+  ArrowDown,
+  ArrowDown01,
+  ArrowDownIcon,
+  ArrowDownNarrowWide,
+  ArrowDownZA,
+} from "lucide-react";
 
 const FullCalendar = () => {
   const [currentDate, setCurrentDate] = useState(dayjs());
@@ -13,6 +20,12 @@ const FullCalendar = () => {
   const [showGoToModal, setShowGoToModal] = useState(false);
   const [goToYear, setGoToYear] = useState(currentDate.year());
   const [goToMonth, setGoToMonth] = useState(currentDate.month());
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
+
+  const collapse = () => {
+    setIsCollapsed(!isCollapsed);
+  };
 
   const months = [
     "January",
@@ -105,105 +118,120 @@ const FullCalendar = () => {
   };
 
   return (
-    <div className="w-full max-w-xl mx-auto bg-white dark:bg-[#28283A] rounded-xl p-4 text-gray-900 dark:text-gray-100">
+    <div
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+      className="w-full max-w-xl mx-auto bg-white dark:bg-[#28283A] rounded-xl p-3 text-gray-900 dark:text-gray-100"
+    >
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center justify-between px-2">
-            <button
-              onClick={goToPreviousMonth}
-              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            </button>
-            <button
-              onClick={() => setShowYearSelect(true)}
-              className="text-lg font-medium hover:text-indigo-500 dark:hover:text-blue-400 transition-colors"
-            >
-              {currentDate.format("MMMM")}
-            </button>
-            <button
-              onClick={goToNextMonth}
-              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </button>
+      <div className="">
+        <div className="flex items-center justify-between ">
+          <div
+            onClick={collapse}
+            className="w-full cursor-pointer p-2 text-xl font-medium"
+          >
+            Calender
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                setCurrentDate(currentDate.subtract(1, "year"));
-              }}
-              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+          {isHovering && (
+            <div className="flex items-center justify-between px-2">
+              <button
+                onClick={goToPreviousMonth}
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            </button>
-            <button
-              onClick={() => {
-                setShowDecadeSelect(true);
-                setShowYearSelect(false);
-              }}
-              className="text-lg font-medium hover:text-indigo-500 dark:hover:text-blue-400 transition-colors"
-            >
-              {currentDate.format("YYYY")}
-            </button>
-            <button
-              onClick={() => {
-                setCurrentDate(currentDate.add(1, "year"));
-              }}
-              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+              </button>
+              <button
+                onClick={() => setShowYearSelect(true)}
+                className="text-lg font-medium hover:text-indigo-500 dark:hover:text-blue-400 transition-colors"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </button>
-          </div>
+                {currentDate.format("MMMM")}
+              </button>
+              <button
+                onClick={goToNextMonth}
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </button>
+            </div>
+          )}
+
+          {isHovering && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  setCurrentDate(currentDate.subtract(1, "year"));
+                }}
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+              </button>
+              <button
+                onClick={() => {
+                  setShowDecadeSelect(true);
+                  setShowYearSelect(false);
+                }}
+                className="text-lg font-medium hover:text-indigo-500 dark:hover:text-blue-400 transition-colors"
+              >
+                {currentDate.format("YYYY")}
+              </button>
+              <button
+                onClick={() => {
+                  setCurrentDate(currentDate.add(1, "year"));
+                }}
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -461,35 +489,37 @@ const FullCalendar = () => {
       )}
 
       {/* Calendar Grid */}
-      <div className="grid grid-cols-7 gap-1">
-        {/* Weekday headers */}
-        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-          <div
-            key={day}
-            className="text-center text-sm text-gray-500 dark:text-gray-400 py-2"
-          >
-            {day}
-          </div>
-        ))}
-
-        {/* Calendar days */}
-        {generateCalendarDays().map((day, index) => {
-          const isCurrentDay = isToday(day.date) && day.isCurrentMonth;
-          const isSelectedDay = isSelected(day.date);
-          const dayHoliday = getHolidayDetails(day.date);
-          const isSunday = day.date.day() === 0;
-
-          return (
-            <div
-              key={index}
-              className="relative"
-              onMouseEnter={() =>
-                dayHoliday && day.isCurrentMonth && setShowTooltip(index)
-              }
-              onMouseLeave={() => setShowTooltip(null)}
-            >
+      {!isCollapsed && (
+        <>
+          <div className="grid grid-cols-7 gap-1">
+            {/* Weekday headers */}
+            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
               <div
-                className={`
+                key={day}
+                className="text-center text-sm text-gray-500 dark:text-gray-400 py-2"
+              >
+                {day}
+              </div>
+            ))}
+
+            {/* Calendar days */}
+            {generateCalendarDays().map((day, index) => {
+              const isCurrentDay = isToday(day.date) && day.isCurrentMonth;
+              const isSelectedDay = isSelected(day.date);
+              const dayHoliday = getHolidayDetails(day.date);
+              const isSunday = day.date.day() === 0;
+
+              return (
+                <div
+                  key={index}
+                  className="relative"
+                  onMouseEnter={() =>
+                    dayHoliday && day.isCurrentMonth && setShowTooltip(index)
+                  }
+                  onMouseLeave={() => setShowTooltip(null)}
+                >
+                  <div
+                    className={`
                   relative h-10 w-full rounded-sm transition-colors
                   ${
                     !day.isCurrentMonth
@@ -522,74 +552,79 @@ const FullCalendar = () => {
                       : ""
                   }
                 `}
-                onClick={() => day.isCurrentMonth && setSelectedDate(day.date)}
-              >
-                <span className="absolute inset-0 flex items-center justify-center">
-                  {day.dayOfMonth}
-                </span>
-              </div>
-              {showTooltip === index && dayHoliday && (
-                <div
-                  style={{ zIndex: "999" }}
-                  className="absolute w-48 p-2 mb-1 text-sm bg-white dark:bg-[#513a7a] text-gray-900 dark:text-gray-100 rounded-sm shadow-lg border border-gray-200 dark:border-gray-700"
-                >
-                  <div className="font-bold">{dayHoliday.name}</div>
-                  <div className="text-xs mt-1">{dayHoliday.description}</div>
-                  <div className="text-xs mt-1 text-gray-500 dark:text-gray-400">
-                    Type: {dayHoliday.type.join(", ")}
+                    onClick={() =>
+                      day.isCurrentMonth && setSelectedDate(day.date)
+                    }
+                  >
+                    <span className="absolute inset-0 flex items-center justify-center">
+                      {day.dayOfMonth}
+                    </span>
                   </div>
+                  {showTooltip === index && dayHoliday && (
+                    <div
+                      style={{ zIndex: "999" }}
+                      className="absolute w-48 p-2 mb-1 text-sm bg-white dark:bg-[#513a7a] text-gray-900 dark:text-gray-100 rounded-sm shadow-lg border border-gray-200 dark:border-gray-700"
+                    >
+                      <div className="font-bold">{dayHoliday.name}</div>
+                      <div className="text-xs mt-1">
+                        {dayHoliday.description}
+                      </div>
+                      <div className="text-xs mt-1 text-gray-500 dark:text-gray-400">
+                        Type: {dayHoliday.type.join(", ")}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+              );
+            })}
+          </div>
 
-      {/* Bottom buttons */}
-      <div className="mt-4 flex justify-between items-center gap-2">
-        <button
-          onClick={() => {
-            setGoToYear(currentDate.year());
-            setGoToMonth(currentDate.month());
-            setShowGoToModal(true);
-          }}
-          className="px-4 py-1.5 text-white text-sm bg-indigo-500 hover:bg-gray-200 hover:dark:bg-[#483072] dark:bg-[#513a7a] dark:hover:bg-gray-700  dark:text-gray-300 rounded-sm transition-colors flex items-center gap-1"
-        >
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-            />
-          </svg>
-          Go to
-        </button>
-        <button
-          onClick={goToToday}
-          className="px-4 py-1.5 text-sm dark:bg-[#513a7a]  bg-indigo-500 hover:bg-indigo-600 hover:dark:bg-[#483072] text-white rounded-sm transition-colors flex items-center gap-1"
-        >
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
-            />
-          </svg>
-          Today
-        </button>
-      </div>
+          <div className="mt-4 flex justify-between items-center gap-2">
+            <button
+              onClick={() => {
+                setGoToYear(currentDate.year());
+                setGoToMonth(currentDate.month());
+                setShowGoToModal(true);
+              }}
+              className="px-4 py-1.5 text-white text-sm bg-indigo-500 hover:bg-gray-200 hover:dark:bg-[#483072] dark:bg-[#513a7a] dark:hover:bg-gray-700  dark:text-gray-300 rounded-sm transition-colors flex items-center gap-1"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+              Go to
+            </button>
+            <button
+              onClick={goToToday}
+              className="px-4 py-1.5 text-sm dark:bg-[#513a7a]  bg-indigo-500 hover:bg-indigo-600 hover:dark:bg-[#483072] text-white rounded-sm transition-colors flex items-center gap-1"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
+                />
+              </svg>
+              Today
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 };

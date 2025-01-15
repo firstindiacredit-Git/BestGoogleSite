@@ -7,11 +7,38 @@ import {
   CloudRain,
   CloudSnow,
   Sun,
+  Wind,
+  Droplets,
+  Settings,
 } from "lucide-react";
-import { CiEdit } from "react-icons/ci";
-import { Droplets, Wind, Settings } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const API_KEY = "78a1522c5ec67352674263eaaa54bffa";
+
+// Weather icon mapping
+const weatherIcons = {
+  Clear: Sun,
+  Clouds: Cloud,
+  Rain: CloudRain,
+  Drizzle: CloudDrizzle,
+  Snow: CloudSnow,
+  Thunderstorm: CloudLightning,
+};
+
+const WeatherIcon = ({ condition, className, animate = true }) => {
+  const Icon = weatherIcons[condition] || Cloud;
+  return animate ? (
+    <motion.div
+      initial={{ scale: 0.8 }}
+      animate={{ scale: 1, rotate: condition === "Clear" ? [0, 5, -5, 0] : 0 }}
+      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+    >
+      <Icon className={className} />
+    </motion.div>
+  ) : (
+    <Icon className={className} />
+  );
+};
 
 const themes = {
   default: {
@@ -56,40 +83,79 @@ const themes = {
   },
 };
 
-
-
 const WeatherCard = ({
   temperature,
+  condition,
   details,
   getTemperature,
   isMain = false,
   theme = "default",
+  description,
+  feelsLike,
 }) => (
-  <div className="space-y-3 my-2 ">
-    <div className=" flex justify-center">
-      <div className="w-full  mb-6">
-      <p className={`text-7xl text-center font-bold tracking-tight ${themes[theme].text}`}>
-        {getTemperature(temperature)}
-      </p>
+  <div className="space-y-3 my-2">
+    <div className="flex justify-center items-center gap-4">
+      <WeatherIcon
+        condition={condition}
+        className={`w-16 h-16 ${themes[theme].accent}`}
+      />
+      <div className="text-center">
+        <p
+          className={`text-7xl font-bold tracking-tight ${themes[theme].text}`}
+        >
+          {getTemperature(temperature)}
+        </p>
+        <p className={`text-lg capitalize ${themes[theme].text}`}>
+          {description}
+        </p>
       </div>
     </div>
 
     {details && isMain && (
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-4 mt-4">
         <div
           className={`flex items-center gap-3 p-3 rounded-sm ${themes[theme].card} ${themes[theme].text}`}
         >
           <Droplets className={`w-5 h-5 ${themes[theme].accent}`} />
-          <span className="text-base">{details.humidity}%</span>
+          <div>
+            <span className="text-sm opacity-70">Humidity</span>
+            <p className="text-base">{details.humidity}%</p>
+          </div>
         </div>
         <div
           className={`flex items-center gap-3 p-3 rounded-sm ${themes[theme].card} ${themes[theme].text}`}
         >
           <Wind className={`w-5 h-5 ${themes[theme].accent}`} />
-          <span className="text-base">{Math.round(details.wind)} m/s</span>
+          <div>
+            <span className="text-sm opacity-70">Wind</span>
+            <p className="text-base">{Math.round(details.wind)} m/s</p>
+          </div>
         </div>
       </div>
     )}
+  </div>
+);
+
+const ForecastCard = ({ data, theme, getTemperature }) => (
+  <div className={`p-3 rounded-sm ${themes[theme].card} ${themes[theme].text}`}>
+    <p className="text-sm opacity-70">
+      {new Date(data.dt * 1000).toLocaleDateString("en-US", {
+        weekday: "short",
+      })}
+    </p>
+    <div className="flex items-center gap-2 my-1">
+      <WeatherIcon
+        condition={data.weather[0].main}
+        className={`w-8 h-8 ${themes[theme].accent}`}
+        animate={false}
+      />
+      <span className="text-lg font-medium">
+        {getTemperature(data.main.temp)}
+      </span>
+    </div>
+    <p className="text-xs capitalize opacity-70">
+      {data.weather[0].description}
+    </p>
   </div>
 );
 
@@ -116,8 +182,9 @@ const Weather = () => {
   const [currentWeather, setCurrentWeather] = useState(null);
   const [forecast, setForecast] = useState([]);
   const [error, setError] = useState(null);
-  const [city, setCity] = useState("Delhi");
-  const [inputValue, setInputValue] = useState("");
+  const [isHovering, setIsHovering] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [city, setCity] = useState("delhi");
   const [unit, setUnit] = useState(
     () => localStorage.getItem("weatherUnit") || "metric"
   );
@@ -132,25 +199,36 @@ const Weather = () => {
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
 
+  const collapse = () => {
+    setIsCollapsed(!isCollapsed);
+  };
+
   const fetchWeather = async (cityName) => {
     try {
-      const currentResponse = await axios.get(
-        `https://api.openweathermap.org/data/2.5/weather`,
-        { params: { q: cityName, appid: API_KEY, units: unit } }
-      );
-      const forecastResponse = await axios.get(
-        `https://api.openweathermap.org/data/2.5/forecast`,
-        { params: { q: cityName, appid: API_KEY, units: unit } }
-      );
+      const [currentResponse, forecastResponse] = await Promise.all([
+        axios.get(`https://api.openweathermap.org/data/2.5/weather`, {
+          params: { q: cityName, appid: API_KEY, units: unit },
+        }),
+        axios.get(`https://api.openweathermap.org/data/2.5/forecast`, {
+          params: { q: cityName, appid: API_KEY, units: unit },
+        }),
+      ]);
 
       setCurrentWeather(currentResponse.data);
-      const dailyForecast = forecastResponse.data.list
-        .filter((_, index) => index % 8 === 0)
-        .slice(1, 4);
-      setForecast(dailyForecast);
+
+      // Get unique days from forecast
+      const dailyForecast = forecastResponse.data.list.reduce((acc, item) => {
+        const date = new Date(item.dt * 1000).toLocaleDateString();
+        if (!acc[date] && acc.length < 5) {
+          acc[date] = item;
+        }
+        return acc;
+      }, []);
+
+      setForecast(Object.values(dailyForecast));
       setError(null);
     } catch (error) {
-      if (error.response && error.response.status === 404) {
+      if (error.response?.status === 404) {
         setError(`Weather data for "${cityName}" not found.`);
       } else {
         setError("Could not fetch weather data. Please try again later.");
@@ -226,81 +304,139 @@ const Weather = () => {
 
   return (
     <div
-      className={`w-full max-w-xl rounded-b-sm  transition-colors ${themes[currentTheme].background} ${themes[currentTheme].text}`}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+      className={`w-full max-w-xl p-1 rounded-sm transition-colors ${themes[currentTheme].background} ${themes[currentTheme].text}`}
     >
-      <div className="px-4 py-2">
+      <div className=" p-2">
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold">{city}</h2>
-          <span>Weather</span>
-          <div className="relative">
-            <button
-              ref={buttonRef}
-              className={`p-2 rounded-sm transition-colors ${themes[currentTheme].hover}`}
-              onClick={() => setIsVisible(!isVisible)}
-            >
-              <Settings className="w-5 h-5" />
-            </button>
-            {isVisible && (
-              <div
-                ref={dropdownRef}
-                className={`absolute right-0 mt-2 w-48 rounded-sm shadow-lg ${themes[currentTheme].background} border ${themes[currentTheme].border} z-50`}
-              >
-                <div className="p-2 border-b border-gray-200 dark:border-gray-700">
-                  <p className="text-sm font-medium mb-1">Theme</p>
-                  <ThemeSelector
-                    currentTheme={currentTheme}
-                    onThemeChange={handleThemeChange}
-                  />
-                </div>
-                <button
-                  onClick={handleUnitToggle}
-                  className={`w-full text-left px-4 py-2 text-sm ${themes[currentTheme].hover}`}
-                >
-                  {unit === "imperial"
-                    ? "Switch to Celsius"
-                    : "Switch to Fahrenheit"}
-                </button>
-                <button
-                  onClick={handleDetailsToggle}
-                  className={`w-full text-left px-4 py-2 text-sm ${themes[currentTheme].hover}`}
-                >
-                  {showDetails ? "Hide Details" : "Show Details"}
-                </button>
-                <button
-                  onClick={handleLocationToggle}
-                  className={`w-full text-left px-4 py-2 text-sm ${themes[currentTheme].hover}`}
-                >
-                  Change Location
-                </button>
-              </div>
-            )}
+          <div
+            onClick={collapse}
+            className="flex p-2  w-full cursor-pointer text-xl font-medium items-center"
+          >
+            Weather
           </div>
+          {isHovering && (
+            <div className="relative">
+              <button
+                ref={buttonRef}
+                className={`p-2 rounded-sm transition-colors ${themes[currentTheme].hover}`}
+                onClick={() => setIsVisible(!isVisible)}
+              >
+                <Settings className="w-5 h-5" />
+              </button>
+              {isVisible && (
+                <div
+                  ref={dropdownRef}
+                  className={`absolute right-0 mt-2 w-48 rounded-sm shadow-lg ${themes[currentTheme].background} border ${themes[currentTheme].border} z-50`}
+                >
+                  <div className="p-2 border-b border-gray-200 dark:border-gray-700">
+                    <p className="text-sm font-medium mb-1">Theme</p>
+                    <ThemeSelector
+                      currentTheme={currentTheme}
+                      onThemeChange={handleThemeChange}
+                    />
+                  </div>
+                  <button
+                    onClick={handleUnitToggle}
+                    className={`w-full text-left px-4 py-2 text-sm ${themes[currentTheme].hover}`}
+                  >
+                    {unit === "imperial"
+                      ? "Switch to Celsius"
+                      : "Switch to Fahrenheit"}
+                  </button>
+                  <button
+                    onClick={handleDetailsToggle}
+                    className={`w-full text-left px-4 py-2 text-sm ${themes[currentTheme].hover}`}
+                  >
+                    {showDetails ? "Hide Details" : "Show Details"}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
-        {error ? (
-          <p className="text-center text-red-500">{error}</p>
-        ) : currentWeather && forecast.length > 0 ? (
-          <WeatherCard
-            temperature={currentWeather.main.temp}
-            condition={currentWeather.weather[0].main}
-            details={
-              showDetails
-                ? {
-                    humidity: currentWeather.main.humidity,
-                    wind: currentWeather.wind.speed,
+        {isCollapsed && (
+          <AnimatePresence>
+            {error ? (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="text-center text-red-500"
+              >
+                {error}
+              </motion.p>
+            ) : currentWeather ? (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <h2 className="text-xl font-semibold">{city}</h2>
+                {currentWeather && (
+                  <span className="text-sm opacity-70">
+                    {new Date().toLocaleDateString("en-US", {
+                      weekday: "short",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </span>
+                )}
+
+                <WeatherCard
+                  temperature={currentWeather.main.temp}
+                  condition={currentWeather.weather[0].main}
+                  description={currentWeather.weather[0].description}
+                  details={
+                    showDetails
+                      ? {
+                          humidity: currentWeather.main.humidity,
+                          wind: currentWeather.wind.speed,
+                        }
+                      : null
                   }
-                : null
-            }
-            getTemperature={getTemperature}
-            isMain={true}
-            theme={currentTheme}
-          />
-        ) : (
-          <div className="flex justify-center items-center h-32">
-            <div
-              className={`animate-spin rounded-full h-8 w-8 border-b-2 ${themes[currentTheme].text}`}
-            ></div>
-          </div>
+                  getTemperature={getTemperature}
+                  isMain={true}
+                  theme={currentTheme}
+                />
+
+                {!isCollapsed && forecast.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-6"
+                  >
+                    <h3
+                      className={`text-sm font-medium mb-3 ${themes[currentTheme].text}`}
+                    >
+                      5-Day Forecast
+                    </h3>
+                    <div className="grid grid-cols-5 gap-2">
+                      {forecast.map((day) => (
+                        <ForecastCard
+                          key={day.dt}
+                          data={day}
+                          theme={currentTheme}
+                          getTemperature={getTemperature}
+                        />
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </motion.div>
+            ) : (
+              <div className="flex justify-center items-center h-32">
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  className={`rounded-full h-8 w-8 border-b-2 ${themes[currentTheme].text}`}
+                />
+              </div>
+            )}
+          </AnimatePresence>
         )}
       </div>
     </div>

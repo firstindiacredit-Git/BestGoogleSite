@@ -20,6 +20,8 @@ const NotePage = ({ inNotebookSheet = false }) => {
   const [lineNumbers, setLineNumbers] = useState(true);
   const [backgroundColor, setBackgroundColor] = useState("#ffffff");
   const [showColorPicker, setShowColorPicker] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
   const [history, setHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
   const [isAutoColor, setIsAutoColor] = useState(false);
@@ -101,17 +103,22 @@ const NotePage = ({ inNotebookSheet = false }) => {
   }, [notes, backgroundColor]);
 
   useEffect(() => {
-    const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkModeMediaQuery = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    );
     setIsDarkMode(darkModeMediaQuery.matches);
 
     const handleThemeChange = (e) => {
       setIsDarkMode(e.matches);
     };
 
-    darkModeMediaQuery.addEventListener('change', handleThemeChange);
-    return () => darkModeMediaQuery.removeEventListener('change', handleThemeChange);
+    darkModeMediaQuery.addEventListener("change", handleThemeChange);
+    return () =>
+      darkModeMediaQuery.removeEventListener("change", handleThemeChange);
   }, []);
-
+  const collapse = () => {
+    setIsCollapsed(!isCollapsed);
+  };
   const isColorDark = (hexColor) => {
     const r = parseInt(hexColor.slice(1, 3), 16);
     const g = parseInt(hexColor.slice(3, 5), 16);
@@ -129,7 +136,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
 
   const getTextColor = () => {
     if (isAutoColor) {
-      return isDarkMode ? '#ffffff' : '#000000';
+      return isDarkMode ? "#ffffff" : "#000000";
     }
     return isColorDark(backgroundColor) ? "#ffffff" : "#000000";
   };
@@ -138,7 +145,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
     if (!isAutoColor) {
       // Convert textColor to rgba with opacity
       const opacity = 0.2;
-      if (textColor.startsWith('#')) {
+      if (textColor.startsWith("#")) {
         const r = parseInt(textColor.slice(1, 3), 16);
         const g = parseInt(textColor.slice(3, 5), 16);
         const b = parseInt(textColor.slice(5, 7), 16);
@@ -150,13 +157,13 @@ const NotePage = ({ inNotebookSheet = false }) => {
     }
 
     // For auto mode
-    return isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)';
+    return isDarkMode ? "rgba(255, 255, 255, 0.2)" : "rgba(0, 0, 0, 0.2)";
   };
 
   const getLineNumberColor = () => {
     if (!isAutoColor) {
       // Convert textColor to rgba with opacity
-      if (textColor.startsWith('#')) {
+      if (textColor.startsWith("#")) {
         const opacity = 0.5;
         const r = parseInt(textColor.slice(1, 3), 16);
         const g = parseInt(textColor.slice(3, 5), 16);
@@ -167,7 +174,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
     }
 
     // For auto mode
-    return isDarkMode ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)';
+    return isDarkMode ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.5)";
   };
 
   const handleNotesChange = (e) => {
@@ -239,147 +246,189 @@ const NotePage = ({ inNotebookSheet = false }) => {
   const lineColor = getLineColor();
 
   return (
-    <div className={`${inNotebookSheet ? 'w-full h-full ' : ' h-full max-w-xl mx-auto'}`}>
+    <div
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+      className={`${
+        inNotebookSheet ? "w-full h-full " : " h-full max-w-xl mx-auto"
+      }`}
+    >
       <div className="rounded-sm h-full">
-        <div className={`overflow-hidden h-full rounded-b-sm ${
-          isAutoColor ? 'bg-white dark:bg-[#28283A]' : ''
-        }`} style={{ backgroundColor: isAutoColor ? 'transparent' : backgroundColor }}>
-          <div className={`p-2 h-full bg flex flex-col justify-between ${
-            isAutoColor ? 'bg-white dark:bg-[#28283A] text-gray-900 dark:text-white' : ''
-          }`} style={{ backgroundColor: isAutoColor ? 'transparent' : backgroundColor }}>
-            
+        <div
+          className={`overflow-hidden h-full rounded-b-sm ${
+            isAutoColor ? "bg-white dark:bg-[#28283A]" : ""
+          }`}
+          style={{
+            backgroundColor: isAutoColor ? "transparent" : backgroundColor,
+          }}
+        >
+          <div
+            className={`p-2 h-full bg flex flex-col justify-between ${
+              isAutoColor
+                ? "bg-white dark:bg-[#28283A] text-gray-900 dark:text-white"
+                : ""
+            }`}
+            style={{
+              backgroundColor: isAutoColor ? "transparent" : backgroundColor,
+            }}
+          >
             <div className="flex justify-between items-center mb-1">
               <div className="w-full  flex justify-between">
-                
-                <div><button
-                  className={`p-2 rounded-sm transition duration-200 ${
-                    isAutoColor ? 'bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700' : 'bg-opacity-20 bg-gray-500 hover:bg-opacity-30'
-                  }`}
-                  onClick={toggleLineNumbers}
-                  title="Toggle Line Numbers"
-                  style={{ color: isAutoColor ? 'inherit' : textColor }}
+                <div
+                  className=" flex p-2 w-full text-xl font-medium items-center cursor-pointer"
+                  onClick={collapse}
                 >
-                  {lineNumbers ? <RxHamburgerMenu /> : <HiOutlineNumberedList />}
-                </button>
+                  Notes
                 </div>
-                {inNotebookSheet && <h2 className="font-semibold text-2xl">NotePad</h2>}
-                <div className="relative" ref={colorPickerRef}>
-                  <button
-                    className={`p-2 rounded-sm transition duration-200 ${
-                      isAutoColor ? 'bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700' : 'bg-opacity-20 bg-gray-500 hover:bg-opacity-30'
-                    }`}
-                    onClick={() => setShowColorPicker((prev) => !prev)}
-                    title="Change Background Color"
-                    style={{ color: isAutoColor ? 'inherit' : textColor }}
-                  >
-                    <Palette className="w-5 h-5" />
-                  </button>
-                  {showColorPicker && (
-                    <div className="absolute w-48 right-0 z-50 -mt-2 bg-white dark:bg-[#513a7a] border border-gray-200 dark:border-gray-700 rounded shadow-lg p-3">
-                      {/* Auto Theme Button */}
-                      <div className="mb-2">
-                        <button
-                          onClick={() => {
-                            setIsAutoColor(true);
-                            setShowColorPicker(false);
-                          }}
-                          className="w-full py-1 px-2 text-sm bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors text-gray-900 dark:text-white"
-                        >
-                          Auto Theme Color
-                        </button>
-                      </div>
+                {isHovering && (
+                  <div className="flex items-center gap-2">
+                    <div className="relative w-9 " ref={colorPickerRef}>
+                      <button
+                        className={`p-2 rounded-sm transition duration-200 ${
+                          isAutoColor
+                            ? "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700"
+                            : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
+                        }`}
+                        onClick={() => setShowColorPicker((prev) => !prev)}
+                        title="Change Background Color"
+                        style={{ color: isAutoColor ? "inherit" : textColor }}
+                      >
+                        <Palette className="w-5 h-5" />
+                      </button>
+                      {showColorPicker && (
+                        <div className="absolute w-48 right-0 z-50 -mt-2 bg-white dark:bg-[#513a7a] border border-gray-200 dark:border-gray-700 rounded shadow-lg p-3">
+                          {/* Auto Theme Button */}
+                          <div className="mb-2">
+                            <button
+                              onClick={() => {
+                                setIsAutoColor(true);
+                                setShowColorPicker(false);
+                              }}
+                              className="w-full py-1 px-2 text-sm bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors text-gray-900 dark:text-white"
+                            >
+                              Auto Theme Color
+                            </button>
+                          </div>
 
-                      {/* Predefined Colors */}
-                      <div className="grid grid-cols-7 gap-1">
-                        {predefinedColors.map((color) => (
-                          <button
-                            key={color}
-                            className="w-5 h-5 border border-gray-200 cursor-pointer transition duration-300 ease-in-out transform hover:scale-125 focus:outline-none"
-                            style={{ backgroundColor: color }}
-                            onClick={() => {
-                              setIsAutoColor(false);
-                              setBackgroundColor(color);
-                              setShowColorPicker(false);
-                            }}
-                          />
-                        ))}
-                      </div>
+                          {/* Predefined Colors */}
+                          <div className="grid grid-cols-7 gap-1">
+                            {predefinedColors.map((color) => (
+                              <button
+                                key={color}
+                                className="w-5 h-5 border border-gray-200 cursor-pointer transition duration-300 ease-in-out transform hover:scale-125 focus:outline-none"
+                                style={{ backgroundColor: color }}
+                                onClick={() => {
+                                  setIsAutoColor(false);
+                                  setBackgroundColor(color);
+                                  setShowColorPicker(false);
+                                }}
+                              />
+                            ))}
+                          </div>
 
-                      {/* Custom Color Picker */}
-                      <div className="mt-2 flex items-center justify-center">
-                        <input
-                          id="customColorPicker"
-                          type="color"
-                          className="w-full h-6 p-0 border border-gray-300 rounded-xs cursor-pointer focus:outline-none"
-                          value={backgroundColor}
-                          onChange={(e) => {
-                            setIsAutoColor(false);
-                            setBackgroundColor(e.target.value);
-                          }}
-                        />
-                      </div>
+                          {/* Custom Color Picker */}
+                          <div className="mt-2 flex items-center justify-center">
+                            <input
+                              id="customColorPicker"
+                              type="color"
+                              className="w-full h-6 p-0 border border-gray-300 rounded-xs cursor-pointer focus:outline-none"
+                              value={backgroundColor}
+                              onChange={(e) => {
+                                setIsAutoColor(false);
+                                setBackgroundColor(e.target.value);
+                              }}
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
+                    <div className="w-9 ">
+                      <button
+                        className={`p-2 rounded-sm transition duration-200 ${
+                          isAutoColor
+                            ? "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700"
+                            : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
+                        }`}
+                        onClick={toggleLineNumbers}
+                        title="Toggle Line Numbers"
+                        style={{ color: isAutoColor ? "inherit" : textColor }}
+                      >
+                        {lineNumbers ? (
+                          <RxHamburgerMenu className="w-5 h-5" />
+                        ) : (
+                          <HiOutlineNumberedList className="w-5 h-5" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
-            <div className="flex ">
-              {lineNumbers && (
-                <div
-                  ref={lineNumberRef}
-                  className={`text-right pr-2 overflow-hidden h-[345px] ${
-                    isAutoColor ? 'text-gray-500 dark:text-gray-400' : ''
-                  }`}
-                  style={{
-                    fontSize: `${fontSize}px`,
-                    lineHeight: "3",
-                    color: !isAutoColor ? textColor : undefined,
-                    opacity: !isAutoColor ? 0.5 : undefined
-                  }}
-                >
-                  {Array.from({ length: getLineCount() }, (_, i) => i + 1).map(
-                    (line) => (
+            {!isCollapsed && (
+              <div className="flex ">
+                {lineNumbers && (
+                  <div
+                    ref={lineNumberRef}
+                    className={`text-right pr-2 overflow-hidden h-[345px] ${
+                      isAutoColor ? "text-gray-500 dark:text-gray-400" : ""
+                    }`}
+                    style={{
+                      fontSize: `${fontSize}px`,
+                      lineHeight: "3",
+                      color: !isAutoColor ? textColor : undefined,
+                      opacity: !isAutoColor ? 0.5 : undefined,
+                    }}
+                  >
+                    {Array.from(
+                      { length: getLineCount() },
+                      (_, i) => i + 1
+                    ).map((line) => (
                       <div key={line} style={{ height: `${fontSize * 2.3}px` }}>
                         {line}
                       </div>
-                    )
-                  )}
-                </div>
-              )}
+                    ))}
+                  </div>
+                )}
 
-              <textarea
-                ref={textareaRef}
-                value={notes}
-                onChange={handleNotesChange}
-                onScroll={handleScroll}
-                className={`hindi-paper ${isAutoColor ? 'text-gray-900 dark:text-white auto-lines' : ''}`}
-                style={{
-                  height: "350px",
-                  marginBottom: "20px",
-                  resize: "none",
-                  color: isAutoColor ? undefined : textColor,
-                  backgroundColor: "transparent",
-                  border: isAutoColor ? '1px solid rgb(209 213 219)' : '1px solid #6c757d',
-                  padding: "10px 10px 10px 10px",
-                  borderRadius: "5px",
-                  fontSize: `${fontSize}px`,
-                  lineHeight: "32px",
-                  fontFamily: "Arial, sans-serif",
-                  position: "relative",
-                  backgroundAttachment: "local",
-                  width: "100%",
-                  transformOrigin: "left top",
-                  fontWeight: isBold ? "bold" : "normal",
-                  textDecoration: isUnderline ? "underline" : "none",
-                  backgroundImage: !isAutoColor 
-                    ? `linear-gradient(to bottom,transparent 30px,${getLineColor()} 31px,transparent 49px)`
-                    : undefined,
-                }}
-                placeholder="Start typing your notes here..."
-              />
-              <style>
-                {`
+                <textarea
+                  ref={textareaRef}
+                  value={notes}
+                  onChange={handleNotesChange}
+                  onScroll={handleScroll}
+                  className={`hindi-paper ${
+                    isAutoColor
+                      ? "text-gray-900 dark:text-white auto-lines"
+                      : ""
+                  }`}
+                  style={{
+                    height: "350px",
+                    marginBottom: "20px",
+                    resize: "none",
+                    color: isAutoColor ? undefined : textColor,
+                    backgroundColor: "transparent",
+                    border: isAutoColor
+                      ? "1px solid rgb(209 213 219)"
+                      : "1px solid #6c757d",
+                    padding: "10px 10px 10px 10px",
+                    borderRadius: "5px",
+                    fontSize: `${fontSize}px`,
+                    lineHeight: "32px",
+                    fontFamily: "Arial, sans-serif",
+                    position: "relative",
+                    backgroundAttachment: "local",
+                    width: "100%",
+                    transformOrigin: "left top",
+                    fontWeight: isBold ? "bold" : "normal",
+                    textDecoration: isUnderline ? "underline" : "none",
+                    backgroundImage: !isAutoColor
+                      ? `linear-gradient(to bottom,transparent 30px,${getLineColor()} 31px,transparent 49px)`
+                      : undefined,
+                  }}
+                  placeholder="Start typing your notes here..."
+                />
+                <style>
+                  {`
                     .hindi-paper {
                       background-size: 100% 32px;
                       background-position-y: -1px;
@@ -411,90 +460,111 @@ const NotePage = ({ inNotebookSheet = false }) => {
                       display: none;
                     }
                 `}
-              </style>
-            </div>
+                </style>
+              </div>
+            )}
 
-            <div className="flex  flex-wrap justify-between items-center gap-4 mt-6">
-              <div className="flex items-center space-x-3">
-                <button
-                  className={`p-3 rounded-sm transition duration-200 ${
-                    isAutoColor
-                      ? isBold
-                        ? "bg-indigo-500 text-white"
-                        : "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
-                      : isBold
-                        ? "bg-indigo-500 text-white"
-                        : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
-                  }`}
-                  onClick={toggleBold}
-                  title="Toggle Bold"
-                  style={!isAutoColor && !isBold ? { color: textColor } : undefined}
-                >
-                  <Bold className="w-5 h-5" />
-                </button>
-                <button
-                  className={`p-3 rounded-sm transition duration-200 ${
-                    isAutoColor
-                      ? isUnderline
-                        ? "bg-indigo-500 text-white"
-                        : "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
-                      : isUnderline
+            {!isCollapsed && (
+              <div className="flex  flex-wrap justify-between items-center gap-4 mt-6">
+                <div className="flex items-center space-x-3">
+                  <button
+                    className={`p-3 rounded-sm transition duration-200 ${
+                      isAutoColor
+                        ? isBold
+                          ? "bg-indigo-500 text-white"
+                          : "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+                        : isBold
                         ? "bg-indigo-500 text-white"
                         : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
-                  }`}
-                  onClick={toggleUnderline}
-                  title="Toggle Underline"
-                  style={!isAutoColor && !isUnderline ? { color: textColor } : undefined}
-                >
-                  <Underline className="w-5 h-5" />
-                </button>
-                <button
-                  className={`p-3 rounded-sm transition duration-200 ${
-                    isAutoColor
-                      ? isListening
+                    }`}
+                    onClick={toggleBold}
+                    title="Toggle Bold"
+                    style={
+                      !isAutoColor && !isBold ? { color: textColor } : undefined
+                    }
+                  >
+                    <Bold className="w-5 h-5" />
+                  </button>
+                  <button
+                    className={`p-3 rounded-sm transition duration-200 ${
+                      isAutoColor
+                        ? isUnderline
+                          ? "bg-indigo-500 text-white"
+                          : "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+                        : isUnderline
+                        ? "bg-indigo-500 text-white"
+                        : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
+                    }`}
+                    onClick={toggleUnderline}
+                    title="Toggle Underline"
+                    style={
+                      !isAutoColor && !isUnderline
+                        ? { color: textColor }
+                        : undefined
+                    }
+                  >
+                    <Underline className="w-5 h-5" />
+                  </button>
+                  <button
+                    className={`p-3 rounded-sm transition duration-200 ${
+                      isAutoColor
+                        ? isListening
+                          ? "bg-red-500 text-white"
+                          : "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+                        : isListening
                         ? "bg-red-500 text-white"
-                        : "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
-                      : isListening
-                        ? "bg-red-500 text-white"
                         : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
-                  }`}
-                  onClick={toggleSpeechToText}
-                  title="Toggle Speech-to-Text"
-                  style={!isAutoColor && !isListening ? { color: textColor } : undefined}
-                >
-                  {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-                </button>
+                    }`}
+                    onClick={toggleSpeechToText}
+                    title="Toggle Speech-to-Text"
+                    style={
+                      !isAutoColor && !isListening
+                        ? { color: textColor }
+                        : undefined
+                    }
+                  >
+                    {isListening ? (
+                      <MicOff className="w-5 h-5" />
+                    ) : (
+                      <Mic className="w-5 h-5" />
+                    )}
+                  </button>
+                  <button
+                    className={`p-3 rounded-sm transition duration-200 ${
+                      isAutoColor
+                        ? "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+                        : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
+                    }`}
+                    onClick={() => setShowHistory(!showHistory)}
+                    title="Show History"
+                    style={!isAutoColor ? { color: textColor } : undefined}
+                  >
+                    <History className="w-5 h-5" />
+                  </button>
+                </div>
                 <button
                   className={`p-3 rounded-sm transition duration-200 ${
                     isAutoColor
                       ? "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
                       : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
                   }`}
-                  onClick={() => setShowHistory(!showHistory)}
-                  title="Show History"
+                  onClick={downloadNotes}
+                  title="Download Notes"
                   style={!isAutoColor ? { color: textColor } : undefined}
                 >
-                  <History className="w-5 h-5" />
+                  <Download className="w-5 h-5" />
                 </button>
               </div>
-              <button
-                className={`p-3 rounded-sm transition duration-200 ${
-                  isAutoColor
-                    ? "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
-                    : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
-                }`}
-                onClick={downloadNotes}
-                title="Download Notes"
-                style={!isAutoColor ? { color: textColor } : undefined}
-              >
-                <Download className="w-5 h-5" />
-              </button>
-            </div>
+            )}
 
             {showHistory && (
-              <div className={`mt-4 p-4 rounded-sm shadow-md ${
-                isAutoColor ? 'bg-gray-50 dark:bg-[#513a7a] text-gray-900 dark:text-gray-100' : 'bg-gray-100'
-              }`}>
+              <div
+                className={`mt-4 p-4 rounded-sm shadow-md ${
+                  isAutoColor
+                    ? "bg-gray-50 dark:bg-[#513a7a] text-gray-900 dark:text-gray-100"
+                    : "bg-gray-100"
+                }`}
+              >
                 <h3 className="text-lg font-bold mb-2">History</h3>
                 <ul className="list-disc pl-6">
                   {history.map((entry, index) => (

@@ -32,6 +32,8 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
   const [user, setUser] = useState(null);
   const [todos, setTodos] = useState([]);
   const [inputValue, setInputValue] = useState("");
+  const [isHovering, setIsHovering] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [containerColor, setContainerColor] = useState("#ffffff");
@@ -83,6 +85,9 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
     "#FF69B4",
   ];
 
+  const collapse = () => {
+    setIsCollapsed(!isCollapsed);
+  };
   const calculateProgress = () => {
     if (todos.length === 0) return 0;
     const completedTodos = todos.filter((todo) => todo.completed).length;
@@ -132,7 +137,9 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
   }, []);
 
   useEffect(() => {
-    const darkModeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const darkModeMediaQuery = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    );
     const handleThemeChange = (e) => {
       setIsDarkMode(e.matches);
       if (isAutoColor) {
@@ -280,7 +287,7 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
 
   return (
     <div
-      className={`p-4 min-h-[400px] transition-colors duration-200 ${
+      className={`p-2  transition-colors duration-200 ${
         inNotebookSheet ? "w-full" : "max-w-xl mx-auto"
       } rounded-b-sm relative ${isAutoColor ? "dark:bg-[#28283A]" : ""}`}
       style={{
@@ -288,25 +295,23 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
         color: isAutoColor ? undefined : textColor,
       }}
     >
-      <div className="flex w-full  justify-between">
-        <div className="w-8"></div>
-        <div>
-          {inNotebookSheet && (
-            <h2
-              className={`text-2xl font-bold ${isAutoColor ? "dark:text-white" : ""}`}
-              style={{ color: isAutoColor ? undefined : textColor }}
-            >
-              Todo List
-            </h2>
-          )}
+      <div className="flex w-full  p-2 justify-between">
+        <div
+          onClick={collapse}
+          className={`text-xl cursor-pointer  flex items-center  w-full font-medium ${
+            isAutoColor ? "dark:text-white" : ""
+          }`}
+          style={{ color: isAutoColor ? undefined : textColor }}
+        >
+          Todo List
         </div>
-        <div className="relative w-8">
+        <div className="relative w-9">
           <button
             onClick={() => setShowColorPicker(!showColorPicker)}
             className={`p-2 rounded-sm transition duration-200 ${
               isAutoColor
-                ? "dark:hover:bg-gray-700 dark:text-white hover:bg-gray-100"
-                : "hover:bg-opacity-20 hover:bg-white"
+                ? "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700"
+                : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
             }`}
             style={{ color: isAutoColor ? undefined : textColor }}
           >
@@ -352,148 +357,155 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
           )}
         </div>
       </div>
-      <div className="flex justify-between gap-4 items-center mb-4">
-        <div className="mb-4 w-full">
-          <div
-            className={`text-sm flex justify-between ${
-              isAutoColor
-                ? "text-gray-900 dark:text-gray-200"
-                : isLight(containerColor)
-                ? "text-gray-700"
-                : "text-gray-200"
-            } mb-1`}
-          >
-            <div>Progress</div>
-            <div>{calculateProgress()}%</div>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className="bg-indigo-500 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${calculateProgress()}%` }}
-            ></div>
-          </div>
-        </div>
-      </div>
-
-      <ul className="space-y-2 mb-4">
-        {todos.map((todo, index) => (
-          <li
-            key={todo.id}
-            draggable
-            onDragStart={() => handleDragStart(index)}
-            onDragOver={(e) => handleDragOver(e, index)}
-            onDrop={handleDrop}
-            className={`flex items-center gap-3 p-2 rounded ${
-              dragOverIndex === index ? "border-2 border-blue-300" : ""
-            }`}
-          >
-            <span
-              className={`min-w-[20px] text-sm ${
-                isAutoColor
-                  ? "text-gray-700 dark:text-gray-300"
-                  : isLight(containerColor)
-                  ? "text-gray-600"
-                  : "text-gray-300"
-              }`}
-            >
-              {index + 1}.
-            </span>
-            <input
-              type="checkbox"
-              checked={todo.completed}
-              onChange={() => toggleComplete(todo.id)}
-              className="w-5 h-5 border-2 rounded-sm focus:ring-0 text-indigo-500"
-            />
-            <span
-              className={`flex-1 ${
-                isAutoColor
-                  ? todo.completed
-                    ? "text-gray-400"
-                    : "text-gray-900 dark:text-gray-100"
-                  : isLight(containerColor)
-                  ? todo.completed
-                    ? "text-gray-400"
-                    : "text-gray-800"
-                  : todo.completed
-                  ? "text-gray-400"
-                  : "text-gray-100"
-              } ${todo.completed ? "line-through" : ""}`}
-            >
-              {todo.text}
-            </span>
-            <div className="flex gap-2">
-              <button
-                onClick={() => startEditing(todo.id, todo.text)}
-                className={`${
+      {!isCollapsed && (
+        <>
+          <div className="flex justify-between gap-4 items-center mb-4">
+            <div className="mb-4 w-full">
+              <div
+                className={`text-sm flex justify-between ${
                   isAutoColor
-                    ? "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                    ? "text-gray-900 dark:text-gray-200"
                     : isLight(containerColor)
-                    ? "text-gray-500 hover:text-gray-700"
-                    : "text-gray-300 hover:text-white"
+                    ? "text-gray-700"
+                    : "text-gray-200"
+                } mb-1`}
+              >
+                <div>Progress</div>
+                <div>{calculateProgress()}%</div>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-indigo-500 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${calculateProgress()}%` }}
+                ></div>
+              </div>
+            </div>
+          </div>
+
+          <ul className="space-y-2 mb-4">
+            {todos.map((todo, index) => (
+              <li
+                key={todo.id}
+                draggable
+                onDragStart={() => handleDragStart(index)}
+                onDragOver={(e) => handleDragOver(e, index)}
+                onDrop={handleDrop}
+                className={`flex items-center gap-3 p-2 rounded ${
+                  dragOverIndex === index ? "border-2 border-blue-300" : ""
                 }`}
               >
-                <Edit className="w-4 h-4" />
-              </button>
-              <Popconfirm
-                title="Delete task"
-                description="Are you sure you want to delete this task?"
-                onConfirm={() => deleteTodo(todo.id)}
-                okText="Yes"
-                cancelText="No"
-                placement="leftTop"
-              >
-                <button
-                  className={`${
+                <span
+                  className={`min-w-[20px] text-sm ${
                     isAutoColor
-                      ? "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                      ? "text-gray-700 dark:text-gray-300"
                       : isLight(containerColor)
-                      ? "text-gray-500 hover:text-gray-700"
-                      : "text-gray-300 hover:text-white"
+                      ? "text-gray-600"
+                      : "text-gray-300"
                   }`}
                 >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </Popconfirm>
-            </div>
-          </li>
-        ))}
-      </ul>
+                  {index + 1}.
+                </span>
+                <input
+                  type="checkbox"
+                  checked={todo.completed}
+                  onChange={() => toggleComplete(todo.id)}
+                  className="w-5 h-5 border-2 rounded-sm focus:ring-0 text-indigo-500"
+                />
+                <span
+                  className={`flex-1 ${
+                    isAutoColor
+                      ? todo.completed
+                        ? "text-gray-400"
+                        : "text-gray-900 dark:text-gray-100"
+                      : isLight(containerColor)
+                      ? todo.completed
+                        ? "text-gray-400"
+                        : "text-gray-800"
+                      : todo.completed
+                      ? "text-gray-400"
+                      : "text-gray-100"
+                  } ${todo.completed ? "line-through" : ""}`}
+                >
+                  {todo.text}
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => startEditing(todo.id, todo.text)}
+                    className={`${
+                      isAutoColor
+                        ? "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                        : isLight(containerColor)
+                        ? "text-gray-500 hover:text-gray-700"
+                        : "text-gray-300 hover:text-white"
+                    }`}
+                  >
+                    <Edit className="w-4 h-4" />
+                  </button>
+                  <Popconfirm
+                    title="Delete task"
+                    description="Are you sure you want to delete this task?"
+                    onConfirm={() => deleteTodo(todo.id)}
+                    okText="Yes"
+                    cancelText="No"
+                    placement="leftTop"
+                  >
+                    <button
+                      className={`${
+                        isAutoColor
+                          ? "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                          : isLight(containerColor)
+                          ? "text-gray-500 hover:text-gray-700"
+                          : "text-gray-300 hover:text-white"
+                      }`}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </Popconfirm>
+                </div>
+              </li>
+            ))}
+          </ul>
 
-      <form onSubmit={editingId ? submitEdit : addTodo} className="relative">
-        <input
-          type="text"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          placeholder="Add new task"
-          className={`w-full p-3 pr-12 border rounded-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-            isAutoColor
-              ? "bg-white text-gray-900 border-gray-200 dark:bg-[#513a7a] dark:text-white dark:placeholder-gray-400 dark:border-gray-700"
-              : isLight(containerColor)
-              ? "bg-white text-gray-800"
-              : "bg-gray-800 text-white placeholder-gray-400 border-gray-700"
-          }`}
-          style={{
-            backgroundColor: isAutoColor ? undefined : containerColor,
-            color: isAutoColor ? undefined : textColor,
-          }}
-        />
-        <button
-          type="submit"
-          className={`absolute right-3 top-1/2 -translate-y-1/2 ${
-            isAutoColor
-              ? "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
-              : isLight(containerColor)
-              ? "text-gray-500 hover:text-gray-700"
-              : "text-gray-300 hover:text-white"
-          }`}
-          style={{
-            backgroundColor: isAutoColor ? undefined : containerColor,
-            color: isAutoColor ? undefined : textColor,
-          }}
-        >
-          <span className="text-2xl">+</span>
-        </button>
-      </form>
+          <form
+            onSubmit={editingId ? submitEdit : addTodo}
+            className="relative"
+          >
+            <input
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder="Add new task"
+              className={`w-full p-3 pr-12 border rounded-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                isAutoColor
+                  ? "bg-white text-gray-900 border-gray-200 dark:bg-[#513a7a] dark:text-white dark:placeholder-gray-400 dark:border-gray-700"
+                  : isLight(containerColor)
+                  ? "bg-white text-gray-800"
+                  : "bg-gray-800 text-white placeholder-gray-400 border-gray-700"
+              }`}
+              style={{
+                backgroundColor: isAutoColor ? undefined : containerColor,
+                color: isAutoColor ? undefined : textColor,
+              }}
+            />
+            <button
+              type="submit"
+              className={`absolute right-3 top-1/2 -translate-y-1/2 ${
+                isAutoColor
+                  ? "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                  : isLight(containerColor)
+                  ? "text-gray-500 hover:text-gray-700"
+                  : "text-gray-300 hover:text-white"
+              }`}
+              style={{
+                backgroundColor: isAutoColor ? undefined : containerColor,
+                color: isAutoColor ? undefined : textColor,
+              }}
+            >
+              <span className="text-2xl">+</span>
+            </button>
+          </form>
+        </>
+      )}
     </div>
   );
 };

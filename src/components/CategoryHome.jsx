@@ -22,6 +22,7 @@ const CategoryHome = ({ categoryType, itemName }) => {
   const [viewMode, setViewMode] = useState("grid");
   const [showUrl, setShowUrl] = useState(true);
   const [iconSize, setIconSize] = useState("large");
+  const [collapsed, setCollapsed] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({
     top: 0,
@@ -31,7 +32,12 @@ const CategoryHome = ({ categoryType, itemName }) => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingBookmark, setEditingBookmark] = useState(null);
   const [newBookmark, setNewBookmark] = useState({ name: "", link: "" });
+  const [isHovered, setIsHovered] = useState(false);
   const buttonRef = useRef(null);
+
+  const collapse = () => {
+    setCollapsed(!collapsed);
+  };
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
@@ -360,24 +366,34 @@ const CategoryHome = ({ categoryType, itemName }) => {
     );
 
     return (
-      <div className="relative flex justify-between  w-full">
-        <button
-          onClick={() => {
-            setShowSettings(false);
-            setShowAddModal(true);
-          }}
-          className="flex dark:text-white items-center rounded-sm gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm"
+      <div className="relative flex justify-between w-full">
+        <div
+          className="dark:text-white text-xl font-medium p-2 w-full cursor-pointer flex items-center"
+          onClick={collapse}
         >
-          <Plus className="w-5 h-5" />
-        </button>
-        <span className="dark:text-white">{itemName}</span>
-        <button
-          ref={buttonRef}
-          onClick={() => setShowSettings(!showSettings)}
-          className="p-2 rounded-sm dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-        >
-          <Settings className="w-5 h-5" />
-        </button>
+          {itemName}
+        </div>
+        {isHovered && (
+          <button
+            onClick={() => {
+              setShowSettings(false);
+              setShowAddModal(true);
+            }}
+            className="flex dark:text-white/50 items-center rounded-sm gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm"
+          >
+            <Plus className="w-5 h-5" />
+          </button>
+        )}
+
+        {isHovered && (
+          <button
+            ref={buttonRef}
+            onClick={() => setShowSettings(!showSettings)}
+            className="p-2 rounded-sm dark:text-white/50 hover:bg-gray-100 dark:hover:bg-gray-700"
+          >
+            <Settings className="w-5 h-5" />
+          </button>
+        )}
         {dropdownContent && createPortal(dropdownContent, document.body)}
       </div>
     );
@@ -385,7 +401,7 @@ const CategoryHome = ({ categoryType, itemName }) => {
 
   const renderBookmarks = () => {
     const commonClasses = {
-      container: "transition-all  duration-200 ease-in-out cursor-pointer",
+      container: "transition-all mt-8 duration-200 ease-in-out cursor-pointer",
       image: `${getIconSizeClass()} rounded`,
       title: "font-medium text-gray-900 dark:text-gray-100",
     };
@@ -451,8 +467,12 @@ const CategoryHome = ({ categoryType, itemName }) => {
   };
 
   return (
-    <div className="bg-white dark:bg-[#28283A] rounded-sm p-3 shadow-sm isolate">
-      <div className="flex justify-end mb-4 relative z-[9999]">
+    <div
+      className="bg-white dark:bg-[#28283A] rounded-sm p-3 shadow-sm isolate"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <div className="flex justify-end relative z-[9999]">
         {renderSettingsMenu()}
       </div>
       {loading ? (
@@ -461,7 +481,7 @@ const CategoryHome = ({ categoryType, itemName }) => {
         </div>
       ) : (
         <>
-          {renderBookmarks()}
+          {!collapsed && renderBookmarks()}
           <Modal
             title="Add New Bookmark"
             open={showAddModal}
