@@ -312,7 +312,7 @@ const Weather = () => {
         <div className="flex justify-between items-center">
           <div
             onClick={collapse}
-            className="flex p-2  w-full cursor-pointer text-xl font-medium items-center"
+            className="flex p-2  text-black dark:text-white  w-full cursor-pointer text-xl font-medium items-center"
           >
             Weather
           </div>

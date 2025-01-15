@@ -35,7 +35,7 @@ function SearchPage() {
     }
   }, []);
 
-  console.log(localStorage.getItem("backgroundImage"));
+  // console.log(localStorage.getItem("backgroundImage"));
   useEffect(() => {
     const storedBackgroundImage = localStorage.getItem("backgroundImage");
     if (storedBackgroundImage) {

@@ -266,7 +266,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
             className={`p-2 h-full bg flex flex-col justify-between ${
               isAutoColor
                 ? "bg-white dark:bg-[#28283A] text-gray-900 dark:text-white"
-                : ""
+                : backgroundColor
             }`}
             style={{
               backgroundColor: isAutoColor ? "transparent" : backgroundColor,

@@ -287,6 +287,8 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
 
   return (
     <div
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
       className={`p-2  transition-colors duration-200 ${
         inNotebookSheet ? "w-full" : "max-w-xl mx-auto"
       } rounded-b-sm relative ${isAutoColor ? "dark:bg-[#28283A]" : ""}`}
@@ -298,64 +300,66 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
       <div className="flex w-full  p-2 justify-between">
         <div
           onClick={collapse}
-          className={`text-xl cursor-pointer  flex items-center  w-full font-medium ${
+          className={`text-xl cursor-pointer p-1 flex items-center  w-full font-medium ${
             isAutoColor ? "dark:text-white" : ""
           }`}
           style={{ color: isAutoColor ? undefined : textColor }}
         >
           Todo List
         </div>
-        <div className="relative w-9">
-          <button
-            onClick={() => setShowColorPicker(!showColorPicker)}
-            className={`p-2 rounded-sm transition duration-200 ${
-              isAutoColor
-                ? "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700"
-                : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
-            }`}
-            style={{ color: isAutoColor ? undefined : textColor }}
-          >
-            <Palette className="w-5 h-5" />
-          </button>
-
-          {showColorPicker && (
-            <div
-              ref={colorPickerRef}
-              className="absolute right-0 mt-2 w-48 dark:bg-[#513a7a] bg-white dark:border-gray-700 border rounded shadow-lg p-3 z-10"
+        {isHovering && (
+          <div className="relative w-9">
+            <button
+              onClick={() => setShowColorPicker(!showColorPicker)}
+              className={`p-2 rounded-sm transition duration-200 ${
+                isAutoColor
+                  ? "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700"
+                  : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
+              }`}
+              style={{ color: isAutoColor ? undefined : textColor }}
             >
-              <div className="mb-2 flex items-center justify-center">
-                <button
-                  onClick={() => {
-                    setIsAutoColor(true);
-                    setShowColorPicker(false);
-                  }}
-                  className="w-full py-1 px-2 text-sm dark:bg-gray-600 dark:text-white bg-gray-100 hover:bg-gray-200 rounded transition-colors"
-                >
-                  Auto Theme Color
-                </button>
-              </div>
-              <div className="grid grid-cols-7 gap-1">
-                {predefinedColors.map((color) => (
-                  <button
-                    key={color}
-                    className="w-5 h-5 border dark:border-gray-600 border-gray-200 cursor-pointer transition duration-300 ease-in-out transform hover:scale-125 focus:outline-none"
-                    style={{ backgroundColor: color }}
-                    onClick={() => handleColorChange(color)}
-                  />
-                ))}
-              </div>
+              <Palette className="w-5 h-5" />
+            </button>
 
-              <div className="mt-2 flex items-center justify-center">
-                <input
-                  type="color"
-                  className="w-full h-6 p-0 border dark:border-gray-600 border-gray-300 rounded-xs cursor-pointer focus:outline-none"
-                  value={containerColor}
-                  onChange={(e) => handleColorChange(e.target.value)}
-                />
+            {showColorPicker && (
+              <div
+                ref={colorPickerRef}
+                className="absolute right-0 mt-2 w-48 dark:bg-[#513a7a] bg-white dark:border-gray-700 border rounded shadow-lg p-3 z-10"
+              >
+                <div className="mb-2 flex items-center justify-center">
+                  <button
+                    onClick={() => {
+                      setIsAutoColor(true);
+                      setShowColorPicker(false);
+                    }}
+                    className="w-full py-1 px-2 text-sm dark:bg-gray-600 dark:text-white bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+                  >
+                    Auto Theme Color
+                  </button>
+                </div>
+                <div className="grid grid-cols-7 gap-1">
+                  {predefinedColors.map((color) => (
+                    <button
+                      key={color}
+                      className="w-5 h-5 border dark:border-gray-600 border-gray-200 cursor-pointer transition duration-300 ease-in-out transform hover:scale-125 focus:outline-none"
+                      style={{ backgroundColor: color }}
+                      onClick={() => handleColorChange(color)}
+                    />
+                  ))}
+                </div>
+
+                <div className="mt-2 flex items-center justify-center">
+                  <input
+                    type="color"
+                    className="w-full h-6 p-0 border dark:border-gray-600 border-gray-300 rounded-xs cursor-pointer focus:outline-none"
+                    value={containerColor}
+                    onChange={(e) => handleColorChange(e.target.value)}
+                  />
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
       {!isCollapsed && (
         <>

@@ -279,11 +279,16 @@ const TimeZoneClock = ({
 
 const ResponsiveWorldClock = () => {
   const [isAnalog, setIsAnalog] = useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
   const [selectedTimezones, setSelectedTimezones] = useState(["Asia/Kolkata"]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [currentTheme, setCurrentTheme] = useState(CLOCK_THEMES.classic);
   const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
   const settingsRef = useRef(null);
+  const collapse = () => {
+    setIsCollapsed(!isCollapsed);
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -353,98 +358,112 @@ const ResponsiveWorldClock = () => {
   );
 
   return (
-    <div className="dark:bg-[#28283A] w-full max-w-xl dark:text-white p-4 bg-white rounded-b-sm flex justify-center items-center">
+    <div
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+      className="dark:bg-[#28283A] w-full max-w-xl dark:text-white p-4 bg-white rounded-b-sm flex justify-center items-center"
+    >
       <div className="mx-auto w-full">
         <div className="flex items-center">
           <div className="flex w-full justify-between items-center">
-            <div className="relative" ref={settingsRef}>
-              <button
-                onClick={() => setShowSettingsDropdown(!showSettingsDropdown)}
-                className="px-4 py-1 dark:bg-white/10 bg-gray-200 hover:bg-gray-300 rounded-full dark:hover:bg-white/20 transition flex items-center gap-2"
-              >
-                <Settings className="w-4 h-4" />
-              </button>
-
-              {showSettingsDropdown && (
-                <div className="absolute left-0 mt-2 w-48 dark:text-white dark:bg-[#513a7a] backdrop-blur-sm bg-gray-200 rounded-sm shadow-lg py-1 z-50">
-                  <button
-                    onClick={() => {
-                      setIsAnalog(!isAnalog);
-                      setShowSettingsDropdown(false);
-                    }}
-                    className="w-full text-left px-4 py-2 hover:bg-white/10 transition"
-                  >
-                    {isAnalog ? "Switch to Digital" : "Switch to Analog"}
-                  </button>
-
-                  <div className="border-t border-gray-700 my-1"></div>
-
-                  {Object.entries(CLOCK_THEMES).map(([key, theme]) => (
-                    <button
-                      key={key}
-                      onClick={() => {
-                        setCurrentTheme(theme);
-                        setShowSettingsDropdown(false);
-                      }}
-                      className="w-full text-left px-4 py-2 hover:bg-white/10 transition"
-                    >
-                      {theme.name} Theme
-                    </button>
-                  ))}
-                </div>
-              )}
+            <div className="text-xl font-medium w-full p-1" onClick={collapse}>
+              Clock
             </div>
+            {isHovering && (
+              <>
+                <div>
+                  {selectedTimezones.length < 10 && (
+                    <div className="relative">
+                      <button
+                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                        className="flex items-center gap-2 p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-sm"
+                        title="Add timezone"
+                      >
+                        <Plus className="w-5 h-5" />
+                      </button>
 
-            <div>
-              {selectedTimezones.length < 10 && (
-                <div className="relative">
-                  <button
-                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="flex items-center gap-2 p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-sm"
-                    title="Add timezone"
-                  >
-                    <Plus className="w-5 h-5" />
-                  </button>
-
-                  {isDropdownOpen && availableZones.length > 0 && (
-                    <>
-                      <div className="absolute right-0 mt-2 w-48 dark:text-white dark:bg-[#513a7a] backdrop-blur-sm bg-gray-200 rounded-sm shadow-lg py-1 z-50 max-h-[250px] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-400 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 dark:[&::-webkit-scrollbar-track]:bg-gray-800">
-                        {availableZones.map((timeZone) => (
-                          <button
-                            key={timeZone}
-                            onClick={() => addTimeZone(timeZone)}
-                            className="w-full px-4 py-2 text-left text-sm hover:bg-white dark:text-white dark:hover:bg-white/10 transition"
-                          >
-                            {formatTimeZoneName(timeZone)}
-                          </button>
-                        ))}
-                      </div>
-                      <div
-                        className="fixed inset-0 z-40"
-                        onClick={() => setIsDropdownOpen(false)}
-                      />
-                    </>
+                      {isDropdownOpen && availableZones.length > 0 && (
+                        <>
+                          <div className="absolute right-0 mt-2 w-48 dark:text-white dark:bg-[#513a7a] backdrop-blur-sm bg-gray-200 rounded-sm shadow-lg py-1 z-50 max-h-[250px] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-400 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 dark:[&::-webkit-scrollbar-track]:bg-gray-800">
+                            {availableZones.map((timeZone) => (
+                              <button
+                                key={timeZone}
+                                onClick={() => addTimeZone(timeZone)}
+                                className="w-full px-4 py-2 text-left text-sm hover:bg-white dark:text-white dark:hover:bg-white/10 transition"
+                              >
+                                {formatTimeZoneName(timeZone)}
+                              </button>
+                            ))}
+                          </div>
+                          <div
+                            className="fixed inset-0 z-40"
+                            onClick={() => setIsDropdownOpen(false)}
+                          />
+                        </>
+                      )}
+                    </div>
                   )}
                 </div>
-              )}
+                <div className="relative" ref={settingsRef}>
+                  <button
+                    onClick={() =>
+                      setShowSettingsDropdown(!showSettingsDropdown)
+                    }
+                    className="px-4 py-1 dark:bg-white/10 bg-gray-200 hover:bg-gray-300 rounded-full dark:hover:bg-white/20 transition flex items-center gap-2"
+                  >
+                    <Settings className="w-4 h-4" />
+                  </button>
+
+                  {showSettingsDropdown && (
+                    <div className="absolute left-0 mt-2 w-48 dark:text-white dark:bg-[#513a7a] backdrop-blur-sm bg-gray-200 rounded-sm shadow-lg py-1 z-50">
+                      <button
+                        onClick={() => {
+                          setIsAnalog(!isAnalog);
+                          setShowSettingsDropdown(false);
+                        }}
+                        className="w-full text-left px-4 py-2 hover:bg-white/10 transition"
+                      >
+                        {isAnalog ? "Switch to Digital" : "Switch to Analog"}
+                      </button>
+
+                      <div className="border-t border-gray-700 my-1"></div>
+
+                      {Object.entries(CLOCK_THEMES).map(([key, theme]) => (
+                        <button
+                          key={key}
+                          onClick={() => {
+                            setCurrentTheme(theme);
+                            setShowSettingsDropdown(false);
+                          }}
+                          className="w-full text-left px-4 py-2 hover:bg-white/10 transition"
+                        >
+                          {theme.name} Theme
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+        {!isCollapsed && (
+          <div className="flex justify-center">
+            <div className="flex flex-wrap justify-between w-full h-fit px-2 py-5">
+              {selectedTimezones.map((timeZone, index) => (
+                <div key={timeZone} className="mt-4">
+                  <TimeZoneClock
+                    timeZone={timeZone}
+                    isAnalog={isAnalog}
+                    onRemove={() => removeTimeZone(index)}
+                    baseTimeZone={selectedTimezones[0]}
+                    theme={currentTheme}
+                  />
+                </div>
+              ))}
             </div>
           </div>
-        </div>
-        <div className="flex justify-center">
-          <div className="flex flex-wrap justify-between w-full h-fit px-2 py-5">
-            {selectedTimezones.map((timeZone, index) => (
-              <div key={timeZone} className="mt-4">
-                <TimeZoneClock
-                  timeZone={timeZone}
-                  isAnalog={isAnalog}
-                  onRemove={() => removeTimeZone(index)}
-                  baseTimeZone={selectedTimezones[0]}
-                  theme={currentTheme}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
