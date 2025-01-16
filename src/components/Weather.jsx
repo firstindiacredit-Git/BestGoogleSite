@@ -306,9 +306,14 @@ const Weather = () => {
     <div
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
-      className={`w-full max-w-xl p-1 rounded-sm transition-colors ${themes[currentTheme].background} ${themes[currentTheme].text}`}
+      className={`w-full max-w-xl p-1 rounded-sm transition-colors ${
+        !localStorage.getItem("backgroundImage") &&
+        themes[currentTheme].background
+      } ${
+        !localStorage.getItem("backgroundImage") && themes[currentTheme].text
+      }`}
     >
-      <div className=" p-2">
+      <div className=" p-2 backdrop-blur-sm">
         <div className="flex justify-between items-center">
           <div
             onClick={collapse}

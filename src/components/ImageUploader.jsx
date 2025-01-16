@@ -5,6 +5,11 @@ import { Image, Button, Popconfirm } from "antd";
 function ImageUploader() {
   const [image, setImage] = useState(null);
   const [imageUrl, setImageUrl] = useState("");
+  const [collapsed, setCollapsed] = useState(false);
+
+  const collapse = () => {
+    setCollapsed(!collapsed);
+  };
 
   useEffect(() => {
     const storedImage = localStorage.getItem("uploadedImage");
@@ -40,57 +45,68 @@ function ImageUploader() {
   };
 
   return (
-    <div className="max-w-xl    rounded-b-sm w-full">
-      
-
-      {!image && (
-        <div className="h-72 flex items-center justify-center bg-white dark:bg-[#28283A] rounded-sm w-full">
-          <label htmlFor="file-input" className="cursor-pointer flex flex-col items-center">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="hidden"
-              id="file-input"
-            />
-            <MdAdd className="w-12 h-12 text-indigo-600 hover:text-indigo-800 transition duration-300" />
-            <span className="mt-2 text-sm text-gray-600 dark:text-gray-400">Click to upload image</span>
-          </label>
-        </div>
-      )}
-
-      {imageUrl && (
-        <div className="relative rounded-b-sm   group h-80">
-          <Image
-            src={imageUrl}
-            alt="Uploaded"
-            preview={true}
-            className="!h-full !w-full rounded-b-sm "
-            style={{ 
-              objectFit: 'cover',
-              height: '100%',
-              width: '100%'
-            }}
-            wrapperClassName="!h-full !w-full rounded-b-sm "
-          />
-          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <Popconfirm
-              title="Delete image"
-              description="Are you sure you want to delete this image?"
-              onConfirm={removeImage}
-              okText="Yes"
-              cancelText="No"
-              placement="leftTop"
-            >
-              <Button 
-                type="primary" 
-                danger
-                icon={<MdDelete className="text-lg" />}
-                className="flex items-center gap-1"
+    <div className="max-w-[21vw]  backdrop-blur-sm  rounded-b-sm w-full">
+      <div
+        onClick={collapse}
+        className="text-xl cursor-pointer font-medium p-5"
+      >
+        Image
+      </div>
+      {!collapsed && (
+        <div>
+          {!image && (
+            <div className="h-72 flex items-center justify-center bg-white dark:bg-[#28283A] rounded-sm w-full">
+              <label
+                htmlFor="file-input"
+                className="cursor-pointer flex flex-col items-center"
               >
-              </Button>
-            </Popconfirm>
-          </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                  id="file-input"
+                />
+                <MdAdd className="w-12 h-12 text-indigo-600 hover:text-indigo-800 transition duration-300" />
+                <span className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                  Click to upload image
+                </span>
+              </label>
+            </div>
+          )}
+          {imageUrl && (
+            <div className="relative rounded-b-sm   group h-80">
+              <Image
+                src={imageUrl}
+                alt="Uploaded"
+                preview={true}
+                className="!h-full !w-full rounded-b-sm "
+                style={{
+                  objectFit: "cover",
+                  height: "100%",
+                  width: "100%",
+                }}
+                wrapperClassName="!h-full !w-full rounded-b-sm "
+              />
+              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <Popconfirm
+                  title="Delete image"
+                  description="Are you sure you want to delete this image?"
+                  onConfirm={removeImage}
+                  okText="Yes"
+                  cancelText="No"
+                  placement="leftTop"
+                >
+                  <Button
+                    type="primary"
+                    danger
+                    icon={<MdDelete className="text-lg" />}
+                    className="flex items-center gap-1"
+                  ></Button>
+                </Popconfirm>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext, useMemo } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { WidgetTransparencyContext } from "../App";
 import { motion } from "framer-motion";
 import { Modal } from "antd";
 import { Spin, Button as AntButton } from "antd";
@@ -22,6 +23,7 @@ import NewsFeed from "./NewsFeed.jsx";
 import CategoryHome from "./CategoryHome.jsx";
 
 const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
+  const { widgetTransparent } = useContext(WidgetTransparencyContext);
   const [grid, isGrid] = useState(true);
   const [user, setUser] = useState(null);
   const [items, setItems] = useState([]);
@@ -359,23 +361,29 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
                                 <div
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
-                                  className=" bg-white dark:bg-[#513a7a] mb-4 border-collapse dark:border-gray-700 drop-shadow-sm border-1 border border-gray-100 rounded-sm"
+                                  className={`bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] mb-4 border-collapse ${
+                                    localStorage.getItem("backgroundImage")
+                                      ? " shadow-sm dark:border-gray-700/[var(--widget-opacity)] border-gray-100/[var(--widget-opacity)]"
+                                      : "dark:border-gray-700 border-gray-100"
+                                  } border-1 border  rounded-sm`}
                                 >
                                   {grid ? (
                                     <>
                                       {visibleHandle && (
-                                        <motion.div className="w-full max-w-xl min-w-[21vw] text-left py-2 px-4  rounded-t-sm bg-gray-100 dark:bg-[#513a7a] dark:text-white font-semibold flex justify-between items-center">
+                                        <motion.div
+                                          className={`w-full max-w-xl min-w-[21vw] text-left py-2 px-4 rounded-t-sm bg-gray-100/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] dark:text-white font-semibold flex justify-between items-center`}
+                                        >
                                           <div
                                             {...provided.dragHandleProps}
-                                            className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 w-5 "
+                                            className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 w-5"
                                           >
                                             ⋮⋮
                                           </div>
-                                          <div className="w-5 "></div>
+                                          <div className="w-5"></div>
                                         </motion.div>
                                       )}
                                       <motion.div
-                                        className={`bg-white w-full max-w-xl min-w-[21vw] dark:bg-[#28283A] ${
+                                        className={`w-full max-w-xl min-w-[21vw] dark:text-white bg-white/[var(--widget-opacity)] dark:bg-[#28283A]/[var(--widget-opacity)] ${
                                           visibleHandle
                                             ? "rounded-b-sm"
                                             : "rounded-sm"
@@ -402,10 +410,12 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
                                   ) : (
                                     <>
                                       {visibleHandle && (
-                                        <motion.div className="w-full max-w-xl min-w-[21vw] text-left py-2 px-4  rounded-t-sm bg-gray-100 dark:bg-[#513a7a] dark:text-white font-semibold flex justify-between items-center">
+                                        <motion.div
+                                          className={`w-full max-w-xl min-w-[21vw] text-left py-2 px-4 rounded-t-sm bg-gray-100/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] dark:text-white font-semibold flex justify-between items-center`}
+                                        >
                                           <div
                                             {...provided.dragHandleProps}
-                                            className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 w-5 "
+                                            className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 w-5"
                                           >
                                             ⋮⋮
                                           </div>
@@ -417,12 +427,12 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
                                           >
                                             {item.name}
                                           </div>
-                                          <div className="w-5 "></div>
+                                          <div className="w-5"></div>
                                         </motion.div>
                                       )}
                                       {item.isOpen && (
                                         <motion.div
-                                          className={`bg-gray-50 dark:bg-[#28283A] ${
+                                          className={`w-full max-w-xl min-w-[21vw] dark:text-white bg-white/[var(--widget-opacity)] dark:bg-[#28283A]/[var(--widget-opacity)] ${
                                             visibleHandle
                                               ? "rounded-b-sm"
                                               : "rounded-sm"
@@ -433,7 +443,7 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
                                             opacity: 1,
                                           }}
                                           exit={{ height: 0, opacity: 0 }}
-                                          transition={{ duration: 0.3 }}
+                                          transition={{ duration: 0.1 }}
                                         >
                                           <div
                                             className={`${

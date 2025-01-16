@@ -1,4 +1,11 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, {
+  useEffect,
+  useState,
+  useContext,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Shortcut from "./ShortCuts";
@@ -31,9 +38,18 @@ function SearchPage() {
   const navigate = useNavigate();
   // const [showButton, setShowButton] = useState(false);
   const [visibleHandle, setVisibleHandle] = useState(false);
-  const [widgetTransparency, setWidgetTransparency] = useState(() =>
+
+  // Keep state for slider position
+  const [sliderTransparency, setSliderTransparency] = useState(() =>
+    parseInt(localStorage.getItem("bgTransparency") || "85")
+  );
+  const [sliderWidgetTransparency, setSliderWidgetTransparency] = useState(() =>
     parseInt(localStorage.getItem("widgetTransparency") || "100")
   );
+
+  // Use refs to store the actual values we'll apply
+  const tempTransparencyRef = useRef(sliderTransparency);
+  const tempWidgetTransparencyRef = useRef(sliderWidgetTransparency);
 
   useEffect(() => {
     const storedThemeMode = localStorage.getItem("themeMode");
@@ -78,21 +94,63 @@ function SearchPage() {
       handleTextColorChange(0);
     }
   }, [isDarkMode]);
-  const handleTransparencyChange = (newValue) => {
-    setTransparency(newValue);
-    localStorage.setItem("bgTransparency", newValue.toString());
-  };
-  //
 
+  // Handler for temporary changes - only update state, no visual changes
+  const handleTempTransparencyChange = useCallback((newValue) => {
+    setSliderTransparency(newValue); // Update slider position
+    tempTransparencyRef.current = newValue; // Store value for later application
+  }, []);
+
+  const handleTempWidgetTransparencyChange = useCallback((newValue) => {
+    setSliderWidgetTransparency(newValue); // Update slider position
+    tempWidgetTransparencyRef.current = newValue; // Store value for later application
+  }, []);
+
+  // Handler to apply all changes
+  const handleApplyChanges = useCallback(() => {
+    // Apply background transparency
+    setTransparency(tempTransparencyRef.current);
+    localStorage.setItem(
+      "bgTransparency",
+      tempTransparencyRef.current.toString()
+    );
+    document.documentElement.style.setProperty(
+      "--bg-opacity",
+      `${tempTransparencyRef.current / 100}`
+    );
+
+    // Apply widget transparency
+    setWidgetTransparent(tempWidgetTransparencyRef.current);
+    localStorage.setItem(
+      "widgetTransparency",
+      tempWidgetTransparencyRef.current.toString()
+    );
+    document.documentElement.style.setProperty(
+      "--widget-opacity",
+      `${tempWidgetTransparencyRef.current / 100}`
+    );
+  }, [setTransparency, setWidgetTransparent]);
+
+  // Handler to reset changes
+  const handleResetChanges = useCallback(() => {
+    // Reset both slider position and stored values
+    setSliderTransparency(transparency);
+    setSliderWidgetTransparency(widgetTransparent);
+    tempTransparencyRef.current = transparency;
+    tempWidgetTransparencyRef.current = widgetTransparent;
+  }, [transparency, widgetTransparent]);
+
+  // Initialize CSS variables on mount with current values
   useEffect(() => {
-    setWidgetTransparent(widgetTransparency);
-  }, [widgetTransparency, setWidgetTransparent]);
-
-  const handleWidgetTransparencyChange = (newValue) => {
-    setWidgetTransparency(newValue);
-    setWidgetTransparent(newValue);
-    localStorage.setItem("widgetTransparency", newValue.toString());
-  };
+    document.documentElement.style.setProperty(
+      "--bg-opacity",
+      `${transparency / 100}`
+    );
+    document.documentElement.style.setProperty(
+      "--widget-opacity",
+      `${widgetTransparent / 100}`
+    );
+  }, [transparency, widgetTransparent]);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -277,7 +335,7 @@ function SearchPage() {
                     <Dropdown
                       overlay={
                         <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-lg min-w-[200px]">
-                          <div className="flex flex-col gap-1">
+                          <div className="flex flex-col gap-3">
                             <div className="flex flex-col gap-2">
                               <span className="text-sm text-gray-600 dark:text-gray-300">
                                 Background Opacity
@@ -286,16 +344,16 @@ function SearchPage() {
                                 type="range"
                                 min="0"
                                 max="100"
-                                value={transparency}
+                                value={sliderTransparency}
                                 onChange={(e) =>
-                                  handleTransparencyChange(
+                                  handleTempTransparencyChange(
                                     parseInt(e.target.value)
                                   )
                                 }
                                 className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
                               />
                               <span className="text-sm text-gray-600 dark:text-gray-300 text-right">
-                                {transparency}%
+                                {sliderTransparency}%
                               </span>
                             </div>
                             <div className="flex flex-col gap-2">
@@ -306,18 +364,35 @@ function SearchPage() {
                                 type="range"
                                 min="0"
                                 max="100"
-                                value={widgetTransparency}
+                                value={sliderWidgetTransparency}
                                 onChange={(e) =>
-                                  handleWidgetTransparencyChange(
+                                  handleTempWidgetTransparencyChange(
                                     parseInt(e.target.value)
                                   )
                                 }
                                 className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
                               />
                               <span className="text-sm text-gray-600 dark:text-gray-300 text-right">
-                                {widgetTransparency}%
+                                {sliderWidgetTransparency}%
                               </span>
                             </div>
+
+                            {/* Apply and Reset buttons */}
+                            <div className="flex gap-2 pt-2 border-t dark:border-gray-700">
+                              <button
+                                onClick={handleApplyChanges}
+                                className="flex-1 px-3 py-1.5 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition-colors"
+                              >
+                                Apply
+                              </button>
+                              <button
+                                onClick={handleResetChanges}
+                                className="px-3 py-1.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                              >
+                                Reset
+                              </button>
+                            </div>
+
                             <div className="flex flex-col gap-2">
                               <span className="text-sm text-gray-600 dark:text-gray-300">
                                 Text Color

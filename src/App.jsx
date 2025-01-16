@@ -1,4 +1,4 @@
-import React, { useState, createContext } from "react";
+import React, { useState, createContext, useMemo } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Dropdown, Menu, Button, Modal, message } from "antd";
 import galleryupload from "../public/galleryupload.png";
@@ -568,15 +568,25 @@ const ContextMenuWrapper = ({ children }) => {
   );
 };
 
-export const WidgetTransparencyContext = createContext();
+export const WidgetTransparencyContext = React.createContext();
 
 // App Component
 const App = () => {
-  const [widgetTransparent, setWidgetTransparent] = useState(100);
+  const [widgetTransparent, setWidgetTransparent] = useState(() =>
+    parseInt(localStorage.getItem("widgetTransparency") || "100")
+  );
+
+  // Memoize the context value
+  const contextValue = useMemo(
+    () => ({
+      widgetTransparent,
+      setWidgetTransparent,
+    }),
+    [widgetTransparent]
+  );
+
   return (
-    <WidgetTransparencyContext.Provider
-      value={{ widgetTransparent, setWidgetTransparent }}
-    >
+    <WidgetTransparencyContext.Provider value={contextValue}>
       <AuthProvider>
         <Router>
           <Routes>

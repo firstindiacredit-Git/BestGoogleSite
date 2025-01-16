@@ -294,7 +294,9 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
       onMouseLeave={() => setIsHovering(false)}
       className={`p-2  transition-colors duration-200 ${
         inNotebookSheet ? "w-full" : "max-w-xl mx-auto"
-      } rounded-b-sm relative ${isAutoColor ? "dark:bg-[#28283A]" : ""}`}
+      } rounded-b-sm backdrop-blur-sm relative ${
+        isAutoColor ? "dark:bg-[#28283A]" : ""
+      }`}
       style={{
         backgroundColor: isAutoColor ? undefined : containerColor,
         color: isAutoColor ? undefined : textColor,

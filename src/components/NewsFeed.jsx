@@ -1,139 +1,135 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Carousel, Spin } from "antd";
-import { LeftOutlined, RightOutlined } from "@ant-design/icons";
+import React, { useState, useEffect, useContext, memo } from "react";
+import { Spin } from "antd";
+import { WidgetTransparencyContext } from "../App";
+
+// Featured news item component
+const FeaturedNewsItem = memo(({ news }) => (
+  <div
+    className={`pb-4 pt-2 px-4 border-b dark:border-gray-700/[var(--widget-opacity)]`}
+  >
+    <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+      Source: {news.source_name}
+    </div>
+    <a
+      href={news.link}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block"
+    >
+      <div className="flex gap-4">
+        {news.image_url && (
+          <div className="w-24 h-24 flex-shrink-0">
+            <img
+              src={
+                news.image_url ||
+                "https://kvaser.com/wp-content/themes/kvaser/assets/images/new-homepage/blog/no-image.jpg"
+              }
+              alt={news.title}
+              className="w-full h-full object-cover rounded"
+            />
+          </div>
+        )}
+        <div className="flex-1">
+          <h3 className="text-base font-medium text-indigo-600 dark:text-blue-400 mb-2 line-clamp-2">
+            {news.title}
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-300 mb-2 line-clamp-2">
+            {news.description?.slice(0, 350)}...
+          </p>
+        </div>
+      </div>
+    </a>
+  </div>
+));
+
+// News list item component
+const NewsListItem = memo(({ news }) => (
+  <a
+    href={news.link}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="block py-2 border-b dark:border-gray-700 last:border-b-0 hover:bg-gray-50/[var(--widget-opacity)] dark:hover:bg-gray-800/50/[var(--widget-opacity)] transition-colors"
+  >
+    <h3 className="text-sm font-medium text-indigo-600 dark:text-blue-400 hover:text-indigo-700 dark:hover:text-blue-500 line-clamp-2">
+      {news.title}
+    </h3>
+  </a>
+));
+
+// Loading component
+const LoadingState = () => (
+  <div className="h-[300px] flex items-center justify-center">
+    <Spin size="large" />
+  </div>
+);
+
+// Error component
+const ErrorState = ({ message }) => (
+  <div className="p-4 text-center">
+    <p className="text-red-500">{message}</p>
+  </div>
+);
 
 const NewsFeed = () => {
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
   const [error, setError] = useState(null);
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const carouselRef = useRef();
-
-  useEffect(() => {
-    fetchNews();
-    const interval = setInterval(fetchNews, 300000);
-    return () => clearInterval(interval);
-  }, []);
+  const { widgetTransparency } = useContext(WidgetTransparencyContext);
 
   const fetchNews = async () => {
     try {
       const response = await fetch(
         "https://bgs-backend.vercel.app/api/top100/news"
       );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch news");
-      }
+      if (!response.ok) throw new Error("Failed to fetch news");
 
       const data = await response.json();
-      // console.log(data)
-
-      if (data && Array.isArray(data)) {
+      if (Array.isArray(data)) {
         setNews(data.filter((item) => item.title && item.description));
       } else {
-        throw new Error("No news items found");
+        throw new Error("No valid news items found");
       }
     } catch (err) {
-      console.error("Error fetching news:", err);
-      setError(err.message);
+      setError(err.message || "An error occurred while fetching news");
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePrev = () => {
-    carouselRef.current?.prev();
-  };
+  useEffect(() => {
+    fetchNews();
+  }, []);
 
-  const handleNext = () => {
-    carouselRef.current?.next();
-  };
+  if (loading) return <LoadingState />;
+  if (error) return <ErrorState message={error} />;
 
-  if (loading) {
-    return (
-      <div className=" h-[300px] flex items-center justify-center">
-        <Spin size="large" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className=" p-4 text-center">
-        <p className="text-red-500">{error}</p>
-      </div>
-    );
-  }
+  const [mainNews, ...remainingNews] = news;
 
   return (
-    <div className=" max-w-sm bg-white dark:bg-[#28283A] rounded-b-sm overflow-hidden">
-      <div className="news-carousel">
-        <Carousel
-          ref={carouselRef}
-          dots={false}
-          autoplay
-          beforeChange={(current, next) => setCurrentSlide(next)}
-        >
-          {news.map((item, index) => (
-            <div key={index} className="pb-4 pt-2 px-4">
-              <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                Source: {item.source_name}
-              </div>
-              <a
-                href={item.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block"
-              >
-                <div className="flex gap-4">
-                  {item.image_url && (
-                    <div className="w-24 h-24 flex-shrink-0">
-                      <img
-                        src={
-                          item.image_url
-                            ? item.image_url
-                            : "https://kvaser.com/wp-content/themes/kvaser/assets/images/new-homepage/blog/no-image.jpg"
-                        }
-                        alt={item.title}
-                        className="w-full h-full object-cover rounded"
-                      />
-                    </div>
-                  )}
-                  <div className="flex-1">
-                    <h3 className="text-base font-medium text-indigo-600 dark:text-blue-400 mb-2 line-clamp-2">
-                      {item.title}
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-2 line-clamp-2">
-                      {item.description?.slice(0, 350)}...
-                    </p>
-                  </div>
-                </div>
-              </a>
-            </div>
-          ))}
-        </Carousel>
-        <div className="flex items-center justify-center gap-4 p-2 border-t dark:border-gray-700">
-          <button
-            onClick={handlePrev}
-            className="text-gray-600 dark:text-gray-400 hover:text-indigo-500 dark:hover:text-blue-400 p-2"
-          >
-            <LeftOutlined />
-          </button>
-          <span className="text-sm text-gray-500 dark:text-gray-400">
-            {currentSlide + 1}/{news.length}
-          </span>
-          <button
-            onClick={handleNext}
-            className="text-gray-600 dark:text-gray-400 hover:text-indigo-500 dark:hover:text-blue-400 p-2"
-          >
-            <RightOutlined />
-          </button>
-        </div>
+    <div
+      style={{ opacity: widgetTransparency }}
+      className="w-[21vw] bg-white/[var(--widget-opacity)] backdrop-blur-sm dark:bg-[#28283A]/[var(--widget-opacity)] rounded-b-sm overflow-hidden"
+    >
+      <div
+        onClick={() => setCollapsed((prev) => !prev)}
+        className="text-xl cursor-pointer font-medium p-5"
+      >
+        News
       </div>
+
+      {!collapsed && mainNews && (
+        <div>
+          <FeaturedNewsItem news={mainNews} />
+          <div className="px-4 py-2">
+            {remainingNews.map((item, index) => (
+              <NewsListItem key={index} news={item} />
+            ))}
+          </div>
+        </div>
+      )}
+
       <style jsx>{`
-        .news-carousel .ant-carousel .slick-slide {
-          padding: 0;
-        }
         .line-clamp-2 {
           display: -webkit-box;
           -webkit-line-clamp: 2;
@@ -145,4 +141,4 @@ const NewsFeed = () => {
   );
 };
 
-export default NewsFeed;
+export default memo(NewsFeed);

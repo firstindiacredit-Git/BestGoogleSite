@@ -121,19 +121,21 @@ const FullCalendar = () => {
     <div
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
-      className="w-full max-w-xl mx-auto bg-white dark:bg-[#28283A] rounded-xl p-3 text-gray-900 dark:text-gray-100"
+      className={`w-full max-w-xl mx-auto ${
+        !localStorage.getItem("backgroundImage") && "dark:bg-[#28283A] bg-white"
+      } rounded-sm p-3 backdrop-blur-sm text-gray-900 dark:text-gray-100`}
     >
       {/* Header */}
       <div className="">
-        <div className="flex items-center justify-between ">
-          <div
-            onClick={collapse}
-            className="w-full cursor-pointer p-2 text-xl font-medium"
-          >
-            Calender
-          </div>
-          {isHovering && (
-            <div className="flex items-center justify-between px-2">
+        <div
+          onClick={collapse}
+          className="w-full cursor-pointer p-2 text-xl font-medium"
+        >
+          Calender
+        </div>
+        <div className="flex items-center  justify-between ">
+          {!isCollapsed && (
+            <div className="flex items-center mt-2 justify-between px-2">
               <button
                 onClick={goToPreviousMonth}
                 className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
@@ -179,8 +181,8 @@ const FullCalendar = () => {
             </div>
           )}
 
-          {isHovering && (
-            <div className="flex items-center gap-2">
+          {!isCollapsed && (
+            <div className="flex items-center mt-2 gap-2">
               <button
                 onClick={() => {
                   setCurrentDate(currentDate.subtract(1, "year"));

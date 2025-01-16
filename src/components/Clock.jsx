@@ -361,12 +361,17 @@ const ResponsiveWorldClock = () => {
     <div
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
-      className="dark:bg-[#28283A] w-full max-w-xl dark:text-white p-4 bg-white rounded-b-sm flex justify-center items-center"
+      className={`${
+        !localStorage.getItem("backgroundImage") && "dark:bg-[#28283A] bg-white"
+      } w-full max-w-xl dark:text-white p-4 backdrop-blur-sm rounded-b-sm flex justify-center items-center`}
     >
       <div className="mx-auto w-full">
         <div className="flex items-center">
           <div className="flex w-full justify-between items-center">
-            <div className="text-xl font-medium w-full p-1" onClick={collapse}>
+            <div
+              className="text-xl font-medium w-full cursor-pointer p-1"
+              onClick={collapse}
+            >
               Clock
             </div>
             {isHovering && (
