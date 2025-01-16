@@ -82,6 +82,7 @@ function SearchPage() {
     setTransparency(newValue);
     localStorage.setItem("bgTransparency", newValue.toString());
   };
+  //
 
   useEffect(() => {
     setWidgetTransparent(widgetTransparency);
