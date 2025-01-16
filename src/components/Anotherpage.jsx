@@ -55,6 +55,40 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
     Todo: <TodoComponent />,
     NewsFeed: <NewsFeed />,
   };
+  const [isCalculating, setIsCalculating] = useState(true);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [optimalColumns, setOptimalColumns] = useState(4);
+
+  // Calculate optimal columns based on window width and widget width
+  const calculateOptimalColumns = () => {
+    const minWidgetWidth = 350; // Minimum width for a widget (21vw converted to approx pixels)
+    const padding = 32; // Account for container padding
+    const availableWidth = windowWidth - padding;
+    const calculatedColumns = Math.floor(availableWidth / minWidgetWidth);
+    return Math.min(Math.max(calculatedColumns, 1), 4); // Limit between 1 and 4 columns
+  };
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      setIsCalculating(true);
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Recalculate columns when window width changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const newOptimalColumns = calculateOptimalColumns();
+      setOptimalColumns(newOptimalColumns);
+      setIsCalculating(false);
+    }, 300); // Debounce the calculation
+
+    return () => clearTimeout(timer);
+  }, [windowWidth]);
 
   // Load user and layout
   useEffect(() => {

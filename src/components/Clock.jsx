@@ -317,7 +317,7 @@ const ResponsiveWorldClock = () => {
   }, []);
 
   const addTimeZone = async (timeZone) => {
-    if (selectedTimezones.length < 10) {
+    if (selectedTimezones.length < 8) {
       const newTimezones = [...selectedTimezones, timeZone];
       setSelectedTimezones(newTimezones);
       setIsDropdownOpen(false);
@@ -377,7 +377,7 @@ const ResponsiveWorldClock = () => {
             {isHovering && (
               <>
                 <div>
-                  {selectedTimezones.length < 10 && (
+                  {selectedTimezones.length < 8 && (
                     <div className="relative">
                       <button
                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
