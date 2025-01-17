@@ -1,1627 +1,629 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
+import { createPortal } from "react-dom";
 import { db, auth } from "../firebase";
 import {
   collection,
-  getDocs,
-  doc,
-  getDoc,
-  setDoc,
-  addDoc,
-  updateDoc,
+  onSnapshot,
   query,
   where,
+  doc,
+  addDoc,
+  updateDoc,
   deleteDoc,
-  writeBatch,
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
-import {
-  Spin,
-  Button,
-  Modal,
-  Input,
-  Space,
-  Radio,
-  Slider,
-  message,
-  Tooltip,
-  Form,
-  Dropdown,
-  Menu,
-  Checkbox,
-  Card,
-  List,
-  Avatar,
-  Empty,
-  Row,
-  Col,
-} from "antd";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import {
-  EyeInvisibleOutlined,
-  EyeOutlined,
-  UnorderedListOutlined,
-  AppstoreOutlined,
-  PictureOutlined,
-  CloudOutlined,
-  PlusOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  MoreOutlined,
-  EllipsisOutlined,
-  CheckOutlined,
-} from "@ant-design/icons";
+import { Settings, Edit, Plus, Trash2 } from "lucide-react";
+import { Modal, message, Input } from "antd";
+import { WidgetTransparencyContext } from "../App";
 
-function PopularBookmarks() {
-  const [categories, setCategories] = useState([]);
-  const [links, setLinks] = useState([]);
+const PopularBookmarks = ({ categoryType, itemName }) => {
   const [user, setUser] = useState(null);
+  const [bookmarks, setBookmarks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState("grid");
-  const [faviconSize, setFaviconSize] = useState(32);
-  const [categoryViewModes, setCategoryViewModes] = useState({});
-  const [isAddCategoryModalVisible, setIsAddCategoryModalVisible] =
-    useState(false);
-  const [isRenameCategoryModalVisible, setIsRenameCategoryModalVisible] =
-    useState(false);
-  const [isAddBookmarkModalVisible, setIsAddBookmarkModalVisible] =
-    useState(false);
-  const [isEditModePanelVisible, setIsEditModePanelVisible] = useState(false);
-  const [isEditBookmarkModalVisible, setIsEditBookmarkModalVisible] =
-    useState(false);
-  const [newCategoryName, setNewCategoryName] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [newBookmark, setNewBookmark] = useState({
-    title: "",
-    url: "",
-    favicon: "",
+  const [showUrl, setShowUrl] = useState(true);
+  const [iconSize, setIconSize] = useState("large");
+  const [collapsed, setCollapsed] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState({
+    top: 0,
+    right: 0,
   });
-  const [selectedBookmarks, setSelectedBookmarks] = useState([]);
-  const [editModeBookmarks, setEditModeBookmarks] = useState([]);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [editingBookmark, setEditingBookmark] = useState(null);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [editBookmarkForm] = Form.useForm();
-  const [columnCount, setColumnCount] = useState(4);
-  const [categoryColumns, setCategoryColumns] = useState({
-    column1: [],
-    column2: [],
-    column3: [],
-    column4: [],
-  });
-  const [categoryPositions, setCategoryPositions] = useState({});
-  const [categoryBookmarkSizes, setCategoryBookmarkSizes] = useState({});
-  const [hiddenCategories, setHiddenCategories] = useState([]);
+  const [newBookmark, setNewBookmark] = useState({ name: "", link: "" });
+  const [isHovered, setIsHovered] = useState(false);
+  const buttonRef = useRef(null);
 
-  // Track auth state
+  const collapse = () => {
+    setCollapsed(!collapsed);
+  };
+  const { widgetTransparent } = useContext(WidgetTransparencyContext);
+
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-    });
-    return () => unsubscribeAuth();
-  }, []);
-
-  // Initialize view modes for categories
-  useEffect(() => {
-    const initViewModes = categories.reduce((acc, category) => {
-      acc[category.id] = acc[category.id] || "list";
-      return acc;
-    }, {});
-    setCategoryViewModes(initViewModes);
-  }, [categories]);
-
-  // Fetch categories, links and hidden bookmarks
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!user) return;
-
-      try {
-        // Fetch hidden bookmarks
-        const userDocRef = doc(db, "users", user.uid);
-        const userDocSnap = await getDoc(userDocRef);
-        const hiddenIds = userDocSnap.exists()
-          ? userDocSnap.data().hiddenBookmarkIds || []
-          : [];
-
-        // Fetch admin categories
-        const adminCategorySnapshot = await getDocs(collection(db, "category"));
-        const adminCategories = adminCategorySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-          isAdminCategory: true,
-        }));
-
-        // Fetch user categories
-        const userCategorySnapshot = await getDocs(
-          collection(db, "users", user.uid, "UserCategory")
+      if (currentUser) {
+        // First, fetch admin categories
+        const categoryQuery = query(
+          collection(db, "category"),
+          where("newCategory", "==", categoryType)
         );
-        const userCategories = userCategorySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-          name: doc.data().newCategory, // Map newCategory to name for consistency
-          isAdminCategory: false,
-        }));
 
-        // Combine and sort all categories
-        const allCategories = [...adminCategories, ...userCategories];
-        allCategories.sort((a, b) => (a.order || 0) - (b.order || 0));
-        setCategories(allCategories);
+        const unsubscribeCategory = onSnapshot(
+          categoryQuery,
+          async (categorySnapshot) => {
+            if (!categorySnapshot.empty) {
+              const categoryDoc = categorySnapshot.docs[0];
+              const categoryId = categoryDoc.id;
 
-        // Fetch all user bookmarks
-        const userBookmarksSnapshot = await getDocs(
-          collection(db, "users", user.uid, "CatBookmarks")
-        );
-        const userBookmarks = userBookmarksSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-          isHidden: hiddenIds.includes(doc.id),
-          isAdminBookmark: false,
-        }));
-
-        // Fetch admin bookmarks for each admin category
-        const adminBookmarksPromises = adminCategories.map(async (category) => {
-          const bookmarksSnapshot = await getDocs(
-            query(collection(db, "links"), where("category", "==", category.id))
-          );
-          return bookmarksSnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-            title: doc.data().name,
-            url: doc.data().link,
-            categoryId: doc.data().category,
-            isHidden: hiddenIds.includes(doc.id),
-            isAdminBookmark: true,
-            createdBy: doc.data().createdBy,
-            updatedAt: doc.data().updatedAt,
-          }));
-        });
-
-        const adminBookmarks = (
-          await Promise.all(adminBookmarksPromises)
-        ).flat();
-
-        // Combine all bookmarks
-        const allBookmarks = [...userBookmarks, ...adminBookmarks];
-        setLinks(allBookmarks);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [user]);
-
-  // Add useEffect to load saved positions
-  useEffect(() => {
-    const loadCategoryPositions = async () => {
-      if (!user) return;
-      try {
-        const userDocRef = doc(db, "users", user.uid);
-        const userDocSnap = await getDoc(userDocRef);
-        if (userDocSnap.exists() && userDocSnap.data().categoryPositions) {
-          setCategoryPositions(userDocSnap.data().categoryPositions);
-          // Initialize columns based on saved positions
-          const savedColumns = userDocSnap.data().categoryPositions;
-          setCategoryColumns(savedColumns.columns || defaultColumnState());
-          setColumnCount(savedColumns.columnCount || 4);
-        }
-      } catch (error) {
-        console.error("Error loading category positions:", error);
-      }
-    };
-    loadCategoryPositions();
-  }, [user]);
-
-  // Add function to get default column state
-  const defaultColumnState = () => ({
-    column1: [],
-    column2: [],
-    column3: [],
-    column4: [],
-  });
-
-  // Update the redistributeCategories function
-  const redistributeCategories = async (count) => {
-    const allCategories = categories;
-    const newColumns = {};
-
-    for (let i = 1; i <= count; i++) {
-      newColumns[`column${i}`] = [];
-    }
-
-    // Use saved positions if available, otherwise distribute evenly
-    allCategories.forEach((category, index) => {
-      const savedPosition = categoryPositions[category.id];
-      if (savedPosition && savedPosition.columnIndex <= count) {
-        const columnKey = `column${savedPosition.columnIndex}`;
-        newColumns[columnKey] = newColumns[columnKey] || [];
-        newColumns[columnKey].push(category.id);
-      } else {
-        const columnIndex = (index % count) + 1;
-        newColumns[`column${columnIndex}`].push(category.id);
-      }
-    });
-
-    setCategoryColumns(newColumns);
-
-    // Save the new layout to database
-    try {
-      const userDocRef = doc(db, "users", user.uid);
-      await updateDoc(userDocRef, {
-        categoryPositions: {
-          columns: newColumns,
-          columnCount: count,
-          lastUpdated: new Date().toISOString(),
-        },
-      });
-    } catch (error) {
-      console.error("Error saving category positions:", error);
-      message.error("Failed to save layout");
-    }
-  };
-
-  // Update the onDragEnd function
-  const onDragEnd = async (result) => {
-    const { source, destination, draggableId } = result;
-
-    if (!destination) return;
-
-    const sourceColId = source.droppableId;
-    const destColId = destination.droppableId;
-    const newColumns = { ...categoryColumns };
-
-    // Remove from source column
-    const [movedCategoryId] = newColumns[sourceColId].splice(source.index, 1);
-
-    // Add to destination column
-    newColumns[destColId].splice(destination.index, 0, movedCategoryId);
-
-    // Update state
-    setCategoryColumns(newColumns);
-
-    try {
-      const batch = writeBatch(db);
-      const updates = {};
-
-      // Update positions for all categories in affected columns
-      Object.entries(newColumns).forEach(([columnId, categoryIds]) => {
-        categoryIds.forEach((categoryId, index) => {
-          const category = categories.find((c) => c.id === categoryId);
-          if (category) {
-            const columnIndex = parseInt(columnId.replace("column", ""));
-            updates[categoryId] = {
-              columnIndex,
-              order: index,
-              lastUpdated: new Date().toISOString(),
-            };
-
-            if (!category.isAdminCategory) {
-              const categoryRef = doc(
-                db,
-                "users",
-                user.uid,
-                "UserCategory",
-                categoryId
+              // Fetch admin links for this category
+              const adminLinksQuery = query(
+                collection(db, "links"),
+                where("category", "==", categoryId)
               );
-              batch.update(categoryRef, {
-                columnIndex,
-                order: index,
-              });
+
+              const adminLinksUnsubscribe = onSnapshot(
+                adminLinksQuery,
+                (adminLinksSnapshot) => {
+                  const adminLinks = adminLinksSnapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                    addedByAdmin: true,
+                  }));
+
+                  // Then fetch user's personal bookmarks
+                  const userBookmarksQuery = query(
+                    collection(db, "users", currentUser.uid, "bookmarks"),
+                    where("category", "==", categoryType)
+                  );
+
+                  const userBookmarksUnsubscribe = onSnapshot(
+                    userBookmarksQuery,
+                    (userSnapshot) => {
+                      const userBookmarks = userSnapshot.docs
+                        .map((doc) => ({
+                          id: doc.id,
+                          ...doc.data(),
+                          addedByAdmin: false,
+                        }))
+                        .filter((bookmark) => !bookmark.hidden);
+
+                      // Combine admin links and user bookmarks
+                      const allBookmarks = [...adminLinks, ...userBookmarks];
+                      setBookmarks(allBookmarks);
+                      setLoading(false);
+                    }
+                  );
+
+                  return () => {
+                    userBookmarksUnsubscribe();
+                  };
+                }
+              );
+
+              return () => {
+                adminLinksUnsubscribe();
+              };
+            } else {
+              // If no admin category found, just fetch user bookmarks
+              const userBookmarksQuery = query(
+                collection(db, "users", currentUser.uid, "bookmarks"),
+                where("category", "==", categoryType)
+              );
+
+              const userBookmarksUnsubscribe = onSnapshot(
+                userBookmarksQuery,
+                (userSnapshot) => {
+                  const userBookmarks = userSnapshot.docs
+                    .map((doc) => ({
+                      id: doc.id,
+                      ...doc.data(),
+                      addedByAdmin: false,
+                    }))
+                    .filter((bookmark) => !bookmark.hidden);
+
+                  setBookmarks(userBookmarks);
+                  setLoading(false);
+                }
+              );
+
+              return () => userBookmarksUnsubscribe();
             }
           }
-        });
-      });
-
-      // Save all positions in user document
-      const userDocRef = doc(db, "users", user.uid);
-      batch.update(userDocRef, {
-        categoryPositions: {
-          columns: newColumns,
-          columnCount,
-          positions: updates,
-          lastUpdated: new Date().toISOString(),
-        },
-      });
-
-      await batch.commit();
-      message.success("Category position updated");
-    } catch (error) {
-      console.error("Error updating category positions:", error);
-      message.error("Failed to update category position");
-    }
-  };
-
-  const toggleBookmarkVisibility = async (bookmarkId) => {
-    if (!user) return;
-
-    try {
-      const userDocRef = doc(db, "users", user.uid);
-      let updatedHiddenIds = [...hiddenIds];
-
-      if (hiddenIds.includes(bookmarkId)) {
-        updatedHiddenIds = updatedHiddenIds.filter((id) => id !== bookmarkId);
-      } else {
-        updatedHiddenIds.push(bookmarkId);
-      }
-
-      await setDoc(
-        userDocRef,
-        { hiddenBookmarkIds: updatedHiddenIds },
-        { merge: true }
-      );
-      // setHiddenBookmarkIds(updatedHiddenIds);
-
-      setLinks((prevLinks) =>
-        prevLinks.map((link) =>
-          link.id === bookmarkId ? { ...link, isHidden: !link.isHidden } : link
-        )
-      );
-    } catch (error) {
-      console.error("Error toggling bookmark visibility:", error);
-    }
-  };
-
-  const handleAddCategory = async () => {
-    if (!newCategoryName.trim()) {
-      message.error("Category name cannot be empty");
-      return;
-    }
-
-    try {
-      const docRef = await addDoc(
-        collection(db, "users", user.uid, "UserCategory"),
-        {
-          newCategory: newCategoryName.trim(),
-          userId: user.uid,
-          order: categories.length,
-          createdAt: new Date().toISOString(),
-        }
-      );
-
-      // Add the new category to the local state immediately
-      setCategories((prevCategories) => [
-        ...prevCategories,
-        {
-          id: docRef.id,
-          userId: user.uid,
-          newCategory: newCategoryName.trim(),
-          order: categories.length,
-        },
-      ]);
-
-      message.success("Category added successfully");
-      setNewCategoryName("");
-      setIsAddCategoryModalVisible(false);
-    } catch (error) {
-      console.error("Error adding category:", error);
-      message.error("Failed to add category");
-    }
-  };
-
-  const handleRenameCategory = async () => {
-    if (!newCategoryName.trim() || !selectedCategory) {
-      message.error("Category name cannot be empty");
-      return;
-    }
-
-    try {
-      const categoryRef = doc(
-        db,
-        "users",
-        user.uid,
-        "UserCategory",
-        selectedCategory.id
-      );
-      await updateDoc(categoryRef, {
-        newCategory: newCategoryName.trim(),
-      });
-
-      message.success("Category renamed successfully");
-      setNewCategoryName("");
-      setIsRenameCategoryModalVisible(false);
-      setSelectedCategory(null);
-    } catch (error) {
-      console.error("Error renaming category:", error);
-      message.error("Failed to rename category");
-    }
-  };
-
-  const handleDeleteCategory = async (categoryId) => {
-    try {
-      // Delete the category
-      await deleteDoc(doc(db, "users", user.uid, "UserCategory", categoryId));
-
-      // Delete all bookmarks in this category
-      const categoryLinks = links.filter(
-        (link) => link.categoryId === categoryId
-      );
-      for (const link of categoryLinks) {
-        await deleteDoc(doc(db, "links", link.id));
-      }
-
-      // Update local state
-      setCategories((prevCategories) =>
-        prevCategories.filter((cat) => cat.id !== categoryId)
-      );
-      setLinks((prevLinks) =>
-        prevLinks.filter((link) => link.categoryId !== categoryId)
-      );
-
-      message.success("Category and its bookmarks deleted successfully");
-    } catch (error) {
-      console.error("Error deleting category:", error);
-      message.error("Failed to delete category");
-    }
-  };
-
-  const handleDeleteBookmark = async (bookmarkId) => {
-    try {
-      await deleteDoc(doc(db, "users", user.uid, "CatBookmarks", bookmarkId));
-      setLinks((prevLinks) =>
-        prevLinks.filter((link) => link.id !== bookmarkId)
-      );
-      message.success("Bookmark deleted successfully");
-    } catch (error) {
-      console.error("Error deleting bookmark:", error);
-      message.error("Failed to delete bookmark");
-    }
-  };
-
-  const fetchFavicon = async (url) => {
-    try {
-      let cleanUrl = url.trim();
-      if (!cleanUrl.match(/^https?:\/\//i)) {
-        cleanUrl = `http://${cleanUrl}`;
-      }
-      const urlObj = new URL(cleanUrl);
-      const domain = urlObj.hostname;
-
-      // Try to fetch favicon
-      const faviconUrl = `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${encodeURIComponent(
-        domain
-      )}&size=32`;
-
-      // Test if favicon exists
-      const response = await fetch(faviconUrl);
-      if (response.ok) {
-        return faviconUrl;
-      }
-      return "https://www.google.com/favicon.ico";
-    } catch (error) {
-      return "https://www.google.com/favicon.ico";
-    }
-  };
-
-  const handleUrlChange = async (e) => {
-    const url = e.target.value;
-    setNewBookmark((prev) => ({ ...prev, url }));
-
-    if (url) {
-      const favicon = await fetchFavicon(url);
-      setNewBookmark((prev) => ({ ...prev, favicon }));
-    }
-  };
-
-  const handleAddBookmark = async () => {
-    if (!selectedCategory) {
-      message.error("Please select a category first");
-      return;
-    }
-
-    if (!newBookmark.title.trim() || !newBookmark.url.trim()) {
-      message.error("Title and URL are required");
-      return;
-    }
-
-    try {
-      // Find the category to get its type
-      const category = categories.find((cat) => cat.id === selectedCategory.id);
-      if (!category) {
-        message.error("Selected category not found");
-        return;
-      }
-
-      // Always store in user's collection, even for admin categories
-      const docRef = await addDoc(
-        collection(db, "users", user.uid, "CatBookmarks"),
-        {
-          title: newBookmark.title.trim(),
-          url: newBookmark.url.trim(),
-          favicon: newBookmark.favicon,
-          categoryId: selectedCategory.id,
-          userId: user.uid,
-          createdAt: new Date().toISOString(),
-          order: links.filter((link) => link.categoryId === selectedCategory.id)
-            .length,
-          isAdminCategory: category.isAdminCategory || false, // Use the category's flag
-        }
-      );
-
-      // Add to local state
-      setLinks((prevLinks) => [
-        ...prevLinks,
-        {
-          id: docRef.id,
-          title: newBookmark.title.trim(),
-          url: newBookmark.url.trim(),
-          favicon: newBookmark.favicon,
-          categoryId: selectedCategory.id,
-          userId: user.uid,
-          createdAt: new Date().toISOString(),
-          order: links.filter((link) => link.categoryId === selectedCategory.id)
-            .length,
-          isAdminCategory: category.isAdminCategory || false,
-          isAdminBookmark: false,
-        },
-      ]);
-
-      setNewBookmark({ title: "", url: "", favicon: "" });
-      setIsAddBookmarkModalVisible(false);
-      message.success("Bookmark added successfully");
-    } catch (error) {
-      console.error("Error adding bookmark:", error);
-      message.error("Failed to add bookmark");
-    }
-  };
-
-  const handleDragEnd = (result) => {
-    if (!result.destination) return;
-
-    const items = Array.from(editModeBookmarks);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-
-    // Update orders for all items
-    const updatedItems = items.map((item, index) => ({
-      ...item,
-      order: index,
-    }));
-
-    setEditModeBookmarks(updatedItems);
-    setHasUnsavedChanges(true);
-  };
-
-  const handleSaveChanges = async () => {
-    try {
-      const batch = writeBatch(db);
-      editModeBookmarks.forEach((item, index) => {
-        const docRef = doc(db, "users", user.uid, "CatBookmarks", item.id);
-        batch.update(docRef, {
-          order: index,
-          title: item.title,
-          url: item.url,
-        });
-      });
-      await batch.commit();
-
-      // Update the links state to reflect changes in the category view
-      setLinks((prevLinks) => {
-        const updatedLinks = [...prevLinks];
-        editModeBookmarks.forEach((editedBookmark) => {
-          const index = updatedLinks.findIndex(
-            (link) => link.id === editedBookmark.id
-          );
-          if (index !== -1) {
-            updatedLinks[index] = {
-              ...updatedLinks[index],
-              title: editedBookmark.title,
-              url: editedBookmark.url,
-              order: editedBookmark.order,
-              userId: user.uid,
-            };
-          }
-        });
-        return updatedLinks;
-      });
-
-      setHasUnsavedChanges(false);
-      message.success("Changes saved successfully");
-      setIsEditModePanelVisible(false);
-    } catch (error) {
-      console.error("Error saving changes:", error);
-      message.error("Failed to save changes");
-    }
-  };
-
-  const handleDeleteSelected = async () => {
-    if (selectedBookmarks.length === 0) return;
-
-    try {
-      const batch = writeBatch(db);
-      selectedBookmarks.forEach((bookmarkId) => {
-        const docRef = doc(db, "users", user.uid, "CatBookmarks", bookmarkId);
-        batch.delete(docRef);
-      });
-      await batch.commit();
-
-      setLinks((prevLinks) =>
-        prevLinks.filter((link) => !selectedBookmarks.includes(link.id))
-      );
-      setSelectedBookmarks([]);
-      message.success("Selected bookmarks deleted successfully");
-    } catch (error) {
-      console.error("Error deleting bookmarks:", error);
-      message.error("Failed to delete bookmarks");
-    }
-  };
-
-  const toggleBookmarkSelection = (bookmarkId) => {
-    setSelectedBookmarks((prev) =>
-      prev.includes(bookmarkId)
-        ? prev.filter((id) => id !== bookmarkId)
-        : [...prev, bookmarkId]
-    );
-  };
-
-  const selectAllBookmarks = () => {
-    if (selectedBookmarks.length === editModeBookmarks.length) {
-      setSelectedBookmarks([]);
-    } else {
-      setSelectedBookmarks(editModeBookmarks.map((bookmark) => bookmark.id));
-    }
-  };
-
-  const getCategoryMenuItems = (category) => [
-    {
-      key: "viewOptions",
-      icon: <UnorderedListOutlined />,
-      label: "View Options",
-      children: [
-        {
-          key: "list",
-          icon: <UnorderedListOutlined />,
-          label: "List View",
-          onClick: () => {
-            const newViewMode = "list";
-            setCategoryViewModes((prev) => ({
-              ...prev,
-              [category.id]: newViewMode,
-            }));
-            saveUserPreferences(
-              category.id,
-              newViewMode,
-              categoryBookmarkSizes[category.id]
-            );
-          },
-        },
-        {
-          key: "grid",
-          icon: <AppstoreOutlined />,
-          label: "Grid View",
-          onClick: () => {
-            const newViewMode = "grid";
-            setCategoryViewModes((prev) => ({
-              ...prev,
-              [category.id]: newViewMode,
-            }));
-            saveUserPreferences(
-              category.id,
-              newViewMode,
-              categoryBookmarkSizes[category.id]
-            );
-          },
-        },
-        {
-          key: "icon",
-          icon: <PictureOutlined />,
-          label: "Icon View",
-          onClick: () => {
-            const newViewMode = "icon";
-            setCategoryViewModes((prev) => ({
-              ...prev,
-              [category.id]: newViewMode,
-            }));
-            saveUserPreferences(
-              category.id,
-              newViewMode,
-              categoryBookmarkSizes[category.id]
-            );
-          },
-        },
-      ],
-    },
-    {
-      key: "size",
-      icon: <PictureOutlined />,
-      label: "Icon Size",
-      children: [
-        {
-          key: "small",
-          label: "Small",
-          onClick: () => {
-            const newSize = { list: 24, grid: 24, icon: 24 };
-            setCategoryBookmarkSizes((prev) => ({
-              ...prev,
-              [category.id]: newSize,
-            }));
-            saveUserPreferences(
-              category.id,
-              categoryViewModes[category.id],
-              newSize
-            );
-          },
-        },
-        {
-          key: "medium",
-          label: "Medium",
-          onClick: () => {
-            const newSize = { list: 28, grid: 32, icon: 32 };
-            setCategoryBookmarkSizes((prev) => ({
-              ...prev,
-              [category.id]: newSize,
-            }));
-            saveUserPreferences(
-              category.id,
-              categoryViewModes[category.id],
-              newSize
-            );
-          },
-        },
-        {
-          key: "large",
-          label: "Large",
-          onClick: () => {
-            const newSize = { list: 40, grid: 64, icon: 70 };
-            setCategoryBookmarkSizes((prev) => ({
-              ...prev,
-              [category.id]: newSize,
-            }));
-            saveUserPreferences(
-              category.id,
-              categoryViewModes[category.id],
-              newSize
-            );
-          },
-        },
-      ],
-    },
-    {
-      key: "rename",
-      icon: <EditOutlined />,
-      label: "Rename Category",
-      onClick: () => {
-        setSelectedCategory(category);
-        setNewCategoryName(category.name);
-        setIsRenameCategoryModalVisible(true);
-      },
-    },
-    {
-      key: "editMode",
-      icon: <EditOutlined />,
-      label: "Edit Mode",
-      onClick: () => {
-        setSelectedCategory(category);
-        setEditModeBookmarks(
-          links
-            .filter((link) => link.categoryId === category.id)
-            .sort((a, b) => (a.order || 0) - (b.order || 0))
-            .map((link) => ({ ...link, isEditing: false }))
         );
-        setIsEditModePanelVisible(true);
-      },
-    },
-    {
-      key: "delete",
-      icon: <DeleteOutlined />,
-      label: "Delete Category",
-      danger: true,
-      onClick: () => {
-        Modal.confirm({
-          title: "Delete Category",
-          content:
-            "Are you sure you want to delete this category and all its bookmarks?",
-          okText: "Yes",
-          okType: "danger",
-          cancelText: "No",
-          onOk: () => handleDeleteCategory(category.id),
-        });
-      },
-    },
-    // ... rest of the menu items ...
-  ];
+
+        return () => {
+          unsubscribeCategory();
+        };
+      } else {
+        setLoading(false);
+      }
+    });
+
+    return () => unsubscribeAuth();
+  }, [categoryType]);
+
+  useEffect(() => {
+    if (showSettings && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right,
+      });
+    }
+  }, [showSettings]);
 
   const getFaviconUrl = (url) => {
     try {
-      if (!url) return "https://www.google.com/favicon.ico";
-      let cleanUrl = url.trim();
-      if (!cleanUrl.match(/^https?:\/\//i)) {
-        cleanUrl = `http://${cleanUrl}`;
-      }
-      const urlObj = new URL(cleanUrl);
-      const domain = urlObj.hostname;
-      return `https://www.google.com/s2/favicons?domain=${domain}&sz=24`;
+      const domain = new URL(url).hostname;
+      return `https://www.google.com/s2/favicons?sz=64&domain=${domain}`;
     } catch (error) {
-      return "https://www.google.com/favicon.ico";
+      return `https://www.google.com/s2/favicons?sz=64&domain=google.com`; // Default favicon
     }
   };
 
-  const handleEditBookmark = (bookmark) => {
-    setEditingBookmark(bookmark);
-    editBookmarkForm.setFieldsValue({
-      title: bookmark.title,
-      url: bookmark.url,
-    });
-    setIsEditBookmarkModalVisible(true);
+  const getIconSizeClass = () => {
+    switch (iconSize) {
+      case "small":
+        return "w-4 h-4";
+      case "large":
+        return "w-8 h-8";
+      default:
+        return "w-6 h-6";
+    }
   };
 
-  const handleEditBookmarkSubmit = async () => {
+  const handleDelete = async (bookmark) => {
     try {
-      const values = await editBookmarkForm.validateFields();
-
-      if (editingBookmark.isAdminBookmark) {
-        // Update admin bookmark in links collection
-        const docRef = doc(db, "links", editingBookmark.id);
-        await updateDoc(docRef, {
-          name: values.title, // Changed from title to name
-          link: values.url, // Changed from url to link
-          updatedAt: new Date().toISOString(),
+      if (bookmark.addedByAdmin) {
+        // Just hide the bookmark for this user
+        await updateDoc(doc(db, "users", user.uid, "bookmarks", bookmark.id), {
+          hidden: true,
         });
+        message.success("Bookmark hidden successfully!");
       } else {
-        // Update user bookmark in CatBookmarks collection
-        const docRef = doc(
-          db,
-          "users",
-          user.uid,
-          "CatBookmarks",
-          editingBookmark.id
-        );
-        await updateDoc(docRef, {
-          title: values.title,
-          url: values.url,
-          updatedAt: new Date().toISOString(),
-        });
+        // Actually delete the bookmark
+        await deleteDoc(doc(db, "users", user.uid, "bookmarks", bookmark.id));
+        message.success("Bookmark deleted successfully!");
+      }
+    } catch (error) {
+      message.error("Failed to delete bookmark");
+      console.error("Error deleting bookmark:", error);
+    }
+  };
+
+  const handleAdd = async () => {
+    try {
+      if (!newBookmark.name || !newBookmark.link) {
+        message.error("Please fill in all fields");
+        return;
       }
 
-      // Update local state
-      setLinks((prevLinks) => {
-        return prevLinks.map((link) => {
-          if (link.id === editingBookmark.id) {
-            return {
-              ...link,
-              title: values.title,
-              url: values.url,
-              name: values.title, // Update both title and name
-              link: values.url, // Update both url and link
-              updatedAt: new Date().toISOString(),
-            };
-          }
-          return link;
-        });
-      });
+      const bookmarkData = {
+        name: newBookmark.name,
+        link: newBookmark.link,
+        category: categoryType,
+        addedByAdmin: false,
+        createdAt: new Date().toISOString(),
+      };
 
-      setEditingBookmark(null);
-      setIsEditBookmarkModalVisible(false);
-      editBookmarkForm.resetFields();
-      message.success("Bookmark updated successfully");
-    } catch (error) {
-      console.error("Error updating bookmark:", error);
-      message.error("Failed to update bookmark");
-    }
-  };
-
-  const handleColumnCountChange = (count) => {
-    setColumnCount(count);
-    // Redistribute categories when column count changes
-    redistributeCategories(count);
-  };
-
-  const renderBookmarkList = (categoryLinks, categoryId) => {
-    const sizes = categoryBookmarkSizes[categoryId] || { list: 32 };
-    return (
-      <List
-        itemLayout="horizontal"
-        dataSource={categoryLinks}
-        renderItem={(link) => (
-          <List.Item
-            actions={[
-              <Tooltip title="Edit">
-                <Button
-                  type="text"
-                  icon={<EditOutlined />}
-                  onClick={() => handleEditBookmark(link)}
-                />
-              </Tooltip>,
-              <Tooltip title="Delete">
-                <Button
-                  type="text"
-                  icon={<DeleteOutlined />}
-                  onClick={() => handleDeleteBookmark(link.id)}
-                  danger
-                />
-              </Tooltip>,
-            ]}
-          >
-            <List.Item.Meta
-              avatar={
-                <Avatar
-                  src={getFaviconUrl(link.url || link.link)}
-                  size={sizes.list}
-                  style={{ padding: "2px" }}
-                />
-              }
-              title={
-                <a
-                  href={link.url || link.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {link.title || link.name}
-                </a>
-              }
-            />
-          </List.Item>
-        )}
-      />
-    );
-  };
-
-  const renderBookmarkGrid = (categoryLinks, categoryId) => {
-    const sizes = categoryBookmarkSizes[categoryId] || { grid: 32 };
-    return (
-      <div className="w-full">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
-          {categoryLinks.map((link) => (
-            <div
-              key={link.id}
-              className="flex flex-col items-center p-1 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 group relative"
-            >
-              <div className="relative w-full flex justify-center">
-                <a
-                  href={link.url || link.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block"
-                >
-                  <img
-                    src={getFaviconUrl(link.url || link.link)}
-                    alt={link.title || link.name}
-                    style={{
-                      width: `${sizes.grid}px`,
-                      height: `${sizes.grid}px`,
-                    }}
-                    className="mx-auto object-contain transition-transform duration-300 group-hover:scale-110"
-                  />
-                </a>
-                
-              </div>
-              <Tooltip title={link.title || link.name}>
-                <div className="w-full text-center">
-                  <span className="text-[12px] truncate -ml-1">
-                    {link.title || link.name}
-                  </span>
-                </div>
-              </Tooltip>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-  const renderBookmarkIcon = (categoryLinks, categoryId) => {
-    const sizes = categoryBookmarkSizes[categoryId] || { icon: 24 };
-    return (
-      <div className="w-full">
-        <div className="grid grid-cols-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 gap-3 p-1">
-          {categoryLinks.map((link) => (
-            <div key={link.id} className="relative group flex justify-center">
-              <a
-                href={link.url || link.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block"
-              >
-                <img
-                  src={getFaviconUrl(link.url || link.link)}
-                  alt={link.title || link.name}
-                  style={{
-                    width: `${sizes.icon}px`,
-                    height: `${sizes.icon}px`,
-                  }}
-                  className="mx-auto transition-transform duration-300 group-hover:scale-110"
-                />
-              </a>
-             
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-  const renderBookmarksByCategory = () => {
-    // Filter out hidden categories
-    const visibleCategories = categories.filter(
-      (category) => !hiddenCategories.includes(category.id)
-    );
-
-    return (
-      <div className="mb-2 ">
-        <div className="flex justify-between mb-4">
-        <div style={{ marginBottom: "24px" }}>
-        <Space>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setIsAddCategoryModalVisible(true)}
-          >
-            Add Hello Category
-          </Button>
-        </Space>
-      </div>
-          <Radio.Group
-            value={columnCount}
-            onChange={(e) => handleColumnCountChange(e.target.value)}
-            buttonStyle="solid"
-          >
-            <Radio.Button value={1}>1</Radio.Button>
-            <Radio.Button value={2}>2</Radio.Button>
-            <Radio.Button value={3}>3</Radio.Button>
-            <Radio.Button value={4}>4</Radio.Button>
-          </Radio.Group>
-        </div>
-
-        <DragDropContext onDragEnd={onDragEnd}>
-          <Row gutter={[16, 16]}>
-            {Array.from({ length: columnCount }, (_, i) => i + 1).map(
-              (colNum) => (
-                <Col
-                  key={`column${colNum}`}
-                  xs={24}
-                  sm={columnCount <= 2 ? 12 : 24}
-                  lg={24 / columnCount}
-                >
-                  <Droppable droppableId={`column${colNum}`}>
-                    {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        className={`p-2 rounded transition-colors duration-200 ${
-                          snapshot.isDraggingOver
-                            ? "bg-blue-200 border-2 border-dashed border-blue-500"
-                            : "bg-gray-700 border-2 border-dashed border-transparent"
-                        }`}
-                      >
-                        <div className="text-center text-gray-400 text-sm mb-4"></div>
-                        {categoryColumns[`column${colNum}`]?.map(
-                          (categoryId, index) => {
-                            const category = visibleCategories.find(
-                              (c) => c.id === categoryId
-                            );
-                            if (!category) return null;
-
-                            const categoryLinks = links
-                              .filter(
-                                (link) =>
-                                  link.categoryId === category.id &&
-                                  !link.isHidden
-                              )
-                              .sort((a, b) => (a.order || 0) - (b.order || 0));
-
-                            return (
-                              <Draggable
-                                key={category.id}
-                                draggableId={category.id}
-                                index={index}
-                              >
-                                {(provided, snapshot) => (
-                                  <div
-                                    ref={provided.innerRef}
-                                    {...provided.draggableProps}
-                                    className={`mb-4 transition-all duration-200 ${
-                                      snapshot.isDragging
-                                        ? "shadow-2xl rotate-1 scale-105"
-                                        : "shadow-none rotate-0 scale-100"
-                                    }`}
-                                  >
-                                    <Card className="max-w-xl mx-auto"
-                                      title={
-                                        <div className="bg-gradient-to-r rounded-sm from-blue-700 via-blue-600 to-blue-800 p-1 relative overflow-hidden">
-                                          <div className="absolute left-0 w-full h-full">
-                                            <div className="absolute inset-0 bg-white opacity-10 transform rotate-45 translate-x-[-50%] translate-y-[-50%] w-[200%] h-[200%]"></div>
-                                          </div>
-                                          <div className="relative z-10 flex justify-between items-center">
-                                            <div className="flex items-center flex-1">
-                                              <div
-                                                {...provided.dragHandleProps}
-                                                className={`cursor-move p-2 rounded-xs transition-all duration-200 group ${
-                                                  snapshot.isDragging
-                                                    ? "bg-indigo-500"
-                                                    : "hover:bg-indigo-500"
-                                                }`}
-                                              >
-                                                <div className="flex flex-col gap-1">
-                                                  <div className="flex gap-1">
-                                                    <div className="w-1 h-1 rounded-full bg-white"></div>
-                                                    <div className="w-1 h-1 rounded-full bg-white"></div>
-                                                  </div>
-                                                  <div className="flex gap-1">
-                                                    <div className="w-1 h-1 rounded-full bg-white"></div>
-                                                    <div className="w-1 h-1 rounded-full bg-white"></div>
-                                                  </div>
-                                                </div>
-                                              </div>
-                                              <span className="text-sm text-white font-semibold ml-2">
-                                                {category.name ||
-                                                  category.newCategory}
-                                              </span>
-                                            </div>
-                                            <Space>
-                                              <Tooltip title="Add Bookmark">
-                                                <Button
-                                                  type="text"
-                                                  icon={<PlusOutlined />}
-                                                  onClick={() => {
-                                                    setSelectedCategory(
-                                                      category
-                                                    );
-                                                    setIsAddBookmarkModalVisible(
-                                                      true
-                                                    );
-                                                  }}
-                                                  style={{ color: "white" }}
-                                                />
-                                              </Tooltip>
-                                              <Dropdown
-                                                menu={{
-                                                  items:
-                                                    getCategoryMenuItems(
-                                                      category
-                                                    ),
-                                                }}
-                                                trigger={["click"]}
-                                              >
-                                                <Button
-                                                  type="text"
-                                                  icon={<MoreOutlined />}
-                                                  style={{ color: "white" }}
-                                                />
-                                              </Dropdown>
-                                            </Space>
-                                          </div>
-                                        </div>
-                                      }
-                                      headStyle={{
-                                        padding: 0,
-                                        borderBottom: "none",
-                                        borderRadius: "8px 8px 0 0",
-                                      }}
-                                      bodyStyle={{
-                                        padding: "16px",
-                                        maxHeight: "400px",
-                                        overflowY: "auto",
-                                      }}
-                                      style={{
-                                        borderRadius: "8px",
-                                        height: "100%",
-                                        transition: "all 0.3s ease",
-                                        transform: snapshot.isDragging
-                                          ? "rotate(1deg)"
-                                          : "rotate(0deg)",
-                                        boxShadow: snapshot.isDragging
-                                          ? "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
-                                          : "none",
-                                      }}
-                                    >
-                                      {categoryLinks.length === 0 ? (
-                                        <Empty
-                                          description="No bookmarks in this category yet"
-                                          image={Empty.PRESENTED_IMAGE_SIMPLE}
-                                        />
-                                      ) : (
-                                        <>
-                                          {categoryViewModes[category.id] ===
-                                            "list" &&
-                                            renderBookmarkList(
-                                              categoryLinks,
-                                              category.id
-                                            )}
-                                          {categoryViewModes[category.id] ===
-                                            "grid" &&
-                                            renderBookmarkGrid(
-                                              categoryLinks,
-                                              category.id
-                                            )}
-                                          {categoryViewModes[category.id] ===
-                                            "icon" &&
-                                            renderBookmarkIcon(
-                                              categoryLinks,
-                                              category.id
-                                            )}
-                                        </>
-                                      )}
-                                    </Card>
-                                  </div>
-                                )}
-                              </Draggable>
-                            );
-                          }
-                        )}
-                        {provided.placeholder}
-                      </div>
-                    )}
-                  </Droppable>
-                </Col>
-              )
-            )}
-          </Row>
-        </DragDropContext>
-      </div>
-    );
-  };
-
-  // Add this function to save view mode and size preferences
-  const saveUserPreferences = async (categoryId, viewMode, size) => {
-    if (!user) return;
-    try {
-      const userPrefsRef = doc(db, "users", user.uid);
-      await updateDoc(userPrefsRef, {
-        [`categoryPreferences.${categoryId}`]: {
-          viewMode,
-          size,
-          lastUpdated: new Date().toISOString(),
-        },
-        globalPreferences: {
-          defaultViewMode: viewMode,
-          faviconSize: size?.grid || 32,
-          lastUpdated: new Date().toISOString(),
-        },
-      });
-    } catch (error) {
-      console.error("Error saving preferences:", error);
-    }
-  };
-
-  // Add this function to toggle category visibility
-  const toggleCategoryVisibility = async (categoryId) => {
-    try {
-      const userDocRef = doc(db, "users", user.uid);
-      const newHiddenCategories = hiddenCategories.includes(categoryId)
-        ? hiddenCategories.filter((id) => id !== categoryId)
-        : [...hiddenCategories, categoryId];
-
-      await updateDoc(userDocRef, {
-        hiddenCategories: newHiddenCategories,
-      });
-
-      setHiddenCategories(newHiddenCategories);
-      message.success(
-        hiddenCategories.includes(categoryId)
-          ? "Category is now visible"
-          : "Category is now hidden"
+      await addDoc(
+        collection(db, "users", user.uid, "bookmarks"),
+        bookmarkData
       );
+      message.success("Bookmark added successfully!");
+      setShowAddModal(false);
+      setNewBookmark({ name: "", link: "" });
     } catch (error) {
-      console.error("Error toggling category visibility:", error);
-      message.error("Failed to update category visibility");
+      message.error("Failed to add bookmark");
+      console.error("Error adding bookmark:", error);
     }
   };
 
-  // Update the useEffect that fetches user data to include preferences
-  useEffect(() => {
-    const fetchUserPreferences = async () => {
-      if (!user) return;
-      try {
-        const userDocRef = doc(db, "users", user.uid);
-        const userDocSnap = await getDoc(userDocRef);
-
-        if (userDocSnap.exists()) {
-          const data = userDocSnap.data();
-          // Load hidden categories
-          setHiddenCategories(data.hiddenCategories || []);
-
-          // Load view mode preferences
-          if (data.categoryPreferences) {
-            const viewModes = {};
-            const sizes = {};
-            Object.entries(data.categoryPreferences).forEach(
-              ([categoryId, prefs]) => {
-                if (prefs.viewMode) viewModes[categoryId] = prefs.viewMode;
-                if (prefs.size) sizes[categoryId] = prefs.size;
-              }
-            );
-            setCategoryViewModes(viewModes);
-            setCategoryBookmarkSizes(sizes);
-          }
-
-          // Load global view preferences
-          if (data.globalPreferences) {
-            if (data.globalPreferences.defaultViewMode) {
-              setViewMode(data.globalPreferences.defaultViewMode);
-            }
-            if (data.globalPreferences.faviconSize) {
-              setFaviconSize(data.globalPreferences.faviconSize);
-            }
-          }
-        }
-      } catch (error) {
-        console.error("Error loading preferences:", error);
+  const handleEdit = async () => {
+    try {
+      if (!editingBookmark.name || !editingBookmark.link) {
+        message.error("Please fill in all fields");
+        return;
       }
+
+      const bookmarkRef = doc(
+        db,
+        "users",
+        user.uid,
+        "bookmarks",
+        editingBookmark.id
+      );
+      await updateDoc(bookmarkRef, {
+        name: editingBookmark.name,
+        link: editingBookmark.link,
+      });
+
+      message.success("Bookmark updated successfully!");
+      setShowEditModal(false);
+      setEditingBookmark(null);
+    } catch (error) {
+      message.error("Failed to update bookmark");
+      console.error("Error updating bookmark:", error);
+    }
+  };
+
+  const renderSettingsMenu = () => {
+    const dropdownContent = showSettings && (
+      <div
+        className={`fixed w-48 bg-white dark:text-white dark:bg-[#28283A] rounded-sm shadow-lg border border-gray-200 dark:border-gray-700 z-[9999]`}
+        style={{
+          top: `${dropdownPosition.top}px`,
+          right: `${dropdownPosition.right}px`,
+        }}
+      >
+        <div className="p-2">
+          <div className="mb-4">
+            <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+              Display
+            </div>
+            <div className="flex gap-1">
+              <button
+                onClick={() => setViewMode("list")}
+                className={`p-1 rounded ${
+                  viewMode === "list"
+                    ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
+                    : "hover:bg-gray-100 dark:hover:bg-gray-700"
+                }`}
+              >
+                List
+              </button>
+              <button
+                onClick={() => setViewMode("grid")}
+                className={`p-1 rounded ${
+                  viewMode === "grid"
+                    ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
+                    : "hover:bg-gray-100 dark:hover:bg-gray-700"
+                }`}
+              >
+                Grid
+              </button>
+              <button
+                onClick={() => setViewMode("cloud")}
+                className={`p-1 rounded ${
+                  viewMode === "cloud"
+                    ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
+                    : "hover:bg-gray-100 dark:hover:bg-gray-700"
+                }`}
+              >
+                Cloud
+              </button>
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+              Icon Size
+            </div>
+            <div className="flex gap-1">
+              <button
+                onClick={() => setIconSize("small")}
+                className={`p-1 w-10 mx-2 rounded ${
+                  iconSize === "small"
+                    ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
+                    : "hover:bg-gray-100 dark:hover:bg-gray-700"
+                }`}
+              >
+                S
+              </button>
+              <button
+                onClick={() => setIconSize("medium")}
+                className={`p-1 w-10 mx-2 rounded ${
+                  iconSize === "medium"
+                    ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
+                    : "hover:bg-gray-100 dark:hover:bg-gray-700"
+                }`}
+              >
+                M
+              </button>
+              <button
+                onClick={() => setIconSize("large")}
+                className={`p-1 w-10 mx-2 rounded ${
+                  iconSize === "large"
+                    ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
+                    : "hover:bg-gray-100 dark:hover:bg-gray-700"
+                }`}
+              >
+                L
+              </button>
+            </div>
+          </div>
+
+          <div className="border-t dark:border-gray-700 pt-2">
+            <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+              Options
+            </div>
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showUrl}
+                onChange={() => setShowUrl(!showUrl)}
+                className="rounded border-gray-300 dark:border-gray-600"
+              />
+              Show Name
+            </label>
+          </div>
+
+          <div className="border-t dark:border-gray-700 pt-2">
+            <button
+              onClick={() => {
+                setShowSettings(false);
+                setShowEditModal(true);
+              }}
+              className="flex items-center gap-2 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-sm"
+            >
+              <Edit className="w-4 h-4" />
+              Edit Bookmarks
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+
+    return (
+      <div className="relative backdrop-blur-sm flex justify-between w-full">
+        <div
+          className="dark:text-white text-xl font-medium p-2 w-full cursor-pointer flex items-center"
+          onClick={collapse}
+        >
+          {itemName || "Popular Bookmarks"}
+        </div>
+        {isHovered && (
+          <button
+            onClick={() => {
+              setShowSettings(false);
+              setShowAddModal(true);
+            }}
+            className="flex dark:text-white/50 items-center rounded-sm gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm"
+          >
+            <Plus className="w-5 h-5" />
+          </button>
+        )}
+
+        {isHovered && (
+          <button
+            ref={buttonRef}
+            onClick={() => setShowSettings(!showSettings)}
+            className="p-2 rounded-sm dark:text-white/50 hover:bg-gray-100 dark:hover:bg-gray-700"
+          >
+            <Settings className="w-5 h-5" />
+          </button>
+        )}
+        {dropdownContent && createPortal(dropdownContent, document.body)}
+      </div>
+    );
+  };
+
+  const renderBookmarks = () => {
+    const commonClasses = {
+      container: "transition-all mt-8 duration-200 ease-in-out cursor-pointer",
+      image: `${getIconSizeClass()} rounded`,
+      title: "font-medium text-gray-900 dark:text-gray-100",
     };
 
-    fetchUserPreferences();
-  }, [user]);
+    const views = {
+      list: {
+        container: "flex flex-col  space-y-2",
+        item: "flex items-center p-2 rounded-sm bg-gray-50/[(var(--bg-opacity))] dark:bg-gray-700/[(var(--bg-opacity))] hover:bg-gray-100 dark:hover:bg-gray-600",
+        content: "flex items-center w-full",
+        details: "flex-grow",
+      },
+      grid: {
+        container: `grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4`,
+        item: "flex flex-col items-center p-2 rounded-sm bg-gray-50/[(var(--bg-opacity))] dark:bg-gray-700/[(var(--bg-opacity))] hover:bg-gray-100 dark:hover:bg-gray-600",
+        content: "flex flex-col items-center text-center w-full",
+        details: "w-full mt-2 overflow-hidden",
+      },
+      cloud: {
+        container: "flex flex-wrap gap-4",
+        item: "flex items-center justify-center p-2 rounded-full bg-gray-50/[(var(--bg-opacity))] dark:bg-gray-700/[(var(--bg-opacity))] hover:bg-gray-100 dark:hover:bg-gray-600",
+        content: "flex items-center w-fit",
+      },
+    };
 
-  if (loading) {
-    return <Spin size="large" />;
-  }
+    const currentView = views[viewMode];
+
+    return (
+      <div className={currentView.container}>
+        {bookmarks.map((item) => (
+          <a
+            key={item.id}
+            href={item.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`${commonClasses.container} ${currentView.item}`}
+          >
+            <div className={currentView.content}>
+              <img
+                src={getFaviconUrl(item.link)}
+                alt=""
+                className={commonClasses.image}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = "https://www.google.com/favicon.ico";
+                }}
+              />
+              <div className={currentView.details}>
+                {showUrl && (
+                  <div
+                    className={`${commonClasses.title} ${
+                      viewMode === "grid" ? "truncate text-center text-sm" : ""
+                    }`}
+                  >
+                    {item.name}
+                  </div>
+                )}
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+    );
+  };
 
   return (
-    <div style={{ padding: "24px" }}>
-      
-
-      {renderBookmarksByCategory()}
-
-      <Modal
-        title="Add New Category"
-        open={isAddCategoryModalVisible}
-        onOk={handleAddCategory}
-        onCancel={() => {
-          setIsAddCategoryModalVisible(false);
-          setNewCategoryName("");
-        }}
-      >
-        <Input
-          placeholder="Enter category name"
-          value={newCategoryName}
-          onChange={(e) => setNewCategoryName(e.target.value)}
-        />
-      </Modal>
-
-      <Modal
-        title="Rename Category"
-        open={isRenameCategoryModalVisible}
-        onOk={handleRenameCategory}
-        onCancel={() => {
-          setIsRenameCategoryModalVisible(false);
-          setNewCategoryName("");
-          setSelectedCategory(null);
-        }}
-      >
-        <Input
-          placeholder="Enter new category name"
-          value={newCategoryName}
-          onChange={(e) => setNewCategoryName(e.target.value)}
-        />
-      </Modal>
-
-      <Modal
-        title="Add Bookmark"
-        open={isAddBookmarkModalVisible}
-        onOk={handleAddBookmark}
-        onCancel={() => {
-          setIsAddBookmarkModalVisible(false);
-          setNewBookmark({ title: "", url: "", favicon: "" });
-        }}
-      >
-        <Form layout="vertical">
-          <Form.Item label="Title" required>
-            <Input
-              placeholder="Enter bookmark title"
-              value={newBookmark.title}
-              onChange={(e) =>
-                setNewBookmark((prev) => ({ ...prev, title: e.target.value }))
-              }
-            />
-          </Form.Item>
-          <Form.Item label="URL" required>
-            <Input
-              placeholder="Enter bookmark URL"
-              value={newBookmark.url}
-              onChange={handleUrlChange}
-              addonBefore={
-                newBookmark.favicon && (
-                  <img
-                    src={newBookmark.favicon}
-                    alt=""
-                    style={{ width: 16, height: 16 }}
-                  />
-                )
-              }
-            />
-          </Form.Item>
-        </Form>
-      </Modal>
-
-      <Modal
-        title="Edit Bookmark"
-        open={isEditBookmarkModalVisible}
-        onCancel={() => {
-          setIsEditBookmarkModalVisible(false);
-          setEditingBookmark(null);
-          editBookmarkForm.resetFields();
-        }}
-        onOk={handleEditBookmarkSubmit}
-      >
-        <Form
-          form={editBookmarkForm}
-          layout="vertical"
-          initialValues={{
-            title: editingBookmark?.title || "",
-            url: editingBookmark?.url || "",
-          }}
-        >
-          <Form.Item
-            name="title"
-            label="Title"
-            rules={[
-              { required: true, message: "Please input bookmark title!" },
-            ]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="url"
-            label="URL"
-            rules={[
-              { required: true, message: "Please input bookmark URL!" },
-              {
-                type: "url",
-                message: "Please enter a valid URL!",
-                transform: (value) => {
-                  if (!/^https?:\/\//i.test(value)) {
-                    return `http://${value}`;
-                  }
-                  return value;
-                },
-              },
-            ]}
-          >
-            <Input />
-          </Form.Item>
-        </Form>
-      </Modal>
-
-      <Modal
-        title={`Edit Bookmarks - ${selectedCategory?.name}`}
-        open={isEditModePanelVisible}
-        width={800}
-        onCancel={() => {
-          if (hasUnsavedChanges) {
-            Modal.confirm({
-              title: "Unsaved Changes",
-              content:
-                "You have unsaved changes. Are you sure you want to exit?",
-              onOk: () => {
-                setIsEditModePanelVisible(false);
-                setHasUnsavedChanges(false);
-                setSelectedBookmarks([]);
-              },
-              okText: "Yes, Exit",
-              cancelText: "Stay",
-            });
-          } else {
-            setIsEditModePanelVisible(false);
-            setSelectedBookmarks([]);
-          }
-        }}
-        footer={[
-          <Button key="selectAll" onClick={selectAllBookmarks}>
-            {selectedBookmarks.length === editModeBookmarks.length
-              ? "Deselect All"
-              : "Select All"}
-          </Button>,
-          <Button
-            key="delete"
-            type="primary"
-            danger
-            disabled={selectedBookmarks.length === 0}
-            onClick={handleDeleteSelected}
-          >
-            Delete Selected ({selectedBookmarks.length})
-          </Button>,
-          <Button
-            key="cancel"
-            onClick={() => {
-              if (hasUnsavedChanges) {
-                Modal.confirm({
-                  title: "Unsaved Changes",
-                  content:
-                    "You have unsaved changes. Are you sure you want to exit?",
-                  onOk: () => {
-                    setIsEditModePanelVisible(false);
-                    setHasUnsavedChanges(false);
-                    setSelectedBookmarks([]);
-                  },
-                  okText: "Yes, Exit",
-                  cancelText: "Stay",
-                });
-              } else {
-                setIsEditModePanelVisible(false);
-                setSelectedBookmarks([]);
-              }
+    <div
+      className={`${
+        !localStorage.getItem("backgroundImage") && "dark:bg-[#28283A] bg-white"
+      } rounded-sm p-3 shadow-sm isolate backdrop-blur-sm`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <div className="flex justify-end relative z-[9999]">
+        {renderSettingsMenu()}
+      </div>
+      {loading ? (
+        <div className="flex justify-center items-center h-24 text-gray-600 dark:text-gray-300">
+          Loading...
+        </div>
+      ) : (
+        <>
+          {!collapsed && renderBookmarks()}
+          <Modal
+            title="Add New Bookmark"
+            open={showAddModal}
+            onOk={handleAdd}
+            onCancel={() => {
+              setShowAddModal(false);
+              setNewBookmark({ name: "", link: "" });
             }}
           >
-            Cancel
-          </Button>,
-          <Button
-            key="save"
-            type="primary"
-            disabled={!hasUnsavedChanges}
-            onClick={handleSaveChanges}
-          >
-            Save Changes
-          </Button>,
-        ]}
-      >
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <Droppable droppableId="bookmarks">
-            {(provided) => (
-              <div
-                {...provided.droppableProps}
-                ref={provided.innerRef}
-                style={{ minHeight: "100px" }}
-              >
-                {editModeBookmarks.map((bookmark, index) => (
-                  <Draggable
-                    key={bookmark.id}
-                    draggableId={bookmark.id}
-                    index={index}
-                  >
-                    {(provided) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        style={{
-                          padding: "8px",
-                          margin: "8px 0",
-                          backgroundColor: selectedBookmarks.includes(
-                            bookmark.id
-                          )
-                            ? "#e6f7ff"
-                            : "#fff",
-                          border: "1px solid #f0f0f0",
-                          borderRadius: "4px",
-                          display: "flex",
-                          alignItems: "center",
-                          ...provided.draggableProps.style,
-                        }}
-                      >
-                        <Checkbox
-                          checked={selectedBookmarks.includes(bookmark.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedBookmarks([
-                                ...selectedBookmarks,
-                                bookmark.id,
-                              ]);
-                            } else {
-                              setSelectedBookmarks(
-                                selectedBookmarks.filter(
-                                  (id) => id !== bookmark.id
-                                )
-                              );
-                            }
-                          }}
-                          style={{ marginRight: 8 }}
-                        />
-                        <img
-                          src={getFaviconUrl(bookmark.url)}
-                          alt=""
-                          style={{
-                            width: 16,
-                            height: 16,
-                            marginRight: 8,
-                          }}
-                        />
-                        <span style={{ flex: 1 }}>{bookmark.title}</span>
-                        <Button
-                          type="text"
-                          icon={<EditOutlined />}
-                          onClick={() => handleEditBookmark(bookmark)}
-                        />
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Name
+                </label>
+                <Input
+                  value={newBookmark.name}
+                  onChange={(e) =>
+                    setNewBookmark({ ...newBookmark, name: e.target.value })
+                  }
+                  placeholder="Enter bookmark name"
+                />
               </div>
-            )}
-          </Droppable>
-        </DragDropContext>
-      </Modal>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  URL
+                </label>
+                <Input
+                  value={newBookmark.link}
+                  onChange={(e) =>
+                    setNewBookmark({ ...newBookmark, link: e.target.value })
+                  }
+                  placeholder="Enter bookmark URL"
+                />
+              </div>
+            </div>
+          </Modal>
+          <Modal
+            title="Edit Bookmarks"
+            open={showEditModal}
+            footer={null}
+            onCancel={() => {
+              setShowEditModal(false);
+              setEditingBookmark(null);
+            }}
+          >
+            <div className="space-y-2">
+              {bookmarks.map((bookmark) => (
+                <div
+                  key={bookmark.id}
+                  className="flex items-center justify-between p-3 rounded-sm bg-gray-50 dark:bg-gray-700"
+                >
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={getFaviconUrl(bookmark.link)}
+                      alt=""
+                      className="w-6 h-6"
+                    />
+                    <div>
+                      <div className="font-medium dark:text-white">
+                        {bookmark.name}
+                      </div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
+                        {bookmark.link}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setEditingBookmark(bookmark);
+                        setNewBookmark({
+                          name: bookmark.name,
+                          link: bookmark.link,
+                        });
+                      }}
+                      className="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+                    >
+                      <Edit className="w-4 h-4 text-blue-500" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(bookmark)}
+                      className="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+                    >
+                      <Trash2 className="w-4 h-4 text-red-500" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Modal>
+          {editingBookmark && (
+            <Modal
+              title="Edit Bookmark"
+              open={!!editingBookmark}
+              onOk={handleEdit}
+              onCancel={() => {
+                setEditingBookmark(null);
+                setNewBookmark({ name: "", link: "" });
+              }}
+            >
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Name
+                  </label>
+                  <Input
+                    value={editingBookmark.name}
+                    onChange={(e) =>
+                      setEditingBookmark({
+                        ...editingBookmark,
+                        name: e.target.value,
+                      })
+                    }
+                    placeholder="Enter bookmark name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    URL
+                  </label>
+                  <Input
+                    value={editingBookmark.link}
+                    onChange={(e) =>
+                      setEditingBookmark({
+                        ...editingBookmark,
+                        link: e.target.value,
+                      })
+                    }
+                    placeholder="Enter bookmark URL"
+                  />
+                </div>
+              </div>
+            </Modal>
+          )}
+        </>
+      )}
     </div>
   );
-}
+};
 
 export default PopularBookmarks;

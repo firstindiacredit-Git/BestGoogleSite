@@ -313,6 +313,7 @@ const ContextMenuWrapper = ({ children }) => {
             break;
           case "dlBG":
             localStorage.removeItem("backgroundImage");
+            localStorage.setItem("bgTransparency", "100");
             window.location.reload();
             break;
 
@@ -338,6 +339,7 @@ const ContextMenuWrapper = ({ children }) => {
               localStorage.removeItem("backgroundImage");
               localStorage.removeItem("backgroundType");
               localStorage.removeItem("backgroundColor");
+              localStorage.setItem("bgTransparency", "100");
               closeModal();
               window.location.reload();
             }}

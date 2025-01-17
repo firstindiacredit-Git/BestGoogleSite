@@ -262,7 +262,7 @@ const CategoryHome = ({ categoryType, itemName }) => {
       >
         <div className="p-2">
           <div className="mb-4">
-            <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+            <div className="text-sm font-medium text-gray-500 dark:text-gray-400 p-2">
               Display
             </div>
             <div className="flex gap-1">
@@ -299,8 +299,8 @@ const CategoryHome = ({ categoryType, itemName }) => {
             </div>
           </div>
 
-          <div className="mb-4">
-            <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+          <div className="mb-4 border-t dark:border-gray-700">
+            <div className="text-sm font-medium text-gray-500 dark:text-gray-400 p-2">
               Icon Size
             </div>
             <div className="flex gap-1">
@@ -337,7 +337,7 @@ const CategoryHome = ({ categoryType, itemName }) => {
             </div>
           </div>
 
-          <div className="border-t dark:border-gray-700 pt-2">
+          <div className="border-t dark:border-gray-700 p-2">
             <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
               Options
             </div>
@@ -412,20 +412,20 @@ const CategoryHome = ({ categoryType, itemName }) => {
     const views = {
       list: {
         container: "flex flex-col  space-y-2",
-        item: "flex items-center p-2 rounded-sm bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600",
-        content: "flex items-center w-full",
-        details: "flex-grow",
+        item: "flex items-center p-2 rounded-sm bg-gray-50/[(var(--bg-opacity))] dark:bg-gray-700/[(var(--bg-opacity))] hover:bg-gray-100 dark:hover:bg-gray-600",
+        content: "flex items-center gap-2 w-full",
+        details: "flex-grow ",
       },
       grid: {
         container: `grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4`,
-        item: "flex flex-col items-center p-2 rounded-sm bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600",
+        item: "flex flex-col items-center p-2 rounded-sm bg-gray-50/[(var(--bg-opacity))] dark:bg-gray-700/[(var(--bg-opacity))] hover:bg-gray-100 dark:hover:bg-gray-600",
         content: "flex flex-col items-center text-center w-full",
         details: "w-full mt-2 overflow-hidden",
       },
       cloud: {
         container: "flex flex-wrap gap-4",
-        item: "flex items-center justify-center p-2 rounded-full bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600",
-        content: "flex items-center w-fit",
+        item: "flex items-center justify-center p-2 rounded-full bg-gray-50/[(var(--bg-opacity))] dark:bg-gray-700/[(var(--bg-opacity))] hover:bg-gray-100 dark:hover:bg-gray-600",
+        content: "flex items-center gap-2 w-fit",
       },
     };
 
@@ -473,7 +473,7 @@ const CategoryHome = ({ categoryType, itemName }) => {
     <div
       className={`${
         !localStorage.getItem("backgroundImage") && "dark:bg-[#28283A] bg-white"
-      } rounded-sm p-3 shadow-sm isolate backdrop-blur-sm`}
+      } rounded-sm p-3    shadow-sm isolate backdrop-blur-sm`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >

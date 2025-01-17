@@ -21,11 +21,12 @@ const NotePage = ({ inNotebookSheet = false }) => {
   const [backgroundColor, setBackgroundColor] = useState("#ffffff");
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const [history, setHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
-  const [isAutoColor, setIsAutoColor] = useState(false);
+  const [isAutoColor, setIsAutoColor] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [textColor, setTextColor] = useState("#000000");
 
   const textareaRef = useRef(null);
   const lineNumberRef = useRef(null);
@@ -106,16 +107,22 @@ const NotePage = ({ inNotebookSheet = false }) => {
     const darkModeMediaQuery = window.matchMedia(
       "(prefers-color-scheme: dark)"
     );
-    setIsDarkMode(darkModeMediaQuery.matches);
-
     const handleThemeChange = (e) => {
       setIsDarkMode(e.matches);
+      if (isAutoColor) {
+        setBackgroundColor(e.matches ? "#1f2937" : "#ffffff");
+        setTextColor(e.matches ? "#ffffff" : "#000000");
+      }
     };
+
+    setIsDarkMode(darkModeMediaQuery.matches);
+    handleThemeChange(darkModeMediaQuery);
 
     darkModeMediaQuery.addEventListener("change", handleThemeChange);
     return () =>
       darkModeMediaQuery.removeEventListener("change", handleThemeChange);
-  }, []);
+  }, [isAutoColor]);
+
   const collapse = () => {
     setIsCollapsed(!isCollapsed);
   };
@@ -242,13 +249,21 @@ const NotePage = ({ inNotebookSheet = false }) => {
     return notes.split("\n").length;
   };
 
-  const textColor = getTextColor();
-  const lineColor = getLineColor();
+  const handleColorChange = (color) => {
+    setBackgroundColor(color);
+    setIsAutoColor(false);
+
+    const r = parseInt(color.slice(1, 3), 16);
+    const g = parseInt(color.slice(3, 5), 16);
+    const b = parseInt(color.slice(5, 7), 16);
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    setTextColor(brightness > 128 ? "#000000" : "#ffffff");
+  };
 
   return (
     <div
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       className={`${
         inNotebookSheet ? "w-full h-full " : " h-full max-w-xl mx-auto"
       }`}
@@ -259,28 +274,29 @@ const NotePage = ({ inNotebookSheet = false }) => {
             isAutoColor ? "bg-white dark:bg-[#28283A]" : ""
           }`}
           style={{
-            backgroundColor: isAutoColor ? "transparent" : backgroundColor,
+            backgroundColor: isAutoColor ? undefined : backgroundColor,
           }}
         >
           <div
             className={`p-2 h-full bg flex flex-col justify-between ${
               isAutoColor
                 ? "bg-white dark:bg-[#28283A] text-gray-900 dark:text-white"
-                : backgroundColor
+                : ""
             }`}
             style={{
-              backgroundColor: isAutoColor ? "transparent" : backgroundColor,
+              backgroundColor: isAutoColor ? undefined : backgroundColor,
+              color: isAutoColor ? undefined : textColor,
             }}
           >
             <div className="flex justify-between items-center mb-1">
               <div className="w-full  flex justify-between">
                 <div
-                  className=" flex p-2 w-full text-xl font-medium items-center cursor-pointer"
+                  className=" flex p-2 w-full dark:text-white text-xl font-medium items-center cursor-pointer"
                   onClick={collapse}
                 >
                   Notes
                 </div>
-                {isHovering && (
+                {isHovered && (
                   <div className="flex items-center gap-2">
                     <div className="relative w-9 " ref={colorPickerRef}>
                       <button
@@ -315,11 +331,11 @@ const NotePage = ({ inNotebookSheet = false }) => {
                             {predefinedColors.map((color) => (
                               <button
                                 key={color}
-                                className="w-5 h-5 border border-gray-200 cursor-pointer transition duration-300 ease-in-out transform hover:scale-125 focus:outline-none"
+                                className="w-5 h-5 border dark:border-gray-600 border-gray-200 cursor-pointer transition duration-300 ease-in-out transform hover:scale-125 focus:outline-none"
                                 style={{ backgroundColor: color }}
                                 onClick={() => {
                                   setIsAutoColor(false);
-                                  setBackgroundColor(color);
+                                  handleColorChange(color);
                                   setShowColorPicker(false);
                                 }}
                               />
@@ -329,13 +345,12 @@ const NotePage = ({ inNotebookSheet = false }) => {
                           {/* Custom Color Picker */}
                           <div className="mt-2 flex items-center justify-center">
                             <input
-                              id="customColorPicker"
                               type="color"
-                              className="w-full h-6 p-0 border border-gray-300 rounded-xs cursor-pointer focus:outline-none"
+                              className="w-full h-6 p-0 border dark:border-gray-600 border-gray-300 rounded-xs cursor-pointer focus:outline-none"
                               value={backgroundColor}
                               onChange={(e) => {
                                 setIsAutoColor(false);
-                                setBackgroundColor(e.target.value);
+                                handleColorChange(e.target.value);
                               }}
                             />
                           </div>
@@ -409,7 +424,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
                     backgroundColor: "transparent",
                     border: isAutoColor
                       ? "1px solid rgb(209 213 219)"
-                      : "1px solid #6c757d",
+                      : `1px solid ${textColor}`,
                     padding: "10px 10px 10px 10px",
                     borderRadius: "5px",
                     fontSize: `${fontSize}px`,
@@ -459,7 +474,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
                     .hindi-paper::-webkit-scrollbar {
                       display: none;
                     }
-                `}
+                  `}
                 </style>
               </div>
             )}

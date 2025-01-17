@@ -414,9 +414,9 @@ const ResponsiveWorldClock = () => {
                     onClick={() =>
                       setShowSettingsDropdown(!showSettingsDropdown)
                     }
-                    className="px-4 py-1 dark:bg-white/10 bg-gray-200 hover:bg-gray-300 rounded-full dark:hover:bg-white/20 transition flex items-center gap-2"
+                    className="p-2  hover:bg-gray-100  dark:hover:bg-white/20 transition flex items-center gap-2"
                   >
-                    <Settings className="w-4 h-4" />
+                    <Settings className="w-5 h-5" />
                   </button>
 
                   {showSettingsDropdown && (

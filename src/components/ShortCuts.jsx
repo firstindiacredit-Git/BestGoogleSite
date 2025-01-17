@@ -169,18 +169,25 @@ function BookmarkPage() {
     setShowModal(true);
   };
 
-  const handleUpdateBookmark = async (e) => {
-    e.preventDefault();
-
+  const handleUpdateBookmark = async (values) => {
     if (!editingBookmark) return;
 
     try {
       const docRef = doc(db, "users", user.uid, "shortcut", editingBookmark.id);
-      await updateDoc(docRef, { name, link });
+      await updateDoc(docRef, {
+        name: values.name || name,
+        link: values.link || link,
+      });
 
       setUserBookmarks((prev) =>
         prev.map((bm) =>
-          bm.id === editingBookmark.id ? { ...bm, name, link } : bm
+          bm.id === editingBookmark.id
+            ? {
+                ...bm,
+                name: values.name || name,
+                link: values.link || link,
+              }
+            : bm
         )
       );
 

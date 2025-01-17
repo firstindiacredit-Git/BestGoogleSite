@@ -227,7 +227,9 @@ function SearchPage() {
       ></div>
       <div
         className={`fixed inset-0 ${
-          isDarkMode ? "bg-[#1a1a2e]" : "bg-white"
+          isDarkMode
+            ? "bg-[#1a1a2e]"
+            : "bg-gradient-to-r from-indigo-200 via-blue-100 to-indigo-200"
         } transition-opacity duration-300`}
         style={{ opacity: transparency / 100, zIndex: 0 }}
       ></div>
