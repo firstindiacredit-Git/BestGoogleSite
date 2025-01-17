@@ -337,51 +337,53 @@ const CredentialManager = () => {
   return (
     <>
       {isLocked ? (
-        <div className="p-8 bg-gray-200/10 dark:bg-[#28283A]/50 flex justify-center max-w-6xl w-full mx-auto rounded-xl ">
-        <div className="w-full bg-white dark:bg-[#28283A] rounded-t-sm   h-[80vh]   flex items-center justify-center">
-          <div className="p-8  border bg-white dark:bg-[#513a7a]  border-gray-500/5 text-center rounded-sm shadow-lg w-fit">
-            <div className="flex text-indigo-500 text-6xl items-center justify-center">
-              <FaLock />
-            </div>
-            <h2 className="text-2xl my-1 mt-4 font-semibold dark:text-gray-200">
-              Enter PIN to Unlock
-            </h2>
-            <div className="flex justify-center mt-4 space-x-2 mb-4">
-              {otp.map((value, index) => (
-                <input
-                  key={index}
-                  id={`otp-${index}`}
-                  value={value}
-                  onChange={(e) => handleInputOTPChange(e.target.value, index)}
-                  onKeyDown={(e) => handleKeyDown(e, index)}
-                  className="w-12 h-12 border border-gray-300 rounded-xs text-center text-lg dark:text-white dark:bg-[#513a7a]"
-                  style={{
-                    appearance: "none", // Removes the arrows
-                    MozAppearance: "textfield", // Firefox-specific
-                    WebkitAppearance: "none", // Chrome/Safari-specific
-                  }}
-                />
-              ))}
-            </div>
-            <button
-              onClick={handleUnlock}
-              className="bg-indigo-500 w-full hover:bg-indigo-600 transition-all text-white px-4 py-2 rounded-xs"
-            >
-              Unlock
-            </button>
-            <div className="text-center flex justify-center gap-2 mt-3 -mb-3">
+        <div className="p-8 backdrop-blur-sm bg-white/[var(--widget-opacity)] dark:bg-[#28283A]/[var(--widget-opacity)] flex justify-center w-[90vw]  mx-auto rounded-xl ">
+          <div className="w-full  rounded-t-sm   h-[80vh]   flex items-center justify-center">
+            <div className="p-8  border bg-white dark:bg-[#513a7a]  border-gray-500/5 text-center rounded-sm shadow-lg w-fit">
+              <div className="flex text-indigo-500 text-6xl items-center justify-center">
+                <FaLock />
+              </div>
+              <h2 className="text-2xl my-1 mt-4 font-semibold dark:text-gray-200">
+                Enter PIN to Unlock
+              </h2>
+              <div className="flex justify-center mt-4 space-x-2 mb-4">
+                {otp.map((value, index) => (
+                  <input
+                    key={index}
+                    id={`otp-${index}`}
+                    value={value}
+                    onChange={(e) =>
+                      handleInputOTPChange(e.target.value, index)
+                    }
+                    onKeyDown={(e) => handleKeyDown(e, index)}
+                    className="w-12 h-12 border border-gray-300 rounded-xs text-center text-lg dark:text-white dark:bg-[#513a7a]"
+                    style={{
+                      appearance: "none", // Removes the arrows
+                      MozAppearance: "textfield", // Firefox-specific
+                      WebkitAppearance: "none", // Chrome/Safari-specific
+                    }}
+                  />
+                ))}
+              </div>
               <button
-                className="text-indigo-500 hover:text-indigo-700 text-xs transition duration-200"
-                onClick={() => navigate("/ProfilePage")}
+                onClick={handleUnlock}
+                className="bg-indigo-500 w-full hover:bg-indigo-600 transition-all text-white px-4 py-2 rounded-xs"
               >
-                Forgot Pin?
+                Unlock
               </button>
+              <div className="text-center flex justify-center gap-2 mt-3 -mb-3">
+                <button
+                  className="text-indigo-500 hover:text-indigo-700 text-xs transition duration-200"
+                  onClick={() => navigate("/ProfilePage")}
+                >
+                  Forgot Pin?
+                </button>
+              </div>
             </div>
           </div>
         </div>
-        </div>
       ) : (
-        <div className="mx-auto min-h-[20vh] max-w-[90vw] rounded-xl  p-12 pb-14 dark:bg-[#28283A]/50 bg-gray-200/10">
+        <div className="mx-auto backdrop-blur-sm min-h-[20vh] max-w-[90vw] rounded-xl  p-12 pb-14 dark:bg-[#28283A]/[var(--widget-opacity)] bg-gray-200/[var(--widget-opacity)]">
           <div className="flex justify-between w-[68%] xl:w-[79.2%] dark:bg-[#28283A] bg-white items-center">
             <button
               className="transition-all bg-indigo-500 text-white lg:text-lg text-sm lg:px-4 px-2 py-2 rounded-xs mb-4"
@@ -401,22 +403,45 @@ const CredentialManager = () => {
               <div className="flex items-center gap-2 bg-gray-200 dark:bg-[#513a7a] p-1 rounded-sm">
                 <button
                   onClick={() => setIsGridView(true)}
-                  className={`p-2 rounded ${isGridView ? 'bg-white dark:bg-gray-600 shadow-sm' : ''}`}
+                  className={`p-2 rounded ${
+                    isGridView ? "bg-white dark:bg-gray-600 shadow-sm" : ""
+                  }`}
                 >
-                  <svg className="w-5 h-5 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                  <svg
+                    className="w-5 h-5 dark:text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                    />
                   </svg>
                 </button>
                 <button
                   onClick={() => setIsGridView(false)}
-                  className={`p-2 rounded ${!isGridView ? 'bg-white dark:bg-gray-600 shadow-sm' : ''}`}
+                  className={`p-2 rounded ${
+                    !isGridView ? "bg-white dark:bg-gray-600 shadow-sm" : ""
+                  }`}
                 >
-                  <svg className="w-5 h-5 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  <svg
+                    className="w-5 h-5 dark:text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
                   </svg>
                 </button>
               </div>
-              
             </div>
             <div className="lg:space-x-2 w-fit flex justify-between  space-x-1">
               {filteredCredentials.length > 0 && (
@@ -752,83 +777,83 @@ const CredentialManager = () => {
               </div>
             )}
             <div className="w-[30%] dark:bg-[#28283A] bg-white xl:w-[20%] ">
-            <div >
-              <h2
-                className={`font-semibold dark:bg-[#28283A] bg-white ${
-                  window.size < 1134 ? "-translate-y-8" : "-translate-y-14"
-                } text-center dark:text-gray-100 text-lg lg:text-2xl `}
-              >
-                Generate Password
-              </h2>
-              <div
-                className={`dark:bg-[#513a7a] bg-gray-100 ${
-                  window.size < 1134 ? "-translate-y-8" : "-translate-y-16"
-                } border border-black/5 flex flex-col justify-between -translate-y-8 text-center space-y-5  w-full h-full   text-gray-700 rounded-xs p-6`}
-              >
-                <div className="text-gray-700 border border-black/10 dark:bg-[#28283A] dark:text-gray-300 bg-white p-3 text-[1vw] font-mono rounded-xs">
-                  {genPass || "Generate hackproof password"}
-                </div>
+              <div>
+                <h2
+                  className={`font-semibold dark:bg-[#28283A] bg-white ${
+                    window.size < 1134 ? "-translate-y-8" : "-translate-y-14"
+                  } text-center dark:text-gray-100 text-lg lg:text-2xl `}
+                >
+                  Generate Password
+                </h2>
+                <div
+                  className={`dark:bg-[#513a7a] bg-gray-100 ${
+                    window.size < 1134 ? "-translate-y-8" : "-translate-y-16"
+                  } border border-black/5 flex flex-col justify-between -translate-y-8 text-center space-y-5  w-full h-full   text-gray-700 rounded-xs p-6`}
+                >
+                  <div className="text-gray-700 border border-black/10 dark:bg-[#28283A] dark:text-gray-300 bg-white p-3 text-[1vw] font-mono rounded-xs">
+                    {genPass || "Generate hackproof password"}
+                  </div>
 
-                <div className="mt-4 text-left flex flex-col  justify-between   space-y-2">
-                  <label className="block text-sm">
-                    <input
-                      type="number"
-                      min="8"
-                      max="24"
-                      value={length}
-                      onChange={(e) => setLength(e.target.value)}
-                      className="mr-2 text-gray-700 dark:text-gray-300 text-center dark:bg-[#28283A] px-3 py-2 rounded-xs"
-                    />
-                    <span className="dark:text-gray-300">Length</span>
-                  </label>
-                  <div className="flex  flex-col lg:flex-row justify-between">
-                    <label className="block text-sm dark:text-gray-300">
+                  <div className="mt-4 text-left flex flex-col  justify-between   space-y-2">
+                    <label className="block text-sm">
                       <input
-                        type="checkbox"
-                        checked={includeNumbers}
-                        onChange={() => setIncludeNumbers(!includeNumbers)}
-                        className="mr-2"
+                        type="number"
+                        min="8"
+                        max="24"
+                        value={length}
+                        onChange={(e) => setLength(e.target.value)}
+                        className="mr-2 text-gray-700 dark:text-gray-300 text-center dark:bg-[#28283A] px-3 py-2 rounded-xs"
                       />
-                      Numbers
+                      <span className="dark:text-gray-300">Length</span>
                     </label>
-                    <label className="block text-sm dark:text-gray-300">
-                      <input
-                        type="checkbox"
-                        checked={includeLetters}
-                        onChange={() => setIncludeLetters(!includeLetters)}
-                        className="mr-2"
-                      />
-                      Letters
-                    </label>
-                    <label className="block text-sm dark:text-gray-300">
-                      <input
-                        type="checkbox"
-                        checked={includeSpecialChars}
-                        onChange={() =>
-                          setIncludeSpecialChars(!includeSpecialChars)
-                        }
-                        className="mr-2"
-                      />
-                      Specials
-                    </label>
+                    <div className="flex  flex-col lg:flex-row justify-between">
+                      <label className="block text-sm dark:text-gray-300">
+                        <input
+                          type="checkbox"
+                          checked={includeNumbers}
+                          onChange={() => setIncludeNumbers(!includeNumbers)}
+                          className="mr-2"
+                        />
+                        Numbers
+                      </label>
+                      <label className="block text-sm dark:text-gray-300">
+                        <input
+                          type="checkbox"
+                          checked={includeLetters}
+                          onChange={() => setIncludeLetters(!includeLetters)}
+                          className="mr-2"
+                        />
+                        Letters
+                      </label>
+                      <label className="block text-sm dark:text-gray-300">
+                        <input
+                          type="checkbox"
+                          checked={includeSpecialChars}
+                          onChange={() =>
+                            setIncludeSpecialChars(!includeSpecialChars)
+                          }
+                          className="mr-2"
+                        />
+                        Specials
+                      </label>
+                    </div>
+                  </div>
+                  <div className="flex flex-col xl:flex-row justify-center space-y-2 xl:space-y-0  w-full xl:space-x-3 mt-4">
+                    <button
+                      onClick={() => generateRandomPassword(length)}
+                      className="bg-gray-300 dark:text-gray-400 dark:hover:bg-gray-900 dark:bg-[#513a7a] border  border-gray-500/5 text-gray-700 w-full xl:w-[60%] px-4 py-2 rounded-xs hover:bg-gray-800 hover:text-gray-100 transition duration-300"
+                    >
+                      Generate
+                    </button>
+                    <button
+                      onClick={handleCopyPassword}
+                      className="bg-gray-300 border  dark:text-gray-400 dark:hover:bg-gray-900 dark:bg-[#513a7a] border-gray-500/5 text-gray-700 w-full xl:w-[40%] px-4 py-2 rounded-xs hover:bg-gray-800 hover:text-gray-100  transition duration-300"
+                    >
+                      Copy
+                    </button>
                   </div>
                 </div>
-                <div className="flex flex-col xl:flex-row justify-center space-y-2 xl:space-y-0  w-full xl:space-x-3 mt-4">
-                  <button
-                    onClick={() => generateRandomPassword(length)}
-                    className="bg-gray-300 dark:text-gray-400 dark:hover:bg-gray-900 dark:bg-[#513a7a] border  border-gray-500/5 text-gray-700 w-full xl:w-[60%] px-4 py-2 rounded-xs hover:bg-gray-800 hover:text-gray-100 transition duration-300"
-                  >
-                    Generate
-                  </button>
-                  <button
-                    onClick={handleCopyPassword}
-                    className="bg-gray-300 border  dark:text-gray-400 dark:hover:bg-gray-900 dark:bg-[#513a7a] border-gray-500/5 text-gray-700 w-full xl:w-[40%] px-4 py-2 rounded-xs hover:bg-gray-800 hover:text-gray-100  transition duration-300"
-                  >
-                    Copy
-                  </button>
-                </div>
               </div>
-            </div>
             </div>
           </div>
 

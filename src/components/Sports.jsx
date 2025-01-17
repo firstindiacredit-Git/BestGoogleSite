@@ -8,7 +8,6 @@ import {
   Button,
   Layout,
   Space,
-  Divider,
   Input,
   Select,
   Radio,
@@ -20,8 +19,6 @@ import {
   LoadingOutlined,
   AppstoreOutlined,
   UnorderedListOutlined,
-  TrophyOutlined,
-  SearchOutlined,
 } from "@ant-design/icons";
 
 const { Title } = Typography;
@@ -34,7 +31,6 @@ const SportsLeagues = () => {
   const [eventsLoading, setEventsLoading] = useState(false);
   const [leagues, setLeagues] = useState([]);
   const [filteredLeagues, setFilteredLeagues] = useState([]);
-  const [selectedEvent, setSelectedEvent] = useState(null);
   const [indianLeagues, setIndianLeagues] = useState([]);
   const [viewMode, setViewMode] = useState("grid");
   const [searchQuery, setSearchQuery] = useState("");
@@ -62,7 +58,7 @@ const SportsLeagues = () => {
   const fetchEvents = async (leagueId) => {
     try {
       setEventsLoading(true);
-      setIsModalVisible(true);  // Show modal immediately
+      setIsModalVisible(true); // Show modal immediately
       const response = await fetch(
         `https://www.thesportsdb.com/api/v1/json/3/eventsnextleague.php?id=${leagueId}`
       );
@@ -146,8 +142,11 @@ const SportsLeagues = () => {
   }
 
   return (
-    <Layout className="p-8 border dark:bg-[#28283A]/50 rounded-sm bg-gray-200/10 dark:border-gray-800 border-gray-200">
-      <Content style={{ padding: "2px", margin: "5px" }} className="dark:bg-[#28283A]">
+    <Layout className="p-8 w-[90vw] mx-auto dark:bg-[#28283A]/[var(--widget-opacity)] backdrop-blur-sm rounded-sm bg-gray-200/[var(--widget-opacity)] dark:border-gray-800 border-gray-200">
+      <Content
+        style={{ padding: "2px", margin: "5px" }}
+        className="dark:bg-[#28283A]"
+      >
         <Space direction="vertical" size="large" style={{ width: "100%" }}>
           <div
             style={{
@@ -163,10 +162,16 @@ const SportsLeagues = () => {
               onChange={(e) => setViewMode(e.target.value)}
               className="dark:bg-[#28283A] rounded-sm dark:text-gray-300"
             >
-              <Radio.Button value="grid" className="dark:bg-[#513a7a] dark:text-gray-300 dark:border-gray-700">
+              <Radio.Button
+                value="grid"
+                className="dark:bg-[#513a7a] dark:text-gray-300 dark:border-gray-700"
+              >
                 <AppstoreOutlined />
               </Radio.Button>
-              <Radio.Button value="list" className="dark:bg-[#513a7a] dark:text-gray-300 dark:border-gray-700">
+              <Radio.Button
+                value="list"
+                className="dark:bg-[#513a7a] dark:text-gray-300 dark:border-gray-700"
+              >
                 <UnorderedListOutlined />
               </Radio.Button>
             </Radio.Group>
@@ -185,7 +190,11 @@ const SportsLeagues = () => {
               <Spin size="large" className="dark:text-gray-300" />
             </div>
           ) : error ? (
-            <Alert message={error} type="error" className="dark:bg-[#513a7a] dark:text-gray-300" />
+            <Alert
+              message={error}
+              type="error"
+              className="dark:bg-[#513a7a] dark:text-gray-300"
+            />
           ) : (
             <Row gutter={[16, 16]}>
               {filteredLeagues.map((league) => (
@@ -227,8 +236,8 @@ const SportsLeagues = () => {
               setSelectedLeague(null);
             }}
             footer={[
-              <Button 
-                key="back" 
+              <Button
+                key="back"
                 onClick={() => {
                   setIsModalVisible(false);
                   setSelectedLeague(null);
@@ -244,7 +253,11 @@ const SportsLeagues = () => {
                 <Spin size="large" />
               </div>
             ) : events.length > 0 ? (
-              <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+              <Space
+                direction="vertical"
+                size="middle"
+                style={{ width: "100%" }}
+              >
                 {events.map((event) => (
                   <Card key={event.idEvent} className="w-full">
                     {event.strThumb && (
@@ -256,11 +269,13 @@ const SportsLeagues = () => {
                           height: "200px",
                           objectFit: "cover",
                           borderRadius: "8px",
-                          marginBottom: "16px"
+                          marginBottom: "16px",
                         }}
                       />
                     )}
-                    <h3 className="text-lg font-semibold mb-2">{event.strEvent}</h3>
+                    <h3 className="text-lg font-semibold mb-2">
+                      {event.strEvent}
+                    </h3>
                     <p className="text-gray-600">Date: {event.dateEvent}</p>
                     <p className="text-gray-600">Time: {event.strTime}</p>
                     {event.strVenue && (

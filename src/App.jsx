@@ -1,4 +1,4 @@
-import React, { useState, createContext, useMemo } from "react";
+import React, { useState, createContext, useMemo, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Dropdown, Menu, Button, Modal, message } from "antd";
 import galleryupload from "../public/galleryupload.png";
@@ -284,45 +284,29 @@ const ContextMenuWrapper = ({ children }) => {
     }
   };
 
-  const menu = (
-    <Menu
-      className="dark:text-white dark:bg-[#513a7a]"
-      items={menuItems.flatMap((group) => [
-        ...group.children.map((item) => ({
-          key: item.key,
-          label: (
-            <div className="flex justify-between dark:text-white dark:bg-[#513a7a] items-center w-full">
-              <span>{item.label}</span>
-              {item.shortcut && (
-                <span className="text-gray-500 dark:text-gray-100 ml-2">
-                  {item.shortcut}
-                </span>
-              )}
-            </div>
-          ),
-        })),
-        { type: "divider" },
-      ])}
-      onClick={({ key }) => {
-        switch (key) {
-          case "refresh":
-            window.location.reload();
-            break;
-          case "chBG":
-            openModal();
-            break;
-          case "dlBG":
-            localStorage.removeItem("backgroundImage");
-            localStorage.setItem("bgTransparency", "100");
-            window.location.reload();
-            break;
+  const handleMenuClick = ({ key }) => {
+    switch (key) {
+      case "refresh":
+        window.location.reload();
+        break;
+      case "chBG":
+        openModal();
+        break;
+      case "dlBG":
+        localStorage.removeItem("backgroundImage");
+        localStorage.setItem("bgTransparency", "100");
+        window.location.reload();
+        break;
 
-          default:
-            console.log(`Unhandled action: ${key}`);
-        }
-      }}
-    />
-  );
+      default:
+        console.log(`Unhandled action: ${key}`);
+    }
+  };
+
+  const menu = {
+    items: menuItems,
+    onClick: handleMenuClick,
+  };
 
   return (
     <>
@@ -536,7 +520,7 @@ const ContextMenuWrapper = ({ children }) => {
           )}
         </div>
       </Modal>
-      <Dropdown overlay={menu} trigger={["contextMenu"]}>
+      <Dropdown menu={menu} trigger={["contextMenu"]}>
         <div
           className="w-full min-h-screen"
           style={{
@@ -572,11 +556,45 @@ const ContextMenuWrapper = ({ children }) => {
 
 export const WidgetTransparencyContext = React.createContext();
 
+// Add theme context and optimized theme handling
+export const ThemeContext = createContext();
+
 // App Component
 const App = () => {
   const [widgetTransparent, setWidgetTransparent] = useState(() =>
     parseInt(localStorage.getItem("widgetTransparency") || "100")
   );
+
+  // Initialize theme state from localStorage
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const savedTheme = localStorage.getItem("theme");
+    return savedTheme === "dark";
+  });
+
+  // Memoize theme context value to prevent unnecessary re-renders
+  const themeContextValue = useMemo(
+    () => ({
+      isDarkMode,
+      toggleTheme: () => {
+        setIsDarkMode((prev) => {
+          const newMode = !prev;
+          localStorage.setItem("theme", newMode ? "dark" : "light");
+          return newMode;
+        });
+      },
+    }),
+    [isDarkMode]
+  );
+
+  // Apply theme changes with optimized performance
+  useEffect(() => {
+    // Use requestAnimationFrame to batch DOM updates
+    requestAnimationFrame(() => {
+      document.documentElement.classList.toggle("dark", isDarkMode);
+      document.documentElement.classList.toggle("theme-transition", true);
+      document.documentElement.classList.toggle("hardware-accelerated", true);
+    });
+  }, [isDarkMode]);
 
   // Memoize the context value
   const contextValue = useMemo(
@@ -588,66 +606,68 @@ const App = () => {
   );
 
   return (
-    <WidgetTransparencyContext.Provider value={contextValue}>
-      <AuthProvider>
-        <Router>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/pricing" element={<PricingPage />} />
-            <Route path="/faq" element={<FAQPage />} />
-            <Route
-              path="/search"
-              element={
-                <ContextMenuWrapper>
-                  <SearchPage />
-                </ContextMenuWrapper>
-              }
-            />
-            <Route
-              path="/calculator"
-              element={
-                <ContextMenuWrapper>
-                  <AddList />
-                </ContextMenuWrapper>
-              }
-            />
-            <Route
-              path="/NewSearchPage"
-              element={
-                <ContextMenuWrapper>
-                  <NewSearchPage />
-                </ContextMenuWrapper>
-              }
-            />
-            <Route
-              path="/password-generator"
-              element={
-                <ContextMenuWrapper>
-                  <PasswordGenerator />
-                </ContextMenuWrapper>
-              }
-            />
-            <Route path="/signin" element={<Signin />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/forgot-password" element={<Forgotpassword />} />
-            <Route path="/premium" element={<PremiumPage />} />
-            <Route path="/premium-form" element={<PremiumForm />} />
+    <ThemeContext.Provider value={themeContextValue}>
+      <WidgetTransparencyContext.Provider value={contextValue}>
+        <AuthProvider>
+          <Router>
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/faq" element={<FAQPage />} />
+              <Route
+                path="/search"
+                element={
+                  <ContextMenuWrapper>
+                    <SearchPage />
+                  </ContextMenuWrapper>
+                }
+              />
+              <Route
+                path="/calculator"
+                element={
+                  <ContextMenuWrapper>
+                    <AddList />
+                  </ContextMenuWrapper>
+                }
+              />
+              <Route
+                path="/NewSearchPage"
+                element={
+                  <ContextMenuWrapper>
+                    <NewSearchPage />
+                  </ContextMenuWrapper>
+                }
+              />
+              <Route
+                path="/password-generator"
+                element={
+                  <ContextMenuWrapper>
+                    <PasswordGenerator />
+                  </ContextMenuWrapper>
+                }
+              />
+              <Route path="/signin" element={<Signin />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/forgot-password" element={<Forgotpassword />} />
+              <Route path="/premium" element={<PremiumPage />} />
+              <Route path="/premium-form" element={<PremiumForm />} />
 
-            {/* Admin Routes with Sidebar Layout */}
-            <Route path="/admin/login" element={<Login />} />
-            <Route element={<Sidebar />}>
-              <Route path="/admin/dashboard" element={<Dashboard />} />
-              <Route path="/admin/users" element={<Users />} />
-              <Route path="/admin/AddBookmark" element={<AddBookmark />} />
-              <Route path="/admin/addlinks" element={<AddLinks />} />
-            </Route>
-          </Routes>
-        </Router>
-      </AuthProvider>
-    </WidgetTransparencyContext.Provider>
+              {/* Admin Routes with Sidebar Layout */}
+              <Route path="/admin/login" element={<Login />} />
+              <Route element={<Sidebar />}>
+                <Route path="/admin/dashboard" element={<Dashboard />} />
+                <Route path="/admin/users" element={<Users />} />
+                <Route path="/admin/AddBookmark" element={<AddBookmark />} />
+                <Route path="/admin/addlinks" element={<AddLinks />} />
+              </Route>
+            </Routes>
+          </Router>
+        </AuthProvider>
+      </WidgetTransparencyContext.Provider>
+    </ThemeContext.Provider>
   );
 };
 

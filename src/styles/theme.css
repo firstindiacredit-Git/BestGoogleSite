@@ -1,0 +1,41 @@
+/* Theme transition optimizations */
+:root {
+  --theme-transition-duration: 200ms;
+  --theme-transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Apply transitions only to specific properties */
+body,
+.theme-transition {
+  transition: background-color var(--theme-transition-duration)
+      var(--theme-transition-timing),
+    color var(--theme-transition-duration) var(--theme-transition-timing),
+    border-color var(--theme-transition-duration) var(--theme-transition-timing);
+}
+
+/* Optimize paint operations */
+.theme-transition * {
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Reduce paint area for dark mode overlay */
+.dark-mode-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity var(--theme-transition-duration)
+    var(--theme-transition-timing);
+}
+
+.dark .dark-mode-overlay {
+  opacity: 1;
+}
+
+/* Hardware acceleration for theme transitions */
+.hardware-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+}
