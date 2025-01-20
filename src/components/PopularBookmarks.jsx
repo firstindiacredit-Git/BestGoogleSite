@@ -35,24 +35,19 @@ import {
   Empty,
   Row,
   Col,
+  Button,
 } from "antd";
 import { motion } from "framer-motion";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import {
-  EyeInvisibleOutlined,
-  EyeOutlined,
   UnorderedListOutlined,
   AppstoreOutlined,
   PictureOutlined,
-  CloudOutlined,
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
   MoreOutlined,
-  EllipsisOutlined,
-  CheckOutlined,
   DragOutlined,
-  ExclamationCircleOutlined,
   SettingOutlined,
 } from "@ant-design/icons";
 import { Alert } from "antd";
@@ -63,8 +58,6 @@ function PopularBookmarks() {
   const [links, setLinks] = useState([]);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState("grid");
-  const [faviconSize, setFaviconSize] = useState(32);
   const [categoryViewModes, setCategoryViewModes] = useState(() => {
     const savedViewModes = localStorage.getItem("categoryViewModes");
     return savedViewModes ? JSON.parse(savedViewModes) : {};
@@ -207,7 +200,7 @@ function PopularBookmarks() {
       }));
 
       // Update preview state
-      setDragPreview((prev) => ({
+      setDragsPreview((prev) => ({
         ...prev,
         destinationColumn: parseInt(result.destination.droppableId),
         previewPosition: {
@@ -1834,17 +1827,13 @@ function PopularBookmarks() {
     return (
       <div className="mb-2">
         <div className="flex justify-between mb-2">
-          <div style={{ marginBottom: "24px" }}>
-            <Space>
-              <AntButton
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={() => setIsAddCategoryModalVisible(true)}
-              >
-                Add Category
-              </AntButton>
-            </Space>
-          </div>
+          <Button
+            onClick={() => setIsAddCategoryModalVisible(true)}
+            style={{ marginBottom: "24px" }}
+          >
+            <PlusOutlined />
+            Add Category
+          </Button>
           <div className="flex items-center gap-4">
             <div
               className={`flex items-center bg-white/10 backdrop-blur-lg dark:bg-[#28283A] p-1 rounded-sm`}
@@ -1894,16 +1883,6 @@ function PopularBookmarks() {
                 </svg>
               </button>
             </div>
-            <Radio.Group
-              value={columnCount}
-              onChange={(e) => handleColumnCountChange(e.target.value)}
-              buttonStyle="solid"
-            >
-              <Radio.Button value={1}>1</Radio.Button>
-              <Radio.Button value={2}>2</Radio.Button>
-              <Radio.Button value={3}>3</Radio.Button>
-              <Radio.Button value={4}>4</Radio.Button>
-            </Radio.Group>
           </div>
         </div>
 
@@ -3000,7 +2979,7 @@ function PopularBookmarks() {
   }
 
   return (
-    <div style={{ padding: "24px" }}>
+    <div className="w-[90vw] mx-auto" style={{ padding: "24px" }}>
       {renderBookmarksByCategory()}
 
       {/* Floating Button for Controller */}
@@ -3035,19 +3014,40 @@ function PopularBookmarks() {
         onCancel={() => setIsControllerOpen(false)}
         width={800}
         footer={[
-          <AntButton key="cancel" onClick={() => setIsControllerOpen(false)}>
-            Cancel
-          </AntButton>,
-          <AntButton
-            key="apply"
-            type="primary"
-            loading={isApplyingChanges}
-            onClick={handleApplyChanges}
-          >
-            Apply Changes
-          </AntButton>,
+          <div key="footer" className="flex justify-between items-center">
+            <div>
+              <AntButton
+                key="cancel"
+                onClick={() => setIsControllerOpen(false)}
+              >
+                Cancel
+              </AntButton>
+              <AntButton
+                key="apply"
+                type="primary"
+                loading={isApplyingChanges}
+                onClick={handleApplyChanges}
+                style={{ marginLeft: "8px" }}
+              >
+                Apply Changes
+              </AntButton>
+            </div>
+          </div>,
         ]}
       >
+        <div className="flex w-full mb-4  justify-between items-center gap-2">
+          <div>Columns:</div>
+          <Radio.Group
+            value={previewColumns}
+            onChange={(e) => handlePreviewColumnChange(e.target.value)}
+            buttonStyle="solid"
+          >
+            <Radio.Button value={1}>1</Radio.Button>
+            <Radio.Button value={2}>2</Radio.Button>
+            <Radio.Button value={3}>3</Radio.Button>
+            <Radio.Button value={4}>4</Radio.Button>
+          </Radio.Group>
+        </div>
         <DragDropContext onDragEnd={handlePreviewDragEnd}>
           <div
             className="sort-columns-container"
@@ -3058,7 +3058,6 @@ function PopularBookmarks() {
               marginBottom: "20px",
               maxHeight: "60vh",
               overflowY: "auto",
-              padding: "8px",
             }}
           >
             {Array.from({ length: previewColumns }).map((_, columnIndex) => (
@@ -3086,15 +3085,7 @@ function PopularBookmarks() {
                         }
                       `}
                     >
-                      <div>
-                        Column {columnIndex + 1} (
-                        {getColumnCategories(columnIndex).length})
-                      </div>
-                      {snapshot.isDraggingOver && (
-                        <div className="text-xs text-indigo-500 mt-1 animate-pulse">
-                          Drop here
-                        </div>
-                      )}
+                      <div>Column {columnIndex + 1}</div>
                     </div>
                     <div className="space-y-2 min-h-[100px]">
                       {getColumnCategories(columnIndex).map(
@@ -3121,7 +3112,7 @@ function PopularBookmarks() {
                                 style={provided.draggableProps.style}
                               >
                                 <div className="flex items-center gap-3">
-                                  <DragOutlined
+                                  <div
                                     className={`
                                     text-base transition-colors duration-200
                                     ${
@@ -3130,7 +3121,9 @@ function PopularBookmarks() {
                                         : "text-gray-400"
                                     }
                                   `}
-                                  />
+                                  >
+                                    ⋮⋮
+                                  </div>
                                   <span
                                     className={`
                                     font-medium transition-colors duration-200
