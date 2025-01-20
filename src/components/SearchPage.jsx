@@ -37,8 +37,9 @@ function SearchPage() {
   );
   const [activeComponent, setActiveComponent] = useState("Anotherpage");
   const navigate = useNavigate();
-  // const [showButton, setShowButton] = useState(false);
-  const [visibleHandle, setVisibleHandle] = useState(false);
+  const [visibleHandle, setVisibleHandle] = useState(
+    () => localStorage.getItem("uiMode") === "modern"
+  );
 
   // Keep state for slider position
   const [sliderTransparency, setSliderTransparency] = useState(() =>
@@ -60,27 +61,12 @@ function SearchPage() {
     }
   }, []);
 
-  const changeVisible = () => {
-    setVisibleHandle(!visibleHandle);
-  };
+  const changeVisible = useCallback(() => {
+    const newMode = !visibleHandle;
+    setVisibleHandle(newMode);
+    localStorage.setItem("uiMode", newMode ? "modern" : "classic");
+  }, [visibleHandle]);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 300) {
-        setShowButton(true);
-      } else {
-        setShowButton(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
-
-  // Handler for temporary changes - only update state, no visual changes
   const handleTempTransparencyChange = useCallback((newValue) => {
     setSliderTransparency(newValue); // Update slider position
     tempTransparencyRef.current = newValue; // Store value for later application
@@ -340,7 +326,7 @@ function SearchPage() {
                   changeVisible();
                 }}
               >
-                {visibleHandle ? "Classic" : "Modern"}
+                {visibleHandle ? "Modern" : "Classic"}
               </button>
             </div>
           ),
@@ -356,6 +342,7 @@ function SearchPage() {
       handleTextColorChange,
       handleApplyChanges,
       handleResetChanges,
+      changeVisible,
     ]
   );
 
