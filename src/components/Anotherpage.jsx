@@ -27,12 +27,12 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
   const [grid, isGrid] = useState(true);
   const [user, setUser] = useState(null);
   const [items, setItems] = useState([]);
-  const [columns, setColumns] = useState(3);
+  const [columns, setColumns] = useState(4);
   const [loading, setLoading] = useState(true); // Loading indicator
   const [isSorterOpen, setIsSorterOpen] = useState(false);
   const [sortedItems, setSortedItems] = useState([]);
   const [isApplying, setIsApplying] = useState(false);
-  const [previewColumns, setPreviewColumns] = useState(3);
+  const [previewColumns, setPreviewColumns] = useState(4);
   const [availableWidgets, setAvailableWidgets] = useState([]);
   const isDarkMode = localStorage.getItem("themeMode") === "dark";
   const componentMap = {
@@ -42,12 +42,7 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
     notepad: <NotePage />,
     imageUploader: <ImageUploader />,
     calendar: <Calendar />,
-    Bookmarks: (
-      <CategoryHome
-        categoryType="Popular Bookmarks"
-        itemName="Popular Bookmarks "
-      />
-    ),
+    Bookmarks: <CategoryHome categoryType="Popular" itemName="Popular " />,
     Bookmarks1: <CategoryHome categoryType="Travel" itemName="Travel" />,
     Bookmarks2: <CategoryHome categoryType="AI" itemName="AI" />,
     Bookmarks3: <CategoryHome categoryType="Sports" itemName="Sports" />,

@@ -144,8 +144,8 @@ const SportsLeagues = () => {
   return (
     <Layout className="p-8 w-[90vw] mx-auto dark:bg-[#28283A]/[var(--widget-opacity)] backdrop-blur-sm rounded-sm bg-gray-200/[var(--widget-opacity)] dark:border-gray-800 border-gray-200">
       <Content
-        style={{ padding: "2px", margin: "5px" }}
-        className="dark:bg-[#28283A]"
+        style={{ padding: "1rem", margin: "5px" }}
+        className="dark:bg-[#28283A] bg-white rounded-sm"
       >
         <Space direction="vertical" size="large" style={{ width: "100%" }}>
           <div

@@ -283,7 +283,7 @@ function BookmarkPage() {
                   {bookmark.createdByUser && (
                     <button
                       onClick={() => handleEditBookmark(bookmark)}
-                      className="block w-full text-left px-2 py-1 text-sm hover:bg-gray-200"
+                      className="block w-full text-left px-2 py-1 dark:text-black text-sm hover:bg-gray-200"
                     >
                       Edit
                     </button>

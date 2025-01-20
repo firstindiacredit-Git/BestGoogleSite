@@ -45,7 +45,7 @@ function ImageUploader() {
   };
 
   return (
-    <div className="max-w-[21vw]  backdrop-blur-sm  rounded-b-sm w-full">
+    <div className=" backdrop-blur-sm  rounded-b-sm w-full">
       <div
         onClick={collapse}
         className="text-xl cursor-pointer font-medium p-5"
@@ -53,9 +53,9 @@ function ImageUploader() {
         Image
       </div>
       {!collapsed && (
-        <div>
+        <div className="">
           {!image && (
-            <div className="h-72 flex items-center justify-center bg-white dark:bg-[#28283A] rounded-sm w-full">
+            <div className="h-72 flex items-center justify-center  dark:bg-[#28283A] rounded-sm w-full">
               <label
                 htmlFor="file-input"
                 className="cursor-pointer flex flex-col items-center"
@@ -75,12 +75,12 @@ function ImageUploader() {
             </div>
           )}
           {imageUrl && (
-            <div className="relative rounded-b-sm   group h-80">
+            <div className="relative rounded-b-sm    group h-80">
               <Image
                 src={imageUrl}
                 alt="Uploaded"
                 preview={true}
-                className="!h-full !w-full rounded-b-sm "
+                className=" rounded-b-sm "
                 style={{
                   objectFit: "cover",
                   height: "100%",

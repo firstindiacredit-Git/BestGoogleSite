@@ -168,34 +168,11 @@ const Top100Page = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [category, setCategory] = useState("motorcycles");
+  const [category, setCategory] = useState("cars");
   const [page, setPage] = useState(1);
   const [viewMode, setViewMode] = useState("grid");
   const [searchQuery, setSearchQuery] = useState("");
-  // const API_KEY = 'BTOsYx47SEw8rRDvct+x+g==SUy2ivypa6z9mOk1';
   const year = new Date().getFullYear();
-  // Updated APIs with real free API endpoints
-  // const APIs = {
-  //   motorcycles: 'local',
-  //   cars: `https://api.api-ninjas.com/v1/cars?limit=100&year=${year}`,
-  //   stocks: 'https://finnhub.io/api/v1/stock/symbol?exchange=US&token=ctp4omhr01qhpppjiev0ctp4omhr01qhpppjievg',
-  //   crypto: 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100',
-  //   billionaires: `https://forbes400.onrender.com/api/forbes400?limit=100&year=${year}`,
-  //   banks: 'wikipedia',
-  //   sportsmen: 'local',
-  //   movies: 'https://imdb-top-100-movies.p.rapidapi.com/',
-  //   brands: 'local',
-  //   gdp: 'local'
-  // };
-
-  // const VIN_NUMBERS = [
-  //   '5UXWX7C5*BA',
-  //   '1HGCM82633A123456',
-  //   'WDDUG7JB0FA123456',
-  //   // Add more VIN numbers...
-  // ];
-
-  // Update the filteredItems definition with null checks
   const filteredItems = items
     .map((item, index) => ({
       ...item,
@@ -212,13 +189,7 @@ const Top100Page = () => {
   const fetchTop100 = async (category) => {
     try {
       setLoading(true);
-
-      // Add debug logs
-      // console.log(`Fetching data for category: ${category}`);
-
-      // Handle local data cases first
       if (["sportsmen", "brands", "motorcycles", "gdp"].includes(category)) {
-        // console.log(`Using local data for ${category}`);
         if (category === "sportsmen") {
           const processedData = sportsmen.map((person) => ({
             name: `${person.name} ${" "} $${(

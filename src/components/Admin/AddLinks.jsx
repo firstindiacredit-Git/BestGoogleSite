@@ -15,6 +15,12 @@ import {
   doc,
   deleteDoc,
 } from "firebase/firestore";
+import {
+  EditOutlined,
+  DeleteOutlined,
+  UpOutlined,
+  DownOutlined,
+} from "@ant-design/icons";
 
 function AddLinks() {
   const [newCategory, setNewCategory] = useState("");
@@ -32,19 +38,25 @@ function AddLinks() {
   const [selectedColor, setSelectedColor] = useState("#3B82F6");
   const [editBookmarkData, setEditBookmarkData] = useState(null);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
+  const [editCategoryData, setEditCategoryData] = useState(null);
+  const [isCategoryEditModalOpen, setIsCategoryEditModalOpen] = useState(false);
 
-  const ITEMS_PER_PAGE = 5
+  const ITEMS_PER_PAGE = 5;
 
   // Filter categories and their links based on search term
   const filteredCategories = newCategories
     .map((category) => ({
       ...category,
-      links: links.filter((link) =>
-        link.category === category.id &&
-        (link.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          link.link?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          category.newCategory?.toLowerCase().includes(searchTerm.toLowerCase()))
-      ) || [], // Ensure links is always an array
+      links:
+        links.filter(
+          (link) =>
+            link.category === category.id &&
+            (link.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              link.link?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              category.newCategory
+                ?.toLowerCase()
+                .includes(searchTerm.toLowerCase()))
+        ) || [], // Ensure links is always an array
     }))
     .filter((category) => category.newCategory); // Only show categories with names
 
@@ -57,12 +69,12 @@ function AddLinks() {
 
   const getFaviconUrl = (link) => {
     try {
-      if (!link) return ''; // Return empty string if link is undefined
+      if (!link) return ""; // Return empty string if link is undefined
       const url = new URL(link);
       return `https://www.google.com/s2/favicons?domain=${url.hostname}`;
     } catch (error) {
-      console.error('Invalid URL:', link);
-      return ''; // Return empty string for invalid URLs
+      console.error("Invalid URL:", link);
+      return ""; // Return empty string for invalid URLs
     }
   };
 
@@ -123,7 +135,7 @@ function AddLinks() {
         ...doc.data(),
       }));
       setNewCategories(fetchedCategories);
-      console.log('Fetched Categories:', fetchedCategories); // Debug log
+      console.log("Fetched Categories:", fetchedCategories); // Debug log
     } catch (error) {
       console.error("Error fetching categories: ", error);
     }
@@ -141,7 +153,7 @@ function AddLinks() {
         // color: selectedColor,
         createdAt: new Date(),
       });
-      
+
       setNewCategory("");
       // setSelectedColor("#3B82F6");
       setCategoryModalOpen(false);
@@ -196,7 +208,7 @@ function AddLinks() {
       id,
       name: currentName,
       link: currentLink,
-      category: currentCategory
+      category: currentCategory,
     });
     setEditModalOpen(true);
   };
@@ -237,13 +249,36 @@ function AddLinks() {
   };
 
   const toggleCategory = (categoryId) => {
-    setExpandedCategories(prev => ({
+    setExpandedCategories((prev) => ({
       ...prev,
-      [categoryId]: !prev[categoryId]
+      [categoryId]: !prev[categoryId],
     }));
   };
 
-  
+  const handleEditCategory = async (categoryId, currentName) => {
+    setEditCategoryData({
+      id: categoryId,
+      name: currentName,
+    });
+    setIsCategoryEditModalOpen(true);
+  };
+
+  const handleUpdateCategory = async () => {
+    if (!editCategoryData) return;
+
+    try {
+      await updateDoc(doc(db, "category", editCategoryData.id), {
+        newCategory: editCategoryData.name,
+        updatedAt: new Date(),
+      });
+      setIsCategoryEditModalOpen(false);
+      setEditCategoryData(null);
+      fetchCategories();
+    } catch (error) {
+      console.error("Error updating category:", error);
+      alert("Failed to update category. Please try again.");
+    }
+  };
 
   if (loading) {
     return <div className="min-h-screen bg-gray-50 dark:bg-[#28283A]"></div>;
@@ -547,8 +582,33 @@ function AddLinks() {
                 >
                   <div className="flex flex-col h-full">
                     <div className="p-4 flex justify-between font-medium text-gray-800 dark:text-white bg-gray-100 dark:bg-[#513a7a] border-b border-gray-200 dark:border-gray-700">
-                      <div>{category.newCategory}</div>
-                      <div>{category.links?.length || 0}</div>
+                      <div className="flex items-center gap-2">
+                        <div>{category.newCategory}</div>
+                        <div>({category.links?.length || 0})</div>
+                      </div>
+                      <div className="flex items-center gap-2 ml-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditCategory(
+                              category.id,
+                              category.newCategory
+                            );
+                          }}
+                          className="p-1 text-gray-400 hover:text-blue-500 transition-colors"
+                        >
+                          <EditOutlined style={{ fontSize: "14px" }} />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteCategory(category.id);
+                          }}
+                          className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                        >
+                          <DeleteOutlined style={{ fontSize: "14px" }} />
+                        </button>
+                      </div>
                     </div>
                     {(category.links || []).length > 0 && (
                       <div className="max-h-[20rem] overflow-y-auto">
@@ -616,64 +676,51 @@ function AddLinks() {
               {paginatedCategories.map((category) => (
                 <div
                   key={category.id}
-                  className="bg-white dark:bg-[#513a7a] rounded-sm shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
+                  className="mb-6 bg-white  dark:bg-[#37375d] rounded-lg shadow-sm"
                 >
-                  {/* Category Header */}
-                  <button
-                    onClick={() =>
-                      (category.links || []).length > 0 &&
-                      toggleCategory(category.id)
-                    }
-                    className={`w-full flex items-center justify-between p-4 bg-gray-100 dark:bg-[#513a7a] border-b border-gray-200 dark:border-gray-700 ${
-                      (category.links || []).length > 0
-                        ? "hover:bg-gray-100 dark:hover:bg-gray-700/50 cursor-pointer"
-                        : "cursor-default"
-                    } transition-colors`}
+                  <div
+                    onClick={() => toggleCategory(category.id)}
+                    className="flex cursor-pointer  items-center justify-between p-4 bg-gray-100 dark:bg-[#513a7a] rounded-t-lg"
                   >
-                    <div className="flex items-center space-x-2">
-                      <span className="text-base font-medium text-gray-900 dark:text-white">
-                        {category.newCategory}
-                      </span>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">
-                        ({category.links?.length || 0})
-                      </span>
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                          {category.newCategory}
+                        </h2>
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                          ({category.links?.length || 0})
+                        </span>
+                      </div>
+                      <div className="flex items-center  ml-3">
+                        <div className="flex items-center gap-2 ml-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditCategory(
+                                category.id,
+                                category.newCategory
+                              );
+                            }}
+                            className="p-1 text-gray-400 hover:text-blue-500 transition-colors"
+                          >
+                            <EditOutlined style={{ fontSize: "14px" }} />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteCategory(category.id);
+                            }}
+                            className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                          >
+                            <DeleteOutlined style={{ fontSize: "14px" }} />
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteCategory(category.id);
-                        }}
-                        className="p-1 text-gray-400 hover:text-red-500 transition-colors"
-                      >
-                        <MdOutlineDeleteOutline size={20} />
-                      </button>
-                      {(category.links || []).length > 0 && (
-                        <svg
-                          className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
-                            expandedCategories[category.id]
-                              ? "transform rotate-180"
-                              : ""
-                          }`}
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 9l-7 7-7-7"
-                          />
-                        </svg>
-                      )}
-                    </div>
-                  </button>
-
-                  {/* Links List */}
+                  </div>
                   {expandedCategories[category.id] &&
                     (category.links || []).length > 0 && (
-                      <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                      <div className="divide-y  divide-gray-200 dark:divide-gray-700">
                         {(category.links || []).map((link) => (
                           <div
                             key={link.id}
@@ -878,6 +925,46 @@ function AddLinks() {
                   className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-xs transition-colors"
                 >
                   Update Bookmark
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {isCategoryEditModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-[#37375d] rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Edit Category
+              </h3>
+              <input
+                type="text"
+                value={editCategoryData?.name || ""}
+                onChange={(e) =>
+                  setEditCategoryData((prev) => ({
+                    ...prev,
+                    name: e.target.value,
+                  }))
+                }
+                className="w-full px-4 py-2 rounded-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#513a7a] text-gray-900 dark:text-white"
+                placeholder="Category name"
+              />
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  onClick={() => {
+                    setIsCategoryEditModalOpen(false);
+                    setEditCategoryData(null);
+                  }}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xs transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleUpdateCategory}
+                  className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-xs transition-colors"
+                >
+                  Update Category
                 </button>
               </div>
             </div>

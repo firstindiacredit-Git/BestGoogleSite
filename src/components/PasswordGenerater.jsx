@@ -338,7 +338,7 @@ const CredentialManager = () => {
     <>
       {isLocked ? (
         <div className="p-8 backdrop-blur-sm bg-white/[var(--widget-opacity)] dark:bg-[#28283A]/[var(--widget-opacity)] flex justify-center w-[90vw]  mx-auto rounded-xl ">
-          <div className="w-full  rounded-t-sm   h-[80vh]   flex items-center justify-center">
+          <div className="w-full  rounded-t-sm   h-[40vh]   flex items-center justify-center">
             <div className="p-8  border bg-white dark:bg-[#513a7a]  border-gray-500/5 text-center rounded-sm shadow-lg w-fit">
               <div className="flex text-indigo-500 text-6xl items-center justify-center">
                 <FaLock />
@@ -383,552 +383,555 @@ const CredentialManager = () => {
           </div>
         </div>
       ) : (
-        <div className="mx-auto backdrop-blur-sm min-h-[20vh] max-w-[90vw] rounded-xl  p-12 pb-14 dark:bg-[#28283A]/[var(--widget-opacity)] bg-gray-200/[var(--widget-opacity)]">
-          <div className="flex justify-between w-[68%] xl:w-[79.2%] dark:bg-[#28283A] bg-white items-center">
-            <button
-              className="transition-all bg-indigo-500 text-white lg:text-lg text-sm lg:px-4 px-2 py-2 rounded-xs mb-4"
-              onClick={() => showModal()}
-            >
-              <FaPlus size={15} />
-            </button>
+        <div className="p-8 bg-white/[var(--widget-opacity)] dark:bg-[#28283A]/[var(--widget-opacity)] mx-auto backdrop-blur-sm min-h-[20vh] max-w-[90vw] rounded-xl ">
+          <div className="   p-4 bg-white">
+            <div className="flex justify-between w-[68%] xl:w-[79.2%]  dark:bg-[#28283A] bg-white items-center">
+              <button
+                className="transition-all bg-indigo-500 text-white lg:text-lg text-sm lg:px-4 px-2 py-2 rounded-xs mb-4"
+                onClick={() => showModal()}
+              >
+                <FaPlus size={15} />
+              </button>
 
-            <div className="relative flex space-x-1 w-1/2 mb-4">
-              <input
-                type="text"
-                placeholder="Search credentials..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-2 dark:bg-[#513a7a] dark:border-gray-700 dark:text-white border rounded-xs focus:outline-none focus:ring-2 focus:ring-gray-800"
-              />
-              <div className="flex items-center gap-2 bg-gray-200 dark:bg-[#513a7a] p-1 rounded-sm">
-                <button
-                  onClick={() => setIsGridView(true)}
-                  className={`p-2 rounded ${
-                    isGridView ? "bg-white dark:bg-gray-600 shadow-sm" : ""
-                  }`}
-                >
-                  <svg
-                    className="w-5 h-5 dark:text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+              <div className="relative flex space-x-1 w-1/2 mb-4">
+                <input
+                  type="text"
+                  placeholder="Search credentials..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full px-4 py-2 dark:bg-[#513a7a] dark:border-gray-700 dark:text-white border rounded-xs focus:outline-none focus:ring-2 focus:ring-gray-800"
+                />
+                <div className="flex items-center gap-2 bg-gray-200 dark:bg-[#513a7a] p-1 rounded-sm">
+                  <button
+                    onClick={() => setIsGridView(true)}
+                    className={`p-2 rounded ${
+                      isGridView ? "bg-white dark:bg-gray-600 shadow-sm" : ""
+                    }`}
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
-                    />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => setIsGridView(false)}
-                  className={`p-2 rounded ${
-                    !isGridView ? "bg-white dark:bg-gray-600 shadow-sm" : ""
-                  }`}
-                >
-                  <svg
-                    className="w-5 h-5 dark:text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                    <svg
+                      className="w-5 h-5 dark:text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => setIsGridView(false)}
+                    className={`p-2 rounded ${
+                      !isGridView ? "bg-white dark:bg-gray-600 shadow-sm" : ""
+                    }`}
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 6h16M4 12h16M4 18h16"
-                    />
-                  </svg>
+                    <svg
+                      className="w-5 h-5 dark:text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 6h16M4 12h16M4 18h16"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div className="lg:space-x-2 w-fit flex justify-between  space-x-1">
+                {filteredCredentials.length > 0 && (
+                  <button
+                    className="transition-all w-fit text-center dark:bg-[#513a7a] dark:hover:bg-gray-600 dark:text-gray-200  bg-gray-300 hover:bg-gray-600 hover:text-gray-100 text-gray-800 border border-black/5 px-4 py-2 rounded-xs mb-4"
+                    onClick={toggleAllPasswordVisibility}
+                  >
+                    {filteredCredentials.length > 0 &&
+                    Object.values(showPasswords).some((value) => value) ? (
+                      <AiFillEyeInvisible />
+                    ) : (
+                      <AiFillEye />
+                    )}
+                  </button>
+                )}
+                <button
+                  className="transition-all bg-red-500 text-white px-4 py-2 rounded-xs mb-4"
+                  onClick={() => {
+                    setIsLocked(true);
+                    setPassword("");
+                  }}
+                >
+                  <IoLockClosed />
                 </button>
               </div>
             </div>
-            <div className="lg:space-x-2 w-fit flex justify-between  space-x-1">
-              {filteredCredentials.length > 0 && (
-                <button
-                  className="transition-all w-fit text-center dark:bg-[#513a7a] dark:hover:bg-gray-600 dark:text-gray-200  bg-gray-300 hover:bg-gray-600 hover:text-gray-100 text-gray-800 border border-black/5 px-4 py-2 rounded-xs mb-4"
-                  onClick={toggleAllPasswordVisibility}
-                >
-                  {filteredCredentials.length > 0 &&
-                  Object.values(showPasswords).some((value) => value) ? (
-                    <AiFillEyeInvisible />
-                  ) : (
-                    <AiFillEye />
-                  )}
-                </button>
-              )}
-              <button
-                className="transition-all bg-red-500 text-white px-4 py-2 rounded-xs mb-4"
-                onClick={() => {
-                  setIsLocked(true);
-                  setPassword("");
-                }}
-              >
-                <IoLockClosed />
-              </button>
-            </div>
-          </div>
 
-          <div className="flex justify-between space-x-4 w-full dark:bg-[#28283A] bg-white">
-            {isGridView ? (
-              filteredCredentials.length > 0 ? (
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 p-5 dark:bg-gray-950/10 bg-gray-100 border h-fit border-black/5 rounded-sm gap-4 w-[70%] xl:w-[80%]">
-                  {filteredCredentials.map((cred, index) => {
-                    const { label, color, message } = calculatePasswordStrength(
-                      cred.password
-                    );
+            <div className="flex justify-between  space-x-4 w-full dark:bg-[#28283A] bg-white">
+              {isGridView ? (
+                filteredCredentials.length > 0 ? (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 p-5 dark:bg-gray-950/10 bg-gray-100 border h-fit border-black/5 rounded-sm gap-4 w-[70%] xl:w-[80%]">
+                    {filteredCredentials.map((cred, index) => {
+                      const { label, color, message } =
+                        calculatePasswordStrength(cred.password);
 
-                    return (
-                      <div
-                        key={cred.id || index}
-                        className="bg-white dark:bg-[#513a7a] dark:text-gray-400 overflow-auto p-4 h-fit rounded-sm border border-black/10 relative"
-                      >
-                        {/* Title and Logo */}
-                        <div className="flex items-center justify-between mb-4">
-                          <h2 className="font-bold text-2xl uppercase">
-                            {cred.website}
-                          </h2>
-                          <img
-                            src={fetchFavicon(cred.url)}
-                            alt="logo"
-                            className="h-8"
-                          />
-                        </div>
-
-                        {/* URL */}
-                        <div className="text-gray-400 font-bold -mt-2 flex justify-between mb-3">
-                          URL:{" "}
-                          <a
-                            href={cred.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="truncate hover:underline transition-all text-xl text-indigo-500"
-                          >
-                            {cred.url}
-                          </a>
-                        </div>
-
-                        {/* Username */}
-                        <div className="flex justify-between w-full items-center mb-3">
-                          <span className="text-gray-600 w-[30%] font-bold dark:text-gray-400">
-                            Username:
-                          </span>
-                          <div className="flex dark:bg-[#28283A] w-[70%] rounded-xs justify-between bg-gray-50 px-3 items-center space-x-2">
-                            <span>{cred.username}</span>
-                            <button
-                              onClick={() => handleCopyText(cred.username)}
-                              className="text-gray-400 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-500"
-                            >
-                              <FaCopy />
-                            </button>
+                      return (
+                        <div
+                          key={cred.id || index}
+                          className="bg-white dark:bg-[#513a7a] dark:text-gray-400 overflow-auto p-4 h-fit rounded-sm border border-black/10 relative"
+                        >
+                          {/* Title and Logo */}
+                          <div className="flex items-center justify-between mb-4">
+                            <h2 className="font-bold text-2xl uppercase">
+                              {cred.website}
+                            </h2>
+                            <img
+                              src={fetchFavicon(cred.url)}
+                              alt="logo"
+                              className="h-8"
+                            />
                           </div>
-                        </div>
 
-                        {/* Password */}
-                        <div className="flex justify-between w-full items-center mb-4">
-                          <span className="text-gray-600 w-[30%] font-bold dark:text-gray-400">
-                            Password:
-                          </span>
-                          <div className="flex dark:bg-[#28283A] w-[70%] rounded-xs bg-gray-50 px-3 items-center justify-between space-x-2">
-                            <span className="text-gray-800 dark:text-gray-400 overflow-hidden">
-                              {showPasswords[cred.website]
-                                ? cred.password
-                                : "••••••••"}
+                          {/* URL */}
+                          <div className="text-gray-400 font-bold -mt-2 flex justify-between mb-3">
+                            URL:{" "}
+                            <a
+                              href={cred.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="truncate hover:underline transition-all text-xl text-indigo-500"
+                            >
+                              {cred.url}
+                            </a>
+                          </div>
+
+                          {/* Username */}
+                          <div className="flex justify-between w-full items-center mb-3">
+                            <span className="text-gray-600 w-[30%] font-bold dark:text-gray-400">
+                              Username:
                             </span>
-                            <div className="flex items-center space-x-2">
+                            <div className="flex dark:bg-[#28283A] w-[70%] rounded-xs justify-between bg-gray-50 px-3 items-center space-x-2">
+                              <span>{cred.username}</span>
                               <button
-                                onClick={() =>
-                                  togglePasswordVisibility(cred.website)
-                                }
-                                className="transition-all text-gray-400 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-500"
-                              >
-                                {showPasswords[cred.website] ? (
-                                  <FaEye />
-                                ) : (
-                                  <FaEyeSlash />
-                                )}
-                              </button>
-                              <button
-                                onClick={() => handleCopyText(cred.password)}
-                                className="transition-all text-gray-400 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-500"
+                                onClick={() => handleCopyText(cred.username)}
+                                className="text-gray-400 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-500"
                               >
                                 <FaCopy />
                               </button>
                             </div>
                           </div>
-                        </div>
 
-                        {/* Password Strength */}
-                        <div className="mb-4">
-                          <div className="flex items-center">
-                            <div
-                              className={`h-1 flex-grow rounded-full ${color}`}
-                            />
-                          </div>
-                          <div
-                            className={`text-sm mt-1 ${
-                              label === "Strong"
-                                ? "text-green-600"
-                                : label === "Medium"
-                                ? "text-yellow-600"
-                                : "text-red-600"
-                            }`}
-                          >
-                            <span>Strength: {label}</span>
-                          </div>
-                        </div>
-
-                        {/* Actions */}
-                        <div className="flex justify-between space-x-3 mt-2">
-                          <div>
-                            <div className="text-xs text-gray-500">
-                              Time needed to crack the Password
-                            </div>
-                            <div className="font-semibold">{message}</div>
-                          </div>
-                          <div>
-                            <button
-                              className="text-indigo-500 hover:bg-gray-100 p-[0.1rem] py-[0.12rem] transition-all rounded-sm -translate-x-1 -translate-y-[2px]"
-                              onClick={() => showModal(cred)}
-                            >
-                              <MdEditSquare size={21} />
-                            </button>
-                            <button
-                              className="text-red-500 hover:bg-gray-100 rounded-sm transition-all"
-                              onClick={() => handleDelete(cred.id)}
-                            >
-                              <MdDelete size={25} />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="flex flex-col w-[70%] xl:w-[80%] p-5 dark:bg-[#513a7a] bg-white rounded-sm border border-gray-800/10 min-h-72 justify-center items-center  text-gray-500">
-                  <FiPlusCircle
-                    size={80}
-                    onClick={() => showModal()}
-                    className="mb-4 text-indigo-500 dark:text-gray-700 cursor-pointer transition-all hover:scale-105"
-                  />
-                  <h2 className="text-xl  text-gray-600 font-semibold">
-                    Create Your First Credential
-                  </h2>
-                  <p className=" text-gray-600">
-                    Start by adding your credentials securely.
-                  </p>
-                </div>
-              )
-            ) : (
-              <div className="overflow-x-auto w-[80%] min-h-72 dark:bg-gray-950/10 bg-white border  border-black/10 rounded-sm">
-                {filteredCredentials.length > 0 ? (
-                  <>
-                    <table className="min-w-full  rounded-sm  table-auto">
-                      <thead className="dark:bg-[#513a7a] dark:text-gray-400 bg-gray-100 rounded-sm">
-                        <tr className="rounded-sm">
-                          <th className="py-2 px-4 w-8 text-left">S.no</th>
-                          <th className="py-2 px-4 text-left max-w-24  lg:max-w-32">
-                            Website
-                          </th>
-                          <th className="py-2 px-4 none xl:block text-left">
-                            URL
-                          </th>
-                          <th className="py-2 px-4 text-left">Username</th>
-                          <th className="py-2 px-4 text-left">Password</th>
-                          <th className="py-2 px-4 text-center max-w-24  lg:max-w-32">
-                            Notes
-                          </th>
-                          <th className="py-2 px-4 text-center max-w-24  lg:max-w-32">
-                            Actions
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="rounded-sm">
-                        {filteredCredentials.map((cred, index) => (
-                          <tr
-                            key={index}
-                            className="border-b dark:border-gray-700 dark:text-gray-200 hover:bg-gray-50/50 dark:hover:bg-gray-900"
-                          >
-                            <td className="py-2 px-2 text-center   max-w-6 ">
-                              {index + 1}
-                            </td>
-                            <td className="py-2 px-4 overflow-hidden max-w-14 ">
-                              <div className=" flex  items-center justify-left">
-                                <img
-                                  src={fetchFavicon(cred.url)}
-                                  alt={cred.url}
-                                  className="w-5 h-5 mx-2 items-center"
-                                />
-                                <span
-                                  title={cred.website}
-                                  className="dark:text-gray-400 text-gray-700 overflow-auto truncate max-w-24 lg:max-w-32 font-medium uppercase"
-                                >
-                                  {cred.website}
-                                </span>
-                              </div>
-                            </td>
-                            <td className="py-2 px-4 max-w-[15ch] overflow-hidden text-indigo-500 cursor-pointer hover:underline">
-                              <a
-                                href={cred.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                {cred.url}
-                              </a>
-                            </td>
-                            <td className="py-2 px-4 text-gray-700  max-w-12">
-                              <div className="flex  px-1 min-w-fit  dark:bg-[#28283A] dark:text-gray-400  bg-gray-50 border border-gray-200/20 rounded-xs justify-between items-center space-x-2 whitespace-nowrap">
-                                <span
-                                  className="overflow-hidden  lg:max-w-24 max-w-[14ch]"
-                                  title={cred.username}
-                                >
-                                  {cred.username}
-                                </span>
+                          {/* Password */}
+                          <div className="flex justify-between w-full items-center mb-4">
+                            <span className="text-gray-600 w-[30%] font-bold dark:text-gray-400">
+                              Password:
+                            </span>
+                            <div className="flex dark:bg-[#28283A] w-[70%] rounded-xs bg-gray-50 px-3 items-center justify-between space-x-2">
+                              <span className="text-gray-800 dark:text-gray-400 overflow-hidden">
+                                {showPasswords[cred.website]
+                                  ? cred.password
+                                  : "••••••••"}
+                              </span>
+                              <div className="flex items-center space-x-2">
                                 <button
-                                  onClick={() => handleCopyText(cred.username)}
-                                  className="text-gray-300 dark:hover:text-gray-500 dark:text-gray-600 hover:text-gray-400 transition-all"
+                                  onClick={() =>
+                                    togglePasswordVisibility(cred.website)
+                                  }
+                                  className="transition-all text-gray-400 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-500"
+                                >
+                                  {showPasswords[cred.website] ? (
+                                    <FaEye />
+                                  ) : (
+                                    <FaEyeSlash />
+                                  )}
+                                </button>
+                                <button
+                                  onClick={() => handleCopyText(cred.password)}
+                                  className="transition-all text-gray-400 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-500"
                                 >
                                   <FaCopy />
                                 </button>
                               </div>
-                            </td>
-                            <td className="py-2 text-gray-500 px-4  max-w-12">
-                              <div className="flex dark:bg-[#28283A] min-w-fit dark:text-gray-400 bg-gray-50 border border-gray-200/20 px-1 rounded-xs justify-between items-center space-x-2 whitespace-nowrap">
-                                <span
-                                  className="overflow-hidden   lg:max-w-24 max-w-[14ch]"
-                                  title={cred.password}
-                                >
-                                  {showPasswords[cred.website]
-                                    ? cred.password
-                                    : "••••••••"}
-                                </span>
-                                <div className="flex space-x-1">
-                                  <button
-                                    onClick={() =>
-                                      togglePasswordVisibility(cred.website)
-                                    }
-                                    className="text-gray-300 dark:hover:text-gray-500 dark:text-gray-600 hover:text-gray-400 transition-all"
+                            </div>
+                          </div>
+
+                          {/* Password Strength */}
+                          <div className="mb-4">
+                            <div className="flex items-center">
+                              <div
+                                className={`h-1 flex-grow rounded-full ${color}`}
+                              />
+                            </div>
+                            <div
+                              className={`text-sm mt-1 ${
+                                label === "Strong"
+                                  ? "text-green-600"
+                                  : label === "Medium"
+                                  ? "text-yellow-600"
+                                  : "text-red-600"
+                              }`}
+                            >
+                              <span>Strength: {label}</span>
+                            </div>
+                          </div>
+
+                          {/* Actions */}
+                          <div className="flex justify-between space-x-3 mt-2">
+                            <div>
+                              <div className="text-xs text-gray-500">
+                                Time needed to crack the Password
+                              </div>
+                              <div className="font-semibold">{message}</div>
+                            </div>
+                            <div>
+                              <button
+                                className="text-indigo-500 hover:bg-gray-100 p-[0.1rem] py-[0.12rem] transition-all rounded-sm -translate-x-1 -translate-y-[2px]"
+                                onClick={() => showModal(cred)}
+                              >
+                                <MdEditSquare size={21} />
+                              </button>
+                              <button
+                                className="text-red-500 hover:bg-gray-100 rounded-sm transition-all"
+                                onClick={() => handleDelete(cred.id)}
+                              >
+                                <MdDelete size={25} />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="flex flex-col w-[70%] xl:w-[80%] p-5 dark:bg-[#513a7a] bg-white rounded-sm border border-gray-800/10 min-h-72 justify-center items-center  text-gray-500">
+                    <FiPlusCircle
+                      size={80}
+                      onClick={() => showModal()}
+                      className="mb-4 text-indigo-500 dark:text-gray-700 cursor-pointer transition-all hover:scale-105"
+                    />
+                    <h2 className="text-xl  text-gray-600 font-semibold">
+                      Create Your First Credential
+                    </h2>
+                    <p className=" text-gray-600">
+                      Start by adding your credentials securely.
+                    </p>
+                  </div>
+                )
+              ) : (
+                <div className="overflow-x-auto w-[80%] min-h-72 dark:bg-gray-950/10 bg-white border  border-black/10 rounded-sm">
+                  {filteredCredentials.length > 0 ? (
+                    <>
+                      <table className="min-w-full  rounded-sm  table-auto">
+                        <thead className="dark:bg-[#513a7a] dark:text-gray-400 bg-gray-100 rounded-sm">
+                          <tr className="rounded-sm">
+                            <th className="py-2 px-4 w-8 text-left">S.no</th>
+                            <th className="py-2 px-4 text-left max-w-24  lg:max-w-32">
+                              Website
+                            </th>
+                            <th className="py-2 px-4 none xl:block text-left">
+                              URL
+                            </th>
+                            <th className="py-2 px-4 text-left">Username</th>
+                            <th className="py-2 px-4 text-left">Password</th>
+                            <th className="py-2 px-4 text-center max-w-24  lg:max-w-32">
+                              Notes
+                            </th>
+                            <th className="py-2 px-4 text-center max-w-24  lg:max-w-32">
+                              Actions
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="rounded-sm">
+                          {filteredCredentials.map((cred, index) => (
+                            <tr
+                              key={index}
+                              className="border-b dark:border-gray-700 dark:text-gray-200 hover:bg-gray-50/50 dark:hover:bg-gray-900"
+                            >
+                              <td className="py-2 px-2 text-center   max-w-6 ">
+                                {index + 1}
+                              </td>
+                              <td className="py-2 px-4 overflow-hidden max-w-14 ">
+                                <div className=" flex  items-center justify-left">
+                                  <img
+                                    src={fetchFavicon(cred.url)}
+                                    alt={cred.url}
+                                    className="w-5 h-5 mx-2 items-center"
+                                  />
+                                  <span
+                                    title={cred.website}
+                                    className="dark:text-gray-400 text-gray-700 overflow-auto truncate max-w-24 lg:max-w-32 font-medium uppercase"
                                   >
-                                    {showPasswords[cred.website] ? (
-                                      <FaEye />
-                                    ) : (
-                                      <FaEyeSlash />
-                                    )}
-                                  </button>
+                                    {cred.website}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="py-2 px-4 max-w-[15ch] overflow-hidden text-indigo-500 cursor-pointer hover:underline">
+                                <a
+                                  href={cred.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  {cred.url}
+                                </a>
+                              </td>
+                              <td className="py-2 px-4 text-gray-700  max-w-12">
+                                <div className="flex  px-1 min-w-fit  dark:bg-[#28283A] dark:text-gray-400  bg-gray-50 border border-gray-200/20 rounded-xs justify-between items-center space-x-2 whitespace-nowrap">
+                                  <span
+                                    className="overflow-hidden  lg:max-w-24 max-w-[14ch]"
+                                    title={cred.username}
+                                  >
+                                    {cred.username}
+                                  </span>
                                   <button
                                     onClick={() =>
-                                      handleCopyText(cred.password)
+                                      handleCopyText(cred.username)
                                     }
                                     className="text-gray-300 dark:hover:text-gray-500 dark:text-gray-600 hover:text-gray-400 transition-all"
                                   >
                                     <FaCopy />
                                   </button>
                                 </div>
-                              </div>
-                            </td>
-                            <td className="py-2 dark:text-gray-500  text-center text-gray-600 overflow-hidden truncate max-w-[14ch] lg:max-w-24 px-6 lg:px-4">
-                              {cred.notes}
-                            </td>
-                            <td className="py-2 px-4   max-w-14 lg:max-w-24">
-                              <div className="flex justify-center gap-4">
-                                <button
-                                  className="text-gray-300 dark:text-gray-600 dark:hover:text-indigo-600 dark:hover:bg-gray-800 transition-all  hover:text-indigo-500 hover:bg-white p-1 rounded-xs "
-                                  onClick={() => {
-                                    setSelectedCred(cred.id);
-                                    showModal(cred);
-                                  }}
-                                >
-                                  <MdEdit size={20} />
-                                </button>
-                                <button
-                                  className="text-gray-300  dark:text-gray-600 dark:hover:text-red-600 dark:hover:bg-gray-800 transition-all hover:text-red-500 hover:bg-white p-1 rounded-xs "
-                                  onClick={() => handleDelete(cred.id)}
-                                >
-                                  <MdDelete size={20} />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </>
-                ) : (
-                  <div className="flex flex-col justify-center items-center h-full w-full text-gray-500">
-                    {/* Icon */}
-                    <FiPlusCircle
-                      size={80}
-                      onClick={() => showModal()}
-                      className="mb-4 dark:text-gray-700 cursor-pointer transition-all hover:scale-105 text-indigo-500"
-                    />
-
-                    {/* Title */}
-                    <h2 className="text-xl dark:text-gray-600  text-gray-600 font-semibold">
-                      Create Your First Credential
-                    </h2>
-
-                    {/* Subtitle */}
-                    <p className="  dark:text-gray-600 text-gray-600">
-                      Start by adding your credentials securely.
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-            <div className="w-[30%] dark:bg-[#28283A] bg-white xl:w-[20%] ">
-              <div>
-                <h2
-                  className={`font-semibold dark:bg-[#28283A] bg-white ${
-                    window.size < 1134 ? "-translate-y-8" : "-translate-y-14"
-                  } text-center dark:text-gray-100 text-lg lg:text-2xl `}
-                >
-                  Generate Password
-                </h2>
-                <div
-                  className={`dark:bg-[#513a7a] bg-gray-100 ${
-                    window.size < 1134 ? "-translate-y-8" : "-translate-y-16"
-                  } border border-black/5 flex flex-col justify-between -translate-y-8 text-center space-y-5  w-full h-full   text-gray-700 rounded-xs p-6`}
-                >
-                  <div className="text-gray-700 border border-black/10 dark:bg-[#28283A] dark:text-gray-300 bg-white p-3 text-[1vw] font-mono rounded-xs">
-                    {genPass || "Generate hackproof password"}
-                  </div>
-
-                  <div className="mt-4 text-left flex flex-col  justify-between   space-y-2">
-                    <label className="block text-sm">
-                      <input
-                        type="number"
-                        min="8"
-                        max="24"
-                        value={length}
-                        onChange={(e) => setLength(e.target.value)}
-                        className="mr-2 text-gray-700 dark:text-gray-300 text-center dark:bg-[#28283A] px-3 py-2 rounded-xs"
+                              </td>
+                              <td className="py-2 text-gray-500 px-4  max-w-12">
+                                <div className="flex dark:bg-[#28283A] min-w-fit dark:text-gray-400 bg-gray-50 border border-gray-200/20 px-1 rounded-xs justify-between items-center space-x-2 whitespace-nowrap">
+                                  <span
+                                    className="overflow-hidden   lg:max-w-24 max-w-[14ch]"
+                                    title={cred.password}
+                                  >
+                                    {showPasswords[cred.website]
+                                      ? cred.password
+                                      : "••••••••"}
+                                  </span>
+                                  <div className="flex space-x-1">
+                                    <button
+                                      onClick={() =>
+                                        togglePasswordVisibility(cred.website)
+                                      }
+                                      className="text-gray-300 dark:hover:text-gray-500 dark:text-gray-600 hover:text-gray-400 transition-all"
+                                    >
+                                      {showPasswords[cred.website] ? (
+                                        <FaEye />
+                                      ) : (
+                                        <FaEyeSlash />
+                                      )}
+                                    </button>
+                                    <button
+                                      onClick={() =>
+                                        handleCopyText(cred.password)
+                                      }
+                                      className="text-gray-300 dark:hover:text-gray-500 dark:text-gray-600 hover:text-gray-400 transition-all"
+                                    >
+                                      <FaCopy />
+                                    </button>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="py-2 dark:text-gray-500  text-center text-gray-600 overflow-hidden truncate max-w-[14ch] lg:max-w-24 px-6 lg:px-4">
+                                {cred.notes}
+                              </td>
+                              <td className="py-2 px-4   max-w-14 lg:max-w-24">
+                                <div className="flex justify-center gap-4">
+                                  <button
+                                    className="text-gray-300 dark:text-gray-600 dark:hover:text-indigo-600 dark:hover:bg-gray-800 transition-all  hover:text-indigo-500 hover:bg-white p-1 rounded-xs "
+                                    onClick={() => {
+                                      setSelectedCred(cred.id);
+                                      showModal(cred);
+                                    }}
+                                  >
+                                    <MdEdit size={20} />
+                                  </button>
+                                  <button
+                                    className="text-gray-300  dark:text-gray-600 dark:hover:text-red-600 dark:hover:bg-gray-800 transition-all hover:text-red-500 hover:bg-white p-1 rounded-xs "
+                                    onClick={() => handleDelete(cred.id)}
+                                  >
+                                    <MdDelete size={20} />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </>
+                  ) : (
+                    <div className="flex flex-col justify-center items-center h-full w-full text-gray-500">
+                      {/* Icon */}
+                      <FiPlusCircle
+                        size={80}
+                        onClick={() => showModal()}
+                        className="mb-4 dark:text-gray-700 cursor-pointer transition-all hover:scale-105 text-indigo-500"
                       />
-                      <span className="dark:text-gray-300">Length</span>
-                    </label>
-                    <div className="flex  flex-col lg:flex-row justify-between">
-                      <label className="block text-sm dark:text-gray-300">
-                        <input
-                          type="checkbox"
-                          checked={includeNumbers}
-                          onChange={() => setIncludeNumbers(!includeNumbers)}
-                          className="mr-2"
-                        />
-                        Numbers
-                      </label>
-                      <label className="block text-sm dark:text-gray-300">
-                        <input
-                          type="checkbox"
-                          checked={includeLetters}
-                          onChange={() => setIncludeLetters(!includeLetters)}
-                          className="mr-2"
-                        />
-                        Letters
-                      </label>
-                      <label className="block text-sm dark:text-gray-300">
-                        <input
-                          type="checkbox"
-                          checked={includeSpecialChars}
-                          onChange={() =>
-                            setIncludeSpecialChars(!includeSpecialChars)
-                          }
-                          className="mr-2"
-                        />
-                        Specials
-                      </label>
+
+                      {/* Title */}
+                      <h2 className="text-xl dark:text-gray-600  text-gray-600 font-semibold">
+                        Create Your First Credential
+                      </h2>
+
+                      {/* Subtitle */}
+                      <p className="  dark:text-gray-600 text-gray-600">
+                        Start by adding your credentials securely.
+                      </p>
                     </div>
-                  </div>
-                  <div className="flex flex-col xl:flex-row justify-center space-y-2 xl:space-y-0  w-full xl:space-x-3 mt-4">
-                    <button
-                      onClick={() => generateRandomPassword(length)}
-                      className="bg-gray-300 dark:text-gray-400 dark:hover:bg-gray-900 dark:bg-[#513a7a] border  border-gray-500/5 text-gray-700 w-full xl:w-[60%] px-4 py-2 rounded-xs hover:bg-gray-800 hover:text-gray-100 transition duration-300"
-                    >
-                      Generate
-                    </button>
-                    <button
-                      onClick={handleCopyPassword}
-                      className="bg-gray-300 border  dark:text-gray-400 dark:hover:bg-gray-900 dark:bg-[#513a7a] border-gray-500/5 text-gray-700 w-full xl:w-[40%] px-4 py-2 rounded-xs hover:bg-gray-800 hover:text-gray-100  transition duration-300"
-                    >
-                      Copy
-                    </button>
+                  )}
+                </div>
+              )}
+              <div className="w-[30%]  dark:bg-[#28283A] bg-white xl:w-[20%] ">
+                <div>
+                  <h2
+                    className={`font-semibold dark:bg-[#28283A] bg-white ${
+                      window.size < 1134 ? "-translate-y-8" : "-translate-y-14"
+                    } text-center dark:text-gray-100 text-lg lg:text-2xl `}
+                  >
+                    Generate Password
+                  </h2>
+                  <div
+                    className={`dark:bg-[#513a7a] bg-gray-100 ${
+                      window.size < 1134 ? "-translate-y-8" : "-translate-y-16"
+                    } border border-black/5 flex flex-col justify-between -translate-y-8 text-center space-y-5  w-full h-full   text-gray-700 rounded-xs p-6`}
+                  >
+                    <div className="text-gray-700 border border-black/10 dark:bg-[#28283A] dark:text-gray-300 bg-white p-3 text-[1vw] font-mono rounded-xs">
+                      {genPass || "Generate hackproof password"}
+                    </div>
+
+                    <div className="mt-4 text-left flex flex-col  justify-between   space-y-2">
+                      <label className="block text-sm">
+                        <input
+                          type="number"
+                          min="8"
+                          max="24"
+                          value={length}
+                          onChange={(e) => setLength(e.target.value)}
+                          className="mr-2 text-gray-700 dark:text-gray-300 text-center dark:bg-[#28283A] px-3 py-2 rounded-xs"
+                        />
+                        <span className="dark:text-gray-300">Length</span>
+                      </label>
+                      <div className="flex  flex-col lg:flex-row justify-between">
+                        <label className="block text-sm dark:text-gray-300">
+                          <input
+                            type="checkbox"
+                            checked={includeNumbers}
+                            onChange={() => setIncludeNumbers(!includeNumbers)}
+                            className="mr-2"
+                          />
+                          Numbers
+                        </label>
+                        <label className="block text-sm dark:text-gray-300">
+                          <input
+                            type="checkbox"
+                            checked={includeLetters}
+                            onChange={() => setIncludeLetters(!includeLetters)}
+                            className="mr-2"
+                          />
+                          Letters
+                        </label>
+                        <label className="block text-sm dark:text-gray-300">
+                          <input
+                            type="checkbox"
+                            checked={includeSpecialChars}
+                            onChange={() =>
+                              setIncludeSpecialChars(!includeSpecialChars)
+                            }
+                            className="mr-2"
+                          />
+                          Specials
+                        </label>
+                      </div>
+                    </div>
+                    <div className="flex flex-col xl:flex-row justify-center space-y-2 xl:space-y-0  w-full xl:space-x-3 mt-4">
+                      <button
+                        onClick={() => generateRandomPassword(length)}
+                        className="bg-gray-300 dark:text-gray-400 dark:hover:bg-gray-900 dark:bg-[#513a7a] border  border-gray-500/5 text-gray-700 w-full xl:w-[60%] px-4 py-2 rounded-xs hover:bg-gray-800 hover:text-gray-100 transition duration-300"
+                      >
+                        Generate
+                      </button>
+                      <button
+                        onClick={handleCopyPassword}
+                        className="bg-gray-300 border  dark:text-gray-400 dark:hover:bg-gray-900 dark:bg-[#513a7a] border-gray-500/5 text-gray-700 w-full xl:w-[40%] px-4 py-2 rounded-xs hover:bg-gray-800 hover:text-gray-100  transition duration-300"
+                      >
+                        Copy
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Modal Component */}
-          {isModalVisible && (
-            <div className="fixed inset-0 bg-black backdrop-blur-sm bg-opacity-50 flex items-center justify-center">
-              <div className="dark:bg-[#513a7a] bg-white p-8 rounded-sm w-96">
-                <h2 className="text-2xl mb-4 dark:text-gray-100">
-                  {currentCredential ? "Edit Credential" : "Add Credential"}
-                </h2>
-                <form
-                  onSubmit={(event) => {
-                    handleSave(event, selectedCred);
-                  }}
-                >
-                  <div className="space-y-4">
-                    <input
-                      type="text"
-                      name="website"
-                      value={formValues.website}
-                      onChange={handleInputChange}
-                      placeholder="Website"
-                      className="w-full p-2 dark:bg-[#28283A] dark:text-gray-400 dark:border-gray-600 border rounded"
-                    />
-                    <input
-                      type="text"
-                      name="url"
-                      value={formValues.url}
-                      onChange={handleInputChange}
-                      placeholder="URL"
-                      className="w-full p-2 dark:bg-[#28283A] dark:text-gray-400 dark:border-gray-600 border rounded"
-                    />
-                    <input
-                      type="text"
-                      name="username"
-                      value={formValues.username}
-                      onChange={handleInputChange}
-                      placeholder="Username"
-                      className="w-full p-2 dark:bg-[#28283A] dark:text-gray-400 dark:border-gray-600 border rounded"
-                    />
-                    <input
-                      type="text"
-                      name="password"
-                      value={formValues.password}
-                      onChange={handleInputChange}
-                      placeholder="Password"
-                      className="w-full p-2 dark:bg-[#28283A] dark:text-gray-400 dark:border-gray-600 border rounded"
-                    />
-                    <textarea
-                      name="notes"
-                      value={formValues.notes}
-                      onChange={handleInputChange}
-                      placeholder="Notes"
-                      className="w-full p-2 dark:bg-[#28283A] dark:text-gray-400 dark:border-gray-600 border rounded"
-                    />
-                  </div>
-                  <div className="flex justify-end space-x-2 mt-4">
-                    <button
-                      type="button"
-                      onClick={() => setIsModalVisible(false)}
-                      className="px-4 py-2 dark:bg-[#513a7a] transition-all dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-900 border rounded"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-4 py-2 bg-indigo-500 border dark:bg-indigo-700 dark:border-blue-600 transition-all dark:text-gray-300 dark:hover:bg-blue-900 text-white rounded"
-                    >
-                      Save
-                    </button>
-                  </div>
-                </form>
+            {/* Modal Component */}
+            {isModalVisible && (
+              <div className="fixed inset-0 bg-black backdrop-blur-sm bg-opacity-50 flex items-center justify-center">
+                <div className="dark:bg-[#513a7a] bg-white p-8 rounded-sm w-96">
+                  <h2 className="text-2xl mb-4 dark:text-gray-100">
+                    {currentCredential ? "Edit Credential" : "Add Credential"}
+                  </h2>
+                  <form
+                    onSubmit={(event) => {
+                      handleSave(event, selectedCred);
+                    }}
+                  >
+                    <div className="space-y-4">
+                      <input
+                        type="text"
+                        name="website"
+                        value={formValues.website}
+                        onChange={handleInputChange}
+                        placeholder="Website"
+                        className="w-full p-2 dark:bg-[#28283A] dark:text-gray-400 dark:border-gray-600 border rounded"
+                      />
+                      <input
+                        type="text"
+                        name="url"
+                        value={formValues.url}
+                        onChange={handleInputChange}
+                        placeholder="URL"
+                        className="w-full p-2 dark:bg-[#28283A] dark:text-gray-400 dark:border-gray-600 border rounded"
+                      />
+                      <input
+                        type="text"
+                        name="username"
+                        value={formValues.username}
+                        onChange={handleInputChange}
+                        placeholder="Username"
+                        className="w-full p-2 dark:bg-[#28283A] dark:text-gray-400 dark:border-gray-600 border rounded"
+                      />
+                      <input
+                        type="text"
+                        name="password"
+                        value={formValues.password}
+                        onChange={handleInputChange}
+                        placeholder="Password"
+                        className="w-full p-2 dark:bg-[#28283A] dark:text-gray-400 dark:border-gray-600 border rounded"
+                      />
+                      <textarea
+                        name="notes"
+                        value={formValues.notes}
+                        onChange={handleInputChange}
+                        placeholder="Notes"
+                        className="w-full p-2 dark:bg-[#28283A] dark:text-gray-400 dark:border-gray-600 border rounded"
+                      />
+                    </div>
+                    <div className="flex justify-end space-x-2 mt-4">
+                      <button
+                        type="button"
+                        onClick={() => setIsModalVisible(false)}
+                        className="px-4 py-2 dark:bg-[#513a7a] transition-all dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-900 border rounded"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-4 py-2 bg-indigo-500 border dark:bg-indigo-700 dark:border-blue-600 transition-all dark:text-gray-300 dark:hover:bg-blue-900 text-white rounded"
+                      >
+                        Save
+                      </button>
+                    </div>
+                  </form>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
     </>
