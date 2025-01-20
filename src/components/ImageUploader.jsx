@@ -75,7 +75,7 @@ function ImageUploader() {
             </div>
           )}
           {imageUrl && (
-            <div className="relative rounded-b-sm    group h-80">
+            <div className="relative rounded-b-sm    group h-[19rem]">
               <Image
                 src={imageUrl}
                 alt="Uploaded"

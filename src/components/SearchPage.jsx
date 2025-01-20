@@ -22,10 +22,11 @@ import "./style.css";
 import { Dropdown } from "antd";
 import { Settings } from "lucide-react";
 import { ThemeContext } from "../App";
-
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 function SearchPage() {
   const { isDarkMode, toggleTheme } = useContext(ThemeContext);
   const [backgroundImage, setBackgroundImage] = useState("");
+  const [user, setUser] = useState(null);
   const [transparency, setTransparency] = useState(() =>
     parseInt(localStorage.getItem("bgTransparency") || "85")
   );
@@ -53,6 +54,17 @@ function SearchPage() {
   const tempTransparencyRef = useRef(sliderTransparency);
   const tempWidgetTransparencyRef = useRef(sliderWidgetTransparency);
   const textColorRef = useRef(textColor);
+
+  useEffect(() => {
+    const authInstance = getAuth();
+    const unsubscribe = onAuthStateChanged(
+      authInstance,
+      async (currentUser) => {
+        setUser(currentUser);
+      }
+    );
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const storedBackgroundImage = localStorage.getItem("backgroundImage");
@@ -383,7 +395,7 @@ function SearchPage() {
               <Shortcut />
               <div>
                 <div className="flex justify-center max-w-[90vw] mb-3 w-full mx-auto">
-                  <div className="flex space-x-1 p-1 justify-between bg-gray-200/10 backdrop-blur-lg border border-gray-200/20 dark:border-gray-800/20 dark:bg-[#513a7a]/10 rounded-lg w-full">
+                  <div className="flex space-x-1 p-1 justify-between bg-gray-200/10 backdrop-blur-lg border border-gray-400/10 dark:border-gray-800/20 dark:bg-[#513a7a]/10 rounded-lg w-full">
                     <button
                       className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
                         activeComponent === "Anotherpage"
@@ -465,7 +477,7 @@ function SearchPage() {
                       <span className="drop-shadow-md">TOOL</span>
                     </button>
                     <Dropdown menu={settingsMenu} trigger={["click"]}>
-                      <button className="px-4 py-2 text-sm font-medium rounded-md transition-all dark:text-white hover:bg-gray-100 dark:hover:bg-[#28283A] flex items-center">
+                      <button className="px-4 py-2 text-sm font-medium rounded-md  transition-all dark:text-white hover:bg-gray-100 dark:hover:bg-[#28283A] flex items-center">
                         <Settings className="w-5 h-5" />
                       </button>
                     </Dropdown>
@@ -474,30 +486,91 @@ function SearchPage() {
               </div>
             </div>
           </div>
-          <div className="w-full">
-            {activeComponent === "NotebookAndSheet" ? (
-              <NotebookAndSheet />
-            ) : activeComponent === "PopularBookmarks" ? (
-              <PopularBookmarks />
-            ) : activeComponent === "PasswordGenerator" ? (
-              <PasswordGenerator />
-            ) : activeComponent === "News" ? (
-              <News />
-            ) : activeComponent === "Sports" ? (
-              <Sports />
-            ) : activeComponent === "Anotherpage" ? (
-              <Anotherpage visibleHandle={visibleHandle} />
-            ) : activeComponent === "Top100" ? (
-              <Top100 />
-            ) : activeComponent === "Tool" ? (
-              <Tool />
-            ) : (
-              <Anotherpage
-                visibleHandle={visibleHandle}
-                isDarkMode={isDarkMode}
-              />
-            )}
-          </div>
+          {!user ? (
+            <div className="w-full">
+              <div className="flex justify-center items-center h-[15vh]">
+                <div className="text-5xl text-indigo-500 font-bold">
+                  UNLOCK MORE FEATURES
+                  <button
+                    onClick={() => navigate("/signin")}
+                    class="group mx-auto mt-5 relative flex flex-row items-center bg-[#212121] dark:bg-white justify-center gap-2 rounded-2xl px-4 py-1.5 text-sm font-medium shadow-[inset_0_-8px_10px_#8fdfff1f] transition-shadow duration-500 ease-out hover:shadow-[inset_0_-5px_10px_#8fdfff3f]"
+                  >
+                    <div class="absolute inset-0 block h-full w-full animate-gradient bg-gradient-to-r from-[#ffaa40]/50 via-[#9c40ff]/50 to-[#ffaa40]/50 bg-[length:var(--bg-size)_100%] [border-radius:inherit] [mask:linear-gradient(#fff_0_0)_content-box,linear-gradient(#fff_0_0)] p-[1px] ![mask-composite:subtract]"></div>
+                    <svg
+                      class="size-4 text-white dark:text-[#212121]"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 15 15"
+                      height="15"
+                      width="15"
+                    >
+                      <path
+                        clip-rule="evenodd"
+                        fill-rule="evenodd"
+                        fill="currentColor"
+                        d="M5 4.63601C5 3.76031 5.24219 3.1054 5.64323 2.67357C6.03934 2.24705 6.64582 1.9783 7.5014 1.9783C8.35745 1.9783 8.96306 2.24652 9.35823 2.67208C9.75838 3.10299 10 3.75708 10 4.63325V5.99999H5V4.63601ZM4 5.99999V4.63601C4 3.58148 4.29339 2.65754 4.91049 1.99307C5.53252 1.32329 6.42675 0.978302 7.5014 0.978302C8.57583 0.978302 9.46952 1.32233 10.091 1.99162C10.7076 2.65557 11 3.57896 11 4.63325V5.99999H12C12.5523 5.99999 13 6.44771 13 6.99999V13C13 13.5523 12.5523 14 12 14H3C2.44772 14 2 13.5523 2 13V6.99999C2 6.44771 2.44772 5.99999 3 5.99999H4ZM3 6.99999H12V13H3V6.99999Z"
+                      ></path>
+                    </svg>
+                    <div
+                      class="shrink-0 bg-border w-[1px] h-4"
+                      role="none"
+                      data-orientation="vertical"
+                    ></div>
+                    <span class="inline animate-gradient whitespace-pre bg-gradient-to-r dark:from-[#ffaa40] dark:via-[#9c40ff] dark:to-[#ffaa40] from-white via-gray-50 to-white bg-[length:var(--bg-size)_100%] bg-clip-text text-transparent [--bg-size:300%] text-center">
+                      Login
+                    </span>
+                    <svg
+                      stroke-linecap="round"
+                      class="text-[#9c40ff]"
+                      stroke-width="1.5"
+                      aria-hidden="true"
+                      viewBox="0 0 10 10"
+                      height="11"
+                      width="11"
+                      stroke="currentColor"
+                      fill="none"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        d="M0 5h7"
+                        class="opacity-0 transition group-hover:opacity-100"
+                      ></path>
+                      <path
+                        stroke-linecap="round"
+                        d="M1 1l4 4-4 4"
+                        class="transition group-hover:translate-x-[3px]"
+                      ></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="w-full">
+              {activeComponent === "NotebookAndSheet" ? (
+                <NotebookAndSheet />
+              ) : activeComponent === "PopularBookmarks" ? (
+                <PopularBookmarks />
+              ) : activeComponent === "PasswordGenerator" ? (
+                <PasswordGenerator />
+              ) : activeComponent === "News" ? (
+                <News />
+              ) : activeComponent === "Sports" ? (
+                <Sports />
+              ) : activeComponent === "Anotherpage" ? (
+                <Anotherpage visibleHandle={visibleHandle} />
+              ) : activeComponent === "Top100" ? (
+                <Top100 />
+              ) : activeComponent === "Tool" ? (
+                <Tool />
+              ) : (
+                <Anotherpage
+                  visibleHandle={visibleHandle}
+                  isDarkMode={isDarkMode}
+                />
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

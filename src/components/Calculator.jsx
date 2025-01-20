@@ -183,7 +183,7 @@ function Calculator() {
           ) : (
             <div className="flex flex-col h-full">
               {/* Display */}
-              <div className="text-right text-gray-700 dark:text-white p-2 rounded-sm bg-gray-100 dark:bg-[#513a7a] mb-3">
+              <div className="text-right text-gray-700 dark:text-white p-2 rounded-sm bg-gray-100 dark:bg-[#513a7a]/20 mb-3">
                 <div className="text-lg opacity-70">
                   {(history.length > 0 && history[0]) || "0"}
                 </div>
@@ -196,26 +196,26 @@ function Calculator() {
               <div className="grid grid-cols-4 gap-1 flex-1">
                 {/* Row 1 */}
                 <button
-                  className="p-4 rounded-sm text-base font-bold bg-gray-100 text-indigo-500 dark:text-indigo-500 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 hover:text-gray-800 transition-all hover:bg-gray-50"
+                  className="p-4 rounded-sm text-base font-bold bg-gray-100 text-[#8163D3] dark:text-[#8163D3] dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 hover:text-gray-800 transition-all hover:bg-gray-50"
                   onClick={() => handleCalcInput("C")}
                 >
                   C
                 </button>
 
                 <button
-                  className="p-4 rounded-sm text-base font-bold bg-gray-100 text-indigo-500 dark:text-indigo-500 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 hover:text-gray-800 transition-all hover:bg-gray-50"
+                  className="p-4 rounded-sm text-base font-bold bg-gray-100 text-[#8163D3] dark:text-[#8163D3] dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 hover:text-gray-800 transition-all hover:bg-gray-50"
                   onClick={() => handleCalcInput("backspace")}
                 >
                   <FaBackspace className="mx-auto" />
                 </button>
                 <button
-                  className="text-indigo-500 rounded-sm p-4 dark:text-indigo-500 font-black text-base hover:bg-gray-50 hover:text-gray-800 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 bg-gray-100"
+                  className="text-[#8163D3] rounded-sm p-4 dark:text-[#8163D3] font-black text-base hover:bg-gray-50 hover:text-gray-800 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 bg-gray-100"
                   onClick={() => handleCalcInput("%")}
                 >
                   %
                 </button>
                 <button
-                  className="text-indigo-500 rounded-sm p-4 dark:text-indigo-500 font-bold text-2xl hover:bg-gray-50 hover:text-gray-800 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 bg-gray-100"
+                  className="text-[#8163D3] rounded-sm p-4 dark:text-[#8163D3] font-bold text-2xl hover:bg-gray-50 hover:text-gray-800 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 bg-gray-100"
                   onClick={() => handleCalcInput("/")}
                 >
                   ÷
@@ -227,7 +227,7 @@ function Calculator() {
                     key={val}
                     className={`p-4 rounded-sm text-base font-bold ${
                       i === 3
-                        ? "text-indigo-500 text-2xl dark:text-indigo-500 hover:bg-gray-50 hover:text-gray-800 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 bg-gray-100"
+                        ? "text-[#8163D3] text-2xl dark:text-[#8163D3] hover:bg-gray-50 hover:text-gray-800 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 bg-gray-100"
                         : "bg-gray-100 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 text-gray-800 hover:text-gray-800 transition-all dark:text-white hover:bg-gray-50"
                     }`}
                     onClick={() => handleCalcInput(val === "*" ? "x" : val)}
@@ -242,7 +242,7 @@ function Calculator() {
                     key={val}
                     className={`p-4 rounded-sm text-base font-bold ${
                       i === 3
-                        ? "text-indigo-500 text-2xl dark:text-indigo-500 hover:bg-gray-50 hover:text-gray-800 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 bg-gray-100"
+                        ? "text-[#8163D3] text-2xl dark:text-[#8163D3] hover:bg-gray-50 hover:text-gray-800 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 bg-gray-100"
                         : "bg-gray-100 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 text-gray-800 hover:text-gray-800 transition-all dark:text-white hover:bg-gray-50"
                     }`}
                     onClick={() => handleCalcInput(val)}
@@ -257,7 +257,7 @@ function Calculator() {
                     key={val}
                     className={`p-4 rounded-sm text-base font-bold ${
                       i === 3
-                        ? "text-indigo-500 text-2xl dark:text-indigo-500 hover:bg-gray-50 hover:text-gray-800 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 bg-gray-100"
+                        ? "text-[#8163D3] text-2xl dark:text-[#8163D3] hover:bg-gray-50 hover:text-gray-800 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 bg-gray-100"
                         : "bg-gray-100 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 text-gray-800 hover:text-gray-800 transition-all dark:text-white hover:bg-gray-50"
                     }`}
                     onClick={() => handleCalcInput(val)}
@@ -271,7 +271,7 @@ function Calculator() {
                   className="p-4 text-base rounded-sm font-bold flex justify-center bg-gray-100 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 text-gray-800 hover:text-gray-800 transition-all dark:text-white hover:bg-gray-50"
                   onClick={toggleHistory}
                 >
-                  <FaHistory className="mt-1 text-indigo-500 dark:text-indigo-500" />
+                  <FaHistory className="mt-1 text-[#8163D3] dark:text-[#8163D3]" />
                 </button>
                 <button
                   className="p-4 text-base rounded-sm font-bold bg-gray-100 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 text-gray-800 hover:text-gray-800 transition-all dark:text-white hover:bg-gray-50"
@@ -286,7 +286,7 @@ function Calculator() {
                   .
                 </button>
                 <button
-                  className="bg-indigo-500 text-white p-4 text-base rounded-sm font-bold hover:bg-indigo-600"
+                  className="bg-indigo-500 text-white p-4 text-base rounded-sm font-bold dark:bg-[#483072] hover:bg-indigo-600"
                   onClick={() => handleCalcInput("=")}
                 >
                   =

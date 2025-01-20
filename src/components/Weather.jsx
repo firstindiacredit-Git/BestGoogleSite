@@ -44,7 +44,7 @@ const themes = {
   default: {
     background: "bg-white dark:bg-[#28283A]",
     text: "text-gray-700 dark:text-white",
-    card: "bg-gray-50 dark:bg-[#513a7a]",
+    card: "bg-gray-50 dark:bg-[#513a7a]/20",
     accent: "text-indigo-500",
     hover: "hover:bg-gray-100 dark:hover:bg-gray-800",
     border: "border-gray-200 dark:border-gray-700",
@@ -91,10 +91,18 @@ const WeatherCard = ({
   isMain = false,
   theme = "default",
   description,
-  feelsLike,
+  city,
 }) => (
-  <div className="space-y-3 my-2">
-    <div className="flex justify-center items-center gap-4">
+  <div className="  flex flex-col justify-between h-full">
+    <span className="text-sm opacity-70">
+      {new Date().toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      })}
+    </span>
+    <h2 className="text-xl font-semibold">{city}</h2>
+    <div className="flex  justify-center items-center gap-4">
       <WeatherIcon
         condition={condition}
         className={`w-16 h-16 ${themes[theme].accent}`}
@@ -270,23 +278,6 @@ const Weather = () => {
       ? `${Math.round(temp)}°C`
       : `${Math.round(temp)}°F`;
   };
-
-  // const handleCityChange = (e) => {
-  //   setInputValue(e.target.value);
-  //   if (!e.target.value) setError(null);
-  // };
-
-  // const handleCitySubmit = (e) => {
-  //   e.preventDefault();
-  //   if (inputValue.trim()) {
-  //     setCity(inputValue.trim());
-  //     setInputValue("");
-  //     setIsVisible(false);
-  //   } else {
-  //     setError("Please enter a valid city name.");
-  //   }
-  // };
-
   const handleDetailsToggle = () => {
     const newShowDetails = !showDetails;
     setShowDetails(newShowDetails);
@@ -306,7 +297,7 @@ const Weather = () => {
     <div
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
-      className={`w-full max-w-xl p-1 rounded-sm transition-colors ${
+      className={`w-full max-w-xl p-1 rounded-sm  transition-colors ${
         !localStorage.getItem("backgroundImage") &&
         themes[currentTheme].background
       } ${
@@ -317,7 +308,7 @@ const Weather = () => {
         <div className="flex justify-between items-center">
           <div
             onClick={collapse}
-            className="flex p-2  text-black dark:text-white  w-full cursor-pointer text-xl font-medium items-center"
+            className="flex p-2   text-black dark:text-white  w-full cursor-pointer text-xl font-medium items-center"
           >
             Weather
           </div>
@@ -369,7 +360,7 @@ const Weather = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="text-center text-red-500"
+                className="text-center"
               >
                 {error}
               </motion.p>
@@ -379,19 +370,10 @@ const Weather = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
+                className="p-3  h-[19rem]"
               >
-                <h2 className="text-xl font-semibold">{city}</h2>
-                {currentWeather && (
-                  <span className="text-sm opacity-70">
-                    {new Date().toLocaleDateString("en-US", {
-                      weekday: "short",
-                      month: "short",
-                      day: "numeric",
-                    })}
-                  </span>
-                )}
-
                 <WeatherCard
+                  city={city}
                   temperature={currentWeather.main.temp}
                   condition={currentWeather.weather[0].main}
                   description={currentWeather.weather[0].description}

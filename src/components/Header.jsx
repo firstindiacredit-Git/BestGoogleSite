@@ -100,7 +100,7 @@ const Header = ({
         const urlParams = new URLSearchParams(window.location.search);
         const currentPageId = urlParams.get("pageId");
         if (currentPageId === pageId.toString()) {
-          navigate("/");
+          navigate("/search");
         }
       },
     });
@@ -251,6 +251,7 @@ const Header = ({
           </div>
         )}
       </div>
+      {!user && <div className="w-36"></div>}
 
       <div className="flex relative mx-auto justify-center">
         <img

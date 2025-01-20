@@ -12,11 +12,12 @@ import {
   where,
   deleteDoc,
   writeBatch,
+  onSnapshot,
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import {
   Spin,
-  Button,
+  Button as AntButton,
   Modal,
   Input,
   Space,
@@ -35,16 +36,27 @@ import {
   Row,
   Col,
 } from "antd";
+import { motion } from "framer-motion";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import {
+  EyeInvisibleOutlined,
+  EyeOutlined,
   UnorderedListOutlined,
   AppstoreOutlined,
   PictureOutlined,
+  CloudOutlined,
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
   MoreOutlined,
+  EllipsisOutlined,
+  CheckOutlined,
+  DragOutlined,
+  ExclamationCircleOutlined,
+  SettingOutlined,
 } from "@ant-design/icons";
+import { Alert } from "antd";
+import debounce from "lodash/debounce";
 
 function PopularBookmarks() {
   const [categories, setCategories] = useState([]);
@@ -98,6 +110,158 @@ function PopularBookmarks() {
     return savedGridView ? JSON.parse(savedGridView) : true;
   });
   const [hiddenBookmarkIds, setHiddenBookmarkIds] = useState([]);
+  const [isControllerOpen, setIsControllerOpen] = useState(false);
+  const [previewCategories, setPreviewCategories] = useState([]);
+  const [previewColumns, setPreviewColumns] = useState(columnCount);
+  const [isApplyingChanges, setIsApplyingChanges] = useState(false);
+  const [availableCategories, setAvailableCategories] = useState([]);
+  const [activeCategories, setActiveCategories] = useState([]);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const savedTheme = localStorage.getItem("theme");
+    return savedTheme ? savedTheme === "dark" : false; // Default to light mode
+  });
+
+  // Enhanced drag state with more comprehensive tracking
+  const [dragState, setDragState] = useState({
+    isDragging: false,
+    draggedItem: null,
+    sourceColumn: null,
+    destinationColumn: null,
+    dragPosition: { x: 0, y: 0 },
+    dragProgress: 0, // 0-1 range for drag progress
+  });
+
+  // Enhanced drag preview state
+  const [dragsPreview, setDragsPreview] = useState({
+    isPreviewActive: false,
+    sourceItem: null,
+    destinationColumn: null,
+    previewPosition: null,
+    previewOpacity: 0,
+    previewScale: 1,
+  });
+
+  // Advanced drag start handler with precise tracking and preview
+  const handleDragStart = (category, columnIndex, event) => {
+    // Capture initial drag position
+    const startX = event.clientX || (event.touches && event.touches[0].clientX);
+    const startY = event.clientY || (event.touches && event.touches[0].clientY);
+
+    // Update drag state
+    setDragState({
+      isDragging: true,
+      draggedItem: category,
+      sourceColumn: columnIndex,
+      destinationColumn: null,
+      dragPosition: { x: startX, y: startY },
+      dragProgress: 0,
+    });
+
+    // Initialize preview state
+    setDragsPreview({
+      isPreviewActive: true,
+      sourceItem: category,
+      destinationColumn: null,
+      previewPosition: { x: startX, y: startY },
+      previewOpacity: 0.5,
+      previewScale: 1.05,
+    });
+
+    // Enhanced feedback
+    try {
+      // Haptic feedback
+      if ("vibrate" in navigator) {
+        navigator.vibrate([25, 50, 25]);
+      }
+
+      // Spatial audio feedback
+      const startDragAudio = new Audio("path/to/drag-start-spatial.mp3");
+      startDragAudio.playbackRate = 1.2;
+      startDragAudio.volume = 0.3;
+      startDragAudio.play().catch(() => {});
+    } catch (error) {
+      console.warn("Drag start feedback failed", error);
+    }
+  };
+
+  // Advanced drag update with progress tracking
+  const handleDragUpdate = (result, provided) => {
+    if (result.destination) {
+      // Calculate drag progress based on movement
+      const progress = Math.min(
+        1,
+        Math.abs(
+          (result.destination.index - result.source.index) /
+            Math.max(1, result.destination.droppableId.length)
+        )
+      );
+
+      setDragState((prev) => ({
+        ...prev,
+        destinationColumn: parseInt(result.destination.droppableId),
+        dragProgress: progress,
+        dragPosition: {
+          x: provided.clientX || prev.dragPosition.x,
+          y: provided.clientY || prev.dragPosition.y,
+        },
+      }));
+
+      // Update preview state
+      setDragPreview((prev) => ({
+        ...prev,
+        destinationColumn: parseInt(result.destination.droppableId),
+        previewPosition: {
+          x: provided.clientX || prev.previewPosition.x,
+          y: provided.clientY || prev.previewPosition.y,
+        },
+        previewOpacity: 0.8,
+        previewScale: 1.1,
+      }));
+
+      // Visual and audio feedback based on drag progress
+      try {
+        if (progress > 0.5) {
+          const progressAudio = new Audio("path/to/drag-progress.mp3");
+          progressAudio.volume = progress * 0.3;
+          progressAudio.playbackRate = 1 + progress * 0.5;
+          progressAudio.play().catch(() => {});
+        }
+      } catch (error) {
+        console.warn("Drag update feedback failed", error);
+      }
+    }
+  };
+
+  // Update theme in localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("theme", isDarkMode ? "dark" : "light");
+    // Update body class for global theme
+    document.body.classList.toggle("dark-mode", isDarkMode);
+  }, [isDarkMode]);
+
+  // Theme-dependent styles
+  const getThemeStyles = () => ({
+    backgroundColor: isDarkMode ? "#141414" : "#ffffff",
+    color: isDarkMode ? "#ffffff" : "#000000",
+    borderColor: isDarkMode ? "#303030" : "#f0f0f0",
+  });
+
+  const getBookmarkItemStyle = (isSelected) => ({
+    padding: "8px",
+    margin: "8px 0",
+    backgroundColor: isSelected
+      ? isDarkMode
+        ? "#1f1f1f"
+        : "#e6f7ff"
+      : isDarkMode
+      ? "#141414"
+      : "#fff",
+    border: `1px solid ${isDarkMode ? "#303030" : "#f0f0f0"}`,
+    borderRadius: "4px",
+    display: "flex",
+    alignItems: "center",
+    color: isDarkMode ? "#ffffff" : "#000000",
+  });
 
   // Track auth state
   useEffect(() => {
@@ -107,7 +271,212 @@ function PopularBookmarks() {
     return () => unsubscribeAuth();
   }, []);
 
-  // Fetch categories, links and hidden bookmarks
+  // Add new helper function for category fetching
+  const fetchCategories = async () => {
+    if (!user) return [];
+
+    try {
+      // Fetch admin categories
+      const adminCategorySnapshot = await getDocs(collection(db, "category"));
+      const adminCategories = adminCategorySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        isAdminCategory: true,
+      }));
+
+      // Fetch user categories
+      const userCategorySnapshot = await getDocs(
+        collection(db, "users", user.uid, "UserCategory")
+      );
+      const userCategories = userCategorySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        name: doc.data().newCategory,
+        isAdminCategory: false,
+      }));
+
+      // Combine and sort categories
+      return [...adminCategories, ...userCategories].sort(
+        (a, b) => (a.order || 0) - (b.order || 0)
+      );
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      message.error("Failed to fetch categories");
+      return [];
+    }
+  };
+
+  // Add improved snapshot listener setup
+  const setupSnapshotListeners = () => {
+    if (!user)
+      return { unsubscribeCategories: null, unsubscribePositions: null };
+
+    // Listen for user category changes
+    const unsubscribeCategories = onSnapshot(
+      collection(db, "users", user.uid, "UserCategory"),
+      {
+        next: async (snapshot) => {
+          try {
+            const changes = snapshot.docChanges();
+
+            // Handle incremental updates
+            setCategories((prevCategories) => {
+              const updatedCategories = [...prevCategories];
+
+              changes.forEach((change) => {
+                const categoryData = {
+                  id: change.doc.id,
+                  ...change.doc.data(),
+                  name: change.doc.data().newCategory,
+                  isAdminCategory: false,
+                };
+
+                if (change.type === "added") {
+                  if (
+                    !updatedCategories.some((cat) => cat.id === categoryData.id)
+                  ) {
+                    updatedCategories.push(categoryData);
+                  }
+                } else if (change.type === "modified") {
+                  const index = updatedCategories.findIndex(
+                    (cat) => cat.id === categoryData.id
+                  );
+                  if (index !== -1) {
+                    updatedCategories[index] = categoryData;
+                  }
+                } else if (change.type === "removed") {
+                  const index = updatedCategories.findIndex(
+                    (cat) => cat.id === categoryData.id
+                  );
+                  if (index !== -1) {
+                    updatedCategories.splice(index, 1);
+                  }
+                }
+              });
+
+              return updatedCategories.sort(
+                (a, b) => (a.order || 0) - (b.order || 0)
+              );
+            });
+
+            // Update columns if needed
+            if (
+              changes.some(
+                (change) => change.type === "added" || change.type === "removed"
+              )
+            ) {
+              setCategoryColumns((prevColumns) =>
+                ensureAllCategoriesInColumns(categories, prevColumns)
+              );
+            }
+          } catch (error) {
+            console.error("Error processing category changes:", error);
+            message.error("Failed to process category updates");
+          }
+        },
+        error: (error) => {
+          console.error("Error in category snapshot:", error);
+          message.error("Failed to listen for category updates");
+        },
+      }
+    );
+
+    // Listen for position changes
+    const unsubscribePositions = onSnapshot(doc(db, "users", user.uid), {
+      next: (docSnapshot) => {
+        try {
+          if (docSnapshot.exists()) {
+            const data = docSnapshot.data();
+            if (data.categoryPositions) {
+              const { columns, columnCount: newColumnCount } =
+                data.categoryPositions;
+
+              // Update columns with optimistic UI
+              setCategoryColumns((prevColumns) => {
+                const newColumns = { ...columns };
+                // Ensure all categories are included
+                return ensureAllCategoriesInColumns(categories, newColumns);
+              });
+
+              // Update column count if changed
+              if (newColumnCount !== columnCount) {
+                setColumnCount(newColumnCount);
+              }
+
+              // Update localStorage for persistence
+              localStorage.setItem("columnCount", newColumnCount.toString());
+              localStorage.setItem("categoryColumns", JSON.stringify(columns));
+            }
+          }
+        } catch (error) {
+          console.error("Error processing position changes:", error);
+          message.error("Failed to process layout updates");
+        }
+      },
+      error: (error) => {
+        console.error("Error in positions snapshot:", error);
+        message.error("Failed to listen for layout updates");
+      },
+    });
+
+    return { unsubscribeCategories, unsubscribePositions };
+  };
+
+  // Update the useEffect for initial data loading and snapshot setup
+  useEffect(() => {
+    let unsubscribeCallbacks = {
+      unsubscribeCategories: null,
+      unsubscribePositions: null,
+    };
+
+    const initializeData = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+
+        // Initial fetch of categories
+        const initialCategories = await fetchCategories();
+        setCategories(initialCategories);
+
+        // Setup real-time listeners
+        unsubscribeCallbacks = setupSnapshotListeners();
+
+        // Load saved states from localStorage
+        const savedOpenStates = localStorage.getItem("categoryOpenStates");
+        const initialOpenStates = savedOpenStates
+          ? JSON.parse(savedOpenStates)
+          : initialCategories.reduce((acc, category) => {
+              acc[category.id] = true;
+              return acc;
+            }, {});
+
+        setOpenCategories(initialOpenStates);
+      } catch (error) {
+        console.error("Error initializing data:", error);
+        message.error("Failed to load initial data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeData();
+
+    // Cleanup function
+    return () => {
+      if (unsubscribeCallbacks.unsubscribeCategories) {
+        unsubscribeCallbacks.unsubscribeCategories();
+      }
+      if (unsubscribeCallbacks.unsubscribePositions) {
+        unsubscribeCallbacks.unsubscribePositions();
+      }
+    };
+  }, [user]);
+
+  // Fetch all user bookmarks
   useEffect(() => {
     const fetchData = async () => {
       if (!user) return;
@@ -119,46 +488,8 @@ function PopularBookmarks() {
         const hiddenIds = userDocSnap.exists()
           ? userDocSnap.data().hiddenBookmarkIds || []
           : [];
+
         setHiddenBookmarkIds(hiddenIds);
-
-        // Fetch admin categories
-        const adminCategorySnapshot = await getDocs(collection(db, "category"));
-        const adminCategories = adminCategorySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-          isAdminCategory: true,
-        }));
-
-        // Fetch user categories
-        const userCategorySnapshot = await getDocs(
-          collection(db, "users", user.uid, "UserCategory")
-        );
-        const userCategories = userCategorySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-          name: doc.data().newCategory,
-          isAdminCategory: false,
-        }));
-
-        // Combine and sort all categories
-        const allCategories = [...adminCategories, ...userCategories];
-        allCategories.sort((a, b) => (a.order || 0) - (b.order || 0));
-        setCategories(allCategories);
-
-        // Load saved states from localStorage or set defaults
-        const savedStates = localStorage.getItem("categoryOpenStates");
-        const initialOpenStates = savedStates
-          ? JSON.parse(savedStates)
-          : allCategories.reduce((acc, category) => {
-              acc[category.id] = true; // Default to open if no saved state
-              return acc;
-            }, {});
-
-        setOpenCategories(initialOpenStates);
-        localStorage.setItem(
-          "categoryOpenStates",
-          JSON.stringify(initialOpenStates)
-        );
 
         // Fetch all user bookmarks
         const userBookmarksSnapshot = await getDocs(
@@ -172,7 +503,7 @@ function PopularBookmarks() {
         }));
 
         // Fetch admin bookmarks for each admin category
-        const adminBookmarksPromises = adminCategories.map(async (category) => {
+        const adminBookmarksPromises = categories.map(async (category) => {
           const bookmarksSnapshot = await getDocs(
             query(collection(db, "links"), where("category", "==", category.id))
           );
@@ -254,7 +585,7 @@ function PopularBookmarks() {
           const [reorderedItem] = items.splice(result.source.index, 1);
           items.splice(result.destination.index, 0, reorderedItem);
 
-          // Update orders for all items
+          // Update local state first for immediate feedback
           const updatedItems = items.map((item, index) => ({
             ...item,
             order: index,
@@ -263,15 +594,18 @@ function PopularBookmarks() {
           setEditModeBookmarks(updatedItems);
           setHasUnsavedChanges(true);
 
-          // Save positions for admin bookmarks
-          if (
-            selectedCategory &&
-            updatedItems.some((item) => item.isAdminBookmark)
-          ) {
-            await handleSaveBookmarkPositions(
-              selectedCategory.id,
-              updatedItems
-            );
+          // Update Firestore in the background
+          if (user) {
+            const batch = writeBatch(db);
+
+            updatedItems.forEach((item, index) => {
+              if (item.isAdminBookmark) {
+                const bookmarkRef = doc(db, "bookmarks", item.id);
+                batch.update(bookmarkRef, { order: index });
+              }
+            });
+
+            await batch.commit();
           }
         };
 
@@ -337,7 +671,7 @@ function PopularBookmarks() {
     };
 
     fetchData();
-  }, [user]);
+  }, [user, categories]);
 
   // Add useEffect to load saved positions
   useEffect(() => {
@@ -367,6 +701,34 @@ function PopularBookmarks() {
     column3: [],
     column4: [],
   });
+
+  // Add function to ensure all categories are in columns
+  const ensureAllCategoriesInColumns = (allCategories, currentColumns) => {
+    const newColumns = { ...currentColumns };
+    const existingCategoryIds = new Set(Object.values(newColumns).flat());
+
+    // Add missing categories to columns
+    allCategories.forEach((category) => {
+      if (!existingCategoryIds.has(category.id)) {
+        // Find the column with the least number of categories
+        let minColumn = "column1";
+        let minCount = newColumns.column1?.length || 0;
+
+        Object.keys(newColumns).forEach((colKey) => {
+          const colCount = newColumns[colKey]?.length || 0;
+          if (colCount < minCount) {
+            minCount = colCount;
+            minColumn = colKey;
+          }
+        });
+
+        // Add category to the column with least items
+        newColumns[minColumn] = [...(newColumns[minColumn] || []), category.id];
+      }
+    });
+
+    return newColumns;
+  };
 
   // Update the redistributeCategories function
   const redistributeCategories = async (count) => {
@@ -522,6 +884,82 @@ function PopularBookmarks() {
     initializeCategoryColumns();
   }, [user, categories]);
 
+  // Effect to manage available and active categories
+  useEffect(() => {
+    if (isControllerOpen) {
+      // Get all categories that are not currently in any column
+      const usedCategoryIds = new Set(
+        previewCategories.map((category) => category.id)
+      );
+
+      const available = categories.filter(
+        (category) => !usedCategoryIds.has(category.id)
+      );
+
+      setAvailableCategories(available);
+      setActiveCategories(previewCategories);
+    }
+  }, [isControllerOpen, previewCategories, categories]);
+
+  // Effect to initialize preview categories when modal opens
+  useEffect(() => {
+    if (isControllerOpen) {
+      // Get all categories from current columns
+      const allColumnCategories = Object.values(categoryColumns)
+        .flat()
+        .map((catId) => categories.find((cat) => cat.id === catId))
+        .filter(Boolean);
+
+      // Create preview categories with their current positions
+      const previewCats = allColumnCategories.map((category) => {
+        let categoryColumn = 0;
+        Object.entries(categoryColumns).forEach(([colKey, colCategories]) => {
+          if (colCategories?.includes(category.id)) {
+            categoryColumn = parseInt(colKey.replace("column", "")) - 1;
+          }
+        });
+
+        return {
+          ...category,
+          column: categoryColumn,
+          order:
+            categoryColumns[`column${categoryColumn + 1}`]?.indexOf(
+              category.id
+            ) || 0,
+        };
+      });
+
+      // Set preview categories
+      setPreviewCategories(previewCats);
+
+      // Set available categories (categories not in any column)
+      const columnCategoryIds = new Set(Object.values(categoryColumns).flat());
+      const availableCats = categories.filter(
+        (cat) => !columnCategoryIds.has(cat.id)
+      );
+      setAvailableCategories(availableCats);
+
+      setPreviewColumns(columnCount);
+    }
+  }, [isControllerOpen, categories, categoryColumns, columnCount]);
+
+  // Function to get categories for a specific column
+  const getColumnCategories = (columnIndex) => {
+    return previewCategories
+      .filter((cat) => cat.column === columnIndex)
+      .sort((a, b) => {
+        // First sort by order
+        const orderDiff = a.order - b.order;
+        if (orderDiff !== 0) return orderDiff;
+
+        // If orders are equal, use column positions as fallback
+        const colKey = `column${columnIndex + 1}`;
+        const aIndex = categoryColumns[colKey]?.indexOf(a.id) || 0;
+        const bIndex = categoryColumns[colKey]?.indexOf(b.id) || 0;
+        return aIndex - bIndex;
+      });
+  };
+
   const toggleBookmarkVisibility = async (bookmarkId) => {
     if (!user) return;
 
@@ -559,7 +997,6 @@ function PopularBookmarks() {
     }
 
     try {
-      // Add the category to Firestore
       const docRef = await addDoc(
         collection(db, "users", user.uid, "UserCategory"),
         {
@@ -570,53 +1007,15 @@ function PopularBookmarks() {
         }
       );
 
-      // Create the new category object with the correct structure
+      // Add the new category to the local state immediately
       const newCategory = {
         id: docRef.id,
         userId: user.uid,
         newCategory: newCategoryName.trim(),
-        name: newCategoryName.trim(), // Add name field to match the structure
         order: categories.length,
-        isAdminCategory: false,
-        createdAt: new Date().toISOString(),
       };
 
-      // Add the new category to the local state
       setCategories((prevCategories) => [...prevCategories, newCategory]);
-
-      // Add the new category to a column (default to the first column with least items)
-      const columnWithLeastItems = Object.entries(categoryColumns).reduce(
-        (acc, [key, value]) => {
-          return value.length < acc.length
-            ? { key, length: value.length }
-            : acc;
-        },
-        { key: "column1", length: Infinity }
-      );
-
-      setCategoryColumns((prev) => ({
-        ...prev,
-        [columnWithLeastItems.key]: [
-          ...prev[columnWithLeastItems.key],
-          docRef.id,
-        ],
-      }));
-
-      // Save the updated column layout to the database
-      const userDocRef = doc(db, "users", user.uid);
-      await updateDoc(userDocRef, {
-        categoryPositions: {
-          columns: {
-            ...categoryColumns,
-            [columnWithLeastItems.key]: [
-              ...categoryColumns[columnWithLeastItems.key],
-              docRef.id,
-            ],
-          },
-          columnCount,
-          lastUpdated: new Date().toISOString(),
-        },
-      });
 
       // Set the new category to be open by default
       setOpenCategories((prev) => ({
@@ -853,125 +1252,132 @@ function PopularBookmarks() {
     }
   };
 
-  const handleDragEnd = (result) => {
+  const handleDragEnd = async (result) => {
     if (!result.destination) return;
 
-    const items = Array.from(editModeBookmarks);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
+    const { source, destination } = result;
 
-    // Update orders for all items
-    const updatedItems = items.map((item, index) => ({
-      ...item,
-      order: index,
-    }));
-
-    setEditModeBookmarks(updatedItems);
-    setHasUnsavedChanges(true);
-  };
-
-  const handleSaveChanges = async () => {
     try {
-      if (editModeBookmarks.length === 0) {
-        message.error("No bookmarks to save");
-        return;
-      }
+      const items = Array.from(editModeBookmarks);
+      const [reorderedItem] = items.splice(source.index, 1);
+      items.splice(destination.index, 0, reorderedItem);
 
-      const batch = writeBatch(db);
-      const userDocRef = doc(db, "users", user.uid);
+      // Update local state first for immediate feedback
+      const updatedItems = items.map((item, index) => ({
+        ...item,
+        order: index,
+      }));
 
-      // Get current positions
-      const userDoc = await getDoc(userDocRef);
-      const existingPositions = userDoc.exists()
-        ? userDoc.data().bookmarkPositions || {}
-        : {};
+      setEditModeBookmarks(updatedItems);
+      setHasUnsavedChanges(true);
 
-      // Prepare positions update
-      const categoryPositions = {};
-      editModeBookmarks.forEach((bookmark, index) => {
-        if (bookmark.isAdminBookmark) {
-          categoryPositions[bookmark.id] = {
-            order: index,
-            isAdminBookmark: true,
-          };
-        }
-      });
+      // Update Firestore in the background
+      if (user) {
+        const batch = writeBatch(db);
 
-      // Update positions in batch
-      if (Object.keys(categoryPositions).length > 0) {
-        batch.update(userDocRef, {
-          [`bookmarkPositions.${selectedCategory.id}`]: categoryPositions,
-        });
-      }
-
-      // Update user bookmarks in batch
-      editModeBookmarks.forEach((bookmark, index) => {
-        if (!bookmark.isAdminBookmark) {
-          const docRef = doc(
-            db,
-            "users",
-            user.uid,
-            "CatBookmarks",
-            bookmark.id
-          );
-          batch.update(docRef, {
-            order: index,
-            title: bookmark.title,
-            url: bookmark.url,
-            updatedAt: new Date().toISOString(),
-          });
-        }
-      });
-
-      await batch.commit();
-
-      // Update local state
-      setLinks((prevLinks) => {
-        const updatedLinks = [...prevLinks];
-        editModeBookmarks.forEach((editedBookmark, index) => {
-          const linkIndex = updatedLinks.findIndex(
-            (link) => link.id === editedBookmark.id
-          );
-          if (linkIndex !== -1) {
-            updatedLinks[linkIndex] = {
-              ...updatedLinks[linkIndex],
-              order: index,
-              title: editedBookmark.title,
-              url: editedBookmark.url,
-            };
+        updatedItems.forEach((item, index) => {
+          if (item.isAdminBookmark) {
+            const bookmarkRef = doc(db, "bookmarks", item.id);
+            batch.update(bookmarkRef, { order: index });
           }
         });
-        return updatedLinks;
-      });
 
-      setHasUnsavedChanges(false);
-      message.success("Changes saved successfully");
-      setIsEditModePanelVisible(false);
+        await batch.commit();
+      }
     } catch (error) {
-      console.error("Error saving changes:", error);
-      message.error("Failed to save changes");
+      console.error("Error handling drag end:", error);
+      message.error("Failed to update bookmark order");
     }
   };
 
-  const handleDeleteSelected = async () => {
-    if (selectedBookmarks.length === 0) return;
-
-    try {
-      const batch = writeBatch(db);
-      selectedBookmarks.forEach((bookmarkId) => {
-        const docRef = doc(db, "users", user.uid, "CatBookmarks", bookmarkId);
-        batch.delete(docRef);
+  const handleControllerDragEnd = async (result) => {
+    if (!result.destination) {
+      // Reset drag state if no valid destination
+      setDragState({
+        isDragging: false,
+        draggedItem: null,
+        sourceColumn: null,
+        destinationColumn: null,
       });
-      await batch.commit();
+      return;
+    }
 
-      setLinks((prevLinks) =>
-        prevLinks.filter((link) => !selectedBookmarks.includes(link.id))
+    const { source, destination } = result;
+    const sourceColumnIndex = parseInt(source.droppableId);
+    const destColumnIndex = parseInt(destination.droppableId);
+
+    // Prevent unnecessary updates if dropped in the same position
+    if (
+      sourceColumnIndex === destColumnIndex &&
+      source.index === destination.index
+    ) {
+      return;
+    }
+
+    // Instant state update for responsive feel
+    setPreviewCategories((prevCategories) => {
+      // Create a deep clone to avoid direct mutation
+      const updatedCategories = prevCategories.map((cat) => ({ ...cat }));
+
+      // Find the category being moved
+      const movedCategory = updatedCategories.find(
+        (cat) =>
+          cat.column === sourceColumnIndex &&
+          categoryColumns[`column${sourceColumnIndex + 1}`]?.indexOf(cat.id) ===
+            source.index
       );
-      setSelectedBookmarks([]);
-      message.success("Selected bookmarks deleted successfully");
+
+      if (movedCategory) {
+        // Remove from source column
+        const sourceColumnCategories = updatedCategories.filter(
+          (cat) => cat.column === sourceColumnIndex
+        );
+        sourceColumnCategories.splice(source.index, 1);
+
+        // Add to destination column
+        const destColumnCategories = updatedCategories.filter(
+          (cat) => cat.column === destColumnIndex
+        );
+        destColumnCategories.splice(destination.index, 0, movedCategory);
+
+        // Update column and reorder
+        movedCategory.column = destColumnIndex;
+        movedCategory.order = destination.index;
+
+        // Reindex categories in affected columns
+        sourceColumnCategories.forEach((cat, index) => {
+          cat.order = index;
+        });
+        destColumnCategories.forEach((cat, index) => {
+          cat.order = index;
+        });
+      }
+
+      return updatedCategories;
+    });
+
+    // Background database sync
+    if (user) {
+      const userDocRef = doc(db, "users", user.uid);
+      updateDoc(userDocRef, {
+        previewCategories: previewCategories.map((cat) => ({
+          id: cat.id,
+          column: cat.column,
+          order: cat.order,
+        })),
+      }).catch((error) => {
+        console.error("Error updating preview categories:", error);
+      });
+    }
+
+    // Optional subtle feedback
+    try {
+      // Minimal vibration
+      if ("vibrate" in navigator) {
+        navigator.vibrate(20);
+      }
     } catch (error) {
-      console.error("Error deleting bookmarks:", error);
-      message.error("Failed to delete bookmarks");
+      console.warn("Feedback effects not supported", error);
     }
   };
 
@@ -1216,10 +1622,73 @@ function PopularBookmarks() {
     }
   };
 
-  const handleColumnCountChange = (count) => {
-    setColumnCount(count);
-    // Redistribute categories when column count changes
-    redistributeCategories(count);
+  const handleColumnCountChange = async (count) => {
+    try {
+      // Get current categories and their positions
+      const userDocRef = doc(db, "users", user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+      const currentPositions = userDocSnap.exists()
+        ? userDocSnap.data().categoryPositions || {}
+        : { columns: {}, columnCount: count };
+
+      // Create new column structure while preserving all categories
+      const newColumnStructure = {};
+      const allCategories = [];
+
+      // Collect all categories from existing columns
+      Object.keys(currentPositions.columns || {}).forEach((colKey) => {
+        const columnCategories = currentPositions.columns[colKey] || [];
+        allCategories.push(...columnCategories);
+      });
+
+      // Remove duplicates
+      const uniqueCategories = [...new Set(allCategories)];
+
+      // Distribute categories across new number of columns
+      uniqueCategories.forEach((categoryId, index) => {
+        const targetColumn = `column${(index % count) + 1}`;
+        if (!newColumnStructure[targetColumn]) {
+          newColumnStructure[targetColumn] = [];
+        }
+        newColumnStructure[targetColumn].push(categoryId);
+      });
+
+      // Ensure all columns exist
+      for (let i = 1; i <= count; i++) {
+        const colKey = `column${i}`;
+        if (!newColumnStructure[colKey]) {
+          newColumnStructure[colKey] = [];
+        }
+      }
+
+      // Update database
+      await updateDoc(userDocRef, {
+        categoryPositions: {
+          columns: newColumnStructure,
+          columnCount: count,
+          lastUpdated: new Date().toISOString(),
+        },
+      });
+
+      // Update local state
+      setColumnCount(count);
+      setCategoryColumns(newColumnStructure);
+
+      // Update preview if controller is open
+      if (isControllerOpen) {
+        const updatedPreviewCategories = previewCategories.map((cat) => ({
+          ...cat,
+          column: cat.order % count,
+        }));
+        setPreviewCategories(updatedPreviewCategories);
+        setPreviewColumns(count);
+      }
+
+      message.success(`Layout updated to ${count} columns`);
+    } catch (error) {
+      console.error("Error updating column count:", error);
+      message.error("Failed to update layout");
+    }
   };
 
   const renderBookmarkList = (categoryLinks, categoryId) => {
@@ -1229,7 +1698,33 @@ function PopularBookmarks() {
         itemLayout="horizontal"
         dataSource={categoryLinks}
         renderItem={(link) => (
-          <List.Item>
+          <List.Item
+            actions={
+              [
+                // <Tooltip title="Edit">
+                //   <Button
+                //     type="text"
+                //     icon={<EditOutlined />}
+                //     onClick={(e) => {
+                //       e.stopPropagation();
+                //       handleEditBookmark(link);
+                //     }}
+                //   />
+                // </Tooltip>,
+                // <Tooltip title="Delete">
+                //   <Button
+                //     type="text"
+                //     icon={<DeleteOutlined />}
+                //     onClick={(e) => {
+                //       e.stopPropagation();
+                //       handleDeleteBookmark(link.id);
+                //     }}
+                //     danger
+                //   />
+                // </Tooltip>,
+              ]
+            }
+          >
             <List.Item.Meta
               avatar={
                 <Avatar
@@ -1336,35 +1831,30 @@ function PopularBookmarks() {
   };
 
   const renderBookmarksByCategory = () => {
-    // Filter out hidden categories
-    const visibleCategories = categories.filter(
-      (category) => !hiddenCategories.includes(category.id)
-    );
-
     return (
       <div className="mb-2">
         <div className="flex justify-between mb-2">
           <div style={{ marginBottom: "24px" }}>
             <Space>
-              <Button
+              <AntButton
                 type="primary"
                 icon={<PlusOutlined />}
                 onClick={() => setIsAddCategoryModalVisible(true)}
               >
                 Add Category
-              </Button>
+              </AntButton>
             </Space>
           </div>
           <div className="flex items-center gap-4">
             <div
-              className={`flex items-center bg-white/[var(--widget-opacity)] backdrop-blur-sm dark:bg-[#28283A]/[var(--widget-opacity)] p-1 rounded-sm`}
+              className={`flex items-center bg-white/10 backdrop-blur-lg dark:bg-[#28283A] p-1 rounded-sm`}
             >
               <button
                 onClick={() => handleGridViewChange(true)}
                 className={`p-2 rounded ${
                   grid
-                    ? "bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] shadow-sm"
-                    : "hover:bg-white/[var(--widget-opacity)] dark:hover:bg-gray-700/[var(--widget-opacity)]"
+                    ? "bg-white dark:bg-[#513a7a] shadow-sm"
+                    : "hover:bg-white/50 dark:hover:bg-gray-700/50"
                 }`}
               >
                 <svg
@@ -1385,7 +1875,7 @@ function PopularBookmarks() {
                 onClick={() => handleGridViewChange(false)}
                 className={`p-2 rounded ${
                   !grid
-                    ? "bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] shadow-sm"
+                    ? "bg-white dark:bg-[#513a7a] shadow-sm"
                     : "hover:bg-white/50 dark:hover:bg-gray-700/50"
                 }`}
               >
@@ -1440,7 +1930,7 @@ function PopularBookmarks() {
                       >
                         {categoryColumns[`column${colNum}`]?.map(
                           (categoryId, index) => {
-                            const category = visibleCategories.find(
+                            const category = categories.find(
                               (c) => c.id === categoryId
                             );
                             if (!category) return null;
@@ -1470,10 +1960,10 @@ function PopularBookmarks() {
                                     }`}
                                   >
                                     <Card
-                                      className="max-w-xl backdrop-blur-sm bg-white/[var(--widget-opacity)] dark:bg-gray-800/[var(--widget-opacity)] mx-auto rounded-sm"
+                                      className="max-w-xl dark:bg-gray-800 mx-auto rounded-sm"
                                       title={
                                         <div
-                                          className="bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] dark:text-white relative overflow-hidden p-2 cursor-pointer"
+                                          className="bg-white dark:bg-[#513a7a] dark:text-white p-1 relative overflow-hidden cursor-pointer"
                                           onClick={(e) => {
                                             if (
                                               !grid &&
@@ -1517,7 +2007,7 @@ function PopularBookmarks() {
                                               }
                                             >
                                               <Tooltip title="Add Bookmark">
-                                                <Button
+                                                <AntButton
                                                   type="text"
                                                   icon={
                                                     <PlusOutlined className="text-black" />
@@ -1546,7 +2036,7 @@ function PopularBookmarks() {
                                                   e.stopPropagation()
                                                 }
                                               >
-                                                <Button
+                                                <AntButton
                                                   type="text"
                                                   icon={
                                                     <MoreOutlined className="text-black" />
@@ -1639,27 +2129,182 @@ function PopularBookmarks() {
     );
   };
 
-  // Update the useEffect that fetches user data to include preferences
+  // Initialize categories with isOpen property
   useEffect(() => {
-    const fetchUserPreferences = async () => {
-      if (!user) return;
+    if (!categories.length || !Object.keys(openCategories).length) return;
+
+    const initCategories = categories.map((category) => ({
+      ...category,
+      isOpen: openCategories[category.id] ?? true,
+    }));
+
+    // Only update if there's an actual change
+    const hasChanges = categories.some(
+      (category, index) => category.isOpen !== initCategories[index].isOpen
+    );
+
+    if (hasChanges) {
+      setCategories(initCategories);
+    }
+  }, [openCategories]); // Only depend on openCategories changes
+
+  // Main effect for handling user data and categories
+  useEffect(() => {
+    if (!user) return;
+
+    let unsubscribeUserDoc = null;
+    let unsubscribeCategories = null;
+    let isComponentMounted = true;
+
+    const setupListeners = async () => {
       try {
         const userDocRef = doc(db, "users", user.uid);
         const userDocSnap = await getDoc(userDocRef);
 
+        if (!isComponentMounted) return;
+
         if (userDocSnap.exists()) {
           const data = userDocSnap.data();
-          // Load hidden categories
-          setHiddenCategories(data.hiddenCategories || []);
+          // Set initial data
+          if (data.hiddenCategories) {
+            setHiddenCategories(data.hiddenCategories);
+          }
+          if (data.categoryPositions) {
+            const { columns, columnCount: count } = data.categoryPositions;
+            if (columns) setCategoryColumns(columns);
+            if (count) setColumnCount(count);
+          }
         }
+
+        // Setup real-time listener for user document
+        unsubscribeUserDoc = onSnapshot(
+          userDocRef,
+          { includeMetadataChanges: true },
+          (docSnapshot) => {
+            if (!isComponentMounted || docSnapshot.metadata.hasPendingWrites)
+              return;
+
+            if (docSnapshot.exists()) {
+              const data = docSnapshot.data();
+              if (data.categoryPositions) {
+                const { columns, columnCount: newCount } =
+                  data.categoryPositions;
+                if (columns) {
+                  setCategoryColumns((prev) =>
+                    JSON.stringify(prev) !== JSON.stringify(columns)
+                      ? columns
+                      : prev
+                  );
+                }
+                if (typeof newCount === "number") {
+                  setColumnCount((prev) =>
+                    prev !== newCount ? newCount : prev
+                  );
+                }
+              }
+            }
+          }
+        );
+
+        // Setup real-time listener for user categories
+        unsubscribeCategories = onSnapshot(
+          collection(db, "users", user.uid, "UserCategory"),
+          { includeMetadataChanges: true },
+          (snapshot) => {
+            if (!isComponentMounted || snapshot.metadata.hasPendingWrites)
+              return;
+
+            const userCategories = snapshot.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+              name: doc.data().newCategory,
+              isAdminCategory: false,
+            }));
+
+            setCategories((prevCategories) => {
+              const adminCategories = prevCategories.filter(
+                (cat) => cat.isAdminCategory
+              );
+              const mergedCategories = [
+                ...adminCategories,
+                ...userCategories,
+              ].sort((a, b) => (a.order || 0) - (b.order || 0));
+
+              // Only update if there's an actual change
+              return JSON.stringify(prevCategories) !==
+                JSON.stringify(mergedCategories)
+                ? mergedCategories
+                : prevCategories;
+            });
+          }
+        );
       } catch (error) {
-        console.error("Error loading preferences:", error);
-        message.error("Failed to load preferences");
+        console.error("Error setting up listeners:", error);
+        if (isComponentMounted) {
+          message.error("Failed to load data. Please refresh the page.");
+        }
       }
     };
 
-    fetchUserPreferences();
-  }, [user]);
+    setupListeners();
+
+    // Cleanup function
+    return () => {
+      isComponentMounted = false;
+      if (unsubscribeUserDoc) unsubscribeUserDoc();
+      if (unsubscribeCategories) unsubscribeCategories();
+    };
+  }, [user]); // Only depend on user changes
+
+  // Optimize controller state updates with debounce
+  useEffect(() => {
+    if (!isControllerOpen || !categories.length) return;
+
+    const debouncedUpdate = debounce(() => {
+      const allColumnCategories = Object.values(categoryColumns)
+        .flat()
+        .map((catId) => categories.find((cat) => cat.id === catId))
+        .filter(Boolean);
+
+      const previewCats = allColumnCategories.map((category) => {
+        let categoryColumn = 0;
+        Object.entries(categoryColumns).forEach(([colKey, colCategories]) => {
+          if (colCategories?.includes(category.id)) {
+            categoryColumn = parseInt(colKey.replace("column", "")) - 1;
+          }
+        });
+
+        return {
+          ...category,
+          column: categoryColumn,
+          order:
+            categoryColumns[`column${categoryColumn + 1}`]?.indexOf(
+              category.id
+            ) || 0,
+        };
+      });
+
+      const columnCategoryIds = new Set(Object.values(categoryColumns).flat());
+      const availableCats = categories.filter(
+        (cat) => !columnCategoryIds.has(cat.id)
+      );
+
+      setPreviewCategories((prev) =>
+        JSON.stringify(prev) !== JSON.stringify(previewCats)
+          ? previewCats
+          : prev
+      );
+      setAvailableCategories((prev) =>
+        JSON.stringify(prev) !== JSON.stringify(availableCats)
+          ? availableCats
+          : prev
+      );
+      setPreviewColumns(columnCount);
+    }, 150);
+
+    debouncedUpdate();
+    return () => debouncedUpdate.cancel();
+  }, [isControllerOpen, categories, categoryColumns, columnCount]);
 
   // Add this function to toggle category visibility
   const toggleCategoryVisibility = async (categoryId) => {
@@ -1698,19 +2343,656 @@ function PopularBookmarks() {
     });
   };
 
-  // Initialize categories with isOpen property
-  useEffect(() => {
-    const initCategories = categories.map((category) => ({
-      ...category,
-      isOpen: openCategories[category.id] || false,
-    }));
-    setCategories(initCategories);
-  }, [openCategories]);
-
   // Add function to handle grid view changes
   const handleGridViewChange = (isGrid) => {
     setGrid(isGrid);
     localStorage.setItem("bookmarksGridView", JSON.stringify(isGrid));
+  };
+
+  // Handle column count changes in preview mode
+  const handlePreviewColumnChange = (numColumns) => {
+    setPreviewColumns(numColumns);
+
+    // Redistribute categories across new columns
+    const updatedCategories = previewCategories.map((category, index) => ({
+      ...category,
+      column: index % numColumns,
+      order: Math.floor(index / numColumns),
+    }));
+
+    setPreviewCategories(updatedCategories);
+  };
+
+  // Function to add category to a column
+  const handleAddToColumn = (category, columnIndex) => {
+    const categoriesInColumn = getColumnCategories(columnIndex);
+    const newOrder = categoriesInColumn.length;
+
+    setPreviewCategories((prev) => [
+      ...prev,
+      { ...category, column: columnIndex, order: newOrder },
+    ]);
+
+    setAvailableCategories((prev) =>
+      prev.filter((cat) => cat.id !== category.id)
+    );
+  };
+
+  // Function to remove category from a column
+  const handleRemoveFromColumn = (category) => {
+    // Remove from preview categories and column structure
+    setPreviewCategories((prev) =>
+      prev.filter((cat) => cat.id !== category.id)
+    );
+
+    setPreviewColumnStructure((prev) => {
+      const newStructure = { ...prev };
+      // Remove category from its current column
+      Object.keys(newStructure).forEach((columnIndex) => {
+        newStructure[columnIndex] = newStructure[columnIndex].filter(
+          (cat) => cat.id !== category.id
+        );
+      });
+      return newStructure;
+    });
+
+    // Add to available categories if not already present
+    setAvailableCategories((prev) => {
+      const exists = prev.some((cat) => cat.id === category.id);
+      if (!exists) {
+        return [...prev, category];
+      }
+      return prev;
+    });
+  };
+
+  // Handle drag end in preview mode
+  const handlePreviewDragEnd = (result) => {
+    if (!result.destination) return;
+
+    const { source, destination } = result;
+    const sourceColumnIndex = parseInt(source.droppableId);
+    const destColumnIndex = parseInt(destination.droppableId);
+
+    setPreviewCategories((prev) => {
+      const updatedCategories = [...prev];
+
+      // Find the category being moved
+      const movedCategory = updatedCategories.find(
+        (cat) => cat.column === sourceColumnIndex && cat.order === source.index
+      );
+
+      if (movedCategory) {
+        // Update the moved category's column and order
+        movedCategory.column = destColumnIndex;
+        movedCategory.order = destination.index;
+
+        // Update order of other categories in the destination column
+        updatedCategories.forEach((cat) => {
+          if (cat.column === destColumnIndex && cat.id !== movedCategory.id) {
+            if (cat.order >= destination.index) {
+              cat.order += 1;
+            }
+          }
+        });
+
+        // Update order of categories in the source column
+        if (sourceColumnIndex !== destColumnIndex) {
+          updatedCategories.forEach((cat) => {
+            if (cat.column === sourceColumnIndex && cat.order > source.index) {
+              cat.order -= 1;
+            }
+          });
+        }
+
+        // Sort categories by column and order
+        return updatedCategories.sort((a, b) => {
+          if (a.column === b.column) {
+            return a.order - b.order;
+          }
+          return a.column - b.column;
+        });
+      }
+
+      return prev;
+    });
+  };
+
+  // Handler for applying changes
+  const handleApplyChanges = async () => {
+    try {
+      setIsApplyingChanges(true);
+
+      // Get all category IDs that are in preview categories
+      const activeCategories = previewCategories.map((cat) => cat.id);
+
+      // Any category not in activeCategories should be hidden
+      const newHiddenCategories = categories
+        .filter((cat) => !activeCategories.includes(cat.id))
+        .map((cat) => cat.id);
+
+      // Prepare column structure
+      const newColumnStructure = Array.from({ length: previewColumns }).reduce(
+        (acc, _, index) => {
+          const columnKey = `column${index + 1}`;
+          acc[columnKey] = previewCategories
+            .filter((cat) => cat.column === index)
+            .sort((a, b) => a.order - b.order)
+            .map((cat) => cat.id);
+          return acc;
+        },
+        {}
+      );
+
+      // Update database
+      const userDocRef = doc(db, "users", user.uid);
+      await updateDoc(userDocRef, {
+        categoryPositions: {
+          columns: newColumnStructure,
+          columnCount: previewColumns,
+          lastUpdated: new Date().toISOString(),
+        },
+        hiddenCategories: newHiddenCategories,
+      });
+
+      // Update local state
+      setHiddenCategories(newHiddenCategories);
+      setColumnCount(previewColumns);
+      setCategoryColumns(newColumnStructure);
+
+      // Update localStorage
+      localStorage.setItem("columnCount", previewColumns.toString());
+      localStorage.setItem(
+        "categoryColumns",
+        JSON.stringify(newColumnStructure)
+      );
+
+      message.success("Changes applied successfully");
+      setIsControllerOpen(false);
+    } catch (error) {
+      console.error("Error applying changes:", error);
+      message.error("Failed to apply changes");
+    } finally {
+      setIsApplyingChanges(false);
+    }
+  };
+
+  // Function to update dashboard with new positions
+  const updateDashboardPositions = (
+    newCategories,
+    newColumnCount,
+    newColumnStructure
+  ) => {
+    // Batch all state updates together
+    const updates = {
+      categories: newCategories,
+      columnCount: newColumnCount,
+      categoryColumns: newColumnStructure,
+    };
+
+    // Update localStorage in one go
+    const storageUpdates = {
+      categories: JSON.stringify(newCategories),
+      columnCount: newColumnCount.toString(),
+      categoryColumns: JSON.stringify(newColumnStructure),
+    };
+
+    // Perform all state updates
+    Object.entries(updates).forEach(([key, value]) => {
+      const setter = {
+        categories: setCategories,
+        columnCount: setColumnCount,
+        categoryColumns: setCategoryColumns,
+      }[key];
+      setter(value);
+    });
+
+    // Perform all localStorage updates
+    Object.entries(storageUpdates).forEach(([key, value]) => {
+      localStorage.setItem(key, value);
+    });
+  };
+
+  // Function to fetch and update category positions
+  const fetchAndUpdateCategories = async () => {
+    if (!user) return;
+
+    try {
+      const userDocRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userDocRef);
+
+      if (userDoc.exists()) {
+        const data = userDoc.data();
+        const updates = {
+          categories: data.categories,
+          columnCount: data.columnCount,
+          categoryColumns: data.categoryColumns,
+        };
+
+        // Only update states that have changed
+        Object.entries(updates).forEach(([key, value]) => {
+          if (value !== undefined) {
+            const setter = {
+              categories: setCategories,
+              columnCount: setColumnCount,
+              categoryColumns: setCategoryColumns,
+            }[key];
+            setter(value);
+          }
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      message.error("Failed to fetch latest category positions");
+    }
+  };
+
+  // Add effect to fetch categories when user changes
+  useEffect(() => {
+    if (user) {
+      fetchAndUpdateCategories();
+    }
+  }, [user]);
+
+  // Effect to handle system theme changes
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = (e) => {
+      setIsDarkMode(e.matches);
+      localStorage.setItem("darkMode", JSON.stringify(e.matches));
+    };
+
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
+
+  // Effect to apply dark mode class to body
+  useEffect(() => {
+    document.body.classList.toggle("dark", isDarkMode);
+    localStorage.setItem("darkMode", JSON.stringify(isDarkMode));
+  }, [isDarkMode]);
+
+  // Toggle dark mode function
+  const toggleDarkMode = () => {
+    setIsDarkMode((prev) => !prev);
+  };
+
+  const handleControllerCancel = () => {
+    setIsControllerOpen(false);
+    setPreviewCategories([...categories]);
+    setPreviewColumns(columnCount);
+  };
+
+  // Function to setup real-time database listeners
+  const setupDatabaseListeners = () => {
+    if (!user) return null;
+
+    const userDocRef = doc(db, "users", user.uid);
+
+    // Setup real-time listener for user document
+    const unsubscribe = onSnapshot(
+      userDocRef,
+      (docSnapshot) => {
+        if (docSnapshot.exists()) {
+          const data = docSnapshot.data();
+
+          // Check if any relevant data has changed
+          const updates = {
+            categories: data.categories,
+            columnCount: data.columnCount,
+            categoryColumns: data.categoryColumns,
+          };
+
+          let hasChanges = false;
+
+          // Compare with current state and update only if changed
+          Object.entries(updates).forEach(([key, newValue]) => {
+            if (newValue !== undefined) {
+              const currentValue = {
+                categories,
+                columnCount,
+                categoryColumns,
+              }[key];
+
+              // Deep comparison for objects, direct comparison for primitives
+              const hasChanged =
+                typeof newValue === "object" && newValue !== null
+                  ? JSON.stringify(newValue) !== JSON.stringify(currentValue)
+                  : newValue !== currentValue;
+
+              if (hasChanged) {
+                hasChanges = true;
+                const setter = {
+                  categories: setCategories,
+                  columnCount: setColumnCount,
+                  categoryColumns: setCategoryColumns,
+                }[key];
+                setter(newValue);
+
+                // Update localStorage
+                try {
+                  localStorage.setItem(
+                    key,
+                    typeof newValue === "object"
+                      ? JSON.stringify(newValue)
+                      : String(newValue)
+                  );
+                } catch (error) {
+                  console.error("Error updating localStorage:", error);
+                }
+              }
+            }
+          });
+        }
+      },
+      (error) => {
+        console.error("Error in real-time sync:", error);
+        message.error("Failed to sync with latest changes");
+      }
+    );
+
+    return unsubscribe;
+  };
+
+  // Effect to setup and cleanup database listeners
+  useEffect(() => {
+    let unsubscribe = null;
+
+    if (user) {
+      unsubscribe = setupDatabaseListeners();
+    }
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  }, [user]); // Only re-run when user changes
+
+  const renderDraggableBookmark = (provided, snapshot, bookmark) => {
+    return (
+      <div
+        ref={provided.innerRef}
+        {...provided.draggableProps}
+        {...provided.dragHandleProps}
+        style={{
+          ...getBookmarkItemStyle(selectedBookmarks.includes(bookmark.id)),
+          ...provided.draggableProps.style,
+        }}
+      >
+        <Checkbox
+          checked={selectedBookmarks.includes(bookmark.id)}
+          onChange={(e) => {
+            if (e.target.checked) {
+              setSelectedBookmarks([...selectedBookmarks, bookmark.id]);
+            } else {
+              setSelectedBookmarks(
+                selectedBookmarks.filter((id) => id !== bookmark.id)
+              );
+            }
+          }}
+          style={{ marginRight: 8 }}
+        />
+        <img
+          src={getFaviconUrl(bookmark.url)}
+          alt=""
+          style={{
+            width: 16,
+            height: 16,
+            marginRight: 8,
+          }}
+        />
+        <span style={{ flex: 1 }}>{bookmark.title}</span>
+        <AntButton
+          type="text"
+          icon={<EditOutlined />}
+          onClick={() => handleEditBookmark(bookmark)}
+        />
+      </div>
+    );
+  };
+
+  // Enhanced draggable category renderer
+  const renderDraggableCategory = (provided, snapshot, category) => {
+    return (
+      <div
+        ref={provided.innerRef}
+        {...provided.draggableProps}
+        {...provided.dragHandleProps}
+        style={{
+          padding: "12px",
+          margin: "8px 0",
+          backgroundColor: snapshot.isDragging ? "#f0f7ff" : "#ffffff",
+          border: snapshot.isDragging
+            ? "2px solid #1890ff"
+            : "1px solid #e8e8e8",
+          borderRadius: "8px",
+          display: "flex",
+          alignItems: "center",
+          gap: "12px",
+          boxShadow: snapshot.isDragging
+            ? "0 4px 12px rgba(0,0,0,0.1)"
+            : "none",
+          transform: snapshot.isDragging
+            ? `${provided.draggableProps.style.transform} scale(1.02)`
+            : provided.draggableProps.style.transform,
+          transition: "all 0.2s ease",
+          ...provided.draggableProps.style,
+        }}
+      >
+        <DragOutlined
+          style={{
+            color: snapshot.isDragging ? "#1890ff" : "#999",
+            fontSize: "16px",
+            cursor: "grab",
+          }}
+        />
+        <span
+          style={{
+            fontWeight: 500,
+            color: snapshot.isDragging ? "#1890ff" : "#333",
+            flex: 1,
+          }}
+        >
+          {category.name || category.newCategory}
+        </span>
+        <AntButton
+          type="text"
+          icon={<DeleteOutlined />}
+          onClick={() => handleRemoveFromColumn(category)}
+          style={{
+            color: snapshot.isDragging ? "#1890ff" : "#999",
+          }}
+        />
+      </div>
+    );
+  };
+
+  // Function to handle saving changes to bookmarks
+  const handleSaveChanges = async () => {
+    try {
+      // Validate bookmark changes
+      if (editModeBookmarks.length === 0) {
+        message.warning("No bookmarks to save", 2);
+        return;
+      }
+
+      // Check for unsaved changes
+      if (!hasUnsavedChanges) {
+        message.info("No changes to save", 2);
+        return;
+      }
+
+      // Start loading state
+      setIsApplyingChanges(true);
+
+      // Create a batch write for efficient updates
+      const batch = writeBatch(db);
+      const userDocRef = doc(db, "users", user.uid);
+
+      // Get current positions from Firestore
+      const userDoc = await getDoc(userDocRef);
+      const existingPositions = userDoc.exists()
+        ? userDoc.data().bookmarkPositions || {}
+        : {};
+
+      // Track save progress
+      const totalBookmarks = editModeBookmarks.length;
+      let savedCount = 0;
+
+      // Prepare batch updates
+      const savePromises = editModeBookmarks.map(async (bookmark, index) => {
+        if (bookmark.isAdminBookmark) {
+          // Update admin bookmark positions
+          const bookmarkRef = doc(db, "bookmarks", bookmark.id);
+          batch.update(bookmarkRef, {
+            order: index,
+            updatedAt: new Date().toISOString(),
+          });
+        } else {
+          // Update user's personal bookmarks
+          const bookmarkRef = doc(
+            db,
+            "users",
+            user.uid,
+            "CatBookmarks",
+            bookmark.id
+          );
+          batch.update(bookmarkRef, {
+            order: index,
+            title: bookmark.title,
+            url: bookmark.url,
+            updatedAt: new Date().toISOString(),
+          });
+        }
+
+        savedCount++;
+
+        // Progress notification
+        if (savedCount % 5 === 0 || savedCount === totalBookmarks) {
+          message.info(`Saving bookmarks: ${savedCount}/${totalBookmarks}`);
+        }
+      });
+
+      // Wait for all save operations to be prepared
+      await Promise.all(savePromises);
+
+      // Commit batch updates
+      await batch.commit();
+
+      // Update local state
+      setLinks((prevLinks) => {
+        const updatedLinks = [...prevLinks];
+        editModeBookmarks.forEach((editedBookmark, index) => {
+          const linkIndex = updatedLinks.findIndex(
+            (link) => link.id === editedBookmark.id
+          );
+          if (linkIndex !== -1) {
+            updatedLinks[linkIndex] = {
+              ...updatedLinks[linkIndex],
+              order: index,
+              title: editedBookmark.title,
+              url: editedBookmark.url,
+            };
+          }
+        });
+        return updatedLinks;
+      });
+
+      // Haptic and audio feedback
+      try {
+        if ("vibrate" in navigator) {
+          navigator.vibrate([50, 100, 50]);
+        }
+
+        const saveAudio = new Audio("path/to/save-success.mp3");
+        saveAudio.volume = 0.4;
+        saveAudio.play().catch(() => {});
+      } catch (error) {
+        console.warn("Save feedback failed", error);
+      }
+
+      // Reset state
+      setHasUnsavedChanges(false);
+      message.success(`${totalBookmarks} bookmark(s) saved successfully`, 3);
+      setIsEditModePanelVisible(false);
+    } catch (error) {
+      console.error("Error saving changes:", error);
+
+      // Detailed error handling
+      if (error.code === "permission-denied") {
+        message.error("You don't have permission to save these bookmarks", 4);
+      } else if (error.code === "unavailable") {
+        message.error(
+          "Network is unavailable. Please check your connection.",
+          4
+        );
+      } else {
+        message.error("Failed to save bookmark changes. Please try again.", 4);
+      }
+    } finally {
+      // Ensure loading state is reset
+      setIsApplyingChanges(false);
+    }
+  };
+
+  // Function to handle deletion of selected bookmarks
+  const handleDeleteSelected = () => {
+    if (selectedBookmarks.length === 0) {
+      message.warning("No bookmarks selected for deletion");
+      return;
+    }
+
+    Modal.confirm({
+      title: "Delete Selected Bookmarks",
+      content: `Are you sure you want to delete ${selectedBookmarks.length} selected bookmark(s)? This action cannot be undone.`,
+      okText: "Delete",
+      okType: "danger",
+      cancelText: "Cancel",
+      onOk: async () => {
+        try {
+          setLoading(true);
+          const batch = writeBatch(db);
+
+          // Delete each selected bookmark
+          for (const bookmarkId of selectedBookmarks) {
+            const bookmarkRef = doc(
+              db,
+              "users",
+              user.uid,
+              "CatBookmarks",
+              bookmarkId
+            );
+            batch.delete(bookmarkRef);
+          }
+
+          await batch.commit();
+
+          // Update local state
+          setEditModeBookmarks((prevBookmarks) =>
+            prevBookmarks.filter(
+              (bookmark) => !selectedBookmarks.includes(bookmark.id)
+            )
+          );
+          setSelectedBookmarks([]);
+          setHasUnsavedChanges(true);
+
+          message.success(
+            `Successfully deleted ${selectedBookmarks.length} bookmark(s)`
+          );
+        } catch (error) {
+          console.error("Error deleting bookmarks:", error);
+          message.error("Failed to delete bookmarks. Please try again.");
+        } finally {
+          setLoading(false);
+        }
+      },
+    });
+  };
+
+  // Function to toggle controller visibility
+  const toggleController = () => {
+    setIsControllerOpen((prev) => !prev);
   };
 
   if (loading) {
@@ -1720,6 +3002,203 @@ function PopularBookmarks() {
   return (
     <div style={{ padding: "24px" }}>
       {renderBookmarksByCategory()}
+
+      {/* Floating Button for Controller */}
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={toggleController}
+        style={{
+          position: "fixed",
+          bottom: "20px",
+          right: "20px",
+          width: "50px",
+          height: "50px",
+          borderRadius: "50%",
+          backgroundColor: "#6366F1",
+          color: "#fff",
+          border: "none",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+          zIndex: 1000,
+        }}
+      >
+        <SettingOutlined style={{ fontSize: "24px" }} />
+      </motion.button>
+
+      <Modal
+        title="Category Controller"
+        open={isControllerOpen}
+        onCancel={() => setIsControllerOpen(false)}
+        width={800}
+        footer={[
+          <AntButton key="cancel" onClick={() => setIsControllerOpen(false)}>
+            Cancel
+          </AntButton>,
+          <AntButton
+            key="apply"
+            type="primary"
+            loading={isApplyingChanges}
+            onClick={handleApplyChanges}
+          >
+            Apply Changes
+          </AntButton>,
+        ]}
+      >
+        <DragDropContext onDragEnd={handlePreviewDragEnd}>
+          <div
+            className="sort-columns-container"
+            style={{
+              display: "grid",
+              gridTemplateColumns: `repeat(${previewColumns}, 1fr)`,
+              gap: "16px",
+              marginBottom: "20px",
+              maxHeight: "60vh",
+              overflowY: "auto",
+              padding: "8px",
+            }}
+          >
+            {Array.from({ length: previewColumns }).map((_, columnIndex) => (
+              <Droppable key={columnIndex} droppableId={String(columnIndex)}>
+                {(provided, snapshot) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className={`
+                        p-4 rounded-lg min-h-[200px] transition-all duration-300
+                        ${
+                          snapshot.isDraggingOver
+                            ? "bg-indigo-50 border-2 border-dashed border-indigo-400 shadow-lg"
+                            : "bg-white border border-gray-200"
+                        }
+                      `}
+                  >
+                    <div
+                      className={`
+                        text-center mb-4 font-semibold transition-colors duration-300
+                        ${
+                          snapshot.isDraggingOver
+                            ? "text-indigo-600"
+                            : "text-gray-700"
+                        }
+                      `}
+                    >
+                      <div>
+                        Column {columnIndex + 1} (
+                        {getColumnCategories(columnIndex).length})
+                      </div>
+                      {snapshot.isDraggingOver && (
+                        <div className="text-xs text-indigo-500 mt-1 animate-pulse">
+                          Drop here
+                        </div>
+                      )}
+                    </div>
+                    <div className="space-y-2 min-h-[100px]">
+                      {getColumnCategories(columnIndex).map(
+                        (category, index) => (
+                          <Draggable
+                            key={category.id}
+                            draggableId={category.id}
+                            index={index}
+                          >
+                            {(provided, snapshot) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                className={`
+                                  flex items-center justify-between p-3 rounded-lg
+                                  transition-all duration-200 bg-white
+                                  ${
+                                    snapshot.isDragging
+                                      ? "shadow-lg border-2 border-indigo-400 scale-105"
+                                      : "shadow-sm border border-gray-200 hover:border-indigo-300"
+                                  }
+                                `}
+                                style={provided.draggableProps.style}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <DragOutlined
+                                    className={`
+                                    text-base transition-colors duration-200
+                                    ${
+                                      snapshot.isDragging
+                                        ? "text-indigo-500"
+                                        : "text-gray-400"
+                                    }
+                                  `}
+                                  />
+                                  <span
+                                    className={`
+                                    font-medium transition-colors duration-200
+                                    ${
+                                      snapshot.isDragging
+                                        ? "text-indigo-600"
+                                        : "text-gray-700"
+                                    }
+                                  `}
+                                  >
+                                    {category.name || category.newCategory}
+                                  </span>
+                                </div>
+                                <AntButton
+                                  type="text"
+                                  icon={<DeleteOutlined />}
+                                  onClick={() =>
+                                    handleRemoveFromColumn(category)
+                                  }
+                                  className={`
+                                    transition-colors duration-200
+                                    ${
+                                      snapshot.isDragging
+                                        ? "text-indigo-500"
+                                        : "text-gray-400 hover:text-red-500"
+                                    }
+                                  `}
+                                />
+                              </div>
+                            )}
+                          </Draggable>
+                        )
+                      )}
+                      {provided.placeholder}
+                    </div>
+                  </div>
+                )}
+              </Droppable>
+            ))}
+          </div>
+        </DragDropContext>
+
+        <div className="mt-6">
+          <div className="text-sm font-medium text-gray-700 mb-2">
+            Available Categories
+          </div>
+          <div className="p-4 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
+            <div className="flex flex-wrap gap-2">
+              {availableCategories.map((category) => (
+                <AntButton
+                  key={category.id}
+                  size="middle"
+                  icon={<PlusOutlined />}
+                  onClick={() => handleAddToColumn(category, 0)}
+                  className="flex items-center hover:scale-105 transition-transform bg-white"
+                >
+                  {category.name || category.newCategory}
+                </AntButton>
+              ))}
+              {availableCategories.length === 0 && (
+                <div className="w-full text-center py-4 text-gray-500">
+                  No available categories
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </Modal>
 
       <Modal
         title="Add New Category"
@@ -1865,12 +3344,12 @@ function PopularBookmarks() {
           }
         }}
         footer={[
-          <Button key="selectAll" onClick={selectAllBookmarks}>
+          <AntButton key="selectAll" onClick={selectAllBookmarks}>
             {selectedBookmarks.length === editModeBookmarks.length
               ? "Deselect All"
               : "Select All"}
-          </Button>,
-          <Button
+          </AntButton>,
+          <AntButton
             key="delete"
             type="primary"
             danger
@@ -1878,8 +3357,8 @@ function PopularBookmarks() {
             onClick={handleDeleteSelected}
           >
             Delete Selected ({selectedBookmarks.length})
-          </Button>,
-          <Button
+          </AntButton>,
+          <AntButton
             key="cancel"
             onClick={() => {
               if (hasUnsavedChanges) {
@@ -1902,15 +3381,15 @@ function PopularBookmarks() {
             }}
           >
             Cancel
-          </Button>,
-          <Button
+          </AntButton>,
+          <AntButton
             key="save"
             type="primary"
             disabled={!hasUnsavedChanges}
             onClick={handleSaveChanges}
           >
             Save Changes
-          </Button>,
+          </AntButton>,
         ]}
       >
         <DragDropContext onDragEnd={handleDragEnd}>
@@ -1927,61 +3406,9 @@ function PopularBookmarks() {
                     draggableId={bookmark.id}
                     index={index}
                   >
-                    {(provided) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        style={{
-                          padding: "8px",
-                          margin: "8px 0",
-                          backgroundColor: selectedBookmarks.includes(
-                            bookmark.id
-                          )
-                            ? "#e6f7ff"
-                            : "#fff",
-                          border: "1px solid #f0f0f0",
-                          borderRadius: "4px",
-                          display: "flex",
-                          alignItems: "center",
-                          ...provided.draggableProps.style,
-                        }}
-                      >
-                        <Checkbox
-                          checked={selectedBookmarks.includes(bookmark.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedBookmarks([
-                                ...selectedBookmarks,
-                                bookmark.id,
-                              ]);
-                            } else {
-                              setSelectedBookmarks(
-                                selectedBookmarks.filter(
-                                  (id) => id !== bookmark.id
-                                )
-                              );
-                            }
-                          }}
-                          style={{ marginRight: 8 }}
-                        />
-                        <img
-                          src={getFaviconUrl(bookmark.url)}
-                          alt=""
-                          style={{
-                            width: 16,
-                            height: 16,
-                            marginRight: 8,
-                          }}
-                        />
-                        <span style={{ flex: 1 }}>{bookmark.title}</span>
-                        <Button
-                          type="text"
-                          icon={<EditOutlined />}
-                          onClick={() => handleEditBookmark(bookmark)}
-                        />
-                      </div>
-                    )}
+                    {(provided, snapshot) =>
+                      renderDraggableBookmark(provided, snapshot, bookmark)
+                    }
                   </Draggable>
                 ))}
                 {provided.placeholder}
