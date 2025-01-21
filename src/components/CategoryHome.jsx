@@ -471,9 +471,7 @@ const CategoryHome = ({ categoryType, itemName }) => {
 
   return (
     <div
-      className={`${
-        !localStorage.getItem("backgroundImage") && "dark:bg-[#28283A] bg-white"
-      } rounded-sm p-3    shadow-sm isolate backdrop-blur-sm`}
+      className={` rounded-sm p-3    shadow-sm isolate backdrop-blur-sm`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >

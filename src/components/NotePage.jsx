@@ -265,22 +265,24 @@ const NotePage = ({ inNotebookSheet = false }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className={`${
-        inNotebookSheet ? "w-full h-full " : " h-full max-w-xl mx-auto"
+        inNotebookSheet ? "w-full h-full" : "h-full max-w-xl mx-auto"
       }`}
     >
       <div className="rounded-sm h-full">
         <div
           className={`overflow-hidden h-full rounded-b-sm ${
-            isAutoColor ? "bg-white dark:bg-[#28283A]" : ""
+            isAutoColor
+              ? "bg-white/[var(--widget-opacity)] dark:bg-[#28283A]/[var(--widget-opacity)]"
+              : ""
           }`}
           style={{
-            backgroundColor: isAutoColor ? undefined : backgroundColor,
+            backgroundColor: isAutoColor ? undefined : "",
           }}
         >
           <div
             className={`p-2 h-full bg flex flex-col justify-between ${
               isAutoColor
-                ? "bg-white dark:bg-[#28283A] text-gray-900 dark:text-white"
+                ? "bg-white/[var(--widget-opacity)] dark:bg-[#28283A]/[var(--widget-opacity)] text-gray-900 dark:text-white"
                 : ""
             }`}
             style={{

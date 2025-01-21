@@ -295,7 +295,7 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
       className={`p-2  transition-colors duration-200 ${
         inNotebookSheet ? "w-full" : "max-w-xl mx-auto"
       } rounded-b-sm backdrop-blur-sm relative ${
-        isAutoColor ? "dark:bg-[#28283A]" : ""
+        isAutoColor ? "dark:bg-[#28283A]/[(var(--widget-opacity))]" : ""
       }`}
       style={{
         backgroundColor: isAutoColor ? undefined : containerColor,

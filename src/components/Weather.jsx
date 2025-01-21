@@ -1,433 +1,820 @@
 import React, { useState, useEffect, useRef } from "react";
+import styled, { keyframes, css } from "styled-components";
 import axios from "axios";
-import {
-  Cloud,
-  CloudDrizzle,
-  CloudLightning,
-  CloudRain,
-  CloudSnow,
-  Sun,
-  Wind,
-  Droplets,
-  Settings,
-} from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Palette } from "lucide-react";
+import { ColorPicker } from "antd";
 
 const API_KEY = "78a1522c5ec67352674263eaaa54bffa";
 
-// Weather icon mapping
-const weatherIcons = {
-  Clear: Sun,
-  Clouds: Cloud,
-  Rain: CloudRain,
-  Drizzle: CloudDrizzle,
-  Snow: CloudSnow,
-  Thunderstorm: CloudLightning,
+// Predefined neon colors
+const neonPresets = [
+  {
+    label: "Neon Blue",
+    colors: {
+      background: "#0c1445",
+      accent: "#00fff2",
+      bottomBg: "#1a237e",
+      buttonBg: "#283593",
+    },
+  },
+  {
+    label: "Neon Pink",
+    colors: {
+      background: "#2d0a31",
+      accent: "#ff00ff",
+      bottomBg: "#4a1850",
+      buttonBg: "#6a1b9a",
+    },
+  },
+  {
+    label: "Neon Green",
+    colors: {
+      background: "#0a2d0a",
+      accent: "#39ff14",
+      bottomBg: "#1b5e20",
+      buttonBg: "#2e7d32",
+    },
+  },
+  {
+    label: "Cyberpunk",
+    colors: {
+      background: "#2b213a",
+      accent: "#f0fb3d",
+      bottomBg: "#453750",
+      buttonBg: "#5c4069",
+    },
+  },
+];
+
+// const themes = {
+//   default: {
+//     background: "#ec7263",
+//     accent: "#efc745",
+//     bottomBg: "#974859",
+//     buttonBg: "#a75265",
+//     glow: "0 0 10px #ec7263",
+//   },
+//   neonBlue: {
+//     background: "#0c1445",
+//     accent: "#00fff2",
+//     bottomBg: "#1a237e",
+//     buttonBg: "#283593",
+//     glow: "0 0 20px #00fff2",
+//   },
+//   neonPink: {
+//     background: "#2d0a31",
+//     accent: "#ff00ff",
+//     bottomBg: "#4a1850",
+//     buttonBg: "#6a1b9a",
+//     glow: "0 0 20px #ff00ff",
+//   },
+//   neonGreen: {
+//     background: "#0a2d0a",
+//     accent: "#39ff14",
+//     bottomBg: "#1b5e20",
+//     buttonBg: "#2e7d32",
+//     glow: "0 0 20px #39ff14",
+//   },
+//   cyberpunk: {
+//     background: "#2b213a",
+//     accent: "#f0fb3d",
+//     bottomBg: "#453750",
+//     buttonBg: "#5c4069",
+//     glow: "0 0 20px #f0fb3d",
+//   },
+// };
+
+// Animation keyframes
+const float = keyframes`
+  0% { transform: translateY(0px) translateX(0px); }
+  50% { transform: translateY(-20px) translateX(10px); }
+  100% { transform: translateY(0px) translateX(0px); }
+`;
+
+const rain = keyframes`
+  0% { transform: translateY(-10px); opacity: 0; }
+  70% { opacity: 0.7; }
+  100% { transform: translateY(30px); opacity: 0; }
+`;
+
+const snow = keyframes`
+  0% { transform: translateY(-10px) rotate(0deg); opacity: 0; }
+  50% { opacity: 0.7; }
+  100% { transform: translateY(30px) rotate(360deg); opacity: 0; }
+`;
+
+const thunder = keyframes`
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  20% { opacity: 0; }
+  30% { opacity: 1; }
+  40% { opacity: 0; }
+  100% { opacity: 0; }
+`;
+
+// const getAnimationStyles = (props) => {
+//   switch (props.weatherType) {
+//     case "cloudy":
+//       return css`
+//         width: 60px;
+//         height: 20px;
+//         background: ${props.isDarkMode ? "#ffffff40" : "#00000020"};
+//         border-radius: 20px;
+//         animation: ${float} 3s ease-in-out infinite;
+//         &:before {
+//           content: "";
+//           position: absolute;
+//           top: -10px;
+//           left: 15px;
+//           width: 30px;
+//           height: 30px;
+//           background: inherit;
+//           border-radius: 50%;
+//         }
+//       `;
+//     case "rainy":
+//       return css`
+//         width: 2px;
+//         height: 10px;
+//         background: ${props.isDarkMode ? "#89CFF0" : "#4682B4"};
+//         animation: ${rain} 1s linear infinite;
+//       `;
+//     case "snowy":
+//       return css`
+//         width: 5px;
+//         height: 5px;
+//         background: ${props.isDarkMode ? "#ffffff" : "#e6e6e6"};
+//         border-radius: 50%;
+//         animation: ${snow} 3s linear infinite;
+//       `;
+//     case "thunder":
+//       return css`
+//         width: 100%;
+//         height: 100%;
+//         background: ${props.isDarkMode ? "#FFD700" : "#FFFF00"};
+//         opacity: 0;
+//         animation: ${thunder} 5s linear infinite;
+//       `;
+//     default:
+//       return css``;
+//   }
+// };
+
+const getWeatherBackground = (weatherType) => {
+  switch (weatherType) {
+    case "clear":
+      return "https://i.imgur.com/8Kw4krW.gif"; // Sunny clear sky
+    case "cloudy":
+      return "https://i.imgur.com/Iwnj05d.gif"; // Cloudy sky
+    case "rainy":
+      return "https://i.imgur.com/g4risdG.gif"; // Rain
+    case "snowy":
+      return "https://i.imgur.com/EwQgpZY.gif"; // Snow
+    case "thunder":
+      return "https://i.imgur.com/WzI0mE7.gif"; // Thunder
+    case "mist":
+      return "https://i.imgur.com/vH9YqyE.gif"; // Misty
+    default:
+      return "https://i.imgur.com/8Kw4krW.gif"; // Default clear sky
+  }
 };
 
-const WeatherIcon = ({ condition, className, animate = true }) => {
-  const Icon = weatherIcons[condition] || Cloud;
-  return animate ? (
-    <motion.div
-      initial={{ scale: 0.8 }}
-      animate={{ scale: 1, rotate: condition === "Clear" ? [0, 5, -5, 0] : 0 }}
-      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-    >
-      <Icon className={className} />
-    </motion.div>
-  ) : (
-    <Icon className={className} />
-  );
-};
-
-const themes = {
-  default: {
-    background: "bg-white dark:bg-[#28283A]",
-    text: "text-gray-700 dark:text-white",
-    card: "bg-gray-50 dark:bg-[#513a7a]/20",
-    accent: "text-indigo-500",
-    hover: "hover:bg-gray-100 dark:hover:bg-gray-800",
-    border: "border-gray-200 dark:border-gray-700",
-  },
-  blue: {
-    background: "bg-blue-50 dark:bg-blue-900",
-    text: "text-indigo-700 dark:text-blue-50",
-    card: "bg-blue-100/50 dark:bg-[#513a7a]/50",
-    accent: "text-indigo-600 dark:text-blue-400",
-    hover: "hover:bg-blue-100 dark:hover:bg-indigo-800",
-    border: "border-blue-200 dark:border-blue-700",
-  },
-  green: {
-    background: "bg-green-50 dark:bg-green-900",
-    text: "text-green-700 dark:text-green-50",
-    card: "bg-green-100/50 dark:bg-green-800/50",
-    accent: "text-green-600 dark:text-green-400",
-    hover: "hover:bg-green-100 dark:hover:bg-green-800",
-    border: "border-green-200 dark:border-green-700",
-  },
-  purple: {
-    background: "bg-purple-50 dark:bg-purple-900",
-    text: "text-purple-700 dark:text-purple-50",
-    card: "bg-purple-100/50 dark:bg-purple-800/50",
-    accent: "text-purple-600 dark:text-purple-400",
-    hover: "hover:bg-purple-100 dark:hover:bg-purple-800",
-    border: "border-purple-200 dark:border-purple-700",
-  },
-  orange: {
-    background: "bg-orange-50 dark:bg-orange-900",
-    text: "text-orange-700 dark:text-orange-50",
-    card: "bg-orange-100/50 dark:bg-orange-800/50",
-    accent: "text-orange-600 dark:text-orange-400",
-    hover: "hover:bg-orange-100 dark:hover:bg-orange-800",
-    border: "border-orange-200 dark:border-orange-700",
-  },
-};
-
-const WeatherCard = ({
-  temperature,
-  condition,
-  details,
-  getTemperature,
-  isMain = false,
-  theme = "default",
-  description,
-  city,
-}) => (
-  <div className="  flex flex-col justify-between h-full">
-    <span className="text-sm opacity-70">
-      {new Date().toLocaleDateString("en-US", {
-        weekday: "short",
-        month: "short",
-        day: "numeric",
-      })}
-    </span>
-    <h2 className="text-xl font-semibold">{city}</h2>
-    <div className="flex  justify-center items-center gap-4">
-      <WeatherIcon
-        condition={condition}
-        className={`w-16 h-16 ${themes[theme].accent}`}
-      />
-      <div className="text-center">
-        <p
-          className={`text-7xl font-bold tracking-tight ${themes[theme].text}`}
-        >
-          {getTemperature(temperature)}
-        </p>
-        <p className={`text-lg capitalize ${themes[theme].text}`}>
-          {description}
-        </p>
-      </div>
-    </div>
-
-    {details && isMain && (
-      <div className="grid grid-cols-2 gap-4 mt-4">
-        <div
-          className={`flex items-center gap-3 p-3 rounded-sm ${themes[theme].card} ${themes[theme].text}`}
-        >
-          <Droplets className={`w-5 h-5 ${themes[theme].accent}`} />
-          <div>
-            <span className="text-sm opacity-70">Humidity</span>
-            <p className="text-base">{details.humidity}%</p>
-          </div>
-        </div>
-        <div
-          className={`flex items-center gap-3 p-3 rounded-sm ${themes[theme].card} ${themes[theme].text}`}
-        >
-          <Wind className={`w-5 h-5 ${themes[theme].accent}`} />
-          <div>
-            <span className="text-sm opacity-70">Wind</span>
-            <p className="text-base">{Math.round(details.wind)} m/s</p>
-          </div>
-        </div>
-      </div>
-    )}
-  </div>
-);
-
-const ForecastCard = ({ data, theme, getTemperature }) => (
-  <div className={`p-3 rounded-sm ${themes[theme].card} ${themes[theme].text}`}>
-    <p className="text-sm opacity-70">
-      {new Date(data.dt * 1000).toLocaleDateString("en-US", {
-        weekday: "short",
-      })}
-    </p>
-    <div className="flex items-center gap-2 my-1">
-      <WeatherIcon
-        condition={data.weather[0].main}
-        className={`w-8 h-8 ${themes[theme].accent}`}
-        animate={false}
-      />
-      <span className="text-lg font-medium">
-        {getTemperature(data.main.temp)}
-      </span>
-    </div>
-    <p className="text-xs capitalize opacity-70">
-      {data.weather[0].description}
-    </p>
-  </div>
-);
-
-const ThemeSelector = ({ currentTheme, onThemeChange }) => (
-  <div className="p-2 grid grid-cols-5 gap-2">
-    {Object.keys(themes).map((themeName) => (
-      <button
-        key={themeName}
-        onClick={() => onThemeChange(themeName)}
-        className={`w-6 h-6 rounded-full border-2 transition-transform ${
-          currentTheme === themeName
-            ? "scale-125 border-blue-500"
-            : "border-gray-300"
-        } ${themes[themeName].background}`}
-        title={`${
-          themeName.charAt(0).toUpperCase() + themeName.slice(1)
-        } theme`}
-      />
-    ))}
-  </div>
-);
+// const getWeatherIcon = (weatherType) => {
+//   const type = weatherType?.toLowerCase() || "";
+//   if (type.includes("clear")) {
+//     return (
+//       <svg
+//         viewBox="0 0 64 64"
+//         xmlns="http://www.w3.org/2000/svg"
+//         className="w-20 scale-[110%]"
+//       >
+//         <defs>
+//           <linearGradient id="sun" x1="0%" y1="0%" x2="100%" y2="100%">
+//             <stop offset="0%" stopColor="#fbbf24" />
+//             <stop offset="100%" stopColor="#f59e0b" />
+//           </linearGradient>
+//         </defs>
+//         <circle cx="32" cy="32" r="16" fill="url(#sun)" />
+//         <g
+//           fill="none"
+//           stroke="#fbbf24"
+//           strokeLinecap="round"
+//           strokeMiterlimit="10"
+//           strokeWidth="2"
+//         >
+//           <path d="M32 5v7M32 52v7M59 32h-7M12 32H5M51.5 12.5l-5 5M17.5 46.5l-5 5M51.5 51.5l-5-5M17.5 17.5l-5-5">
+//             <animateTransform
+//               attributeName="transform"
+//               dur="45s"
+//               repeatCount="indefinite"
+//               type="rotate"
+//               values="0 32 32; 360 32 32"
+//             />
+//           </path>
+//         </g>
+//       </svg>
+//     );
+//   }
+//   if (type.includes("cloud")) {
+//     return (
+//       <svg
+//         viewBox="0 0 64 64"
+//         xmlns="http://www.w3.org/2000/svg"
+//         className="w-20 scale-[110%]"
+//       >
+//         <defs>
+//           <linearGradient id="cloud" x1="0%" y1="0%" x2="100%" y2="100%">
+//             <stop offset="0%" stopColor="#f3f7fe" />
+//             <stop offset="100%" stopColor="#deeafb" />
+//           </linearGradient>
+//         </defs>
+//         <path
+//           d="M46.5 31.5h-.32a10.49 10.49 0 00-19.11-8 7 7 0 00-10.57 6 7.21 7.21 0 00.1 1.14A7.5 7.5 0 0018 45.5a4.19 4.19 0 00.5 0v0h28a7 7 0 000-14z"
+//           fill="url(#cloud)"
+//           stroke="#e6effc"
+//           strokeMiterlimit="10"
+//           strokeWidth=".5"
+//         />
+//       </svg>
+//     );
+//   }
+//   if (type.includes("rain")) {
+//     return (
+//       <svg
+//         viewBox="0 0 64 64"
+//         xmlns="http://www.w3.org/2000/svg"
+//         className="w-20 scale-[110%]"
+//       >
+//         <defs>
+//           <linearGradient id="rain-cloud" x1="0%" y1="0%" x2="100%" y2="100%">
+//             <stop offset="0%" stopColor="#f3f7fe" />
+//             <stop offset="100%" stopColor="#deeafb" />
+//           </linearGradient>
+//           <linearGradient id="rain-drop" x1="0%" y1="0%" x2="100%" y2="100%">
+//             <stop offset="0%" stopColor="#4286ee" />
+//             <stop offset="100%" stopColor="#0950bc" />
+//           </linearGradient>
+//         </defs>
+//         <path
+//           d="M46.5 31.5h-.32a10.49 10.49 0 00-19.11-8 7 7 0 00-10.57 6 7.21 7.21 0 00.1 1.14A7.5 7.5 0 0018 45.5a4.19 4.19 0 00.5 0v0h28a7 7 0 000-14z"
+//           fill="url(#rain-cloud)"
+//           stroke="#e6effc"
+//           strokeMiterlimit="10"
+//           strokeWidth=".5"
+//         />
+//         <g
+//           fill="none"
+//           stroke="url(#rain-drop)"
+//           strokeLinecap="round"
+//           strokeMiterlimit="10"
+//           strokeWidth="2"
+//         >
+//           <path d="M24.39 43.03l-.78 4.94">
+//             <animateTransform
+//               attributeName="transform"
+//               dur="0.7s"
+//               repeatCount="indefinite"
+//               type="translate"
+//               values="1 -5; -2 10"
+//             />
+//           </path>
+//           <path d="M31.39 43.03l-.78 4.94">
+//             <animateTransform
+//               attributeName="transform"
+//               begin="-0.4s"
+//               dur="0.7s"
+//               repeatCount="indefinite"
+//               type="translate"
+//               values="1 -5; -2 10"
+//             />
+//           </path>
+//           <path d="M38.39 43.03l-.78 4.94">
+//             <animateTransform
+//               attributeName="transform"
+//               begin="-0.2s"
+//               dur="0.7s"
+//               repeatCount="indefinite"
+//               type="translate"
+//               values="1 -5; -2 10"
+//             />
+//           </path>
+//         </g>
+//       </svg>
+//     );
+//   }
+//   // Default icon (can add more weather conditions)
+//   return (
+//     <svg
+//       viewBox="0 0 64 64"
+//       xmlns="http://www.w3.org/2000/svg"
+//       className="w-20 scale-[110%]"
+//     >
+//       <defs>
+//         <linearGradient id="default-cloud" x1="0%" y1="0%" x2="100%" y2="100%">
+//           <stop offset="0%" stopColor="#f3f7fe" />
+//           <stop offset="100%" stopColor="#deeafb" />
+//         </linearGradient>
+//       </defs>
+//       <path
+//         d="M46.5 31.5h-.32a10.49 10.49 0 00-19.11-8 7 7 0 00-10.57 6 7.21 7.21 0 00.1 1.14A7.5 7.5 0 0018 45.5a4.19 4.19 0 00.5 0v0h28a7 7 0 000-14z"
+//         fill="url(#default-cloud)"
+//         stroke="#e6effc"
+//         strokeMiterlimit="10"
+//         strokeWidth=".5"
+//       />
+//     </svg>
+//   );
+// };
 
 const Weather = () => {
   const [currentWeather, setCurrentWeather] = useState(null);
   const [forecast, setForecast] = useState([]);
   const [error, setError] = useState(null);
-  const [isHovering, setIsHovering] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [city, setCity] = useState("delhi");
-  const [unit, setUnit] = useState(
-    () => localStorage.getItem("weatherUnit") || "metric"
-  );
-  const [showDetails, setShowDetails] = useState(
-    () => JSON.parse(localStorage.getItem("showDetails")) ?? true
-  );
-  const [isVisible, setIsVisible] = useState(false);
-  const [currentTheme, setCurrentTheme] = useState(
-    () => localStorage.getItem("weatherTheme") || "default"
-  );
+  const [unit, setUnit] = useState("metric");
+  const [city, setCity] = useState("");
+  // const [currentTheme, setCurrentTheme] = useState("default");
+  const [isVisible, setisVisible] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const settingsRef = useRef(null);
+  const searchInputRef = useRef(null);
+  const [browserInfo, setBrowserInfo] = useState(null);
+  const [ipLocation, setIpLocation] = useState(null);
+  const [customTheme, setCustomTheme] = useState(() => {
+    const saved = localStorage.getItem("weatherCustomTheme");
+    return saved ? JSON.parse(saved) : neonPresets[0].colors;
+  });
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const savedMode = localStorage.getItem("weatherDarkMode");
+    return savedMode
+      ? JSON.parse(savedMode)
+      : window.matchMedia("(prefers-color-scheme: dark)").matches;
+  });
 
-  const dropdownRef = useRef(null);
-  const buttonRef = useRef(null);
-
-  const collapse = () => {
-    setIsCollapsed(!isCollapsed);
-  };
-
-  const fetchWeather = async (cityName) => {
+  const fetchWeatherByCoords = async (lat, lon) => {
     try {
-      const [currentResponse, forecastResponse] = await Promise.all([
-        axios.get(`https://api.openweathermap.org/data/2.5/weather`, {
-          params: { q: cityName, appid: API_KEY, units: unit },
-        }),
-        axios.get(`https://api.openweathermap.org/data/2.5/forecast`, {
-          params: { q: cityName, appid: API_KEY, units: unit },
-        }),
-      ]);
+      const currentResponse = await axios.get(
+        `https://api.openweathermap.org/data/2.5/weather`,
+        { params: { lat, lon, appid: API_KEY, units: unit } }
+      );
+      const forecastResponse = await axios.get(
+        `https://api.openweathermap.org/data/2.5/forecast`,
+        { params: { lat, lon, appid: API_KEY, units: unit } }
+      );
 
       setCurrentWeather(currentResponse.data);
-
-      // Get unique days from forecast
-      const dailyForecast = forecastResponse.data.list.reduce((acc, item) => {
-        const date = new Date(item.dt * 1000).toLocaleDateString();
-        if (!acc[date] && acc.length < 5) {
-          acc[date] = item;
-        }
-        return acc;
-      }, []);
-
-      setForecast(Object.values(dailyForecast));
+      const dailyForecast = forecastResponse.data.list
+        .filter((_, index) => index % 8 === 0)
+        .slice(1, 3); // Get next 4 days
+      setForecast(dailyForecast);
+      setCity(currentResponse.data.name);
       setError(null);
     } catch (error) {
-      if (error.response?.status === 404) {
+      setError("Could not fetch weather data. Please try again later.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchWeatherByCity = async (cityName) => {
+    try {
+      setIsLoading(true);
+      const currentResponse = await axios.get(
+        `https://api.openweathermap.org/data/2.5/weather`,
+        { params: { q: cityName, appid: API_KEY, units: unit } }
+      );
+      const forecastResponse = await axios.get(
+        `https://api.openweathermap.org/data/2.5/forecast`,
+        { params: { q: cityName, appid: API_KEY, units: unit } }
+      );
+
+      setCurrentWeather(currentResponse.data);
+      const dailyForecast = forecastResponse.data.list
+        .filter((_, index) => index % 8 === 0)
+        .slice(1, 3); // Get next 4 days
+      setForecast(dailyForecast);
+      setError(null);
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
         setError(`Weather data for "${cityName}" not found.`);
       } else {
         setError("Could not fetch weather data. Please try again later.");
       }
       setCurrentWeather(null);
       setForecast([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchWeather(city);
-  }, [city, unit]);
+  // Add IP-based location fetch
+  const getLocationByIP = async () => {
+    try {
+      const response = await axios.get("https://ipapi.co/json/");
+      setIpLocation({
+        city: response.data.city,
+        country: response.data.country_name,
+        latitude: response.data.latitude,
+        longitude: response.data.longitude,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching IP location:", error);
+      return null;
+    }
+  };
+
+  const getUserLocation = async () => {
+    setIsLoading(true);
+    setBrowserInfo(getBrowserInfo());
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          fetchWeatherByCoords(latitude, longitude);
+        },
+        async (error) => {
+          console.error("Geolocation error:", error);
+          // Fallback to IP-based location
+          const ipData = await getLocationByIP();
+          if (ipData) {
+            fetchWeatherByCoords(ipData.latitude, ipData.longitude);
+          } else {
+            fetchWeatherByCity("New York"); // Final fallback
+          }
+        }
+      );
+    } else {
+      // Fallback to IP-based location if geolocation is not supported
+      const ipData = await getLocationByIP();
+      if (ipData) {
+        fetchWeatherByCoords(ipData.latitude, ipData.longitude);
+      } else {
+        fetchWeatherByCity("New York"); // Final fallback
+      }
+    }
+  };
+
+  const isCollapse = () => {
+    setisVisible(!isVisible);
+  };
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        isVisible &&
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target) &&
-        buttonRef.current &&
-        !buttonRef.current.contains(event.target)
-      ) {
-        setIsVisible(false);
-      }
+    getUserLocation();
+  }, [unit]);
+
+  useEffect(() => {
+    localStorage.setItem("weatherDarkMode", JSON.stringify(isDarkMode));
+  }, [isDarkMode]);
+
+  // const handleCitySubmit = (e) => {
+  //   e.preventDefault();
+  //   const cityInput = e.target.elements.city.value;
+  //   if (cityInput.trim()) {
+  //     setCity(cityInput);
+  //     fetchWeatherByCity(cityInput);
+  //   }
+  // };
+
+  const getDayName = (date) => {
+    return new Date(date).toLocaleDateString("en-US", { weekday: "short" });
+  };
+
+  const getBrowserInfo = () => {
+    const userAgent = navigator.userAgent;
+    const browserData = {
+      name: "Unknown",
+      version: "Unknown",
+      os: navigator.platform || "Unknown",
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isVisible]);
+    // Browser detection
+    if (userAgent.includes("Firefox/")) {
+      browserData.name = "Firefox";
+      browserData.version = userAgent.split("Firefox/")[1];
+    } else if (userAgent.includes("Edge/")) {
+      browserData.name = "Edge";
+      browserData.version = userAgent.split("Edge/")[1];
+    } else if (userAgent.includes("Chrome/")) {
+      browserData.name = "Chrome";
+      browserData.version = userAgent.split("Chrome/")[1].split(" ")[0];
+    } else if (userAgent.includes("Safari/")) {
+      browserData.name = "Safari";
+      browserData.version = userAgent.split("Version/")[1].split(" ")[0];
+    }
 
-  const handleUnitToggle = () => {
-    const newUnit = unit === "imperial" ? "metric" : "imperial";
-    setUnit(newUnit);
-    localStorage.setItem("weatherUnit", newUnit);
+    // OS detection
+    if (userAgent.includes("Windows")) {
+      browserData.os = "Windows";
+    } else if (userAgent.includes("Mac")) {
+      browserData.os = "MacOS";
+    } else if (userAgent.includes("Linux")) {
+      browserData.os = "Linux";
+    }
+
+    return browserData;
   };
 
-  const getTemperature = (temp) => {
-    return unit === "metric"
-      ? `${Math.round(temp)}°C`
-      : `${Math.round(temp)}°F`;
-  };
-  const handleDetailsToggle = () => {
-    const newShowDetails = !showDetails;
-    setShowDetails(newShowDetails);
-    localStorage.setItem("showDetails", JSON.stringify(newShowDetails));
+  const handleColorChange = (color, type) => {
+    const newTheme = { ...customTheme, [type]: color.toHexString() };
+    setCustomTheme(newTheme);
+    localStorage.setItem("weatherCustomTheme", JSON.stringify(newTheme));
   };
 
-  const handleLocationToggle = () => {
-    setIsVisible(false);
+  const applyPreset = (preset) => {
+    setCustomTheme(preset.colors);
+    localStorage.setItem("weatherCustomTheme", JSON.stringify(preset.colors));
   };
 
-  const handleThemeChange = (theme) => {
-    setCurrentTheme(theme);
-    localStorage.setItem("weatherTheme", theme);
+  // const renderColorPicker = () => (
+  //   <div className="color-picker-section">
+  //     <div className="color-picker-header">
+  //       <h3>Custom Theme</h3>
+  //       <button
+  //         className="color-picker-toggle"
+  //         onClick={() => setShowColorPicker(!showColorPicker)}
+  //       >
+  //         <Palette size={16} />
+  //       </button>
+  //     </div>
+
+  //     {showColorPicker && (
+  //       <div className="color-picker-content">
+  //         <div className="color-options">
+  //           <button
+  //             className={`color-option ${
+  //               activeColor === "background" ? "active" : ""
+  //             }`}
+  //             onClick={() => setActiveColor("background")}
+  //             style={{ backgroundColor: customTheme.background }}
+  //           >
+  //             Background
+  //           </button>
+  //           <button
+  //             className={`color-option ${
+  //               activeColor === "accent" ? "active" : ""
+  //             }`}
+  //             onClick={() => setActiveColor("accent")}
+  //             style={{ backgroundColor: customTheme.accent }}
+  //           >
+  //             Accent
+  //           </button>
+  //           <button
+  //             className={`color-option ${
+  //               activeColor === "bottomBg" ? "active" : ""
+  //             }`}
+  //             onClick={() => setActiveColor("bottomBg")}
+  //             style={{ backgroundColor: customTheme.bottomBg }}
+  //           >
+  //             Bottom
+  //           </button>
+  //           <button
+  //             className={`color-option ${
+  //               activeColor === "buttonBg" ? "active" : ""
+  //             }`}
+  //             onClick={() => setActiveColor("buttonBg")}
+  //             style={{ backgroundColor: customTheme.buttonBg }}
+  //           >
+  //             Buttons
+  //           </button>
+  //         </div>
+
+  //         <ColorPicker
+  //           value={customTheme[activeColor]}
+  //           onChange={(color) => handleColorChange(color, activeColor)}
+  //           presets={[
+  //             {
+  //               label: "Recommended",
+  //               colors: neonPresets.map((preset) => preset.colors[activeColor]),
+  //             },
+  //           ]}
+  //         />
+
+  //         <div className="presets">
+  //           <h4>Presets</h4>
+  //           <div className="preset-buttons">
+  //             {neonPresets.map((preset, index) => (
+  //               <button
+  //                 key={index}
+  //                 className="preset-btn"
+  //                 onClick={() => applyPreset(preset)}
+  //                 style={{
+  //                   background: `linear-gradient(45deg, ${preset.colors.background}, ${preset.colors.accent})`,
+  //                 }}
+  //               >
+  //                 {preset.label}
+  //               </button>
+  //             ))}
+  //           </div>
+  //         </div>
+  //       </div>
+  //     )}
+  //   </div>
+  // );
+
+  const getWeatherAnimation = (weatherCode) => {
+    const code = weatherCode?.toLowerCase() || "";
+    if (code.includes("clear")) return "clear";
+    if (
+      code.includes("cloud") ||
+      code.includes("haze") ||
+      code.includes("mist")
+    )
+      return "cloudy";
+    if (code.includes("rain")) return "rainy";
+    if (code.includes("snow")) return "snowy";
+    if (code.includes("thunder")) return "thunder";
+    return "default";
   };
 
   return (
-    <div
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
-      className={`w-full max-w-xl p-1 rounded-sm  transition-colors ${
-        !localStorage.getItem("backgroundImage") &&
-        themes[currentTheme].background
-      } ${
-        !localStorage.getItem("backgroundImage") && themes[currentTheme].text
-      }`}
-    >
-      <div className=" p-2 backdrop-blur-sm">
-        <div className="flex justify-between items-center">
-          <div
-            onClick={collapse}
-            className="flex p-2   text-black dark:text-white  w-full cursor-pointer text-xl font-medium items-center"
-          >
-            Weather
-          </div>
-          {isHovering && (
-            <div className="relative">
-              <button
-                ref={buttonRef}
-                className={`p-2 rounded-sm transition-colors ${themes[currentTheme].hover}`}
-                onClick={() => setIsVisible(!isVisible)}
-              >
-                <Settings className="w-5 h-5" />
-              </button>
-              {isVisible && (
-                <div
-                  ref={dropdownRef}
-                  className={`absolute right-0 mt-2 w-48 rounded-sm shadow-lg ${themes[currentTheme].background} border ${themes[currentTheme].border} z-50`}
-                >
-                  <div className="p-2 border-b border-gray-200 dark:border-gray-700">
-                    <p className="text-sm font-medium mb-1">Theme</p>
-                    <ThemeSelector
-                      currentTheme={currentTheme}
-                      onThemeChange={handleThemeChange}
-                    />
-                  </div>
-                  <button
-                    onClick={handleUnitToggle}
-                    className={`w-full text-left px-4 py-2 text-sm ${themes[currentTheme].hover}`}
-                  >
-                    {unit === "imperial"
-                      ? "Switch to Celsius"
-                      : "Switch to Fahrenheit"}
-                  </button>
-                  <button
-                    onClick={handleDetailsToggle}
-                    className={`w-full text-left px-4 py-2 text-sm ${themes[currentTheme].hover}`}
-                  >
-                    {showDetails ? "Hide Details" : "Show Details"}
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {isCollapsed && (
-          <AnimatePresence>
-            {error ? (
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="text-center"
-              >
-                {error}
-              </motion.p>
-            ) : currentWeather ? (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-                className="p-3  h-[19rem]"
-              >
-                <WeatherCard
-                  city={city}
-                  temperature={currentWeather.main.temp}
-                  condition={currentWeather.weather[0].main}
-                  description={currentWeather.weather[0].description}
-                  details={
-                    showDetails
-                      ? {
-                          humidity: currentWeather.main.humidity,
-                          wind: currentWeather.wind.speed,
-                        }
-                      : null
-                  }
-                  getTemperature={getTemperature}
-                  isMain={true}
-                  theme={currentTheme}
-                />
-
-                {!isCollapsed && forecast.length > 0 && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-6"
-                  >
-                    <h3
-                      className={`text-sm font-medium mb-3 ${themes[currentTheme].text}`}
-                    >
-                      5-Day Forecast
-                    </h3>
-                    <div className="grid grid-cols-5 gap-2">
-                      {forecast.map((day) => (
-                        <ForecastCard
-                          key={day.dt}
-                          data={day}
-                          theme={currentTheme}
-                          getTemperature={getTemperature}
-                        />
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </motion.div>
-            ) : (
-              <div className="flex justify-center items-center h-32">
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                  className={`rounded-full h-8 w-8 border-b-2 ${themes[currentTheme].text}`}
-                />
-              </div>
-            )}
-          </AnimatePresence>
-        )}
+    <div className="p-2">
+      <div
+        className="text-xl font-medium p-3 cursor-pointer"
+        onClick={isCollapse}
+      >
+        Weather
       </div>
+      {isVisible && (
+        <StyledWrapper
+          isDarkMode={isDarkMode}
+          weatherType={
+            currentWeather
+              ? getWeatherAnimation(currentWeather.weather[0].main)
+              : "default"
+          }
+          weatherBackground={
+            currentWeather
+              ? getWeatherBackground(
+                  getWeatherAnimation(currentWeather.weather[0].main)
+                )
+              : getWeatherBackground("default")
+          }
+        >
+          <div className="weather-container h-[19rem]">
+            <div className="content-wrapper flex-col">
+              {/* Main Weather Card */}
+              <div className="duration-300 font-mono dark:text-white text-gray-700 group cursor-default relative overflow-hidden w-full h-[48.5%]  rounded-sm p-6 hover:bg-indigo-100 hover:dark:bg-[#0C66E4]">
+                <div className="flex justify-between -mt-4 items-center">
+                  <div className="flex-1">
+                    <h3 className="text-2xl font-bold">Today</h3>
+                    {currentWeather && (
+                      <div className="flex items-center gap-6">
+                        <h4 className="font-sans ml-2 text-6xl">
+                          {Math.round(currentWeather.main.temp)}°
+                        </h4>
+                        <div className="text-lg">
+                          <p>{currentWeather.weather[0].description}</p>
+                          <p>{currentWeather.main.humidity}% humidity</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 flex justify-center items-center">
+                    {currentWeather && (
+                      <div className="w-30 h-30">
+                        <img
+                          src={`https://openweathermap.org/img/wn/${currentWeather.weather[0].icon}@4x.png`}
+                          alt={currentWeather.weather[0].description}
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 flex justify-end items-start">
+                    <div className="text-lg text-right">
+                      <p className="text-2xl">
+                        {new Date().toLocaleTimeString("en-US", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: false,
+                        })}
+                      </p>
+                      <p>
+                        {new Date().toLocaleDateString("en-US", {
+                          weekday: "long",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Forecast Cards */}
+              <div className="forecast-container   h-[48.5%] w-full flex justify-between">
+                {forecast.map((day, index) => (
+                  <div
+                    key={index}
+                    className=" font-mono group cursor-default relative overflow-hidden text-black bg-white/[(var(--bg-opacity))] h-full w-[48.5%] dark:bg-[#8163D3]/[(var(--bg-opacity))] rounded-sm  p-2  hover:bg-indigo-100 hover:dark:bg-[#0C66E4]"
+                  >
+                    <h3 className="text-sm text-center">
+                      {getDayName(day.dt_txt)}
+                    </h3>
+                    <div className="gap-4 relative">
+                      <img
+                        src={`https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png`}
+                        alt={day.weather[0].description}
+                        className="w-16 h-16 mx-auto"
+                      />
+                      <h4 className="font-sans duration-300 absolute left-1/2 -translate-x-1/2 text-3xl text-center group-hover:translate-x-9 group-hover:-translate-y-12 group-hover:scale-125">
+                        {Math.round(day.main.temp)}°
+                      </h4>
+                    </div>
+                    <div className="absolute duration-300 -left-32 mt-1 group-hover:left-8">
+                      <p className="text-xs">{day.weather[0].description}</p>
+                      <p className="text-xs">{day.main.humidity}% humidity</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </StyledWrapper>
+      )}
     </div>
   );
 };
+
+const StyledWrapper = styled.div`
+  .weather-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 0 2px;
+  }
+
+  .content-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    height: 100%;
+  }
+
+  .forecast-container {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .mode-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+
+    button {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 30%;
+      font-size: 20px;
+      transition: transform 0.3s ease;
+      backdrop-filter: blur(8px);
+      background: rgba(255, 255, 255, 0.1);
+
+      &:hover {
+        transform: scale(1.1) rotate(360deg);
+      }
+    }
+  }
+
+  /* Weather Icons */
+  .weather-icon {
+    width: 50px;
+    height: 50px;
+    margin: 0 auto;
+    display: block;
+  }
+
+  /* Animations */
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-5px);
+    }
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .content-wrapper {
+      justify-content: center;
+    }
+
+    .forecast-container {
+      justify-content: center;
+    }
+  }
+`;
 
 export default Weather;

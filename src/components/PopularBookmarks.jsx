@@ -3250,15 +3250,6 @@ function PopularBookmarks() {
               placeholder="Enter bookmark URL"
               value={newBookmark.url}
               onChange={handleUrlChange}
-              addonBefore={
-                newBookmark.favicon && (
-                  <img
-                    src={newBookmark.favicon}
-                    alt=""
-                    style={{ width: 16, height: 16 }}
-                  />
-                )
-              }
             />
           </Form.Item>
         </Form>

@@ -136,12 +136,7 @@ function Calculator() {
       </div>
 
       {!collapsed && (
-        <div
-          className={`${
-            !localStorage.getItem("backgroundImage") &&
-            "dark:bg-[#28283A] bg-white"
-          } rounded-sm  h-full w-full p-3`}
-        >
+        <div className={` rounded-sm  h-full w-full p-3`}>
           {showHistory ? (
             <div className="dark:bg-[#28283A] text-white w-full h-full p-6">
               <div className="flex justify-between items-center mb-4">
