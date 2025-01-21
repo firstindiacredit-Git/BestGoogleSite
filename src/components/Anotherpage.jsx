@@ -47,6 +47,7 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
     Bookmarks2: <CategoryHome categoryType="AI" itemName="AI" />,
     Bookmarks3: <CategoryHome categoryType="Sports" itemName="Sports" />,
     Bookmarks4: <CategoryHome categoryType="Shopping" itemName="Shopping" />,
+    Bookmarks5: <CategoryHome categoryType="News" itemName="News" />,
     Todo: <TodoComponent />,
     NewsFeed: <NewsFeed />,
   };

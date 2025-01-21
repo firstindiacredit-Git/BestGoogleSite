@@ -31,6 +31,13 @@ const defaultWidgets = {
       column: 1,
       position: 3,
     },
+    {
+      id: "Bookmarks5",
+      name: "News",
+      isOpen: true,
+      column: 1,
+      position: 4,
+    },
     { id: "NewsFeed", name: "News Feed", isOpen: true, column: 3, position: 0 },
     {
       id: "imageUploader",
@@ -57,6 +64,7 @@ export const allWidgets = {
   Bookmarks2: { id: "Bookmarks2", name: "Travel" },
   Bookmarks3: { id: "Bookmarks3", name: "Sports" },
   Bookmarks4: { id: "Bookmarks4", name: "Shopping" },
+  Bookmarks5: { id: "Bookmarks5", name: "News" },
   Todo: { id: "Todo", name: "Todo List" },
   NewsFeed: { id: "NewsFeed", name: "News Feed" },
 };

@@ -338,7 +338,7 @@ function SearchPage() {
                   changeVisible();
                 }}
               >
-                {visibleHandle ? "Modern" : "Classic"}
+                {!visibleHandle ? "Modern" : "Classic"}
               </button>
             </div>
           ),

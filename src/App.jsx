@@ -269,6 +269,7 @@ const ContextMenuWrapper = ({ children }) => {
 
       try {
         localStorage.setItem("backgroundImage", compressedImage);
+        localStorage.setItem("bgTransparency", "50");
         window.location.reload();
       } catch (error) {
         if (error.name === "QuotaExceededError") {
