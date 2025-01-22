@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { sendPasswordResetEmail } from "firebase/auth";
-import { auth } from "../../firebase"; 
-import { useNavigate } from "react-router-dom"; 
+import { auth } from "../../firebase";
+import { useNavigate } from "react-router-dom";
 
 const ResetPassword = () => {
   const [email, setEmail] = useState("");
@@ -32,7 +32,7 @@ const ResetPassword = () => {
   };
 
   const goBack = () => {
-    navigate(-1);  
+    navigate("/search");
   };
 
   return (
@@ -44,7 +44,7 @@ const ResetPassword = () => {
         Back
       </button>
       <div className="relative bg-white p-6 rounded-sm shadow-md w-full max-w-md">
-              <h2 className="text-2xl font-bold text-center mb-4">Reset Password</h2>
+        <h2 className="text-2xl font-bold text-center mb-4">Reset Password</h2>
         <p className="text-sm text-gray-600 text-center mb-6">
           Enter your email address to receive a password reset link.
         </p>

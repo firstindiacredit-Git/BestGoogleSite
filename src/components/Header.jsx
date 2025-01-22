@@ -20,13 +20,7 @@ import {
 import { CiEdit } from "react-icons/ci";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 
-const Header = ({
-  isDarkMode,
-  toggleTheme,
-  onPageNameChange,
-  textColor,
-  goBack,
-}) => {
+const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
   const [showButtons, setShowButtons] = useState(false);
   const [user, setUser] = useState(null);
   const [panel, setPanel] = useState(false);
@@ -361,12 +355,11 @@ const Header = ({
         <div
           onClick={toggleTheme}
           className="flex items-center text-sm dark:hover:bg-gray-800/20 transition-all hover:bg-gray-200/80 p-2 cursor-pointer rounded-md"
-          style={{ color: textColor }}
         >
           {isDarkMode ? (
-            <FaMoon className="w-5 h-5" style={{ color: textColor }} />
+            <FaMoon className="w-5 h-5" />
           ) : (
-            <FaSun className="w-5 h-5" style={{ color: textColor }} />
+            <FaSun className="w-5 h-5" />
           )}
         </div>
         {user ? (

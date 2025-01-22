@@ -154,7 +154,7 @@ const SignIn = () => {
               <div className="text-center flex justify-center gap-2 mt-4">
                 <button
                   className="text-indigo-500 hover:text-indigo-700 transition duration-200"
-                  onClick={() => navigate("/forgotpassword")}
+                  onClick={() => navigate("/forgot-password")}
                 >
                   Forgot Password?
                 </button>

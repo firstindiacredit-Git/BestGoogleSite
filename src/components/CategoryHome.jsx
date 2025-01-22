@@ -27,8 +27,8 @@ const CategoryHome = ({ categoryType, itemName }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({
-    top: 0,
-    right: 0,
+    top: null,
+    right: null,
   });
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -40,7 +40,9 @@ const CategoryHome = ({ categoryType, itemName }) => {
   const collapse = () => {
     setCollapsed(!collapsed);
   };
-  const { widgetTransparent } = useContext(WidgetTransparencyContext);
+  const preventScroll = (prevent) => {
+    document.body.style.overflow = prevent ? "hidden" : "";
+  };
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
@@ -153,8 +155,33 @@ const CategoryHome = ({ categoryType, itemName }) => {
         top: rect.bottom + 8,
         right: window.innerWidth - rect.right,
       });
+      preventScroll(true);
+    } else {
+      preventScroll(false);
     }
+    return () => preventScroll(false);
   }, [showSettings]);
+
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (!event.target.closest("#menu-Container")) {
+        setShowButtons(false);
+      }
+
+      if (
+        !event.target.closest(".user-panel") &&
+        !event.target.closest(".user-avatar")
+      ) {
+        setPanel(false);
+      }
+    };
+
+    document.addEventListener("click", handleOutsideClick);
+
+    return () => {
+      document.removeEventListener("click", handleOutsideClick);
+    };
+  }, []);
 
   const getFaviconUrl = (url) => {
     try {
@@ -254,7 +281,7 @@ const CategoryHome = ({ categoryType, itemName }) => {
   const renderSettingsMenu = () => {
     const dropdownContent = showSettings && (
       <div
-        className={`fixed w-48 bg-white dark:text-white dark:bg-[#28283A] rounded-sm shadow-lg border border-gray-200 dark:border-gray-700 z-[9999]`}
+        className={` menu-Container fixed w-48 bg-white dark:text-white dark:bg-[#28283A] rounded-sm shadow-lg border border-gray-200 dark:border-gray-700 z-[9999]`}
         style={{
           top: `${dropdownPosition.top}px`,
           right: `${dropdownPosition.right}px`,
@@ -369,7 +396,7 @@ const CategoryHome = ({ categoryType, itemName }) => {
     );
 
     return (
-      <div className="relative backdrop-blur-sm flex justify-between w-full">
+      <div className="menu-Container relative backdrop-blur-sm flex justify-between w-full">
         <div
           className="dark:text-white text-xl font-medium p-2 w-full cursor-pointer flex items-center"
           onClick={collapse}

@@ -27,14 +27,20 @@ onAuthStateChanged(auth, async (user) => {
     const userDocSnap = await getDoc(userDocRef);
 
     if (!userDocSnap.exists()) {
-      // Create a new Firestore document for the user
+      // Create a new Firestore document for the user with trial info
       try {
+        const trialStartDate = new Date();
+        const trialEndDate = new Date(trialStartDate);
+        trialEndDate.setDate(trialEndDate.getDate() + 30); // 30 days trial
+
         await setDoc(userDocRef, {
           uid: user.uid,
           email: user.email,
           displayName: user.displayName || "",
           photoURL: user.photoURL || "",
-          subscriptionStatus: "free",
+          subscriptionStatus: "trial",
+          trialStartDate: trialStartDate,
+          trialEndDate: trialEndDate,
           createdAt: new Date(),
           lastLoginAt: new Date(),
           preferences: {
@@ -45,28 +51,43 @@ onAuthStateChanged(auth, async (user) => {
           bookmarks: [],
           profile: {},
           role: "user",
+          isTrialExpired: false,
+          subscriptionEndDate: null,
         });
       } catch (error) {
         console.error("Error creating user document: ", error);
       }
     } else {
       // Update last login time and handle roles
-      const userRole = userDocSnap.data().role;
-      if (userRole === "admin") {
-        console.log("Admin user logged in");
-      } else {
-        console.log("Non-admin user logged in");
-      }
-      try {
-        await setDoc(
-          userDocRef,
-          {
-            lastLoginAt: new Date(),
-          },
-          { merge: true }
-        );
-      } catch (error) {
-        console.error("Error updating last login time: ", error);
+      const userData = userDocSnap.data();
+      const userRole = userData.role;
+
+      // Don't update trial status for admin users
+      if (userRole !== "admin") {
+        const now = new Date();
+        const trialEndDate = userData.trialEndDate?.toDate();
+        const isTrialExpired = trialEndDate && now > trialEndDate;
+
+        // Update trial status if needed
+        if (isTrialExpired && userData.subscriptionStatus === "trial") {
+          await setDoc(
+            userDocRef,
+            {
+              subscriptionStatus: "expired",
+              isTrialExpired: true,
+              lastLoginAt: now,
+            },
+            { merge: true }
+          );
+        } else {
+          await setDoc(
+            userDocRef,
+            {
+              lastLoginAt: now,
+            },
+            { merge: true }
+          );
+        }
       }
     }
   }
