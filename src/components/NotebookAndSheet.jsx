@@ -19,7 +19,7 @@ const NotebookAndDocumentSheet = () => {
             <TodoComponent inNotebookSheet={true} />
           </div>
         </div>
-        <div className="overflow-hidden">
+        <div className="overflow-hidden mt-4">
           <Excel />
         </div>
       </div>

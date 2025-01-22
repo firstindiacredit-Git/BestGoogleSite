@@ -124,7 +124,9 @@ const NotePage = ({ inNotebookSheet = false }) => {
   }, [isAutoColor]);
 
   const collapse = () => {
-    setIsCollapsed(!isCollapsed);
+    if (!inNotebookSheet) {
+      setIsCollapsed(!isCollapsed);
+    }
   };
   const isColorDark = (hexColor) => {
     const r = parseInt(hexColor.slice(1, 3), 16);
@@ -265,7 +267,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className={`${
-        inNotebookSheet ? "w-full h-full" : "h-full max-w-xl mx-auto"
+        inNotebookSheet ? "w-full h-full " : "h-full max-w-xl mx-auto"
       } backdrop-blur-sm`}
     >
       <div className="rounded-sm h-full">
@@ -363,7 +365,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
                       <button
                         className={`p-2 rounded-sm transition duration-200 ${
                           isAutoColor
-                            ? "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700"
+                            ? "bg-gray-100/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] hover:bg-gray-200 dark:hover:bg-gray-700"
                             : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
                         }`}
                         onClick={toggleLineNumbers}

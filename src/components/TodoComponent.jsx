@@ -85,11 +85,10 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
     "#9370DB",
     "#FF69B4",
   ];
-  const { widgetTransparent, setWidgetTransparent } = useContext(
-    WidgetTransparencyContext
-  );
   const collapse = () => {
-    setIsCollapsed(!isCollapsed);
+    if (!inNotebookSheet) {
+      setIsCollapsed(!isCollapsed);
+    }
   };
   const calculateProgress = () => {
     if (todos.length === 0) return 0;
