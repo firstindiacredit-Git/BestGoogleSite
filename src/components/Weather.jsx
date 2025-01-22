@@ -332,18 +332,16 @@ const Weather = () => {
   const [error, setError] = useState(null);
   const [unit, setUnit] = useState("metric");
   const [city, setCity] = useState("");
-  // const [currentTheme, setCurrentTheme] = useState("default");
   const [isVisible, setisVisible] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const settingsRef = useRef(null);
   const searchInputRef = useRef(null);
   const [browserInfo, setBrowserInfo] = useState(null);
   const [ipLocation, setIpLocation] = useState(null);
-  const [customTheme, setCustomTheme] = useState(() => {
-    const saved = localStorage.getItem("weatherCustomTheme");
-    return saved ? JSON.parse(saved) : neonPresets[0].colors;
-  });
-  const [showColorPicker, setShowColorPicker] = useState(false);
+  // const [customTheme, setCustomTheme] = useState(() => {
+  //   const saved = localStorage.getItem("weatherCustomTheme");
+  //   return saved ? JSON.parse(saved) : neonPresets[0].colors;
+  // });
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const savedMode = localStorage.getItem("weatherDarkMode");
     return savedMode
@@ -516,16 +514,16 @@ const Weather = () => {
     return browserData;
   };
 
-  const handleColorChange = (color, type) => {
-    const newTheme = { ...customTheme, [type]: color.toHexString() };
-    setCustomTheme(newTheme);
-    localStorage.setItem("weatherCustomTheme", JSON.stringify(newTheme));
-  };
+  // const handleColorChange = (color, type) => {
+  //   const newTheme = { ...customTheme, [type]: color.toHexString() };
+  //   setCustomTheme(newTheme);
+  //   localStorage.setItem("weatherCustomTheme", JSON.stringify(newTheme));
+  // };
 
-  const applyPreset = (preset) => {
-    setCustomTheme(preset.colors);
-    localStorage.setItem("weatherCustomTheme", JSON.stringify(preset.colors));
-  };
+  // const applyPreset = (preset) => {
+  //   setCustomTheme(preset.colors);
+  //   localStorage.setItem("weatherCustomTheme", JSON.stringify(preset.colors));
+  // };
 
   // const renderColorPicker = () => (
   //   <div className="color-picker-section">
@@ -655,7 +653,7 @@ const Weather = () => {
           <div className="weather-container h-[19rem]">
             <div className="content-wrapper flex-col">
               {/* Main Weather Card */}
-              <div className="duration-300 font-mono dark:text-white text-gray-700 group cursor-default relative overflow-hidden w-full h-[48.5%]  rounded-sm p-6 hover:bg-indigo-100 hover:dark:bg-[#0C66E4]">
+              <div className="duration-300 font-mono dark:text-white text-gray-700 group cursor-default relative overflow-hidden w-full h-[48.5%]  rounded-sm p-6 ">
                 <div className="flex justify-between -mt-4 items-center">
                   <div className="flex-1">
                     <h3 className="text-2xl font-bold">Today</h3>
@@ -702,13 +700,11 @@ const Weather = () => {
                   </div>
                 </div>
               </div>
-
-              {/* Forecast Cards */}
               <div className="forecast-container   h-[48.5%] w-full flex justify-between">
                 {forecast.map((day, index) => (
                   <div
                     key={index}
-                    className=" font-mono group cursor-default relative overflow-hidden text-black bg-white/[(var(--bg-opacity))] h-full w-[48.5%] dark:bg-[#8163D3]/[(var(--bg-opacity))] rounded-sm  p-2  hover:bg-indigo-100 hover:dark:bg-[#0C66E4]"
+                    className=" font-mono group cursor-default relative overflow-hidden text-black bg-white/[(var(--widget-opacity))] h-full w-[48.5%] dark:bg-[#8163D3]/[(var(--widget-opacity))] rounded-sm  p-2  hover:bg-indigo-100/[var(--widget-opacity)] hover:dark:bg-[#0C66E4]/[(var(--widget-opacity))]"
                   >
                     <h3 className="text-sm text-center">
                       {getDayName(day.dt_txt)}

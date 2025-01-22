@@ -210,27 +210,52 @@ function SearchPage() {
         {
           key: "bgOpacity",
           label: (
-            <div
-              className="flex flex-col gap-2"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <span className="text-sm text-gray-600 dark:text-gray-300">
-                Background Opacity
-              </span>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={sliderTransparency}
-                onChange={(e) =>
-                  handleTempTransparencyChange(parseInt(e.target.value))
-                }
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-              />
-              <span className="text-sm text-gray-600 dark:text-gray-300 text-right">
-                {sliderTransparency}%
-              </span>
-            </div>
+            <>
+              <div
+                className="flex flex-col gap-2"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <span className="text-sm text-gray-600 dark:text-gray-300">
+                  Background Opacity
+                </span>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={sliderTransparency}
+                  onChange={(e) =>
+                    handleTempTransparencyChange(parseInt(e.target.value))
+                  }
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+                />
+                <span className="text-sm text-gray-600 dark:text-gray-300 text-right">
+                  {sliderTransparency}%
+                </span>
+              </div>
+              <div
+                className="flex gap-2 pt-2 border-t dark:border-gray-700"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleApplyChanges();
+                  }}
+                  className="flex-1 px-3 py-1.5 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition-colors"
+                >
+                  Apply
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleResetChanges();
+                  }}
+                  className="px-3 py-1.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                >
+                  Reset
+                </button>
+              </div>
+            </>
           ),
         },
         {

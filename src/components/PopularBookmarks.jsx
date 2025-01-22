@@ -1688,36 +1688,11 @@ function PopularBookmarks() {
     const sizes = categoryBookmarkSizes[categoryId] || { list: 32 };
     return (
       <List
+        className="bg-white/[(var(--widget-opacity))]"
         itemLayout="horizontal"
         dataSource={categoryLinks}
         renderItem={(link) => (
-          <List.Item
-            actions={
-              [
-                // <Tooltip title="Edit">
-                //   <Button
-                //     type="text"
-                //     icon={<EditOutlined />}
-                //     onClick={(e) => {
-                //       e.stopPropagation();
-                //       handleEditBookmark(link);
-                //     }}
-                //   />
-                // </Tooltip>,
-                // <Tooltip title="Delete">
-                //   <Button
-                //     type="text"
-                //     icon={<DeleteOutlined />}
-                //     onClick={(e) => {
-                //       e.stopPropagation();
-                //       handleDeleteBookmark(link.id);
-                //     }}
-                //     danger
-                //   />
-                // </Tooltip>,
-              ]
-            }
-          >
+          <List.Item>
             <List.Item.Meta
               avatar={
                 <Avatar
@@ -1747,11 +1722,11 @@ function PopularBookmarks() {
     const sizes = categoryBookmarkSizes[categoryId] || { grid: 32 };
     return (
       <div className="w-full">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2  sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {categoryLinks.map((link) => (
             <div
               key={link.id}
-              className="flex flex-col items-center p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all duration-300 group relative"
+              className="flex flex-col items-center p-2 bg-white/[(var(--widget-opacity))] dark:bg-[#513a7a]/[(var(--widget-opacity))] hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all duration-300 group relative"
             >
               <div className="relative w-full flex justify-center mb-2">
                 <a
@@ -1836,7 +1811,7 @@ function PopularBookmarks() {
           </Button>
           <div className="flex items-center gap-4">
             <div
-              className={`flex items-center bg-white/10 backdrop-blur-lg dark:bg-[#28283A] p-1 rounded-sm`}
+              className={`flex items-center bg-white/[(var(--widget-opacity))] backdrop-blur-lg dark:bg-[#28283A]/[(var(--widget-opacity))] p-1 rounded-sm`}
             >
               <button
                 onClick={() => handleGridViewChange(true)}
@@ -1864,8 +1839,8 @@ function PopularBookmarks() {
                 onClick={() => handleGridViewChange(false)}
                 className={`p-2 rounded ${
                   !grid
-                    ? "bg-white dark:bg-[#513a7a] shadow-sm"
-                    : "hover:bg-white/50 dark:hover:bg-gray-700/50"
+                    ? "bg-white/[(var(--widget-opacity))] dark:bg-[#513a7a]/[(var(--widget-opacity))] shadow-sm"
+                    : "hover:bg-white/[(var(--widget-opacity))] dark:hover:bg-gray-700/50"
                 }`}
               >
                 <svg
@@ -1939,10 +1914,10 @@ function PopularBookmarks() {
                                     }`}
                                   >
                                     <Card
-                                      className="max-w-xl dark:bg-gray-800 mx-auto rounded-sm"
+                                      className="max-w-xl dark:bg-gray-800/[(var(--widget-opacity))] mx-auto rounded-sm"
                                       title={
                                         <div
-                                          className="bg-white dark:bg-[#513a7a] dark:text-white p-1 relative overflow-hidden cursor-pointer"
+                                          className="bg-white/[(var(--widget-opacity))] dark:bg-[#513a7a]/[(var(--widget-opacity))] dark:text-white p-1 relative overflow-hidden cursor-pointer"
                                           onClick={(e) => {
                                             if (
                                               !grid &&
@@ -1964,7 +1939,7 @@ function PopularBookmarks() {
                                                 {...provided.dragHandleProps}
                                                 className={`cursor-move p-3 transition-all duration-200 group ${
                                                   snapshot.isDragging
-                                                    ? "bg-gray-300 rounded"
+                                                    ? "bg-gray-300/[(var(--widget-opacity))] rounded"
                                                     : ""
                                                 }`}
                                                 onClick={(e) =>

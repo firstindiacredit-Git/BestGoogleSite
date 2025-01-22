@@ -266,7 +266,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
       onMouseLeave={() => setIsHovered(false)}
       className={`${
         inNotebookSheet ? "w-full h-full" : "h-full max-w-xl mx-auto"
-      }`}
+      } backdrop-blur-sm`}
     >
       <div className="rounded-sm h-full">
         <div
@@ -424,9 +424,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
                     resize: "none",
                     color: isAutoColor ? undefined : textColor,
                     backgroundColor: "transparent",
-                    border: isAutoColor
-                      ? "1px solid rgb(209 213 219)"
-                      : `1px solid ${textColor}`,
+                    border: `1px solid ${textColor}`,
                     padding: "10px 10px 10px 10px",
                     borderRadius: "5px",
                     fontSize: `${fontSize}px`,

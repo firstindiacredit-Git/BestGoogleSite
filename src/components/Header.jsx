@@ -170,7 +170,7 @@ const Header = ({
   }, []);
 
   return (
-    <header className="p-2 bg-gray-200/10 backdrop-blur-xl dark:bg-[#513a7a]/10 border-b border dark:border-gray-800/20 border-gray-200/20 flex justify-between items-center sticky top-0 z-50">
+    <header className="p-2 bg-gray-200/10 backdrop-blur-sm dark:bg-[#513a7a]/10 border-b border dark:border-gray-800/20 border-gray-200/20 flex justify-between items-center sticky top-0 z-50">
       <div className="flex items-center space-x-2">
         {user && (
           <div className="relative">
