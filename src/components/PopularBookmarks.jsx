@@ -2980,7 +2980,16 @@ function PopularBookmarks() {
           zIndex: 1000,
         }}
       >
-        <SettingOutlined style={{ fontSize: "24px" }} />
+        <svg
+          viewBox="0 0 24 24"
+          width="24"
+          height="24"
+          stroke="currentColor"
+          strokeWidth="2"
+          fill="none"
+        >
+          <path d="M3 4h18M3 12h18M3 20h18" />
+        </svg>
       </motion.button>
 
       <Modal

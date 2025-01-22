@@ -1,5 +1,10 @@
 import React, { useState, createContext, useMemo, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useNavigate,
+} from "react-router-dom";
 import { Dropdown, Menu, Button, Modal, message } from "antd";
 import galleryupload from "../public/galleryupload.png";
 import { AuthProvider } from "./hooks/AuthContext.jsx";
@@ -24,6 +29,9 @@ import AboutPage from "./components/AboutPage.jsx";
 import PricingPage from "./components/PricingPage.jsx";
 import FAQPage from "./components/FAQPage.jsx";
 import axios from "axios";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "./firebase";
+import { auth } from "./firebase";
 
 // Context Menu Items configuration
 const menuItems = [
@@ -560,6 +568,41 @@ export const WidgetTransparencyContext = React.createContext();
 // Add theme context and optimized theme handling
 export const ThemeContext = createContext();
 
+const SearchPageWrapper = () => {
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const checkDefaultPage = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        try {
+          const userDocRef = doc(db, "users", user.uid);
+          const userDoc = await getDoc(userDocRef);
+          if (userDoc.exists() && userDoc.data().defaultPageId) {
+            navigate(`/NewSearchPage?pageId=${userDoc.data().defaultPageId}`);
+          }
+        } catch (error) {
+          console.error("Error checking default page:", error);
+        }
+      }
+      setIsLoading(false);
+    };
+
+    checkDefaultPage();
+  }, [navigate]);
+
+  if (isLoading) {
+    return <div>Loading...</div>; // You can replace this with a proper loading component
+  }
+
+  return (
+    <ContextMenuWrapper>
+      <SearchPage />
+    </ContextMenuWrapper>
+  );
+};
+
 // App Component
 const App = () => {
   const [widgetTransparent, setWidgetTransparent] = useState(() =>
@@ -617,14 +660,7 @@ const App = () => {
               <Route path="/about" element={<AboutPage />} />
               <Route path="/pricing" element={<PricingPage />} />
               <Route path="/faq" element={<FAQPage />} />
-              <Route
-                path="/search"
-                element={
-                  <ContextMenuWrapper>
-                    <SearchPage />
-                  </ContextMenuWrapper>
-                }
-              />
+              <Route path="/search" element={<SearchPageWrapper />} />
               <Route
                 path="/calculator"
                 element={

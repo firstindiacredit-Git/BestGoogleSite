@@ -1,14 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { signOut, onAuthStateChanged } from "firebase/auth";
-import { auth } from "../firebase";
+import { auth, db } from "../firebase";
 import { FaSun, FaMoon, FaHome, FaArrowLeft } from "react-icons/fa";
 import { IoIosLogOut } from "react-icons/io";
 import { RiUserLine } from "react-icons/ri";
 import { MdAddHomeWork } from "react-icons/md";
-import { Modal, Input } from "antd";
-import { MenuOutlined } from "@ant-design/icons";
+import { Modal, Input, Button, Dropdown, message } from "antd";
+import {
+  MenuOutlined,
+  HomeOutlined,
+  PlusOutlined,
+  AppstoreOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  StarOutlined,
+  StarFilled,
+} from "@ant-design/icons";
 import { CiEdit } from "react-icons/ci";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 
 const Header = ({
   isDarkMode,
@@ -25,10 +35,22 @@ const Header = ({
     const savedPages = localStorage.getItem("customPages");
     return savedPages ? JSON.parse(savedPages) : [];
   });
+  const [currentPageName, setCurrentPageName] = useState("Pages");
   const navigate = useNavigate();
-  const Back = () => {
-    navigate("/search");
-  };
+  const location = useLocation();
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const pageId = urlParams.get("pageId");
+    if (pageId) {
+      const page = pages.find((p) => p.id.toString() === pageId);
+      if (page) {
+        setCurrentPageName(page.name);
+      }
+    } else {
+      setCurrentPageName("Pages");
+    }
+  }, [location.search, pages]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -48,8 +70,6 @@ const Header = ({
   }, []);
 
   const togglePanel = () => setPanel(!panel);
-
-  // const toggleMenu = () => setShowButtons(!showButtons);
 
   const handleSignOut = async () => {
     try {
@@ -131,6 +151,137 @@ const Header = ({
     });
   };
 
+  const Back = () => {
+    navigate("/search");
+  };
+
+  const setDefaultPage = async (pageId) => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      message.error("Please sign in to set a default page");
+      return;
+    }
+
+    try {
+      const userDocRef = doc(db, "users", currentUser.uid);
+      await setDoc(
+        userDocRef,
+        {
+          defaultPageId: pageId,
+        },
+        { merge: true }
+      );
+
+      setDefaultPageId(pageId);
+      message.success("Default page updated successfully");
+    } catch (error) {
+      console.error("Error setting default page:", error);
+      message.error("Failed to set default page");
+    }
+  };
+
+  const [defaultPageId, setDefaultPageId] = useState(null);
+
+  useEffect(() => {
+    const fetchDefaultPage = async () => {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return;
+
+      try {
+        const userDocRef = doc(db, "users", currentUser.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          setDefaultPageId(userDoc.data().defaultPageId);
+        }
+      } catch (error) {
+        console.error("Error fetching default page:", error);
+      }
+    };
+
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        fetchDefaultPage();
+      } else {
+        setDefaultPageId(null);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const items = [
+    {
+      key: "home",
+      label: (
+        <Link to="/search">
+          <div className="flex items-center gap-2 px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors duration-200">
+            <HomeOutlined className="text-lg" />
+            <span>Home</span>
+          </div>
+        </Link>
+      ),
+    },
+    {
+      key: "newPage",
+      label: (
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+            createNewPage();
+          }}
+          className="flex items-center gap-2 px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors duration-200"
+        >
+          <PlusOutlined className="text-lg" />
+          <span>Add New Page</span>
+        </div>
+      ),
+    },
+    {
+      type: "divider",
+    },
+    ...pages.map((page) => ({
+      key: page.id,
+      label: (
+        <div
+          onClick={() => handlePageClick(page.id)}
+          className="flex items-center justify-between px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors duration-200 group"
+        >
+          <div className="flex items-center gap-2">
+            <AppstoreOutlined className="text-lg" />
+            <span>{page.name}</span>
+            {defaultPageId === page.id.toString() && (
+              <StarFilled className="text-yellow-500 ml-1" />
+            )}
+          </div>
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setDefaultPage(page.id.toString());
+              }}
+              className="text-yellow-500 hover:text-yellow-600"
+              title="Set as default page"
+            >
+              <StarOutlined className="text-base" />
+            </button>
+            <button
+              onClick={(e) => handlePageNameEdit(page.id, page.name, e)}
+              className="text-indigo-500 hover:text-indigo-700 dark:text-blue-400 dark:hover:text-indigo-600"
+            >
+              <EditOutlined className="text-base" />
+            </button>
+            <button
+              onClick={(e) => deletePage(page.id, e)}
+              className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-600"
+            >
+              <DeleteOutlined className="text-base" />
+            </button>
+          </div>
+        </div>
+      ),
+    })),
+  ];
+
   useEffect(() => {
     const handleOutsideClick = (event) => {
       if (
@@ -145,13 +296,6 @@ const Header = ({
         !event.target.closest(".user-avatar")
       ) {
         setPanel(false);
-      }
-
-      if (
-        !event.target.closest(".home-dropdown") &&
-        !event.target.closest(".home-button")
-      ) {
-        setShowHomeDropdown(false);
       }
     };
 
@@ -183,70 +327,20 @@ const Header = ({
                 <span className="text-white">Back</span>
               </button>
             ) : (
-              <button
-                className="bg-indigo-500 py-1.5 px-2.5 rounded home-button"
-                onClick={() => setShowHomeDropdown(!showHomeDropdown)}
+              <Dropdown
+                menu={{ items }}
+                trigger={["click"]}
+                placement="bottomLeft"
+                overlayClassName="mt-1"
               >
-                <MenuOutlined className="h-2 w-3 text-white" />{" "}
-                <span className="text-white">Pages</span>
-              </button>
-            )}
-
-            {showHomeDropdown && (
-              <div className="absolute left-0 mt-2 w-40 bg-white shadow-lg rounded-lg text-sm dark:bg-[#513a7a] home-dropdown">
-                <Link to="/search">
-                  <button
-                    className="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors duration-200"
-                    style={{ color: textColor }}
-                  >
-                    <FaHome style={{ color: textColor }} />
-                    <span style={{ color: textColor }}>Home</span>
-                  </button>
-                </Link>
-                <button
-                  onClick={createNewPage}
-                  className="w-full flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600 rounded transition-colors duration-200"
+                <Button
+                  type="primary"
+                  className="bg-indigo-500 border-none hover:bg-indigo-600 flex items-center gap-2"
+                  icon={<MenuOutlined />}
                 >
-                  <MdAddHomeWork />
-                  <span>Add New Page</span>
-                </button>
-
-                {pages.map((page) => (
-                  <button
-                    key={page.id}
-                    onClick={() => handlePageClick(page.id)}
-                    className="w-full flex items-center justify-between px-4 py-2 text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600 rounded transition-colors duration-200 group"
-                  >
-                    <div className="flex items-center gap-2">
-                      <MdAddHomeWork />
-                      <span
-                        className="hover:cursor-text"
-                        onClick={(e) =>
-                          handlePageNameEdit(page.id, page.name, e)
-                        }
-                      >
-                        {page.name}
-                      </span>
-                    </div>
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
-                      <button
-                        onClick={(e) =>
-                          handlePageNameEdit(page.id, page.name, e)
-                        }
-                        className="text-indigo-500 hover:text-indigo-700 dark:text-blue-400 dark:hover:text-indigo-600"
-                      >
-                        <CiEdit className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={(e) => deletePage(page.id, e)}
-                        className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-600"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  </button>
-                ))}
-              </div>
+                  {currentPageName}
+                </Button>
+              </Dropdown>
             )}
           </div>
         )}
