@@ -86,13 +86,9 @@ export const initializeUserLayout = async (userId) => {
     if (!layoutDoc.exists()) {
       await setDoc(userLayoutRef, {
         home: {
-          widgets: defaultWidgets.home,
+          widgets: [], // Start with empty widgets array
           columns: 4,
-        },
-        // popularBookmarks: {
-        //   widgets: defaultWidgets.popularBookmarks,
-        //   columns: 4
-        // }
+        }
       });
     }
   } catch (error) {
@@ -135,7 +131,7 @@ export const getPageLayout = async (userId, pageName) => {
     if (layoutDoc.exists()) {
       const data = layoutDoc.data();
       const pageData = data[pageName] || {
-        widgets: defaultWidgets[pageName] || [],
+        widgets: [], // Always return empty widgets array for new pages
         columns: optimalColumns,
       };
 
@@ -154,25 +150,16 @@ export const getPageLayout = async (userId, pageName) => {
       return pageData;
     }
 
-    // For new layouts, use optimal column count
-    const defaultLayout = {
-      widgets: defaultWidgets[pageName] || [],
+    // For new layouts, return empty widgets array
+    return {
+      widgets: [],
       columns: optimalColumns,
     };
-
-    if (defaultLayout.widgets.length) {
-      defaultLayout.widgets = redistributeWidgets(
-        defaultLayout.widgets,
-        optimalColumns
-      );
-    }
-
-    return defaultLayout;
   } catch (error) {
     console.error("Error getting page layout:", error);
     return {
-      widgets: defaultWidgets[pageName] || [],
-      columns: 4,
+      widgets: [],
+      columns: optimalColumns,
     };
   }
 };

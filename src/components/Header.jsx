@@ -341,15 +341,17 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
       </div>
       {!user && <div className="w-36"></div>}
 
-      <div className="flex relative mx-auto justify-center">
-        <img
-          src={`${
-            isDarkMode ? "/BrowseyFullDark2.svg" : "/BrowseyFullDark.svg"
-          }`}
-          className="w-40 drop-shadow-sm"
-          alt="Browsey"
-        />
-      </div>
+      <Link to="/search">
+        <div className="flex relative mx-auto justify-center">
+          <img
+            src={`${
+              isDarkMode ? "/BrowseyFullDark2.svg" : "/BrowseyFullDark.svg"
+            }`}
+            className="w-40 drop-shadow-sm"
+            alt="Browsey"
+          />
+        </div>
+      </Link>
 
       <div className="flex items-center justify-between w-fit gap-4 space-x-4">
         <div
@@ -357,9 +359,9 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
           className="flex items-center text-sm dark:hover:bg-gray-800/20 transition-all hover:bg-gray-200/80 p-2 cursor-pointer rounded-md"
         >
           {isDarkMode ? (
-            <FaMoon className="w-5 h-5" />
+            <FaSun className="w-5 h-5 text-white" />
           ) : (
-            <FaSun className="w-5 h-5" />
+            <FaMoon className="w-5 h-5 " />
           )}
         </div>
         {user ? (

@@ -6,6 +6,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 import { Dropdown, Menu, Button, Modal, message } from "antd";
+import NotFound from "./components/NotFound.jsx";
 import galleryupload from "../public/galleryupload.png";
 import { AuthProvider } from "./hooks/AuthContext.jsx";
 import SearchPage from "./components/SearchPage.jsx";
@@ -660,15 +661,9 @@ const App = () => {
               <Route path="/about" element={<AboutPage />} />
               <Route path="/pricing" element={<PricingPage />} />
               <Route path="/faq" element={<FAQPage />} />
+              <Route path="*" element={<NotFound />} />
               <Route path="/search" element={<SearchPageWrapper />} />
-              <Route
-                path="/calculator"
-                element={
-                  <ContextMenuWrapper>
-                    <AddList />
-                  </ContextMenuWrapper>
-                }
-              />
+
               <Route
                 path="/NewSearchPage"
                 element={
@@ -677,14 +672,7 @@ const App = () => {
                   </ContextMenuWrapper>
                 }
               />
-              <Route
-                path="/password-generator"
-                element={
-                  <ContextMenuWrapper>
-                    <PasswordGenerator />
-                  </ContextMenuWrapper>
-                }
-              />
+
               <Route path="/signin" element={<Signin />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/profile" element={<ProfilePage />} />

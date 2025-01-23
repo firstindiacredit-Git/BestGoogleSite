@@ -1,49 +1,49 @@
-import React from 'react';
-import { Menu, Button, Space, Avatar } from 'antd';
-import { 
-  HomeOutlined, 
-  CalculatorOutlined, 
-  FileTextOutlined, 
+import React from "react";
+import { Menu, Button, Space } from "antd";
+import {
+  HomeOutlined,
+  CalculatorOutlined,
+  FileTextOutlined,
   UserOutlined,
   SearchOutlined,
   LockOutlined,
-  CrownOutlined
-} from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
+  CrownOutlined,
+} from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 
 const HeaderComponent = () => {
   const navigate = useNavigate();
 
   const menuItems = [
     {
-      key: '/',
+      key: "/",
       icon: <HomeOutlined />,
-      label: 'Home',
+      label: "Home",
     },
     {
-      key: '/AddList',
+      key: "/AddList",
       icon: <CalculatorOutlined />,
-      label: 'Calculator',
+      label: "Calculator",
     },
     {
-      key: '/Notes',
+      key: "/Notes",
       icon: <FileTextOutlined />,
-      label: 'Notes',
+      label: "Notes",
     },
     {
-      key: '/NewSearchPage',
+      key: "/NewSearchPage",
       icon: <SearchOutlined />,
-      label: 'New Search',
+      label: "New Search",
     },
     {
-      key: '/PasswordGenerator',
+      key: "/PasswordGenerator",
       icon: <LockOutlined />,
-      label: 'Password Generator',
+      label: "Password Generator",
     },
     {
-      key: '/PremiumPage',
+      key: "/PremiumPage",
       icon: <CrownOutlined />,
-      label: 'Premium',
+      label: "Premium",
     },
   ];
 
@@ -63,10 +63,14 @@ const HeaderComponent = () => {
         />
       </div>
       <Space>
-        <Button type="text" icon={<UserOutlined />} onClick={() => navigate('/Signin')}>
+        <Button
+          type="text"
+          icon={<UserOutlined />}
+          onClick={() => navigate("/Signin")}
+        >
           Sign In
         </Button>
-        <Button type="primary" onClick={() => navigate('/Signup')}>
+        <Button type="primary" onClick={() => navigate("/Signup")}>
           Sign Up
         </Button>
       </Space>
