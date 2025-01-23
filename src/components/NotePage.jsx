@@ -362,20 +362,14 @@ const NotePage = ({ inNotebookSheet = false }) => {
     >
       <div className="rounded-sm h-full">
         <div
-          className={`overflow-hidden h-full rounded-b-sm ${
-            isAutoColor
-              ? "bg-white/[var(--widget-opacity)] dark:bg-[#28283A]/[var(--widget-opacity)]"
-              : ""
-          }`}
+          className={`overflow-hidden h-full rounded-b-sm `}
           style={{
             backgroundColor: isAutoColor ? undefined : "",
           }}
         >
           <div
             className={`p-2 h-full bg flex flex-col justify-between ${
-              isAutoColor
-                ? "bg-white/[var(--widget-opacity)] dark:bg-[#28283A]/[var(--widget-opacity)] text-gray-900 dark:text-white"
-                : ""
+              isAutoColor ? " text-gray-900 dark:text-white" : ""
             }`}
             style={{
               backgroundColor: isAutoColor ? undefined : backgroundColor,

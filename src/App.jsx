@@ -4,8 +4,18 @@ import {
   Routes,
   Route,
   useNavigate,
+  useLocation,
 } from "react-router-dom";
 import { Dropdown, Menu, Button, Modal, message } from "antd";
+import {
+  ReloadOutlined,
+  PictureOutlined,
+  DeleteOutlined,
+  PlusOutlined,
+  FileOutlined,
+  BgColorsOutlined,
+  ClearOutlined,
+} from "@ant-design/icons";
 import NotFound from "./components/NotFound.jsx";
 import galleryupload from "../public/galleryupload.png";
 import { AuthProvider } from "./hooks/AuthContext.jsx";
@@ -39,22 +49,55 @@ const menuItems = [
   {
     key: "group1",
     type: "group",
-    children: [{ key: "refresh", label: "Refresh", shortcut: "Ctrl+R" }],
+    label: "Page Actions",
+    children: [
+      {
+        key: "refresh",
+        label: "Refresh Page",
+        icon: <ReloadOutlined />,
+        shortcut: "Ctrl+R",
+      },
+    ],
+  },
+  {
+    type: "divider",
   },
   {
     key: "group2",
     type: "group",
+    label: "Background",
     children: [
-      { key: "chBG", label: "Change Background" },
-      { key: "dlBG", label: "Delete Background" },
+      {
+        key: "chBG",
+        label: "Change Background",
+        icon: <BgColorsOutlined />,
+      },
+      {
+        key: "dlBG",
+        label: "Remove Background",
+        icon: <ClearOutlined />,
+      },
     ],
+  },
+  {
+    type: "divider",
   },
   {
     key: "group4",
     type: "group",
+    label: "Page Management",
     children: [
-      { key: "deletePage", label: "Delete Page", shortcut: "Ctrl+Alt+D" },
-      { key: "addPage", label: "New Page", shortcut: "Ctrl+Alt+N" },
+      {
+        key: "addPage",
+        label: "New Page",
+        icon: <PlusOutlined />,
+      },
+      {
+        key: "deletePage",
+        label: "Delete Page",
+        icon: <DeleteOutlined />,
+        danger: true,
+      },
     ],
   },
 ];
@@ -224,11 +267,53 @@ const backgroundCollections = {
 const ContextMenuWrapper = ({ children }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [activeSection, setActiveSection] = useState("images"); // custom, gradients, solid, glass, images
+  const [activeSection, setActiveSection] = useState("images");
   const [selectedCategory, setSelectedCategory] = useState("nature");
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const openModal = () => setIsModalVisible(true);
   const closeModal = () => setIsModalVisible(false);
+
+  const createNewPage = () => {
+    const pages = JSON.parse(localStorage.getItem("customPages") || "[]");
+    const newPageNumber = pages.length + 1;
+    const newPage = {
+      id: Date.now(),
+      name: `Page ${newPageNumber}`,
+      widgets: [],
+    };
+
+    const updatedPages = [...pages, newPage];
+    localStorage.setItem("customPages", JSON.stringify(updatedPages));
+    navigate(`/NewSearchPage?pageId=${newPage.id}`);
+  };
+
+  const deletePage = () => {
+    const urlParams = new URLSearchParams(location.search);
+    const currentPageId = urlParams.get("pageId");
+
+    if (!currentPageId) {
+      message.error("Cannot delete the home page");
+      return;
+    }
+
+    Modal.confirm({
+      title: "Delete Page",
+      content: "Are you sure you want to delete this page?",
+      okText: "Yes",
+      okType: "danger",
+      cancelText: "No",
+      onOk() {
+        const pages = JSON.parse(localStorage.getItem("customPages") || "[]");
+        const updatedPages = pages.filter(
+          (page) => page.id.toString() !== currentPageId
+        );
+        localStorage.setItem("customPages", JSON.stringify(updatedPages));
+        navigate("/search");
+      },
+    });
+  };
 
   const compressImage = (file) => {
     return new Promise((resolve) => {
@@ -307,7 +392,12 @@ const ContextMenuWrapper = ({ children }) => {
         localStorage.setItem("bgTransparency", "100");
         window.location.reload();
         break;
-
+      case "deletePage":
+        deletePage();
+        break;
+      case "addPage":
+        createNewPage();
+        break;
       default:
         console.log(`Unhandled action: ${key}`);
     }
@@ -316,6 +406,10 @@ const ContextMenuWrapper = ({ children }) => {
   const menu = {
     items: menuItems,
     onClick: handleMenuClick,
+    style: {
+      width: "200px",
+      padding: "4px 0",
+    },
   };
 
   return (
@@ -328,7 +422,6 @@ const ContextMenuWrapper = ({ children }) => {
         footer={[
           <Button
             key="remove"
-            danger
             onClick={() => {
               localStorage.removeItem("backgroundImage");
               localStorage.removeItem("backgroundType");
@@ -530,7 +623,14 @@ const ContextMenuWrapper = ({ children }) => {
           )}
         </div>
       </Modal>
-      <Dropdown menu={menu} trigger={["contextMenu"]}>
+      <Dropdown
+        menu={menu}
+        trigger={["contextMenu"]}
+        overlayStyle={{
+          boxShadow:
+            "0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 9px 28px 8px rgba(0, 0, 0, 0.05)",
+        }}
+      >
         <div
           className="w-full min-h-screen"
           style={{

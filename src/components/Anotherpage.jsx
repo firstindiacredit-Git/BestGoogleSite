@@ -260,13 +260,12 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
     setAvailableWidgets(getAvailableWidgets(updatedItems));
   };
 
-  const handleAddWidget = (columnIndex, widget) => {
+  const handleAddWidget = (widget) => {
     const newWidget = {
       ...widget,
-      column: columnIndex,
+      column: 0, // Default to first column, will be redistributed
       isOpen: false,
-      position: sortedItems.filter((item) => item.column === columnIndex)
-        .length,
+      position: sortedItems.length,
     };
     setSortedItems([...sortedItems, newWidget]);
   };
@@ -359,7 +358,6 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
                     display: "grid",
                     maxWidth: "90vw",
                     gridTemplateColumns: `repeat(${columns}, 1fr)`,
-                    gap: "4px",
                   }}
                 >
                   {distributeItems().map((columnItems, columnIndex) => (
@@ -539,52 +537,26 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
         </svg>
       </motion.button>
 
-      {/* Widget Sorter Modal */}
+      {/* Widget Controller Modal */}
       <Modal
-        title={
-          <div className="text-white dark:text-[#afafaf] mb-2 text-center">
-            Widget Controller
-          </div>
-        }
+        className="min-w-[50vw]"
+        title="Widget Controller"
         open={isSorterOpen}
-        onCancel={() => {
-          if (!isApplying) {
-            setIsSorterOpen(false);
-            // Reset preview state when closing
-            setSortedItems([...items]);
-            setPreviewColumns(columns);
-          }
-        }}
+        onCancel={() => setIsSorterOpen(false)}
         footer={[
-          <AntButton
-            key="cancel"
-            onClick={() => {
-              setIsSorterOpen(false);
-              // Reset preview state when canceling
-              setSortedItems([...items]);
-              setPreviewColumns(columns);
-            }}
-            disabled={isApplying}
-            className="mt-2"
-          >
+          <AntButton key="cancel" onClick={() => setIsSorterOpen(false)}>
             Cancel
           </AntButton>,
           <AntButton
             key="apply"
             type="primary"
             onClick={handleApplySorting}
-            disabled={isApplying}
             loading={isApplying}
-            className="mt-2"
           >
             Apply Changes
           </AntButton>,
         ]}
-        width={800}
-        centered
-        className={`custom-modal  ${isDarkMode ? "dark-mode" : "light-mode"}`} // Add this class to make it gray in dark mode
       >
-        {/* {console.log(isDarkMode)} */}
         {isApplying ? (
           <div
             style={{
@@ -597,87 +569,44 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
           </div>
         ) : (
           <>
-            <div className="mb-6 flex items-center justify-between">
+            <div className="mb-6  flex items-center justify-between">
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 Select number of columns:
               </div>
               <div className="flex gap-2">
-                <AntButton
-                  key={1}
-                  type={previewColumns === 1 ? "primary" : "default"}
-                  onClick={() => handleColumnChange(1)}
-                  className={previewColumns === 1 ? "" : "hover:border-primary"}
-                  size="small"
-                >
-                  1
-                </AntButton>
-                <AntButton
-                  key={2}
-                  type={previewColumns === 2 ? "primary" : "default"}
-                  onClick={() => handleColumnChange(2)}
-                  className={previewColumns === 2 ? "" : "hover:border-primary"}
-                  size="small"
-                >
-                  2
-                </AntButton>
-                <AntButton
-                  key={3}
-                  type={previewColumns === 3 ? "primary" : "default"}
-                  onClick={() => handleColumnChange(3)}
-                  className={previewColumns === 3 ? "" : "hover:border-primary"}
-                  size="small"
-                >
-                  3
-                </AntButton>
-                <AntButton
-                  key={4}
-                  type={previewColumns === 4 ? "primary" : "default"}
-                  onClick={() => handleColumnChange(4)}
-                  className={previewColumns === 4 ? "" : "hover:border-primary"}
-                  size="small"
-                >
-                  4
-                </AntButton>
+                {[1, 2, 3, 4].map((num) => (
+                  <AntButton
+                    key={num}
+                    type={previewColumns === num ? "primary" : "default"}
+                    onClick={() => handleColumnChange(num)}
+                    className={
+                      previewColumns === num ? "" : "hover:border-primary"
+                    }
+                    size="small"
+                  >
+                    {num}
+                  </AntButton>
+                ))}
               </div>
             </div>
+
             <DragDropContext onDragEnd={handleSortEnd}>
-              <div
-                className="sort-columns-container"
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: `repeat(${previewColumns}, 1fr)`,
-                  gap: "16px",
-                  marginBottom: "20px",
-                  maxHeight: "60vh",
-                  overflowY: "auto",
-                  padding: "8px",
-                }}
-              >
-                {Array.from({ length: previewColumns }).map(
-                  (_, columnIndex) => (
+              <div className="grid grid-cols-4 gap-4">
+                {Array.from({ length: previewColumns }, (_, i) => i).map(
+                  (columnIndex) => (
                     <Droppable
                       key={columnIndex}
-                      droppableId={String(columnIndex)}
+                      droppableId={columnIndex.toString()}
                     >
                       {(provided, snapshot) => (
                         <div
                           ref={provided.innerRef}
                           {...provided.droppableProps}
-                          className="sort-column"
-                          style={{
-                            padding: "12px",
-                            backgroundColor: snapshot.isDraggingOver
-                              ? "rgba(24, 144, 255, 0.1)"
-                              : "rgba(0, 0, 0, 0.02)",
-                            borderRadius: "8px",
-                            minHeight: "150px",
-                            transition: "background-color 0.2s ease",
-                            border: snapshot.isDraggingOver
-                              ? "2px dashed #1890ff"
-                              : "2px solid transparent",
-                            display: "flex",
-                            flexDirection: "column",
-                          }}
+                          className={`p-4 rounded-lg ${
+                            snapshot.isDraggingOver
+                              ? "bg-blue-50 dark:bg-blue-900/20"
+                              : "bg-gray-50 dark:bg-gray-800/50"
+                          }`}
                         >
                           <div
                             className="column-header"
@@ -689,15 +618,7 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
                           >
                             Column {columnIndex + 1}
                           </div>
-                          <div
-                            className="items-container"
-                            style={{
-                              display: "flex",
-                              flexDirection: "column",
-                              gap: "8px",
-                              flexGrow: 1,
-                            }}
-                          >
+                          <div className="items-container space-y-2">
                             {sortedItems
                               .filter((item) => item.column === columnIndex)
                               .map((item, index) => (
@@ -710,65 +631,40 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
                                     <div
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
-                                      className="bg-white dark:bg-[#462b75] rounded-sm shadow-sm border dark:border-[#462b75] border-gray-100"
+                                      {...provided.dragHandleProps}
+                                      className="bg-white dark:bg-[#462b75] p-2 rounded-sm shadow-sm border dark:border-[#462b75] border-gray-100 flex justify-between items-center"
                                       style={{
                                         ...provided.draggableProps.style,
                                         opacity: snapshot.isDragging ? 0.9 : 1,
-                                        transform: snapshot.isDragging
-                                          ? `${provided.draggableProps.style.transform} scale(1.05)`
-                                          : provided.draggableProps.style
-                                              .transform,
                                       }}
                                     >
-                                      <div className="flex items-center p-2 gap-2">
+                                      <div className="flex gap-2">
                                         <div
-                                          {...provided.dragHandleProps}
-                                          className="cursor-grab text-gray-400 hover:text-gray-600 "
+                                          className={`
+                                    text-base transition-colors duration-200
+                                    ${
+                                      snapshot.isDragging
+                                        ? "text-indigo-500"
+                                        : "text-gray-400"
+                                    }
+                                  `}
                                         >
                                           ⋮⋮
                                         </div>
-                                        <span className="dark:text-white text-gray-700  flex-grow">
-                                          {item.name}
-                                        </span>
-                                        <AntButton
-                                          type="text"
-                                          icon={<DeleteOutlined />}
-                                          onClick={() =>
-                                            handleRemoveWidget(item.id)
-                                          }
-                                          className="text-gray-400 hover:text-red-500"
-                                          size="small"
-                                        />
+                                        <span>{item.name}</span>
                                       </div>
+                                      <DeleteOutlined
+                                        onClick={() =>
+                                          handleRemoveWidget(item.id)
+                                        }
+                                        className="text-gray-400 hover:text-red-500 cursor-pointer"
+                                      />
                                     </div>
                                   )}
                                 </Draggable>
                               ))}
                             {provided.placeholder}
                           </div>
-                          {availableWidgets.length > 0 && (
-                            <div className="mt-4 p-2 border-t border-gray-200 dark:border-gray-600">
-                              <div className="text-sm text-gray-500 mb-2">
-                                Add Widget:
-                              </div>
-                              <div className="flex flex-wrap gap-2">
-                                {availableWidgets.map((widget) => (
-                                  <AntButton
-                                    key={widget.id}
-                                    onClick={() =>
-                                      handleAddWidget(columnIndex, widget)
-                                    }
-                                    icon={<PlusOutlined />}
-                                    size="small"
-                                    type="dashed"
-                                    className="flex items-center"
-                                  >
-                                    {widget.name}
-                                  </AntButton>
-                                ))}
-                              </div>
-                            </div>
-                          )}
                         </div>
                       )}
                     </Droppable>
@@ -776,6 +672,32 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
                 )}
               </div>
             </DragDropContext>
+            <div className="mt-6">
+              <div className="text-sm font-medium text-gray-700 mb-2">
+                Available Widgets
+              </div>
+              <div className="p-4 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
+                <div className="flex flex-wrap gap-2">
+                  {availableWidgets.length > 0 &&
+                    availableWidgets.map((widget) => (
+                      <AntButton
+                        key={widget.id}
+                        size="middle"
+                        icon={<PlusOutlined />}
+                        onClick={() => handleAddWidget(widget)}
+                        className="flex items-center hover:scale-105 transition-transform bg-white"
+                      >
+                        {widget.name}
+                      </AntButton>
+                    ))}
+                  {availableWidgets.length === 0 && (
+                    <div className="w-full text-center py-4 text-gray-500">
+                      No available widgets
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           </>
         )}
       </Modal>

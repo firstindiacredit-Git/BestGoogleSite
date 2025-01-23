@@ -403,7 +403,6 @@ function SearchPage() {
             isDarkMode={isDarkMode}
             toggleTheme={toggleTheme}
             handleImageChange={handleImageChange}
-            // textColor={getTextColor(textColor)}
           />
 
           <div className="w-full">

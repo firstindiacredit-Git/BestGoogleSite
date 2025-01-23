@@ -141,7 +141,7 @@ const NewsFeed = () => {
   return (
     <div
       style={{ opacity: widgetTransparency }}
-      className="min-[21vw] bg-white/[var(--widget-opacity)] backdrop-blur-sm dark:bg-[#28283A]/[var(--widget-opacity)] rounded-b-sm overflow-hidden"
+      className="min-[21vw] backdrop-blur-sm rounded-b-sm overflow-hidden"
     >
       <div
         onClick={() => setCollapsed((prev) => !prev)}

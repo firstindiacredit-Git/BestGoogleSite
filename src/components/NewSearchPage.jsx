@@ -346,22 +346,6 @@ function NewSearchPage() {
     ]
   );
 
-  const createNewPage = () => {
-    const newPageNumber = pages.length + 1;
-    const newPage = {
-      id: Date.now(),
-      name: `Page ${newPageNumber}`,
-      widgets: [], // Start with empty widgets array
-    };
-
-    const updatedPages = [...pages, newPage];
-    setPages(updatedPages);
-    localStorage.setItem("customPages", JSON.stringify(updatedPages));
-
-    navigate(`/NewSearchPage?pageId=${newPage.id}`);
-    setShowHomeDropdown(false);
-  };
-
   return (
     <div style={backgroundStyles}>
       <div

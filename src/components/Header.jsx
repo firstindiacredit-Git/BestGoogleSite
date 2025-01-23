@@ -327,13 +327,10 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
                 placement="bottomLeft"
                 overlayClassName="mt-1"
               >
-                <Button
-                  type="primary"
-                  className="bg-indigo-500 border-none hover:bg-indigo-600 flex items-center gap-2"
-                  icon={<MenuOutlined />}
-                >
-                  {currentPageName}
-                </Button>
+                <button className="bg-indigo-500 border-none hover:bg-indigo-600 flex items-center gap-2 px-2 py-1 rounded-md transition-all duration-200">
+                  <MenuOutlined className="text-white" />
+                  <span className="text-white">{currentPageName}</span>
+                </button>
               </Dropdown>
             )}
           </div>

@@ -517,7 +517,7 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
               placeholder="Add new task"
               className={`w-full p-3 pr-12 border rounded-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                 isAutoColor
-                  ? "bg-white text-gray-900 border-gray-200 dark:bg-[#513a7a] dark:text-white dark:placeholder-gray-400 dark:border-gray-700"
+                  ? "bg-white text-gray-900 border-gray-200 dark:bg-[#28283A] dark:text-white dark:placeholder-gray-400 dark:border-gray-700"
                   : isLight(containerColor)
                   ? "bg-white text-gray-800"
                   : "bg-gray-800 text-white placeholder-gray-400 border-gray-700"
