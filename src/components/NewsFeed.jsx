@@ -71,7 +71,10 @@ const ErrorState = ({ message }) => (
 );
 
 const NewsFeed = () => {
-  const [news, setNews] = useState([]);
+  const [news, setNews] = useState(() => {
+    const savedNews = localStorage.getItem("newsData");
+    return savedNews ? JSON.parse(savedNews) : [];
+  });
   const [loading, setLoading] = useState(true);
   const [collapsed, setCollapsed] = useState(false);
   const [error, setError] = useState(null);
@@ -79,6 +82,18 @@ const NewsFeed = () => {
 
   const fetchNews = async () => {
     try {
+      // Check if we have recently fetched news (within last hour)
+      const lastFetch = localStorage.getItem("lastNewsFetch");
+      const now = Date.now();
+      if (lastFetch && now - parseInt(lastFetch) < 3600000) {
+        const savedNews = localStorage.getItem("newsData");
+        if (savedNews) {
+          setNews(JSON.parse(savedNews));
+          setLoading(false);
+          return;
+        }
+      }
+
       const response = await fetch(
         "https://bgs-backend.vercel.app/api/top100/news"
       );
@@ -86,7 +101,12 @@ const NewsFeed = () => {
 
       const data = await response.json();
       if (Array.isArray(data)) {
-        setNews(data.filter((item) => item.title && item.description));
+        const filteredNews = data.filter(
+          (item) => item.title && item.description
+        );
+        setNews(filteredNews);
+        localStorage.setItem("newsData", JSON.stringify(filteredNews));
+        localStorage.setItem("lastNewsFetch", now.toString());
       } else {
         throw new Error("No valid news items found");
       }
@@ -99,6 +119,18 @@ const NewsFeed = () => {
 
   useEffect(() => {
     fetchNews();
+
+    // Add event listener for drag end
+    const handleDragEnd = () => {
+      fetchNews();
+    };
+
+    document.addEventListener("dragend", handleDragEnd);
+
+    // Cleanup
+    return () => {
+      document.removeEventListener("dragend", handleDragEnd);
+    };
   }, []);
 
   if (loading) return <LoadingState />;
@@ -109,7 +141,7 @@ const NewsFeed = () => {
   return (
     <div
       style={{ opacity: widgetTransparency }}
-      className="max-w-[21vw] bg-white/[var(--widget-opacity)] backdrop-blur-sm dark:bg-[#28283A]/[var(--widget-opacity)] rounded-b-sm overflow-hidden"
+      className="min-[21vw] bg-white/[var(--widget-opacity)] backdrop-blur-sm dark:bg-[#28283A]/[var(--widget-opacity)] rounded-b-sm overflow-hidden"
     >
       <div
         onClick={() => setCollapsed((prev) => !prev)}

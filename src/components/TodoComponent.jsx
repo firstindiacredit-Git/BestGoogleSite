@@ -198,12 +198,12 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
     return brightness < 128;
   };
 
-  const getTextColor = () => {
-    if (isAutoColor) {
-      return isDarkMode ? "#ffffff" : "#000000";
-    }
-    return isColorDark(backgroundColor) ? "#ffffff" : "#000000";
-  };
+  // const getTextColor = () => {
+  //   if (isAutoColor) {
+  //     return isDarkMode ? "#ffffff" : "#000000";
+  //   }
+  //   return isColorDark(backgroundColor) ? "#ffffff" : "#000000";
+  // };
 
   const addTodo = async (e) => {
     e.preventDefault();
@@ -376,11 +376,10 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
     <div
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
-      className={`p-2  transition-colors duration-200 ${
-        inNotebookSheet ? "w-full" : "max-w-xl mx-auto"
-      } rounded-b-sm backdrop-blur-sm relative ${
-        isAutoColor ? "dark:bg-[#28283A]/[(var(--widget-opacity))]" : ""
-      }`}
+      className={`p-2  transition-colors duration-200 w-full"
+       rounded-b-sm backdrop-blur-sm relative ${
+         isAutoColor ? "dark:bg-[#28283A]/[(var(--widget-opacity))]" : ""
+       }`}
       style={{
         backgroundColor: isAutoColor ? undefined : containerColor,
         color: isAutoColor ? undefined : textColor,

@@ -437,9 +437,9 @@ const ResponsiveWorldClock = () => {
     <div
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
-      className={`w-full max-w-xl dark:text-white p-4 backdrop-blur-sm rounded-b-sm flex justify-center items-center`}
+      className={`w-full  dark:text-white p-4 backdrop-blur-sm rounded-b-sm flex justify-center items-center`}
     >
-      <div className="mx-auto w-full">
+      <div className=" w-full">
         <div className="flex items-center">
           <div className="flex w-full justify-between items-center">
             <div

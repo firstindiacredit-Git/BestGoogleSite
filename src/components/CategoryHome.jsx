@@ -162,27 +162,6 @@ const CategoryHome = ({ categoryType, itemName }) => {
     return () => preventScroll(false);
   }, [showSettings]);
 
-  useEffect(() => {
-    const handleOutsideClick = (event) => {
-      if (!event.target.closest("#menu-Container")) {
-        setShowButtons(false);
-      }
-
-      if (
-        !event.target.closest(".user-panel") &&
-        !event.target.closest(".user-avatar")
-      ) {
-        setPanel(false);
-      }
-    };
-
-    document.addEventListener("click", handleOutsideClick);
-
-    return () => {
-      document.removeEventListener("click", handleOutsideClick);
-    };
-  }, []);
-
   const getFaviconUrl = (url) => {
     try {
       const domain = new URL(url).hostname;

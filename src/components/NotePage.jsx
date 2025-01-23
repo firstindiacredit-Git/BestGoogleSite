@@ -358,9 +358,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
     <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`${
-        inNotebookSheet ? "w-full h-full " : "h-full max-w-xl mx-auto"
-      } backdrop-blur-sm`}
+      className={`w-full h-full backdrop-blur-sm`}
     >
       <div className="rounded-sm h-full">
         <div
