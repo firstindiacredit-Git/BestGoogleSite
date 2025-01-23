@@ -19,14 +19,16 @@ import Tool from "../components/Tool";
 import Sports from "../components/Sports";
 import Top100 from "../components/Top100";
 import "./style.css";
-import { Dropdown } from "antd";
+import { Dropdown, Skeleton } from "antd";
 import { Settings } from "lucide-react";
 import { ThemeContext } from "../App";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+
 function SearchPage() {
   const { isDarkMode, toggleTheme } = useContext(ThemeContext);
   const [backgroundImage, setBackgroundImage] = useState("");
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [transparency, setTransparency] = useState(() =>
     parseInt(localStorage.getItem("bgTransparency") || "85")
   );
@@ -61,6 +63,7 @@ function SearchPage() {
       authInstance,
       async (currentUser) => {
         setUser(currentUser);
+        setLoading(false);
       }
     );
     return () => unsubscribe();
@@ -378,6 +381,47 @@ function SearchPage() {
       changeVisible,
     ]
   );
+
+  if (loading) {
+    return (
+      <div
+        className={`fixed inset-0 ${
+          isDarkMode
+            ? "bg-gradient-to-r from-[#1a1a2e] via-[#2a243f] to-[#1a1a2e]"
+            : "bg-gradient-to-r from-indigo-200 via-blue-100 to-indigo-200"
+        } transition-colors duration-300`}
+        style={overlayStyles}
+      >
+        <div className="container mx-auto mt-48 px-4 py-8">
+          <div className="flex justify-center mb-8">
+            <Skeleton.Input active size="large" />
+          </div>
+          <div className="space-y-4">
+            <div className="flex justify-center gap-4">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                <Skeleton.Button
+                  active
+                  key={i}
+                  size="default"
+                  className="w-24"
+                />
+              ))}
+            </div>
+            <div className="mt-20 grid  mx-auto w-fit grid-cols-4  gap-24">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                <Skeleton.Node
+                  size="large"
+                  className="w-48 scale-x-125"
+                  key={i}
+                  active
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={backgroundStyles}>

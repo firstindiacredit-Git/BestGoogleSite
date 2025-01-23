@@ -308,9 +308,9 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
   }, []);
 
   return (
-    <header className="p-2 bg-gray-200/10 backdrop-blur-sm dark:bg-[#513a7a]/10 border-b border dark:border-gray-800/20 border-gray-200/20 flex justify-between items-center sticky top-0 z-50">
-      <div className="flex items-center space-x-2">
-        {user && (
+    <header className="p-2 bg-gray-200/20 backdrop-blur-sm dark:bg-[#513a7a]/10 border-b border dark:border-gray-800/20 border-gray-200/20 flex justify-between items-center sticky top-0 z-50">
+      <div className="flex  items-center space-x-2">
+        {user ? (
           <div className="relative">
             {goBack ? (
               <button
@@ -334,12 +334,13 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
               </Dropdown>
             )}
           </div>
+        ) : (
+          <div className="w-36  "></div>
         )}
       </div>
-      {!user && <div className="w-36"></div>}
 
       <Link to="/search">
-        <div className="flex relative mx-auto justify-center">
+        <div className="flex relative mx-auto   justify-center">
           <img
             src={`${
               isDarkMode ? "/BrowseyFullDark2.svg" : "/BrowseyFullDark.svg"

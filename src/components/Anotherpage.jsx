@@ -2,9 +2,13 @@ import React, { useState, useEffect, useContext, useMemo } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { WidgetTransparencyContext } from "../App";
 import { motion } from "framer-motion";
-import { Modal } from "antd";
+import { Modal, message } from "antd";
 import { Spin, Button as AntButton } from "antd";
-import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  PlusOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import Calculator from "./Calculator.jsx";
 import Clock from "./Clock.jsx";
@@ -17,14 +21,13 @@ import {
   getPageLayout,
   updatePageLayout,
   getAvailableWidgets,
+  resetPageLayout,
 } from "../firebase/widgetLayouts";
 import TodoComponent from "./TodoComponent.jsx";
 import NewsFeed from "./NewsFeed.jsx";
 import CategoryHome from "./CategoryHome.jsx";
 
 const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
-  const { widgetTransparent } = useContext(WidgetTransparencyContext);
-  const [grid, isGrid] = useState(true);
   const [user, setUser] = useState(null);
   const [items, setItems] = useState([]);
   const [columns, setColumns] = useState(4);
@@ -54,6 +57,7 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
   const [isCalculating, setIsCalculating] = useState(true);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [optimalColumns, setOptimalColumns] = useState(4);
+  const [isResetting, setIsResetting] = useState(false);
 
   // Calculate optimal columns based on window width and widget width
   const calculateOptimalColumns = () => {
@@ -280,6 +284,29 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
     return columnsArray;
   };
 
+  const handleResetLayout = async () => {
+    if (!user) return;
+
+    try {
+      setIsResetting(true);
+      const defaultLayout = await resetPageLayout(user.uid, pageId);
+
+      // Update local state
+      setItems(defaultLayout.widgets);
+      setColumns(defaultLayout.columns);
+      setSortedItems(defaultLayout.widgets);
+      setPreviewColumns(defaultLayout.columns);
+
+      message.success("Layout has been reset to default");
+      setIsSorterOpen(false);
+    } catch (error) {
+      console.error("Error resetting layout:", error);
+      message.error("Failed to reset layout");
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
   if (!user) {
     return (
       <div className="text-gray-500 text-5xl  my-20">
@@ -292,60 +319,6 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
     <div style={{ position: "relative" }}>
       <div className="flex justify-center">
         <div className={`flex flex-col items-center w-full    rounded-xl`}>
-          {visibleHandle && (
-            <div
-              className={`flex items-center  w-fit mx-auto mt-4 bg-white/10 backdrop-blur-lg dark:bg-[#28283A] p-1 rounded-sm`}
-            >
-              <button
-                onClick={() => {
-                  isGrid(true);
-                }}
-                className={`p-2 rounded ${
-                  grid
-                    ? "bg-white dark:bg-[#513a7a] shadow-sm"
-                    : "hover:bg-white/50 dark:hover:bg-gray-700/50"
-                }`}
-              >
-                <svg
-                  className="w-5 h-5 dark:text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
-                  />
-                </svg>
-              </button>
-              <button
-                onClick={() => {
-                  isGrid(false);
-                }}
-                className={`p-2 rounded ${
-                  !grid
-                    ? "bg-white dark:bg-[#513a7a] shadow-sm"
-                    : "hover:bg-white/50 dark:hover:bg-gray-700/50"
-                }`}
-              >
-                <svg
-                  className="w-5 h-5 dark:text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-              </button>
-            </div>
-          )}
           <div className="p-4   ">
             {loading ? (
               <div className="flex justify-center items-center min-h-screen">
@@ -395,97 +368,45 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
                                       : "dark:border-gray-700 border-gray-100"
                                   } border-1 border  rounded-sm`}
                                 >
-                                  {grid ? (
-                                    <>
-                                      {visibleHandle && (
-                                        <motion.div
-                                          className={`w-full max-w-xl min-w-[21vw] text-left py-2 px-4 rounded-t-sm bg-gray-100/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] dark:text-white font-semibold flex justify-between items-center`}
-                                        >
-                                          <div
-                                            {...provided.dragHandleProps}
-                                            className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 w-5"
-                                          >
-                                            ⋮⋮
-                                          </div>
-                                          <div className="w-5"></div>
-                                        </motion.div>
-                                      )}
+                                  <div>
+                                    {visibleHandle && (
                                       <motion.div
-                                        className={`w-full max-w-xl min-w-[21vw] dark:text-white bg-white/[var(--widget-opacity)] dark:bg-[#28283A]/[var(--widget-opacity)] ${
+                                        className={`w-full max-w-xl min-w-[21vw] text-left py-2 px-4 rounded-t-sm bg-gray-100/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] dark:text-white font-semibold flex justify-between items-center`}
+                                      >
+                                        <div
+                                          {...provided.dragHandleProps}
+                                          className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 w-5"
+                                        >
+                                          ⋮⋮
+                                        </div>
+                                        <div className="w-5"></div>
+                                      </motion.div>
+                                    )}
+                                    <motion.div
+                                      className={`w-full max-w-xl min-w-[21vw] dark:text-white bg-white/[var(--widget-opacity)] dark:bg-[#28283A]/[var(--widget-opacity)] ${
+                                        visibleHandle
+                                          ? "rounded-b-sm"
+                                          : "rounded-sm"
+                                      }`}
+                                      initial={{ height: 0, opacity: 0 }}
+                                      animate={{
+                                        height: "auto",
+                                        opacity: 1,
+                                      }}
+                                      exit={{ height: 0, opacity: 0 }}
+                                      transition={{ duration: 0.1 }}
+                                    >
+                                      <div
+                                        className={`${
                                           visibleHandle
                                             ? "rounded-b-sm"
                                             : "rounded-sm"
                                         }`}
-                                        initial={{ height: 0, opacity: 0 }}
-                                        animate={{
-                                          height: "auto",
-                                          opacity: 1,
-                                        }}
-                                        exit={{ height: 0, opacity: 0 }}
-                                        transition={{ duration: 0.1 }}
                                       >
-                                        <div
-                                          className={`${
-                                            visibleHandle
-                                              ? "rounded-b-sm"
-                                              : "rounded-sm"
-                                          }`}
-                                        >
-                                          {componentMap[item.id]}
-                                        </div>
-                                      </motion.div>
-                                    </>
-                                  ) : (
-                                    <>
-                                      {visibleHandle && (
-                                        <motion.div
-                                          className={`w-full max-w-xl min-w-[21vw] text-left py-2 px-4 rounded-t-sm bg-gray-100/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] dark:text-white font-semibold flex justify-between items-center`}
-                                        >
-                                          <div
-                                            {...provided.dragHandleProps}
-                                            className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 w-5"
-                                          >
-                                            ⋮⋮
-                                          </div>
-                                          <div
-                                            onClick={() =>
-                                              toggleDropdown(item.id)
-                                            }
-                                            className="text-center w-full"
-                                          >
-                                            {item.name}
-                                          </div>
-                                          <div className="w-5"></div>
-                                        </motion.div>
-                                      )}
-                                      {item.isOpen && (
-                                        <motion.div
-                                          className={`w-full max-w-xl min-w-[21vw] dark:text-white bg-white/[var(--widget-opacity)] dark:bg-[#28283A]/[var(--widget-opacity)] ${
-                                            visibleHandle
-                                              ? "rounded-b-sm"
-                                              : "rounded-sm"
-                                          }`}
-                                          initial={{ height: 0, opacity: 0 }}
-                                          animate={{
-                                            height: "auto",
-                                            opacity: 1,
-                                          }}
-                                          exit={{ height: 0, opacity: 0 }}
-                                          transition={{ duration: 0.1 }}
-                                        >
-                                          <div
-                                            className={`${
-                                              visibleHandle
-                                                ? "rounded-b-sm"
-                                                : "rounded-sm"
-                                            }`}
-                                          >
-                                            {componentMap[item.id]}
-                                          </div>
-                                        </motion.div>
-                                      )}
-                                    </>
-                                  )}
+                                        {componentMap[item.id]}
+                                      </div>
+                                    </motion.div>
+                                  </div>
                                 </div>
                               )}
                             </Draggable>
@@ -544,6 +465,16 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
         open={isSorterOpen}
         onCancel={() => setIsSorterOpen(false)}
         footer={[
+          <AntButton
+            key="reset"
+            type="default"
+            icon={<ReloadOutlined />}
+            onClick={handleResetLayout}
+            loading={isResetting}
+            className="mr-auto hover:text-blue-500"
+          >
+            Reset Layout
+          </AntButton>,
           <AntButton key="cancel" onClick={() => setIsSorterOpen(false)}>
             Cancel
           </AntButton>,
