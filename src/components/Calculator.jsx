@@ -127,7 +127,7 @@ function Calculator() {
   };
 
   return (
-    <div className="w-full max-w-xl backdrop-blur-sm h-full">
+    <div className="w-full  backdrop-blur-sm h-full">
       <div
         onClick={collapse}
         className="text-xl cursor-pointer  font-medium p-5"

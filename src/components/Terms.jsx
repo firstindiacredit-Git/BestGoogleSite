@@ -26,15 +26,13 @@ import PersonIcon from "@mui/icons-material/Person";
 import SettingsIcon from "@mui/icons-material/Settings";
 import EmailIcon from "@mui/icons-material/Email";
 
-
 const Terms = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [activeSection, setActiveSection] = useState("1. Acceptance of Terms");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const sections = [
     {
@@ -213,7 +211,7 @@ We aim to respond to inquiries within 24 hours.`,
             transition: "all 0.3s ease",
             "&:hover": {
               "& .MuiTypography-root": { color: "#6366f1" },
-              "& .MuiBox-root": {  },
+              "& .MuiBox-root": {},
               transform: "translateX(8px)",
             },
           }}

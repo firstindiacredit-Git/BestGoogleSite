@@ -72,7 +72,7 @@ const ErrorState = ({ message }) => (
 
 const NewsFeed = () => {
   const [news, setNews] = useState(() => {
-    const savedNews = localStorage.getItem('newsData');
+    const savedNews = localStorage.getItem("newsData");
     return savedNews ? JSON.parse(savedNews) : [];
   });
   const [loading, setLoading] = useState(true);
@@ -83,10 +83,10 @@ const NewsFeed = () => {
   const fetchNews = async () => {
     try {
       // Check if we have recently fetched news (within last hour)
-      const lastFetch = localStorage.getItem('lastNewsFetch');
+      const lastFetch = localStorage.getItem("lastNewsFetch");
       const now = Date.now();
-      if (lastFetch && (now - parseInt(lastFetch)) < 3600000) {
-        const savedNews = localStorage.getItem('newsData');
+      if (lastFetch && now - parseInt(lastFetch) < 3600000) {
+        const savedNews = localStorage.getItem("newsData");
         if (savedNews) {
           setNews(JSON.parse(savedNews));
           setLoading(false);
@@ -101,10 +101,12 @@ const NewsFeed = () => {
 
       const data = await response.json();
       if (Array.isArray(data)) {
-        const filteredNews = data.filter((item) => item.title && item.description);
+        const filteredNews = data.filter(
+          (item) => item.title && item.description
+        );
         setNews(filteredNews);
-        localStorage.setItem('newsData', JSON.stringify(filteredNews));
-        localStorage.setItem('lastNewsFetch', now.toString());
+        localStorage.setItem("newsData", JSON.stringify(filteredNews));
+        localStorage.setItem("lastNewsFetch", now.toString());
       } else {
         throw new Error("No valid news items found");
       }
@@ -123,11 +125,11 @@ const NewsFeed = () => {
       fetchNews();
     };
 
-    document.addEventListener('dragend', handleDragEnd);
+    document.addEventListener("dragend", handleDragEnd);
 
     // Cleanup
     return () => {
-      document.removeEventListener('dragend', handleDragEnd);
+      document.removeEventListener("dragend", handleDragEnd);
     };
   }, []);
 
@@ -139,7 +141,7 @@ const NewsFeed = () => {
   return (
     <div
       style={{ opacity: widgetTransparency }}
-      className="min-[21vw] bg-white/[var(--widget-opacity)] backdrop-blur-sm dark:bg-[#28283A]/[var(--widget-opacity)] rounded-b-sm overflow-hidden"
+      className="min-[21vw] backdrop-blur-sm rounded-b-sm overflow-hidden"
     >
       <div
         onClick={() => setCollapsed((prev) => !prev)}

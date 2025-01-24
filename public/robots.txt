@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+Allow: /signin
+Allow: /signup
+Allow: /about
+Allow: /contact
+Allow: /faq
+Allow: /privacy
+Allow: /terms
+
+# Disallow sensitive routes
+Disallow: /admin
+Disallow: /api/
+Disallow: /user/settings
+
+# Sitemap
+Sitemap: https://browsey.vercel.app/sitemap.xml 

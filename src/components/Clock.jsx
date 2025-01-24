@@ -3,6 +3,7 @@ import { Plus, X, Settings } from "lucide-react";
 import { Popconfirm, Menu, Dropdown } from "antd";
 import { auth, db } from "../firebase";
 import { doc, updateDoc, onSnapshot } from "firebase/firestore";
+import { createPortal } from "react-dom";
 
 const AVAILABLE_TIMEZONES = [
   "America/New_York",
@@ -277,6 +278,11 @@ const TimeZoneClock = ({
   );
 };
 
+// Simple prevent scroll function like in CategoryHome
+const preventScroll = (prevent) => {
+  document.body.style.overflow = prevent ? "hidden" : "";
+};
+
 const ResponsiveWorldClock = () => {
   const [isAnalog, setIsAnalog] = useState(true);
   const [currentTheme, setCurrentTheme] = useState(CLOCK_THEMES.classic);
@@ -285,15 +291,32 @@ const ResponsiveWorldClock = () => {
   const [isHovering, setIsHovering] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
+  const [dropdownPosition, setDropdownPosition] = useState({
+    top: 0,
+    right: 0,
+  });
   const settingsRef = useRef(null);
   const collapse = () => {
     setIsCollapsed(!isCollapsed);
   };
 
   useEffect(() => {
+    if (showSettingsDropdown && settingsRef.current) {
+      const rect = settingsRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right,
+      });
+      preventScroll(true);
+    } else {
+      preventScroll(false);
+    }
+    return () => preventScroll(false);
+  }, [showSettingsDropdown]);
+
+  useEffect(() => {
     const handleClickOutside = (event) => {
-      if (settingsRef.current && !settingsRef.current.contains(event.target)) {
+      if (!event.target.closest(".menu-Container")) {
         setShowSettingsDropdown(false);
       }
     };
@@ -368,13 +391,65 @@ const ResponsiveWorldClock = () => {
     (tz) => !selectedTimezones.includes(tz)
   );
 
+  const renderSettingsDropdown = () => {
+    const dropdownContent = showSettingsDropdown && (
+      <div
+        className="fixed w-48 bg-white dark:text-white dark:bg-[#28283A] rounded-sm shadow-lg border border-gray-200 dark:border-gray-700 z-[9999] menu-Container"
+        style={{
+          top: `${dropdownPosition.top}px`,
+          right: `${dropdownPosition.right}px`,
+        }}
+      >
+        <div className="py-1">
+          <button
+            onClick={() => {
+              setIsAnalog(!isAnalog);
+              setShowSettingsDropdown(false);
+            }}
+            className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+          >
+            {isAnalog ? "Switch to Digital" : "Switch to Analog"}
+          </button>
+
+          <div className="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+
+          {Object.entries(CLOCK_THEMES).map(([key, theme]) => (
+            <button
+              key={key}
+              onClick={() => {
+                setCurrentTheme(theme);
+                setShowSettingsDropdown(false);
+              }}
+              className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+            >
+              {theme.name} Theme
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+
+    return (
+      <div className="menu-Container relative">
+        <button
+          ref={settingsRef}
+          onClick={() => setShowSettingsDropdown(!showSettingsDropdown)}
+          className="p-2 hover:bg-gray-100 dark:hover:bg-white/20 transition flex items-center gap-2 rounded-sm"
+        >
+          <Settings className="w-5 h-5" />
+        </button>
+        {dropdownContent && createPortal(dropdownContent, document.body)}
+      </div>
+    );
+  };
+
   return (
     <div
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
       className={`w-full max-w-xl dark:text-white p-4 backdrop-blur-sm  rounded-b-sm flex justify-center items-center`}
     >
-      <div className="mx-auto w-full">
+      <div className=" w-full">
         <div className="flex items-center">
           <div className="flex w-full justify-between items-center">
             <div
@@ -429,7 +504,7 @@ const ResponsiveWorldClock = () => {
                   </button>
 
                   {showSettingsDropdown && (
-                    <div 
+                    <div
                       className="absolute w-48 bg-white dark:text-white dark:bg-[#28283A] rounded-sm shadow-lg border border-gray-200 dark:border-gray-700 z-[9999]"
                       style={{
                         top: `${dropdownPosition.top}px`,
@@ -448,7 +523,9 @@ const ResponsiveWorldClock = () => {
                             }}
                             className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                           >
-                            {isAnalog ? "Switch to Digital" : "Switch to Analog"}
+                            {isAnalog
+                              ? "Switch to Digital"
+                              : "Switch to Analog"}
                           </button>
                         </div>
 

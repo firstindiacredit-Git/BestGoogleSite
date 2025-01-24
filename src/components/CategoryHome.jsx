@@ -11,6 +11,8 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
+  getDoc,
+  setDoc,
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { Settings, Edit, Plus, Trash2 } from "lucide-react";
@@ -20,6 +22,7 @@ import { WidgetTransparencyContext } from "../App";
 const CategoryHome = ({ categoryType, itemName }) => {
   const [user, setUser] = useState(null);
   const [bookmarks, setBookmarks] = useState([]);
+  const [hiddenBookmarkIds, setHiddenBookmarkIds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState("grid");
   const [showUrl, setShowUrl] = useState(true);
@@ -27,8 +30,8 @@ const CategoryHome = ({ categoryType, itemName }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({
-    top: 0,
-    right: 0,
+    top: null,
+    right: null,
   });
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -40,13 +43,23 @@ const CategoryHome = ({ categoryType, itemName }) => {
   const collapse = () => {
     setCollapsed(!collapsed);
   };
-  const { widgetTransparent } = useContext(WidgetTransparencyContext);
+  const preventScroll = (prevent) => {
+    document.body.style.overflow = prevent ? "hidden" : "";
+  };
 
   useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
-        // First, fetch admin categories
+        // First, fetch user's hidden bookmarks
+        const userDocRef = doc(db, "users", currentUser.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        const hiddenIds = userDocSnap.exists()
+          ? userDocSnap.data().hiddenCategoryBookmarks || []
+          : [];
+        setHiddenBookmarkIds(hiddenIds);
+
+        // Then fetch admin categories
         const categoryQuery = query(
           collection(db, "category"),
           where("newCategory", "==", categoryType)
@@ -68,11 +81,13 @@ const CategoryHome = ({ categoryType, itemName }) => {
               const adminLinksUnsubscribe = onSnapshot(
                 adminLinksQuery,
                 (adminLinksSnapshot) => {
-                  const adminLinks = adminLinksSnapshot.docs.map((doc) => ({
-                    id: doc.id,
-                    ...doc.data(),
-                    addedByAdmin: true,
-                  }));
+                  const adminLinks = adminLinksSnapshot.docs
+                    .map((doc) => ({
+                      id: doc.id,
+                      ...doc.data(),
+                      addedByAdmin: true,
+                    }))
+                    .filter((bookmark) => !hiddenIds.includes(bookmark.id)); // Filter out hidden admin bookmarks
 
                   // Then fetch user's personal bookmarks
                   const userBookmarksQuery = query(
@@ -83,13 +98,11 @@ const CategoryHome = ({ categoryType, itemName }) => {
                   const userBookmarksUnsubscribe = onSnapshot(
                     userBookmarksQuery,
                     (userSnapshot) => {
-                      const userBookmarks = userSnapshot.docs
-                        .map((doc) => ({
-                          id: doc.id,
-                          ...doc.data(),
-                          addedByAdmin: false,
-                        }))
-                        .filter((bookmark) => !bookmark.hidden);
+                      const userBookmarks = userSnapshot.docs.map((doc) => ({
+                        id: doc.id,
+                        ...doc.data(),
+                        addedByAdmin: false,
+                      }));
 
                       // Combine admin links and user bookmarks
                       const allBookmarks = [...adminLinks, ...userBookmarks];
@@ -153,7 +166,11 @@ const CategoryHome = ({ categoryType, itemName }) => {
         top: rect.bottom + 8,
         right: window.innerWidth - rect.right,
       });
+      preventScroll(true);
+    } else {
+      preventScroll(false);
     }
+    return () => preventScroll(false);
   }, [showSettings]);
 
   const getFaviconUrl = (url) => {
@@ -179,19 +196,29 @@ const CategoryHome = ({ categoryType, itemName }) => {
   const handleDelete = async (bookmark) => {
     try {
       if (bookmark.addedByAdmin) {
-        // Just hide the bookmark for this user
-        await updateDoc(doc(db, "users", user.uid, "bookmarks", bookmark.id), {
-          hidden: true,
-        });
+        // Hide the admin bookmark instead of deleting
+        const newHiddenIds = [...hiddenBookmarkIds, bookmark.id];
+        setHiddenBookmarkIds(newHiddenIds);
+
+        // Update user's hidden bookmarks in Firestore
+        const userDocRef = doc(db, "users", user.uid);
+        await setDoc(
+          userDocRef,
+          { hiddenCategoryBookmarks: newHiddenIds },
+          { merge: true }
+        );
+
+        // Update local state to remove the hidden bookmark
+        setBookmarks((prev) => prev.filter((b) => b.id !== bookmark.id));
         message.success("Bookmark hidden successfully!");
       } else {
-        // Actually delete the bookmark
+        // Delete user's own bookmark
         await deleteDoc(doc(db, "users", user.uid, "bookmarks", bookmark.id));
         message.success("Bookmark deleted successfully!");
       }
     } catch (error) {
-      message.error("Failed to delete bookmark");
-      console.error("Error deleting bookmark:", error);
+      message.error("Failed to process bookmark");
+      console.error("Error processing bookmark:", error);
     }
   };
 
