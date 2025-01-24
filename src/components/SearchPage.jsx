@@ -390,7 +390,6 @@ function SearchPage() {
             ? "bg-gradient-to-r from-[#1a1a2e] via-[#2a243f] to-[#1a1a2e]"
             : "bg-gradient-to-r from-indigo-200 via-blue-100 to-indigo-200"
         } transition-colors duration-300`}
-        style={overlayStyles}
       >
         <div className="container mx-auto mt-48 px-4 py-8">
           <div className="flex justify-center mb-8">

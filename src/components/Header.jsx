@@ -208,7 +208,7 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
       key: "home",
       label: (
         <Link to="/search">
-          <div className="flex items-center gap-2 px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors duration-200">
+          <div className="flex items-center gap-2 px-2 py-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors duration-200">
             <HomeOutlined className="text-lg" />
             <span>Home</span>
           </div>
@@ -223,7 +223,7 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
             e.stopPropagation();
             createNewPage();
           }}
-          className="flex items-center gap-2 px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors duration-200"
+          className="flex items-center gap-2 px-2 py-2  rounded transition-colors duration-200"
         >
           <PlusOutlined className="text-lg" />
           <span>Add New Page</span>
@@ -238,7 +238,7 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
       label: (
         <div
           onClick={() => handlePageClick(page.id)}
-          className="flex items-center justify-between px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors duration-200 group"
+          className="flex items-center justify-between px-2 py-2  rounded transition-colors duration-200 group"
         >
           <div className="flex items-center gap-2">
             <AppstoreOutlined className="text-lg" />
