@@ -174,6 +174,7 @@ const SignIn = () => {
           <h2 className="text-center text-2xl font-extrabold mb-6 text-gray-800">
             Welcome Back
           </h2>
+          {/* more things */}
 
           {error && <p className="text-red-500 text-center mb-4">{error}</p>}
 
