@@ -9,10 +9,7 @@ import {
   IconButton,
   Drawer,
 } from "@mui/material";
-import {
-  FiMenu,
-  FiX,
-} from "react-icons/fi";
+import { FiMenu, FiX } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -98,7 +95,7 @@ const Privacy = () => {
             transition: "all 0.3s ease",
             "&:hover": {
               "& .MuiTypography-root": { color: "#6366f1" },
-              "& .MuiBox-root": { },
+              "& .MuiBox-root": {},
               transform: "translateX(8px)",
             },
           }}
@@ -746,9 +743,7 @@ const Privacy = () => {
                       "& svg": { mr: 1 },
                     }}
                   >
-                    <a
-                      href="mailto:support@bestgooglesite.com"
-                     >
+                    <a href="mailto:support@bestgooglesite.com">
                       <ChevronRightIcon /> support@browsey.com
                     </a>
                   </Typography>
@@ -824,6 +819,5 @@ const sections = [
       "We may update this privacy policy as our extension evolves. We will notify you of any significant changes through the extension interface and require your acknowledgment to continue using the service.",
   },
 ];
-
 
 export default Privacy;

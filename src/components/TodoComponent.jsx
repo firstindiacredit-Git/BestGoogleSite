@@ -12,6 +12,7 @@ import {
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { WidgetTransparencyContext } from "../App";
+import { createPortal } from "react-dom";
 
 // Helper function to determine if a color is light or dark
 const isLight = (color) => {
@@ -29,6 +30,11 @@ const isLight = (color) => {
   return luminance > 0.5;
 };
 
+// Simple prevent scroll function like in CategoryHome
+const preventScroll = (prevent) => {
+  document.body.style.overflow = prevent ? "hidden" : "";
+};
+
 const TodoComponent = ({ inNotebookSheet = false }) => {
   const [user, setUser] = useState(null);
   const [todos, setTodos] = useState([]);
@@ -44,6 +50,10 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
   const [draggedItemIndex, setDraggedItemIndex] = useState(null);
   const [backgroundColor, setBackgroundColor] = useState("#ffffff");
   const [dragOverIndex, setDragOverIndex] = useState(null);
+  const [dropdownPosition, setDropdownPosition] = useState({
+    top: null,
+    right: null,
+  });
 
   const colorPickerRef = useRef(null);
 
@@ -126,10 +136,7 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        colorPickerRef.current &&
-        !colorPickerRef.current.contains(event.target)
-      ) {
+      if (!event.target.closest(".menu-Container")) {
         setShowColorPicker(false);
       }
     };
@@ -158,6 +165,20 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
       darkModeMediaQuery.removeEventListener("change", handleThemeChange);
   }, [isAutoColor]);
 
+  useEffect(() => {
+    if (showColorPicker && colorPickerRef.current) {
+      const rect = colorPickerRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right,
+      });
+      preventScroll(true);
+    } else {
+      preventScroll(false);
+    }
+    return () => preventScroll(false);
+  }, [showColorPicker]);
+
   const handleColorChange = (color) => {
     setContainerColor(color);
     setIsAutoColor(false);
@@ -177,12 +198,12 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
     return brightness < 128;
   };
 
-  const getTextColor = () => {
-    if (isAutoColor) {
-      return isDarkMode ? "#ffffff" : "#000000";
-    }
-    return isColorDark(backgroundColor) ? "#ffffff" : "#000000";
-  };
+  // const getTextColor = () => {
+  //   if (isAutoColor) {
+  //     return isDarkMode ? "#ffffff" : "#000000";
+  //   }
+  //   return isColorDark(backgroundColor) ? "#ffffff" : "#000000";
+  // };
 
   const addTodo = async (e) => {
     e.preventDefault();
@@ -287,15 +308,78 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
     setDragOverIndex(null);
   };
 
+  const renderColorPicker = () => {
+    const dropdownContent = showColorPicker && (
+      <div
+        className="fixed w-48 bg-white dark:bg-[#28283A] border border-gray-200 dark:border-gray-700 rounded-sm shadow-lg p-3 z-[9999] menu-Container"
+        style={{
+          top: `${dropdownPosition.top}px`,
+          right: `${dropdownPosition.right}px`,
+        }}
+      >
+        <div className="mb-2">
+          <button
+            onClick={() => {
+              setIsAutoColor(true);
+              setShowColorPicker(false);
+            }}
+            className="w-full py-1 px-2 text-sm bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors text-gray-900 dark:text-white"
+          >
+            Auto Theme Color
+          </button>
+        </div>
+
+        <div className="grid grid-cols-7 gap-1">
+          {predefinedColors.map((color) => (
+            <button
+              key={color}
+              className="w-5 h-5 border dark:border-gray-600 border-gray-200 cursor-pointer transition duration-300 ease-in-out transform hover:scale-125 focus:outline-none"
+              style={{ backgroundColor: color }}
+              onClick={() => {
+                handleColorChange(color);
+                setShowColorPicker(false);
+              }}
+            />
+          ))}
+        </div>
+
+        <div className="mt-2 flex items-center justify-center">
+          <input
+            type="color"
+            className="w-full h-6 p-0 border dark:border-gray-600 border-gray-300 rounded-xs cursor-pointer focus:outline-none"
+            value={containerColor}
+            onChange={(e) => handleColorChange(e.target.value)}
+          />
+        </div>
+      </div>
+    );
+
+    return (
+      <div className="menu-Container relative w-9" ref={colorPickerRef}>
+        <button
+          onClick={() => setShowColorPicker(!showColorPicker)}
+          className={`p-2 rounded-sm transition duration-200 ${
+            isAutoColor
+              ? "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700"
+              : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
+          }`}
+          style={{ color: isAutoColor ? undefined : textColor }}
+        >
+          <Palette className="w-5 h-5" />
+        </button>
+        {dropdownContent && createPortal(dropdownContent, document.body)}
+      </div>
+    );
+  };
+
   return (
     <div
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
-      className={`p-2  transition-colors duration-200 ${
-        inNotebookSheet ? "w-full" : "max-w-xl mx-auto"
-      } rounded-b-sm backdrop-blur-sm relative ${
-        isAutoColor ? "dark:bg-[#28283A]/[(var(--widget-opacity))]" : ""
-      }`}
+      className={`p-2  transition-colors duration-200 w-full"
+       rounded-b-sm backdrop-blur-sm relative ${
+         isAutoColor ? "dark:bg-[#28283A]/[(var(--widget-opacity))]" : ""
+       }`}
       style={{
         backgroundColor: isAutoColor ? undefined : containerColor,
         color: isAutoColor ? undefined : textColor,
@@ -311,59 +395,7 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
         >
           Todo List
         </div>
-        {isHovering && (
-          <div className="relative w-9">
-            <button
-              onClick={() => setShowColorPicker(!showColorPicker)}
-              className={`p-2 rounded-sm transition duration-200 ${
-                isAutoColor
-                  ? "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700"
-                  : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
-              }`}
-              style={{ color: isAutoColor ? undefined : textColor }}
-            >
-              <Palette className="w-5 h-5" />
-            </button>
-
-            {showColorPicker && (
-              <div
-                ref={colorPickerRef}
-                className="absolute right-0 mt-2 w-48 dark:bg-[#513a7a] bg-white dark:border-gray-700 border rounded shadow-lg p-3 z-10"
-              >
-                <div className="mb-2 flex items-center justify-center">
-                  <button
-                    onClick={() => {
-                      setIsAutoColor(true);
-                      setShowColorPicker(false);
-                    }}
-                    className="w-full py-1 px-2 text-sm dark:bg-gray-600 dark:text-white bg-gray-100 hover:bg-gray-200 rounded transition-colors"
-                  >
-                    Auto Theme Color
-                  </button>
-                </div>
-                <div className="grid grid-cols-7 gap-1">
-                  {predefinedColors.map((color) => (
-                    <button
-                      key={color}
-                      className="w-5 h-5 border dark:border-gray-600 border-gray-200 cursor-pointer transition duration-300 ease-in-out transform hover:scale-125 focus:outline-none"
-                      style={{ backgroundColor: color }}
-                      onClick={() => handleColorChange(color)}
-                    />
-                  ))}
-                </div>
-
-                <div className="mt-2 flex items-center justify-center">
-                  <input
-                    type="color"
-                    className="w-full h-6 p-0 border dark:border-gray-600 border-gray-300 rounded-xs cursor-pointer focus:outline-none"
-                    value={containerColor}
-                    onChange={(e) => handleColorChange(e.target.value)}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+        {isHovering && renderColorPicker()}
       </div>
       {!isCollapsed && (
         <div className="p-3">
@@ -485,7 +517,7 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
               placeholder="Add new task"
               className={`w-full p-3 pr-12 border rounded-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                 isAutoColor
-                  ? "bg-white text-gray-900 border-gray-200 dark:bg-[#513a7a] dark:text-white dark:placeholder-gray-400 dark:border-gray-700"
+                  ? "bg-white text-gray-900 border-gray-200 dark:bg-[#28283A] dark:text-white dark:placeholder-gray-400 dark:border-gray-700"
                   : isLight(containerColor)
                   ? "bg-white text-gray-800"
                   : "bg-gray-800 text-white placeholder-gray-400 border-gray-700"

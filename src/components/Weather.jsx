@@ -704,7 +704,7 @@ const Weather = () => {
                 {forecast.map((day, index) => (
                   <div
                     key={index}
-                    className=" font-mono group cursor-default relative overflow-hidden text-black bg-white/[(var(--widget-opacity))] h-full w-[48.5%] dark:bg-[#8163D3]/[(var(--widget-opacity))] rounded-sm  p-2  hover:bg-indigo-100/[var(--widget-opacity)] hover:dark:bg-[#0C66E4]/[(var(--widget-opacity))]"
+                    className=" font-mono group cursor-default dark:text-white relative overflow-hidden text-black bg-white/[(var(--widget-opacity))] h-full w-[48.5%] dark:bg-[#8163D3]/[(var(--widget-opacity))] rounded-sm  p-2  hover:bg-indigo-100/[var(--widget-opacity)] hover:dark:bg-[#0C66E4]/[(var(--widget-opacity))]"
                   >
                     <h3 className="text-sm text-center">
                       {getDayName(day.dt_txt)}

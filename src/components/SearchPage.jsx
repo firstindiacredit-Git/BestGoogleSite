@@ -19,14 +19,16 @@ import Tool from "../components/Tool";
 import Sports from "../components/Sports";
 import Top100 from "../components/Top100";
 import "./style.css";
-import { Dropdown } from "antd";
+import { Dropdown, Skeleton } from "antd";
 import { Settings } from "lucide-react";
 import { ThemeContext } from "../App";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+
 function SearchPage() {
   const { isDarkMode, toggleTheme } = useContext(ThemeContext);
   const [backgroundImage, setBackgroundImage] = useState("");
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [transparency, setTransparency] = useState(() =>
     parseInt(localStorage.getItem("bgTransparency") || "85")
   );
@@ -61,6 +63,7 @@ function SearchPage() {
       authInstance,
       async (currentUser) => {
         setUser(currentUser);
+        setLoading(false);
       }
     );
     return () => unsubscribe();
@@ -215,7 +218,7 @@ function SearchPage() {
                 className="flex flex-col gap-2"
                 onClick={(e) => e.stopPropagation()}
               >
-                <span className="text-sm text-gray-600 dark:text-gray-300">
+                <span className="text-sm text-gray-600">
                   Background Opacity
                 </span>
                 <input
@@ -226,14 +229,14 @@ function SearchPage() {
                   onChange={(e) =>
                     handleTempTransparencyChange(parseInt(e.target.value))
                   }
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer "
                 />
-                <span className="text-sm text-gray-600 dark:text-gray-300 text-right">
+                <span className="text-sm text-gray-600 text-right">
                   {sliderTransparency}%
                 </span>
               </div>
               <div
-                className="flex gap-2 pt-2 border-t dark:border-gray-700"
+                className="flex gap-2 pt-2 border-t"
                 onClick={(e) => e.stopPropagation()}
               >
                 <button
@@ -250,7 +253,7 @@ function SearchPage() {
                     e.stopPropagation();
                     handleResetChanges();
                   }}
-                  className="px-3 py-1.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                  className="px-3 py-1.5 text-gray-600 hover:bg-gray-100 rounded transition-colors"
                 >
                   Reset
                 </button>
@@ -261,34 +264,34 @@ function SearchPage() {
         {
           key: "widgetOpacity",
           label: (
-            <div
-              className="flex flex-col gap-2"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <span className="text-sm text-gray-600 dark:text-gray-300">
-                Widget Opacity
-              </span>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={sliderWidgetTransparency}
-                onChange={(e) =>
-                  handleTempWidgetTransparencyChange(parseInt(e.target.value))
-                }
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-              />
-              <span className="text-sm text-gray-600 dark:text-gray-300 text-right">
-                {sliderWidgetTransparency}%
-              </span>
-            </div>
+            <>
+              <div
+                className="flex flex-col gap-2"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <span className="text-sm text-gray-600">Widget Opacity</span>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={sliderWidgetTransparency}
+                  onChange={(e) =>
+                    handleTempWidgetTransparencyChange(parseInt(e.target.value))
+                  }
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer "
+                />
+                <span className="text-sm text-gray-600 text-right">
+                  {sliderWidgetTransparency}%
+                </span>
+              </div>
+            </>
           ),
         },
         {
           key: "actions",
           label: (
             <div
-              className="flex gap-2 pt-2 border-t dark:border-gray-700"
+              className="flex gap-2 pt-2 border-t "
               onClick={(e) => e.stopPropagation()}
             >
               <button
@@ -305,7 +308,7 @@ function SearchPage() {
                   e.stopPropagation();
                   handleResetChanges();
                 }}
-                className="px-3 py-1.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                className="px-3 py-1.5 text-gray-600 hover:bg-gray-100 rounded transition-colors"
               >
                 Reset
               </button>
@@ -319,9 +322,7 @@ function SearchPage() {
               className="flex flex-col gap-2"
               onClick={(e) => e.stopPropagation()}
             >
-              <span className="text-sm text-gray-600 dark:text-gray-300">
-                Text Color
-              </span>
+              <span className="text-sm text-gray-600">Text Color</span>
               <div className="flex gap-2 items-center">
                 <input
                   type="range"
@@ -338,7 +339,7 @@ function SearchPage() {
                     e.stopPropagation();
                     handleResetTextColor();
                   }}
-                  className="px-2 py-1 text-xs bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded transition-colors duration-200"
+                  className="px-2 py-1 text-xs bg-gray-200 hover:bg-gray-300  rounded transition-colors duration-200"
                 >
                   Reset
                 </button>
@@ -350,14 +351,12 @@ function SearchPage() {
           key: "cardUI",
           label: (
             <div
-              className="flex flex-col gap-2"
+              className="flex flex-col gap-2 border-t"
               onClick={(e) => e.stopPropagation()}
             >
-              <span className="text-sm text-gray-600 dark:text-gray-300">
-                Card UI
-              </span>
+              <span className="text-sm text-gray-600">Card UI</span>
               <button
-                className="text-center bg-black/5 dark:bg-white/5 dark:text-white hover:bg-gray-50 w-full rounded-sm"
+                className="text-center bg-black/5 dark:bg-white/5  hover:bg-gray-50 w-full rounded-sm"
                 onClick={(e) => {
                   e.stopPropagation();
                   changeVisible();
@@ -383,6 +382,46 @@ function SearchPage() {
     ]
   );
 
+  if (loading) {
+    return (
+      <div
+        className={`fixed inset-0 ${
+          isDarkMode
+            ? "bg-gradient-to-r from-[#1a1a2e] via-[#2a243f] to-[#1a1a2e]"
+            : "bg-gradient-to-r from-indigo-200 via-blue-100 to-indigo-200"
+        } transition-colors duration-300`}
+      >
+        <div className="container mx-auto mt-48 px-4 py-8">
+          <div className="flex justify-center mb-8">
+            <Skeleton.Input active size="large" />
+          </div>
+          <div className="space-y-4">
+            <div className="flex justify-center gap-4">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                <Skeleton.Button
+                  active
+                  key={i}
+                  size="default"
+                  className="w-24"
+                />
+              ))}
+            </div>
+            <div className="mt-20 grid  mx-auto w-fit grid-cols-4  gap-24">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                <Skeleton.Node
+                  size="large"
+                  className="w-48 scale-x-125"
+                  key={i}
+                  active
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={backgroundStyles}>
       <div
@@ -407,7 +446,6 @@ function SearchPage() {
             isDarkMode={isDarkMode}
             toggleTheme={toggleTheme}
             handleImageChange={handleImageChange}
-            textColor={getTextColor(textColor)}
           />
 
           <div className="w-full">

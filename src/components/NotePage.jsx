@@ -10,6 +10,11 @@ import {
 } from "lucide-react";
 import { HiOutlineNumberedList } from "react-icons/hi2";
 import { RxHamburgerMenu } from "react-icons/rx";
+import { createPortal } from "react-dom";
+
+const preventScroll = (prevent) => {
+  document.body.style.overflow = prevent ? "hidden" : "";
+};
 
 const NotePage = ({ inNotebookSheet = false }) => {
   const [notes, setNotes] = useState("");
@@ -27,6 +32,10 @@ const NotePage = ({ inNotebookSheet = false }) => {
   const [isAutoColor, setIsAutoColor] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [textColor, setTextColor] = useState("#000000");
+  const [dropdownPosition, setDropdownPosition] = useState({
+    top: null,
+    right: null,
+  });
 
   const textareaRef = useRef(null);
   const lineNumberRef = useRef(null);
@@ -84,10 +93,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
 
   useEffect(() => {
     function handleClickOutside(event) {
-      if (
-        colorPickerRef.current &&
-        !colorPickerRef.current.contains(event.target)
-      ) {
+      if (!event.target.closest(".menu-Container")) {
         setShowColorPicker(false);
       }
     }
@@ -122,6 +128,20 @@ const NotePage = ({ inNotebookSheet = false }) => {
     return () =>
       darkModeMediaQuery.removeEventListener("change", handleThemeChange);
   }, [isAutoColor]);
+
+  useEffect(() => {
+    if (showColorPicker && colorPickerRef.current) {
+      const rect = colorPickerRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right,
+      });
+      preventScroll(true);
+    } else {
+      preventScroll(false);
+    }
+    return () => preventScroll(false);
+  }, [showColorPicker]);
 
   const collapse = () => {
     if (!inNotebookSheet) {
@@ -262,30 +282,94 @@ const NotePage = ({ inNotebookSheet = false }) => {
     setTextColor(brightness > 128 ? "#000000" : "#ffffff");
   };
 
+  const renderColorPicker = () => {
+    const dropdownContent = showColorPicker && (
+      <div
+        className="fixed w-48 bg-white dark:bg-[#28283A] border border-gray-200 dark:border-gray-700 rounded-sm shadow-lg p-3 z-[9999] menu-Container"
+        style={{
+          top: `${dropdownPosition.top}px`,
+          right: `${dropdownPosition.right}px`,
+        }}
+      >
+        {/* Auto Theme Button */}
+        <div className="mb-2">
+          <button
+            onClick={() => {
+              setIsAutoColor(true);
+              setShowColorPicker(false);
+            }}
+            className="w-full py-1 px-2 text-sm bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors text-gray-900 dark:text-white"
+          >
+            Auto Theme Color
+          </button>
+        </div>
+
+        {/* Predefined Colors */}
+        <div className="grid grid-cols-7 gap-1">
+          {predefinedColors.map((color) => (
+            <button
+              key={color}
+              className="w-5 h-5 border dark:border-gray-600 border-gray-200 cursor-pointer transition duration-300 ease-in-out transform hover:scale-125 focus:outline-none"
+              style={{ backgroundColor: color }}
+              onClick={() => {
+                setIsAutoColor(false);
+                handleColorChange(color);
+                setShowColorPicker(false);
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Custom Color Picker */}
+        <div className="mt-2 flex items-center justify-center">
+          <input
+            type="color"
+            className="w-full h-6 p-0 border dark:border-gray-600 border-gray-300 rounded-xs cursor-pointer focus:outline-none"
+            value={backgroundColor}
+            onChange={(e) => {
+              setIsAutoColor(false);
+              handleColorChange(e.target.value);
+            }}
+          />
+        </div>
+      </div>
+    );
+
+    return (
+      <div className="menu-Container relative w-9" ref={colorPickerRef}>
+        <button
+          className={`p-2 rounded-sm transition duration-200 ${
+            isAutoColor
+              ? "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700"
+              : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
+          }`}
+          onClick={() => setShowColorPicker((prev) => !prev)}
+          title="Change Background Color"
+          style={{ color: isAutoColor ? "inherit" : textColor }}
+        >
+          <Palette className="w-5 h-5" />
+        </button>
+        {dropdownContent && createPortal(dropdownContent, document.body)}
+      </div>
+    );
+  };
+
   return (
     <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`${
-        inNotebookSheet ? "w-full h-full " : "h-full max-w-xl mx-auto"
-      } backdrop-blur-sm`}
+      className={`w-full h-full backdrop-blur-sm`}
     >
       <div className="rounded-sm h-full">
         <div
-          className={`overflow-hidden h-full rounded-b-sm ${
-            isAutoColor
-              ? "bg-white/[var(--widget-opacity)] dark:bg-[#28283A]/[var(--widget-opacity)]"
-              : ""
-          }`}
+          className={`overflow-hidden h-full rounded-b-sm `}
           style={{
             backgroundColor: isAutoColor ? undefined : "",
           }}
         >
           <div
             className={`p-2 h-full bg flex flex-col justify-between ${
-              isAutoColor
-                ? "bg-white/[var(--widget-opacity)] dark:bg-[#28283A]/[var(--widget-opacity)] text-gray-900 dark:text-white"
-                : ""
+              isAutoColor ? " text-gray-900 dark:text-white" : ""
             }`}
             style={{
               backgroundColor: isAutoColor ? undefined : backgroundColor,
@@ -302,70 +386,12 @@ const NotePage = ({ inNotebookSheet = false }) => {
                 </div>
                 {isHovered && (
                   <div className="flex items-center gap-2">
-                    <div className="relative w-9 " ref={colorPickerRef}>
-                      <button
-                        className={`p-2 rounded-sm transition duration-200 ${
-                          isAutoColor
-                            ? "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700"
-                            : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
-                        }`}
-                        onClick={() => setShowColorPicker((prev) => !prev)}
-                        title="Change Background Color"
-                        style={{ color: isAutoColor ? "inherit" : textColor }}
-                      >
-                        <Palette className="w-5 h-5" />
-                      </button>
-                      {showColorPicker && (
-                        <div className="absolute w-48 right-0 z-50 -mt-2 bg-white dark:bg-[#513a7a] border border-gray-200 dark:border-gray-700 rounded shadow-lg p-3">
-                          {/* Auto Theme Button */}
-                          <div className="mb-2">
-                            <button
-                              onClick={() => {
-                                setIsAutoColor(true);
-                                setShowColorPicker(false);
-                              }}
-                              className="w-full py-1 px-2 text-sm bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors text-gray-900 dark:text-white"
-                            >
-                              Auto Theme Color
-                            </button>
-                          </div>
-
-                          {/* Predefined Colors */}
-                          <div className="grid grid-cols-7 gap-1">
-                            {predefinedColors.map((color) => (
-                              <button
-                                key={color}
-                                className="w-5 h-5 border dark:border-gray-600 border-gray-200 cursor-pointer transition duration-300 ease-in-out transform hover:scale-125 focus:outline-none"
-                                style={{ backgroundColor: color }}
-                                onClick={() => {
-                                  setIsAutoColor(false);
-                                  handleColorChange(color);
-                                  setShowColorPicker(false);
-                                }}
-                              />
-                            ))}
-                          </div>
-
-                          {/* Custom Color Picker */}
-                          <div className="mt-2 flex items-center justify-center">
-                            <input
-                              type="color"
-                              className="w-full h-6 p-0 border dark:border-gray-600 border-gray-300 rounded-xs cursor-pointer focus:outline-none"
-                              value={backgroundColor}
-                              onChange={(e) => {
-                                setIsAutoColor(false);
-                                handleColorChange(e.target.value);
-                              }}
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                    {renderColorPicker()}
                     <div className="w-9 ">
                       <button
                         className={`p-2 rounded-sm transition duration-200 ${
                           isAutoColor
-                            ? "bg-gray-100/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] hover:bg-gray-200 dark:hover:bg-gray-700"
+                            ? "bg-gray-100 dark:bg-[#513a7a]/[var(--widget-opacity)] hover:bg-gray-200 dark:hover:bg-gray-700"
                             : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
                         }`}
                         onClick={toggleLineNumbers}

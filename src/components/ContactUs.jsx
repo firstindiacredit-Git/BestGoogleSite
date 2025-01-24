@@ -1,23 +1,27 @@
-import {React, useState} from 'react';
-import { Container, Typography, Box, TextField, Button, Grid, Paper } from '@mui/material';
-import EmailIcon from '@mui/icons-material/Email';
-import PhoneIcon from '@mui/icons-material/Phone';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
+import { React, useState } from "react";
+import {
+  Container,
+  Typography,
+  Box,
+  TextField,
+  Button,
+  Grid,
+  Paper,
+} from "@mui/material";
+import EmailIcon from "@mui/icons-material/Email";
+import PhoneIcon from "@mui/icons-material/Phone";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { Chrome, ChromeIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiMenu, FiX } from "react-icons/fi";
-import { useNavigate, Link } from "react-router-dom";
-
-
-
+import { Link } from "react-router-dom";
 
 const ContactUs = () => {
-
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-white">
-              <motion.header
+      <motion.header
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         className={`fixed top-0 left-0 right-0 w-full z-50 transition-all duration-300 bg-white/20 backdrop-blur-md  border-b border-gray-200/50`}
@@ -255,23 +259,23 @@ const ContactUs = () => {
       {/* Header */}
       <Box
         sx={{
-          background: '#6366f1',
-          color: 'white',
+          background: "#6366f1",
+          color: "white",
           pt: { xs: 10, md: 15 },
           pb: { xs: 8, md: 12 },
-          position: 'relative',
-          overflow: 'hidden'
+          position: "relative",
+          overflow: "hidden",
         }}
       >
         <Container maxWidth="lg">
-          <Box sx={{ position: 'relative', zIndex: 2 }}>
+          <Box sx={{ position: "relative", zIndex: 2 }}>
             <Typography
               variant="h2"
               component="h1"
               sx={{
                 fontWeight: 800,
-                textAlign: 'center',
-                mb: 3
+                textAlign: "center",
+                mb: 3,
               }}
             >
               Contact Us
@@ -279,38 +283,41 @@ const ContactUs = () => {
             <Typography
               variant="h6"
               sx={{
-                textAlign: 'center',
+                textAlign: "center",
                 opacity: 0.9,
-                maxWidth: '800px',
-                mx: 'auto'
+                maxWidth: "800px",
+                mx: "auto",
               }}
             >
-              We would love to hear from you! Please fill out the form below or contact us using the information provided.
+              We would love to hear from you! Please fill out the form below or
+              contact us using the information provided.
             </Typography>
           </Box>
         </Container>
         {/* Decorative Elements */}
         <Box
           sx={{
-            position: 'absolute',
-            top: '50%',
-            left: '5%',
-            width: '300px',
-            height: '300px',
-            background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)',
-            transform: 'translateY(-50%)',
-            borderRadius: '50%'
+            position: "absolute",
+            top: "50%",
+            left: "5%",
+            width: "300px",
+            height: "300px",
+            background:
+              "radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)",
+            transform: "translateY(-50%)",
+            borderRadius: "50%",
           }}
         />
         <Box
           sx={{
-            position: 'absolute',
-            bottom: '-10%',
-            right: '10%',
-            width: '200px',
-            height: '200px',
-            background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)',
-            borderRadius: '50%'
+            position: "absolute",
+            bottom: "-10%",
+            right: "10%",
+            width: "200px",
+            height: "200px",
+            background:
+              "radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)",
+            borderRadius: "50%",
           }}
         />
       </Box>
@@ -324,13 +331,16 @@ const ContactUs = () => {
               elevation={0}
               sx={{
                 p: 4,
-                bgcolor: 'white',
+                bgcolor: "white",
                 borderRadius: 2,
-                border: '1px solid rgba(0,0,0,0.1)',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
+                border: "1px solid rgba(0,0,0,0.1)",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
               }}
             >
-              <Typography variant="h5" sx={{ fontWeight: 700, color: '#1a237e', mb: 3 }}>
+              <Typography
+                variant="h5"
+                sx={{ fontWeight: 700, color: "#1a237e", mb: 3 }}
+              >
                 Send Us a Message
               </Typography>
               <Box component="form" noValidate autoComplete="off">
@@ -359,7 +369,11 @@ const ContactUs = () => {
                 />
                 <Button
                   variant="contained"
-                  sx={{ mt: 2, bgcolor: '#1a237e', '&:hover': { bgcolor: '#3949ab' } }}
+                  sx={{
+                    mt: 2,
+                    bgcolor: "#1a237e",
+                    "&:hover": { bgcolor: "#3949ab" },
+                  }}
                   fullWidth
                 >
                   Submit
@@ -374,44 +388,41 @@ const ContactUs = () => {
               elevation={0}
               sx={{
                 p: 4,
-                bgcolor: 'white',
+                bgcolor: "white",
                 borderRadius: 2,
-                border: '1px solid rgba(0,0,0,0.1)',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
+                border: "1px solid rgba(0,0,0,0.1)",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
               }}
             >
-              <Typography variant="h5" sx={{ fontWeight: 700, color: '#1a237e', mb: 3 }}>
+              <Typography
+                variant="h5"
+                sx={{ fontWeight: 700, color: "#1a237e", mb: 3 }}
+              >
                 Contact Information
               </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <LocationOnIcon sx={{ color: '#1a237e', mr: 2 }} />
+              <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                <LocationOnIcon sx={{ color: "#1a237e", mr: 2 }} />
                 <Typography variant="body2">
-                  88, Sant Nagar, Near India Post Office, East of Kailash, New Delhi 110065, INDIA
+                  88, Sant Nagar, Near India Post Office, East of Kailash, New
+                  Delhi 110065, INDIA
                 </Typography>
               </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <PhoneIcon sx={{ color: '#1a237e', mr: 2 }} />
-                <Typography variant="body2">
-                  +91 9015-6627-28
-                </Typography>
+              <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                <PhoneIcon sx={{ color: "#1a237e", mr: 2 }} />
+                <Typography variant="body2">+91 9015-6627-28</Typography>
               </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <PhoneIcon sx={{ color: '#1a237e', mr: 2 }} />
-                <Typography variant="body2">
-                  +91 9675-9675-09
-                </Typography>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <PhoneIcon sx={{ color: "#1a237e", mr: 2 }} />
+                <Typography variant="body2">+91 9675-9675-09</Typography>
               </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-                <EmailIcon sx={{ color: '#1a237e', mr: 2 }} />
-                <Typography variant="body2">
-                  support@browsey.com
-                </Typography>
+              <Box sx={{ display: "flex", alignItems: "center", mt: 2 }}>
+                <EmailIcon sx={{ color: "#1a237e", mr: 2 }} />
+                <Typography variant="body2">support@browsey.com</Typography>
               </Box>
             </Paper>
           </Grid>
         </Grid>
       </Container>
-
     </div>
   );
 };
