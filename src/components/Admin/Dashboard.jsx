@@ -39,9 +39,9 @@ function Dashboard() {
         const usersSnapshot = await getDocs(usersCollection);
         setTotalUsers(usersSnapshot.size);
 
-          const categoriesCollection = collection(db, "category");
-          const categoriesSnapshot = await getDocs(categoriesCollection);
-          setTotalCategories(categoriesSnapshot.size);
+        const categoriesCollection = collection(db, "category");
+        const categoriesSnapshot = await getDocs(categoriesCollection);
+        setTotalCategories(categoriesSnapshot.size);
 
         const bookmarksCollection = collection(db, "bookmarks");
         const bookmarksSnapshot = await getDocs(bookmarksCollection);

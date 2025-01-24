@@ -1,15 +1,29 @@
-import React, { useState } from "react";
-import { Form, Input, Button, message, Upload, Select } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
+import React, { useState, useEffect } from "react";
+import {
+  Form,
+  Input,
+  Button,
+  message,
+  Upload,
+  Select,
+  Tag,
+  Space,
+  Modal,
+  Spin,
+} from "antd";
+import {
+  UploadOutlined,
+  PlusOutlined,
+  EyeOutlined,
+  DeleteOutlined,
+  LoadingOutlined,
+} from "@ant-design/icons";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../../firebase";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
 const { Option } = Select;
-
-const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
 const categories = [
   "Business Finance",
@@ -20,93 +34,30 @@ const categories = [
   "Financial Planning",
 ];
 
-const AddBlog = () => {
+const AddBlog = ({ editBlog, onSuccess }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
   const [content, setContent] = useState("");
   const [uploadLoading, setUploadLoading] = useState(false);
+  const [tags, setTags] = useState([]);
+  const [inputVisible, setInputVisible] = useState(false);
+  const [inputValue, setInputValue] = useState("");
+  const [previewVisible, setPreviewVisible] = useState(false);
 
-  const uploadImage = async (file) => {
-    try {
-      setUploadLoading(true);
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("upload_preset", UPLOAD_PRESET);
-
-      const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error?.message || "Upload failed");
-      }
-
-      if (data.secure_url) {
-        message.success("Image uploaded successfully!");
-        return data.secure_url;
-      } else {
-        throw new Error("Upload failed: No secure URL received");
-      }
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      message.error(error.message || "Failed to upload image");
-      return null;
-    } finally {
-      setUploadLoading(false);
+  useEffect(() => {
+    if (editBlog) {
+      form.setFieldsValue({
+        title: editBlog.title,
+        category: editBlog.category,
+        summary: editBlog.summary,
+        featured: editBlog.featured,
+      });
+      setContent(editBlog.content || "");
+      setImageUrl(editBlog.imageUrl || "");
+      setTags(editBlog.tags || []);
     }
-  };
-
-  const handleSubmit = async (values) => {
-    if (!imageUrl) {
-      message.error("Please upload a featured image");
-      return;
-    }
-
-    if (!content) {
-      message.error("Please add blog content");
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      // Calculate estimated read time (rough estimate: 200 words per minute)
-      const wordCount = content.replace(/<[^>]*>/g, "").split(/\s+/).length;
-      const readTime = Math.max(1, Math.ceil(wordCount / 200)) + " min read";
-
-      const blogPost = {
-        title: values.title,
-        summary: values.summary,
-        content: content,
-        category: values.category,
-        featuredImage: imageUrl,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        author: "Admin", // You can get this from auth context if needed
-        readTime: readTime,
-        featured: values.featured || false,
-        status: "published",
-      };
-
-      await addDoc(collection(db, "blogs"), blogPost);
-      message.success("Blog post created successfully!");
-      form.resetFields();
-      setContent("");
-      setImageUrl("");
-    } catch (error) {
-      console.error("Error creating blog post:", error);
-      message.error("Failed to create blog post: " + error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [editBlog, form]);
 
   const handleImageUpload = async (file) => {
     const isImage = file.type.startsWith("image/");
@@ -122,31 +73,133 @@ const AddBlog = () => {
     }
 
     try {
-      const url = await uploadImage(file);
-      if (url) {
-        setImageUrl(url);
+      setUploadLoading(true);
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append(
+        "upload_preset",
+        import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
+      );
+
+      if (!import.meta.env.VITE_CLOUDINARY_CLOUD_NAME) {
+        throw new Error("Cloudinary configuration is missing");
       }
+
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${
+          import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
+        }/image/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to upload image to Cloudinary");
+      }
+
+      const data = await response.json();
+
+      if (!data.secure_url) {
+        throw new Error("No image URL received from Cloudinary");
+      }
+
+      setImageUrl(data.secure_url);
+      message.success("Image uploaded successfully!");
+      return false; // Prevent default upload behavior
     } catch (error) {
-      message.error("Failed to upload image");
+      console.error("Image upload error:", error);
+      message.error(
+        error.message || "Failed to upload image. Please try again."
+      );
+      setImageUrl("");
+    } finally {
+      setUploadLoading(false);
     }
-    return false;
   };
 
-  const modules = {
-    toolbar: [
-      [{ header: [1, 2, 3, 4, 5, 6, false] }],
-      ["bold", "italic", "underline", "strike"],
-      [{ list: "ordered" }, { list: "bullet" }],
-      [{ color: [] }, { background: [] }],
-      [{ align: [] }],
-      ["link", "image"],
-      ["clean"],
-    ],
+  const handleSubmit = async (values) => {
+    try {
+      setLoading(true);
+      if (!content) {
+        message.error("Please add some content to your blog post");
+        return;
+      }
+
+      if (!imageUrl) {
+        message.error("Please upload a featured image");
+        return;
+      }
+
+      const wordCount = content.replace(/<[^>]*>/g, "").split(/\s+/).length;
+      const readTime = Math.ceil(wordCount / 200); // Assuming 200 words per minute
+
+      const blogPost = {
+        title: values.title,
+        content,
+        summary: values.summary,
+        imageUrl,
+        category: values.category,
+        tags,
+        featured: values.featured || false,
+        readTime,
+        author: "Admin", // You can get this from auth context if needed
+        createdAt: serverTimestamp(),
+      };
+
+      await addDoc(collection(db, "blogs"), blogPost);
+      message.success("Blog post created successfully!");
+      form.resetFields();
+      setContent("");
+      setImageUrl("");
+      setTags([]);
+      if (onSuccess) onSuccess();
+    } catch (error) {
+      console.error("Error creating blog post:", error);
+      message.error("Failed to create blog post: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTagClose = (removedTag) => {
+    const newTags = tags.filter((tag) => tag !== removedTag);
+    setTags(newTags);
+  };
+
+  const handleInputConfirm = () => {
+    if (inputValue && !tags.includes(inputValue)) {
+      setTags([...tags, inputValue]);
+    }
+    setInputVisible(false);
+    setInputValue("");
+  };
+
+  const showPreview = () => {
+    const values = form.getFieldsValue();
+    const previewData = {
+      title: values.title || "Untitled",
+      content,
+      imageUrl,
+      category: values.category,
+      tags,
+    };
+    setPreviewVisible(true);
+    return previewData;
   };
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Add New Blog Post</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">
+          {editBlog ? "Edit Blog Post" : "Add New Blog Post"}
+        </h1>
+        <Button icon={<EyeOutlined />} onClick={showPreview}>
+          Preview
+        </Button>
+      </div>
+
       <Form
         form={form}
         layout="vertical"
@@ -186,52 +239,111 @@ const AddBlog = () => {
           />
         </Form.Item>
 
-        <Form.Item label="Featured Image">
+        <Form.Item label="Content" required>
+          <ReactQuill
+            theme="snow"
+            value={content}
+            onChange={setContent}
+            className="h-64 mb-12"
+          />
+        </Form.Item>
+
+        <Form.Item
+          label="Featured Image"
+          required
+          help={
+            !imageUrl && "Please upload a featured image for your blog post"
+          }
+          validateStatus={!imageUrl ? "error" : "success"}
+        >
           <Upload
             accept="image/*"
             beforeUpload={handleImageUpload}
             showUploadList={false}
             disabled={uploadLoading}
           >
-            {imageUrl ? (
-              <div className="relative">
-                <img
-                  src={imageUrl}
-                  alt="Featured"
-                  className="max-w-xs rounded"
-                />
-                <Button
-                  type="text"
-                  className="absolute top-2 right-2"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setImageUrl("");
-                  }}
-                  disabled={uploadLoading}
-                >
-                  Change
-                </Button>
-              </div>
-            ) : (
-              <Button icon={<UploadOutlined />} loading={uploadLoading}>
-                {uploadLoading ? "Uploading..." : "Upload Featured Image"}
+            <div className="space-y-4">
+              <Button
+                icon={uploadLoading ? <LoadingOutlined /> : <UploadOutlined />}
+                loading={uploadLoading}
+                disabled={uploadLoading}
+              >
+                {uploadLoading ? "Uploading..." : "Upload Image"}
               </Button>
-            )}
+              {imageUrl ? (
+                <div className="relative inline-block">
+                  <div className="relative">
+                    <img
+                      src={imageUrl}
+                      alt="Featured"
+                      className="max-w-xs rounded mt-4"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        message.error("Failed to load image");
+                        setImageUrl("");
+                      }}
+                    />
+                    {uploadLoading && (
+                      <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded">
+                        <Spin size="large" />
+                      </div>
+                    )}
+                  </div>
+                  <Button
+                    type="text"
+                    icon={<DeleteOutlined />}
+                    className="absolute top-2 right-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setImageUrl("");
+                      message.success("Image removed");
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="mt-4 p-8 border-2 border-dashed rounded-lg text-center">
+                  <p className="text-gray-500">
+                    Click or drag an image here to upload
+                  </p>
+                  <p className="text-gray-400 text-sm">PNG, JPG up to 5MB</p>
+                </div>
+              )}
+            </div>
           </Upload>
         </Form.Item>
 
-        <Form.Item
-          label="Content"
-          required
-          help="Write your blog content here. You can use the toolbar for formatting."
-        >
-          <ReactQuill
-            theme="snow"
-            value={content}
-            onChange={setContent}
-            modules={modules}
-            className="h-64 mb-12"
-          />
+        <Form.Item label="Tags">
+          <Space wrap className="mb-2">
+            {tags.map((tag) => (
+              <Tag
+                key={tag}
+                closable
+                onClose={() => handleTagClose(tag)}
+                className="text-base py-1"
+              >
+                {tag}
+              </Tag>
+            ))}
+            {inputVisible ? (
+              <Input
+                type="text"
+                size="small"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onBlur={handleInputConfirm}
+                onPressEnter={handleInputConfirm}
+                className="w-24"
+                autoFocus
+              />
+            ) : (
+              <Tag
+                onClick={() => setInputVisible(true)}
+                className="cursor-pointer text-base py-1"
+              >
+                <PlusOutlined /> New Tag
+              </Tag>
+            )}
+          </Space>
         </Form.Item>
 
         <Form.Item name="featured" valuePropName="checked">
@@ -248,10 +360,26 @@ const AddBlog = () => {
             loading={loading}
             className="w-full"
           >
-            Publish Blog Post
+            {editBlog ? "Update" : "Publish"} Blog Post
           </Button>
         </Form.Item>
       </Form>
+
+      <Modal
+        title="Blog Preview"
+        open={previewVisible}
+        onCancel={() => setPreviewVisible(false)}
+        footer={null}
+        width={800}
+      >
+        <div className="prose max-w-none">
+          <h1>{form.getFieldValue("title") || "Untitled"}</h1>
+          {imageUrl && (
+            <img src={imageUrl} alt="Featured" className="w-full rounded-lg" />
+          )}
+          <div dangerouslySetInnerHTML={{ __html: content }} />
+        </div>
+      </Modal>
     </div>
   );
 };

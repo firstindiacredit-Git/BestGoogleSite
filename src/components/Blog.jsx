@@ -16,7 +16,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Chrome, ChromeIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiMenu, FiX } from "react-icons/fi";
@@ -34,6 +34,10 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import FeaturedPlayListIcon from "@mui/icons-material/FeaturedPlayList";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import { db } from "../firebase";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import CommentIcon from "@mui/icons-material/Comment";
+import ShareIcon from "@mui/icons-material/Share";
+
 
 const StyledButton = styled(Button)(({ theme }) => ({
   borderRadius: "24px",
@@ -66,6 +70,84 @@ const CategoryButton = styled(Button)(({ theme }) => ({
   },
 }));
 
+const HeroSection = styled(Box)(({ theme }) => ({
+  position: "relative",
+  background: "linear-gradient(135deg, #F3F4FF 0%, #E8E9FF 100%)",
+  borderRadius: "0 0 50px 50px",
+  overflow: "hidden",
+  "&::after": {
+    content: '""',
+    position: "absolute",
+    bottom: 0,
+    left: "10%",
+    right: "10%",
+    height: "100px",
+    background:
+      "linear-gradient(to bottom, transparent, rgba(243,244,255,0.8))",
+    borderRadius: "50%",
+    transform: "translateY(50%)",
+  },
+}));
+
+const CategoryCard = styled(Paper)(({ theme }) => ({
+  borderRadius: "20px",
+  overflow: "hidden",
+  position: "relative",
+  cursor: "pointer",
+  height: "280px",
+  transition: "transform 0.3s ease-in-out",
+  "&:hover": {
+    transform: "translateY(-8px)",
+    "& .overlay": {
+      background: "rgba(99, 102, 241, 0.7)",
+    },
+    "& img": {
+      transform: "scale(1.1)",
+    },
+  },
+}));
+
+const CurvedSection = styled(Box)(({ theme }) => ({
+  position: "relative",
+  "&::before": {
+    content: '""',
+    position: "absolute",
+    top: "-50px",
+    left: 0,
+    right: 0,
+    height: "50px",
+    background: "inherit",
+    borderRadius: "50% 50% 0 0",
+  },
+}));
+
+const FullWidthSection = styled(Box)(({ theme }) => ({
+  width: "100vw",
+  marginLeft: "calc(-50vw + 50%)",
+  marginRight: "calc(-50vw + 50%)",
+  position: "relative",
+  background: "linear-gradient(135deg, #F3F4FF 0%, #E8E9FF 100%)",
+  padding: theme.spacing(8, 0),
+  "&::before": {
+    content: '""',
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: "100px",
+    background: "linear-gradient(to bottom, white, transparent)",
+  },
+  "&::after": {
+    content: '""',
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: "100px",
+    background: "linear-gradient(to top, white, transparent)",
+  },
+}));
+
 const Blogs = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -73,21 +155,51 @@ const Blogs = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const categories = [
-    "All",
-    "Business Finance",
-    "Expense Management",
-    "Bookkeeping",
-    "Tax Tips",
-    "Business Growth",
-    "Financial Planning",
-  ];
-
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [blogs, setBlogs] = useState([]);
+  const navigate = useNavigate();
+   
+
 
   useEffect(() => {
+    const styleSheet = document.createElement("style");
+    styleSheet.innerText = `
+      .swiper-container {
+        overflow: visible !important;
+        padding: 50px 0;
+      }
+      
+      .swiper-slide {
+        transition: all 0.3s ease;
+        opacity: 0.4;
+      }
+      
+      .swiper-slide-active {
+        opacity: 1;
+        transform: scale(1.1);
+      }
+      
+      .swiper-pagination {
+        position: relative;
+        margin-top: 40px;
+      }
+      
+      .swiper-pagination-bullet {
+        width: 10px;
+        height: 10px;
+        background: #6366f1;
+        opacity: 0.5;
+        transition: all 0.3s ease;
+      }
+      
+      .swiper-pagination-bullet-active {
+        width: 20px;
+        border-radius: 5px;
+        opacity: 1;
+      }
+    `;
+    document.head.appendChild(styleSheet);
+
     const fetchBlogs = async () => {
       try {
         setIsLoading(true);
@@ -104,8 +216,9 @@ const Blogs = () => {
           author: doc.data().author,
           readTime: doc.data().readTime || "5 min read",
           date: new Date(doc.data().createdAt?.toDate()).toLocaleDateString(),
-          image: doc.data().featuredImage,
+          image: doc.data().imageUrl,
           featured: doc.data().featured || false,
+          tags: doc.data().tags || [],
         }));
 
         setBlogs(fetchedBlogs);
@@ -118,7 +231,21 @@ const Blogs = () => {
     };
 
     fetchBlogs();
+
+    return () => {
+      document.head.removeChild(styleSheet);
+    };
   }, []);
+
+  const categories = [
+    "All",
+    "Business Finance",
+    "Expense Management",
+    "Bookkeeping",
+    "Tax Tips",
+    "Business Growth",
+    "Financial Planning",
+  ];
 
   const testimonials = [
     {
@@ -212,12 +339,15 @@ const Blogs = () => {
         post.excerpt.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
-  // Add loading and error states to your JSX
+  const handleReadMore = (blogId) => {
+    navigate(`/blog/${blogId}`);
+  };
+
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <Box sx={{ bgcolor: "#fff" }}>
       <motion.header
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -454,49 +584,45 @@ const Blogs = () => {
         </AnimatePresence>
       </motion.header>
       {/* Hero Section */}
-      <Box
-        sx={{
-          background: "#6366f1",
-          pt: { xs: 20, md: 24 },
-          pb: { xs: 10, md: 14 },
-        }}
-      >
-        <Container maxWidth="lg">
+      <HeroSection>
+        <Container
+          maxWidth="lg"
+          sx={{ pt: { xs: 12, md: 15 }, pb: { xs: 8, md: 10 } }}
+        >
           <Grid container spacing={4} alignItems="center">
             <Grid item xs={12} md={6}>
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8 }}
-              >
+              <Box>
                 <Typography
-                  variant="h1"
+                  variant="overline"
                   sx={{
-                    fontSize: { xs: "2.5rem", md: "3.5rem" },
-                    fontWeight: 800,
-                    color: "#fff",
-                    lineHeight: 1.2,
-                    mb: 3,
+                    color: "#6366f1",
+                    fontWeight: 600,
+                    mb: 2,
+                    display: "block",
                   }}
                 >
-                  Design & grow your
-                  <Box
-                    component="span"
-                    sx={{
-                      color: "#fff",
-                      display: "block",
-                    }}
-                  >
-                    business knowledge
-                  </Box>
+                  BROWSEY
+                </Typography>
+                <Typography
+                  variant="h2"
+                  sx={{
+                    fontWeight: 800,
+                    mb: 3,
+                    background: "linear-gradient(45deg, #6366f1, #8b5cf6)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    lineHeight: 1.2,
+                  }}
+                >
+                  Design & grow your business knowledge
                 </Typography>
                 <Typography
                   variant="h6"
                   sx={{
-                    color: "white",
+                    color: "#4B5563",
                     mb: 4,
-                    fontSize: "1.125rem",
                     fontWeight: 400,
+                    lineHeight: 1.6,
                   }}
                 >
                   Discover expert insights, tips, and strategies to help your
@@ -505,258 +631,364 @@ const Blogs = () => {
                 <Box sx={{ display: "flex", gap: 2 }}>
                   <StyledButton
                     variant="contained"
-                    color="primary"
-                    endIcon={<ArrowForwardIcon />}
+                    sx={{
+                      background: "linear-gradient(45deg, #6366f1, #8b5cf6)",
+                      color: "white",
+                      "&:hover": {
+                        background: "linear-gradient(45deg, #4f46e5, #7c3aed)",
+                      },
+                    }}
                   >
                     Start Reading
                   </StyledButton>
                   <StyledButton
                     variant="outlined"
-                    sx={{ backgroundColor: "#fff" }}
+                    sx={{
+                      borderColor: "#6366f1",
+                      color: "#6366f1",
+                      "&:hover": {
+                        borderColor: "#4f46e5",
+                        background: "rgba(99, 102, 241, 0.05)",
+                      },
+                    }}
                   >
-                    <p style={{ color: "#6366f1" }}> Browse Topics</p>
+                    Browse Topics
                   </StyledButton>
                 </Box>
-              </motion.div>
+              </Box>
             </Grid>
             <Grid item xs={12} md={6}>
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8 }}
+              <Box
+                sx={{
+                  position: "relative",
+                  "&::before": {
+                    content: '""',
+                    position: "absolute",
+                    top: "-10%",
+                    right: "-10%",
+                    width: "200px",
+                    height: "200px",
+                    background: "linear-gradient(45deg, #6366f1, #8b5cf6)",
+                    borderRadius: "50%",
+                    opacity: 0.1,
+                    zIndex: 0,
+                  },
+                }}
               >
                 <Box
                   component="img"
                   src="/Blogmain.jpg"
-                  alt="Blog Hero"
+                  alt="blog-hero"
                   sx={{
                     width: "100%",
-                    maxWidth: 600,
                     height: "auto",
-                    borderRadius: "10px",
+                    borderRadius: "30px",
+                    boxShadow: "0 20px 40px rgba(99, 102, 241, 0.2)",
+                    transform: "rotate(deg)",
+                    position: "relative",
+                    zIndex: 1,
                   }}
                 />
-              </motion.div>
+              </Box>
             </Grid>
           </Grid>
         </Container>
-      </Box>
+      </HeroSection>
 
-      {/* Featured Categories Section */}
-      <Container
-        maxWidth="lg"
-        sx={{ mt: -8, mb: 8, position: "relative", zIndex: 2 }}
-      >
-        <Paper
-          elevation={2}
-          sx={{
-            p: 4,
-            borderRadius: 3,
-            backgroundColor: "white",
-          }}
-        >
+      {/* Categories Section
+      <FullWidthSection sx={{ my: 8 }}>
+        <Container maxWidth="xl">
           <Typography
-            variant="h6"
+            variant="h3"
+            align="center"
             sx={{
-              mb: 3,
-              fontWeight: 600,
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
+              mb: 6,
+              fontWeight: 700,
+              background: "linear-gradient(45deg, #6366f1, #8b5cf6)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              position: "relative",
+              "&::after": {
+                content: '""',
+                position: "absolute",
+                bottom: "-16px",
+                left: "50%",
+                transform: "translateX(-50%)",
+                width: "80px",
+                height: "4px",
+                background: "linear-gradient(45deg, #6366f1, #8b5cf6)",
+                borderRadius: "2px",
+              },
             }}
           >
-            <FeaturedPlayListIcon color="primary" />
-            Popular Categories
+            Explore Categories
           </Typography>
-          <Box
-            sx={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 1,
+
+          <Swiper
+            effect="coverflow"
+            grabCursor={true}
+            centeredSlides={true}
+            slidesPerView="auto"
+            loop={true}
+            autoplay={{
+              delay: 3000,
+              disableOnInteraction: false,
+            }}
+            coverflowEffect={{
+              rotate: 35,
+              stretch: 0,
+              depth: 100,
+              modifier: 1.5,
+              slideShadows: true,
+            }}
+            pagination={{
+              clickable: true,
+              dynamicBullets: true,
+            }}
+            modules={[Autoplay, Pagination, EffectCoverflow]}
+            className="mySwiper"
+            breakpoints={{
+              320: {
+                slidesPerView: 1,
+                spaceBetween: 20,
+              },
+              640: {
+                slidesPerView: 2,
+                spaceBetween: 30,
+              },
+              1024: {
+                slidesPerView: 3,
+                spaceBetween: 40,
+              },
+              1280: {
+                slidesPerView: 4,
+                spaceBetween: 50,
+              },
             }}
           >
-            {categories.map((category) => (
-              <CategoryButton
-                key={category}
-                className={selectedCategory === category ? "active" : ""}
-                onClick={() => setSelectedCategory(category)}
-                startIcon={category === "All" ? <TrendingUpIcon /> : null}
-              >
-                {category}
-              </CategoryButton>
-            ))}
-          </Box>
-        </Paper>
-      </Container>
-
-      {/* Add Testimonials Section before Featured Posts */}
-      <Container maxWidth="lg" sx={{ mt: 12, mb: 8 }}>
-        <Typography
-          variant="h4"
-          sx={{
-            mb: 6,
-            fontWeight: 700,
-            textAlign: "center",
-            position: "relative",
-            "&::after": {
-              content: '""',
-              position: "absolute",
-              bottom: -12,
-              left: "50%",
-              transform: "translateX(-50%)",
-              width: 60,
-              height: 4,
-              bgcolor: "#6366f1",
-              borderRadius: 2,
-            },
-          }}
-        >
-          What Our Readers Say
-        </Typography>
-
-        <Swiper
-          modules={[Autoplay, Pagination, EffectCoverflow]}
-          effect="coverflow"
-          grabCursor={true}
-          centeredSlides={true}
-          slidesPerView={isMobile ? 1 : 3}
-          coverflowEffect={{
-            rotate: 50,
-            stretch: 0,
-            depth: 100,
-            modifier: 1,
-            slideShadows: false,
-          }}
-          pagination={{ clickable: true }}
-          autoplay={{
-            delay: 2000,
-            disableOnInteraction: false,
-          }}
-          className="testimonial-swiper"
-        >
-          {testimonials.map((testimonial) => (
-            <SwiperSlide key={testimonial.id}>
-              <motion.div whileHover={{ y: -5 }} className="p-6">
-                <Paper
-                  elevation={2}
-                  sx={{
-                    p: 4,
-                    height: "100%",
-                    bgcolor: "rgba(255, 255, 255, 0.8)",
-                    backdropFilter: "blur(10px)",
-                    borderRadius: 2,
-                    position: "relative",
-                  }}
-                >
-                  <FormatQuoteIcon
-                    sx={{
-                      fontSize: 40,
-                      color: "#6366f1",
-                      opacity: 0.3,
-                      position: "absolute",
-                      top: 16,
-                      left: 16,
-                    }}
-                  />
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      mb: 4,
-                      fontStyle: "italic",
-                      color: "#4B5563",
-                      minHeight: 80,
-                    }}
-                  >
-                    "{testimonial.content}"
-                  </Typography>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                    <Avatar
-                      src={testimonial.author.avatar}
-                      alt={testimonial.author.name}
+            {[
+              {
+                name: "Yoga Basics",
+                image: "/blog-1.jpg",
+                count: "12 Articles",
+                description:
+                  "Start your yoga journey with fundamental poses and practices",
+              },
+              {
+                name: "Meditation",
+                image: "/blog-2.jpg",
+                count: "8 Articles",
+                description:
+                  "Find inner peace through guided meditation sessions",
+              },
+              {
+                name: "Mindfulness",
+                image: "/blog-3.jpg",
+                count: "15 Articles",
+                description:
+                  "Learn to live in the present moment with mindfulness techniques",
+              },
+              {
+                name: "Flexibility",
+                image: "/blog-4.jpg",
+                count: "10 Articles",
+                description:
+                  "Improve your flexibility with targeted stretching routines",
+              },
+              {
+                name: "Stress Reduction",
+                image: "/blog-1.jpg",
+                count: "9 Articles",
+                description:
+                  "Effective techniques for managing stress and anxiety",
+              },
+              {
+                name: "Yoga Classes",
+                image: "/blog-2.jpg",
+                count: "14 Articles",
+                description: "Join our virtual and in-person yoga classes",
+              },
+              {
+                name: "Breathing Techniques",
+                image: "/blog-3.jpg",
+                count: "7 Articles",
+                description: "Master pranayama and breathing exercises",
+              },
+              {
+                name: "Yoga Philosophy",
+                image: "/blog-4.jpg",
+                count: "11 Articles",
+                description: "Explore the ancient wisdom of yoga traditions",
+              },
+              {
+                name: "Asanas",
+                image: "/blog-1.jpg",
+                count: "16 Articles",
+                description: "Deep dive into yoga poses and their benefits",
+              },
+              {
+                name: "Wellness",
+                image: "/blog-2.jpg",
+                count: "13 Articles",
+                description: "Holistic approaches to health and well-being",
+              },
+              {
+                name: "Yoga Lifestyle",
+                image: "/blog-3.jpg",
+                count: "8 Articles",
+                description: "Incorporate yoga principles into daily life",
+              },
+              {
+                name: "Teacher Training",
+                image: "/blog-4.jpg",
+                count: "6 Articles",
+                description: "Resources for aspiring yoga instructors",
+              },
+            ].map((category, index) => (
+              <SwiperSlide key={category.name}>
+                <CategoryCard elevation={3}>
+                  <Box sx={{ position: "relative", height: "100%" }}>
+                    <Box
+                      component="img"
+                      src={category.image}
+                      alt={category.name}
                       sx={{
-                        width: 56,
-                        height: 56,
-                        border: "2px solid #6366f1",
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        transition: "transform 0.5s ease",
                       }}
                     />
-                    <Box>
-                      <Typography variant="subtitle1" fontWeight="bold">
-                        {testimonial.author.name}
+                    <Box
+                      className="overlay"
+                      sx={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background:
+                          "linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.8))",
+                        transition: "all 0.3s ease",
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "flex-end",
+                        p: 3,
+                        "&:hover": {
+                          background:
+                            "linear-gradient(to bottom, rgba(99,102,241,0.8), rgba(139,92,246,0.9))",
+                        },
+                      }}
+                    >
+                      <Typography
+                        variant="h5"
+                        sx={{
+                          color: "white",
+                          fontWeight: 600,
+                          mb: 1,
+                          textShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                        }}
+                      >
+                        {category.name}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {testimonial.author.role} at{" "}
-                        {testimonial.author.company}
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: "rgba(255,255,255,0.9)",
+                          mb: 2,
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                        }}
+                      >
+                        {category.description}
                       </Typography>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Typography
+                          variant="body2"
+                          sx={{ color: "rgba(255,255,255,0.9)" }}
+                        >
+                          {category.count}
+                        </Typography>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          sx={{
+                            bgcolor: "rgba(255,255,255,0.15)",
+                            backdropFilter: "blur(4px)",
+                            color: "white",
+                            "&:hover": {
+                              bgcolor: "rgba(255,255,255,0.25)",
+                            },
+                          }}
+                          endIcon={<ArrowForwardIcon sx={{ fontSize: 16 }} />}
+                        >
+                          Explore
+                        </Button>
+                      </Box>
                     </Box>
                   </Box>
-                </Paper>
-              </motion.div>
-            </SwiperSlide>
-          ))}
-        </Swiper>
-      </Container>
+                </CategoryCard>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </Container>
+      </FullWidthSection> */}
 
-      {/* Featured Articles */}
-      {featuredPosts.length > 0 && (
-        <Container maxWidth="lg" sx={{ mt: 12, mb: 8 }}>
-          <Box sx={{ mb: 6, textAlign: "center" }}>
-            <Typography
-              variant="h4"
-              sx={{
-                fontWeight: 800,
-                position: "relative",
-                display: "inline-block",
-                "&::after": {
-                  content: '""',
-                  position: "absolute",
-                  bottom: -12,
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                  width: 80,
-                  height: 4,
-                  background:
-                    "linear-gradient(90deg, #6366f1 0%, #4f46e5 100%)",
-                  borderRadius: 2,
-                },
-              }}
-            >
-              Featured Articles
-            </Typography>
-          </Box>
-
+      {/* Featured Posts */}
+      <Box sx={{ py: 5, mt: 5 }}>
+        <Container maxWidth="lg">
+          <Typography
+            variant="h3"
+            align="center"
+            sx={{
+              mb: 6,
+              fontWeight: 700,
+              background: "linear-gradient(45deg, #6366f1, #8b5cf6)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            Featured Articles
+          </Typography>
           <Grid container spacing={4}>
-            {featuredPosts.map((post, index) => (
-              <Grid item xs={12} key={post.id}>
+            {featuredPosts.map((post) => (
+              <Grid item xs={12} md={4} key={post.id}>
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.2 }}
+                  whileHover={{ y: -8 }}
+                  transition={{ duration: 0.2 }}
+                  onClick={() => handleReadMore(post.id)}
+                  style={{ cursor: "pointer" }}
                 >
                   <Paper
-                    elevation={0}
                     sx={{
-                      display: "flex",
+                      borderRadius: "20px",
                       overflow: "hidden",
-                      borderRadius: 4,
-                      backgroundColor: "white",
-                      border: "1px solid",
-                      borderColor: "rgba(0, 0, 0, 0.08)",
+                      height: "100%",
+                      bgcolor: "white",
+                      boxShadow: "0 10px 30px rgba(99, 102, 241, 0.1)",
+                      transition: "all 0.3s ease",
                       "&:hover": {
-                        boxShadow: "0 8px 40px rgba(0, 0, 0, 0.08)",
-                        transform: "translateY(-4px)",
+                        boxShadow: "0 20px 40px rgba(99, 102, 241, 0.2)",
                         "& img": {
-                          transform: "scale(1.1) rotate(2deg)",
+                          transform: "scale(1.1)",
                         },
                       },
-                      transition: "all 0.3s ease-in-out",
                     }}
                   >
-                    {/* Image Container */}
                     <Box
                       sx={{
-                        width: "40%",
                         position: "relative",
+                        paddingTop: "66%",
                         overflow: "hidden",
+                        cursor: "pointer",
                       }}
                     >
                       <Box
@@ -764,6 +996,8 @@ const Blogs = () => {
                         src={post.image}
                         alt={post.title}
                         sx={{
+                          position: "absolute",
+                          top: 0,
                           width: "100%",
                           height: "100%",
                           objectFit: "cover",
@@ -773,107 +1007,132 @@ const Blogs = () => {
                       <Box
                         sx={{
                           position: "absolute",
-                          top: 16,
-                          left: 16,
-                          zIndex: 1,
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          p: 2,
+                          background:
+                            "linear-gradient(transparent, rgba(0,0,0,0.8))",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "flex-end",
                         }}
                       >
                         <Chip
-                          label="FEATURED"
-                          size="small"
+                          label={post.category}
                           sx={{
-                            borderRadius: "20px",
-                            backgroundColor: "#6366f1",
+                            bgcolor: "#6366f1",
                             color: "white",
                             fontWeight: 600,
-                            mb: 1,
                           }}
                         />
-                        <Chip
-                          label={post.category}
-                          size="small"
-                          sx={{
-                            borderRadius: "20px",
-                            backgroundColor: "rgba(255, 255, 255, 0.9)",
-                            color: "#6366f1",
-                            fontWeight: 600,
-                            backdropFilter: "blur(4px)",
-                          }}
-                        />
+                        <Box sx={{ display: "flex", gap: 1 }}>
+                          <IconButton
+                            size="small"
+                            sx={{
+                              color: "white",
+                              bgcolor: "rgba(255,255,255,0.1)",
+                              "&:hover": {
+                                bgcolor: "rgba(255,255,255,0.2)",
+                              },
+                            }}
+                          >
+                            <VisibilityIcon fontSize="small" />
+                          </IconButton>
+                          <IconButton
+                            size="small"
+                            sx={{
+                              color: "white",
+                              bgcolor: "rgba(255,255,255,0.1)",
+                              "&:hover": {
+                                bgcolor: "rgba(255,255,255,0.2)",
+                              },
+                            }}
+                          >
+                            <ShareIcon fontSize="small" />
+                          </IconButton>
+                        </Box>
                       </Box>
                     </Box>
-
-                    {/* Content Container */}
-                    <Box sx={{ width: "60%", p: 4 }}>
+                    <Box sx={{ p: 3 }}>
                       <Typography
-                        variant="h4"
+                        variant="h5"
                         sx={{
                           fontWeight: 700,
                           mb: 2,
-                          color: "#1f2937",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          cursor: "pointer",
+                          "&:hover": {
+                            color: "#6366f1",
+                          },
                         }}
                       >
                         {post.title}
                       </Typography>
                       <Typography
-                        variant="body1"
+                        variant="body2"
+                        color="text.secondary"
                         sx={{
-                          mb: 3,
-                          color: "#6b7280",
-                          fontSize: "1.1rem",
+                          mb: 2,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          display: "-webkit-box",
+                          WebkitLineClamp: 3,
+                          WebkitBoxOrient: "vertical",
                         }}
                       >
                         {post.excerpt}
                       </Typography>
-
-                      {/* Author and Meta Info */}
                       <Box
                         sx={{
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "space-between",
-                          mt: 4,
+                          mt: 2,
                         }}
                       >
                         <Box
-                          sx={{ display: "flex", alignItems: "center", gap: 2 }}
+                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
                         >
                           <Avatar
                             src={`https://ui-avatars.com/api/?name=${post.author}&background=6366f1&color=fff`}
-                            sx={{
-                              width: 48,
-                              height: 48,
-                              border: "2px solid white",
-                              boxShadow: "0 0 0 2px #6366f1",
-                            }}
+                            sx={{ width: 32, height: 32 }}
                           />
-                          <Box>
-                            <Typography
-                              variant="subtitle1"
-                              sx={{ fontWeight: 600, color: "#1f2937" }}
-                            >
-                              {post.author}
-                            </Typography>
-                            <Typography
-                              variant="caption"
-                              sx={{
-                                color: "#6b7280",
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 0.5,
-                              }}
-                            >
-                              <AccessTimeIcon sx={{ fontSize: 14 }} />
-                              {post.readTime}
-                            </Typography>
-                          </Box>
+                          <Typography variant="body2" fontWeight={500}>
+                            {post.author}
+                          </Typography>
                         </Box>
-                        <Typography
-                          variant="caption"
-                          sx={{ color: "#6b7280", fontWeight: 500 }}
+                        <Box
+                          sx={{ display: "flex", alignItems: "center", gap: 2 }}
                         >
-                          {post.date}
-                        </Typography>
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 0.5,
+                              color: "text.secondary",
+                            }}
+                          >
+                            <AccessTimeIcon sx={{ fontSize: 16 }} />
+                            {post.readTime}
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 0.5,
+                              color: "text.secondary",
+                            }}
+                          >
+                            {post.date}
+                          </Typography>
+                        </Box>
                       </Box>
                     </Box>
                   </Paper>
@@ -882,31 +1141,50 @@ const Blogs = () => {
             ))}
           </Grid>
         </Container>
-      )}
+      </Box>
 
-      {/* Regular Posts */}
-      <Container maxWidth="lg" sx={{ mt: 8, mb: 8 }}>
-        <Typography variant="h4" sx={{ mb: 4, fontWeight: 700 }}>
+      {/* Latest Articles */}
+      <Container maxWidth="lg" sx={{ py: 10 }}>
+        <Typography
+          variant="h3"
+          align="center"
+          sx={{
+            mb: 6,
+            fontWeight: 700,
+            background: "linear-gradient(45deg, #6366f1, #8b5cf6)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+          }}
+        >
           Latest Articles
         </Typography>
         <Grid container spacing={4}>
           {filteredPosts.map((post) => (
             <Grid item xs={12} md={4} key={post.id}>
-              <motion.div whileHover={{ y: -8 }} transition={{ duration: 0.2 }}>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                transition={{ duration: 0.3 }}
+                className="h-full"
+              >
                 <Paper
                   sx={{
                     overflow: "hidden",
                     borderRadius: 3,
                     backgroundColor: "white",
-                    "&:hover img": {
-                      transform: "scale(1.05)",
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    position: "relative",
+                    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
+                    "&:hover": {
+                      boxShadow: "0 8px 30px rgba(0, 0, 0, 0.2)",
                     },
                   }}
                 >
                   <Box
                     sx={{
                       position: "relative",
-                      paddingTop: "56.25%", // 16:9 aspect ratio
+                      paddingTop: "66%",
                       overflow: "hidden",
                     }}
                   >
@@ -921,33 +1199,11 @@ const Blogs = () => {
                         width: "100%",
                         height: "100%",
                         objectFit: "cover",
-                        transition: "transform 0.3s ease-in-out",
+                        transition: "all 0.5s ease-in-out",
                       }}
                     />
                   </Box>
                   <Box sx={{ p: 3 }}>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        mb: 2,
-                      }}
-                    >
-                      <Chip
-                        label={post.category}
-                        size="small"
-                        sx={{
-                          borderRadius: "12px",
-                          backgroundColor: "rgba(99, 102, 241, 0.1)",
-                          color: "#6366f1",
-                          fontWeight: 600,
-                        }}
-                      />
-                      <Typography variant="caption" sx={{ color: "#6b7280" }}>
-                        {post.date}
-                      </Typography>
-                    </Box>
                     <Typography
                       variant="h6"
                       sx={{
@@ -981,31 +1237,24 @@ const Blogs = () => {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "space-between",
+                        mt: 2,
                       }}
                     >
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                      >
-                        <Avatar
-                          src={`https://ui-avatars.com/api/?name=${post.author}&background=6366f1&color=fff`}
-                          sx={{ width: 32, height: 32 }}
-                        />
-                        <Typography variant="body2" fontWeight={500}>
-                          {post.author}
-                        </Typography>
-                      </Box>
-                      <Typography
-                        variant="caption"
+                      <Typography variant="caption" color="text.secondary">
+                        {post.date}
+                      </Typography>
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        onClick={() => handleReadMore(post.id)}
                         sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 0.5,
-                          color: "#6b7280",
+                          textTransform: "none",
+                          borderRadius: 2,
+                          py: 1,
                         }}
                       >
-                        <AccessTimeIcon sx={{ fontSize: 16 }} />
-                        {post.readTime}
-                      </Typography>
+                        Read More
+                      </Button>
                     </Box>
                   </Box>
                 </Paper>
@@ -1014,7 +1263,7 @@ const Blogs = () => {
           ))}
         </Grid>
       </Container>
-    </div>
+    </Box>
   );
 };
 

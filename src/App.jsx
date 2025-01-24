@@ -28,6 +28,8 @@ import Privacy from "./components/Privacy.jsx";
 import Terms from "./components/terms.jsx";
 import Blog from "./components/Blog.jsx";
 import ContactUs from "./components/ContactUs.jsx";
+import BlogList from "./components/Admin/BlogList.jsx";
+import BlogDetail from "./components/BlogDetail";
 import axios from "axios";
 
 // Context Menu Items configuration
@@ -664,6 +666,7 @@ const App = () => {
               <Route path="/terms" element={<Terms />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/contact" element={<ContactUs />} />
+              <Route path="/blog/:id" element={<BlogDetail />} />
               {/* Admin Routes with Sidebar Layout */}
               <Route path="/admin/login" element={<Login />} />
               <Route element={<Sidebar />}>
@@ -672,6 +675,7 @@ const App = () => {
                 <Route path="/admin/AddBookmark" element={<AddBookmark />} />
                 <Route path="/admin/addlinks" element={<AddLinks />} />
                 <Route path="/admin/addblog" element={<AddBlog />} />
+                <Route path="/admin/bloglist" element={<BlogList />} />
               </Route>
             </Routes>
           </Router>

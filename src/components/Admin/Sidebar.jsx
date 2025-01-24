@@ -91,6 +91,11 @@ export default function Sidebar() {
       icon: MdOutlineAddLink,
     },
     {
+      path: "/admin/BlogList",
+      label: "Blog List",
+      icon: MdOutlineAddLink,
+    },
+    {
       path: "/admin/AddBlog",
       label: "Add Blogs",
       icon: RiBloggerLine,
