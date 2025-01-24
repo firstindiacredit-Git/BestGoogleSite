@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, Outlet } from "react-router-dom";
 import { LuLayoutDashboard, LuUsers } from "react-icons/lu";
-import { MdOutlineAddLink } from "react-icons/md";
-import { IoSettingsOutline, IoSunny, IoMoon,IoLogOut } from "react-icons/io5";
+import { MdOutlineAddLink, MdBook } from "react-icons/md";
+import { IoSettingsOutline, IoSunny, IoMoon, IoLogOut } from "react-icons/io5";
+import { RiBloggerLine } from "react-icons/ri";
 import { signOut } from "firebase/auth";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../../firebase";
@@ -89,11 +90,11 @@ export default function Sidebar() {
       label: "Add Shortcuts",
       icon: MdOutlineAddLink,
     },
-    // {
-    //   path: "/admin/settings",
-    //   label: "Settings",
-    //   icon: IoSettingsOutline,
-    // },
+    {
+      path: "/admin/AddBlog",
+      label: "Add Blogs",
+      icon: RiBloggerLine,
+    },
   ];
 
   return (
@@ -101,7 +102,9 @@ export default function Sidebar() {
       <div className="w-[18rem] fixed left-0 top-0 h-screen bg-white dark:bg-[#37375d] border-r border-gray-200 dark:border-gray-800 flex flex-col">
         {/* Header */}
         <div className="p-5 border-b border-gray-200 dark:border-gray-800">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white text-center">Admin Panel</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white text-center">
+            Admin Panel
+          </h1>
         </div>
 
         {/* Profile Section */}
@@ -115,8 +118,12 @@ export default function Sidebar() {
               />
               <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 ring-2 ring-white dark:ring-gray-800"></div>
             </div>
-            <span className="mt-3 font-medium text-gray-900 dark:text-white">{dispName}</span>
-            <span className="text-sm text-gray-500 dark:text-gray-400">Administrator</span>
+            <span className="mt-3 font-medium text-gray-900 dark:text-white">
+              {dispName}
+            </span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              Administrator
+            </span>
           </div>
         </div>
 
@@ -132,13 +139,20 @@ export default function Sidebar() {
                 to={item.path}
                 className={`
                   flex items-center px-4 py-3 rounded-sm transition-all duration-200
-                  ${isActive 
-                    ? 'bg-gray-100 dark:bg-[#513a7a] text-gray-900 dark:text-white'
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white'
+                  ${
+                    isActive
+                      ? "bg-gray-100 dark:bg-[#513a7a] text-gray-900 dark:text-white"
+                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white"
                   }
                 `}
               >
-                <Icon className={`w-5 h-5 ${isActive ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`} />
+                <Icon
+                  className={`w-5 h-5 ${
+                    isActive
+                      ? "text-gray-900 dark:text-white"
+                      : "text-gray-500 dark:text-gray-400"
+                  }`}
+                />
                 <span className="ml-3 font-medium">{item.label}</span>
               </Link>
             );
@@ -152,8 +166,9 @@ export default function Sidebar() {
               onClick={handleLogout}
               className="w-full flex items-center  px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/20 rounded-sm transition-colors duration-200"
             >
-              <span><IoLogOut/></span>
-              
+              <span>
+                <IoLogOut />
+              </span>
               Logout
             </button>
 

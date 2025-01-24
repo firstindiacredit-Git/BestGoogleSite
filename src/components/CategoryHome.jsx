@@ -254,7 +254,7 @@ const CategoryHome = ({ categoryType, itemName }) => {
   const renderSettingsMenu = () => {
     const dropdownContent = showSettings && (
       <div
-        className={`fixed w-48 bg-white dark:text-white dark:bg-[#28283A] rounded-sm shadow-lg border border-gray-200 dark:border-gray-700 z-[9999]`}
+        className={`absolute w-48 bg-white dark:text-white dark:bg-[#28283A] rounded-sm shadow-lg border border-gray-200 dark:border-gray-700 z-[9998]`}
         style={{
           top: `${dropdownPosition.top}px`,
           right: `${dropdownPosition.right}px`,
@@ -369,7 +369,7 @@ const CategoryHome = ({ categoryType, itemName }) => {
     );
 
     return (
-      <div className="relative backdrop-blur-sm flex justify-between w-full">
+      <div className="relative backdrop-blur-sm isolate flex justify-between w-full">
         <div
           className="dark:text-white text-xl font-medium p-2 w-full cursor-pointer flex items-center"
           onClick={collapse}

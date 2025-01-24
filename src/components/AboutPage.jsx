@@ -22,7 +22,7 @@ const AboutPage = () => {
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="flex items-center space-x-2">
               <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-500 bg-clip-text text-transparent">
-                BGS
+                Browsey
               </span>
             </Link>
 
@@ -105,7 +105,7 @@ const AboutPage = () => {
             >
               About{' '}
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-500">
-                Best Google Site
+                Browsey
               </span>
             </motion.h1>
             <motion.p
@@ -130,7 +130,7 @@ const AboutPage = () => {
           >
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Story</h2>
             <p className="text-gray-600 mb-4">
-              Best Google Site emerged from a simple observation: the digital generation 
+              Browsey emerged from a simple observation: the digital generation 
               needed a better way to interact with the world's most powerful search engine.
             </p>
             <p className="text-gray-600">
@@ -224,7 +224,7 @@ const AboutPage = () => {
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">
         <div className="container mx-auto px-4 text-center">
-          <p>&copy; 2024 Best Google Site. All rights reserved.</p>
+          <p>&copy; 2024 Browsey. All rights reserved.</p>
         </div>
       </footer>
     </div>

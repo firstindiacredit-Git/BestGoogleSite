@@ -2,7 +2,7 @@ import React, { useState, createContext, useMemo, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Dropdown, Menu, Button, Modal, message } from "antd";
 import galleryupload from "../public/galleryupload.png";
-import { AuthProvider } from "./hooks/AuthContext.jsx";
+import { AuthProvider } from "./hooks/AuthContext";
 import SearchPage from "./components/SearchPage.jsx";
 import AddList from "./components/Calculator.jsx";
 import Signin from "./components/Signup/signin.jsx";
@@ -13,6 +13,7 @@ import Forgotpassword from "./components/Signup/Forgotpassword.jsx";
 import AddLinks from "./components/Admin/AddLinks.jsx";
 import Dashboard from "./components/Admin/Dashboard.jsx";
 import AddBookmark from "./components/Admin/AddBookmark.jsx";
+import AddBlog from "./components/Admin/AddBlog.jsx";
 import Login from "./components/Admin/Login.jsx";
 import Users from "./components/Admin/Users.jsx";
 import PremiumPage from "./components/PremiumPage.jsx";
@@ -23,6 +24,10 @@ import LandingPage from "./components/LandingPage.jsx";
 import AboutPage from "./components/AboutPage.jsx";
 import PricingPage from "./components/PricingPage.jsx";
 import FAQPage from "./components/FAQPage.jsx";
+import Privacy from "./components/Privacy.jsx";
+import Terms from "./components/terms.jsx";
+import Blog from "./components/Blog.jsx";
+import ContactUs from "./components/ContactUs.jsx";
 import axios from "axios";
 
 // Context Menu Items configuration
@@ -269,7 +274,6 @@ const ContextMenuWrapper = ({ children }) => {
 
       try {
         localStorage.setItem("backgroundImage", compressedImage);
-        localStorage.setItem("bgTransparency", "50");
         window.location.reload();
       } catch (error) {
         if (error.name === "QuotaExceededError") {
@@ -597,8 +601,8 @@ const App = () => {
     });
   }, [isDarkMode]);
 
-  // Memoize the context value
-  const contextValue = useMemo(
+  // Memoize the widget transparency context value
+  const widgetTransparencyValue = useMemo(
     () => ({
       widgetTransparent,
       setWidgetTransparent,
@@ -608,7 +612,7 @@ const App = () => {
 
   return (
     <ThemeContext.Provider value={themeContextValue}>
-      <WidgetTransparencyContext.Provider value={contextValue}>
+      <WidgetTransparencyContext.Provider value={widgetTransparencyValue}>
         <AuthProvider>
           <Router>
             <Routes>
@@ -617,6 +621,7 @@ const App = () => {
               <Route path="/about" element={<AboutPage />} />
               <Route path="/pricing" element={<PricingPage />} />
               <Route path="/faq" element={<FAQPage />} />
+              <Route path="/terms" element={<Terms />} />
               <Route
                 path="/search"
                 element={
@@ -655,7 +660,10 @@ const App = () => {
               <Route path="/forgot-password" element={<Forgotpassword />} />
               <Route path="/premium" element={<PremiumPage />} />
               <Route path="/premium-form" element={<PremiumForm />} />
-
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/contact" element={<ContactUs />} />
               {/* Admin Routes with Sidebar Layout */}
               <Route path="/admin/login" element={<Login />} />
               <Route element={<Sidebar />}>
@@ -663,6 +671,7 @@ const App = () => {
                 <Route path="/admin/users" element={<Users />} />
                 <Route path="/admin/AddBookmark" element={<AddBookmark />} />
                 <Route path="/admin/addlinks" element={<AddLinks />} />
+                <Route path="/admin/addblog" element={<AddBlog />} />
               </Route>
             </Routes>
           </Router>

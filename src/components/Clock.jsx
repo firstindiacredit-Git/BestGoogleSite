@@ -279,12 +279,13 @@ const TimeZoneClock = ({
 
 const ResponsiveWorldClock = () => {
   const [isAnalog, setIsAnalog] = useState(true);
+  const [currentTheme, setCurrentTheme] = useState(CLOCK_THEMES.classic);
+  const [selectedTimezones, setSelectedTimezones] = useState(["Asia/Kolkata"]);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
-  const [selectedTimezones, setSelectedTimezones] = useState(["Asia/Kolkata"]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [currentTheme, setCurrentTheme] = useState(CLOCK_THEMES.classic);
   const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
   const settingsRef = useRef(null);
   const collapse = () => {
     setIsCollapsed(!isCollapsed);
@@ -300,6 +301,16 @@ const ResponsiveWorldClock = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (showSettingsDropdown && settingsRef.current) {
+      const rect = settingsRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.height + 8,
+        right: 0,
+      });
+    }
+  }, [showSettingsDropdown]);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -361,7 +372,7 @@ const ResponsiveWorldClock = () => {
     <div
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
-      className={`w-full max-w-xl dark:text-white p-4 backdrop-blur-sm rounded-b-sm flex justify-center items-center`}
+      className={`w-full max-w-xl dark:text-white p-4 backdrop-blur-sm  rounded-b-sm flex justify-center items-center`}
     >
       <div className="mx-auto w-full">
         <div className="flex items-center">
@@ -392,14 +403,14 @@ const ResponsiveWorldClock = () => {
                               <button
                                 key={timeZone}
                                 onClick={() => addTimeZone(timeZone)}
-                                className="w-full px-4 py-2 text-left text-sm hover:bg-white dark:text-white dark:hover:bg-white/10 transition"
+                                className="w-full px-4 py-2 text-left text-sm hover:bg-white dark:hover:bg-white/10 transition"
                               >
                                 {formatTimeZoneName(timeZone)}
                               </button>
                             ))}
                           </div>
                           <div
-                            className="fixed inset-0 z-40"
+                            className="fixed inset-0 z-50"
                             onClick={() => setIsDropdownOpen(false)}
                           />
                         </>
@@ -412,37 +423,53 @@ const ResponsiveWorldClock = () => {
                     onClick={() =>
                       setShowSettingsDropdown(!showSettingsDropdown)
                     }
-                    className="p-2  hover:bg-gray-100  dark:hover:bg-white/20 transition flex items-center gap-2"
+                    className="p-2   transition flex items-center gap-2"
                   >
                     <Settings className="w-5 h-5" />
                   </button>
 
                   {showSettingsDropdown && (
-                    <div className="absolute left-0 mt-2 w-48 dark:text-white dark:bg-[#513a7a] backdrop-blur-sm bg-gray-200 rounded-sm shadow-lg py-1 z-50">
-                      <button
-                        onClick={() => {
-                          setIsAnalog(!isAnalog);
-                          setShowSettingsDropdown(false);
-                        }}
-                        className="w-full text-left px-4 py-2 hover:bg-white/10 transition"
-                      >
-                        {isAnalog ? "Switch to Digital" : "Switch to Analog"}
-                      </button>
+                    <div 
+                      className="absolute w-48 bg-white dark:text-white dark:bg-[#28283A] rounded-sm shadow-lg border border-gray-200 dark:border-gray-700 z-[9999]"
+                      style={{
+                        top: `${dropdownPosition.top}px`,
+                        right: `${dropdownPosition.right}px`,
+                      }}
+                    >
+                      <div className="p-2">
+                        <div className="mb-4">
+                          <div className="text-sm font-medium text-gray-500 dark:text-gray-400 p-2">
+                            Display
+                          </div>
+                          <button
+                            onClick={() => {
+                              setIsAnalog(!isAnalog);
+                              setShowSettingsDropdown(false);
+                            }}
+                            className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                          >
+                            {isAnalog ? "Switch to Digital" : "Switch to Analog"}
+                          </button>
+                        </div>
 
-                      <div className="border-t border-gray-700 my-1"></div>
-
-                      {Object.entries(CLOCK_THEMES).map(([key, theme]) => (
-                        <button
-                          key={key}
-                          onClick={() => {
-                            setCurrentTheme(theme);
-                            setShowSettingsDropdown(false);
-                          }}
-                          className="w-full text-left px-4 py-2 hover:bg-white/10 transition"
-                        >
-                          {theme.name} Theme
-                        </button>
-                      ))}
+                        <div className="mb-2">
+                          <div className="text-sm font-medium text-gray-500 dark:text-gray-400 p-2">
+                            Theme
+                          </div>
+                          {Object.entries(CLOCK_THEMES).map(([key, theme]) => (
+                            <button
+                              key={key}
+                              onClick={() => {
+                                setCurrentTheme(theme);
+                                setShowSettingsDropdown(false);
+                              }}
+                              className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                            >
+                              {theme.name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
