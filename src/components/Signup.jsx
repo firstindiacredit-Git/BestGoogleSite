@@ -1,14 +1,14 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   signInWithPopup,
   createUserWithEmailAndPassword,
-  signOut,
   onAuthStateChanged,
 } from "firebase/auth";
 import { auth, provider } from "../firebase";
 import { getFirestore, setDoc, doc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { IoEyeOff, IoEye } from "react-icons/io5";
+import { protectForm } from "../utils/recaptcha";
 
 const Signup = () => {
   const [firstName, setFirstName] = useState("");
@@ -18,11 +18,11 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [recaptchaLoaded, setRecaptchaLoaded] = useState(false);
+  const recaptchaContainer = useRef(null);
 
   const navigate = useNavigate();
   const db = getFirestore();
-
-  const suggestedPassword = "StrongPass123!";
 
   const registerUserInFirestore = async (user) => {
     try {
@@ -45,30 +45,41 @@ const Signup = () => {
     setLoading(true);
     setError("");
 
-    try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      const user = userCredential.user;
-      await registerUserInFirestore(user);
-      navigate("/search");
-    } catch (error) {
-      setError("Something went wrong. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+    await protectForm(
+      async () => {
+        try {
+          const userCredential = await createUserWithEmailAndPassword(
+            auth,
+            email,
+            password
+          );
+          const user = userCredential.user;
+          await registerUserInFirestore(user);
+          navigate("/search");
+        } catch (error) {
+          setError("Something went wrong. Please try again.");
+        }
+      },
+      (error) => setError(error)
+    );
+
+    setLoading(false);
   };
 
   const handleGoogleSignIn = async () => {
     setError("");
-    try {
-      await signInWithPopup(auth, provider);
-      navigate("/search");
-    } catch (error) {
-      setError("Something went wrong. Please try again.");
-    }
+
+    await protectForm(
+      async () => {
+        try {
+          await signInWithPopup(auth, provider);
+          navigate("/search");
+        } catch (error) {
+          setError("Something went wrong. Please try again.");
+        }
+      },
+      (error) => setError(error)
+    );
   };
 
   useEffect(() => {
@@ -80,6 +91,35 @@ const Signup = () => {
 
     return () => unsubscribe();
   }, [navigate]);
+
+  useEffect(() => {
+    // Load reCAPTCHA when component mounts
+    const script = document.createElement("script");
+    script.src = "https://www.google.com/recaptcha/api.js?render=explicit";
+    script.async = true;
+    script.defer = true;
+
+    script.onload = () => {
+      if (window.grecaptcha) {
+        window.grecaptcha.ready(() => {
+          window.grecaptcha.render(recaptchaContainer.current, {
+            sitekey: "6LdL78EqAAAAADhSJys9dchITOCB3Q6lyriJOuYF",
+            callback: () => setRecaptchaLoaded(true),
+          });
+        });
+      }
+    };
+
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+      // Reset reCAPTCHA state when component unmounts
+      if (window.grecaptcha) {
+        window.grecaptcha.reset();
+      }
+    };
+  }, []);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
@@ -138,9 +178,12 @@ const Signup = () => {
               {showPassword ? <IoEye /> : <IoEyeOff />}
             </button>
           </div>
+          <div className="flex justify-center mb-4">
+            <div ref={recaptchaContainer}></div>
+          </div>
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !recaptchaLoaded}
             className="w-full bg-indigo-500 text-white py-2 rounded-xs hover:bg-indigo-600 focus:outline-none"
           >
             {loading ? "Creating account..." : "Create account"}
@@ -156,7 +199,7 @@ const Signup = () => {
         <div className="flex flex-col space-y-2">
           <button
             onClick={handleGoogleSignIn}
-            disabled={loading}
+            disabled={loading || !recaptchaLoaded}
             className="flex items-center justify-center w-full border border-gray-300 py-2 rounded-xs hover:bg-gray-100 focus:outline-none"
           >
             <img src="/google.png" alt="Google" className="w-5 h-5 mr-2" />

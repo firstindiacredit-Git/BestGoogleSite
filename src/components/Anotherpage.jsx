@@ -473,7 +473,7 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
             loading={isResetting}
             className="mr-auto hover:text-blue-500"
           >
-            Reset Layout
+            Default Layout
           </AntButton>,
           <AntButton key="cancel" onClick={() => setIsSorterOpen(false)}>
             Cancel

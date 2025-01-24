@@ -1,55 +1,89 @@
 import React, { useState, useEffect } from "react";
 import Header from "../components/Header";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Chrome } from "lucide-react";
 import { FiCheck } from "react-icons/fi";
+import PayPalSubscription from "./PayPalSubscription";
 
+const PricingCard = ({ plan, popular }) => {
+  const [showPayPal, setShowPayPal] = useState(false);
 
-const PricingCard = ({ plan, popular }) => (
-  <motion.div
-    whileHover={{ y: -5 }}
-    className={`p-8 rounded-2xl ${
-      popular
-        ? 'bg-gradient-to-br from-indigo-600 to-indigo-700 text-white'
-        : 'bg-white'
-    } shadow-xl`}
-  >
-    <h3 className={`text-2xl font-bold mb-4 ${popular ? 'text-white' : 'text-gray-900'}`}>
-      {plan.title}
-    </h3>
-    <div className="flex items-baseline mb-8">
-      <span className={`text-4xl font-bold ${popular ? 'text-white' : 'text-indigo-600'}`}>
-        ${plan.price}
-      </span>
-      <span className={popular ? 'text-white/80' : 'text-gray-600'}>
-        {plan.popular ? "/Month" : "/Forever"}
-      </span>
-    </div>
-    <ul className="space-y-4 mb-8">
-      {plan.features.map((feature, i) => (
-        <li key={i} className="flex items-center gap-3">
-          <FiCheck className={`w-5 h-5 ${popular ? 'text-white' : 'text-indigo-600'}`} />
-          <span className={popular ? 'text-white' : 'text-gray-600'}>{feature}</span>
-        </li>
-      ))}
-    </ul>
-    <button
-      className={`w-full py-3 rounded-sm font-semibold transition-all ${
+  return (
+    <motion.div
+      whileHover={{ y: -5 }}
+      className={`p-8 rounded-2xl ${
         popular
-          ? 'bg-white text-indigo-600 hover:bg-indigo-50'
-          : 'bg-indigo-600 text-white hover:bg-indigo-700'
-      }`}
+          ? "bg-gradient-to-br from-indigo-600 to-indigo-700 text-white"
+          : "bg-white"
+      } shadow-xl`}
     >
-      Get Started
-    </button>
-  </motion.div>
-);
+      <h3
+        className={`text-2xl font-bold mb-4 ${
+          popular ? "text-white" : "text-gray-900"
+        }`}
+      >
+        {plan.title}
+      </h3>
+      <div className="flex items-baseline mb-8">
+        <span
+          className={`text-4xl font-bold ${
+            popular ? "text-white" : "text-indigo-600"
+          }`}
+        >
+          ${plan.price}
+        </span>
+        <span className={popular ? "text-white/80" : "text-gray-600"}>
+          {plan.popular ? "/Month" : "/Forever"}
+        </span>
+      </div>
+      <ul className="space-y-4 mb-8">
+        {plan.features.map((feature, i) => (
+          <li key={i} className="flex items-center gap-3">
+            <FiCheck
+              className={`w-5 h-5 ${
+                popular ? "text-white" : "text-indigo-600"
+              }`}
+            />
+            <span className={popular ? "text-white" : "text-gray-600"}>
+              {feature}
+            </span>
+          </li>
+        ))}
+      </ul>
+      {plan.title === "Pro" ? (
+        <>
+          {!showPayPal ? (
+            <button
+              onClick={() => setShowPayPal(true)}
+              className={`w-full py-3 rounded-sm font-semibold transition-all bg-white text-indigo-600 hover:bg-indigo-50`}
+            >
+              Get Started
+            </button>
+          ) : (
+            <PayPalSubscription
+              onSuccess={() => {
+                setShowPayPal(false);
+                // You can add additional success handling here
+              }}
+            />
+          )}
+        </>
+      ) : (
+        <button
+          className={`w-full py-3 rounded-sm font-semibold transition-all ${
+            popular
+              ? "bg-white text-indigo-600 hover:bg-indigo-50"
+              : "bg-indigo-600 text-white hover:bg-indigo-700"
+          }`}
+        >
+          Get Started
+        </button>
+      )}
+    </motion.div>
+  );
+};
 
 const PremiumPage = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
   const plans = [
     {
       title: "Free",
@@ -58,8 +92,8 @@ const PremiumPage = () => {
         "Basic search functionality",
         "Chrome extension access",
         "Standard support",
-        "1 device"
-      ]
+        "1 device",
+      ],
     },
     {
       title: "Pro",
@@ -70,8 +104,8 @@ const PremiumPage = () => {
         "Priority support",
         "Multiple devices",
         "Custom themes",
-        "AI-powered suggestions"
-      ]
+        "AI-powered suggestions",
+      ],
     },
     {
       title: "Enterprise",
@@ -81,9 +115,9 @@ const PremiumPage = () => {
         "Team collaboration",
         "API access",
         "24/7 dedicated support",
-        "Custom integration"
-      ]
-    }
+        "Custom integration",
+      ],
+    },
   ];
   const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -103,11 +137,6 @@ const PremiumPage = () => {
       return newMode;
     });
   };
-  const goBack = () => {
-    navigate(-1);
-  };
-
-   const navigate = useNavigate();
 
   return (
     <div className={`min-h-screen ${isDarkMode ? "bg-gray-900" : "bg-white"}`}>
@@ -154,8 +183,6 @@ const PremiumPage = () => {
           ))}
         </div>
       </div>
-
-      
 
       {/* CTA Section */}
       <div className="relative overflow-hidden">

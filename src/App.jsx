@@ -20,8 +20,10 @@ import NotFound from "./components/NotFound.jsx";
 import galleryupload from "../public/galleryupload.png";
 import { AuthProvider } from "./hooks/AuthContext.jsx";
 import SearchPage from "./components/SearchPage.jsx";
-import AddList from "./components/Calculator.jsx";
 import Signin from "./components/Signup/signin.jsx";
+import Privacy from "./components/Privacy.jsx";
+import Terms from "./components/Terms.jsx";
+import ContactUs from "./components/ContactUs.jsx";
 import Signup from "./components/Signup.jsx";
 import NewSearchPage from "./components/NewSearchPage.jsx";
 import ProfilePage from "./components/ProfilePage.jsx";
@@ -32,17 +34,16 @@ import AddBookmark from "./components/Admin/AddBookmark.jsx";
 import Login from "./components/Admin/Login.jsx";
 import Users from "./components/Admin/Users.jsx";
 import PremiumPage from "./components/PremiumPage.jsx";
-import PasswordGenerator from "./components/PasswordGenerater.jsx";
 import PremiumForm from "./components/PremiumForm.jsx";
 import Sidebar from "./components/Admin/Sidebar.jsx";
 import LandingPage from "./components/LandingPage.jsx";
 import AboutPage from "./components/AboutPage.jsx";
 import PricingPage from "./components/PricingPage.jsx";
 import FAQPage from "./components/FAQPage.jsx";
-import axios from "axios";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "./firebase";
 import { auth } from "./firebase";
+import PayPalProvider from "./providers/PayPalProvider";
 
 // Context Menu Items configuration
 const menuItems = [
@@ -751,48 +752,53 @@ const App = () => {
   );
 
   return (
-    <ThemeContext.Provider value={themeContextValue}>
-      <WidgetTransparencyContext.Provider value={contextValue}>
-        <AuthProvider>
-          <Router>
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/about" element={<AboutPage />} />
-              <Route path="/pricing" element={<PricingPage />} />
-              <Route path="/faq" element={<FAQPage />} />
-              <Route path="*" element={<NotFound />} />
-              <Route path="/search" element={<SearchPageWrapper />} />
+    <PayPalProvider>
+      <ThemeContext.Provider value={themeContextValue}>
+        <WidgetTransparencyContext.Provider value={contextValue}>
+          <AuthProvider>
+            <Router>
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/about" element={<AboutPage />} />
+                <Route path="/pricing" element={<PricingPage />} />
+                <Route path="/faq" element={<FAQPage />} />
+                <Route path="*" element={<NotFound />} />
+                <Route path="/search" element={<SearchPageWrapper />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/contact" element={<ContactUs />} />
 
-              <Route
-                path="/NewSearchPage"
-                element={
-                  <ContextMenuWrapper>
-                    <NewSearchPage />
-                  </ContextMenuWrapper>
-                }
-              />
+                <Route
+                  path="/NewSearchPage"
+                  element={
+                    <ContextMenuWrapper>
+                      <NewSearchPage />
+                    </ContextMenuWrapper>
+                  }
+                />
 
-              <Route path="/signin" element={<Signin />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/forgot-password" element={<Forgotpassword />} />
-              <Route path="/premium" element={<PremiumPage />} />
-              <Route path="/premium-form" element={<PremiumForm />} />
+                <Route path="/signin" element={<Signin />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/forgot-password" element={<Forgotpassword />} />
+                <Route path="/premium" element={<PremiumPage />} />
+                <Route path="/premium-form" element={<PremiumForm />} />
 
-              {/* Admin Routes with Sidebar Layout */}
-              <Route path="/admin/login" element={<Login />} />
-              <Route element={<Sidebar />}>
-                <Route path="/admin/dashboard" element={<Dashboard />} />
-                <Route path="/admin/users" element={<Users />} />
-                <Route path="/admin/AddBookmark" element={<AddBookmark />} />
-                <Route path="/admin/addlinks" element={<AddLinks />} />
-              </Route>
-            </Routes>
-          </Router>
-        </AuthProvider>
-      </WidgetTransparencyContext.Provider>
-    </ThemeContext.Provider>
+                {/* Admin Routes with Sidebar Layout */}
+                <Route path="/admin/login" element={<Login />} />
+                <Route element={<Sidebar />}>
+                  <Route path="/admin/dashboard" element={<Dashboard />} />
+                  <Route path="/admin/users" element={<Users />} />
+                  <Route path="/admin/AddBookmark" element={<AddBookmark />} />
+                  <Route path="/admin/addlinks" element={<AddLinks />} />
+                </Route>
+              </Routes>
+            </Router>
+          </AuthProvider>
+        </WidgetTransparencyContext.Provider>
+      </ThemeContext.Provider>
+    </PayPalProvider>
   );
 };
 
