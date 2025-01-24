@@ -13,14 +13,12 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase app and services
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 const storage = getStorage(app); // Firebase Storage initialization
 
-// User State Listener and Firestore Sync
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     const userDocRef = doc(db, "users", user.uid);
@@ -38,7 +36,7 @@ onAuthStateChanged(auth, async (user) => {
           email: user.email,
           displayName: user.displayName || "",
           photoURL: user.photoURL || "",
-          subscriptionStatus: "trial",
+          subscriptionStatus: "free",
           trialStartDate: trialStartDate,
           trialEndDate: trialEndDate,
           createdAt: new Date(),
@@ -58,17 +56,12 @@ onAuthStateChanged(auth, async (user) => {
         console.error("Error creating user document: ", error);
       }
     } else {
-      // Update last login time and handle roles
       const userData = userDocSnap.data();
       const userRole = userData.role;
-
-      // Don't update trial status for admin users
       if (userRole !== "admin") {
         const now = new Date();
         const trialEndDate = userData.trialEndDate?.toDate();
         const isTrialExpired = trialEndDate && now > trialEndDate;
-
-        // Update trial status if needed
         if (isTrialExpired && userData.subscriptionStatus === "trial") {
           await setDoc(
             userDocRef,
@@ -93,5 +86,4 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-// Export Firebase services
 export { db, auth, provider, storage };
