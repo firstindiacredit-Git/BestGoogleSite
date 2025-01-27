@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { updatePassword, updateProfile } from "firebase/auth";
-import { auth, db, storage } from "../firebase";
+import { auth, db } from "../firebase";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { FaEye, FaEyeSlash, FaPen, FaCamera } from "react-icons/fa";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import imageCompression from "browser-image-compression";
+import {
+  CLOUDINARY_CONFIG,
+  getCloudinaryUploadUrl,
+} from "../config/cloudinary";
 
 const ProfilePage = () => {
   const [username, setUsername] = useState("");
@@ -54,10 +57,10 @@ const ProfilePage = () => {
     fileInputRef.current?.click();
   };
 
-  const compressImage = async (file) => {
+  const compressImage = async (file, isForAuth = false) => {
     const options = {
-      maxSizeMB: 1,
-      maxWidthOrHeight: 800,
+      maxSizeMB: isForAuth ? 0.1 : 1, // Much smaller for auth profile
+      maxWidthOrHeight: isForAuth ? 200 : 800, // Smaller dimensions for auth
       useWebWorker: true,
       fileType: file.type,
     };
@@ -71,56 +74,69 @@ const ProfilePage = () => {
     }
   };
 
- const handleFileChange = async (e) => {
-   const file = e.target.files?.[0];
-   if (!file) return;
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-   // Validate file type
-   if (!file.type.startsWith("image/")) {
-     alert("Please upload an image file");
-     return;
-   }
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      alert("Please upload an image file");
+      return;
+    }
 
-   try {
-     setIsUploading(true);
-     const currentUser = auth.currentUser;
-     if (!currentUser) throw new Error("No user logged in");
+    try {
+      setIsUploading(true);
+      const currentUser = auth.currentUser;
+      if (!currentUser) throw new Error("No user logged in");
 
-     const compressedImage = await compressImage(file);
+      // Compress image before upload
+      const compressedImage = await compressImage(file, false);
 
-     const timestamp = Date.now();
-     const filename = `${timestamp}_${file.name}`;
-     const storageRef = ref(storage, `avatars/${currentUser.uid}/${filename}`);
+      // Create form data for Cloudinary upload
+      const formData = new FormData();
+      formData.append("file", compressedImage);
+      formData.append("upload_preset", CLOUDINARY_CONFIG.UPLOAD_PRESET);
+      formData.append("folder", "user_avatars");
 
-     const uploadTask = await uploadBytes(storageRef, compressedImage);
-     console.log("Upload successful:", uploadTask);
+      // Upload to Cloudinary
+      const response = await fetch(getCloudinaryUploadUrl(), {
+        method: "POST",
+        body: formData,
+      });
 
-     const downloadURL = await getDownloadURL(storageRef);
+      if (!response.ok) {
+        throw new Error("Failed to upload image to Cloudinary");
+      }
 
-     await updateProfile(currentUser, {
-       photoURL: downloadURL,
-     });
+      const data = await response.json();
+      const imageUrl = data.secure_url;
 
-     const userRef = doc(db, "users", currentUser.uid);
-     await updateDoc(userRef, {
-       avatarUrl: downloadURL,
-     });
+      try {
+        // Update auth profile with Cloudinary URL
+        await updateProfile(currentUser, {
+          photoURL: imageUrl,
+        });
 
-     setAvatarUrl(downloadURL);
-     alert("Profile picture updated successfully!");
-   } catch (error) {
-     console.error("Error uploading avatar:", error);
-     if (error.code === "storage/unauthorized") {
-       alert("Error: Permission denied. Please make sure you are logged in.");
-     } else if (error.code === "storage/quota-exceeded") {
-       alert("Error: Storage quota exceeded. Please contact support.");
-     } else {
-       alert("Failed to upload profile picture. Please try again.");
-     }
-   } finally {
-     setIsUploading(false);
-   }
- };
+        // Update Firestore with Cloudinary URL
+        const userRef = doc(db, "users", currentUser.uid);
+        await updateDoc(userRef, {
+          avatarUrl: imageUrl,
+        });
+
+        // Update UI
+        setAvatarUrl(imageUrl);
+        alert("Profile picture updated successfully!");
+      } catch (error) {
+        console.error("Error updating profile:", error);
+        alert("Failed to update profile picture. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error processing image:", error);
+      alert("Failed to process image. Please try again.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const fetchUserPin = async (userId) => {
     try {

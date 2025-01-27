@@ -12,6 +12,7 @@
   "dependencies": {
     "@babel/plugin-transform-runtime": "^7.25.9",
     "@babel/runtime": "^7.26.0",
+    "@cloudinary/url-gen": "^1.21.0",
     "@emotion/styled": "^11.13.0",
     "@mui/icons-material": "^6.1.10",
     "@mui/material": "^6.1.10",
@@ -24,6 +25,7 @@
     "axios": "^1.7.9",
     "browser-image-compression": "^2.0.2",
     "chart.js": "^4.4.5",
+    "cloudinary-react": "^1.8.1",
     "date-fns": "^4.1.0",
     "exceljs": "^4.4.0",
     "firebase": "^10.14.1",

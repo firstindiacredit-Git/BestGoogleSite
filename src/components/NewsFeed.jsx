@@ -48,7 +48,7 @@ const NewsListItem = memo(({ news }) => (
     href={news.link}
     target="_blank"
     rel="noopener noreferrer"
-    className="block py-2 border-b dark:border-gray-700 last:border-b-0 hover:bg-gray-50/[var(--widget-opacity)] dark:hover:bg-gray-800/50/[var(--widget-opacity)] transition-colors"
+    className="block py-2 border-b dark:border-gray-700 last:border-b-0  dark:hover:bg-gray-800/50/[var(--widget-opacity)] transition-colors"
   >
     <h3 className="text-sm font-medium text-indigo-600 dark:text-blue-400 hover:text-indigo-700 dark:hover:text-blue-500 line-clamp-2">
       {news.title}

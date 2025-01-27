@@ -1,45 +1,170 @@
-/* Default modal customization */
-.custom-modal .ant-modal-content {
-  background-color: white; /* Light mode */
-  color: #000; /* Light text color */
-}
-
 /* Dark mode styling */
-.custom-modal.dark-mode .ant-modal-content {
-  background-color: #323344; /* Dark background */
-  color: #fff; /* Light text color */
+.custom-modal.dark .ant-modal-content {
+  background-color: red;
+  color: #fff;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
 }
 
+/* Header styling for both modes */
+.custom-modal .ant-modal-header {
+  background-color: #fff;
+  border-bottom: 1px solid #f0f0f0;
+  border-radius: 8px 8px 0 0;
+  padding: 16px 24px;
+}
+
+.custom-modal .ant-modal-title {
+  color: #000;
+  font-weight: 500;
+}
+
 /* Header for dark mode */
-.custom-modal.dark-mode .ant-modal-header {
-  background-color: #323344; /* Dark header background */
+.custom-modal.dark .ant-modal-header {
+  background-color: #323344;
   border-bottom: 1px solid #444;
 }
 
-/* Footer for dark mode */
-.custom-modal.dark-mode .ant-modal-footer {
-  background-color: #323344;
+.custom-modal.dark .ant-modal-title {
+  color: #fff;
+}
+
+/* Body styling for both modes */
+.custom-modal .ant-modal-body {
+  padding: 24px;
+  background-color: #fff;
+}
+
+.custom-modal.dark .ant-modal-body {
+  background-color: #28283a;
+  color: #fff;
+}
+
+/* Footer styling */
+.custom-modal .ant-modal-footer {
+  background-color: #fff;
+  border-top: 1px solid #f0f0f0;
+  border-radius: 0 0 8px 8px;
+  padding: 10px 16px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.custom-modal.dark .ant-modal-footer {
+  background-color: #28283a;
   border-top: 1px solid #444;
   display: flex;
   justify-content: space-between;
 }
-.custom-modal.light-mode .ant-modal-footer {
+
+.custom-modal.light .ant-modal-footer {
   border-top: 1px solid #dfdfdf;
   display: flex;
   justify-content: space-between;
 }
 
-/* Button in footer for dark mode */
-.custom-modal.dark-mode .ant-btn {
-  color: #ddd;
+/* Button styling for both modes */
+.custom-modal .ant-btn {
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+/* Button in footer for light mode */
+.custom-modal .ant-btn-default {
+  color: rgba(0, 0, 0, 0.85);
+  background: #fff;
+  border: 1px solid #d9d9d9;
+}
+
+.custom-modal .ant-btn-default:hover {
+  color: #513a7a;
+  border-color: #513a7a;
+}
+
+.custom-modal .ant-btn-primary {
+  color: #fff;
   background: #513a7a;
   border: 1px solid #513a7a;
 }
 
-.custom-modal.dark-mode .ant-btn:hover {
+.custom-modal .ant-btn-primary:hover {
+  background: #624890;
+  border-color: #624890;
+}
+
+/* Button in footer for dark mode */
+.custom-modal.dark .ant-btn {
   color: #fff;
   background: #513a7a;
-  border-color: #513a7a;
+  border: 1px solid #513a7a;
+}
+
+.custom-modal.dark .ant-btn:hover {
+  color: #fff;
+  background: #624890;
+  border-color: #624890;
+}
+
+/* Close button styling */
+.custom-modal .ant-modal-close {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.custom-modal.dark .ant-modal-close {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.custom-modal .ant-modal-close:hover {
+  color: rgba(0, 0, 0, 0.75);
+}
+
+.custom-modal.dark .ant-modal-close:hover {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+
+
+.ant-modal .ant-modal-content {
+  position: relative;
+  background-color: white;
+  background-clip: padding-box;
+  border: 0;
+  border-radius: 8px;
+  box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08),
+    0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
+  pointer-events: auto;
+  padding: 20px 24px;
+}
+
+.dark .ant-modal .ant-modal-content {
+  position: relative;
+  background-color: #28283A;
+  background-clip: padding-box;
+  border: 0;
+  border-radius: 8px;
+  box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08),
+    0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
+  pointer-events: auto;
+  padding: 20px 24px;
+}
+
+.dark .ant-modal .ant-modal-title {
+  margin: 0;
+  background-color: #28283a;
+  color: rgba(255, 255, 255, 0.88);
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+.dark .ant-modal .ant-modal-close-x {
+  display: flex;
+  font-size: 16px;
+  font-style: normal;
+  line-height: 32px;
+  justify-content: center;
+  text-transform: none;
+  text-rendering: auto;
+  color:white;
 }

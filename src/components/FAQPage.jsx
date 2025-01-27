@@ -145,7 +145,7 @@ const FAQPage = () => {
           <div className="flex items-center justify-between h-16">
             <Link to="/search" className="flex items-center space-x-2">
               <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-500 bg-clip-text text-transparent">
-                BGS
+                Browsey
               </span>
             </Link>
 
@@ -224,7 +224,7 @@ const FAQPage = () => {
             >
               {category.category}
             </motion.h2>
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-200/10 divide-y divide-gray-200">
+            <div className="bg-white rounded-2xl shadow-lg border p-4 border-gray-200/10 divide-y divide-gray-200">
               {category.questions.map((faq, faqIndex) => (
                 <FAQItem
                   key={faqIndex}
@@ -262,7 +262,7 @@ const FAQPage = () => {
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">
         <div className="container mx-auto px-4 text-center">
-          <p>&copy; 2024 Best Google Site. All rights reserved.</p>
+          <p>&copy; 2024 Browsey. All rights reserved.</p>
         </div>
       </footer>
     </div>

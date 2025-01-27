@@ -6,325 +6,61 @@ import { ColorPicker } from "antd";
 
 const API_KEY = "78a1522c5ec67352674263eaaa54bffa";
 
-// Predefined neon colors
-const neonPresets = [
+// Predefined theme colors
+const themePresets = [
   {
-    label: "Neon Blue",
+    name: "Modern Light",
     colors: {
-      background: "#0c1445",
-      accent: "#00fff2",
-      bottomBg: "#1a237e",
-      buttonBg: "#283593",
-    },
+      primary: "#4F46E5",
+      secondary: "#3B82F6",
+      background: "rgba(255, 255, 255, 0.9)",
+      text: "#1F2937",
+      titleText: "#111827",
+      titleBg: "rgba(255, 255, 255, 0.95)",
+      cardBg: "rgba(255, 255, 255, 0.95)",
+      cardHover: "rgba(79, 70, 229, 0.1)"
+    }
   },
   {
-    label: "Neon Pink",
+    name: "Dark Mode",
     colors: {
-      background: "#2d0a31",
-      accent: "#ff00ff",
-      bottomBg: "#4a1850",
-      buttonBg: "#6a1b9a",
-    },
+      primary: "#8B5CF6",
+      secondary: "#6D28D9",
+      background: "rgba(17, 24, 39, 0.95)",
+      text: "#F3F4F6",
+      titleText: "#F9FAFB",
+      titleBg: "rgba(31, 41, 55, 0.95)",
+      cardBg: "rgba(31, 41, 55, 0.95)",
+      cardHover: "rgba(139, 92, 246, 0.2)"
+    }
   },
   {
-    label: "Neon Green",
+    name: "Ocean Blue",
     colors: {
-      background: "#0a2d0a",
-      accent: "#39ff14",
-      bottomBg: "#1b5e20",
-      buttonBg: "#2e7d32",
-    },
+      primary: "#0EA5E9",
+      secondary: "#0284C7",
+      background: "rgba(240, 249, 255, 0.95)",
+      text: "#0F172A",
+      titleText: "#0C4A6E",
+      titleBg: "rgba(224, 242, 254, 0.95)",
+      cardBg: "rgba(255, 255, 255, 0.95)",
+      cardHover: "rgba(14, 165, 233, 0.1)"
+    }
   },
   {
-    label: "Cyberpunk",
+    name: "Sunset Orange",
     colors: {
-      background: "#2b213a",
-      accent: "#f0fb3d",
-      bottomBg: "#453750",
-      buttonBg: "#5c4069",
-    },
-  },
-];
-
-// const themes = {
-//   default: {
-//     background: "#ec7263",
-//     accent: "#efc745",
-//     bottomBg: "#974859",
-//     buttonBg: "#a75265",
-//     glow: "0 0 10px #ec7263",
-//   },
-//   neonBlue: {
-//     background: "#0c1445",
-//     accent: "#00fff2",
-//     bottomBg: "#1a237e",
-//     buttonBg: "#283593",
-//     glow: "0 0 20px #00fff2",
-//   },
-//   neonPink: {
-//     background: "#2d0a31",
-//     accent: "#ff00ff",
-//     bottomBg: "#4a1850",
-//     buttonBg: "#6a1b9a",
-//     glow: "0 0 20px #ff00ff",
-//   },
-//   neonGreen: {
-//     background: "#0a2d0a",
-//     accent: "#39ff14",
-//     bottomBg: "#1b5e20",
-//     buttonBg: "#2e7d32",
-//     glow: "0 0 20px #39ff14",
-//   },
-//   cyberpunk: {
-//     background: "#2b213a",
-//     accent: "#f0fb3d",
-//     bottomBg: "#453750",
-//     buttonBg: "#5c4069",
-//     glow: "0 0 20px #f0fb3d",
-//   },
-// };
-
-// Animation keyframes
-const float = keyframes`
-  0% { transform: translateY(0px) translateX(0px); }
-  50% { transform: translateY(-20px) translateX(10px); }
-  100% { transform: translateY(0px) translateX(0px); }
-`;
-
-const rain = keyframes`
-  0% { transform: translateY(-10px); opacity: 0; }
-  70% { opacity: 0.7; }
-  100% { transform: translateY(30px); opacity: 0; }
-`;
-
-const snow = keyframes`
-  0% { transform: translateY(-10px) rotate(0deg); opacity: 0; }
-  50% { opacity: 0.7; }
-  100% { transform: translateY(30px) rotate(360deg); opacity: 0; }
-`;
-
-const thunder = keyframes`
-  0% { opacity: 0; }
-  10% { opacity: 1; }
-  20% { opacity: 0; }
-  30% { opacity: 1; }
-  40% { opacity: 0; }
-  100% { opacity: 0; }
-`;
-
-// const getAnimationStyles = (props) => {
-//   switch (props.weatherType) {
-//     case "cloudy":
-//       return css`
-//         width: 60px;
-//         height: 20px;
-//         background: ${props.isDarkMode ? "#ffffff40" : "#00000020"};
-//         border-radius: 20px;
-//         animation: ${float} 3s ease-in-out infinite;
-//         &:before {
-//           content: "";
-//           position: absolute;
-//           top: -10px;
-//           left: 15px;
-//           width: 30px;
-//           height: 30px;
-//           background: inherit;
-//           border-radius: 50%;
-//         }
-//       `;
-//     case "rainy":
-//       return css`
-//         width: 2px;
-//         height: 10px;
-//         background: ${props.isDarkMode ? "#89CFF0" : "#4682B4"};
-//         animation: ${rain} 1s linear infinite;
-//       `;
-//     case "snowy":
-//       return css`
-//         width: 5px;
-//         height: 5px;
-//         background: ${props.isDarkMode ? "#ffffff" : "#e6e6e6"};
-//         border-radius: 50%;
-//         animation: ${snow} 3s linear infinite;
-//       `;
-//     case "thunder":
-//       return css`
-//         width: 100%;
-//         height: 100%;
-//         background: ${props.isDarkMode ? "#FFD700" : "#FFFF00"};
-//         opacity: 0;
-//         animation: ${thunder} 5s linear infinite;
-//       `;
-//     default:
-//       return css``;
-//   }
-// };
-
-const getWeatherBackground = (weatherType) => {
-  switch (weatherType) {
-    case "clear":
-      return "https://i.imgur.com/8Kw4krW.gif"; // Sunny clear sky
-    case "cloudy":
-      return "https://i.imgur.com/Iwnj05d.gif"; // Cloudy sky
-    case "rainy":
-      return "https://i.imgur.com/g4risdG.gif"; // Rain
-    case "snowy":
-      return "https://i.imgur.com/EwQgpZY.gif"; // Snow
-    case "thunder":
-      return "https://i.imgur.com/WzI0mE7.gif"; // Thunder
-    case "mist":
-      return "https://i.imgur.com/vH9YqyE.gif"; // Misty
-    default:
-      return "https://i.imgur.com/8Kw4krW.gif"; // Default clear sky
+      primary: "#F97316",
+      secondary: "#EA580C",
+      background: "rgba(255, 247, 237, 0.95)",
+      text: "#431407",
+      titleText: "#7C2D12",
+      titleBg: "rgba(255, 237, 213, 0.95)",
+      cardBg: "rgba(255, 255, 255, 0.95)",
+      cardHover: "rgba(249, 115, 22, 0.1)"
+    }
   }
-};
-
-// const getWeatherIcon = (weatherType) => {
-//   const type = weatherType?.toLowerCase() || "";
-//   if (type.includes("clear")) {
-//     return (
-//       <svg
-//         viewBox="0 0 64 64"
-//         xmlns="http://www.w3.org/2000/svg"
-//         className="w-20 scale-[110%]"
-//       >
-//         <defs>
-//           <linearGradient id="sun" x1="0%" y1="0%" x2="100%" y2="100%">
-//             <stop offset="0%" stopColor="#fbbf24" />
-//             <stop offset="100%" stopColor="#f59e0b" />
-//           </linearGradient>
-//         </defs>
-//         <circle cx="32" cy="32" r="16" fill="url(#sun)" />
-//         <g
-//           fill="none"
-//           stroke="#fbbf24"
-//           strokeLinecap="round"
-//           strokeMiterlimit="10"
-//           strokeWidth="2"
-//         >
-//           <path d="M32 5v7M32 52v7M59 32h-7M12 32H5M51.5 12.5l-5 5M17.5 46.5l-5 5M51.5 51.5l-5-5M17.5 17.5l-5-5">
-//             <animateTransform
-//               attributeName="transform"
-//               dur="45s"
-//               repeatCount="indefinite"
-//               type="rotate"
-//               values="0 32 32; 360 32 32"
-//             />
-//           </path>
-//         </g>
-//       </svg>
-//     );
-//   }
-//   if (type.includes("cloud")) {
-//     return (
-//       <svg
-//         viewBox="0 0 64 64"
-//         xmlns="http://www.w3.org/2000/svg"
-//         className="w-20 scale-[110%]"
-//       >
-//         <defs>
-//           <linearGradient id="cloud" x1="0%" y1="0%" x2="100%" y2="100%">
-//             <stop offset="0%" stopColor="#f3f7fe" />
-//             <stop offset="100%" stopColor="#deeafb" />
-//           </linearGradient>
-//         </defs>
-//         <path
-//           d="M46.5 31.5h-.32a10.49 10.49 0 00-19.11-8 7 7 0 00-10.57 6 7.21 7.21 0 00.1 1.14A7.5 7.5 0 0018 45.5a4.19 4.19 0 00.5 0v0h28a7 7 0 000-14z"
-//           fill="url(#cloud)"
-//           stroke="#e6effc"
-//           strokeMiterlimit="10"
-//           strokeWidth=".5"
-//         />
-//       </svg>
-//     );
-//   }
-//   if (type.includes("rain")) {
-//     return (
-//       <svg
-//         viewBox="0 0 64 64"
-//         xmlns="http://www.w3.org/2000/svg"
-//         className="w-20 scale-[110%]"
-//       >
-//         <defs>
-//           <linearGradient id="rain-cloud" x1="0%" y1="0%" x2="100%" y2="100%">
-//             <stop offset="0%" stopColor="#f3f7fe" />
-//             <stop offset="100%" stopColor="#deeafb" />
-//           </linearGradient>
-//           <linearGradient id="rain-drop" x1="0%" y1="0%" x2="100%" y2="100%">
-//             <stop offset="0%" stopColor="#4286ee" />
-//             <stop offset="100%" stopColor="#0950bc" />
-//           </linearGradient>
-//         </defs>
-//         <path
-//           d="M46.5 31.5h-.32a10.49 10.49 0 00-19.11-8 7 7 0 00-10.57 6 7.21 7.21 0 00.1 1.14A7.5 7.5 0 0018 45.5a4.19 4.19 0 00.5 0v0h28a7 7 0 000-14z"
-//           fill="url(#rain-cloud)"
-//           stroke="#e6effc"
-//           strokeMiterlimit="10"
-//           strokeWidth=".5"
-//         />
-//         <g
-//           fill="none"
-//           stroke="url(#rain-drop)"
-//           strokeLinecap="round"
-//           strokeMiterlimit="10"
-//           strokeWidth="2"
-//         >
-//           <path d="M24.39 43.03l-.78 4.94">
-//             <animateTransform
-//               attributeName="transform"
-//               dur="0.7s"
-//               repeatCount="indefinite"
-//               type="translate"
-//               values="1 -5; -2 10"
-//             />
-//           </path>
-//           <path d="M31.39 43.03l-.78 4.94">
-//             <animateTransform
-//               attributeName="transform"
-//               begin="-0.4s"
-//               dur="0.7s"
-//               repeatCount="indefinite"
-//               type="translate"
-//               values="1 -5; -2 10"
-//             />
-//           </path>
-//           <path d="M38.39 43.03l-.78 4.94">
-//             <animateTransform
-//               attributeName="transform"
-//               begin="-0.2s"
-//               dur="0.7s"
-//               repeatCount="indefinite"
-//               type="translate"
-//               values="1 -5; -2 10"
-//             />
-//           </path>
-//         </g>
-//       </svg>
-//     );
-//   }
-//   // Default icon (can add more weather conditions)
-//   return (
-//     <svg
-//       viewBox="0 0 64 64"
-//       xmlns="http://www.w3.org/2000/svg"
-//       className="w-20 scale-[110%]"
-//     >
-//       <defs>
-//         <linearGradient id="default-cloud" x1="0%" y1="0%" x2="100%" y2="100%">
-//           <stop offset="0%" stopColor="#f3f7fe" />
-//           <stop offset="100%" stopColor="#deeafb" />
-//         </linearGradient>
-//       </defs>
-//       <path
-//         d="M46.5 31.5h-.32a10.49 10.49 0 00-19.11-8 7 7 0 00-10.57 6 7.21 7.21 0 00.1 1.14A7.5 7.5 0 0018 45.5a4.19 4.19 0 00.5 0v0h28a7 7 0 000-14z"
-//         fill="url(#default-cloud)"
-//         stroke="#e6effc"
-//         strokeMiterlimit="10"
-//         strokeWidth=".5"
-//       />
-//     </svg>
-//   );
-// };
+];
 
 const Weather = () => {
   const [currentWeather, setCurrentWeather] = useState(null);
@@ -334,20 +70,19 @@ const Weather = () => {
   const [city, setCity] = useState("");
   const [isVisible, setisVisible] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [customColors, setCustomColors] = useState(() => {
+    const saved = localStorage.getItem("weatherCustomColors");
+    return saved ? JSON.parse(saved) : themePresets[0].colors;
+  });
   const settingsRef = useRef(null);
   const searchInputRef = useRef(null);
   const [browserInfo, setBrowserInfo] = useState(null);
   const [ipLocation, setIpLocation] = useState(null);
-  // const [customTheme, setCustomTheme] = useState(() => {
-  //   const saved = localStorage.getItem("weatherCustomTheme");
-  //   return saved ? JSON.parse(saved) : neonPresets[0].colors;
-  // });
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const savedMode = localStorage.getItem("weatherDarkMode");
-    return savedMode
-      ? JSON.parse(savedMode)
-      : window.matchMedia("(prefers-color-scheme: dark)").matches;
-  });
+
+  useEffect(() => {
+    localStorage.setItem("weatherCustomColors", JSON.stringify(customColors));
+  }, [customColors]);
 
   const fetchWeatherByCoords = async (lat, lon) => {
     try {
@@ -405,7 +140,6 @@ const Weather = () => {
     }
   };
 
-  // Add IP-based location fetch
   const getLocationByIP = async () => {
     try {
       const response = await axios.get("https://ipapi.co/json/");
@@ -462,19 +196,6 @@ const Weather = () => {
     getUserLocation();
   }, [unit]);
 
-  useEffect(() => {
-    localStorage.setItem("weatherDarkMode", JSON.stringify(isDarkMode));
-  }, [isDarkMode]);
-
-  // const handleCitySubmit = (e) => {
-  //   e.preventDefault();
-  //   const cityInput = e.target.elements.city.value;
-  //   if (cityInput.trim()) {
-  //     setCity(cityInput);
-  //     fetchWeatherByCity(cityInput);
-  //   }
-  // };
-
   const getDayName = (date) => {
     return new Date(date).toLocaleDateString("en-US", { weekday: "short" });
   };
@@ -514,103 +235,6 @@ const Weather = () => {
     return browserData;
   };
 
-  // const handleColorChange = (color, type) => {
-  //   const newTheme = { ...customTheme, [type]: color.toHexString() };
-  //   setCustomTheme(newTheme);
-  //   localStorage.setItem("weatherCustomTheme", JSON.stringify(newTheme));
-  // };
-
-  // const applyPreset = (preset) => {
-  //   setCustomTheme(preset.colors);
-  //   localStorage.setItem("weatherCustomTheme", JSON.stringify(preset.colors));
-  // };
-
-  // const renderColorPicker = () => (
-  //   <div className="color-picker-section">
-  //     <div className="color-picker-header">
-  //       <h3>Custom Theme</h3>
-  //       <button
-  //         className="color-picker-toggle"
-  //         onClick={() => setShowColorPicker(!showColorPicker)}
-  //       >
-  //         <Palette size={16} />
-  //       </button>
-  //     </div>
-
-  //     {showColorPicker && (
-  //       <div className="color-picker-content">
-  //         <div className="color-options">
-  //           <button
-  //             className={`color-option ${
-  //               activeColor === "background" ? "active" : ""
-  //             }`}
-  //             onClick={() => setActiveColor("background")}
-  //             style={{ backgroundColor: customTheme.background }}
-  //           >
-  //             Background
-  //           </button>
-  //           <button
-  //             className={`color-option ${
-  //               activeColor === "accent" ? "active" : ""
-  //             }`}
-  //             onClick={() => setActiveColor("accent")}
-  //             style={{ backgroundColor: customTheme.accent }}
-  //           >
-  //             Accent
-  //           </button>
-  //           <button
-  //             className={`color-option ${
-  //               activeColor === "bottomBg" ? "active" : ""
-  //             }`}
-  //             onClick={() => setActiveColor("bottomBg")}
-  //             style={{ backgroundColor: customTheme.bottomBg }}
-  //           >
-  //             Bottom
-  //           </button>
-  //           <button
-  //             className={`color-option ${
-  //               activeColor === "buttonBg" ? "active" : ""
-  //             }`}
-  //             onClick={() => setActiveColor("buttonBg")}
-  //             style={{ backgroundColor: customTheme.buttonBg }}
-  //           >
-  //             Buttons
-  //           </button>
-  //         </div>
-
-  //         <ColorPicker
-  //           value={customTheme[activeColor]}
-  //           onChange={(color) => handleColorChange(color, activeColor)}
-  //           presets={[
-  //             {
-  //               label: "Recommended",
-  //               colors: neonPresets.map((preset) => preset.colors[activeColor]),
-  //             },
-  //           ]}
-  //         />
-
-  //         <div className="presets">
-  //           <h4>Presets</h4>
-  //           <div className="preset-buttons">
-  //             {neonPresets.map((preset, index) => (
-  //               <button
-  //                 key={index}
-  //                 className="preset-btn"
-  //                 onClick={() => applyPreset(preset)}
-  //                 style={{
-  //                   background: `linear-gradient(45deg, ${preset.colors.background}, ${preset.colors.accent})`,
-  //                 }}
-  //               >
-  //                 {preset.label}
-  //               </button>
-  //             ))}
-  //           </div>
-  //         </div>
-  //       </div>
-  //     )}
-  //   </div>
-  // );
-
   const getWeatherAnimation = (weatherCode) => {
     const code = weatherCode?.toLowerCase() || "";
     if (code.includes("clear")) return "clear";
@@ -627,107 +251,292 @@ const Weather = () => {
   };
 
   return (
-    <div className="p-2 backdrop-blur-sm">
-      <div
-        className="text-xl font-medium p-3 cursor-pointer"
-        onClick={isCollapse}
-      >
-        Weather
-      </div>
-      {isVisible && (
-        <StyledWrapper
-          isDarkMode={isDarkMode}
-          weatherType={
-            currentWeather
-              ? getWeatherAnimation(currentWeather.weather[0].main)
-              : "default"
-          }
-          weatherBackground={
-            currentWeather
-              ? getWeatherBackground(
-                  getWeatherAnimation(currentWeather.weather[0].main)
-                )
-              : getWeatherBackground("default")
-          }
-        >
-          <div className="weather-container h-[19rem]">
-            <div className="content-wrapper flex-col">
-              {/* Main Weather Card */}
-              <div className="duration-300 font-mono dark:text-white text-gray-700 group cursor-default relative overflow-hidden w-full h-[48.5%]  rounded-sm p-6 ">
-                <div className="flex justify-between -mt-4 items-center">
-                  <div className="flex-1">
-                    <h3 className="text-2xl font-bold">Today</h3>
-                    {currentWeather && (
-                      <div className="flex items-center gap-6">
-                        <h4 className="font-sans ml-2 text-6xl">
-                          {Math.round(currentWeather.main.temp)}°
-                        </h4>
-                        <div className="text-lg">
-                          <p>{currentWeather.weather[0].description}</p>
-                          <p>{currentWeather.main.humidity}% humidity</p>
+    <div className="relative">
+      {isLoading ? (
+        <div>Loading...</div>
+      ) : (
+        <StyledWrapper customColors={customColors}>
+          <div
+            className="text-xl font-medium p-3 cursor-pointer flex justify-between items-center rounded-t-lg"
+            style={{
+              backgroundColor: customColors.titleBg,
+              color: customColors.titleText,
+              backdropFilter: 'blur(8px)'
+            }}
+            onClick={isCollapse}
+          >
+            <span>Weather</span>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowColorPicker(!showColorPicker);
+              }}
+              className="p-2 rounded-full hover:bg-white/20 transition-all"
+              style={{
+                backgroundColor: `${customColors.primary}30`
+              }}
+            >
+              <Palette size={20} color={customColors.titleText} />
+            </button>
+          </div>
+          
+          {showColorPicker && (
+            <div className="absolute top-14 right-4 z-50 bg-white p-4 rounded-lg shadow-lg">
+              <div className="space-y-4">
+                <div className="mb-4">
+                  <h3 className="text-sm font-medium mb-2">Theme Presets</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    {themePresets.map((theme, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCustomColors(theme.colors)}
+                        className="p-2 rounded text-xs text-left hover:bg-gray-50 transition-all"
+                        style={{
+                          backgroundColor: theme.colors.cardBg,
+                          color: theme.colors.text,
+                          border: `1px solid ${theme.colors.primary}30`
+                        }}
+                      >
+                        <div className="flex items-center gap-2">
+                          <div 
+                            className="w-4 h-4 rounded-full"
+                            style={{ backgroundColor: theme.colors.primary }}
+                          />
+                          {theme.name}
                         </div>
-                      </div>
-                    )}
+                      </button>
+                    ))}
                   </div>
-                  <div className="flex-1 flex justify-center items-center">
-                    {currentWeather && (
-                      <div className="w-30 h-30">
-                        <img
-                          src={`https://openweathermap.org/img/wn/${currentWeather.weather[0].icon}@4x.png`}
-                          alt={currentWeather.weather[0].description}
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 flex justify-end items-start">
-                    <div className="text-lg text-right">
-                      <p className="text-2xl">
-                        {new Date().toLocaleTimeString("en-US", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          hour12: false,
-                        })}
-                      </p>
-                      <p>
-                        {new Date().toLocaleDateString("en-US", {
-                          weekday: "long",
-                          month: "short",
-                          day: "numeric",
-                        })}
-                      </p>
+                </div>
+
+                <div className="border-t pt-4">
+                  <h3 className="text-sm font-medium mb-2">Custom Colors</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs font-medium mb-1">Title Text</label>
+                      <ColorPicker 
+                        value={customColors.titleText} 
+                        onChange={(color) => setCustomColors(prev => ({ ...prev, titleText: color.toHexString() }))}
+                        presets={{
+                          recommended: themePresets.map(t => ({ label: t.name, value: t.colors.titleText }))
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium mb-1">Title Background</label>
+                      <ColorPicker 
+                        value={customColors.titleBg} 
+                        onChange={(color) => setCustomColors(prev => ({ ...prev, titleBg: color.toHexString() }))}
+                        presets={{
+                          recommended: themePresets.map(t => ({ label: t.name, value: t.colors.titleBg }))
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium mb-1">Primary Color</label>
+                      <ColorPicker 
+                        value={customColors.primary} 
+                        onChange={(color) => setCustomColors(prev => ({ ...prev, primary: color.toHexString() }))}
+                        presets={{
+                          recommended: themePresets.map(t => ({ label: t.name, value: t.colors.primary }))
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium mb-1">Secondary Color</label>
+                      <ColorPicker 
+                        value={customColors.secondary} 
+                        onChange={(color) => setCustomColors(prev => ({ ...prev, secondary: color.toHexString() }))}
+                        presets={{
+                          recommended: themePresets.map(t => ({ label: t.name, value: t.colors.secondary }))
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium mb-1">Background</label>
+                      <ColorPicker 
+                        value={customColors.background} 
+                        onChange={(color) => setCustomColors(prev => ({ ...prev, background: color.toHexString() }))}
+                        presets={{
+                          recommended: themePresets.map(t => ({ label: t.name, value: t.colors.background }))
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium mb-1">Card Background</label>
+                      <ColorPicker 
+                        value={customColors.cardBg} 
+                        onChange={(color) => setCustomColors(prev => ({ ...prev, cardBg: color.toHexString() }))}
+                        presets={{
+                          recommended: themePresets.map(t => ({ label: t.name, value: t.colors.cardBg }))
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium mb-1">Card Hover</label>
+                      <ColorPicker 
+                        value={customColors.cardHover} 
+                        onChange={(color) => setCustomColors(prev => ({ ...prev, cardHover: color.toHexString() }))}
+                        presets={{
+                          recommended: themePresets.map(t => ({ label: t.name, value: t.colors.cardHover }))
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium mb-1">Text Color</label>
+                      <ColorPicker 
+                        value={customColors.text} 
+                        onChange={(color) => setCustomColors(prev => ({ ...prev, text: color.toHexString() }))}
+                        presets={{
+                          recommended: themePresets.map(t => ({ label: t.name, value: t.colors.text }))
+                        }}
+                      />
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="forecast-container   h-[48.5%] w-full flex justify-between">
-                {forecast.map((day, index) => (
-                  <div
-                    key={index}
-                    className=" font-mono group cursor-default dark:text-white relative overflow-hidden text-black bg-white/[(var(--widget-opacity))] h-full w-[48.5%] dark:bg-[#8163D3]/[(var(--widget-opacity))] rounded-sm  p-2  hover:bg-indigo-100/[var(--widget-opacity)] hover:dark:bg-[#0C66E4]/[(var(--widget-opacity))]"
-                  >
-                    <h3 className="text-sm text-center">
-                      {getDayName(day.dt_txt)}
-                    </h3>
-                    <div className="gap-4 relative">
-                      <img
-                        src={`https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png`}
-                        alt={day.weather[0].description}
-                        className="w-16 h-16 mx-auto"
-                      />
-                      <h4 className="font-sans duration-300 absolute left-1/2 -translate-x-1/2 text-3xl text-center group-hover:translate-x-9 group-hover:-translate-y-12 group-hover:scale-125">
-                        {Math.round(day.main.temp)}°
-                      </h4>
+            </div>
+          )}
+          {isVisible && (
+            <div
+              className="weather-container h-[19rem]"
+              style={{
+                backgroundColor: customColors.background,
+                color: customColors.text,
+                borderRadius: '0 0 0.5rem 0.5rem',
+                boxShadow: `0 4px 6px -1px ${customColors.primary}10`,
+              }}
+            >
+              <div className="content-wrapper flex-col">
+                {/* Main Weather Card */}
+                <div 
+                  className="duration-300 font-mono relative overflow-hidden w-full h-[48.5%] rounded-sm p-6"
+                  style={{
+                    backgroundColor: customColors.cardBg,
+                    color: customColors.text,
+                    borderLeft: `4px solid ${customColors.primary}`,
+                  }}
+                >
+                  <div className="flex justify-between -mt-4 items-center">
+                    <div className="flex-1">
+                      <h3 
+                        className="text-2xl font-bold"
+                        style={{ color: customColors.primary }}
+                      >
+                        Today
+                      </h3>
+                      {currentWeather && (
+                        <div className="flex items-center gap-6">
+                          <h4 
+                            className="font-sans ml-2 text-6xl"
+                            style={{ color: customColors.secondary }}
+                          >
+                            {Math.round(currentWeather.main.temp)}°
+                          </h4>
+                          <div className="text-lg">
+                            <p style={{ color: customColors.text }}>
+                              {currentWeather.weather[0].description}
+                            </p>
+                            <p style={{ color: `${customColors.text}99` }}>
+                              {currentWeather.main.humidity}% humidity
+                            </p>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    <div className="absolute duration-300 -left-32 mt-1 group-hover:left-8">
-                      <p className="text-xs">{day.weather[0].description}</p>
-                      <p className="text-xs">{day.main.humidity}% humidity</p>
+                    <div className="flex-1 flex justify-center items-center">
+                      {currentWeather && (
+                        <div 
+                          className="w-30 h-30 p-2 rounded-full"
+                          style={{
+                            backgroundColor: `${customColors.primary}10`,
+                          }}
+                        >
+                          <img
+                            src={`https://openweathermap.org/img/wn/${currentWeather.weather[0].icon}@4x.png`}
+                            alt={currentWeather.weather[0].description}
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 flex justify-end items-start">
+                      <div className="text-lg text-right">
+                        <p 
+                          className="text-2xl"
+                          style={{ color: customColors.primary }}
+                        >
+                          {new Date().toLocaleTimeString("en-US", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: false,
+                          })}
+                        </p>
+                        <p style={{ color: `${customColors.text}99` }}>
+                          {new Date().toLocaleDateString("en-US", {
+                            weekday: "long",
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                ))}
+                </div>
+                <div className="forecast-container h-[48.5%] w-full flex justify-between">
+                  {forecast.map((day, index) => (
+                    <div
+                      key={index}
+                      className="font-mono group cursor-default relative overflow-hidden h-full w-[48.5%] rounded-sm p-2 transition-all duration-300"
+                      style={{
+                        backgroundColor: customColors.cardBg,
+                        color: customColors.text,
+                        borderLeft: `4px solid ${customColors.secondary}`,
+                        '--hover-bg': customColors.cardHover,
+                        transition: 'all 0.3s ease'
+                      }}
+                    >
+                      <h3 
+                        className="text-sm text-center font-bold"
+                        style={{ color: customColors.secondary }}
+                      >
+                        {getDayName(day.dt_txt)}
+                      </h3>
+                      <div className="gap-4 relative">
+                        <div 
+                          className="p-2 rounded-full mx-auto w-fit"
+                          style={{
+                            backgroundColor: `${customColors.secondary}10`,
+                          }}
+                        >
+                          <img
+                            src={`https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png`}
+                            alt={day.weather[0].description}
+                            className="w-16 h-16"
+                          />
+                        </div>
+                        <h4 
+                          className="font-sans duration-300 absolute left-1/2 -translate-x-1/2 text-3xl text-center group-hover:translate-x-9 group-hover:-translate-y-12 group-hover:scale-125"
+                          style={{ color: customColors.secondary }}
+                        >
+                          {Math.round(day.main.temp)}°
+                        </h4>
+                      </div>
+                      <div 
+                        className="absolute duration-300 -left-32 mt-1 group-hover:left-8"
+                        style={{ color: customColors.text }}
+                      >
+                        <p className="text-xs">{day.weather[0].description}</p>
+                        <p className="text-xs" style={{ color: `${customColors.text}99` }}>
+                          {day.main.humidity}% humidity
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </StyledWrapper>
       )}
     </div>
@@ -735,82 +544,60 @@ const Weather = () => {
 };
 
 const StyledWrapper = styled.div`
-  .weather-container {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    padding: 0 2px;
-  }
-
-  .content-wrapper {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    height: 100%;
-  }
-
-  .forecast-container {
-    display: flex;
-    flex-wrap: wrap;
-  }
-
-  .mode-toggle {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
-
-    button {
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      padding: 8px;
-      border-radius: 30%;
-      font-size: 20px;
-      transition: transform 0.3s ease;
-      backdrop-filter: blur(8px);
-      background: rgba(255, 255, 255, 0.1);
-
-      &:hover {
-        transform: scale(1.1) rotate(360deg);
-      }
+  ${props => css`
+    .weather-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      padding: 0 2px;
+      color: ${props.customColors.text};
+      background-color: ${props.customColors.background};
     }
-  }
 
-  /* Weather Icons */
-  .weather-icon {
-    width: 50px;
-    height: 50px;
-    margin: 0 auto;
-    display: block;
-  }
-
-  /* Animations */
-  @keyframes float {
-    0%,
-    100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(-5px);
-    }
-  }
-
-  .animate-float {
-    animation: float 3s ease-in-out infinite;
-  }
-
-  /* Responsive Design */
-  @media (max-width: 768px) {
     .content-wrapper {
-      justify-content: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      height: 100%;
     }
 
     .forecast-container {
-      justify-content: center;
+      display: flex;
+      flex-wrap: wrap;
     }
-  }
+
+    .group {
+      transition: all 0.3s ease;
+      &:hover {
+        background-color: ${props.customColors.cardHover} !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px ${props.customColors.primary}20;
+      }
+    }
+
+    .weather-icon {
+      width: 50px;
+      height: 50px;
+      margin: 0 auto;
+      display: block;
+      filter: drop-shadow(0 0 4px ${props.customColors.primary}40);
+    }
+
+    .animate-float {
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @media (max-width: 768px) {
+      .content-wrapper {
+        justify-content: center;
+      }
+
+      .forecast-container {
+        justify-content: center;
+      }
+    }
+  `}
 `;
 
 export default Weather;

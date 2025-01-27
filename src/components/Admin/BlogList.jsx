@@ -186,7 +186,6 @@ const BlogList = () => {
             />
           </Tooltip>,
         ]}
-        className="group"
       >
         <div className="px-1">
           <div className="flex items-center gap-3 mb-3">

@@ -69,7 +69,7 @@ const LandingPage = () => {
     const [count, setCount] = useState(0);
     const [ref, inView] = useInView({
       triggerOnce: true,
-      threshold: 0.1,
+      threshold: 0,
     });
 
     useEffect(() => {
@@ -1054,21 +1054,32 @@ const LandingPage = () => {
       <div className="w-full h-px bg-gradient-to-r from-transparent via-indigo-200/20 to-transparent" />
 
       {/* FAQ Accordion */}
-      <div className="backdrop-blur-lg bg-white/30 border-y border-indigo-500/50 py-20">
-        <div className="container mx-auto px-4">
+      <div className="relative overflow-hidden py-24">
+        {/* Background decorative elements */}
+        <div className="absolute inset-0 bg-gradient-to-b from-indigo-50/50 via-white to-white" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent" />
+        <div className="absolute -top-24 right-0 w-96 h-96 bg-indigo-200/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-24 left-0 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl" />
+
+        <div className="container relative mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl font-bold text-gray-900 mb-4 drop-shadow-md">
-              Frequently Asked Questions
+            <span className="px-4 py-1 rounded-full bg-indigo-100 text-indigo-700 text-sm font-medium inline-block mb-4">
+              FAQ
+            </span>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              Frequently Asked{" "}
+              <span className="text-indigo-600">Questions</span>
             </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
               Find answers to common questions about our platform
             </p>
           </motion.div>
-          <div className="max-w-3xl mx-auto space-y-4">
+
+          <div className="max-w-3xl mx-auto space-y-6">
             {[
               {
                 question: "What makes your platform different?",
@@ -1096,33 +1107,57 @@ const LandingPage = () => {
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="backdrop-blur-lg bg-white/50 rounded-xl border border-indigo-500/50 overflow-hidden shadow-lg shadow-indigo-500/10 hover:shadow-xl hover:shadow-indigo-500/20 transition-all"
+                className="group"
               >
-                <button
-                  onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                  className="w-full px-6 py-4 text-left flex justify-between items-center"
+                <motion.div
+                  className={`bg-white rounded-2xl border border-gray-200 hover:border-indigo-500/50 transition-all duration-300 ${
+                    openFaq === index ? "shadow-lg shadow-indigo-500/10" : ""
+                  }`}
                 >
-                  <span className="font-semibold text-gray-900">
-                    {faq.question}
-                  </span>
-                  {openFaq === index ? (
-                    <FiMinus className="text-indigo-600" />
-                  ) : (
-                    <FiPlus className="text-indigo-600" />
-                  )}
-                </button>
-                <AnimatePresence>
-                  {openFaq === index && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="px-6 pb-4"
+                  <button
+                    onClick={() => setOpenFaq(openFaq === index ? null : index)}
+                    className="w-full px-8 py-6 text-left flex justify-between items-center group"
+                  >
+                    <span className="font-semibold text-xl text-gray-900 group-hover:text-indigo-600 transition-colors">
+                      {faq.question}
+                    </span>
+                    <div
+                      className={`ml-4 flex-shrink-0 p-2 rounded-full border ${
+                        openFaq === index
+                          ? "bg-indigo-50 border-indigo-200"
+                          : "bg-gray-50 border-gray-200 group-hover:bg-indigo-50 group-hover:border-indigo-200"
+                      } transition-all duration-300`}
                     >
-                      <p className="text-gray-600">{faq.answer}</p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                      {openFaq === index ? (
+                        <FiMinus
+                          className={`w-5 h-5 ${
+                            openFaq === index
+                              ? "text-indigo-600"
+                              : "text-gray-400"
+                          }`}
+                        />
+                      ) : (
+                        <FiPlus className="w-5 h-5 text-gray-400 group-hover:text-indigo-600" />
+                      )}
+                    </div>
+                  </button>
+                  <AnimatePresence>
+                    {openFaq === index && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="px-8 pb-6"
+                      >
+                        <div className="w-full h-px bg-gray-100 mb-6" />
+                        <p className="text-gray-600 text-lg leading-relaxed">
+                          {faq.answer}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
               </motion.div>
             ))}
           </div>
@@ -1188,8 +1223,8 @@ const LandingPage = () => {
         <div className="container mx-auto px-4 py-16">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
             <div className="space-y-">
-              <h2 className="text-2xl font-bold text-white">BGS</h2>
-              <p className="text-gray-400">
+              <h2 className="text-2xl font-bold text-white">BROWSEY</h2>
+              <p className="text-gray-400 mt-2">
                 Your ultimate Chrome extension for a more productive online
                 experience.
               </p>
@@ -1281,7 +1316,7 @@ const LandingPage = () => {
           </div>
           <div className="border-t border-gray-800 mt-12 pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <p className="text-gray-400"> 2025 BGS. All rights reserved.</p>
+              <p className="text-gray-400"> 2025 Browsey. All rights reserved.</p>
               <div className="flex gap-8">
                 <a
                   href="/Privacy"

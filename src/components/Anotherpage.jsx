@@ -318,7 +318,7 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
   return (
     <div style={{ position: "relative" }}>
       <div className="flex justify-center">
-        <div className={`flex flex-col items-center w-full    rounded-xl`}>
+        <div className={`flex flex-col items-center w-full rounded-xl`}>
           <div className="p-4   ">
             {loading ? (
               <div className="flex justify-center items-center min-h-screen">
@@ -464,29 +464,46 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
         title="Widget Controller"
         open={isSorterOpen}
         onCancel={() => setIsSorterOpen(false)}
-        footer={[
-          <AntButton
-            key="reset"
-            type="default"
-            icon={<ReloadOutlined />}
-            onClick={handleResetLayout}
-            loading={isResetting}
-            className="mr-auto hover:text-blue-500"
+        footer={
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              width: "100%",
+            }}
           >
-            Default Layout
-          </AntButton>,
-          <AntButton key="cancel" onClick={() => setIsSorterOpen(false)}>
-            Cancel
-          </AntButton>,
-          <AntButton
-            key="apply"
-            type="primary"
-            onClick={handleApplySorting}
-            loading={isApplying}
-          >
-            Apply Changes
-          </AntButton>,
-        ]}
+            <div>
+              <AntButton
+                className="dark:bg-gray-700/50 dark:hover:bg-gray-700 dark:text-white"
+                key="cancel"
+                 type="dark:hover:text-white"
+                onClick={() => setIsSorterOpen(false)}
+              >
+                <span className="justify-start">Cancel</span>
+              </AntButton>
+            </div>
+            <div>
+              <AntButton
+                key="reset"
+                type="dark:hover:text-white"
+                icon={<ReloadOutlined />}
+                onClick={handleResetLayout}
+                loading={isResetting}
+                className="dark:bg-gray-700/50 dark:hover:bg-gray-700 dark:text-white  mr-2"
+              >
+                Default Layout
+              </AntButton>
+              <AntButton
+                key="apply"
+                type="primary"
+                onClick={handleApplySorting}
+                loading={isApplying}
+              >
+                Apply Changes
+              </AntButton>
+            </div>
+          </div>
+        }
       >
         {isApplying ? (
           <div
@@ -500,18 +517,20 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
           </div>
         ) : (
           <>
-            <div className="mb-6  flex items-center justify-between">
-              <div className="text-sm text-gray-600 dark:text-gray-400">
+            <div className="mb-6  flex items-center dark:bg-[#28283A] justify-between">
+              <div className="text-sm text-gray-600  dark:text-gray-400">
                 Select number of columns:
               </div>
               <div className="flex gap-2">
                 {[1, 2, 3, 4].map((num) => (
                   <AntButton
                     key={num}
-                    type={previewColumns === num ? "primary" : "default"}
+                    type={previewColumns === num ? "primary" : "dark:hover:text-white"}
                     onClick={() => handleColumnChange(num)}
                     className={
-                      previewColumns === num ? "" : "hover:border-primary"
+                      previewColumns === num
+                        ? ""
+                        : "dark:hover:text-white dark:text-white dark:bg-gray-700/50 dark:hover:bg-gray-700"
                     }
                     size="small"
                   >
@@ -521,8 +540,18 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
               </div>
             </div>
 
-            <DragDropContext onDragEnd={handleSortEnd}>
-              <div className="grid grid-cols-4 gap-4">
+            <DragDropContext className="w-full" onDragEnd={handleSortEnd}>
+              <div
+                className="grid gap-4 mx-auto px-4"
+                style={{
+                  width: "100%",
+                  maxWidth: "1280px", // max-w-7xl equivalent
+                  display: "grid",
+                  gridTemplateColumns: `repeat(${previewColumns}, minmax(0, 1fr))`,
+                  justifyContent: "center",
+                  margin: "0 auto",
+                }}
+              >
                 {Array.from({ length: previewColumns }, (_, i) => i).map(
                   (columnIndex) => (
                     <Droppable
@@ -533,23 +562,24 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
                         <div
                           ref={provided.innerRef}
                           {...provided.droppableProps}
-                          className={`p-4 rounded-lg ${
+                          className={`p-4 rounded-lg align-center justify-center ${
                             snapshot.isDraggingOver
                               ? "bg-blue-50 dark:bg-blue-900/20"
-                              : "bg-gray-50 dark:bg-gray-800/50"
+                              : "bg-gray-50 dark:bg-gray-700/50"
                           }`}
                         >
                           <div
-                            className="column-header"
+                            className="column-header justify-center"
                             style={{
                               marginBottom: "12px",
                               fontWeight: "bold",
+                              textAlign: "center",
                               color: isDarkMode ? "#afafaf" : "#1890ff",
                             }}
                           >
                             Column {columnIndex + 1}
                           </div>
-                          <div className="items-container space-y-2">
+                          <div className="items-container  space-y-2">
                             {sortedItems
                               .filter((item) => item.column === columnIndex)
                               .map((item, index) => (
@@ -563,7 +593,7 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
-                                      className="bg-white dark:bg-[#462b75] p-2 rounded-sm shadow-sm border dark:border-[#462b75] border-gray-100 flex justify-between items-center"
+                                      className="bg-white dark:text-white dark:bg-[#462b75] p-2 rounded-sm shadow-sm border dark:border-[#462b75] border-gray-100 flex justify-between items-center"
                                       style={{
                                         ...provided.draggableProps.style,
                                         opacity: snapshot.isDragging ? 0.9 : 1,
@@ -603,11 +633,11 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
                 )}
               </div>
             </DragDropContext>
-            <div className="mt-6">
-              <div className="text-sm font-medium text-gray-700 mb-2">
+            <div className="mt-6 dark:bg-[#28283A]">
+              <div className="text-sm font-medium dark:bg-[#28283A] text-gray-700 mb-2">
                 Available Widgets
               </div>
-              <div className="p-4 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
+              <div className="p-4 border-2 border-dashed dark:bg-[#28283A] border-gray-300 rounded-lg bg-gray-50">
                 <div className="flex flex-wrap gap-2">
                   {availableWidgets.length > 0 &&
                     availableWidgets.map((widget) => (
@@ -616,13 +646,13 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
                         size="middle"
                         icon={<PlusOutlined />}
                         onClick={() => handleAddWidget(widget)}
-                        className="flex items-center hover:scale-105 transition-transform bg-white"
+                        className="flex items-center hover:scale-105 transition-transform dark:text-white dark:bg-[#462b75] bg-white"
                       >
                         {widget.name}
                       </AntButton>
                     ))}
                   {availableWidgets.length === 0 && (
-                    <div className="w-full text-center py-4 text-gray-500">
+                    <div className="w-full text-center py-4 dark:bg-[#28283A] text-gray-500">
                       No available widgets
                     </div>
                   )}

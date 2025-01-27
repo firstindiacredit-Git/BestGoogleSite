@@ -76,6 +76,14 @@ function SearchPage() {
     }
   }, []);
 
+  useEffect(() => {
+    // Retrieve active component from localStorage on mount
+    const storedActiveComponent = localStorage.getItem("activeComponent");
+    if (storedActiveComponent) {
+      setActiveComponent(storedActiveComponent);
+    }
+  }, []);
+
   const changeVisible = useCallback(() => {
     const newMode = !visibleHandle;
     setVisibleHandle(newMode);
@@ -159,6 +167,7 @@ function SearchPage() {
 
   const handleToggleComponent = (component) => {
     setActiveComponent(component); // Always set the component, don't toggle
+    localStorage.setItem("activeComponent", component); // Store active component in localStorage
   };
 
   useEffect(() => {

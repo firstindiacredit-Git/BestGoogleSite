@@ -168,7 +168,7 @@ const Top100Page = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [category, setCategory] = useState("cars");
+  const [category, setCategory] = useState("motorcycles");
   const [page, setPage] = useState(1);
   const [viewMode, setViewMode] = useState("grid");
   const [searchQuery, setSearchQuery] = useState("");

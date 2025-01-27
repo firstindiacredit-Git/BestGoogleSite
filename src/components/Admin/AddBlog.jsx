@@ -263,13 +263,13 @@ const AddBlog = ({ editBlog, onSuccess }) => {
             disabled={uploadLoading}
           >
             <div className="space-y-4">
-              <Button
+              {/* <Button
                 icon={uploadLoading ? <LoadingOutlined /> : <UploadOutlined />}
                 loading={uploadLoading}
                 disabled={uploadLoading}
               >
                 {uploadLoading ? "Uploading..." : "Upload Image"}
-              </Button>
+              </Button> */}
               {imageUrl ? (
                 <div className="relative inline-block">
                   <div className="relative">
@@ -301,8 +301,8 @@ const AddBlog = ({ editBlog, onSuccess }) => {
                   />
                 </div>
               ) : (
-                <div className="mt-4 p-8 border-2 border-dashed rounded-lg text-center">
-                  <p className="text-gray-500">
+                <div className="mt-4 p-8 border-2 hover:border-blue-500 border-dashed rounded-lg text-center">
+                  <p className="text-gray-600">
                     Click or drag an image here to upload
                   </p>
                   <p className="text-gray-400 text-sm">PNG, JPG up to 5MB</p>
@@ -313,13 +313,13 @@ const AddBlog = ({ editBlog, onSuccess }) => {
         </Form.Item>
 
         <Form.Item label="Tags">
-          <Space wrap className="mb-2">
+          <Space wrap className="mb-2 bg-red-500">
             {tags.map((tag) => (
-              <Tag
+               <Tag
                 key={tag}
                 closable
                 onClose={() => handleTagClose(tag)}
-                className="text-base py-1"
+                className="text-base bg-green-500 rouned-3xl py-1 px-5"
               >
                 {tag}
               </Tag>
@@ -332,13 +332,13 @@ const AddBlog = ({ editBlog, onSuccess }) => {
                 onChange={(e) => setInputValue(e.target.value)}
                 onBlur={handleInputConfirm}
                 onPressEnter={handleInputConfirm}
-                className="w-24"
+                className="w-24 bg-yellow-500"
                 autoFocus
               />
             ) : (
               <Tag
                 onClick={() => setInputVisible(true)}
-                className="cursor-pointer text-base py-1"
+                className="cursor-pointer text-base rounded-2xl -mt-1 py-1"
               >
                 <PlusOutlined /> New Tag
               </Tag>

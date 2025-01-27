@@ -100,7 +100,7 @@ function PopularBookmarks() {
   });
   const [grid, setGrid] = useState(() => {
     const savedGridView = localStorage.getItem("bookmarksGridView");
-    return savedGridView ? JSON.parse(savedGridView) : true;
+    return savedGridView ? JSON.parse(savedGridView) : false;
   });
   const [hiddenBookmarkIds, setHiddenBookmarkIds] = useState([]);
   const [isControllerOpen, setIsControllerOpen] = useState(false);
@@ -249,7 +249,7 @@ function PopularBookmarks() {
       : isDarkMode
       ? "#141414"
       : "#fff",
-    border: `1px solid ${isDarkMode ? "#303030" : "#f0f0f0"}`,
+    border: `${isDarkMode ? "#303030" : "#f0f0f0"}`,
     borderRadius: "4px",
     display: "flex",
     alignItems: "center",
@@ -2029,6 +2029,7 @@ function PopularBookmarks() {
                                         boxShadow: snapshot.isDragging
                                           ? "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
                                           : "none",
+                                          border: "none",
                                       }}
                                     >
                                       {categoryLinks.length === 0 ? (
@@ -3002,7 +3003,9 @@ function PopularBookmarks() {
             <div>
               <AntButton
                 key="cancel"
+                value="dark:hover:bg-gray-800"
                 onClick={() => setIsControllerOpen(false)}
+                className="dark:text-white border-none  dark:hover:bg-gray-800 dark:bg-gray-700"
               >
                 Cancel
               </AntButton>
@@ -3020,21 +3023,22 @@ function PopularBookmarks() {
         ]}
       >
         <div className="flex w-full mb-4  justify-between items-center gap-2">
-          <div>Columns:</div>
+          <div className="dark:text-white">Columns:</div>
           <Radio.Group
             value={previewColumns}
             onChange={(e) => handlePreviewColumnChange(e.target.value)}
             buttonStyle="solid"
+            className=" "
           >
-            <Radio.Button value={1}>1</Radio.Button>
-            <Radio.Button value={2}>2</Radio.Button>
-            <Radio.Button value={3}>3</Radio.Button>
-            <Radio.Button value={4}>4</Radio.Button>
+            <Radio.Button className="dark:text-white dark:bg-gray-700 border-none" value={1}>1</Radio.Button>
+            <Radio.Button className="dark:text-white dark:bg-gray-700 border-none" value={2}>2</Radio.Button>
+            <Radio.Button className="dark:text-white dark:bg-gray-700 border-none" value={3}>3</Radio.Button>
+            <Radio.Button className="dark:text-white dark:bg-gray-700 border-none" value={4}>4</Radio.Button>
           </Radio.Group>
         </div>
         <DragDropContext onDragEnd={handlePreviewDragEnd}>
           <div
-            className="sort-columns-container"
+            className="sort-columns-container "
             style={{
               display: "grid",
               gridTemplateColumns: `repeat(${previewColumns}, 1fr)`,
@@ -3055,7 +3059,7 @@ function PopularBookmarks() {
                         ${
                           snapshot.isDraggingOver
                             ? "bg-indigo-50 border-2 border-dashed border-indigo-400 shadow-lg"
-                            : "bg-white border border-gray-200"
+                            : " border dark:text-white border-none dark:bg-gray-700/50 "
                         }
                       `}
                   >
@@ -3069,9 +3073,9 @@ function PopularBookmarks() {
                         }
                       `}
                     >
-                      <div>Column {columnIndex + 1}</div>
+                      <div className="dark:text-white">Column {columnIndex + 1}</div>
                     </div>
-                    <div className="space-y-2 min-h-[100px]">
+                    <div className="space-y-2 border-none dark:text-white min-h-[100px]">
                       {getColumnCategories(columnIndex).map(
                         (category, index) => (
                           <Draggable
@@ -3085,17 +3089,17 @@ function PopularBookmarks() {
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
                                 className={`
-                                  flex items-center justify-between p-3 rounded-lg
-                                  transition-all duration-200 bg-white
+                                  flex items-center border-none dark:text-white justify-between p-3 rounded-lg
+                                  transition-all duration-200 dark:bg-gray-600/50
                                   ${
                                     snapshot.isDragging
                                       ? "shadow-lg border-2 border-indigo-400 scale-105"
-                                      : "shadow-sm border border-gray-200 hover:border-indigo-300"
+                                      : "shadow-sm border border-none border-gray-200 hover:border-indigo-300"
                                   }
                                 `}
                                 style={provided.draggableProps.style}
                               >
-                                <div className="flex items-center gap-3">
+                                <div className="flex items-center border-none  gap-3">
                                   <div
                                     className={`
                                     text-base transition-colors duration-200
@@ -3110,11 +3114,11 @@ function PopularBookmarks() {
                                   </div>
                                   <span
                                     className={`
-                                    font-medium transition-colors duration-200
+                                    font-medium transition-colors border-none duration-200
                                     ${
                                       snapshot.isDragging
                                         ? "text-indigo-600"
-                                        : "text-gray-700"
+                                        : "text-gray-700 border-none dark:text-white"
                                     }
                                   `}
                                   >
@@ -3151,10 +3155,10 @@ function PopularBookmarks() {
         </DragDropContext>
 
         <div className="mt-6">
-          <div className="text-sm font-medium text-gray-700 mb-2">
+          <div className="text-sm font-medium dark:text-white text-gray-700 mb-2">
             Available Categories
           </div>
-          <div className="p-4 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
+          <div className="p-4 border-2 border-dashed dark:text-white dark:bg-gray-700/50 border-gray-300 rounded-lg bg-gray-50">
             <div className="flex flex-wrap gap-2">
               {availableCategories.map((category) => (
                 <AntButton
