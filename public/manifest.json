@@ -1,1 +1,16 @@
- 
+{
+  "name": "AllMyTab",
+  "description": "Transform your browsing experience with powerful search, organization tools, and productivity features.",
+  "version": "1.0.0",
+  "manifest_version": 3,
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "chrome_url_overrides": {
+    "newtab": "index.html"
+  },
+  "permissions": ["storage"],
+  "host_permissions": ["https://allmytab.com/*"]
+}

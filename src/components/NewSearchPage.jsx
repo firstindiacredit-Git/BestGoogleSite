@@ -15,7 +15,7 @@ import PopularBookmarks from "../components/PopularBookmarks";
 import NotebookAndSheet from "../components/NotebookAndSheet";
 import PasswordGenerator from "../components/PasswordGenerater";
 import News from "../components/News";
-import Tool from "../components/Tool";
+import Tool from "../../Tools/Tool.jsx";
 import Sports from "../components/Sports";
 import Top100 from "../components/Top100";
 import "./style.css";

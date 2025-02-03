@@ -38,7 +38,6 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import CommentIcon from "@mui/icons-material/Comment";
 import ShareIcon from "@mui/icons-material/Share";
 
-
 const StyledButton = styled(Button)(({ theme }) => ({
   borderRadius: "24px",
   padding: "10px 24px",
@@ -158,8 +157,6 @@ const Blogs = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [blogs, setBlogs] = useState([]);
   const navigate = useNavigate();
-   
-
 
   useEffect(() => {
     const styleSheet = document.createElement("style");
@@ -601,7 +598,7 @@ const Blogs = () => {
                     display: "block",
                   }}
                 >
-                  BROWSEY
+                  AllMyTab
                 </Typography>
                 <Typography
                   variant="h2"

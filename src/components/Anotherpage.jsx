@@ -54,41 +54,7 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
     Todo: <TodoComponent />,
     NewsFeed: <NewsFeed />,
   };
-  const [isCalculating, setIsCalculating] = useState(true);
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  const [optimalColumns, setOptimalColumns] = useState(4);
   const [isResetting, setIsResetting] = useState(false);
-
-  // Calculate optimal columns based on window width and widget width
-  const calculateOptimalColumns = () => {
-    const minWidgetWidth = 350; // Minimum width for a widget (21vw converted to approx pixels)
-    const padding = 32; // Account for container padding
-    const availableWidth = windowWidth - padding;
-    const calculatedColumns = Math.floor(availableWidth / minWidgetWidth);
-    return Math.min(Math.max(calculatedColumns, 1), 4); // Limit between 1 and 4 columns
-  };
-
-  // Handle window resize
-  useEffect(() => {
-    const handleResize = () => {
-      setIsCalculating(true);
-      setWindowWidth(window.innerWidth);
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  // Recalculate columns when window width changes
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const newOptimalColumns = calculateOptimalColumns();
-      setOptimalColumns(newOptimalColumns);
-      setIsCalculating(false);
-    }, 300); // Debounce the calculation
-
-    return () => clearTimeout(timer);
-  }, [windowWidth]);
 
   // Load user and layout
   useEffect(() => {
@@ -276,7 +242,15 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
 
   const distributeItems = () => {
     const columnsArray = Array.from({ length: columns }, () => []);
-    items.forEach((item) => {
+    // Sort items by column and position before distributing
+    const sortedItems = [...items].sort((a, b) => {
+      if (a.column === b.column) {
+        return a.position - b.position;
+      }
+      return a.column - b.column;
+    });
+
+    sortedItems.forEach((item) => {
       if (item.column >= 0 && item.column < columns) {
         columnsArray[item.column].push(item);
       }
@@ -291,10 +265,18 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
       setIsResetting(true);
       const defaultLayout = await resetPageLayout(user.uid, pageId);
 
+      // Sort widgets by column and position
+      const sortedWidgets = defaultLayout.widgets.sort((a, b) => {
+        if (a.column === b.column) {
+          return a.position - b.position;
+        }
+        return a.column - b.column;
+      });
+
       // Update local state
-      setItems(defaultLayout.widgets);
+      setItems(sortedWidgets);
       setColumns(defaultLayout.columns);
-      setSortedItems(defaultLayout.widgets);
+      setSortedItems(sortedWidgets);
       setPreviewColumns(defaultLayout.columns);
 
       message.success("Layout has been reset to default");
@@ -379,6 +361,7 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
                                         >
                                           ⋮⋮
                                         </div>
+                                        <div>{componentMap[item.name]}</div>
                                         <div className="w-5"></div>
                                       </motion.div>
                                     )}
@@ -476,7 +459,7 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
               <AntButton
                 className="dark:bg-gray-700/50 dark:hover:bg-gray-700 dark:text-white"
                 key="cancel"
-                 type="dark:hover:text-white"
+                type="dark:hover:text-white"
                 onClick={() => setIsSorterOpen(false)}
               >
                 <span className="justify-start">Cancel</span>
@@ -525,7 +508,11 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
                 {[1, 2, 3, 4].map((num) => (
                   <AntButton
                     key={num}
-                    type={previewColumns === num ? "primary" : "dark:hover:text-white"}
+                    type={
+                      previewColumns === num
+                        ? "primary"
+                        : "dark:hover:text-white"
+                    }
                     onClick={() => handleColumnChange(num)}
                     className={
                       previewColumns === num

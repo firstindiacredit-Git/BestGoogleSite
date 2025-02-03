@@ -37,7 +37,7 @@ const PayPalSubscription = ({ onSuccess }) => {
         application_context: {
           shipping_preference: "NO_SHIPPING",
           user_action: "SUBSCRIBE_NOW",
-          brand_name: "Browsey",
+          brand_name: "AllMyTab",
         },
       })
       .then((orderId) => {

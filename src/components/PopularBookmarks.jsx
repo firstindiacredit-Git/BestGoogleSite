@@ -2029,7 +2029,7 @@ function PopularBookmarks() {
                                         boxShadow: snapshot.isDragging
                                           ? "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
                                           : "none",
-                                          border: "none",
+                                        border: "none",
                                       }}
                                     >
                                       {categoryLinks.length === 0 ? (
@@ -2956,6 +2956,7 @@ function PopularBookmarks() {
 
   return (
     <div className="w-[90vw] mx-auto" style={{ padding: "24px" }}>
+      <h2 className="text-lg font-semibold mb-4">Popular</h2>
       {renderBookmarksByCategory()}
 
       {/* Floating Button for Controller */}
@@ -3030,10 +3031,30 @@ function PopularBookmarks() {
             buttonStyle="solid"
             className=" "
           >
-            <Radio.Button className="dark:text-white dark:bg-gray-700 border-none" value={1}>1</Radio.Button>
-            <Radio.Button className="dark:text-white dark:bg-gray-700 border-none" value={2}>2</Radio.Button>
-            <Radio.Button className="dark:text-white dark:bg-gray-700 border-none" value={3}>3</Radio.Button>
-            <Radio.Button className="dark:text-white dark:bg-gray-700 border-none" value={4}>4</Radio.Button>
+            <Radio.Button
+              className="dark:text-white dark:bg-gray-700 border-none"
+              value={1}
+            >
+              1
+            </Radio.Button>
+            <Radio.Button
+              className="dark:text-white dark:bg-gray-700 border-none"
+              value={2}
+            >
+              2
+            </Radio.Button>
+            <Radio.Button
+              className="dark:text-white dark:bg-gray-700 border-none"
+              value={3}
+            >
+              3
+            </Radio.Button>
+            <Radio.Button
+              className="dark:text-white dark:bg-gray-700 border-none"
+              value={4}
+            >
+              4
+            </Radio.Button>
           </Radio.Group>
         </div>
         <DragDropContext onDragEnd={handlePreviewDragEnd}>
@@ -3073,7 +3094,9 @@ function PopularBookmarks() {
                         }
                       `}
                     >
-                      <div className="dark:text-white">Column {columnIndex + 1}</div>
+                      <div className="dark:text-white">
+                        Column {columnIndex + 1}
+                      </div>
                     </div>
                     <div className="space-y-2 border-none dark:text-white min-h-[100px]">
                       {getColumnCategories(columnIndex).map(

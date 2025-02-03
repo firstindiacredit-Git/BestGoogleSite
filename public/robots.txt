@@ -14,4 +14,4 @@ Disallow: /api/
 Disallow: /user/settings
 
 # Sitemap
-Sitemap: https://browsey.vercel.app/sitemap.xml 
+Sitemap: https://allmytab.com/sitemap.xml 

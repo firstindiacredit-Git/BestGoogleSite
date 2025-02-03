@@ -122,8 +122,6 @@
   color: rgba(255, 255, 255, 0.75);
 }
 
-
-
 .ant-modal .ant-modal-content {
   position: relative;
   background-color: white;
@@ -138,7 +136,7 @@
 
 .dark .ant-modal .ant-modal-content {
   position: relative;
-  background-color: #28283A;
+  background-color: #28283a;
   background-clip: padding-box;
   border: 0;
   border-radius: 8px;
@@ -166,5 +164,5 @@
   justify-content: center;
   text-transform: none;
   text-rendering: auto;
-  color:white;
+  color: white;
 }

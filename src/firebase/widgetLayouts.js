@@ -1,9 +1,10 @@
 import { db } from "../firebase";
-import { doc, getDoc, setDoc, collection } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 // Default widget configurations for different pages
 const defaultWidgets = {
   home: [
+    // Column 0
     { id: "weather", name: "Weather", isOpen: true, column: 0, position: 0 },
     { id: "clock", name: "Clock", isOpen: true, column: 0, position: 1 },
     { id: "calendar", name: "Calendar", isOpen: true, column: 0, position: 2 },
@@ -14,6 +15,7 @@ const defaultWidgets = {
       column: 0,
       position: 3,
     },
+
     {
       id: "Bookmarks",
       name: "Popular Bookmarks",
@@ -21,24 +23,22 @@ const defaultWidgets = {
       column: 1,
       position: 0,
     },
-    { id: "Bookmarks1", name: "AI", isOpen: true, column: 2, position: 0 },
     { id: "Bookmarks2", name: "Travel", isOpen: true, column: 1, position: 1 },
-    { id: "Bookmarks3", name: "Sports", isOpen: true, column: 2, position: 1 },
     {
       id: "Bookmarks4",
       name: "Shopping",
       isOpen: true,
       column: 1,
-      position: 3,
+      position: 2,
     },
-    {
-      id: "Bookmarks5",
-      name: "News",
-      isOpen: true,
-      column: 1,
-      position: 4,
-    },
-    { id: "NewsFeed", name: "News Feed", isOpen: true, column: 3, position: 1 },
+    { id: "Bookmarks5", name: "News", isOpen: true, column: 2, position: 2 },
+
+    // Column 2
+    { id: "Bookmarks1", name: "AI", isOpen: true, column: 2, position: 0 },
+    { id: "Bookmarks3", name: "Sports", isOpen: true, column: 2, position: 1 },
+    { id: "Todo", name: "Todo List", isOpen: true, column: 3, position: 2 },
+
+    // Column 3
     {
       id: "imageUploader",
       name: "Image Uploader",
@@ -46,8 +46,8 @@ const defaultWidgets = {
       column: 3,
       position: 0,
     },
-    { id: "Todo", name: "Todo List", isOpen: true, column: 3, position: 2 },
-    { id: "notepad", name: "Notepad", isOpen: true, column: 3, position: 3 },
+    { id: "NewsFeed", name: "News Feed", isOpen: true, column: 3, position: 1 },
+    { id: "notepad", name: "Notepad", isOpen: true, column: 3, position: 2 },
   ],
 };
 
@@ -89,10 +89,6 @@ export const initializeUserLayout = async (userId) => {
           widgets: defaultWidgets.home,
           columns: 4,
         },
-        // popularBookmarks: {
-        //   widgets: defaultWidgets.popularBookmarks,
-        //   columns: 4
-        // }
       });
     }
   } catch (error) {

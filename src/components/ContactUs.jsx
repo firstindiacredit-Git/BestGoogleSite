@@ -417,7 +417,7 @@ const ContactUs = () => {
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", mt: 2 }}>
                 <EmailIcon sx={{ color: "#1a237e", mr: 2 }} />
-                <Typography variant="body2">support@browsey.com</Typography>
+                <Typography variant="body2">support@AllMyTab.com</Typography>
               </Box>
             </Paper>
           </Grid>

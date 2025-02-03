@@ -1,11 +1,30 @@
 import React, { useState, createContext, useMemo, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { Dropdown, Menu, Button, Modal, message } from "antd";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
+import { Dropdown, Button, Modal, message } from "antd";
+import {
+  ReloadOutlined,
+  DeleteOutlined,
+  PlusOutlined,
+  BgColorsOutlined,
+  ClearOutlined,
+} from "@ant-design/icons";
+import NotFound from "./components/NotFound.jsx";
 import galleryupload from "../public/galleryupload.png";
-import { AuthProvider } from "./hooks/AuthContext";
+import { AuthProvider } from "./hooks/AuthContext.jsx";
+import Tool from "../Tools/Tool.jsx";
 import SearchPage from "./components/SearchPage.jsx";
-import AddList from "./components/Calculator.jsx";
 import Signin from "./components/Signup/signin.jsx";
+import Privacy from "./components/Privacy.jsx";
+import Terms from "./components/Terms.jsx";
+import Second from "../Tools/Component/Second.jsx";
+import ContactUs from "./components/ContactUs.jsx";
+
 import Signup from "./components/Signup.jsx";
 import NewSearchPage from "./components/NewSearchPage.jsx";
 import ProfilePage from "./components/ProfilePage.jsx";
@@ -13,46 +32,146 @@ import Forgotpassword from "./components/Signup/Forgotpassword.jsx";
 import AddLinks from "./components/Admin/AddLinks.jsx";
 import Dashboard from "./components/Admin/Dashboard.jsx";
 import AddBookmark from "./components/Admin/AddBookmark.jsx";
-import AddBlog from "./components/Admin/AddBlog.jsx";
 import Login from "./components/Admin/Login.jsx";
 import Users from "./components/Admin/Users.jsx";
 import PremiumPage from "./components/PremiumPage.jsx";
-import PasswordGenerator from "./components/PasswordGenerater.jsx";
 import PremiumForm from "./components/PremiumForm.jsx";
 import Sidebar from "./components/Admin/Sidebar.jsx";
 import LandingPage from "./components/LandingPage.jsx";
 import AboutPage from "./components/AboutPage.jsx";
 import PricingPage from "./components/PricingPage.jsx";
 import FAQPage from "./components/FAQPage.jsx";
-import Privacy from "./components/Privacy.jsx";
-import Terms from "./components/terms.jsx";
+import AddBlog from "./components/Admin/AddBlog.jsx";
 import Blog from "./components/Blog.jsx";
-import ContactUs from "./components/ContactUs.jsx";
 import BlogList from "./components/Admin/BlogList.jsx";
-import BlogDetail from "./components/BlogDetail";
-import axios from "axios";
+import BlogDetail from "./components/BlogDetail.jsx";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "./firebase";
+import { auth } from "./firebase";
+import Transactions from "./components/Admin/Transactions";
 
-// Context Menu Items configuration
+/*Tools */
+
+import Calculator from "../Tools/Component/Calculator.jsx";
+import FarenToCelciusAndCelciusToFaren from "../Tools/Component/FarenToCelciusAndCelciusToFaren.jsx";
+import Paypal from "../Tools/Component/Paypal.jsx";
+import Beautifier from "../Tools/Component/Beautifier.jsx";
+
+import ResumeBuild from "../Tools/Component/ResumeBuild.jsx";
+import Grocery from "../Tools/Component/Grocery.jsx";
+import Bmi from "../Tools/Component/Bmi.jsx";
+import LinkChecker from "../Tools/Component/LinkChecker.jsx";
+import Percentage from "../Tools/Component/Percentage.jsx";
+import ImageToPdf from "../Tools/Component/ImageToPdf.jsx";
+import SplitPdf from "../Tools/Component/SplitPdf.jsx";
+import Hours from "../Tools/Component/Hours.jsx";
+import Compress from "../Tools/Component/Compress.jsx";
+import MergePDF from "../Tools/Component/MergePDF.jsx";
+import PdfConverter from "../Tools/Component/PdfConverter.jsx";
+import SearchPDF from "../Tools/Component/SearchPDF.jsx";
+//import SearchExcelPdf from '../Tools/Component/SearchExcelPdf.jsx';
+import Upload from "../Tools/Component/EditableImage/Upload.jsx";
+import EditPdf from "../Tools/Component/EditPdf.jsx";
+import ExtractPages from "../Tools/Component/ExtractPages.jsx";
+import PdfCropper from "../Tools/Component/PdfCropper.jsx";
+import AddPageNum from "../Tools/Component/AddPageNum.jsx";
+import Protect from "../Tools/Component/Protect.jsx";
+import UnlockPdf from "../Tools/Component/UnlockPdf.jsx";
+import PdfToImage from "../Tools/Component/PdfToImage.jsx";
+import PdfToWord from "../Tools/Component/PdfToWord.jsx";
+import Scientific from "../Tools/Component/Scientific.jsx";
+import BulkEmailChecker from "../Tools/Component/BulkEmailChecker.jsx";
+import BulkEmailSender from "../Tools/Component/BulkEmailSender.jsx";
+import GoogleMap from "../Tools/Component/GoogleMap.jsx";
+import CardValidation from "../Tools/Component/CardValidation.jsx";
+import CardGenerator from "../Tools/Component/CardGenerator.jsx";
+import TemplateGenerator from "../Tools/Component/TemplateGenerator.jsx";
+import CompareLoan from "../Tools/Component/CompareLoan.jsx";
+import CurrencyConverter from "../Tools/Component/CurrencyConverter.jsx";
+import TextToSpeech from "../Tools/Component/TextToSpeech.jsx";
+import SpeechToText from "../Tools/Component/SpeechToText.jsx";
+import OnlineVoiceRecorder from "../Tools/Component/OnlineVoiceRecorder.jsx";
+import OnlineScreenrecoder from "../Tools/Component/OnlineScreenrecoder.jsx";
+import OnlineScreenshot from "../Tools/Component/OnlineScreenshot.jsx";
+import OnlineWebcamTest from "../Tools/Component/OnlineWebcamTest.jsx";
+import PhoneNumberFormat from "../Tools/Component/PhoneNumberFormat.jsx";
+import RandomPassword from "../Tools/Component/RandomPassword.jsx";
+import FractionCalculator from "../Tools/Component/FractionCalculator.jsx";
+import AverageCalculator from "../Tools/Component/AverageCalculator.jsx";
+import Lcm from "../Tools/Component/Lcm.jsx";
+import AgeCalculator from "../Tools/Component/AgeCalculator.jsx";
+import DateDiffCalculator from "../Tools/Component/DateDiffCalculator.jsx";
+import LinkedinScraper from "../Tools/Component/LinkedinScraper.jsx";
+import Calendar from "../Tools/Component/Calendar.jsx";
+import Clock from "../Tools/Component/Clock.jsx";
+import Stopwatch from "../Tools/Component/StopWatch.jsx";
+import Timer from "../Tools/Component/Timer.jsx";
+import Alarm from "../Tools/Component/Alarm.jsx";
+import BinaryToDecimal from "../Tools/Component/BinaryToDecimal.jsx";
+import WordCounter from "../Tools/Component/WordCounter.jsx";
+import CompoundIntrest from "../Tools/Component/CompoundIntrest.jsx";
+import SimpleInterest from "../Tools/Component/SimpleInterest.jsx";
+import DiscountCalculator from "../Tools/Component/DiscountCalculator.jsx";
+import GSTCalculator from "../Tools/Component/GSTCalculator.jsx";
+import VATCalculator from "../Tools/Component/VATCalculator.jsx";
+import ElectricityBill from "../Tools/Component/ElectricityBill.jsx";
+import TestScoreCalculator from "../Tools/Component/TestScoreCalculator.jsx";
+import TrafficChecker from "../Tools/Component/TrafficChecker.jsx";
+
+// Context Menu Items configuratio
 const menuItems = [
   {
     key: "group1",
     type: "group",
-    children: [{ key: "refresh", label: "Refresh", shortcut: "Ctrl+R" }],
+    label: "Page Actions",
+    children: [
+      {
+        key: "refresh",
+        label: "Refresh Page",
+        icon: <ReloadOutlined />,
+        shortcut: "Ctrl+R",
+      },
+    ],
+  },
+  {
+    type: "divider",
   },
   {
     key: "group2",
     type: "group",
+    label: "Background",
     children: [
-      { key: "chBG", label: "Change Background" },
-      { key: "dlBG", label: "Delete Background" },
+      {
+        key: "chBG",
+        label: "Change Background",
+        icon: <BgColorsOutlined />,
+      },
+      {
+        key: "dlBG",
+        label: "Remove Background",
+        icon: <ClearOutlined />,
+      },
     ],
+  },
+  {
+    type: "divider",
   },
   {
     key: "group4",
     type: "group",
+    label: "Page Management",
     children: [
-      { key: "deletePage", label: "Delete Page", shortcut: "Ctrl+Alt+D" },
-      { key: "addPage", label: "New Page", shortcut: "Ctrl+Alt+N" },
+      {
+        key: "addPage",
+        label: "New Page",
+        icon: <PlusOutlined />,
+      },
+      {
+        key: "deletePage",
+        label: "Delete Page",
+        icon: <DeleteOutlined />,
+        danger: true,
+      },
     ],
   },
 ];
@@ -222,11 +341,53 @@ const backgroundCollections = {
 const ContextMenuWrapper = ({ children }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [activeSection, setActiveSection] = useState("images"); // custom, gradients, solid, glass, images
+  const [activeSection, setActiveSection] = useState("images");
   const [selectedCategory, setSelectedCategory] = useState("nature");
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const openModal = () => setIsModalVisible(true);
   const closeModal = () => setIsModalVisible(false);
+
+  const createNewPage = () => {
+    const pages = JSON.parse(localStorage.getItem("customPages") || "[]");
+    const newPageNumber = pages.length + 1;
+    const newPage = {
+      id: Date.now(),
+      name: `Page ${newPageNumber}`,
+      widgets: [],
+    };
+
+    const updatedPages = [...pages, newPage];
+    localStorage.setItem("customPages", JSON.stringify(updatedPages));
+    navigate(`/NewSearchPage?pageId=${newPage.id}`);
+  };
+
+  const deletePage = () => {
+    const urlParams = new URLSearchParams(location.search);
+    const currentPageId = urlParams.get("pageId");
+
+    if (!currentPageId) {
+      message.error("Cannot delete the home page");
+      return;
+    }
+
+    Modal.confirm({
+      title: "Delete Page",
+      content: "Are you sure you want to delete this page?",
+      okText: "Yes",
+      okType: "danger",
+      cancelText: "No",
+      onOk() {
+        const pages = JSON.parse(localStorage.getItem("customPages") || "[]");
+        const updatedPages = pages.filter(
+          (page) => page.id.toString() !== currentPageId
+        );
+        localStorage.setItem("customPages", JSON.stringify(updatedPages));
+        navigate("/search");
+      },
+    });
+  };
 
   const compressImage = (file) => {
     return new Promise((resolve) => {
@@ -276,6 +437,7 @@ const ContextMenuWrapper = ({ children }) => {
 
       try {
         localStorage.setItem("backgroundImage", compressedImage);
+        localStorage.setItem("bgTransparency", "50");
         window.location.reload();
       } catch (error) {
         if (error.name === "QuotaExceededError") {
@@ -304,7 +466,12 @@ const ContextMenuWrapper = ({ children }) => {
         localStorage.setItem("bgTransparency", "100");
         window.location.reload();
         break;
-
+      case "deletePage":
+        deletePage();
+        break;
+      case "addPage":
+        createNewPage();
+        break;
       default:
         console.log(`Unhandled action: ${key}`);
     }
@@ -313,6 +480,10 @@ const ContextMenuWrapper = ({ children }) => {
   const menu = {
     items: menuItems,
     onClick: handleMenuClick,
+    style: {
+      width: "200px",
+      padding: "4px 0",
+    },
   };
 
   return (
@@ -325,7 +496,6 @@ const ContextMenuWrapper = ({ children }) => {
         footer={[
           <Button
             key="remove"
-            danger
             onClick={() => {
               localStorage.removeItem("backgroundImage");
               localStorage.removeItem("backgroundType");
@@ -527,7 +697,14 @@ const ContextMenuWrapper = ({ children }) => {
           )}
         </div>
       </Modal>
-      <Dropdown menu={menu} trigger={["contextMenu"]}>
+      <Dropdown
+        menu={menu}
+        trigger={["contextMenu"]}
+        overlayStyle={{
+          boxShadow:
+            "0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 9px 28px 8px rgba(0, 0, 0, 0.05)",
+        }}
+      >
         <div
           className="w-full min-h-screen"
           style={{
@@ -566,6 +743,37 @@ export const WidgetTransparencyContext = React.createContext();
 // Add theme context and optimized theme handling
 export const ThemeContext = createContext();
 
+const SearchPageWrapper = () => {
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const checkDefaultPage = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        try {
+          const userDocRef = doc(db, "users", user.uid);
+          const userDoc = await getDoc(userDocRef);
+          if (userDoc.exists() && userDoc.data().defaultPageId) {
+            navigate(`/NewSearchPage?pageId=${userDoc.data().defaultPageId}`);
+          }
+        } catch (error) {
+          console.error("Error checking default page:", error);
+        }
+      }
+      setIsLoading(false);
+    };
+
+    checkDefaultPage();
+  }, [navigate]);
+
+  return (
+    <ContextMenuWrapper>
+      <SearchPage />
+    </ContextMenuWrapper>
+  );
+};
+
 // App Component
 const App = () => {
   const [widgetTransparent, setWidgetTransparent] = useState(() =>
@@ -603,19 +811,20 @@ const App = () => {
     });
   }, [isDarkMode]);
 
-  // Memoize the widget transparency context value
-  const widgetTransparencyValue = useMemo(
+  // Memoize the context value
+  const contextValue = useMemo(
     () => ({
       widgetTransparent,
       setWidgetTransparent,
     }),
     [widgetTransparent]
   );
-
   return (
+    // <PayPalProvider>
     <ThemeContext.Provider value={themeContextValue}>
-      <WidgetTransparencyContext.Provider value={widgetTransparencyValue}>
+      <WidgetTransparencyContext.Provider value={contextValue}>
         <AuthProvider>
+          {/* <SubscriptionProvider> */}
           <Router>
             <Routes>
               {/* Public Routes */}
@@ -623,23 +832,14 @@ const App = () => {
               <Route path="/about" element={<AboutPage />} />
               <Route path="/pricing" element={<PricingPage />} />
               <Route path="/faq" element={<FAQPage />} />
+              <Route path="*" element={<NotFound />} />
+              <Route path="/search" element={<SearchPageWrapper />} />
+              <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
-              <Route
-                path="/search"
-                element={
-                  <ContextMenuWrapper>
-                    <SearchPage />
-                  </ContextMenuWrapper>
-                }
-              />
-              <Route
-                path="/calculator"
-                element={
-                  <ContextMenuWrapper>
-                    <AddList />
-                  </ContextMenuWrapper>
-                }
-              />
+              <Route path="/contact" element={<ContactUs />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:id" element={<BlogDetail />} />
+
               <Route
                 path="/NewSearchPage"
                 element={
@@ -648,37 +848,127 @@ const App = () => {
                   </ContextMenuWrapper>
                 }
               />
+              <Route path="/calculator" element={<Calculator />} />
               <Route
-                path="/password-generator"
-                element={
-                  <ContextMenuWrapper>
-                    <PasswordGenerator />
-                  </ContextMenuWrapper>
-                }
+                path="/faren-to-celcius"
+                element={<FarenToCelciusAndCelciusToFaren />}
               />
+              <Route path="/second" element={<Second />} />
+              <Route path="/hours" element={<Hours />} />
+              <Route path="/paypal" element={<Paypal />} />
+              <Route path="/beautifier" element={<Beautifier />} />
+              <Route path="/resumebuild" element={<ResumeBuild />} />
+              <Route path="/grocery" element={<Grocery />} />
+              <Route path="/bmi" element={<Bmi />} />
+              <Route path="/linkchecker" element={<LinkChecker />} />
+              <Route path="/percentage" element={<Percentage />} />
+              <Route path="/imagetopdf" element={<ImageToPdf />} />
+              <Route path="/splitpdf" element={<SplitPdf />} />
+              <Route path="/compress" element={<Compress />} />
+              <Route path="/mergepdf" element={<MergePDF />} />
+              <Route path="/pdfconverter" element={<PdfConverter />} />
+              <Route path="/searchpdf" element={<SearchPDF />} />
+              {/* <Route path="/searchexcelpdf" element={<SearchExcelPdf />} /> */}
+              <Route path="/upload" element={<Upload />} />
+              <Route path="/editpdf" element={<EditPdf />} />
+              <Route path="/extractpages" element={<ExtractPages />} />
+              <Route path="/pdfcropper" element={<PdfCropper />} />
+              <Route path="/addpagenum" element={<AddPageNum />} />
+              <Route path="/protect" element={<Protect />} />
+              <Route path="/unlockpdf" element={<UnlockPdf />} />
+              <Route path="/pdftoimage" element={<PdfToImage />} />
+              <Route path="/pdftoword" element={<PdfToWord />} />
+              <Route path="/scientific" element={<Scientific />} />
+              <Route path="/bulkemailchecker" element={<BulkEmailChecker />} />
+              <Route path="/bulkemailsender" element={<BulkEmailSender />} />
+              <Route path="/googlemap" element={<GoogleMap />} />
+              <Route path="/cardvalidation" element={<CardValidation />} />
+              <Route path="/cardgenerator" element={<CardGenerator />} />
+              <Route
+                path="/templategenerator"
+                element={<TemplateGenerator />}
+              />
+              <Route path="/compareloan" element={<CompareLoan />} />
+              <Route
+                path="/currencyconverter"
+                element={<CurrencyConverter />}
+              />
+              <Route path="/texttospeech" element={<TextToSpeech />} />
+              <Route path="/speechtotext" element={<SpeechToText />} />
+              <Route
+                path="/onlinevoiceRecorder"
+                element={<OnlineVoiceRecorder />}
+              />
+              <Route
+                path="/onlinescreenRecorder"
+                element={<OnlineScreenrecoder />}
+              />
+              <Route path="/onlinescreenshot" element={<OnlineScreenshot />} />
+              <Route path="/onlinewebcamtest" element={<OnlineWebcamTest />} />
+              <Route
+                path="/phonenumberformat"
+                element={<PhoneNumberFormat />}
+              />
+              <Route path="/randompassword" element={<RandomPassword />} />
+              <Route
+                path="/fractioncalculator"
+                element={<FractionCalculator />}
+              />
+              <Route
+                path="/averagecalculator"
+                element={<AverageCalculator />}
+              />
+              <Route path="/lcm" element={<Lcm />} />
+              <Route path="/agecalculator" element={<AgeCalculator />} />
+              <Route
+                path="/datediffcalculator"
+                element={<DateDiffCalculator />}
+              />
+              <Route path="/linkedinscraper" element={<LinkedinScraper />} />
+              <Route path="/calendar" element={<Calendar />} />
+              <Route path="/clock" element={<Clock />} />
+              <Route path="/stopwatch" element={<Stopwatch />} />
+              <Route path="/timer" element={<Timer />} />
+              <Route path="/alarm" element={<Alarm />} />
+              <Route path="/binarytodecimal" element={<BinaryToDecimal />} />
+              <Route path="/wordcounter" element={<WordCounter />} />
+              <Route path="/compoundintrest" element={<CompoundIntrest />} />
+              <Route path="/simpleinterest" element={<SimpleInterest />} />
+              <Route
+                path="/discountcalculator"
+                element={<DiscountCalculator />}
+              />
+              <Route path="/gstcalculator" element={<GSTCalculator />} />
+              <Route path="/vatcalculator" element={<VATCalculator />} />
+              <Route path="/electricitybill" element={<ElectricityBill />} />
+              <Route
+                path="/testscorecalculator"
+                element={<TestScoreCalculator />}
+              />
+              <Route path="/trafficchecker" element={<TrafficChecker />} />
               <Route path="/signin" element={<Signin />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/tools" element={<Tool />} />
+              <Route path="/second" element={<Second />} />
               <Route path="/forgot-password" element={<Forgotpassword />} />
               <Route path="/premium" element={<PremiumPage />} />
               <Route path="/premium-form" element={<PremiumForm />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/blog" element={<Blog />} />
-              <Route path="/contact" element={<ContactUs />} />
-              <Route path="/blog/:id" element={<BlogDetail />} />
+
               {/* Admin Routes with Sidebar Layout */}
               <Route path="/admin/login" element={<Login />} />
               <Route element={<Sidebar />}>
                 <Route path="/admin/dashboard" element={<Dashboard />} />
+                <Route path="/admin/transactions" element={<Transactions />} />
+                <Route path="/admin/addblog" element={<AddBlog />} />
+                <Route path="/admin/bloglist" element={<BlogList />} />
                 <Route path="/admin/users" element={<Users />} />
                 <Route path="/admin/AddBookmark" element={<AddBookmark />} />
                 <Route path="/admin/addlinks" element={<AddLinks />} />
-                <Route path="/admin/addblog" element={<AddBlog />} />
-                <Route path="/admin/bloglist" element={<BlogList />} />
               </Route>
             </Routes>
           </Router>
+          {/* </SubscriptionProvider> */}
         </AuthProvider>
       </WidgetTransparencyContext.Provider>
     </ThemeContext.Provider>
