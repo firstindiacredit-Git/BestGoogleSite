@@ -356,60 +356,61 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
 
   return (
     <>
-      {isAdmin && (
-        <div className="bg-red-500/90 backdrop-blur-sm text-white py-1 px-4 text-center sticky top-0 z-50">
-          <Alert
-            message={
-              <div className="flex items-center justify-center gap-2">
-                <RiAdminLine className="text-xl" />
-                <span className="font-semibold">Admin Mode Active</span>
-                <span className="text-sm">
-                  - Please proceed with caution. Changes can affect system
-                  functionality.
-                </span>
-              </div>
-            }
-            type="error"
-            showIcon={false}
-            className="bg-transparent border-none text-white p-0"
-            closable
-          />
-        </div>
-      )}
-      <header className="p-2 bg-gray-200/20 backdrop-blur-sm dark:bg-[#513a7a]/10 border-b border dark:border-gray-800/20 border-gray-200/20 flex justify-between items-center sticky top-0 z-50">
-        <div className="flex  items-center space-x-2">
-          {user ? (
-            <div className="relative flex items-center gap-2">
-              {goBack ? (
-                <button
-                  className="bg-indigo-500 py-1.5 px-4 flex items-center gap-2 rounded home-button"
-                  onClick={Back}
-                >
-                  <FaArrowLeft className="h-2 w-3 text-white" />
-                  <span className="text-white">Back</span>
-                </button>
-              ) : (
-                <Dropdown
-                  menu={{ items }}
-                  trigger={["click"]}
-                  placement="bottomLeft"
-                  overlayClassName="mt-1"
-                >
-                  <button className="bg-indigo-500 border-none hover:bg-indigo-600 flex items-center gap-2 px-2 py-1 rounded-md transition-all duration-200">
-                    <MenuOutlined className="text-white" />
-                    <span className="text-white">{currentPageName}</span>
+      <header className=" bg-gray-200/20 backdrop-blur-sm dark:bg-[#513a7a]/10 border-b border dark:border-gray-800/20 border-gray-200/20  sticky top-0 z-50">
+        {isAdmin && (
+          <div className="bg-red-500/90 backdrop-blur-sm text-white py-1 px-4 text-center sticky top-0 z-50">
+            <Alert
+              message={
+                <div className="flex items-center justify-center gap-2">
+                  <RiAdminLine className="text-xl" />
+                  <span className="font-semibold">Admin Mode Active</span>
+                  <span className="text-sm">
+                    - Please proceed with caution. Changes can affect system
+                    functionality.
+                  </span>
+                </div>
+              }
+              type="error"
+              showIcon={false}
+              className="bg-transparent border-none text-white p-0"
+              closable
+            />
+          </div>
+        )}
+        <div className="flex p-2 justify-between items-center">
+          <div className="flex  items-center space-x-2">
+            {user ? (
+              <div className="relative flex items-center gap-2">
+                {goBack ? (
+                  <button
+                    className="bg-indigo-500 py-1.5 px-4 flex items-center gap-2 rounded home-button"
+                    onClick={Back}
+                  >
+                    <FaArrowLeft className="h-2 w-3 text-white" />
+                    <span className="text-white">Back</span>
                   </button>
-                </Dropdown>
-              )}
-              <div
-                className={` p-2 rounded-lg text-sm flex items-center justify-center gap-2 
+                ) : (
+                  <Dropdown
+                    menu={{ items }}
+                    trigger={["click"]}
+                    placement="bottomLeft"
+                    overlayClassName="mt-1"
+                  >
+                    <button className="bg-indigo-500 border-none hover:bg-indigo-600 flex items-center gap-2 px-2 py-1 rounded-md transition-all duration-200">
+                      <MenuOutlined className="text-white" />
+                      <span className="text-white">{currentPageName}</span>
+                    </button>
+                  </Dropdown>
+                )}
+                <div
+                  className={` p-2 rounded-lg text-sm flex items-center justify-center gap-2 
                       ${
                         subscriptionStatus === "pro"
                           ? "text-yellow-500"
                           : "text-gray-500 dark:text-gray-400"
                       }`}
-              >
-                {/* <span>
+                >
+                  {/* <span>
                   {subscriptionStatus !== "pro" && (
                     <button
                       type="button"
@@ -421,109 +422,110 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
                     </button>
                   )}
                 </span> */}
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="w-36  "></div>
-          )}
-        </div>
-
-        <Link to="/search">
-          <div className="flex relative mx-auto   justify-center">
-            <img
-              src={`${
-                isDarkMode ? "/BrowseyFullDark2.svg" : "/BrowseyFullDark.svg"
-              }`}
-              className="w-40 drop-shadow-sm"
-              alt="Browsey"
-            />
-          </div>
-        </Link>
-
-        <div className="flex items-center justify-between w-fit gap-4 space-x-4">
-          <div
-            onClick={toggleTheme}
-            className="flex items-center text-sm dark:hover:bg-gray-800/20 transition-all hover:bg-gray-200/80 p-2 cursor-pointer rounded-md"
-          >
-            {isDarkMode ? (
-              <FaSun className="w-5 h-5 text-white" />
             ) : (
-              <FaMoon className="w-5 h-5 " />
+              <div className="w-36  "></div>
             )}
           </div>
-          {user ? (
-            <div className="relative">
-              <div
-                onClick={togglePanel}
-                className="flex items-center cursor-pointer user-avatar"
-              >
-                <img
-                  src={user.photoURL || "/default-avatar.png"}
-                  alt="User Avatar"
-                  className="h-8 w-8 rounded-full border border-gray-300 dark:border-gray-500"
-                />
-              </div>
 
-              {panel && (
-                <div className="absolute right-0 mt-2 w-60 py-2 bg-white shadow-lg rounded-lg text-sm dark:bg-[#513a7a] user-panel">
-                  <div className="px-4 py-2 text-center dark:text-white">
-                    <p className="font-bold">
-                      {user.username || user.displayName || "User"}
-                    </p>
-                    <p>{user.email}</p>
-                    <div
-                      className={`mt-2 text-sm flex items-center justify-center gap-2 
+          <Link to="/search">
+            <div className="flex relative mx-auto   justify-center">
+              <img
+                src={`${
+                  isDarkMode ? "/BrowseyFullDark2.svg" : "/BrowseyFullDark.svg"
+                }`}
+                className="w-40 drop-shadow-sm"
+                alt="Browsey"
+              />
+            </div>
+          </Link>
+
+          <div className="flex items-center justify-between w-fit gap-4 space-x-4">
+            <div
+              onClick={toggleTheme}
+              className="flex items-center text-sm dark:hover:bg-gray-800/20 transition-all hover:bg-gray-200/80 p-2 cursor-pointer rounded-md"
+            >
+              {isDarkMode ? (
+                <FaSun className="w-5 h-5 text-white" />
+              ) : (
+                <FaMoon className="w-5 h-5 " />
+              )}
+            </div>
+            {user ? (
+              <div className="relative">
+                <div
+                  onClick={togglePanel}
+                  className="flex items-center cursor-pointer user-avatar"
+                >
+                  <img
+                    src={user.photoURL || "/default-avatar.png"}
+                    alt="User Avatar"
+                    className="h-8 w-8 rounded-full border border-gray-300 dark:border-gray-500"
+                  />
+                </div>
+
+                {panel && (
+                  <div className="absolute right-0 mt-2 w-60 py-2 bg-white shadow-lg rounded-lg text-sm dark:bg-[#513a7a] user-panel">
+                    <div className="px-4 py-2 text-center dark:text-white">
+                      <p className="font-bold">
+                        {user.username || user.displayName || "User"}
+                      </p>
+                      <p>{user.email}</p>
+                      <div
+                        className={`mt-2 text-sm flex items-center justify-center gap-2 
                       ${
                         subscriptionStatus === "pro"
                           ? "text-yellow-500"
                           : "text-gray-500 dark:text-gray-400"
                       }`}
-                    >
-                      <FaCrown
-                        className={`${
-                          subscriptionStatus === "pro" ? "animate-pulse" : ""
-                        }`}
-                      />
-                      <span>
-                        {subscriptionStatus === "pro"
-                          ? "Pro Member"
-                          : "Free User"}
-                      </span>
+                      >
+                        <FaCrown
+                          className={`${
+                            subscriptionStatus === "pro" ? "animate-pulse" : ""
+                          }`}
+                        />
+                        <span>
+                          {subscriptionStatus === "pro"
+                            ? "Pro Member"
+                            : "Free User"}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                  <hr className="my-2 border-gray-200 dark:border-gray-600" />
-                  <Link to="/Profile">
-                    <button className="w-full flex items-center justify-center gap-2 px-4 py-2 text-center text-sm text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600 rounded transition-colors duration-200">
-                      <RiUserLine />
-                      <span>Profile</span>
+                    <hr className="my-2 border-gray-200 dark:border-gray-600" />
+                    <Link to="/Profile">
+                      <button className="w-full flex items-center justify-center gap-2 px-4 py-2 text-center text-sm text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600 rounded transition-colors duration-200">
+                        <RiUserLine />
+                        <span>Profile</span>
+                      </button>
+                    </Link>
+                    <button
+                      onClick={handleSignOut}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2 text-center text-sm text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600 rounded transition-colors duration-200"
+                    >
+                      <IoIosLogOut />
+                      <span>Sign Out</span>
                     </button>
-                  </Link>
-                  <button
-                    onClick={handleSignOut}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2 text-center text-sm text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600 rounded transition-colors duration-200"
-                  >
-                    <IoIosLogOut />
-                    <span>Sign Out</span>
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="flex space-x-2">
-              <Link
-                to="/signin"
-                className="px-2 py-1 border  text-white bg-green-500 border-green-500 dark:border-green-500 rounded hover:bg-green-600  transition-colors duration-200"
-              >
-                Login
-              </Link>
-              <Link
-                to="/signup"
-                className="px-2 py-1 border text-white bg-blue-500 border-blue-500 dark:border-gray-500 rounded hover:bg-blue-600 transition-colors duration-200"
-              >
-                Sign Up
-              </Link>
-            </div>
-          )}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex space-x-2">
+                <Link
+                  to="/signin"
+                  className="px-2 py-1 border  text-white bg-green-500 border-green-500 dark:border-green-500 rounded hover:bg-green-600  transition-colors duration-200"
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/signup"
+                  className="px-2 py-1 border text-white bg-blue-500 border-blue-500 dark:border-gray-500 rounded hover:bg-blue-600 transition-colors duration-200"
+                >
+                  Sign Up
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
       </header>
     </>

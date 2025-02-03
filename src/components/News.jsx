@@ -145,36 +145,34 @@ const NewsApp = () => {
 
   return (
     <div className="p-6">
-      <div className="mb-6">
+      <div className="flex mb-5 justify-between items-center">
         <Search
           placeholder="Search news..."
           onSearch={(value) => fetchData(value)}
-          className="max-w-lg mx-auto block mb-4"
+          className="w-96 block"
           enterButton
         />
         <Menu
           mode="horizontal"
           onClick={({ key }) => fetchData(key)}
           items={menuItems}
-          className="justify-center dark:bg-gray-800 dark:text-white"
+          className="justify-center rounded-md bg-white dark:bg-gray-800 dark:text-white"
         />
+        <Space className="mb-4  w-96  justify-end">
+          <Button
+            type={viewMode === "grid" ? "primary" : "default"}
+            icon={<AppstoreOutlined />}
+            onClick={() => setViewMode("grid")}
+            className="dark:bg-gray-700 dark:text-white"
+          />
+          <Button
+            type={viewMode === "list" ? "primary" : "default"}
+            icon={<UnorderedListOutlined />}
+            onClick={() => setViewMode("list")}
+            className="dark:bg-gray-700 dark:text-white"
+          />
+        </Space>
       </div>
-
-      <Space className="mb-4 w-full justify-end">
-        <Button
-          type={viewMode === "grid" ? "primary" : "default"}
-          icon={<AppstoreOutlined />}
-          onClick={() => setViewMode("grid")}
-          className="dark:bg-gray-700 dark:text-white"
-        />
-        <Button
-          type={viewMode === "list" ? "primary" : "default"}
-          icon={<UnorderedListOutlined />}
-          onClick={() => setViewMode("list")}
-          className="dark:bg-gray-700 dark:text-white"
-        />
-      </Space>
-
       {loading ? (
         <div className="text-center p-12">
           <Spin size="large" />
