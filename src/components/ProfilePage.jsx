@@ -6,10 +6,9 @@ import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { FaEye, FaEyeSlash, FaPen, FaCamera } from "react-icons/fa";
 import imageCompression from "browser-image-compression";
-import {
-  CLOUDINARY_CONFIG,
-  getCloudinaryUploadUrl,
-} from "../config/cloudinary";
+import { useSubscription } from "../hooks/useSubscription";
+import { Modal, message } from "antd";
+// https://cdn.dribbble.com/userupload/14883451/file/original-761915986636e2ae85fee541c6b9c051.jpg?resize=1200x900&vertical=center
 
 const ProfilePage = () => {
   const [username, setUsername] = useState("");
@@ -29,6 +28,11 @@ const ProfilePage = () => {
   const [newPin, setNewPin] = useState(["", "", "", ""]);
   const [showPin, setShowPin] = useState(false);
 
+  // const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const { isPro } = useSubscription();
+
+  const [previewUrl, setPreviewUrl] = useState(null);
+
   const navigate = useNavigate();
 
   const handleGoBack = () => {
@@ -44,7 +48,14 @@ const ProfilePage = () => {
       if (user) {
         setUsername(user.displayName || "Alexis Hill");
         setEmail(user.email || "example@mail.com");
-        setAvatarUrl(user.photoURL || "/path/to/default-avatar.jpg");
+        setAvatarUrl(
+          user.photoURL ||
+            "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"
+        );
+        setPreviewUrl(
+          user.photoURL ||
+            "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"
+        );
         setUserId(user.uid);
         fetchUserPin(user.uid);
       }
@@ -57,10 +68,10 @@ const ProfilePage = () => {
     fileInputRef.current?.click();
   };
 
-  const compressImage = async (file, isForAuth = false) => {
+  const compressImage = async (file) => {
     const options = {
-      maxSizeMB: isForAuth ? 0.1 : 1, // Much smaller for auth profile
-      maxWidthOrHeight: isForAuth ? 200 : 800, // Smaller dimensions for auth
+      maxSizeMB: 1,
+      maxWidthOrHeight: 800,
       useWebWorker: true,
       fileType: file.type,
     };
@@ -80,9 +91,22 @@ const ProfilePage = () => {
 
     // Validate file type
     if (!file.type.startsWith("image/")) {
-      alert("Please upload an image file");
+      message.error("Please upload an image file");
       return;
     }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      message.error("File size should not exceed 5MB");
+      return;
+    }
+
+    // Show preview immediately
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreviewUrl(reader.result);
+    };
+    reader.readAsDataURL(file);
 
     try {
       setIsUploading(true);
@@ -90,49 +114,66 @@ const ProfilePage = () => {
       if (!currentUser) throw new Error("No user logged in");
 
       // Compress image before upload
-      const compressedImage = await compressImage(file, false);
+      const compressedImage = await compressImage(file);
 
-      // Create form data for Cloudinary upload
+      // Prepare form data for Cloudinary upload
       const formData = new FormData();
       formData.append("file", compressedImage);
-      formData.append("upload_preset", CLOUDINARY_CONFIG.UPLOAD_PRESET);
-      formData.append("folder", "user_avatars");
+      formData.append(
+        "upload_preset",
+        import.meta.env.VITE_CLOUDINARY_UPLOAD_AVATAR_PRESET
+      );
+      formData.append("folder", "browsey/avatars");
+      formData.append("public_id", `user_${currentUser.uid}_${Date.now()}`);
+      formData.append("cloud_name", import.meta.env.VITE_CLOUDINARY_CLOUD_NAME);
 
       // Upload to Cloudinary
-      const response = await fetch(getCloudinaryUploadUrl(), {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${
+          import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
+        }/image/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
-        throw new Error("Failed to upload image to Cloudinary");
+        const errorData = await response.json();
+        console.error("Cloudinary Error:", errorData);
+        throw new Error(
+          errorData.error?.message || "Failed to upload image to Cloudinary"
+        );
       }
 
       const data = await response.json();
       const imageUrl = data.secure_url;
 
-      try {
-        // Update auth profile with Cloudinary URL
-        await updateProfile(currentUser, {
-          photoURL: imageUrl,
-        });
+      // Update user profile with new image URL
+      await updateProfile(currentUser, {
+        photoURL: imageUrl,
+      });
 
-        // Update Firestore with Cloudinary URL
-        const userRef = doc(db, "users", currentUser.uid);
-        await updateDoc(userRef, {
-          avatarUrl: imageUrl,
-        });
+      // Update Firestore document
+      const userRef = doc(db, "users", currentUser.uid);
+      await updateDoc(userRef, {
+        avatarUrl: imageUrl,
+        lastUpdated: new Date().toISOString(),
+      });
 
-        // Update UI
-        setAvatarUrl(imageUrl);
-        alert("Profile picture updated successfully!");
-      } catch (error) {
-        console.error("Error updating profile:", error);
-        alert("Failed to update profile picture. Please try again.");
-      }
+      setAvatarUrl(imageUrl);
+      message.success("Profile picture updated successfully!");
     } catch (error) {
-      console.error("Error processing image:", error);
-      alert("Failed to process image. Please try again.");
+      console.error("Error uploading avatar:", error);
+      setPreviewUrl(avatarUrl); // Revert preview on error
+
+      if (error.message.includes("Cloudinary")) {
+        message.error("Failed to upload image. Please try again later.");
+      } else if (error.message === "No user logged in") {
+        message.error("Please log in to upload an image.");
+      } else {
+        message.error("An error occurred while updating your profile picture.");
+      }
     } finally {
       setIsUploading(false);
     }
@@ -248,7 +289,7 @@ const ProfilePage = () => {
         <div className="flex items-center space-x-4">
           <div className="relative">
             <img
-              src={avatarUrl}
+              src={previewUrl || avatarUrl}
               alt="Avatar"
               className="w-16 h-16 rounded-full border-2 border-gray-300 dark:border-gray-700 object-cover"
             />
@@ -257,7 +298,11 @@ const ProfilePage = () => {
               className="absolute bottom-0 right-0 bg-indigo-600 rounded-full p-1.5 text-white hover:bg-indigo-700"
               disabled={isUploading}
             >
-              <FaCamera size={12} />
+              {isUploading ? (
+                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                <FaCamera size={12} />
+              )}
             </button>
             <input
               type="file"
@@ -333,21 +378,12 @@ const ProfilePage = () => {
         </div>
 
         {/* Account Type */}
-        <div className="flex justify-between border-b items-center">
+        <div className="flex justify-between border-b items-center pb-4">
           <div>
             <h2 className="font-semibold">Account</h2>
             <p className="text-green-500">{accountType}</p>
           </div>
-          <button
-            onClick={handleUpgrade}
-            className="bg-yellow-400 text-black px-4 py-2 rounded font-bold flex items-center space-x-2 hover:bg-yellow-500"
-          >
-            <span>⚡</span>
-            <span>Get Pro</span>
-          </button>
         </div>
-
-        {/* Change PIN Section */}
         {userId && (
           <div className="flex justify-between items-center">
             <div>
