@@ -132,7 +132,7 @@ const BlogList = () => {
             <div className="absolute top-4 right-4 flex gap-2">
               {blog.featured && (
                 <Tag color="gold" className="flex items-center shadow-lg">
-                  <StarFilled className="mr-1" />Featured
+                  <StarFilled className="mr-1" /> Featured
                 </Tag>
               )}
               <Tag color="blue" className="shadow-lg">
