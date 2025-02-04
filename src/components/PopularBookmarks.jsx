@@ -2956,7 +2956,7 @@ function PopularBookmarks() {
 
   return (
     <div className="w-[90vw] mx-auto" style={{ padding: "24px" }}>
-      <h2 className="text-lg font-semibold mb-4">Popular</h2>
+      
       {renderBookmarksByCategory()}
 
       {/* Floating Button for Controller */}

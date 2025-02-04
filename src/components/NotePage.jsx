@@ -7,6 +7,10 @@ import {
   MicOff,
   Palette,
   History,
+  Save,
+  Edit2,
+  Trash2,
+  X,
 } from "lucide-react";
 import { HiOutlineNumberedList } from "react-icons/hi2";
 import { RxHamburgerMenu } from "react-icons/rx";
@@ -36,10 +40,15 @@ const NotePage = ({ inNotebookSheet = false }) => {
     top: null,
     right: null,
   });
+  const [historyPopupPosition, setHistoryPopupPosition] = useState({
+    top: null,
+    right: null,
+  });
 
   const textareaRef = useRef(null);
   const lineNumberRef = useRef(null);
   const colorPickerRef = useRef(null);
+  const historyButtonRef = useRef(null);
 
   const predefinedColors = [
     "#000000",
@@ -92,9 +101,30 @@ const NotePage = ({ inNotebookSheet = false }) => {
   }, []);
 
   useEffect(() => {
+    const savedHistory = localStorage.getItem("notesHistory");
+    if (savedHistory) {
+      setHistory(JSON.parse(savedHistory));
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("notes", notes);
+    localStorage.setItem("backgroundColor", backgroundColor);
+  }, [notes, backgroundColor]);
+
+  useEffect(() => {
+    localStorage.setItem("notesHistory", JSON.stringify(history));
+  }, [history]);
+
+  useEffect(() => {
     function handleClickOutside(event) {
-      if (!event.target.closest(".menu-Container")) {
+      if (
+        !event.target.closest(".menu-Container") &&
+        !event.target.closest(".history-popup") &&
+        event.target.closest(".history-backdrop")
+      ) {
         setShowColorPicker(false);
+        setShowHistory(false);
       }
     }
 
@@ -103,11 +133,6 @@ const NotePage = ({ inNotebookSheet = false }) => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
-  useEffect(() => {
-    localStorage.setItem("notes", notes);
-    localStorage.setItem("backgroundColor", backgroundColor);
-  }, [notes, backgroundColor]);
 
   useEffect(() => {
     const darkModeMediaQuery = window.matchMedia(
@@ -208,7 +233,31 @@ const NotePage = ({ inNotebookSheet = false }) => {
 
   const handleNotesChange = (e) => {
     setNotes(e.target.value);
-    setHistory((prevHistory) => [...prevHistory, e.target.value]);
+  };
+
+  const saveToHistory = () => {
+    const newEntry = {
+      id: Date.now(),
+      content: notes,
+      timestamp: new Date().toLocaleString(),
+    };
+    setHistory((prevHistory) => [newEntry, ...prevHistory]);
+  };
+
+  const deleteHistoryEntry = (id) => {
+    setHistory((prevHistory) => prevHistory.filter((entry) => entry.id !== id));
+  };
+
+  const editHistoryEntry = (id) => {
+    const entry = history.find((entry) => entry.id === id);
+    if (entry) {
+      setNotes(entry.content);
+      setShowHistory(false);
+    }
+  };
+
+  const toggleHistoryPanel = () => {
+    setShowHistory(!showHistory);
   };
 
   const toggleBold = () => setIsBold(!isBold);
@@ -508,7 +557,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
             )}
 
             {!isCollapsed && (
-              <div className="flex  flex-wrap justify-between items-center gap-4 mt-6">
+              <div className="flex flex-wrap justify-between items-center gap-4 mt-6">
                 <div className="flex items-center space-x-3">
                   <button
                     className={`p-3 rounded-sm transition duration-200 ${
@@ -573,16 +622,29 @@ const NotePage = ({ inNotebookSheet = false }) => {
                     )}
                   </button>
                   <button
+                    ref={historyButtonRef}
                     className={`p-3 rounded-sm transition duration-200 ${
                       isAutoColor
                         ? "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
                         : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
                     }`}
-                    onClick={() => setShowHistory(!showHistory)}
+                    onClick={toggleHistoryPanel}
                     title="Show History"
                     style={!isAutoColor ? { color: textColor } : undefined}
                   >
                     <History className="w-5 h-5" />
+                  </button>
+                  <button
+                    className={`p-3 rounded-sm transition duration-200 ${
+                      isAutoColor
+                        ? "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+                        : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
+                    }`}
+                    onClick={saveToHistory}
+                    title="Save to History"
+                    style={!isAutoColor ? { color: textColor } : undefined}
+                  >
+                    <Save className="w-5 h-5" />
                   </button>
                 </div>
                 <button
@@ -600,27 +662,91 @@ const NotePage = ({ inNotebookSheet = false }) => {
               </div>
             )}
 
-            {showHistory && (
-              <div
-                className={`mt-4 p-4 rounded-sm shadow-md ${
-                  isAutoColor
-                    ? "bg-gray-50 dark:bg-[#513a7a] text-gray-900 dark:text-gray-100"
-                    : "bg-gray-100"
-                }`}
-              >
-                <h3 className="text-lg font-bold mb-2">History</h3>
-                <ul className="list-disc pl-6">
-                  {history.map((entry, index) => (
-                    <li key={index} className="text-sm mb-1">
-                      {entry}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {showHistory &&
+              createPortal(
+                <div
+                  className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-[9999]"
+                  onClick={() => setShowHistory(false)}
+                >
+                  <div
+                    className="history-popup bg-white dark:bg-[#28283A] border border-gray-200 dark:border-gray-700 rounded-sm shadow-lg p-4 w-[90%] max-w-[500px] max-h-[80vh] overflow-y-auto transform transition-all duration-200 ease-out"
+                    style={{
+                      animation:
+                        "0.2s ease-out 0s 1 normal none running modalFadeIn",
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                        History
+                      </h3>
+                      <button
+                        onClick={() => setShowHistory(false)}
+                        className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+                    {history.length === 0 ? (
+                      <p className="text-gray-500 dark:text-gray-400 text-center py-4">
+                        No history entries yet
+                      </p>
+                    ) : (
+                      <div className="space-y-3">
+                        {history.map((entry) => (
+                          <div
+                            key={entry.id}
+                            className="p-3 bg-gray-50 dark:bg-gray-800 rounded-sm border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
+                          >
+                            <div className="flex justify-between items-start mb-2">
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                {entry.timestamp}
+                              </span>
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => editHistoryEntry(entry.id)}
+                                  className="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
+                                  title="Load this entry"
+                                >
+                                  <Edit2 className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => deleteHistoryEntry(entry.id)}
+                                  className="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300"
+                                  title="Delete this entry"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+                            <div className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3">
+                              {entry.content}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>,
+                document.body
+              )}
           </div>
         </div>
       </div>
+      <style>
+        {`
+          @keyframes modalFadeIn {
+            from {
+              opacity: 0;
+              transform: scale(0.95) translateY(10px);
+            }
+            to {
+              opacity: 1;
+              transform: scale(1) translateY(0);
+            }
+          }
+        `}
+      </style>
     </div>
   );
 };

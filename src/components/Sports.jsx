@@ -39,6 +39,8 @@ const SportsLeagues = () => {
   const [error, setError] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [events, setEvents] = useState([]);
+  const [leagueEvents, setLeagueEvents] = useState({}); // Store events by league ID
+  const [selectedEvent, setSelectedEvent] = useState(null); // Added selectedEvent state
 
   const fetchLeagues = useCallback(async () => {
     setLoading(true);
@@ -63,8 +65,12 @@ const SportsLeagues = () => {
         `https://www.thesportsdb.com/api/v1/json/3/eventsnextleague.php?id=${leagueId}`
       );
       const data = await response.json();
-      if (data.events) {
-        setEvents(data.events);
+      if (data.events && data.events.length > 0) {
+        setLeagueEvents((prev) => ({
+          ...prev,
+          [leagueId]: data.events[0], // Store only the first event for the league
+        }));
+        setSelectedEvent(data.events[0]); // Set the selected event
       } else {
         message.info("No upcoming events found for this league");
       }
@@ -229,11 +235,12 @@ const SportsLeagues = () => {
 
           {/* Custom Modal */}
           <Modal
-            title="Upcoming Events"
+            title="Upcoming Event"
             open={isModalVisible}
             onCancel={() => {
               setIsModalVisible(false);
               setSelectedLeague(null);
+              setSelectedEvent(null); // Reset selected event when modal is closed
             }}
             footer={[
               <Button
@@ -241,6 +248,7 @@ const SportsLeagues = () => {
                 onClick={() => {
                   setIsModalVisible(false);
                   setSelectedLeague(null);
+                  setSelectedEvent(null); // Reset selected event when modal is closed
                 }}
               >
                 Close
@@ -252,38 +260,32 @@ const SportsLeagues = () => {
               <div className="flex justify-center items-center p-8">
                 <Spin size="large" />
               </div>
-            ) : events.length > 0 ? (
-              <Space
-                direction="vertical"
-                size="middle"
-                style={{ width: "100%" }}
-              >
-                {events.map((event) => (
-                  <Card key={event.idEvent} className="w-full">
-                    {event.strThumb && (
-                      <img
-                        src={event.strThumb}
-                        alt="Event Thumbnail"
-                        style={{
-                          width: "100%",
-                          height: "200px",
-                          objectFit: "cover",
-                          borderRadius: "8px",
-                          marginBottom: "16px",
-                        }}
-                      />
-                    )}
-                    <h3 className="text-lg font-semibold mb-2">
-                      {event.strEvent}
-                    </h3>
-                    <p className="text-gray-600">Date: {event.dateEvent}</p>
-                    <p className="text-gray-600">Time: {event.strTime}</p>
-                    {event.strVenue && (
-                      <p className="text-gray-600">Venue: {event.strVenue}</p>
-                    )}
-                  </Card>
-                ))}
-              </Space>
+            ) : selectedEvent ? (
+              <Card className="w-full">
+                {selectedEvent.strThumb && (
+                  <img
+                    src={selectedEvent.strThumb}
+                    alt="Event Thumbnail"
+                    style={{
+                      width: "100%",
+                      height: "200px",
+                      objectFit: "cover",
+                      borderRadius: "8px",
+                      marginBottom: "16px",
+                    }}
+                  />
+                )}
+                <h3 className="text-lg font-semibold mb-2">
+                  {selectedEvent.strEvent}
+                </h3>
+                <p className="text-gray-600">Date: {selectedEvent.dateEvent}</p>
+                <p className="text-gray-600">Time: {selectedEvent.strTime}</p>
+                {selectedEvent.strVenue && (
+                  <p className="text-gray-600">
+                    Venue: {selectedEvent.strVenue}
+                  </p>
+                )}
+              </Card>
             ) : (
               <div className="text-center p-8 text-gray-500">
                 No upcoming events found for this league

@@ -444,12 +444,12 @@ const NewTab = () => {
               onClick={() => setViewType("grid")}
               className={`p-2 rounded-md transition-all duration-200 ${
                 viewType === "grid"
-                  ? "bg-blue-50 text-blue-600"
+                  ? "bg-blue-50  text-blue-600"
                   : "text-gray-600 hover:bg-gray-50"
               }`}
               title="Grid View"
             >
-              <FaTh size={20} />
+              <FaTh size={15} />
             </button>
             <button
               onClick={() => setViewType("list")}
@@ -460,7 +460,7 @@ const NewTab = () => {
               }`}
               title="List View"
             >
-              <FaList size={20} />
+              <FaList size={15} />
             </button>
           </div>
         </div>

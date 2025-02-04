@@ -1350,7 +1350,7 @@ const Excel = () => {
       <div className="flex items-center justify-center transition-all">
         <button
           onClick={() => addTable()}
-          className="border border-gray-300 transition-all text-gray-300 px-3 py-1 rounded hover:bg-gray-600"
+          className="border hover:text-white dark:border-gray-300 border-black transition-all dark:text-gray-300 px-3 py-1 rounded hover:bg-gray-600"
         >
           + Table
         </button>

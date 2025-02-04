@@ -65,12 +65,12 @@ const NewsApp = () => {
         <Col xs={24} sm={12} md={8} lg={6} key={index}>
           <Card
             hoverable
-            className="h-[450px] overflow-hidden dark:bg-gray-800"
+            className="h-[380px] overflow-hidden dark:bg-gray-800"
             cover={
               <img
                 alt={news.title}
                 src={news.image}
-                className="h-[200px] object-cover"
+                className="h-[190px] object-cover"
                 onError={(e) => {
                   e.target.src =
                     "https://via.placeholder.com/400x200?text=No+Image";
@@ -91,9 +91,9 @@ const NewsApp = () => {
             <Meta
               title={<span className="dark:text-white">{news.title}</span>}
               description={
-                <span className="dark:text-gray-300">{news.description}</span>
+                <span className="dark:text-gray-300 text-sm">{news.description}</span>
               }
-              className="h-[150px] overflow-hidden"
+              className="h-[100px] overflow-hidden"
             />
           </Card>
         </Col>
@@ -109,7 +109,7 @@ const NewsApp = () => {
       renderItem={(news) => (
         <List.Item
           key={news.title}
-          className="dark:bg-gray-800 dark:text-white mb-4 rounded-lg"
+          className="dark:bg-gray-800 dark:text-white rounded-lg"
           extra={
             <img
               width={272}
@@ -151,7 +151,7 @@ const NewsApp = () => {
           mode="horizontal"
           onClick={({ key }) => fetchData(key)}
           items={menuItems}
-          className="justify-center rounded-md bg-white dark:bg-gray-800 dark:text-white"
+          className="m-auto rounded-md bg-white dark:bg-gray-800 dark:text-white"
         />
         <Space className="mb-4  w-96  justify-end">
           <Button
@@ -184,7 +184,7 @@ const NewsApp = () => {
 // Main News component
 const News = () => {
   return (
-    <div className="pb-10">
+    <div className="pb-9">
       <div className="p-8 rounded-sm backdrop-blur-sm shadow-sm w-[90vw] mx-auto bg-gray-200/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]">
         <NewsProvider>
           <NewsApp />
