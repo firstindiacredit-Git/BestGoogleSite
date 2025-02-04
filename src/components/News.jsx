@@ -145,13 +145,8 @@ const NewsApp = () => {
 
   return (
     <div className="p-6">
-      <div className="flex mb-5 justify-between items-center">
-        <Search
-          placeholder="Search news..."
-          onSearch={(value) => fetchData(value)}
-          className="w-96 block"
-          enterButton
-        />
+      <div className="flex mb-5 ">
+        
         <Menu
           mode="horizontal"
           onClick={({ key }) => fetchData(key)}

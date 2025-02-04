@@ -35,7 +35,7 @@ import {
   orderBy,
 } from "firebase/firestore";
 import { db } from "../../firebase";
-import AddBlog from "../admin/AddBlog";
+import AddBlog from "./AddBlog";
 
 const { Title, Text, Paragraph } = Typography;
 
