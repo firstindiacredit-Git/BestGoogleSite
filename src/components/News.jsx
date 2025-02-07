@@ -96,9 +96,7 @@ const NewsApp = () => {
             <Meta
               title={<span className="dark:text-white">{news.title}</span>}
               description={
-                <span className="dark:text-gray-300 text-sm">
-                  {news.description}
-                </span>
+                <span className="dark:text-gray-300 text-sm">{news.description}</span>
               }
               className="h-[100px] overflow-hidden"
             />
@@ -152,12 +150,13 @@ const NewsApp = () => {
 
   return (
     <div className="p-6">
-      <div className="flex mb-5 ">
+      <div className="flex mb-5">
+        
         <Menu
           mode="horizontal"
           onClick={({ key }) => fetchData(key)}
           items={menuItems}
-          className="m-auto rounded-md bg-white dark:bg-gray-800 dark:text-white"
+          className="m-auto rounded-md text-black bg-white dark:bg-gray-800 dark:text-white"
         />
         <Space className="mb-4  w-96  justify-end">
           <Button
