@@ -12,19 +12,41 @@ const NewsContext = createContext(null);
 const NewsProvider = ({ children }) => {
   const [newsapi, setNewsApi] = useState([]);
   const [loading, setLoading] = useState(false);
-  const apiKey = import.meta.env.VITE_NEWS_API_KEY;
+  const [error, setError] = useState(null);
+
+  // Hardcode the API key temporarily for testing
+  const apiKey = "d1561b9a1c352425b78fd42024da7255";
 
   const fetchData = async (title = "") => {
     setLoading(true);
+    setError(null);
+
     try {
       const query = title || "general";
+      console.log(
+        "Using API URL:",
+        `https://gnews.io/api/v4/top-headlines?q=${query}&apikey=${apiKey}`
+      );
+
       const res = await fetch(
         `https://gnews.io/api/v4/top-headlines?q=${query}&apikey=${apiKey}`
       );
       const resData = await res.json();
-      setNewsApi(resData.articles);
+
+      if (resData.errors) {
+        setError(resData.errors[0]);
+        console.error("API Error:", resData.errors);
+        return;
+      }
+
+      if (resData.articles) {
+        setNewsApi(resData.articles);
+      } else {
+        setError("No articles found");
+      }
     } catch (error) {
       console.error("Error fetching news:", error);
+      setError("Failed to fetch news");
     } finally {
       setLoading(false);
     }
@@ -35,7 +57,7 @@ const NewsProvider = ({ children }) => {
   }, []);
 
   return (
-    <NewsContext.Provider value={{ newsapi, fetchData, loading }}>
+    <NewsContext.Provider value={{ newsapi, fetchData, loading, error }}>
       {children}
     </NewsContext.Provider>
   );
@@ -91,7 +113,9 @@ const NewsApp = () => {
             <Meta
               title={<span className="dark:text-white">{news.title}</span>}
               description={
-                <span className="dark:text-gray-300 text-sm">{news.description}</span>
+                <span className="dark:text-gray-300 text-sm">
+                  {news.description}
+                </span>
               }
               className="h-[100px] overflow-hidden"
             />
@@ -146,7 +170,6 @@ const NewsApp = () => {
   return (
     <div className="p-6">
       <div className="flex mb-5 ">
-        
         <Menu
           mode="horizontal"
           onClick={({ key }) => fetchData(key)}
