@@ -96,7 +96,9 @@ const NewsApp = () => {
             <Meta
               title={<span className="dark:text-white">{news.title}</span>}
               description={
-                <span className="dark:text-gray-300 text-sm">{news.description}</span>
+                <span className="dark:text-gray-300 text-sm">
+                  {news.description}
+                </span>
               }
               className="h-[100px] overflow-hidden"
             />
@@ -151,7 +153,6 @@ const NewsApp = () => {
   return (
     <div className="p-6">
       <div className="flex mb-5">
-        
         <Menu
           mode="horizontal"
           onClick={({ key }) => fetchData(key)}
@@ -190,7 +191,7 @@ const NewsApp = () => {
 const News = () => {
   return (
     <div className="pb-9">
-      <div className="p-8 rounded-sm backdrop-blur-sm shadow-sm w-[90vw] mx-auto bg-gray-200/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]">
+      <div className="p-8  rounded-sm backdrop-blur-sm shadow-sm w-[90vw] mx-auto bg-gray-200/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]">
         <NewsProvider>
           <NewsApp />
         </NewsProvider>
