@@ -1,5 +1,16 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
-import { Card, Row, Col, List, Button, Space, Spin, Input, Menu } from "antd";
+import {
+  Card,
+  Row,
+  Col,
+  List,
+  Button,
+  Space,
+  Spin,
+  Input,
+  Menu,
+  message,
+} from "antd";
 import { AppstoreOutlined, UnorderedListOutlined } from "@ant-design/icons";
 
 const { Meta } = Card;
@@ -12,24 +23,42 @@ const NewsContext = createContext(null);
 const NewsProvider = ({ children }) => {
   const [newsapi, setNewsApi] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const apiKey = import.meta.env.VITE_NEWS_API_KEY;
 
   const fetchData = async (title = "") => {
     setLoading(true);
-    console.log("API Key:", apiKey);
+    setError(null);
+
+    if (!apiKey) {
+      setError("API key is not configured");
+      setLoading(false);
+      message.error("News API key is not configured");
+      return;
+    }
+
     try {
       const query = title || "general";
       const res = await fetch(
-        `https://gnews.io/api/v4/top-headlines?q=${query}&apikey=${apiKey}`
+        `https://gnews.io/api/v4/top-headlines?q=${query}&lang=en&apikey=${apiKey}`
       );
       const resData = await res.json();
-      if (res.ok) {
+
+      if (res.ok && resData.articles) {
         setNewsApi(resData.articles);
       } else {
-        console.error("Error fetching news:", resData);
+        const errorMessage = resData.errors?.[0] || "Failed to fetch news";
+        setError(errorMessage);
+        message.error(errorMessage);
+        // Fallback to empty array if error
+        setNewsApi([]);
       }
     } catch (error) {
       console.error("Error fetching news:", error);
+      setError("Failed to fetch news. Please try again later.");
+      message.error("Failed to fetch news. Please try again later.");
+      // Fallback to empty array if error
+      setNewsApi([]);
     } finally {
       setLoading(false);
     }
@@ -40,7 +69,7 @@ const NewsProvider = ({ children }) => {
   }, []);
 
   return (
-    <NewsContext.Provider value={{ newsapi, fetchData, loading }}>
+    <NewsContext.Provider value={{ newsapi, fetchData, loading, error }}>
       {children}
     </NewsContext.Provider>
   );
@@ -48,7 +77,7 @@ const NewsProvider = ({ children }) => {
 
 // Main NewsApp component
 const NewsApp = () => {
-  const { newsapi, loading, fetchData } = useContext(NewsContext);
+  const { newsapi, loading, error, fetchData } = useContext(NewsContext);
   const [viewMode, setViewMode] = useState("grid");
 
   const menuItems = [
@@ -159,7 +188,7 @@ const NewsApp = () => {
           items={menuItems}
           className="m-auto rounded-md text-black bg-white dark:bg-gray-800 dark:text-white"
         />
-        <Space className="mb-4  w-96  justify-end">
+        <Space className="mb-4 w-96 justify-end">
           <Button
             type={viewMode === "grid" ? "primary" : "default"}
             icon={<AppstoreOutlined />}
@@ -177,6 +206,17 @@ const NewsApp = () => {
       {loading ? (
         <div className="text-center p-12">
           <Spin size="large" />
+        </div>
+      ) : error ? (
+        <div className="text-center p-12">
+          <p className="text-red-500">{error}</p>
+          <Button onClick={() => fetchData()} className="mt-4">
+            Try Again
+          </Button>
+        </div>
+      ) : newsapi.length === 0 ? (
+        <div className="text-center p-12">
+          <p>No news articles found.</p>
         </div>
       ) : viewMode === "grid" ? (
         renderGridView()
