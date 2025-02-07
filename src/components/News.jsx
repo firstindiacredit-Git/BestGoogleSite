@@ -231,7 +231,7 @@ const NewsApp = () => {
 const News = () => {
   return (
     <div className="pb-9">
-      <div className="p-8  rounded-sm backdrop-blur-sm shadow-sm w-[90vw] mx-auto bg-gray-200/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]">
+      <div className="p-8 rounded-sm backdrop-blur-sm shadow-sm w-[90vw] mx-auto bg-gray-200/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]">
         <NewsProvider>
           <NewsApp />
         </NewsProvider>
