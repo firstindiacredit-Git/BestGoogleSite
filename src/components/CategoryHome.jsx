@@ -397,33 +397,6 @@ const CategoryHome = ({ categoryType, itemName }) => {
 
     return (
       <div className="relative backdrop-blur-sm isolate flex justify-between w-full">
-        <div
-          className="dark:text-white text-xl font-medium p-2 w-full cursor-pointer flex items-center"
-          onClick={collapse}
-        >
-          {itemName}
-        </div>
-        {isHovered && (
-          <button
-            onClick={() => {
-              setShowSettings(false);
-              setShowAddModal(true);
-            }}
-            className="flex dark:text-white/50 items-center rounded-sm gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm"
-          >
-            <Plus className="w-5 h-5" />
-          </button>
-        )}
-
-        {isHovered && (
-          <button
-            ref={buttonRef}
-            onClick={() => setShowSettings(!showSettings)}
-            className="p-2 rounded-sm dark:text-white/50 hover:bg-gray-100 dark:hover:bg-gray-700"
-          >
-            <Settings className="w-5 h-5" />
-          </button>
-        )}
         {dropdownContent && createPortal(dropdownContent, document.body)}
       </div>
     );
@@ -431,7 +404,7 @@ const CategoryHome = ({ categoryType, itemName }) => {
 
   const renderBookmarks = () => {
     const commonClasses = {
-      container: "transition-all mt-8 duration-200 ease-in-out cursor-pointer",
+      container: "transition-all duration-200 ease-in-out cursor-pointer",
       image: `${getIconSizeClass()} rounded`,
       title: "font-medium text-gray-900 dark:text-gray-100",
     };
@@ -498,7 +471,7 @@ const CategoryHome = ({ categoryType, itemName }) => {
 
   return (
     <div
-      className={` rounded-sm p-3    shadow-sm isolate backdrop-blur-sm`}
+      className="relative rounded-sm p-1 shadow-sm isolate backdrop-blur-sm"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -510,7 +483,7 @@ const CategoryHome = ({ categoryType, itemName }) => {
           Loading...
         </div>
       ) : (
-        <>
+        <div className="pb-10">
           {!collapsed && renderBookmarks()}
           <Modal
             title="Add New Bookmark"
@@ -561,7 +534,7 @@ const CategoryHome = ({ categoryType, itemName }) => {
               {bookmarks.map((bookmark) => (
                 <div
                   key={bookmark.id}
-                  className="flex items-center justify-between p-3 rounded-sm bg-gray-50 dark:bg-gray-700"
+                  className="flex items-center justify-between p-4 rounded-sm bg-gray-50 dark:bg-gray-700"
                 >
                   <div className="flex items-center gap-3">
                     <img
@@ -646,7 +619,28 @@ const CategoryHome = ({ categoryType, itemName }) => {
               </div>
             </Modal>
           )}
-        </>
+          {isHovered && (
+            <div className="fixed bottom-1 right-1 flex gap-2 p-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-50">
+              <button
+                onClick={() => {
+                  setShowSettings(false);
+                  setShowAddModal(true);
+                }}
+                className="flex dark:text-white/50 items-center rounded-sm gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+
+              <button
+                ref={buttonRef}
+                onClick={() => setShowSettings(!showSettings)}
+                className="p-2 rounded-sm dark:text-white/50 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <Settings className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

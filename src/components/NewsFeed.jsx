@@ -143,12 +143,7 @@ const NewsFeed = () => {
       style={{ opacity: widgetTransparency }}
       className="min-[21vw] backdrop-blur-sm rounded-b-sm overflow-hidden"
     >
-      <div
-        onClick={() => setCollapsed((prev) => !prev)}
-        className="text-xl cursor-pointer font-medium p-5"
-      >
-        News
-      </div>
+      
 
       {!collapsed && mainNews && (
         <div>

@@ -427,12 +427,7 @@ const Weather = () => {
 
   return (
     <div className="p-2 backdrop-blur-sm">
-      <div
-        className="text-xl font-medium p-3 cursor-pointer"
-        onClick={isCollapse}
-      >
-        Weather
-      </div>
+     
       {isVisible && (
         <StyledWrapper
           isDarkMode={isDarkMode}

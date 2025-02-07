@@ -57,16 +57,16 @@ export const allWidgets = {
   weather: { id: "weather", name: "Weather" },
   calculator: { id: "calculator", name: "Calculator" },
   notepad: { id: "notepad", name: "Notepad" },
-  imageUploader: { id: "imageUploader", name: "Image Uploader" },
+  imageUploader: { id: "imageUploader", name: "Image" },
   calendar: { id: "calendar", name: "Calendar" },
-  Bookmarks: { id: "Bookmarks", name: "Popular Bookmarks" },
-  Bookmarks1: { id: "Bookmarks1", name: "AI" },
-  Bookmarks2: { id: "Bookmarks2", name: "Travel" },
+  Bookmarks: { id: "Bookmarks", name: "Popular" },
+  Bookmarks1: { id: "Bookmarks1", name: "Travel" },
+  Bookmarks2: { id: "Bookmarks2", name: "AI" },
   Bookmarks3: { id: "Bookmarks3", name: "Sports" },
   Bookmarks4: { id: "Bookmarks4", name: "Shopping" },
   Bookmarks5: { id: "Bookmarks5", name: "News" },
   Todo: { id: "Todo", name: "Todo List" },
-  NewsFeed: { id: "NewsFeed", name: "News Feed" },
+  NewsFeed: { id: "NewsFeed", name: "Latest News" },
 };
 
 // Get available widgets that aren't already in use

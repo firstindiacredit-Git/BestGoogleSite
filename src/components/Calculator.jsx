@@ -128,12 +128,7 @@ function Calculator() {
 
   return (
     <div className="w-full  backdrop-blur-sm h-full">
-      <div
-        onClick={collapse}
-        className="text-xl cursor-pointer  font-medium p-5"
-      >
-        Calculator
-      </div>
+     
 
       {!collapsed && (
         <div className={` rounded-sm  h-full w-full p-3`}>

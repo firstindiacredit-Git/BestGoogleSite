@@ -37,6 +37,7 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
   const [isApplying, setIsApplying] = useState(false);
   const [previewColumns, setPreviewColumns] = useState(4);
   const [availableWidgets, setAvailableWidgets] = useState([]);
+  const [collapsedItems, setCollapsedItems] = useState({});
   const isDarkMode = localStorage.getItem("themeMode") === "dark";
   const componentMap = {
     clock: <Clock />,
@@ -186,12 +187,11 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
     setSortedItems(newItems);
   };
 
-  const toggleDropdown = (id) => {
-    setItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === id ? { ...item, isOpen: !item.isOpen } : item
-      )
-    );
+  const toggleCollapse = (itemId) => {
+    setCollapsedItems((prev) => ({
+      ...prev,
+      [itemId]: !prev[itemId],
+    }));
   };
 
   const handleColumnChange = async (numColumns) => {
@@ -353,16 +353,20 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
                                   <div>
                                     {visibleHandle && (
                                       <motion.div
-                                        className={`w-full max-w-xl min-w-[21vw] text-left py-2 px-4 rounded-t-sm bg-gray-100/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] dark:text-white font-semibold flex justify-between items-center`}
+                                        className={`w-full max-w-xl min-w-[21vw] text-left py-4 px-4 rounded-t-sm bg-gray-100/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] dark:text-white font-semibold flex justify-between items-center cursor-pointer`}
+                                        onClick={() => toggleCollapse(item.id)}
                                       >
                                         <div
                                           {...provided.dragHandleProps}
                                           className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 w-5"
+                                          onClick={(e) => e.stopPropagation()}
                                         >
                                           ⋮⋮
                                         </div>
-                                        <div>{componentMap[item.name]}</div>
-                                        <div className="w-5"></div>
+                                        <div>{item.name}</div>
+                                        <div className="w-5">
+                                          {collapsedItems[item.id] ? "" : ""}
+                                        </div>
                                       </motion.div>
                                     )}
                                     <motion.div
@@ -373,8 +377,12 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
                                       }`}
                                       initial={{ height: 0, opacity: 0 }}
                                       animate={{
-                                        height: "auto",
-                                        opacity: 1,
+                                        height: collapsedItems[item.id]
+                                          ? 0
+                                          : "auto",
+                                        opacity: collapsedItems[item.id]
+                                          ? 0
+                                          : 1,
                                       }}
                                       exit={{ height: 0, opacity: 0 }}
                                       transition={{ duration: 0.1 }}

@@ -125,12 +125,7 @@ const FullCalendar = () => {
     >
       {/* Header */}
       <div className="">
-        <div
-          onClick={collapse}
-          className="w-full cursor-pointer p-2 text-xl font-medium"
-        >
-          Calender
-        </div>
+        
         <div className="flex items-center  justify-between ">
           {!isCollapsed && (
             <div className="flex items-center mt-2 justify-between px-2">
