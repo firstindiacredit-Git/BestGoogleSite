@@ -16,13 +16,18 @@ const NewsProvider = ({ children }) => {
 
   const fetchData = async (title = "") => {
     setLoading(true);
+    console.log("API Key:", apiKey);
     try {
       const query = title || "general";
       const res = await fetch(
         `https://gnews.io/api/v4/top-headlines?q=${query}&apikey=${apiKey}`
       );
       const resData = await res.json();
-      setNewsApi(resData.articles);
+      if (res.ok) {
+        setNewsApi(resData.articles);
+      } else {
+        console.error("Error fetching news:", resData);
+      }
     } catch (error) {
       console.error("Error fetching news:", error);
     } finally {
@@ -91,7 +96,9 @@ const NewsApp = () => {
             <Meta
               title={<span className="dark:text-white">{news.title}</span>}
               description={
-                <span className="dark:text-gray-300 text-sm">{news.description}</span>
+                <span className="dark:text-gray-300 text-sm">
+                  {news.description}
+                </span>
               }
               className="h-[100px] overflow-hidden"
             />
@@ -146,7 +153,6 @@ const NewsApp = () => {
   return (
     <div className="p-6">
       <div className="flex mb-5 ">
-        
         <Menu
           mode="horizontal"
           onClick={({ key }) => fetchData(key)}
