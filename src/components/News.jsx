@@ -1,16 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
-import {
-  Card,
-  Row,
-  Col,
-  List,
-  Button,
-  Space,
-  Spin,
-  Input,
-  Menu,
-  message,
-} from "antd";
+import { Card, Row, Col, List, Button, Space, Spin, Input, Menu } from "antd";
 import { AppstoreOutlined, UnorderedListOutlined } from "@ant-design/icons";
 
 const { Meta } = Card;
@@ -23,42 +12,19 @@ const NewsContext = createContext(null);
 const NewsProvider = ({ children }) => {
   const [newsapi, setNewsApi] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const apiKey = import.meta.env.VITE_NEWS_API_KEY;
 
   const fetchData = async (title = "") => {
     setLoading(true);
-    setError(null);
-
-    if (!apiKey) {
-      setError("API key is not configured");
-      setLoading(false);
-      message.error("News API key is not configured");
-      return;
-    }
-
     try {
       const query = title || "general";
       const res = await fetch(
-        `https://gnews.io/api/v4/top-headlines?q=${query}&lang=en&apikey=${apiKey}`
+        `https://gnews.io/api/v4/top-headlines?q=${query}&apikey=${apiKey}`
       );
       const resData = await res.json();
-
-      if (res.ok && resData.articles) {
-        setNewsApi(resData.articles);
-      } else {
-        const errorMessage = resData.errors?.[0] || "Failed to fetch news";
-        setError(errorMessage);
-        message.error(errorMessage);
-        // Fallback to empty array if error
-        setNewsApi([]);
-      }
+      setNewsApi(resData.articles);
     } catch (error) {
       console.error("Error fetching news:", error);
-      setError("Failed to fetch news. Please try again later.");
-      message.error("Failed to fetch news. Please try again later.");
-      // Fallback to empty array if error
-      setNewsApi([]);
     } finally {
       setLoading(false);
     }
@@ -69,7 +35,7 @@ const NewsProvider = ({ children }) => {
   }, []);
 
   return (
-    <NewsContext.Provider value={{ newsapi, fetchData, loading, error }}>
+    <NewsContext.Provider value={{ newsapi, fetchData, loading }}>
       {children}
     </NewsContext.Provider>
   );
@@ -77,7 +43,7 @@ const NewsProvider = ({ children }) => {
 
 // Main NewsApp component
 const NewsApp = () => {
-  const { newsapi, loading, error, fetchData } = useContext(NewsContext);
+  const { newsapi, loading, fetchData } = useContext(NewsContext);
   const [viewMode, setViewMode] = useState("grid");
 
   const menuItems = [
@@ -125,9 +91,7 @@ const NewsApp = () => {
             <Meta
               title={<span className="dark:text-white">{news.title}</span>}
               description={
-                <span className="dark:text-gray-300 text-sm">
-                  {news.description}
-                </span>
+                <span className="dark:text-gray-300 text-sm">{news.description}</span>
               }
               className="h-[100px] overflow-hidden"
             />
@@ -181,14 +145,15 @@ const NewsApp = () => {
 
   return (
     <div className="p-6">
-      <div className="flex mb-5">
+      <div className="flex mb-5 ">
+        
         <Menu
           mode="horizontal"
           onClick={({ key }) => fetchData(key)}
           items={menuItems}
-          className="m-auto rounded-md text-black bg-white dark:bg-gray-800 dark:text-white"
+          className="m-auto rounded-md bg-white dark:bg-gray-800 dark:text-white"
         />
-        <Space className="mb-4 w-96 justify-end">
+        <Space className="mb-4  w-96  justify-end">
           <Button
             type={viewMode === "grid" ? "primary" : "default"}
             icon={<AppstoreOutlined />}
@@ -206,17 +171,6 @@ const NewsApp = () => {
       {loading ? (
         <div className="text-center p-12">
           <Spin size="large" />
-        </div>
-      ) : error ? (
-        <div className="text-center p-12">
-          <p className="text-red-500">{error}</p>
-          <Button onClick={() => fetchData()} className="mt-4">
-            Try Again
-          </Button>
-        </div>
-      ) : newsapi.length === 0 ? (
-        <div className="text-center p-12">
-          <p>No news articles found.</p>
         </div>
       ) : viewMode === "grid" ? (
         renderGridView()
