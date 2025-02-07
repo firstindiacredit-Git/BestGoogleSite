@@ -12,41 +12,19 @@ const NewsContext = createContext(null);
 const NewsProvider = ({ children }) => {
   const [newsapi, setNewsApi] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  // Hardcode the API key temporarily for testing
-  const apiKey = "d1561b9a1c352425b78fd42024da7255";
+  const apiKey = import.meta.env.VITE_NEWS_API_KEY;
 
   const fetchData = async (title = "") => {
     setLoading(true);
-    setError(null);
-
     try {
       const query = title || "general";
-      console.log(
-        "Using API URL:",
-        `https://gnews.io/api/v4/top-headlines?q=${query}&apikey=${apiKey}`
-      );
-
       const res = await fetch(
         `https://gnews.io/api/v4/top-headlines?q=${query}&apikey=${apiKey}`
       );
       const resData = await res.json();
-
-      if (resData.errors) {
-        setError(resData.errors[0]);
-        console.error("API Error:", resData.errors);
-        return;
-      }
-
-      if (resData.articles) {
-        setNewsApi(resData.articles);
-      } else {
-        setError("No articles found");
-      }
+      setNewsApi(resData.articles);
     } catch (error) {
       console.error("Error fetching news:", error);
-      setError("Failed to fetch news");
     } finally {
       setLoading(false);
     }
@@ -57,7 +35,7 @@ const NewsProvider = ({ children }) => {
   }, []);
 
   return (
-    <NewsContext.Provider value={{ newsapi, fetchData, loading, error }}>
+    <NewsContext.Provider value={{ newsapi, fetchData, loading }}>
       {children}
     </NewsContext.Provider>
   );
