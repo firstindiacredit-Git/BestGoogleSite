@@ -88,7 +88,7 @@ function SearchPage() {
   const changeVisible = useCallback(() => {
     const newMode = !visibleHandle;
     setVisibleHandle(newMode);
-    localStorage.setItem("modern");
+    localStorage.setItem("uiMode", newMode ? "modern" : " ");
   }, [visibleHandle]);
 
   const handleTempTransparencyChange = useCallback((newValue) => {
@@ -358,24 +358,24 @@ function SearchPage() {
           ),
         },
         {
-          // key: "cardUI",
-          // label: (
-          //   <div
-          //     className="flex flex-col gap-2 border-t"
-          //     onClick={(e) => e.stopPropagation()}
-          //   >
-          //     <span className="text-sm text-gray-600">Card UI</span>
-          //     <button
-          //       className="text-center bg-black/5 dark:bg-white/5  hover:bg-gray-50 w-full rounded-sm"
-          //       onClick={(e) => {
-          //         e.stopPropagation();
-          //         changeVisible();
-          //       }}
-          //     >
-          //       {!visibleHandle ? "Modern" : "Classic"}
-          //     </button>
-          //   </div>
-          // ),
+          key: "",
+          label: (
+            <div
+              className="flex flex-col gap-2 border-t"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* <span className="text-sm text-gray-600">Card UI</span> */}
+              <button
+                className="text-center bg-black/5 dark:bg-white/5  hover:bg-gray-50 w-full rounded-sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  changeVisible();
+                }}
+              >
+                {!visibleHandle ? "Modern" : ""}
+              </button>
+            </div>
+          ),
         },
       ],
     }),
