@@ -46,12 +46,7 @@ function ImageUploader() {
 
   return (
     <div className=" backdrop-blur-sm  rounded-b-sm w-full">
-      <div
-        onClick={collapse}
-        className="text-xl cursor-pointer font-medium p-5"
-      >
-        Image
-      </div>
+     
       {!collapsed && (
         <div className="">
           {!image && (

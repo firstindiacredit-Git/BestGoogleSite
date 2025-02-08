@@ -37,23 +37,64 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
   const [isApplying, setIsApplying] = useState(false);
   const [previewColumns, setPreviewColumns] = useState(4);
   const [availableWidgets, setAvailableWidgets] = useState([]);
-  const [collapsedItems, setCollapsedItems] = useState({});
+  const [collapsedItems, setCollapsedItems] = useState(() => {
+    const savedState = localStorage.getItem("collapsedItems");
+    return savedState ? JSON.parse(savedState) : {};
+  });
   const isDarkMode = localStorage.getItem("themeMode") === "dark";
   const componentMap = {
-    clock: <Clock />,
-    weather: <Weather />,
-    calculator: <Calculator />,
-    notepad: <NotePage />,
-    imageUploader: <ImageUploader />,
-    calendar: <Calendar />,
-    Bookmarks: <CategoryHome categoryType="Popular" itemName="Popular " />,
-    Bookmarks1: <CategoryHome categoryType="Travel" itemName="Travel" />,
-    Bookmarks2: <CategoryHome categoryType="AI" itemName="AI" />,
-    Bookmarks3: <CategoryHome categoryType="Sports" itemName="Sports" />,
-    Bookmarks4: <CategoryHome categoryType="Shopping" itemName="Shopping" />,
-    Bookmarks5: <CategoryHome categoryType="News" itemName="News" />,
-    Todo: <TodoComponent />,
-    NewsFeed: <NewsFeed />,
+    clock: <Clock collapsed={collapsedItems["clock"]} />,
+    weather: <Weather collapsed={collapsedItems["weather"]} />,
+    calculator: <Calculator collapsed={collapsedItems["calculator"]} />,
+    notepad: <NotePage collapsed={collapsedItems["notepad"]} />,
+    imageUploader: (
+      <ImageUploader collapsed={collapsedItems["imageUploader"]} />
+    ),
+    calendar: <Calendar collapsed={collapsedItems["calendar"]} />,
+    Bookmarks: (
+      <CategoryHome
+        categoryType="Popular"
+        itemName="Popular"
+        collapsed={collapsedItems["Bookmarks"]}
+      />
+    ),
+    Bookmarks1: (
+      <CategoryHome
+        categoryType="Travel"
+        itemName="Travel"
+        collapsed={collapsedItems["Bookmarks1"]}
+      />
+    ),
+    Bookmarks2: (
+      <CategoryHome
+        categoryType="AI"
+        itemName="AI"
+        collapsed={collapsedItems["Bookmarks2"]}
+      />
+    ),
+    Bookmarks3: (
+      <CategoryHome
+        categoryType="Sports"
+        itemName="Sports"
+        collapsed={collapsedItems["Bookmarks3"]}
+      />
+    ),
+    Bookmarks4: (
+      <CategoryHome
+        categoryType="Shopping"
+        itemName="Shopping"
+        collapsed={collapsedItems["Bookmarks4"]}
+      />
+    ),
+    Bookmarks5: (
+      <CategoryHome
+        categoryType="News"
+        itemName="News"
+        collapsed={collapsedItems["Bookmarks5"]}
+      />
+    ),
+    Todo: <TodoComponent collapsed={collapsedItems["Todo"]} />,
+    NewsFeed: <NewsFeed collapsed={collapsedItems["NewsFeed"]} />,
   };
   const [isResetting, setIsResetting] = useState(false);
 
@@ -93,28 +134,71 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
     const { source, destination } = result;
     if (!destination || !user) return;
 
-    const columnsArray = distributeItems();
-    const sourceColumnIndex = parseInt(source.droppableId);
-    const destColumnIndex = parseInt(destination.droppableId);
-    const sourceItems = columnsArray[sourceColumnIndex];
-    const destItems = columnsArray[destColumnIndex];
-    const [draggedItem] = sourceItems.splice(source.index, 1);
-    draggedItem.column = destColumnIndex;
-    destItems.splice(destination.index, 0, draggedItem);
-    const updatedItems = columnsArray.flat();
+    // If dropped in the same position, don't do anything
+    if (
+      source.droppableId === destination.droppableId &&
+      source.index === destination.index
+    ) {
+      return;
+    }
 
-    // Update local state
-    setItems(updatedItems);
-
-    // Update database
     try {
+      const columnsArray = distributeItems();
+      const sourceColumnIndex = parseInt(source.droppableId);
+      const destColumnIndex = parseInt(destination.droppableId);
+
+      // Get source and destination items
+      const sourceItems = [...columnsArray[sourceColumnIndex]];
+      const destItems =
+        sourceColumnIndex === destColumnIndex
+          ? sourceItems
+          : [...columnsArray[destColumnIndex]];
+
+      // Remove the dragged item from source
+      const [draggedItem] = sourceItems.splice(source.index, 1);
+
+      // Update positions for source items
+      sourceItems.forEach((item, idx) => {
+        item.position = idx;
+      });
+
+      // Insert the dragged item at destination
+      draggedItem.column = destColumnIndex;
+      draggedItem.position = destination.index;
+      destItems.splice(destination.index, 0, draggedItem);
+
+      // Update positions for destination items
+      destItems.forEach((item, idx) => {
+        item.position = idx;
+      });
+
+      // Update the columns array
+      columnsArray[sourceColumnIndex] = sourceItems;
+      if (sourceColumnIndex !== destColumnIndex) {
+        columnsArray[destColumnIndex] = destItems;
+      }
+
+      // Flatten and update all positions
+      const updatedItems = columnsArray.flat().map((item, idx) => ({
+        ...item,
+        globalPosition: idx,
+      }));
+
+      // Update local state immediately
+      setItems(updatedItems);
+
+      // Update database
       await updatePageLayout(user.uid, pageId, {
         widgets: updatedItems,
         columns: columns,
       });
+
+      message.success("Layout updated successfully");
     } catch (error) {
       console.error("Error updating layout:", error);
-      // Optionally revert the local state if the database update fails
+      message.error("Failed to update layout");
+      // Revert to previous state on error
+      const columnsArray = distributeItems();
       setItems(columnsArray.flat());
     }
   };
@@ -188,11 +272,20 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
   };
 
   const toggleCollapse = (itemId) => {
-    setCollapsedItems((prev) => ({
-      ...prev,
-      [itemId]: !prev[itemId],
-    }));
+    setCollapsedItems((prev) => {
+      const newState = {
+        ...prev,
+        [itemId]: !prev[itemId],
+      };
+      localStorage.setItem("collapsedItems", JSON.stringify(newState));
+      return newState;
+    });
   };
+
+  // Add useEffect to handle persistence
+  useEffect(() => {
+    localStorage.setItem("collapsedItems", JSON.stringify(collapsedItems));
+  }, [collapsedItems]);
 
   const handleColumnChange = async (numColumns) => {
     setPreviewColumns(numColumns);
@@ -242,19 +335,26 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
 
   const distributeItems = () => {
     const columnsArray = Array.from({ length: columns }, () => []);
-    // Sort items by column and position before distributing
-    const sortedItems = [...items].sort((a, b) => {
+
+    // Create a copy and sort by column and position
+    const itemsToDistribute = [...items].sort((a, b) => {
       if (a.column === b.column) {
-        return a.position - b.position;
+        return (a.position || 0) - (b.position || 0);
       }
-      return a.column - b.column;
+      return (a.column || 0) - (b.column || 0);
     });
 
-    sortedItems.forEach((item) => {
-      if (item.column >= 0 && item.column < columns) {
-        columnsArray[item.column].push(item);
-      }
+    // Distribute items to columns
+    itemsToDistribute.forEach((item) => {
+      // Ensure column is valid
+      const targetColumn = Math.min(Math.max(0, item.column || 0), columns - 1);
+      columnsArray[targetColumn].push({
+        ...item,
+        column: targetColumn,
+        position: columnsArray[targetColumn].length,
+      });
     });
+
     return columnsArray;
   };
 
@@ -289,6 +389,11 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
     }
   };
 
+  const resetCollapsedState = () => {
+    setCollapsedItems({});
+    localStorage.removeItem("collapsedItems");
+  };
+
   if (!user) {
     return (
       <div className="text-gray-500 text-5xl  my-20">
@@ -301,7 +406,7 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
     <div style={{ position: "relative" }}>
       <div className="flex justify-center">
         <div className={`flex flex-col items-center w-full rounded-xl`}>
-          <div className="p-4   ">
+          <div className="p-4">
             {loading ? (
               <div className="flex justify-center items-center min-h-screen">
                 <Spin size="large" />
@@ -313,6 +418,7 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
                     display: "grid",
                     maxWidth: "90vw",
                     gridTemplateColumns: `repeat(${columns}, 1fr)`,
+                    gap: "16px",
                   }}
                 >
                   {distributeItems().map((columnItems, columnIndex) => (
@@ -325,14 +431,11 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
                         <div
                           {...provided.droppableProps}
                           ref={provided.innerRef}
-                          style={{
-                            backgroundColor: snapshot.isDraggingOver
-                              ? "#f0f0f080"
-                              : "transparent",
-                            padding: "8px",
-                            minHeight: "200px",
-                            borderRadius: "0.5rem",
-                          }}
+                          className={`p-4 rounded-lg min-h-[200px] transition-all duration-300 ${
+                            snapshot.isDraggingOver
+                              ? "bg-blue-50/50 dark:bg-blue-900/20 border-2 border-dashed border-blue-300 dark:border-blue-600"
+                              : "bg-transparent border-2 border-dashed border-transparent"
+                          }`}
                         >
                           {columnItems.map((item, index) => (
                             <Draggable
@@ -340,25 +443,47 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
                               draggableId={item.id}
                               index={index}
                             >
-                              {(provided) => (
+                              {(provided, snapshot) => (
                                 <div
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   className={`bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] mb-4 border-collapse ${
                                     localStorage.getItem("backgroundImage")
-                                      ? " shadow-sm dark:border-gray-700/[var(--widget-opacity)] border-gray-100/[var(--widget-opacity)]"
+                                      ? "shadow-sm dark:border-gray-700/[var(--widget-opacity)] border-gray-100/[var(--widget-opacity)]"
                                       : "dark:border-gray-700 border-gray-100"
-                                  } border-1 border  rounded-sm`}
+                                  } border rounded-sm transition-transform duration-200 ${
+                                    snapshot.isDragging
+                                      ? "shadow-lg scale-[1.02] rotate-1"
+                                      : ""
+                                  } ${
+                                    snapshot.isDropAnimating
+                                      ? "transition-all duration-300"
+                                      : ""
+                                  }`}
+                                  style={{
+                                    ...provided.draggableProps.style,
+                                    transformOrigin: snapshot.isDragging
+                                      ? "center"
+                                      : "0 0",
+                                  }}
                                 >
                                   <div>
                                     {visibleHandle && (
                                       <motion.div
-                                        className={`w-full max-w-xl min-w-[21vw] text-left py-4 px-4 rounded-t-sm bg-gray-100/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] dark:text-white font-semibold flex justify-between items-center cursor-pointer`}
+                                        className={`w-full max-w-xl min-w-[21vw] text-left py-4 px-4 rounded-t-sm bg-gray-100/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] dark:text-white font-semibold flex justify-between items-center cursor-pointer select-none ${
+                                          snapshot.isDragging
+                                            ? "cursor-grabbing"
+                                            : ""
+                                        }`}
                                         onClick={() => toggleCollapse(item.id)}
                                       >
                                         <div
                                           {...provided.dragHandleProps}
-                                          className="cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 w-5"
+                                          className={`cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 w-5 ${
+                                            snapshot.isDragging
+                                              ? "cursor-grabbing"
+                                              : ""
+                                          }`}
                                           onClick={(e) => e.stopPropagation()}
                                         >
                                           ⋮⋮
@@ -375,7 +500,7 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
                                           ? "rounded-b-sm"
                                           : "rounded-sm"
                                       }`}
-                                      initial={{ height: 0, opacity: 0 }}
+                                      initial={false}
                                       animate={{
                                         height: collapsedItems[item.id]
                                           ? 0
@@ -384,8 +509,13 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
                                           ? 0
                                           : 1,
                                       }}
-                                      exit={{ height: 0, opacity: 0 }}
-                                      transition={{ duration: 0.1 }}
+                                      transition={{ duration: 0.2 }}
+                                      style={{
+                                        overflow: "hidden",
+                                        pointerEvents: collapsedItems[item.id]
+                                          ? "none"
+                                          : "auto",
+                                      }}
                                     >
                                       <div
                                         className={`${

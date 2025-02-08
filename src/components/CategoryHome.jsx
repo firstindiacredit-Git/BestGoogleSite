@@ -19,7 +19,7 @@ import { Settings, Edit, Plus, Trash2 } from "lucide-react";
 import { Modal, message, Input } from "antd";
 import { WidgetTransparencyContext } from "../App";
 
-const CategoryHome = ({ categoryType, itemName }) => {
+const CategoryHome = ({ categoryType, itemName, collapsed = false }) => {
   const [user, setUser] = useState(null);
   const [bookmarks, setBookmarks] = useState([]);
   const [hiddenBookmarkIds, setHiddenBookmarkIds] = useState([]);
@@ -27,7 +27,6 @@ const CategoryHome = ({ categoryType, itemName }) => {
   const [viewMode, setViewMode] = useState("grid");
   const [showUrl, setShowUrl] = useState(true);
   const [iconSize, setIconSize] = useState("large");
-  const [collapsed, setCollapsed] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({
     top: null,
@@ -40,9 +39,6 @@ const CategoryHome = ({ categoryType, itemName }) => {
   const [isHovered, setIsHovered] = useState(false);
   const buttonRef = useRef(null);
 
-  const collapse = () => {
-    setCollapsed(!collapsed);
-  };
   const preventScroll = (prevent) => {
     document.body.style.overflow = prevent ? "hidden" : "";
   };
@@ -472,11 +468,17 @@ const CategoryHome = ({ categoryType, itemName }) => {
   return (
     <div
       className="relative rounded-sm p-1 shadow-sm isolate backdrop-blur-sm"
-      onMouseEnter={() => setIsHovered(true)}
+      onMouseEnter={() => !collapsed && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      style={{
+        display: collapsed ? "none" : "block",
+        height: collapsed ? 0 : "auto",
+        overflow: "hidden",
+        transition: "height 0.2s ease-in-out",
+      }}
     >
       <div className="flex justify-end relative z-[9999]">
-        {renderSettingsMenu()}
+        {!collapsed && renderSettingsMenu()}
       </div>
       {loading ? (
         <div className="flex justify-center items-center h-24 text-gray-600 dark:text-gray-300">
@@ -485,141 +487,145 @@ const CategoryHome = ({ categoryType, itemName }) => {
       ) : (
         <div className="pb-10">
           {!collapsed && renderBookmarks()}
-          <Modal
-            title="Add New Bookmark"
-            open={showAddModal}
-            onOk={handleAdd}
-            onCancel={() => {
-              setShowAddModal(false);
-              setNewBookmark({ name: "", link: "" });
-            }}
-          >
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Name
-                </label>
-                <Input
-                  value={newBookmark.name}
-                  onChange={(e) =>
-                    setNewBookmark({ ...newBookmark, name: e.target.value })
-                  }
-                  placeholder="Enter bookmark name"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  URL
-                </label>
-                <Input
-                  value={newBookmark.link}
-                  onChange={(e) =>
-                    setNewBookmark({ ...newBookmark, link: e.target.value })
-                  }
-                  placeholder="Enter bookmark URL"
-                />
-              </div>
-            </div>
-          </Modal>
-          <Modal
-            title="Edit Bookmarks"
-            open={showEditModal}
-            footer={null}
-            onCancel={() => {
-              setShowEditModal(false);
-              setEditingBookmark(null);
-            }}
-          >
-            <div className="space-y-2">
-              {bookmarks.map((bookmark) => (
-                <div
-                  key={bookmark.id}
-                  className="flex items-center justify-between p-4 rounded-sm bg-gray-50 dark:bg-gray-700"
-                >
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={getFaviconUrl(bookmark.link)}
-                      alt=""
-                      className="w-6 h-6"
+          {!collapsed && (
+            <>
+              <Modal
+                title="Add New Bookmark"
+                open={showAddModal}
+                onOk={handleAdd}
+                onCancel={() => {
+                  setShowAddModal(false);
+                  setNewBookmark({ name: "", link: "" });
+                }}
+              >
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Name
+                    </label>
+                    <Input
+                      value={newBookmark.name}
+                      onChange={(e) =>
+                        setNewBookmark({ ...newBookmark, name: e.target.value })
+                      }
+                      placeholder="Enter bookmark name"
                     />
-                    <div>
-                      <div className="font-medium dark:text-white">
-                        {bookmark.name}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      URL
+                    </label>
+                    <Input
+                      value={newBookmark.link}
+                      onChange={(e) =>
+                        setNewBookmark({ ...newBookmark, link: e.target.value })
+                      }
+                      placeholder="Enter bookmark URL"
+                    />
+                  </div>
+                </div>
+              </Modal>
+              <Modal
+                title="Edit Bookmarks"
+                open={showEditModal}
+                footer={null}
+                onCancel={() => {
+                  setShowEditModal(false);
+                  setEditingBookmark(null);
+                }}
+              >
+                <div className="space-y-2">
+                  {bookmarks.map((bookmark) => (
+                    <div
+                      key={bookmark.id}
+                      className="flex items-center justify-between p-4 rounded-sm bg-gray-50 dark:bg-gray-700"
+                    >
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={getFaviconUrl(bookmark.link)}
+                          alt=""
+                          className="w-6 h-6"
+                        />
+                        <div>
+                          <div className="font-medium dark:text-white">
+                            {bookmark.name}
+                          </div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">
+                            {bookmark.link}
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">
-                        {bookmark.link}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => {
+                            setEditingBookmark(bookmark);
+                            setNewBookmark({
+                              name: bookmark.name,
+                              link: bookmark.link,
+                            });
+                          }}
+                          className="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+                        >
+                          <Edit className="w-4 h-4 text-blue-500" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(bookmark)}
+                          className="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+                        >
+                          <Trash2 className="w-4 h-4 text-red-500" />
+                        </button>
                       </div>
                     </div>
+                  ))}
+                </div>
+              </Modal>
+              {editingBookmark && (
+                <Modal
+                  title="Edit Bookmark"
+                  open={!!editingBookmark}
+                  onOk={handleEdit}
+                  onCancel={() => {
+                    setEditingBookmark(null);
+                    setNewBookmark({ name: "", link: "" });
+                  }}
+                >
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Name
+                      </label>
+                      <Input
+                        value={editingBookmark.name}
+                        onChange={(e) =>
+                          setEditingBookmark({
+                            ...editingBookmark,
+                            name: e.target.value,
+                          })
+                        }
+                        placeholder="Enter bookmark name"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        URL
+                      </label>
+                      <Input
+                        value={editingBookmark.link}
+                        onChange={(e) =>
+                          setEditingBookmark({
+                            ...editingBookmark,
+                            link: e.target.value,
+                          })
+                        }
+                        placeholder="Enter bookmark URL"
+                      />
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => {
-                        setEditingBookmark(bookmark);
-                        setNewBookmark({
-                          name: bookmark.name,
-                          link: bookmark.link,
-                        });
-                      }}
-                      className="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
-                    >
-                      <Edit className="w-4 h-4 text-blue-500" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(bookmark)}
-                      className="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
-                    >
-                      <Trash2 className="w-4 h-4 text-red-500" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Modal>
-          {editingBookmark && (
-            <Modal
-              title="Edit Bookmark"
-              open={!!editingBookmark}
-              onOk={handleEdit}
-              onCancel={() => {
-                setEditingBookmark(null);
-                setNewBookmark({ name: "", link: "" });
-              }}
-            >
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Name
-                  </label>
-                  <Input
-                    value={editingBookmark.name}
-                    onChange={(e) =>
-                      setEditingBookmark({
-                        ...editingBookmark,
-                        name: e.target.value,
-                      })
-                    }
-                    placeholder="Enter bookmark name"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    URL
-                  </label>
-                  <Input
-                    value={editingBookmark.link}
-                    onChange={(e) =>
-                      setEditingBookmark({
-                        ...editingBookmark,
-                        link: e.target.value,
-                      })
-                    }
-                    placeholder="Enter bookmark URL"
-                  />
-                </div>
-              </div>
-            </Modal>
+                </Modal>
+              )}
+            </>
           )}
-          {isHovered && (
+          {isHovered && !collapsed && (
             <div className="fixed bottom-1 right-1 flex gap-2 p-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-50">
               <button
                 onClick={() => {

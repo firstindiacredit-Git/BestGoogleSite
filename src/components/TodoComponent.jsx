@@ -311,7 +311,7 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
   const renderColorPicker = () => {
     const dropdownContent = showColorPicker && (
       <div
-        className="fixed w-48 bg-white dark:bg-[#28283A] border border-gray-200 dark:border-gray-700 rounded-sm shadow-lg p-3 z-[9999] menu-Container"
+        className="fixed w-48 bg-white dark:bg-[#28283A] border border-gray-200 dark:border-gray-700 rounded-sm shadow-lg p-1 z-[9999] menu-Container"
         style={{
           top: `${dropdownPosition.top}px`,
           right: `${dropdownPosition.right}px`,
@@ -385,18 +385,6 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
         color: isAutoColor ? undefined : textColor,
       }}
     >
-      <div className="flex w-full  p-2 justify-between">
-        <div
-          onClick={collapse}
-          className={`text-xl cursor-pointer p-1 flex items-center  w-full font-medium ${
-            isAutoColor ? "dark:text-white" : ""
-          }`}
-          style={{ color: isAutoColor ? undefined : textColor }}
-        >
-          Todo List
-        </div>
-        {isHovering && renderColorPicker()}
-      </div>
       {!isCollapsed && (
         <div className="p-3">
           <div className="flex justify-between gap-4 items-center mb-1">
@@ -513,14 +501,14 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
 
           <form
             onSubmit={editingId ? submitEdit : addTodo}
-            className="relative"
+            className="relative flex items-center"
           >
             <input
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="Add new task"
-              className={`w-full p-3 pr-12 border rounded-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+              className={`w-full p-1.5 pr-10 border rounded-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                 isAutoColor
                   ? "bg-white text-gray-900 border-gray-200 dark:bg-[#28283A] dark:text-white dark:placeholder-gray-400 dark:border-gray-700"
                   : isLight(containerColor)
@@ -534,7 +522,7 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
             />
             <button
               type="submit"
-              className={`absolute right-3 top-1/2 -translate-y-1/2 ${
+              className={`absolute right-12 top-1/2 -translate-y-1/2 ${
                 isAutoColor
                   ? "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
                   : isLight(containerColor)
@@ -548,7 +536,17 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
             >
               <span className="text-2xl">+</span>
             </button>
+            {renderColorPicker()}
           </form>
+          <div className="flex w-full  p-2.5 justify-between">
+            <div
+              onClick={collapse}
+              className={`text-xl cursor-pointer p-2 flex items-center  w-full font-medium ${
+                isAutoColor ? "dark:text-white" : ""
+              }`}
+              style={{ color: isAutoColor ? undefined : textColor }}
+            ></div>
+          </div>
         </div>
       )}
     </div>
