@@ -24,6 +24,7 @@ import sportsmen from "./sportsmen.json";
 import brands from "./brand.json";
 import bikes from "./bikes.json";
 import gdp from "./gdp.json";
+import "./ToastifyNotification.css";
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -152,7 +153,7 @@ function WikipediaBanks() {
       </div>
 
       {loading ? (
-        <div style={{ textAlign: "center", margin: "2rem" }}>
+        <div style={{ textAlign: "center", margin: "2rem", height: "200px" }}>
           <Spin size="large" />
         </div>
       ) : viewMode === "grid" ? (
@@ -487,14 +488,14 @@ const Top100Page = () => {
                       ))}
                     </div>
                   );
-                case "cars":
-                  return (
-                    <div>
-                      {item.description.split(",").map((info, index) => (
-                        <p key={index}>{info.trim()}</p>
-                      ))}
-                    </div>
-                  );
+                // case "cars":
+                //   return (
+                //     <div>
+                //       {item.description.split(",").map((info, index) => (
+                //         <p key={index}>{info.trim()}</p>
+                //       ))}
+                //     </div>
+                //   );
                 case "crypto":
                   return (
                     <div>
@@ -742,12 +743,12 @@ const Top100Page = () => {
             >
               Bikes
             </Radio.Button>
-            <Radio.Button
+            {/* <Radio.Button
               className="dark:bg-[#28283A] dark:text-white"
               value="cars"
             >
               Cars
-            </Radio.Button>
+            </Radio.Button> */}
             <Radio.Button
               className="dark:bg-[#28283A] dark:text-white"
               value="crypto"
@@ -831,7 +832,7 @@ const Top100Page = () => {
 
       {/* Show loading state */}
       {loading && (
-        <div style={{ textAlign: "center", margin: "2rem" }}>
+        <div style={{ textAlign: "center", margin: "2rem", height: "200px" }}>
           <Spin size="large" />
         </div>
       )}
@@ -850,7 +851,7 @@ const Top100Page = () => {
           {category === "banks" ? (
             <WikipediaBanks />
           ) : (
-            <>
+            <div style={{ minHeight: "200px" }}>
               {category === "sportsmen" && (
                 <Title
                   level={2}
@@ -860,7 +861,7 @@ const Top100Page = () => {
                 </Title>
               )}
               {viewMode === "grid" ? renderGridView() : renderListView()}
-            </>
+            </div>
           )}
         </>
       )}

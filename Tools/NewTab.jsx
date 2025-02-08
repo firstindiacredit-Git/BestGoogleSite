@@ -22,6 +22,7 @@ import {
 import { Input } from "antd";
 import ButtonComponent from "./ButtonComponent";
 import GridComponent from "./GridComponent";
+import "./SearchTool.css"
 
 const { Search } = Input;
 
@@ -408,7 +409,7 @@ const NewTab = () => {
     <div className="space-y-8">
       {toolCategories.map((category) => (
         <div key={category.title}>
-          <h3 className="font-semibold dark:text-white text-xl text-gray-900 mb-6 pb-2 border-b">
+          <h3 className="font-semibold text-center dark:text-white text-2xl text-gray-900 mb-6 pb-2">
             {category.title} Tools
           </h3>
           <div className="grid grid-cols-5 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
@@ -428,23 +429,24 @@ const NewTab = () => {
   );
 
   return (
-    <div className="min-h-screen dark:bg-[#513a7a]/[var(--widget-opacity)] bg-white/[var(--widget-opacity)] w-[90vw] mx-auto rounded-sm">
+    <div className="min-h-screen dark:bg-[#513a7a]/[var(--widget-opacity)] backdrop-blur-sm bg-white/[var(--widget-opacity)] w-[90vw] mx-auto rounded-sm">
       <div className="px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center  mb-6">
           <Search
             placeholder="Search tools..."
             allowClear
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{ width: 300 }}
-            className="mr-4"
+            className=" mr-4"
+            id="Toolsearch"
           />
 
-          <div className="bg-white rounded-lg shadow-sm border p-1 inline-flex">
+          <div className="bg-white dark:bg-[#28283A] rounded-lg shadow-sm  p-1 inline-flex">
             <button
               onClick={() => setViewType("grid")}
               className={`p-2 rounded-md transition-all duration-200 ${
                 viewType === "grid"
-                  ? "bg-blue-50  text-blue-600"
+                  ? "bg-gray-700  text-blue-600"
                   : "text-gray-600 hover:bg-gray-50"
               }`}
               title="Grid View"
@@ -455,7 +457,7 @@ const NewTab = () => {
               onClick={() => setViewType("list")}
               className={`p-2 rounded-md transition-all duration-200 ${
                 viewType === "list"
-                  ? "bg-blue-50 text-blue-600"
+                  ? "bg-gray-700 text-blue-600"
                   : "text-gray-600 hover:bg-gray-50"
               }`}
               title="List View"

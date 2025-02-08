@@ -28,3 +28,28 @@
   border-radius: 50px !important; 
 }
 
+.dark :where(.css-dev-only-do-not-override-1kf000u).ant-radio-button-wrapper {
+    position: relative;
+    display: inline-block;
+    height: 32px;
+    margin: 0;
+    padding-inline: 15px;
+    padding-block: 0;
+    color: rgba(0, 0, 0, 0.88);
+    font-size: 14px;
+    line-height: 30px;
+    background: #28283a;
+     border: 0px solid black;
+}
+
+.dark :where(.css-dev-only-do-not-override-1kf000u).ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+    z-index: 1;
+    color: #4096FF;
+    background: #28283a;
+    border-color: #28283a;
+}
+:where(.css-dev-only-do-not-override-1kf000u).ant-btn-variant-outlined, :where(.css-dev-only-do-not-override-1kf000u).ant-btn-variant-dashed {
+    border-color: transparent;
+    background: #fff;
+}
+

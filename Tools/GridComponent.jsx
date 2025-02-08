@@ -88,12 +88,12 @@ const GridComponent = ({ path, name, icon, onToolUse }) => {
 
   return (
     <Link to={path} className="block group" onClick={handleClick}>
-      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all duration-200">
+      <div className="bg-white dark:bg-gray-800  p-4 rounded-xl  shadow-sm hover:shadow-md hover:border-blue-300 transition-all duration-200">
         <div className="flex flex-col items-center">
-          <div className="w-12 h-12 flex items-center justify-center rounded-lg bg-gray-50 group-hover:bg-blue-50 transition-colors duration-200 mb-3">
+          <div className="w-12 h-12 flex items-center justify-center rounded-lg  bg-transparent  mb-3">
             <span className="text-2xl">{icon}</span>
           </div>
-          <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900 text-center">
+          <span className="text-sm font-medium text-gray-700 dark:text-white group-hover:text-gray-900 text-center">
             {name}
           </span>
         </div>

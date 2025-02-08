@@ -88,7 +88,7 @@ function SearchPage() {
   const changeVisible = useCallback(() => {
     const newMode = !visibleHandle;
     setVisibleHandle(newMode);
-    localStorage.setItem("uiMode", newMode ? "modern" : "classic");
+    localStorage.setItem("modern");
   }, [visibleHandle]);
 
   const handleTempTransparencyChange = useCallback((newValue) => {
