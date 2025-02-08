@@ -38,6 +38,8 @@ const CategoryHome = ({ categoryType, itemName, collapsed = false }) => {
   const [newBookmark, setNewBookmark] = useState({ name: "", link: "" });
   const [isHovered, setIsHovered] = useState(false);
   const buttonRef = useRef(null);
+  const settingsMenuRef = useRef(null);
+  const componentRef = useRef(null);
 
   const preventScroll = (prevent) => {
     document.body.style.overflow = prevent ? "hidden" : "";
@@ -169,6 +171,27 @@ const CategoryHome = ({ categoryType, itemName, collapsed = false }) => {
     return () => preventScroll(false);
   }, [showSettings]);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Check if click is outside both the settings menu and the settings button
+      if (
+        settingsMenuRef.current &&
+        !settingsMenuRef.current.contains(event.target) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target) &&
+        componentRef.current &&
+        !componentRef.current.contains(event.target)
+      ) {
+        setShowSettings(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const getFaviconUrl = (url) => {
     try {
       const domain = new URL(url).hostname;
@@ -277,7 +300,8 @@ const CategoryHome = ({ categoryType, itemName, collapsed = false }) => {
   const renderSettingsMenu = () => {
     const dropdownContent = showSettings && (
       <div
-        className={`absolute w-48  bg-white dark:text-white dark:bg-[#28283A] rounded-sm shadow-lg border border-gray-200 dark:border-gray-700 z-[9998]`}
+        ref={settingsMenuRef}
+        className={`absolute w-48 bg-white dark:text-white dark:bg-[#28283A] rounded-sm shadow-lg border border-gray-200 dark:border-gray-700 z-[9998]`}
         style={{
           top: `${dropdownPosition.top}px`,
           right: `${dropdownPosition.right}px`,
@@ -467,6 +491,7 @@ const CategoryHome = ({ categoryType, itemName, collapsed = false }) => {
 
   return (
     <div
+      ref={componentRef}
       className="relative rounded-sm p-1 shadow-sm isolate backdrop-blur-sm"
       onMouseEnter={() => !collapsed && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

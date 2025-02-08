@@ -97,13 +97,13 @@ export const initializeUserLayout = async (userId) => {
 };
 
 // Function to calculate optimal columns based on window width
-const calculateOptimalColumns = (windowWidth) => {
-  const minWidgetWidth = 350; // Minimum width for a widget
-  const padding = 32; // Account for container padding
-  const availableWidth = windowWidth - padding;
-  const calculatedColumns = Math.floor(availableWidth / minWidgetWidth);
-  return Math.min(Math.max(calculatedColumns, 1), 4); // Limit between 1 and 4 columns
-};
+// const calculateOptimalColumns = (windowWidth) => {
+//   const minWidgetWidth = 350; // Minimum width for a widget
+//   const padding = 32; // Account for container padding
+//   const availableWidth = windowWidth - padding;
+//   const calculatedColumns = Math.floor(availableWidth / minWidgetWidth);
+//   return Math.min(Math.max(calculatedColumns, 1), 4); // Limit between 1 and 4 columns
+// };
 
 // Function to redistribute widgets across new column count
 const redistributeWidgets = (widgets, newColumnCount) => {

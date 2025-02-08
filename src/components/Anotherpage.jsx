@@ -419,6 +419,7 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
                     maxWidth: "90vw",
                     gridTemplateColumns: `repeat(${columns}, 1fr)`,
                     gap: "16px",
+                    justifyContent: columns === 4 ? "center" : "start",
                   }}
                 >
                   {distributeItems().map((columnItems, columnIndex) => (
