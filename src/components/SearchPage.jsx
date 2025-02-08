@@ -20,7 +20,7 @@ import Tool from "../../Tools/Tool.jsx";
 import Sports from "../components/Sports";
 import Top100 from "../components/Top100";
 import "./style.css";
-import { Dropdown, Skeleton } from "antd";
+import { Dropdown, Skeleton, Input } from "antd";
 import { Settings } from "lucide-react";
 import { ThemeContext } from "../App";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -58,6 +58,9 @@ function SearchPage() {
   const tempTransparencyRef = useRef(sliderTransparency);
   const tempWidgetTransparencyRef = useRef(sliderWidgetTransparency);
   const textColorRef = useRef(textColor);
+
+  const [isGoogleSearchLoaded, setIsGoogleSearchLoaded] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const authInstance = getAuth();
@@ -393,6 +396,39 @@ function SearchPage() {
     ]
   );
 
+  // Add this new useEffect for Google Search loading detection
+  useEffect(() => {
+    const checkGoogleSearch = setInterval(() => {
+      if (document.querySelector(".gsc-control-searchbox-only")) {
+        setIsGoogleSearchLoaded(true);
+        clearInterval(checkGoogleSearch);
+      }
+    }, 100);
+
+    // Cleanup interval
+    return () => clearInterval(checkGoogleSearch);
+  }, []);
+
+  // Add handleSearch function
+  const handleSearch = useCallback((value) => {
+    if (value.trim()) {
+      const searchUrl = `https://www.google.com/search?client=ms-google-coop&qcx=80904074a37154829&q=${encodeURIComponent(
+        value
+      )}`;
+      window.location.href = searchUrl;
+    }
+  }, []);
+
+  // Add handleKeyPress function for Enter key
+  const handleKeyPress = useCallback(
+    (e) => {
+      if (e.key === "Enter" && searchQuery.trim()) {
+        handleSearch(searchQuery);
+      }
+    },
+    [searchQuery, handleSearch]
+  );
+
   if (loading) {
     return (
       <div
@@ -461,8 +497,30 @@ function SearchPage() {
 
           <div className="w-full">
             <div className="flex mt-14 flex-col items-center">
+              {!isGoogleSearchLoaded && (
+                <div className="w-[55%] mb-[5px]">
+                  <Input.Search
+                    placeholder="Search Google..."
+                    size="large"
+                    className={`temporary-search ${isDarkMode ? "dark" : ""}`}
+                    style={{
+                      backgroundColor: "white",
+                      padding: "8px 1rem",
+                      borderRadius: "2px",
+                      boxShadow: "0px 0px 1px rgba(0, 0, 0, 0.3)",
+                    }}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onSearch={handleSearch}
+                    onKeyPress={handleKeyPress}
+                    enterButton
+                  />
+                </div>
+              )}
               <div
-                className="gcse-searchbox-only"
+                className={`gcse-searchbox-only ${
+                  !isGoogleSearchLoaded ? "opacity-0 absolute" : "opacity-100"
+                }`}
                 data-resultsurl="https://www.google.com/search?client=ms-google-coop&qcx=80904074a37154829"
                 data-defaulttoimagesearch="true"
               />
