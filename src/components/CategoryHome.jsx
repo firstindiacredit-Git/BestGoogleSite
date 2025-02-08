@@ -159,7 +159,7 @@ const CategoryHome = ({ categoryType, itemName, collapsed = false }) => {
     if (showSettings && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
       setDropdownPosition({
-        top: rect.bottom + 8,
+        top: rect.bottom - 280,
         right: window.innerWidth - rect.right,
       });
       preventScroll(true);
@@ -277,7 +277,7 @@ const CategoryHome = ({ categoryType, itemName, collapsed = false }) => {
   const renderSettingsMenu = () => {
     const dropdownContent = showSettings && (
       <div
-        className={`absolute w-48 bg-white dark:text-white dark:bg-[#28283A] rounded-sm shadow-lg border border-gray-200 dark:border-gray-700 z-[9998]`}
+        className={`absolute w-48  bg-white dark:text-white dark:bg-[#28283A] rounded-sm shadow-lg border border-gray-200 dark:border-gray-700 z-[9998]`}
         style={{
           top: `${dropdownPosition.top}px`,
           right: `${dropdownPosition.right}px`,

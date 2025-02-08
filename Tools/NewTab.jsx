@@ -65,27 +65,27 @@ const pdfTools = [
   {
     path: "/extractpages",
     name: "Extract Page",
-    icon: <FaStream className="text-blue-800" />,
+    icon: <FaStream className="text-blue-500" />,
   },
   {
     path: "/pdfcropper",
     name: "PDF Cropper",
-    icon: <FaCropAlt className="text-green-300" />,
+    icon: <FaCropAlt className="text-green-500" />,
   },
   {
     path: "/addpagenum",
     name: "Add Page No.",
-    icon: <AiOutlineNumber className="text-green-300" />,
+    icon: <AiOutlineNumber className="text-blue-500" />,
   },
   {
     path: "/protect",
     name: "Protect PDF",
-    icon: <FaLock className="text-pink-700" />,
+    icon: <FaLock className="text-red-500" />,
   },
   {
     path: "/unlockpdf",
     name: "Unlock PDF",
-    icon: <FaUnlockAlt className="text-pink-500" />,
+    icon: <FaUnlockAlt className="text-green-500" />,
   },
   {
     path: "/pdftoimage",
@@ -103,52 +103,52 @@ const todoTools = [
   {
     path: "/grocery",
     name: "Grocery List",
-    icon: <FaTasks className="text-purple-500" />,
+    icon: <FaTasks className="text-yellow-500" />,
   },
   {
     path: "/bulkemailchecker",
     name: "Email Checker",
-    icon: <FaTasks className="text-purple-500" />,
+    icon: <FaTasks className="text-yellow-500" />,
   },
   {
     path: "/bulkemailsender",
     name: "Email Sender",
-    icon: <FaTasks className="text-purple-500" />,
+    icon: <FaTasks className="text-yellow-500" />,
   },
   {
     path: "/googlemap",
     name: "Google Map Extractor",
-    icon: <FaTasks className="text-purple-500" />,
+    icon: <FaTasks className="text-yellow-500" />,
   },
   {
     path: "/cardvalidation",
     name: "Card Validator",
-    icon: <FaTasks className="text-purple-500" />,
+    icon: <FaTasks className="text-yellow-500" />,
   },
   {
     path: "/cardgenerator",
     name: "Card Generator",
-    icon: <FaTasks className="text-purple-500" />,
+    icon: <FaTasks className="text-yellow-500" />,
   },
   {
     path: "/templategenerator",
     name: "HTML Template Generator",
-    icon: <FaTasks className="text-purple-500" />,
+    icon: <FaTasks className="text-yellow-500" />,
   },
   {
     path: "/phonenumberformat",
     name: "Phone Number Formatter",
-    icon: <FaTasks className="text-purple-500" />,
+    icon: <FaTasks className="text-yellow-500" />,
   },
   {
     path: "/randompassword",
     name: "Random Password Gen.",
-    icon: <FaTasks className="text-purple-500" />,
+    icon: <FaTasks className="text-yellow-500" />,
   },
   {
     path: "/linkedinscraper",
     name: "LinkedIn Scraper",
-    icon: <FaTasks className="text-purple-500" />,
+    icon: <FaTasks className="text-yellow-500" />,
   },
 ];
 
@@ -156,92 +156,92 @@ const calculatorTools = [
   {
     path: "/calculator",
     name: "Calculator",
-    icon: <FaCalculator className="text-teal-500" />,
+    icon: <FaCalculator className="text-indigo-500" />,
   },
   {
     path: "/percentage",
     name: "% Calculator",
-    icon: <FaCalculator className="text-teal-500" />,
+    icon: <FaCalculator className="text-indigo-500" />,
   },
   {
     path: "/bmi",
     name: "BMI Calculator",
-    icon: <FaCalculator className="text-teal-500" />,
+    icon: <FaCalculator className="text-indigo-500" />,
   },
   {
     path: "/scientific",
     name: "Scientific Calculator",
-    icon: <FaCalculator className="text-teal-500" />,
+    icon: <FaCalculator className="text-indigo-500" />,
   },
   {
     path: "/compareloan",
     name: "Compare Loan",
-    icon: <FaCalculator className="text-teal-500" />,
+    icon: <FaCalculator className="text-indigo-500" />,
   },
   {
     path: "/currencyconverter",
     name: "Currency Converter",
-    icon: <FaCalculator className="text-teal-500" />,
+    icon: <FaCalculator className="text-indigo-500" />,
   },
   {
     path: "/fractioncalculator",
     name: "Fraction Calculator",
-    icon: <FaCalculator className="text-teal-500" />,
+    icon: <FaCalculator className="text-indigo-500" />,
   },
   {
     path: "/averagecalculator",
     name: "Average Calculator",
-    icon: <FaCalculator className="text-teal-500" />,
+    icon: <FaCalculator className="text-indigo-500" />,
   },
   {
     path: "/lcm",
     name: "LCM Calculator",
-    icon: <FaCalculator className="text-teal-500" />,
+    icon: <FaCalculator className="text-indigo-500" />,
   },
   {
     path: "/agecalculator",
     name: "Age Calculator",
-    icon: <FaCalculator className="text-teal-500" />,
+    icon: <FaCalculator className="text-indigo-500" />,
   },
   {
     path: "/datediffcalculator",
     name: "Date Difference Calculator",
-    icon: <FaCalculator className="text-teal-500" />,
+    icon: <FaCalculator className="text-indigo-500" />,
   },
   {
     path: "/compoundintrest",
     name: "Compound Interest Calculator",
-    icon: <FaCalculator className="text-teal-500" />,
+    icon: <FaCalculator className="text-indigo-500" />,
   },
   {
     path: "/simpleinterest",
     name: "Simple Interest Calculator",
-    icon: <FaCalculator className="text-teal-500" />,
+    icon: <FaCalculator className="text-indigo-500" />,
   },
   {
     path: "/discountcalculator",
     name: "Discount Calculator",
-    icon: <FaCalculator className="text-teal-500" />,
+    icon: <FaCalculator className="text-indigo-500" />,
   },
   {
     path: "/gstcalculator",
     name: "GST Calculator",
-    icon: <FaCalculator className="text-teal-500" />,
+    icon: <FaCalculator className="text-indigo-500" />,
   },
   {
     path: "/vatcalculator",
     name: "VAT Calculator",
-    icon: <FaCalculator className="text-teal-500" />,
+    icon: <FaCalculator className="text-indigo-500" />,
   },
   {
     path: "/electricitybill",
     name: "Electricity Bill Calculator",
-    icon: <FaCalculator className="text-teal-500" />,
+    icon: <FaCalculator className="text-indigo-500" />,
   },
   {
     path: "/testscorecalculator",
     name: "Test Score Calculator",
-    icon: <FaCalculator className="text-teal-500" />,
+    icon: <FaCalculator className="text-indigo-500" />,
   },
 ];
 
@@ -327,32 +327,32 @@ const miscTools = [
   {
     path: "/paypal",
     name: "Paypal Link Gen.",
-    icon: <FaFilePdf className="text-pink-500" />,
+    icon: <FaFilePdf className="text-green-500" />,
   },
   {
     path: "/beautifier",
     name: "HTML Beautifier",
-    icon: <FaFilePdf className="text-pink-500" />,
+    icon: <FaFilePdf className="text-green-500" />,
   },
   {
     path: "/resumebuild",
     name: "Resume Builder",
-    icon: <FaFilePdf className="text-pink-500" />,
+    icon: <FaFilePdf className="text-green-500" />,
   },
   {
     path: "/linkchecker",
     name: "Website Link Checker",
-    icon: <FaFilePdf className="text-pink-500" />,
+    icon: <FaFilePdf className="text-green-500" />,
   },
   {
     path: "/wordcounter",
     name: "Word Counter",
-    icon: <FaFilePdf className="text-pink-500" />,
+    icon: <FaFilePdf className="text-green-500" />,
   },
   {
     path: "/trafficchecker",
     name: "Traffic Checker",
-    icon: <FaFilePdf className="text-pink-500" />,
+    icon: <FaFilePdf className="text-green-500" />,
   },
 ];
 
@@ -384,10 +384,10 @@ const NewTab = () => {
   };
 
   const renderListView = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
+    <div className="grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3 xl:grid-cols-5 gap-8">
       {toolCategories.map((category) => (
         <div key={category.title}>
-          <h3 className="font-semibold text-lg text-neutral-600 text-left mb-4">
+          <h3 className="font-semibold text-lg dark:text-white text-neutral-600 text-left mb-4">
             {category.title.toUpperCase()}
           </h3>
           {category.tools.filter(filterTools).map((tool) => (
@@ -405,13 +405,13 @@ const NewTab = () => {
   );
 
   const renderGridView = () => (
-    <div className="space-y-12">
+    <div className="space-y-8">
       {toolCategories.map((category) => (
         <div key={category.title}>
-          <h3 className="font-semibold text-xl text-gray-900 mb-6 pb-2 border-b">
+          <h3 className="font-semibold dark:text-white text-xl text-gray-900 mb-6 pb-2 border-b">
             {category.title} Tools
           </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-5 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
             {category.tools.filter(filterTools).map((tool) => (
               <GridComponent
                 key={tool.path}
@@ -428,7 +428,7 @@ const NewTab = () => {
   );
 
   return (
-    <div className="min-h-screen bg-white/[var(--widget-opacity)] w-[90vw] mx-auto rounded-sm">
+    <div className="min-h-screen dark:bg-[#513a7a]/[var(--widget-opacity)] bg-white/[var(--widget-opacity)] w-[90vw] mx-auto rounded-sm">
       <div className="px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-6">
           <Search
@@ -465,7 +465,7 @@ const NewTab = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border p-6">
+        <div className="bg-transparent rounded-xl shadow-sm border p-6">
           {viewType === "list" ? renderListView() : renderGridView()}
         </div>
       </div>

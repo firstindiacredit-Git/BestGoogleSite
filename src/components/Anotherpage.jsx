@@ -479,7 +479,7 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
                                       >
                                         <div
                                           {...provided.dragHandleProps}
-                                          className={`cursor-grab mr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 w-5 ${
+                                          className={`cursor-grab mr-3 text-gray-500 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 w-5 ${
                                             snapshot.isDragging
                                               ? "cursor-grabbing"
                                               : ""

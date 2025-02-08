@@ -342,7 +342,7 @@ const Top100Page = () => {
       {filteredItems.map((item) => (
         <Col xs={24} sm={12} lg={8} key={item.originalIndex}>
           <Card
-            className="dark:bg-[#28283A] border border-gray-200 dark:border-gray-800 dark:text"
+            className="dark:bg-[#28283A] dark:text-white border border-gray-200 dark:border-gray-800 dark:text"
             title={
               category === "stocks" ? (
                 <div
@@ -352,7 +352,7 @@ const Top100Page = () => {
                     alignItems: "center",
                   }}
                 >
-                  <span>
+                  <span className="dark:text-white">
                     {item.originalIndex + 1}. {item.name}
                   </span>
                 </div>
@@ -364,10 +364,10 @@ const Top100Page = () => {
                     alignItems: "center",
                   }}
                 >
-                  <span>
+                  <span className="dark:text-white">
                     {item.originalIndex + 1}. {item.name}
                   </span>
-                  <span>
+                  <span className="dark:text-white">
                     {item.description.split("Kmh Speed: ")[1]?.split("km/h")[0]}{" "}
                     km/h
                   </span>
@@ -380,10 +380,10 @@ const Top100Page = () => {
                     alignItems: "center",
                   }}
                 >
-                  <span>
+                  <span className="dark:text-white">
                     {item.originalIndex + 1}. {item.name}
                   </span>
-                  <span>{item.value}</span>
+                  <span className="dark:text-white">{item.value}</span>
                 </div>
               ) : category === "sportsmen" ? (
                 <div
@@ -393,11 +393,11 @@ const Top100Page = () => {
                     alignItems: "center",
                   }}
                 >
-                  <span>
+                  <span className="dark:text-white">
                     {item.originalIndex + 1}.{" "}
                     {item.name?.split("$")[0] || item.name}
                   </span>
-                  <span>
+                  <span className="dark:text-white">
                     {item.name?.includes("$")
                       ? `$${item.name.split("$")[1]}`
                       : ""}
@@ -430,11 +430,11 @@ const Top100Page = () => {
                         }}
                       />
                     )}
-                    <span>
+                    <span className="dark:text-white">
                       {item.originalIndex + 1}. {item.name}
                     </span>
                   </div>
-                  <span>
+                  <span className="dark:text-white">
                     {item.description?.split("Net Worth: ")[1]?.split(",")[0]}
                   </span>
                 </div>
@@ -446,10 +446,10 @@ const Top100Page = () => {
                     alignItems: "center",
                   }}
                 >
-                  <span>
+                  <span className="dark:text-white">
                     {item.originalIndex + 1}. {item.name}
                   </span>
-                  <span>
+                  <span className="dark:text-white">
                     {item.description?.includes("Price: $")
                       ? `$${
                           item.description.split("Price: $")[1]?.split(",")[0]
@@ -465,10 +465,10 @@ const Top100Page = () => {
                     alignItems: "center",
                   }}
                 >
-                  <span>
+                  <span className="dark:text-white">
                     {item.originalIndex + 1}. {item.name}
                   </span>
-                  <span>{item.value}</span>
+                  <span className="dark:text-white">{item.value}</span>
                 </div>
               ) : (
                 `${item.originalIndex + 1}. ${item.name}`

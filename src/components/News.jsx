@@ -65,7 +65,7 @@ const NewsApp = () => {
         <Col xs={24} sm={12} md={8} lg={6} key={index}>
           <Card
             hoverable
-            className="h-[380px] overflow-hidden dark:bg-gray-800"
+            className="h-[380px] bg-white overflow-hidden dark:bg-gray-800"
             cover={
               <img
                 alt={news.title}
@@ -152,9 +152,9 @@ const NewsApp = () => {
           mode="horizontal"
           onClick={({ key }) => fetchData(key)}
           items={menuItems}
-          className="m-auto rounded-md bg-white dark:bg-gray-800 dark:text-white"
+          className="m-auto ml-30 rounded-md bg-white  dark:text-white"
         />
-        <Space className="mb-4  w-96  justify-end">
+       
           <Button
             type={viewMode === "grid" ? "primary" : "default"}
             icon={<AppstoreOutlined />}
@@ -167,7 +167,7 @@ const NewsApp = () => {
             onClick={() => setViewMode("list")}
             className="dark:bg-gray-700 dark:text-white"
           />
-        </Space>
+      
       </div>
       {loading ? (
         <div className="text-center p-12">

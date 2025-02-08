@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { db, auth } from "../firebase";
 import {
   collection,
@@ -133,6 +133,21 @@ function PopularBookmarks() {
     previewOpacity: 0,
     previewScale: 1,
   });
+
+  const dropdownRef = useRef(null); // Create a ref for the dropdown
+
+  const handleClickOutside = (event) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      setIsEditModePanelVisible(false); // Close the dropdown if clicked outside
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside); // Add event listener
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside); // Cleanup on unmount
+    };
+  }, []);
 
   // Advanced drag start handler with precise tracking and preview
   const handleDragStart = (category, columnIndex, event) => {
@@ -1964,7 +1979,7 @@ function PopularBookmarks() {
                                                 <AntButton
                                                   type="text"
                                                   icon={
-                                                    <PlusOutlined className="text-black" />
+                                                    <PlusOutlined className="text-black dark:text-white" />
                                                   }
                                                   onClick={(e) => {
                                                     e.stopPropagation();
@@ -1993,7 +2008,7 @@ function PopularBookmarks() {
                                                 <AntButton
                                                   type="text"
                                                   icon={
-                                                    <MoreOutlined className="text-black" />
+                                                    <MoreOutlined className="text-black dark:text-white" />
                                                   }
                                                   onClick={(e) =>
                                                     e.stopPropagation()
@@ -3246,20 +3261,28 @@ function PopularBookmarks() {
         }}
       >
         <Form layout="vertical">
-          <Form.Item label="Title" required>
+          <Form.Item
+            label={<span className="dark:text-white">Title</span>}
+            required
+          >
             <Input
               placeholder="Enter bookmark title"
               value={newBookmark.title}
               onChange={(e) =>
                 setNewBookmark((prev) => ({ ...prev, title: e.target.value }))
               }
+              className=""
             />
           </Form.Item>
-          <Form.Item label="URL" required>
+          <Form.Item
+            label={<span className="dark:text-white">URL</span>}
+            required
+          >
             <Input
               placeholder="Enter bookmark URL"
               value={newBookmark.url}
               onChange={handleUrlChange}
+              className=" "
             />
           </Form.Item>
         </Form>
@@ -3321,9 +3344,12 @@ function PopularBookmarks() {
         onCancel={() => {
           if (hasUnsavedChanges) {
             Modal.confirm({
-              title: "Unsaved Changes",
-              content:
-                "You have unsaved changes. Are you sure you want to exit?",
+              title: <span className="dark:text-white">Unsaved Changes</span>,
+              content: (
+                <span className="dark:text-white">
+                  You have unsaved changes. Are you sure you want to exit?
+                </span>
+              ),
               onOk: () => {
                 setIsEditModePanelVisible(false);
                 setHasUnsavedChanges(false);
@@ -3338,7 +3364,11 @@ function PopularBookmarks() {
           }
         }}
         footer={[
-          <AntButton key="selectAll" onClick={selectAllBookmarks}>
+          <AntButton
+            key="selectAll"
+            className="dark:text-white dark:bg-transparent"
+            onClick={selectAllBookmarks}
+          >
             {selectedBookmarks.length === editModeBookmarks.length
               ? "Deselect All"
               : "Select All"}
@@ -3350,16 +3380,24 @@ function PopularBookmarks() {
             disabled={selectedBookmarks.length === 0}
             onClick={handleDeleteSelected}
           >
-            Delete Selected ({selectedBookmarks.length})
+            <span className="dark:text-white">
+              Delete Selected({selectedBookmarks.length})
+            </span>
           </AntButton>,
           <AntButton
             key="cancel"
+            className="dark:text-white dark:bg-transparent"
             onClick={() => {
               if (hasUnsavedChanges) {
                 Modal.confirm({
-                  title: "Unsaved Changes",
-                  content:
-                    "You have unsaved changes. Are you sure you want to exit?",
+                  title: (
+                    <span className="dark:text-white">Unsaved Changes</span>
+                  ), // Added dark text color
+                  content: (
+                    <span className="dark:text-white">
+                      You have unsaved changes. Are you sure you want to exit?
+                    </span>
+                  ), // Added dark text color
                   onOk: () => {
                     setIsEditModePanelVisible(false);
                     setHasUnsavedChanges(false);
@@ -3382,7 +3420,7 @@ function PopularBookmarks() {
             disabled={!hasUnsavedChanges}
             onClick={handleSaveChanges}
           >
-            Save Changes
+            <span className="dark:text-white"> Save Changes</span>
           </AntButton>,
         ]}
       >

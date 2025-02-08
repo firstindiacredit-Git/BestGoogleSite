@@ -185,7 +185,7 @@ function SearchPage() {
   }, [navigate]);
 
   const handleResetTextColor = () => {
-    const newValue = isDarkMode ? 100 : 0; // 100 for white in dark mode, 0 for black in light mode
+    const newValue = isDarkMode ? 0 : 100; // 100 for white in dark mode, 0 for black in light mode
     handleTextColorChange(newValue);
   };
 
