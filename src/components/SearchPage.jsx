@@ -34,7 +34,7 @@ function SearchPage() {
     parseInt(localStorage.getItem("bgTransparency") || "85")
   );
   const [textColor, setTextColor] = useState(() =>
-    parseInt(localStorage.getItem("textColorValue") || "100")
+    parseInt(localStorage.getItem("textColorValue") || "0")
   );
   const { widgetTransparent, setWidgetTransparent } = useContext(
     WidgetTransparencyContext
@@ -358,24 +358,24 @@ function SearchPage() {
           ),
         },
         {
-          key: "cardUI",
-          label: (
-            <div
-              className="flex flex-col gap-2 border-t"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <span className="text-sm text-gray-600">Card UI</span>
-              <button
-                className="text-center bg-black/5 dark:bg-white/5  hover:bg-gray-50 w-full rounded-sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  changeVisible();
-                }}
-              >
-                {!visibleHandle ? "Modern" : "Classic"}
-              </button>
-            </div>
-          ),
+          // key: "cardUI",
+          // label: (
+          //   <div
+          //     className="flex flex-col gap-2 border-t"
+          //     onClick={(e) => e.stopPropagation()}
+          //   >
+          //     <span className="text-sm text-gray-600">Card UI</span>
+          //     <button
+          //       className="text-center bg-black/5 dark:bg-white/5  hover:bg-gray-50 w-full rounded-sm"
+          //       onClick={(e) => {
+          //         e.stopPropagation();
+          //         changeVisible();
+          //       }}
+          //     >
+          //       {!visibleHandle ? "Modern" : "Classic"}
+          //     </button>
+          //   </div>
+          // ),
         },
       ],
     }),
