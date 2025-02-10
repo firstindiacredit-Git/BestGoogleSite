@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Plus, X, Settings } from "lucide-react";
+import { Plus, X, Settings, ChevronDown, ChevronUp } from "lucide-react";
 import { Popconfirm, Menu, Dropdown } from "antd";
 import { auth, db } from "../firebase";
 import { doc, updateDoc, onSnapshot } from "firebase/firestore";
@@ -165,7 +165,7 @@ const TimeZoneClock = ({
   useEffect(() => {
     const timer = setInterval(() => {
       setTime(new Date());
-    }, 16); // Update approximately 60 times per second for smooth animation
+    }, 16);
     return () => clearInterval(timer);
   }, []);
 
@@ -290,21 +290,24 @@ const ResponsiveWorldClock = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({
     top: 0,
     right: 0,
   });
+  const [addDropdownPosition, setAddDropdownPosition] = useState({
+    top: 0,
+    right: 0,
+  });
   const settingsRef = useRef(null);
-  const collapse = () => {
-    setIsCollapsed(!isCollapsed);
-  };
+  const addButtonRef = useRef(null);
+  const settingsMenuRef = useRef(null);
 
   useEffect(() => {
-    if (showSettingsDropdown && settingsRef.current) {
+    if (showSettings && settingsRef.current) {
       const rect = settingsRef.current.getBoundingClientRect();
       setDropdownPosition({
-        top: rect.bottom + 8,
+        top: rect.top - 180,
         right: window.innerWidth - rect.right,
       });
       preventScroll(true);
@@ -312,28 +315,41 @@ const ResponsiveWorldClock = () => {
       preventScroll(false);
     }
     return () => preventScroll(false);
-  }, [showSettingsDropdown]);
+  }, [showSettings]);
+
+  useEffect(() => {
+    if (isDropdownOpen && addButtonRef.current) {
+      const rect = addButtonRef.current.getBoundingClientRect();
+      setAddDropdownPosition({
+        top: rect.bottom - 280,
+        right: window.innerWidth - rect.right - 5,
+      });
+      preventScroll(true);
+    } else {
+      preventScroll(false);
+    }
+    return () => preventScroll(false);
+  }, [isDropdownOpen]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (!event.target.closest(".menu-Container")) {
-        setShowSettingsDropdown(false);
+      if (
+        settingsMenuRef.current &&
+        !settingsMenuRef.current.contains(event.target) &&
+        settingsRef.current &&
+        !settingsRef.current.contains(event.target)
+      ) {
+        setShowSettings(false);
+        setIsDropdownOpen(false);
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      preventScroll(false);
+    };
   }, []);
-
-  useEffect(() => {
-    if (showSettingsDropdown && settingsRef.current) {
-      const rect = settingsRef.current.getBoundingClientRect();
-      setDropdownPosition({
-        top: rect.height + 8,
-        right: 0,
-      });
-    }
-  }, [showSettingsDropdown]);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -391,71 +407,142 @@ const ResponsiveWorldClock = () => {
     (tz) => !selectedTimezones.includes(tz)
   );
 
-  const renderSettingsDropdown = () => {
-    const dropdownContent = showSettingsDropdown && (
+  const renderSettingsMenu = () => {
+    const settingsContent = showSettings && (
       <div
-        className="fixed w-48 bg-white dark:text-white dark:bg-[#28283A] rounded-sm shadow-lg border border-gray-200 dark:border-gray-700 z-[9999] menu-Container"
+        ref={settingsMenuRef}
+        className="fixed w-48 bg-white dark:bg-[#28283A] rounded-sm shadow-lg border border-gray-200 dark:border-gray-700 z-[9999] overflow-hidden"
         style={{
           top: `${dropdownPosition.top}px`,
           right: `${dropdownPosition.right}px`,
         }}
       >
-        <div className="py-1">
-          <button
-            onClick={() => {
-              setIsAnalog(!isAnalog);
-              setShowSettingsDropdown(false);
-            }}
-            className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-          >
-            {isAnalog ? "Switch to Digital" : "Switch to Analog"}
-          </button>
+        <div className="p-2">
+          <div className="mb-4">
+            <div className="text-sm font-medium text-gray-500 dark:text-gray-400 p-2">
+              Display
+            </div>
+            <div className="flex gap-1">
+              <button
+                onClick={() => {
+                  setIsAnalog(false);
+                  setShowSettings(false);
+                }}
+                className={`p-1 rounded flex-1 ${
+                  !isAnalog
+                    ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
+                    : "hover:bg-gray-100 dark:hover:bg-gray-700"
+                }`}
+              >
+                Digital
+              </button>
+              <button
+                onClick={() => {
+                  setIsAnalog(true);
+                  setShowSettings(false);
+                }}
+                className={`p-1 rounded flex-1 ${
+                  isAnalog
+                    ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
+                    : "hover:bg-gray-100 dark:hover:bg-gray-700"
+                }`}
+              >
+                Analog
+              </button>
+            </div>
+          </div>
 
-          <div className="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+          <div className="mb-4 border-t dark:border-gray-700">
+            <div className="text-sm font-medium text-gray-500 dark:text-gray-400 p-2">
+              Theme
+            </div>
+            <div className="grid grid-cols-2 gap-1">
+              {Object.entries(CLOCK_THEMES).map(([key, theme]) => (
+                <button
+                  key={key}
+                  onClick={() => {
+                    setCurrentTheme(theme);
+                    setShowSettings(false);
+                  }}
+                  className={`p-1 rounded text-sm ${
+                    currentTheme.name === theme.name
+                      ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
+                      : "hover:bg-gray-100 dark:hover:bg-gray-700"
+                  }`}
+                >
+                  {theme.name}
+                </button>
+              ))}
+            </div>
+          </div>
 
-          {Object.entries(CLOCK_THEMES).map(([key, theme]) => (
-            <button
-              key={key}
-              onClick={() => {
-                setCurrentTheme(theme);
-                setShowSettingsDropdown(false);
-              }}
-              className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-            >
-              {theme.name} Theme
-            </button>
-          ))}
+          
         </div>
       </div>
     );
 
     return (
-      <div className="menu-Container relative">
-        <button
-          ref={settingsRef}
-          onClick={() => setShowSettingsDropdown(!showSettingsDropdown)}
-          className="p-2 mt-4 hover:bg-gray-100 dark:hover:bg-white/20 transition flex items-center gap-2 rounded-sm"
-        >
-          <Settings className="w-5 h-5" />
-        </button>
-        {dropdownContent && createPortal(dropdownContent, document.body)}
+      <div className="relative backdrop-blur-sm isolate flex justify-between w-full">
+        {settingsContent && createPortal(settingsContent, document.body)}
       </div>
     );
+  };
+
+  const renderAddTimezoneMenu = () => {
+    const addTimezoneContent = isDropdownOpen && (
+      <div
+        className="fixed w-48 bg-white dark:bg-[#28283A] rounded-sm shadow-lg border border-gray-200 dark:border-gray-700 z-[9999] overflow-hidden"
+        style={{
+          top: `${addDropdownPosition.top}px`,
+          right: `${addDropdownPosition.right}px`,
+        }}
+      >
+        <div className="p-2">
+          <div className="text-sm font-medium text-gray-500 dark:text-gray-400 p-2">
+            Add Timezone
+          </div>
+          <div className="max-h-[200px] overflow-y-auto">
+            {availableZones.map((timeZone) => (
+              <button
+                key={timeZone}
+                onClick={() => addTimeZone(timeZone)}
+                className="w-full p-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition dark:text-white flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                {formatTimeZoneName(timeZone)}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+
+    return (
+      <div className="relative backdrop-blur-sm isolate flex justify-between w-full">
+        {addTimezoneContent && createPortal(addTimezoneContent, document.body)}
+      </div>
+    );
+  };
+
+  const collapse = () => {
+    setIsCollapsed(!isCollapsed);
   };
 
   return (
     <div
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
-      className={`w-full max-w-xl dark:text-white backdrop-blur-sm  rounded-b-sm flex justify-center items-center`}
+      className="w-full max-w-xl dark:text-white backdrop-blur-sm rounded-sm flex flex-col relative p-4"
     >
-      <div className=" w-full">
-        <div className="flex items-center">
-          <div className="flex w-full justify-between items-center"></div>
-        </div>
+      {/* Title Bar */}
+
+      {/* Main Content */}
+      <div className="w-full flex-1 mb-12">
+        {" "}
+        {/* Added margin bottom for options */}
         {!isCollapsed && (
           <div className="flex justify-center">
-            <div className="flex flex-wrap justify-between w-full h-fit px-2 py-3">
+            <div className="flex flex-wrap justify-between w-full h-fit">
               {selectedTimezones.map((timeZone, index) => (
                 <div key={timeZone} className="mt-4">
                   <TimeZoneClock
@@ -471,88 +558,33 @@ const ResponsiveWorldClock = () => {
           </div>
         )}
       </div>
+
+      {/* Bottom Options Bar */}
       {isHovering && (
-        <div className="absolute bottom-2 right-2 flex items-center gap-2">
+        <div className="absolute bottom-2 left-2 right-2 flex items-center justify-end gap-2">
           {selectedTimezones.length < 8 && (
-            <div className="relative">
-              <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center gap-2 p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-sm"
-                title="Add timezone"
-              >
-                <Plus className="w-5 h-5" />
-              </button>
-
-              {isDropdownOpen && availableZones.length > 0 && (
-                <>
-                  <div className="absolute bottom-full left-0 mb-2 w-48 dark:text-white dark:bg-[#513a7a] backdrop-blur-sm bg-gray-200 rounded-sm shadow-lg py-1 z-50 max-h-[250px] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-400 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 dark:[&::-webkit-scrollbar-track]:bg-gray-800">
-                    {availableZones.map((timeZone) => (
-                      <button
-                        key={timeZone}
-                        onClick={() => addTimeZone(timeZone)}
-                        className="w-full px-4 py-2 text-left text-sm hover:bg-white dark:hover:bg-white/10 transition"
-                      >
-                        {formatTimeZoneName(timeZone)}
-                      </button>
-                    ))}
-                  </div>
-                  <div
-                    className="fixed inset-0 z-40"
-                    onClick={() => setIsDropdownOpen(false)}
-                  />
-                </>
-              )}
-            </div>
-          )}
-          <div className="relative" ref={settingsRef}>
             <button
-              onClick={() => setShowSettingsDropdown(!showSettingsDropdown)}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm transition flex items-center gap-2"
+              ref={addButtonRef}
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+              title="Add timezone"
             >
-              <Settings className="w-5 h-5" />
+              <Plus className="w-5 h-5" />
             </button>
-
-            {showSettingsDropdown && (
-              <div className="absolute bottom-full left-0 mb-2 w-48 bg-white dark:text-white dark:bg-[#28283A] rounded-sm shadow-lg border border-gray-200 dark:border-gray-700 z-50">
-                <div className="p-2">
-                  <div className="mb-4">
-                    <div className="text-sm font-medium text-gray-500 dark:text-gray-400 p-2">
-                      Display
-                    </div>
-                    <button
-                      onClick={() => {
-                        setIsAnalog(!isAnalog);
-                        setShowSettingsDropdown(false);
-                      }}
-                      className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                    >
-                      {isAnalog ? "Switch to Digital" : "Switch to Analog"}
-                    </button>
-                  </div>
-
-                  <div className="mb-2">
-                    <div className="text-sm font-medium text-gray-500 dark:text-gray-400 p-2">
-                      Theme
-                    </div>
-                    {Object.entries(CLOCK_THEMES).map(([key, theme]) => (
-                      <button
-                        key={key}
-                        onClick={() => {
-                          setCurrentTheme(theme);
-                          setShowSettingsDropdown(false);
-                        }}
-                        className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                      >
-                        {theme.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+          )}
+          <button
+            ref={settingsRef}
+            onClick={() => setShowSettings(!showSettings)}
+            className="p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+            title="Settings"
+          >
+            <Settings className="w-5 h-5" />
+          </button>
         </div>
       )}
+
+      {renderSettingsMenu()}
+      {renderAddTimezoneMenu()}
     </div>
   );
 };
