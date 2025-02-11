@@ -266,9 +266,7 @@ const CredentialManager = () => {
 
     // Cleanup subscription
     return () => unsubscribe();
-  }, []); // Empty dependency array ensures this effect runs only once when the component mounts
-
-  // Separate useEffect for loading credentials
+  }, []);
   useEffect(() => {
     let isMounted = true; // Add mounted check
 
@@ -337,7 +335,7 @@ const CredentialManager = () => {
   return (
     <>
       {isLocked ? (
-        <div className="p-8 backdrop-blur-sm bg-white/[var(--widget-opacity)] dark:bg-[#28283A]/[var(--widget-opacity)] flex justify-center w-[90vw]  mx-auto rounded-xl ">
+        <div className="flex justify-center w-[90vw] mx-auto">
           <div className="w-full  rounded-t-sm   h-[40vh]   flex items-center justify-center">
             <div className="p-8  border bg-white dark:bg-[#513a7a]  border-gray-500/5 text-center rounded-sm shadow-lg w-fit">
               <div className="flex text-indigo-500 text-6xl items-center justify-center">
@@ -374,7 +372,7 @@ const CredentialManager = () => {
               <div className="text-center flex justify-center gap-2 mt-3 -mb-3">
                 <button
                   className="text-indigo-500 hover:text-indigo-700 text-xs transition duration-200"
-                  onClick={() => navigate("/ProfilePage")}
+                  onClick={() => navigate("/Profile")}
                 >
                   Forgot Pin?
                 </button>

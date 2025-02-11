@@ -148,11 +148,8 @@ const SportsLeagues = () => {
   }
 
   return (
-    <Layout className="p-8 w-[90vw] mx-auto  backdrop-blur-sm rounded-sm dark:bg-[#513a7a]/[var(--widget-opacity)] dark:border-gray-800 border-gray-200">
-      <Content
-        style={{ padding: "1rem", margin: "5px" }}
-        className="bg-transparent rounded-sm"
-      >
+    <Layout className="w-[90vw] bg-transparent mx-auto  ">
+      <Content className="rounded-sm">
         <Space direction="vertical" size="large" style={{ width: "100%" }}>
           <div
             style={{
@@ -161,8 +158,14 @@ const SportsLeagues = () => {
               alignItems: "center",
               marginBottom: "16px",
             }}
-            className="p-4"
           >
+            <Search
+              placeholder="Search leagues..."
+              allowClear
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ width: 300 }}
+              className="dark:bg-[#28283A] dark:text-gray-300 dark:border-gray-700"
+            />
             <Radio.Group
               value={viewMode}
               onChange={(e) => setViewMode(e.target.value)}
@@ -181,14 +184,6 @@ const SportsLeagues = () => {
                 <UnorderedListOutlined />
               </Radio.Button>
             </Radio.Group>
-
-            <Search
-              placeholder="Search leagues..."
-              allowClear
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ width: 300 }}
-              className="dark:bg-[#28283A] dark:text-gray-300 dark:border-gray-700"
-            />
           </div>
 
           {loading ? (

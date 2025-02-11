@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
-import { Card, Row, Col, List, Button, Space, Spin, Input, Menu } from "antd";
+import { Card, Row, Col, List, Button, Input, Menu, Image } from "antd";
 import { AppstoreOutlined, UnorderedListOutlined } from "@ant-design/icons";
+import SkeletonLoader from "./SkeletonLoader";
 
 const { Meta } = Card;
 const { Search } = Input;
@@ -44,7 +45,7 @@ const NewsProvider = ({ children }) => {
 // Main NewsApp component
 const NewsApp = () => {
   const { newsapi, loading, fetchData } = useContext(NewsContext);
-  const [viewMode, setViewMode] = useState("grid");
+  const [viewMode, setViewMode] = useState("list");
 
   const menuItems = [
     { key: "latest", label: "Latest" },
@@ -65,7 +66,7 @@ const NewsApp = () => {
         <Col xs={24} sm={12} md={8} lg={6} key={index}>
           <Card
             hoverable
-            className="h-[380px] bg-white overflow-hidden dark:bg-gray-800"
+            className=" bg-white overflow-hidden dark:bg-gray-800"
             cover={
               <img
                 alt={news.title}
@@ -73,27 +74,23 @@ const NewsApp = () => {
                 className="h-[190px] object-cover"
                 onError={(e) => {
                   e.target.src =
-                    "https://via.placeholder.com/400x200?text=No+Image";
+                    "https://plus.unsplash.com/premium_photo-1707080369554-359143c6aa0b?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8bmV3cyUyMHdlYnNpdGV8ZW58MHx8MHx8fDA%3D";
                 }}
               />
             }
-            actions={[
-              <a
-                href={news.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-indigo-500 hover:text-indigo-600"
-              >
-                Read more →
-              </a>,
-            ]}
           >
             <Meta
-              title={<span className="dark:text-white">{news.title}</span>}
+              title={
+                <a href={news.url} target="_blank" rel="noopener noreferrer">
+                  <span className="dark:text-white">{news.title}</span>
+                </a>
+              }
               description={
-                <span className="dark:text-gray-300 text-sm">
-                  {news.description}
-                </span>
+                <a href={news.url} target="_blank" rel="noopener noreferrer">
+                  <span className="dark:text-gray-300 text-sm">
+                    {news.description}
+                  </span>
+                </a>
               }
               className="h-[100px] overflow-hidden"
             />
@@ -111,15 +108,20 @@ const NewsApp = () => {
       renderItem={(news) => (
         <List.Item
           key={news.title}
-          className="dark:bg-gray-800 dark:text-white rounded-lg"
+          className="dark:bg-[#332B4A] mb-3 bg-white dark:text-white rounded-lg"
           extra={
-            <img
-              width={272}
+            <Image
+              height={150}
+              width={150}
               alt={news.title}
-              src={news.image}
+              style={{ objectFit: "cover" }}
+              src={
+                news.image ||
+                "https://plus.unsplash.com/premium_photo-1707080369554-359143c6aa0b?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8bmV3cyUyMHdlYnNpdGV8ZW58MHx8MHx8fDA%3D"
+              }
               onError={(e) => {
                 e.target.src =
-                  "https://via.placeholder.com/400x200?text=No+Image";
+                  "https://plus.unsplash.com/premium_photo-1707080369554-359143c6aa0b?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8bmV3cyUyMHdlYnNpdGV8ZW58MHx8MHx8fDA%3D";
               }}
             />
           }
@@ -152,26 +154,25 @@ const NewsApp = () => {
           mode="horizontal"
           onClick={({ key }) => fetchData(key)}
           items={menuItems}
-          className="m-auto ml-30 rounded-md bg-white  dark:text-white"
+          className="m-auto w-fit  rounded-md bg-white dark:bg-[#513a7a]"
         />
-       
-          <Button
-            type={viewMode === "grid" ? "primary" : "default"}
-            icon={<AppstoreOutlined />}
-            onClick={() => setViewMode("grid")}
-            className="dark:bg-gray-700 dark:text-white"
-          />
-          <Button
-            type={viewMode === "list" ? "primary" : "default"}
-            icon={<UnorderedListOutlined />}
-            onClick={() => setViewMode("list")}
-            className="dark:bg-gray-700 dark:text-white"
-          />
-      
+
+        <Button
+          type={viewMode === "grid" ? "primary" : "default"}
+          icon={<AppstoreOutlined />}
+          onClick={() => setViewMode("grid")}
+          className="dark:bg-gray-700 text-gray-800  dark:text-white"
+        />
+        <Button
+          type={viewMode === "list" ? "primary" : "default"}
+          icon={<UnorderedListOutlined />}
+          onClick={() => setViewMode("list")}
+          className="dark:bg-gray-700  text-gray-800 dark:text-white"
+        />
       </div>
       {loading ? (
-        <div className="text-center p-12">
-          <Spin size="large" />
+        <div className="min-h-screen p-4 w-[90vw] mx-auto">
+          <SkeletonLoader count={10} isListView={viewMode === "list"} />
         </div>
       ) : viewMode === "grid" ? (
         renderGridView()
@@ -186,7 +187,7 @@ const NewsApp = () => {
 const News = () => {
   return (
     <div className="pb-9">
-      <div className="p-8 rounded-sm backdrop-blur-sm shadow-sm w-[90vw] mx-auto bg-gray-200/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]">
+      <div className="   w-[90vw] mx-auto bg-transparent ">
         <NewsProvider>
           <NewsApp />
         </NewsProvider>

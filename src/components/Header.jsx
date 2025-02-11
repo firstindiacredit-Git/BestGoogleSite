@@ -36,6 +36,7 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const MAX_PAGES = 3; // Maximum allowed pages for free users
+  const [showAdminBanner, setShowAdminBanner] = useState(true);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
@@ -57,6 +58,7 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
         const userData = userDoc.data();
         setSubscriptionStatus(userData?.subscriptionStatus || "free");
         setIsAdmin(userData?.role === "admin");
+        setShowAdminBanner(userData?.showAdminBanner !== false);
 
         setUser({
           displayName: currentUser.displayName,
@@ -68,6 +70,7 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
         setUser(null);
         setSubscriptionStatus("free");
         setIsAdmin(false);
+        setShowAdminBanner(true);
       }
     });
 
@@ -357,7 +360,7 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
   return (
     <>
       <header className=" bg-gray-200/20 backdrop-blur-sm dark:bg-[#513a7a]/10 border-b border dark:border-gray-800/20 border-gray-200/20  sticky top-0 z-50">
-        {isAdmin && (
+        {isAdmin && showAdminBanner && (
           <div className="bg-red-500/90 backdrop-blur-sm text-white py-1 px-4 text-center sticky top-0 z-50">
             <Alert
               message={

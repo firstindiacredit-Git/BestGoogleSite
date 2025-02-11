@@ -1,26 +1,44 @@
-
-#Toolsearch{
+#Toolsearch {
   background-color: transparent;
 }
 .dark .ant-input-outlined {
-    background: #28283a;
+  background: #28283a;
+  color: white;
+  &::placeholder {
+    color: white;
+  }
 }
 
-.dark .ant-btn-variant-outlined, :where(.css-dev-only-do-not-override-1kf000u).ant-btn-variant-dashed {
-   
-    background: #28283a;
+.dark .ant-btn-variant-outlined,
+:where(.css-dev-only-do-not-override-1kf000u).ant-btn-variant-dashed {
+  background: #28283a;
+  color: white;
+  &::placeholder {
     color: white;
+  }
 }
 .dark .anticon svg {
+  color: white;
+  &::placeholder {
     color: white;
+  }
 }
 :where(.css-dev-only-do-not-override-1kf000u).ant-input-outlined {
-    background: #ffffff;
-    border-width: 0px;
-    border-style: solid;
-    border-color: #d9d9d9;
+  background: #ffffff;
+  border-width: 0px;
+  border-style: solid;
+  border-color: #d9d9d9;
+  color: white;
+  &::placeholder {
+    color: white;
+  }
 }
-:where(.css-dev-only-do-not-override-1kf000u).ant-btn-variant-outlined, :where(.css-dev-only-do-not-override-1kf000u).ant-btn-variant-dashed {
-    border-color: transparent;
-    background: #28283a;
+:where(.css-dev-only-do-not-override-1kf000u).ant-btn-variant-outlined,
+:where(.css-dev-only-do-not-override-1kf000u).ant-btn-variant-dashed {
+  border-color: transparent;
+  background: #28283a;
+  color: white;
+  &::placeholder {
+    color: white;
+  }
 }

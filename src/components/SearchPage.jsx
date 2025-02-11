@@ -269,7 +269,7 @@ function SearchPage() {
                   }}
                   className="px-3 py-1.5 text-gray-600 hover:bg-gray-100 rounded transition-colors"
                 >
-                  Reset 
+                  Reset
                 </button>
               </div>
             </>
@@ -361,25 +361,7 @@ function SearchPage() {
             </div>
           ),
         },
-        {
-          // key: "uiMode",
-          // label: (
-          //   <div
-          //     className="flex flex-col gap-2 border-t"
-          //     onClick={(e) => e.stopPropagation()}
-          //   >
-          //     <button
-          //       className="text-center bg-black/5 dark:bg-white/5 hover:bg-gray-50 w-full rounded-sm py-2 mt-2"
-          //       onClick={(e) => {
-          //         e.stopPropagation();
-          //         changeVisible();
-          //       }}
-          //     >
-          //       {visibleHandle ? "Classic Mode" : "Modern Mode"}
-          //     </button>
-          //   </div>
-          // ),
-        },
+        {},
       ],
     }),
     [

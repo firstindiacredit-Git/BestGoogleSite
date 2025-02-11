@@ -14,11 +14,11 @@ const ButtonComponent = ({ path, name, icon, onToolUse }) => {
 
   return (
     <Link to={path} className="block mb-2 group" onClick={handleClick}>
-      <div className="flex items-center justify-start bg-white p-3 rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 hover:shadow-md transition-all duration-200">
-        <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-gray-50 group-hover:bg-blue-50 transition-colors duration-200">
+      <div className="flex items-center justify-start bg-white dark:bg-[#513a7a] p-3 rounded-lg  shadow-sm hover:border-blue-300 hover:shadow-md transition-all duration-200">
+        <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-gray-50 dark:bg-gray-700 group-hover:bg-blue-50 transition-colors duration-200">
           {icon}
         </div>
-        <span className="ml-3 text-gray-700 font-medium group-hover:text-gray-900">
+        <span className="ml-3 text-gray-700 dark:text-gray-200 font-medium group-hover:text-gray-900 dark:group-hover:text-white">
           {name}
         </span>
       </div>

@@ -117,6 +117,7 @@ import VATCalculator from "../Tools/Component/VATCalculator.jsx";
 import ElectricityBill from "../Tools/Component/ElectricityBill.jsx";
 import TestScoreCalculator from "../Tools/Component/TestScoreCalculator.jsx";
 import TrafficChecker from "../Tools/Component/TrafficChecker.jsx";
+import NetworkStatus from "./components/NetworkStatus";
 
 // Context Menu Items configuratio
 const menuItems = [
@@ -970,6 +971,7 @@ const App = () => {
           </Router>
           {/* </SubscriptionProvider> */}
         </AuthProvider>
+        <NetworkStatus />
       </WidgetTransparencyContext.Provider>
     </ThemeContext.Provider>
   );

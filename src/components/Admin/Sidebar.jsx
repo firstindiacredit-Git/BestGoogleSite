@@ -7,7 +7,7 @@ import { RiBloggerLine } from "react-icons/ri";
 import { signOut } from "firebase/auth";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../../firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 export default function Sidebar() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -16,6 +16,7 @@ export default function Sidebar() {
   const [link, setLink] = useState("/default-avatar.png");
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showAdminBanner, setShowAdminBanner] = useState(true);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -55,8 +56,30 @@ export default function Sidebar() {
     localStorage.setItem("theme", theme);
   }, [theme]);
 
+  useEffect(() => {
+    const fetchBannerPreference = async () => {
+      if (auth.currentUser) {
+        const userDocRef = doc(db, "users", auth.currentUser.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          setShowAdminBanner(userDoc.data().showAdminBanner !== false);
+        }
+      }
+    };
+    fetchBannerPreference();
+  }, []);
+
   const toggleTheme = () => {
     setTheme((prevTheme) => (prevTheme === "dark" ? "light" : "dark"));
+  };
+
+  const toggleAdminBanner = async () => {
+    if (auth.currentUser) {
+      const newValue = !showAdminBanner;
+      setShowAdminBanner(newValue);
+      const userDocRef = doc(db, "users", auth.currentUser.uid);
+      await setDoc(userDocRef, { showAdminBanner: newValue }, { merge: true });
+    }
   };
 
   const handleLogout = async () => {
@@ -203,6 +226,19 @@ export default function Sidebar() {
                           Dark Mode
                         </>
                       )}
+                    </button>
+                    <button
+                      onClick={toggleAdminBanner}
+                      className="w-full px-4 py-2 text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
+                    >
+                      <span
+                        className={`w-4 h-4 mr-2 ${
+                          showAdminBanner ? "text-green-500" : "text-red-500"
+                        }`}
+                      >
+                        {showAdminBanner ? "✓" : "×"}
+                      </span>
+                      Show Admin Banner
                     </button>
                   </div>
                 </div>

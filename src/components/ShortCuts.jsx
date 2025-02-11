@@ -309,7 +309,7 @@ function BookmarkPage() {
           </div>
         ))}
       </div>
-      <div className="text-center shadow-sm dark:bg-[#28283a]/10 backdrop-blur-md border  bg-gray-200/10 dark:border-gray-800/20 border-gray-200/10 cursor-pointer p-2 rounded-sm">
+      <div className="text-center shadow-sm dark:bg-[#28283a]/[var(--widget-opacity)] backdrop-blur-lg border  bg-white/[var(--widget-opacity)] dark:border-gray-800/[var(--widget-opacity)] border-gray-200/[var(--widget-opacity)] cursor-pointer p-2 rounded-sm">
         <button
           onClick={() => setShowModal(true)}
           className=" dark:text-white   w-12 h-12 flex items-center justify-center "
@@ -328,42 +328,8 @@ function BookmarkPage() {
           setErrorMessage("");
           setSuccessMessage("");
         }}
-        footer={null}
-        className="dark:bg-[#513a7a]"
-      >
-        <Form
-          onFinish={editingBookmark ? handleUpdateBookmark : handleAddBookmark}
-          layout="vertical"
-        >
-          <Form.Item
-            label={<span className="dark:text-white">Name</span>}
-            name="name"
-            rules={[{ required: true, message: "Please enter bookmark name" }]}
-            initialValue={name}
-          >
-            <Input
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter bookmark name"
-              className="dark:bg-[#513a7a] dark:border-gray-600 dark:text-white"
-            />
-          </Form.Item>
-          <Form.Item
-            label={<span className="dark:text-white">URL</span>}
-            name="link"
-            rules={[
-              { required: true, message: "Please enter URL" },
-              { type: "url", message: "Please enter a valid URL" },
-            ]}
-            initialValue={link}
-          >
-            <Input
-              onChange={(e) => setLink(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Enter URL"
-              className="dark:bg-[#513a7a] dark:border-gray-600 dark:text-white"
-            />
-          </Form.Item>
-          <div className="flex justify-end gap-2">
+        footer={
+          <div className="flex justify-between gap-2">
             <button
               type="button"
               onClick={() => {
@@ -385,6 +351,41 @@ function BookmarkPage() {
               {editMode ? "Update" : "Add"}
             </button>
           </div>
+        }
+        className="dark:bg-[#513a7a]"
+      >
+        <Form
+          onFinish={editingBookmark ? handleUpdateBookmark : handleAddBookmark}
+          layout="vertical"
+        >
+          <Form.Item
+            label={<span className="dark:text-white">Name</span>}
+            name="name"
+            rules={[{ required: true, message: "Please enter bookmark name" }]}
+            initialValue={name}
+          >
+            <Input
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter bookmark name"
+              className="dark:bg-[#513a7a] border dark:border-gray-600 dark:text-white"
+            />
+          </Form.Item>
+          <Form.Item
+            label={<span className="dark:text-white">URL</span>}
+            name="link"
+            rules={[
+              { required: true, message: "Please enter URL" },
+              { type: "url", message: "Please enter a valid URL" },
+            ]}
+            initialValue={link}
+          >
+            <Input
+              onChange={(e) => setLink(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Enter URL"
+              className="dark:bg-[#513a7a] border dark:border-gray-600 dark:text-white"
+            />
+          </Form.Item>
         </Form>
       </Modal>
     </div>
