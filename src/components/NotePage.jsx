@@ -409,6 +409,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
       onMouseLeave={() => setIsHovered(false)}
       className={`w-full h-full backdrop-blur-sm`}
     >
+      {inNotebookSheet && <h1 className="text-2xl font-bold">Notebook</h1>}
       <div className="rounded-sm h-full">
         <div
           className={`overflow-hidden h-full rounded-b-sm `}
@@ -615,31 +616,29 @@ const NotePage = ({ inNotebookSheet = false }) => {
                 </div>
                 <div className="flex justify-between items-center mb-1">
                   <div className="w-full  flex justify-between">
-                   
-                      <div className="flex items-center gap-2">
-                        {renderColorPicker()}
-                        <div className="w-9 ">
-                          <button
-                            className={`p-2 rounded-sm transition duration-200 ${
-                              isAutoColor
-                                ? "bg-gray-100 dark:bg-[#513a7a]/[var(--widget-opacity)] hover:bg-gray-200 dark:hover:bg-gray-700"
-                                : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
-                            }`}
-                            onClick={toggleLineNumbers}
-                            title="Toggle Line Numbers"
-                            style={{
-                              color: isAutoColor ? "inherit" : textColor,
-                            }}
-                          >
-                            {lineNumbers ? (
-                              <RxHamburgerMenu className="w-5 h-5" />
-                            ) : (
-                              <HiOutlineNumberedList className="w-5 h-5" />
-                            )}
-                          </button>
-                        </div>
+                    <div className="flex items-center gap-2">
+                      {renderColorPicker()}
+                      <div className="w-9 ">
+                        <button
+                          className={`p-2 rounded-sm transition duration-200 ${
+                            isAutoColor
+                              ? "bg-gray-100 dark:bg-[#513a7a]/[var(--widget-opacity)] hover:bg-gray-200 dark:hover:bg-gray-700"
+                              : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
+                          }`}
+                          onClick={toggleLineNumbers}
+                          title="Toggle Line Numbers"
+                          style={{
+                            color: isAutoColor ? "inherit" : textColor,
+                          }}
+                        >
+                          {lineNumbers ? (
+                            <RxHamburgerMenu className="w-5 h-5" />
+                          ) : (
+                            <HiOutlineNumberedList className="w-5 h-5" />
+                          )}
+                        </button>
                       </div>
-                  
+                    </div>
                   </div>
                 </div>
               </div>

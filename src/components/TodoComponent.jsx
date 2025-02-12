@@ -385,6 +385,8 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
         color: isAutoColor ? undefined : textColor,
       }}
     >
+      {inNotebookSheet && <h1 className="text-2xl font-bold">TodoList</h1>}
+
       {!isCollapsed && (
         <div className="p-3">
           <div className="flex justify-between gap-4 items-center mb-1">

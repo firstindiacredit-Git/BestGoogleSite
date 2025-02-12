@@ -14,18 +14,20 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
 
     <!-- Language Variants -->
-    <link
-      rel="alternate"
-      hreflang="x-default"
-      href="https://browsey.vercel.app/"
-    />
-    <link rel="alternate" hreflang="en" href="https://browsey.vercel.app/en/" />
+    <link rel="alternate" hreflang="x-default" href="https://allmytab.com" />
+    <link rel="alternate" hreflang="en" href="https://allmytab.com" />
 
     <!-- Performance Optimization -->
     <link rel="preconnect" href="https://www.google.com" />
     <link rel="preconnect" href="https://www.gstatic.com" />
     <link rel="dns-prefetch" href="https://www.google.com" />
     <link rel="dns-prefetch" href="https://www.gstatic.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
 
     <!-- Primary Meta Tags -->
     <title>AllMyTab - Your Smart Browser Homepage</title>
@@ -112,7 +114,7 @@
 
     <!-- Enhanced Structured Data -->
     <!-- <script type="application/ld+json">
-      {
+      {% comment %} {
         "@context": "https://schema.org",
         "@type": "WebApplication",
         "name": "Browsey",
@@ -136,7 +138,7 @@
         ],
         "screenshot": {
           "@type": "ImageObject",
-          "url": "https://browsey.vercel.app/screenshot.png"
+          "url": "https://allmytab.comscreenshot.png"
         },
         "aggregateRating": {
           "@type": "AggregateRating",
@@ -150,10 +152,10 @@
           "name": "Browsey",
           "url": "https://browsey.vercel.app"
         }
-      }
+      } {% endcomment %}
     </script> -->
   </head>
-  <body>
+  <body class="font-body">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
     <!-- Google tag (gtag.js) -->

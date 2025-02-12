@@ -14,6 +14,7 @@ import {
   Compass,
   ChevronLeft,
   ChevronRight,
+  ArrowRight,
 } from "lucide-react";
 import { Modal, Button, Image } from "antd";
 
@@ -635,6 +636,20 @@ const BrowserPreview = () => {
   );
 };
 
+const grainStyle = {
+  position: "fixed",
+  top: "-50%",
+  left: "-50%",
+  right: "-50%",
+  bottom: "-50%",
+  width: "200%",
+  height: "200vh",
+  background: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+  opacity: "0.15",
+  pointerEvents: "none",
+  zIndex: 1,
+};
+
 const LandingPage = () => {
   const FeatureCard = ({ icon: Icon, title, description }) => (
     <motion.div
@@ -650,318 +665,338 @@ const LandingPage = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-lg border-b border-gray-200/80 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center">
-              <Link to="/" className="text-2xl font-bold text-indigo-600">
-                AllMyTab
-              </Link>
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Grainy overlay */}
+      <div style={grainStyle} />
+
+      {/* Background gradient with blur */}
+      <div className="fixed inset-0 bg-gradient-to-b from-indigo-50/50 via-white/80 to-purple-50/50 backdrop-blur-3xl -z-10" />
+
+      {/* Content */}
+      <div className="relative z-10">
+        {/* Navbar with glass effect */}
+        <nav className="fixed top-0 left-0 right-0 bg-white/60 backdrop-blur-lg border-b border-gray-200/20 z-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <div className="flex items-center">
+                <Link
+                  to="/"
+                  className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600"
+                >
+                  AllMyTab
+                </Link>
+              </div>
+
+              <div className="hidden md:flex items-center space-x-8">
+                <Link
+                  to="/pricing"
+                  className="text-gray-600 hover:text-indigo-600 transition-colors"
+                >
+                  Pricing
+                </Link>
+                <Link
+                  to="/about"
+                  className="text-gray-600 hover:text-indigo-600 transition-colors"
+                >
+                  About
+                </Link>
+                <Link
+                  to="/search"
+                  className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+                >
+                  Launch App
+                </Link>
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        {/* Hero Section with modern gradient text */}
+        <section className="pt-32 pb-20 px-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center">
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-7xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 tracking-tight"
+              >
+                Your Browser, Elevated
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="text-xl text-gray-600/90 mb-8 max-w-2xl mx-auto"
+              >
+                Experience the future of browsing with AllMyTab's powerful suite
+                of tools
+              </motion.p>
+
+              {/* Modern call-to-action buttons */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="flex justify-center gap-4"
+              >
+                <Link
+                  to="/search"
+                  className="px-8 py-4 bg-black text-white rounded-xl hover:bg-gray-800 transition-all flex items-center gap-2 shadow-lg shadow-indigo-500/20"
+                >
+                  <Search className="w-5 h-5" />
+                  Try Now
+                </Link>
+                <Link
+                  to="/about"
+                  className="px-8 py-4 bg-white/80 backdrop-blur-sm text-gray-900 rounded-xl hover:bg-white/90 transition-all border border-gray-200/50 shadow-lg shadow-purple-500/10"
+                >
+                  Learn More
+                </Link>
+              </motion.div>
             </div>
 
-            <div className="hidden md:flex items-center space-x-8">
-              <Link
-                to="/pricing"
-                className="text-gray-600 hover:text-indigo-600"
-              >
-                Pricing
-              </Link>
-              <Link to="/about" className="text-gray-600 hover:text-indigo-600">
-                About
-              </Link>
-              <Link
-                to="/search"
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-              >
-                Launch App
-              </Link>
+            {/* Add floating elements */}
+            <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-purple-300/30 rounded-full mix-blend-multiply filter blur-xl animate-blob" />
+            <div className="absolute top-1/3 right-1/4 w-64 h-64 bg-yellow-300/30 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000" />
+            <div className="absolute bottom-1/2 left-1/2 w-64 h-64 bg-pink-300/30 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-4000" />
+
+            {/* Browser Preview with glass effect */}
+            <div className="mt-20 relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-purple-500/5 rounded-2xl backdrop-blur-3xl" />
+              <BrowserPreview />
             </div>
           </div>
-        </div>
-      </nav>
+        </section>
 
-      {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div
-            className="absolute inset-0 top-[10%] opacity-70"
-            style={{ zIndex: -1 }}
-          >
-            <div className="absolute top-0 left-1/4 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl animate-blob" />
-            <div className="absolute top-0 right-1/4 w-72 h-72 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000" />
-            <div className="absolute bottom-0 left-1/3 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-4000" />
+        {/* Features Grid */}
+        <section className="py-20 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">
+                Everything You Need
+              </h2>
+              <p className="text-xl text-gray-600">
+                Powerful features to enhance your browsing experience
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <FeatureCard
+                icon={Command}
+                title="Command Center"
+                description="Access all tools and features with quick keyboard shortcuts"
+              />
+              <FeatureCard
+                icon={Sparkles}
+                title="Smart Search"
+                description="Find anything instantly with our intelligent search engine"
+              />
+              <FeatureCard
+                icon={Layout}
+                title="Tab Management"
+                description="Organize and manage your tabs efficiently"
+              />
+              <FeatureCard
+                icon={BookOpen}
+                title="Reading Mode"
+                description="Distraction-free reading experience"
+              />
+              <FeatureCard
+                icon={Shield}
+                title="Privacy Focus"
+                description="Your data stays private and secure"
+              />
+              <FeatureCard
+                icon={Settings}
+                title="Customizable"
+                description="Personalize your browsing experience"
+              />
+            </div>
           </div>
-          <div className="text-center">
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-6xl font-bold text-gray-900 mb-6"
-            >
-              Your Browser,
-              <span className="text-indigo-600"> Supercharged</span>
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto"
-            >
-              Transform your browsing experience with powerful search,
-              organization tools, and productivity features.
-            </motion.p>
+        </section>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="flex justify-center gap-4"
-            >
-              <Link
-                to="/search"
-                className="px-8 py-4 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all flex items-center gap-2"
-              >
-                <Search className="w-5 h-5" />
-                Try Now
-              </Link>
-              <SetHomepageButton />
-            </motion.div>
-          </div>
+        {/* How It Works */}
+        <section className="py-20">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">
+                How It Works
+              </h2>
+              <p className="text-xl text-gray-600">
+                Get started in three simple steps
+              </p>
+            </div>
 
-          {/* Browser Preview */}
-          <BrowserPreview />
-        </div>
-      </section>
-
-      {/* Features Grid */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Everything You Need
-            </h2>
-            <p className="text-xl text-gray-600">
-              Powerful features to enhance your browsing experience
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <FeatureCard
-              icon={Command}
-              title="Command Center"
-              description="Access all tools and features with quick keyboard shortcuts"
-            />
-            <FeatureCard
-              icon={Sparkles}
-              title="Smart Search"
-              description="Find anything instantly with our intelligent search engine"
-            />
-            <FeatureCard
-              icon={Layout}
-              title="Tab Management"
-              description="Organize and manage your tabs efficiently"
-            />
-            <FeatureCard
-              icon={BookOpen}
-              title="Reading Mode"
-              description="Distraction-free reading experience"
-            />
-            <FeatureCard
-              icon={Shield}
-              title="Privacy Focus"
-              description="Your data stays private and secure"
-            />
-            <FeatureCard
-              icon={Settings}
-              title="Customizable"
-              description="Personalize your browsing experience"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              How It Works
-            </h2>
-            <p className="text-xl text-gray-600">
-              Get started in three simple steps
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            {[
-              {
-                icon: Chrome,
-                title: "1. Add to Chrome",
-                description: "Install AllMyTab from the Chrome Web Store",
-              },
-              {
-                icon: Compass,
-                title: "2. Set as Homepage",
-                description: "Make AllMyTab your default new tab page",
-              },
-              {
-                icon: Zap,
-                title: "3. Start Browsing",
-                description: "Enjoy a more productive browsing experience",
-              },
-            ].map((step, index) => (
-              <div key={index} className="text-center">
-                <div className="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <step.icon className="w-8 h-8 text-indigo-600" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+              {[
+                {
+                  icon: Chrome,
+                  title: "1. Add to Chrome",
+                  description: "Install AllMyTab from the Chrome Web Store",
+                },
+                {
+                  icon: Compass,
+                  title: "2. Set as Homepage",
+                  description: "Make AllMyTab your default new tab page",
+                },
+                {
+                  icon: Zap,
+                  title: "3. Start Browsing",
+                  description: "Enjoy a more productive browsing experience",
+                },
+              ].map((step, index) => (
+                <div key={index} className="text-center">
+                  <div className="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <step.icon className="w-8 h-8 text-indigo-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
+                  <p className="text-gray-600">{step.description}</p>
                 </div>
-                <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
-                <p className="text-gray-600">{step.description}</p>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Client Testimonials */}
+        <section className="py-20 ">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="text-center mb-16">
+              <motion.span
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                className="text-indigo-600 font-semibold text-sm uppercase tracking-wider"
+              >
+                Testimonials
+              </motion.span>
+              <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                className="text-4xl font-bold text-gray-900 mt-2 mb-4"
+              >
+                What Our Users Say
+              </motion.h2>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="text-xl text-gray-600"
+              >
+                Don't just take our word for it - hear from some of our
+                satisfied users
+              </motion.p>
+            </div>
+
+            <TestimonialCarousel />
+            <CompanyLogos />
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        {/* <section className="py-20 bg-indigo-600">
+          <div className="max-w-7xl mx-auto px-4 text-center">
+            <h2 className="text-4xl font-bold text-white mb-6">
+              Ready to Transform Your Browsing?
+            </h2>
+            <p className="text-xl text-indigo-100 mb-8 max-w-2xl mx-auto">
+              Join thousands of users who have already enhanced their Chrome
+              experience
+            </p>
+            <div className="flex justify-center gap-4">
+              <a
+                href="https://chrome.google.com/webstore"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-8 py-4 bg-white text-indigo-600 rounded-xl hover:bg-gray-50 transition-all flex items-center gap-2"
+              >
+                <Chrome className="w-5 h-5" />
+                Add to Chrome - It's Free
+              </a>
+              <Link
+                to="/search"
+                className="px-8 py-4 bg-indigo-500 text-white rounded-xl hover:bg-indigo-400 transition-all"
+              >
+                Try Demo
+              </Link>
+            </div>
+          </div>
+        </section> */}
+
+        {/* Footer */}
+        <footer className="bg-gray-900 text-gray-400 py-12">
+          <div className="max-w-7xl mx-auto justify-center text-center px-4">
+            <p className="text-3xl mb-10 font-bold">AllMyTab</p>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-8 ">
+              {/* Product Links */}
+              <div>
+                <h3 className="text-white font-semibold mb-4">Product</h3>
+                <ul className="space-y-2">
+                  <li>
+                    <Link to="/features" className="hover:text-white">
+                      Features
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/pricing" className="hover:text-white">
+                      Pricing
+                    </Link>
+                  </li>
+                </ul>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* Client Testimonials */}
-      <section className="py-20 ">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <motion.span
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              className="text-indigo-600 font-semibold text-sm uppercase tracking-wider"
-            >
-              Testimonials
-            </motion.span>
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              className="text-4xl font-bold text-gray-900 mt-2 mb-4"
-            >
-              What Our Users Say
-            </motion.h2>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="text-xl text-gray-600"
-            >
-              Don't just take our word for it - hear from some of our satisfied
-              users
-            </motion.p>
-          </div>
+              {/* Company Links */}
+              <div>
+                <h3 className="text-white font-semibold mb-4">Company</h3>
+                <ul className="space-y-2">
+                  <li>
+                    <Link to="/about" className="hover:text-white">
+                      About
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/blog" className="hover:text-white">
+                      Blog
+                    </Link>
+                  </li>
+                </ul>
+              </div>
 
-          <TestimonialCarousel />
-          <CompanyLogos />
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      {/* <section className="py-20 bg-indigo-600">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold text-white mb-6">
-            Ready to Transform Your Browsing?
-          </h2>
-          <p className="text-xl text-indigo-100 mb-8 max-w-2xl mx-auto">
-            Join thousands of users who have already enhanced their Chrome
-            experience
-          </p>
-          <div className="flex justify-center gap-4">
-            <a
-              href="https://chrome.google.com/webstore"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-8 py-4 bg-white text-indigo-600 rounded-xl hover:bg-gray-50 transition-all flex items-center gap-2"
-            >
-              <Chrome className="w-5 h-5" />
-              Add to Chrome - It's Free
-            </a>
-            <Link
-              to="/search"
-              className="px-8 py-4 bg-indigo-500 text-white rounded-xl hover:bg-indigo-400 transition-all"
-            >
-              Try Demo
-            </Link>
+              {/* Legal Links */}
+              <div>
+                <h3 className="text-white font-semibold mb-4">Legal</h3>
+                <ul className="space-y-2">
+                  <li>
+                    <Link to="/privacy" className="hover:text-white">
+                      Privacy
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/terms" className="hover:text-white">
+                      Terms
+                    </Link>
+                  </li>
+                </ul>
               </div>
             </div>
-      </section> */}
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-gray-400 py-12">
-        <div className="max-w-7xl mx-auto justify-center text-center px-4">
-          <p className="text-3xl mb-10 font-bold">AllMyTab</p>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-8 ">
-            {/* Product Links */}
-            <div>
-              <h3 className="text-white font-semibold mb-4">Product</h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link to="/features" className="hover:text-white">
-                    Features
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/pricing" className="hover:text-white">
-                    Pricing
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* Company Links */}
-            <div>
-              <h3 className="text-white font-semibold mb-4">Company</h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link to="/about" className="hover:text-white">
-                    About
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/blog" className="hover:text-white">
-                    Blog
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* Legal Links */}
-            <div>
-              <h3 className="text-white font-semibold mb-4">Legal</h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link to="/privacy" className="hover:text-white">
-                    Privacy
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/terms" className="hover:text-white">
-                    Terms
-                  </Link>
-                </li>
-              </ul>
+            {/* Bottom Section */}
+            <div className="border-t border-gray-800 mt-12 pt-8 flex justify-between items-center">
+              <p>© 2024 AllMyTab. All rights reserved.</p>
+              <div className="flex gap-4">
+                <a href="#" className="hover:text-white">
+                  Twitter
+                </a>
+                <a href="#" className="hover:text-white">
+                  GitHub
+                </a>
+                <a href="#" className="hover:text-white">
+                  Discord
+                </a>
+              </div>
             </div>
           </div>
-
-          {/* Bottom Section */}
-          <div className="border-t border-gray-800 mt-12 pt-8 flex justify-between items-center">
-            <p>© 2024 AllMyTab. All rights reserved.</p>
-            <div className="flex gap-4">
-              <a href="#" className="hover:text-white">
-                Twitter
-              </a>
-              <a href="#" className="hover:text-white">
-                GitHub
-              </a>
-              <a href="#" className="hover:text-white">
-                Discord
-              </a>
-            </div>
-          </div>
-        </div>
-      </footer>
+        </footer>
+      </div>
     </div>
   );
 };

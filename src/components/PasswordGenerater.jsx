@@ -19,7 +19,7 @@ import { useNavigate } from "react-router-dom";
 
 const CredentialManager = () => {
   const [showPasswords, setShowPasswords] = useState({});
-  const [isGridView, setIsGridView] = useState(false);
+  const [isGridView, setIsGridView] = useState(true);
   const [credentials, setCredentials] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -337,45 +337,47 @@ const CredentialManager = () => {
       {isLocked ? (
         <div className="flex justify-center w-[90vw] mx-auto">
           <div className="w-full  rounded-t-sm   h-[40vh]   flex items-center justify-center">
-            <div className="p-8  border bg-white dark:bg-[#513a7a]  border-gray-500/5 text-center rounded-sm shadow-lg w-fit">
-              <div className="flex text-indigo-500 text-6xl items-center justify-center">
-                <FaLock />
+            <div className="p-8 flex w-1/3 gap-6  items-center justify-between border bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]  border-gray-500/5 text-center rounded-sm shadow-lg ">
+              <div className=" text-indigo-500 mr-10 text-6xl">
+                <img src="/undraw_secure-login_m11a.svg" alt="locker" />
               </div>
-              <h2 className="text-2xl my-1 mt-4 font-semibold dark:text-gray-200">
-                Enter PIN to Unlock
-              </h2>
-              <div className="flex justify-center mt-4 space-x-2 mb-4">
-                {otp.map((value, index) => (
-                  <input
-                    key={index}
-                    id={`otp-${index}`}
-                    value={value}
-                    onChange={(e) =>
-                      handleInputOTPChange(e.target.value, index)
-                    }
-                    onKeyDown={(e) => handleKeyDown(e, index)}
-                    className="w-12 h-12 border border-gray-300 rounded-xs text-center text-lg dark:text-white dark:bg-[#513a7a]"
-                    style={{
-                      appearance: "none", // Removes the arrows
-                      MozAppearance: "textfield", // Firefox-specific
-                      WebkitAppearance: "none", // Chrome/Safari-specific
-                    }}
-                  />
-                ))}
-              </div>
-              <button
-                onClick={handleUnlock}
-                className="bg-indigo-500 w-full hover:bg-indigo-600 transition-all text-white px-4 py-2 rounded-xs"
-              >
-                Unlock
-              </button>
-              <div className="text-center flex justify-center gap-2 mt-3 -mb-3">
+              <div>
+                <h2 className="text-2xl my-1 mt-4 font-semibold dark:text-gray-200">
+                  Enter PIN to Unlock
+                </h2>
+                <div className="flex justify-center mt-4 space-x-2 mb-4">
+                  {otp.map((value, index) => (
+                    <input
+                      key={index}
+                      id={`otp-${index}`}
+                      value={value}
+                      onChange={(e) =>
+                        handleInputOTPChange(e.target.value, index)
+                      }
+                      onKeyDown={(e) => handleKeyDown(e, index)}
+                      className="w-12 h-12 border border-gray-300 rounded-xs text-center text-lg dark:text-white dark:bg-[#513a7a]"
+                      style={{
+                        appearance: "none", // Removes the arrows
+                        MozAppearance: "textfield", // Firefox-specific
+                        WebkitAppearance: "none", // Chrome/Safari-specific
+                      }}
+                    />
+                  ))}
+                </div>
                 <button
-                  className="text-indigo-500 hover:text-indigo-700 text-xs transition duration-200"
-                  onClick={() => navigate("/Profile")}
+                  onClick={handleUnlock}
+                  className="bg-indigo-500 w-full hover:bg-indigo-600 transition-all text-white px-4 py-2 rounded-xs"
                 >
-                  Forgot Pin?
+                  Unlock
                 </button>
+                <div className="text-center flex justify-center gap-2 mt-3 -mb-3">
+                  <button
+                    className="text-indigo-500 hover:text-indigo-700 text-xs transition duration-200"
+                    onClick={() => navigate("/Profile")}
+                  >
+                    Forgot Pin?
+                  </button>
+                </div>
               </div>
             </div>
           </div>

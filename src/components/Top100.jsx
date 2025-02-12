@@ -18,9 +18,6 @@ import brands from "./brand.json";
 import bikes from "./bikes.json";
 import gdp from "./gdp.json";
 import "./ToastifyNotification.css";
-import { FaTh, FaList } from "react-icons/fa";
-import ButtonComponent from "../../Tools/ButtonComponent";
-import GridComponent from "../../Tools/GridComponent";
 import SkeletonLoader from "./SkeletonLoader";
 
 const { Title } = Typography;
@@ -86,17 +83,16 @@ function WikipediaBanks() {
     <Row gutter={[16, 16]}>
       {filteredData.map((item, index) => (
         <Col xs={24} sm={12} lg={8} key={index}>
-          <Card
-            title={`${index + 1}. ${item["Bank name"] || "Unknown Bank"}`}
-            bordered={true}
-            hoverable
-          >
-            <p>Rank: {item["Rank"] || "N/A"}</p>
-            <p>
-              Total Assets: {item["Total assets(2023)(US$ billion)"] || "N/A"}{" "}
-              billion USD
-            </p>
-          </Card>
+          <div className="bg-white/[(var(--widget-opacity))] dark:bg-[#513a7a]/[(var(--widget-opacity))] p-4 rounded-xl hover:shadow-sm transition-all duration-200">
+            <div>{`${index + 1}. ${item["Bank name"] || "Unknown Bank"}`}</div>
+            <div>
+              <p>Rank: {item["Rank"] || "N/A"}</p>
+              <p>
+                Total Assets: {item["Total assets(2023)(US$ billion)"] || "N/A"}{" "}
+                billion USD
+              </p>
+            </div>
+          </div>
         </Col>
       ))}
     </Row>
@@ -185,9 +181,7 @@ function WikipediaBanks() {
       </div>
 
       {loading ? (
-        <div style={{ textAlign: "center", margin: "2rem", height: "200px" }}>
-          <Spin size="large" />
-        </div>
+        <SkeletonLoader count={4} />
       ) : viewMode === "grid" ? (
         renderGridView()
       ) : (

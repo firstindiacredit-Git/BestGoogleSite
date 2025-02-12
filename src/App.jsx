@@ -118,6 +118,7 @@ import ElectricityBill from "../Tools/Component/ElectricityBill.jsx";
 import TestScoreCalculator from "../Tools/Component/TestScoreCalculator.jsx";
 import TrafficChecker from "../Tools/Component/TrafficChecker.jsx";
 import NetworkStatus from "./components/NetworkStatus";
+import ToolWrapper from "./components/ToolWrapper";
 
 // Context Menu Items configuratio
 const menuItems = [
@@ -849,7 +850,14 @@ const App = () => {
                   </ContextMenuWrapper>
                 }
               />
-              <Route path="/calculator" element={<Calculator />} />
+              <Route
+                path="/calculator"
+                element={
+                  <ToolWrapper>
+                    <Calculator />
+                  </ToolWrapper>
+                }
+              />
               <Route
                 path="/faren-to-celcius"
                 element={<FarenToCelciusAndCelciusToFaren />}
@@ -863,7 +871,14 @@ const App = () => {
               <Route path="/bmi" element={<Bmi />} />
               <Route path="/linkchecker" element={<LinkChecker />} />
               <Route path="/percentage" element={<Percentage />} />
-              <Route path="/imagetopdf" element={<ImageToPdf />} />
+              <Route
+                path="/imagetopdf"
+                element={
+                  <ToolWrapper>
+                    <ImageToPdf />
+                  </ToolWrapper>
+                }
+              />
               <Route path="/splitpdf" element={<SplitPdf />} />
               <Route path="/compress" element={<Compress />} />
               <Route path="/mergepdf" element={<MergePDF />} />
@@ -877,7 +892,6 @@ const App = () => {
               <Route path="/addpagenum" element={<AddPageNum />} />
               <Route path="/protect" element={<Protect />} />
               <Route path="/unlockpdf" element={<UnlockPdf />} />
-              <Route path="/pdftoimage" element={<PdfToImage />} />
               <Route path="/pdftoword" element={<PdfToWord />} />
               <Route path="/scientific" element={<Scientific />} />
               <Route path="/bulkemailchecker" element={<BulkEmailChecker />} />

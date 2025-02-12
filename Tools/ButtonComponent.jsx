@@ -1,15 +1,18 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const ButtonComponent = ({ path, name, icon, onToolUse }) => {
-  const handleClick = () => {
-    // Store tool usage in localStorage
+  const navigate = useNavigate();
+
+  const handleClick = (e) => {
+    e.preventDefault();
     const usedTools = JSON.parse(localStorage.getItem("usedTools") || "[]");
     if (!usedTools.includes(path)) {
       usedTools.push(path);
       localStorage.setItem("usedTools", JSON.stringify(usedTools));
       if (onToolUse) onToolUse();
     }
+    navigate(path);
   };
 
   return (

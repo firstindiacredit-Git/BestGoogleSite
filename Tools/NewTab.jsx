@@ -368,16 +368,6 @@ const toolCategories = [
 const NewTab = () => {
   const [viewType, setViewType] = useState("grid");
   const [searchTerm, setSearchTerm] = useState("");
-  const [toolsUsed, setToolsUsed] = useState(0);
-
-  useEffect(() => {
-    const usedTools = JSON.parse(localStorage.getItem("usedTools") || "[]");
-    setToolsUsed(usedTools.length);
-  }, []);
-
-  const handleToolUse = () => {
-    setToolsUsed((prev) => prev + 1);
-  };
 
   const filterTools = (tool) => {
     if (!searchTerm) return true;
@@ -397,7 +387,6 @@ const NewTab = () => {
               path={tool.path}
               name={tool.name}
               icon={tool.icon}
-              onToolUse={handleToolUse}
             />
           ))}
         </div>
@@ -409,7 +398,7 @@ const NewTab = () => {
     <div className="space-y-8">
       {toolCategories.map((category) => (
         <div key={category.title}>
-          <h3 className="font-semibold text-center dark:text-white text-2xl text-gray-900 mb-6 pb-2">
+          <h3 className=" bg-white/[var(--widget-opacity)] backdrop-blur-sm dark:bg-[#513a7a]/[var(--widget-opacity)] p-4 font-semibold text-center dark:text-white text-2xl text-gray-900 mb-6 rounded-lg">
             {category.title} Tools
           </h3>
           <div className="grid grid-cols-5 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
@@ -419,7 +408,6 @@ const NewTab = () => {
                 path={tool.path}
                 name={tool.name}
                 icon={tool.icon}
-                onToolUse={handleToolUse}
               />
             ))}
           </div>

@@ -4,6 +4,10 @@ module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["Poppins", "sans-serif"],
+        body: ["Poppins", "sans-serif"],
+      },
       transitionProperty: {
         theme: "background-color, border-color, color, fill, stroke",
       },
@@ -12,6 +16,45 @@ module.exports = {
       },
       transitionTimingFunction: {
         theme: "cubic-bezier(0.4, 0, 0.2, 1)",
+      },
+      animation: {
+        blob: "blob 7s infinite",
+        "fade-in": "fade-in 0.5s linear forwards",
+        spotlight: "spotlight 2s ease .75s 1 forwards",
+      },
+      keyframes: {
+        blob: {
+          "0%": {
+            transform: "translate(0px, 0px) scale(1)",
+          },
+          "33%": {
+            transform: "translate(30px, -50px) scale(1.1)",
+          },
+          "66%": {
+            transform: "translate(-20px, 20px) scale(0.9)",
+          },
+          "100%": {
+            transform: "translate(0px, 0px) scale(1)",
+          },
+        },
+        "fade-in": {
+          from: {
+            opacity: 0,
+          },
+          to: {
+            opacity: 1,
+          },
+        },
+        spotlight: {
+          "0%": {
+            opacity: 0,
+            transform: "translate(-72%, -62%) scale(0.5)",
+          },
+          "100%": {
+            opacity: 1,
+            transform: "translate(-50%,-40%) scale(1)",
+          },
+        },
       },
     },
   },

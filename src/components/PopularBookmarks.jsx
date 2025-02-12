@@ -50,8 +50,8 @@ import {
   DragOutlined,
   SettingOutlined,
 } from "@ant-design/icons";
-import { Alert } from "antd";
 import debounce from "lodash/debounce";
+import SkeletonLoader from "./SkeletonLoader";
 
 function PopularBookmarks() {
   const [categories, setCategories] = useState([]);
@@ -1818,8 +1818,8 @@ function PopularBookmarks() {
       <div className="mb-2">
         <div className="flex justify-between mb-2">
           <Button
+            className="text-black bg-white dark:text-white"
             onClick={() => setIsAddCategoryModalVisible(true)}
-            style={{ marginBottom: "24px" }}
           >
             <PlusOutlined />
             Add Category
@@ -2966,7 +2966,71 @@ function PopularBookmarks() {
   };
 
   if (loading) {
-    return <Spin size="large" />;
+    return (
+      <div className="w-[90vw] mx-auto" style={{ padding: "24px" }}>
+        <div className="flex justify-between mb-2">
+          <Button
+            className="text-black bg-white dark:text-white"
+            onClick={() => setIsAddCategoryModalVisible(true)}
+            style={{ marginBottom: "24px" }}
+          >
+            <PlusOutlined />
+            Add Category
+          </Button>
+          <div className="flex items-center gap-4">
+            <div
+              className={`flex items-center bg-white/[(var(--widget-opacity))] backdrop-blur-lg dark:bg-[#28283A]/[(var(--widget-opacity))] p-1 rounded-sm`}
+            >
+              <button
+                onClick={() => handleGridViewChange(true)}
+                className={`p-2 rounded ${
+                  grid
+                    ? "bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] shadow-sm"
+                    : "hover:bg-white/[var(--widget-opacity)] dark:hover:bg-gray-700/[var(--widget-opacity)]"
+                }`}
+              >
+                <svg
+                  className="w-5 h-5 dark:text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                  />
+                </svg>
+              </button>
+              <button
+                onClick={() => handleGridViewChange(false)}
+                className={`p-2 rounded ${
+                  !grid
+                    ? "bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] shadow-sm"
+                    : "hover:bg-white dark:hover:bg-gray-700/50"
+                }`}
+              >
+                <svg
+                  className="w-5 h-5 dark:text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        <SkeletonLoader count={4} />
+      </div>
+    );
   }
 
   return (
@@ -3271,7 +3335,7 @@ function PopularBookmarks() {
               onChange={(e) =>
                 setNewBookmark((prev) => ({ ...prev, title: e.target.value }))
               }
-              className=""
+              className="text-black bg-white dark:text-white"
             />
           </Form.Item>
           <Form.Item
