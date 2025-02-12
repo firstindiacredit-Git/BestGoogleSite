@@ -7,6 +7,7 @@ const App = () => {
   
   return (
     <>
+    // s
     <Navbar/>
     <Newsapp/>      
     </>
