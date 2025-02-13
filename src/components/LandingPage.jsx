@@ -683,7 +683,7 @@ const LandingPage = () => {
                   to="/"
                   className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600"
                 >
-                  AllMyTab
+                  <img src="/LOGO.svg" alt="AllMyTab" className="w-28 h-28" />
                 </Link>
               </div>
 
