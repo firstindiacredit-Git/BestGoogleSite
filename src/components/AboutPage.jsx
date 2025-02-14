@@ -25,70 +25,42 @@ import { Chrome } from "lucide-react";
 import "./Landing.css";
 
 const AboutPage = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
   return (
     <div className="min-h-screen relative scroll-smooth bg-gradient-to-b from-indigo-50 via-white to-white">
       {/* Header */}
-      <motion.header
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="fixed top-0 left-0 right-0 w-full z-50 transition-all duration-300 bg-white/80 backdrop-blur-lg shadow-lg border-b border-gray-200/50"
-      >
-        <nav className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            <Link to="/" className="flex items-center space-x-2">
-              <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-500 bg-clip-text text-transparent">
-                AllMyTab
-              </span>
-            </Link>
-
-            <div className="hidden md:flex items-center space-x-8">
-              <Link
-                to="/"
-                className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-sm hover:bg-white/60"
-              >
-                Home
-              </Link>
-              <Link
-                to="/about"
-                className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-sm hover:bg-white/60"
-              >
-                About
-              </Link>
-              <Link
-                to="/pricing"
-                className="text-gray-700 hover:text-indigo-600 font-medium transition-colors px-3 py-1 rounded-sm hover:bg-white/60"
-              >
-                Pricing
-              </Link>
-            </div>
-
-            <div className="hidden md:flex items-center space-x-4">
-              <a
-                href="https://chrome.google.com/webstore"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-6 py-2.5 bg-indigo-600 text-white font-medium rounded-sm hover:bg-indigo-700 transition-all shadow-md shadow-indigo-500/20 hover:shadow-lg hover:shadow-indigo-500/30 border border-indigo-500/50 flex items-center gap-2"
-              >
-                <Chrome />
-                Add to Chrome
-              </a>
-            </div>
-
-            <button
-              className="md:hidden p-2 rounded-sm hover:bg-white/50 transition-colors"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+      <nav className="fixed w-[55%] px-10 rounded-full left-0 right-0 top-5 mx-auto bg-white/60 backdrop-blur-lg border-b border-gray-200/20 z-50">
+        <div className="flex items-center justify-between h-16">
+          <div className="flex items-center">
+            <Link
+              to="/"
+              className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600"
             >
-              {isMenuOpen ? (
-                <FiX className="w-6 h-6 text-gray-600" />
-              ) : (
-                <FiMenu className="w-6 h-6 text-gray-600" />
-              )}
-            </button>
+              <img src="/LOGO.svg" alt="AllMyTab" className="w-28 h-28" />
+            </Link>
           </div>
-        </nav>
-      </motion.header>
+
+          <div className="hidden md:flex items-center space-x-8">
+            <Link
+              to="/pricing"
+              className="text-gray-600 hover:text-indigo-600 transition-colors"
+            >
+              Pricing
+            </Link>
+            <Link
+              to="/about"
+              className="text-gray-600 hover:text-indigo-600 transition-colors"
+            >
+              About
+            </Link>
+            <Link
+              to="/search"
+              className="px-4 py-2 bg-[#3C5DFF] text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Launch App
+            </Link>
+          </div>
+        </div>
+      </nav>
 
       {/* Hero Section */}
       <div className="relative overflow-hidden bg-gradient-to-b from-indigo-50 via-white to-white pt-20 pb-16 sm:pb-24">
@@ -264,9 +236,73 @@ const AboutPage = () => {
       </div>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="container mx-auto px-4 text-center">
-          <p>&copy; 2024 AllMyTab. All rights reserved.</p>
+      <footer className="bg-gray-900 text-gray-400 py-12">
+        <div className="max-w-7xl mx-auto justify-center text-center px-4">
+          <p className="text-3xl mb-10 font-bold">AllMyTab</p>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-8 ">
+            {/* Product Links */}
+            <div>
+              <h3 className="text-white font-semibold mb-4">Product</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link to="/pricing" className="hover:text-white">
+                    Pricing
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Company Links */}
+            <div>
+              <h3 className="text-white font-semibold mb-4">Company</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link to="/about" className="hover:text-white">
+                    About
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/blog" className="hover:text-white">
+                    Blog
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Legal Links */}
+            <div>
+              <h3 className="text-white font-semibold mb-4">Legal</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link to="/privacy" className="hover:text-white">
+                    Privacy
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/terms" className="hover:text-white">
+                    Terms
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Bottom Section */}
+          <div className="border-t border-gray-800 mt-12 pt-8 flex justify-between items-center">
+            <p>© {new Date().getFullYear()} AllMyTab. All rights reserved.</p>
+            <div className="flex gap-4">
+              <a href="#" className="hover:text-white">
+                Twitter
+              </a>
+              <a href="#" className="hover:text-white">
+                Instagram
+              </a>
+              <a href="#" className="hover:text-white">
+                Discord
+              </a>
+            </div>
+          </div>
         </div>
       </footer>
     </div>

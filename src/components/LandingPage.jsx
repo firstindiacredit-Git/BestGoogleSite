@@ -480,63 +480,11 @@ const CompanyLogos = () => (
 const BrowserPreview = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
-  const [timer, setTimer] = useState(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [progress, setProgress] = useState(0);
 
-  const previewImages = [
-    "/prev (4).png",
-    "/prev (1).png",
-    "/prev (2).png",
-    "/prev (3).png",
-  ];
-
-  const changeImage = (nextIndex) => {
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setCurrentImageIndex(
-        typeof nextIndex === "function"
-          ? nextIndex(currentImageIndex)
-          : nextIndex
-      );
-      setIsTransitioning(false);
-      setProgress(0); // Reset progress when image changes
-    }, 700);
-  };
-
-  useEffect(() => {
-    let progressInterval;
-    if (!isHovered) {
-      progressInterval = setInterval(() => {
-        setProgress((prev) => {
-          if (prev >= 100) {
-            changeImage((prev) => (prev + 1) % previewImages.length);
-            return 0;
-          }
-          return prev + 0.9; // Increment by 0.4 to complete in ~12 seconds
-        });
-      }, 50); // Update every 50ms for smooth animation
-    }
-    return () => clearInterval(progressInterval);
-  }, [isHovered, currentImageIndex]);
-
-  const handleMouseEnter = () => {
-    setIsHovered(true);
-  };
-
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-  };
-
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 40 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.03 }}
-      className="mt-16 relative"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
+    <div className="mt-16 relative">
       <div className="relative rounded-xl overflow-hidden border border-gray-200 shadow-2xl">
         {/* Browser Chrome UI */}
         <div className="h-10 bg-gray-100 flex items-center px-4 gap-2">
@@ -554,85 +502,15 @@ const BrowserPreview = () => {
 
         {/* Images Container */}
         <div className="relative h-[490px]">
-          {previewImages.map((img, index) => (
-            <motion.div
-              key={index}
-              className="absolute inset-0 w-full h-[675px]"
-              initial={{ opacity: 0 }}
-              animate={{
-                opacity: currentImageIndex === index ? 1 : 0,
-                zIndex: currentImageIndex === index ? 1 : 0,
-              }}
-              transition={{
-                duration: 1.2,
-                ease: "easeInOut",
-              }}
-            >
-              <motion.img
-                src={img}
-                alt={`AllMyTab Interface ${index + 1}`}
-                className="w-full h-full object-scale-down object-top"
-                animate={{
-                  scale: 1,
-                  filter:
-                    currentImageIndex === index ? "blur(0px)" : "blur(2px)",
-                }}
-                transition={{ duration: 0.03, ease: "easeOut" }}
-              />
-            </motion.div>
-          ))}
-
-          {/* Custom Progress Bar */}
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-200/50 z-10">
-            <motion.div
-              className="h-full bg-indigo-600"
-              style={{ width: `${progress}%` }}
-              transition={{ duration: 0.03 }}
-            />
-          </div>
-
-          {/* Navigation Dots */}
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-20">
-            {previewImages.map((_, index) => (
-              <motion.button
-                key={index}
-                whileHover={{ scale: 1.2 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => !isTransitioning && changeImage(index)}
-                className={`
-                  w-2 h-2 rounded-full transition-all duration-500
-                  ${
-                    currentImageIndex === index
-                      ? "w-8 bg-indigo-600"
-                      : "bg-gray-300/50 hover:bg-indigo-400"
-                  }
-                  ${isTransitioning ? "cursor-not-allowed" : "cursor-pointer"}
-                `}
-              >
-                {currentImageIndex === index && (
-                  <motion.div
-                    layoutId="activeDot"
-                    className="w-full h-full bg-indigo-600 rounded-full"
-                    transition={{ duration: 0.03 }}
-                  />
-                )}
-              </motion.button>
-            ))}
-          </div>
-
-          {/* Hover Overlay */}
-          {isHovered && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="absolute inset-0 flex items-center justify-center z-30"
-            >
-              <div className="text-white text-center"></div>
-            </motion.div>
-          )}
+          <img
+            src={"/prev (4).png"}
+            alt={`allmytab.com`}
+            className="w-full h-full object-scale-down object-top"
+            transition={{ duration: 0.03, ease: "easeOut" }}
+          />
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
@@ -670,57 +548,55 @@ const LandingPage = () => {
       <div style={grainStyle} />
 
       {/* Background gradient with blur */}
-      <div className="fixed inset-0 bg-gradient-to-b from-indigo-50/50 via-white/80 to-purple-50/50 backdrop-blur-3xl -z-10" />
+      <div className="fixed inset-0 bg-blue-50/50 backdrop-blur-3xl -z-10" />
 
       {/* Content */}
       <div className="relative z-10">
         {/* Navbar with glass effect */}
-        <nav className="fixed top-0 left-0 right-0 bg-white/60 backdrop-blur-lg border-b border-gray-200/20 z-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <div className="flex items-center">
-                <Link
-                  to="/"
-                  className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600"
-                >
-                  <img src="/LOGO.svg" alt="AllMyTab" className="w-28 h-28" />
-                </Link>
-              </div>
+        <nav className="fixed w-[55%] px-10 rounded-full left-0 right-0 top-5 mx-auto bg-white/60 backdrop-blur-lg border-b border-gray-200/20 z-50">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center">
+              <Link
+                to="/"
+                className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600"
+              >
+                <img src="/LOGO.svg" alt="AllMyTab" className="w-28 h-28" />
+              </Link>
+            </div>
 
-              <div className="hidden md:flex items-center space-x-8">
-                <Link
-                  to="/pricing"
-                  className="text-gray-600 hover:text-indigo-600 transition-colors"
-                >
-                  Pricing
-                </Link>
-                <Link
-                  to="/about"
-                  className="text-gray-600 hover:text-indigo-600 transition-colors"
-                >
-                  About
-                </Link>
-                <Link
-                  to="/search"
-                  className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
-                >
-                  Launch App
-                </Link>
-              </div>
+            <div className="hidden md:flex items-center space-x-8">
+              <Link
+                to="/pricing"
+                className="text-gray-600 hover:text-indigo-600 transition-colors"
+              >
+                Pricing
+              </Link>
+              <Link
+                to="/about"
+                className="text-gray-600 hover:text-indigo-600 transition-colors"
+              >
+                About
+              </Link>
+              <Link
+                to="/search"
+                className="px-4 py-2 bg-[#3C5DFF] text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Launch App
+              </Link>
             </div>
           </div>
         </nav>
 
         {/* Hero Section with modern gradient text */}
-        <section className="pt-32 pb-20 px-4">
+        <section className="mt-48 pb-20 px-4">
           <div className="max-w-7xl mx-auto">
             <div className="text-center">
               <motion.h1
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-7xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 tracking-tight"
+                className="text-7xl font-bold mb-6 bg-clip-text text-transparent bg-[#3C5DFF] tracking-tight"
               >
-                Your Browser, Elevated
+                Your Browser on Steroids!
               </motion.h1>
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
@@ -741,7 +617,7 @@ const LandingPage = () => {
               >
                 <Link
                   to="/search"
-                  className="px-8 py-4 bg-black text-white rounded-xl hover:bg-gray-800 transition-all flex items-center gap-2 shadow-lg shadow-indigo-500/20"
+                  className="px-8 py-4 bg-[#3C5DFF] text-white rounded-xl hover:bg-blue-700 transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20"
                 >
                   <Search className="w-5 h-5" />
                   Try Now
@@ -754,11 +630,6 @@ const LandingPage = () => {
                 </Link>
               </motion.div>
             </div>
-
-            {/* Add floating elements */}
-            <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-purple-300/30 rounded-full mix-blend-multiply filter blur-xl animate-blob" />
-            <div className="absolute top-1/3 right-1/4 w-64 h-64 bg-yellow-300/30 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000" />
-            <div className="absolute bottom-1/2 left-1/2 w-64 h-64 bg-pink-300/30 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-4000" />
 
             {/* Browser Preview with glass effect */}
             <div className="mt-20 relative">
@@ -890,36 +761,6 @@ const LandingPage = () => {
             <CompanyLogos />
           </div>
         </section>
-
-        {/* CTA Section */}
-        {/* <section className="py-20 bg-indigo-600">
-          <div className="max-w-7xl mx-auto px-4 text-center">
-            <h2 className="text-4xl font-bold text-white mb-6">
-              Ready to Transform Your Browsing?
-            </h2>
-            <p className="text-xl text-indigo-100 mb-8 max-w-2xl mx-auto">
-              Join thousands of users who have already enhanced their Chrome
-              experience
-            </p>
-            <div className="flex justify-center gap-4">
-              <a
-                href="https://chrome.google.com/webstore"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-8 py-4 bg-white text-indigo-600 rounded-xl hover:bg-gray-50 transition-all flex items-center gap-2"
-              >
-                <Chrome className="w-5 h-5" />
-                Add to Chrome - It's Free
-              </a>
-              <Link
-                to="/search"
-                className="px-8 py-4 bg-indigo-500 text-white rounded-xl hover:bg-indigo-400 transition-all"
-              >
-                Try Demo
-              </Link>
-            </div>
-          </div>
-        </section> */}
 
         {/* Footer */}
         <footer className="bg-gray-900 text-gray-400 py-12">

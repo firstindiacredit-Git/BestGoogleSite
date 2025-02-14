@@ -1,5 +1,5 @@
-import React from 'react';
-import { Typography, Space } from 'antd';
+import React from "react";
+import { Typography, Space } from "antd";
 
 const { Link, Text } = Typography;
 
@@ -11,7 +11,9 @@ const FooterComponent = () => {
         <Link href="/privacy">Privacy</Link>
         <Link href="/terms">Terms</Link>
       </Space>
-      <Text type="secondary">© 2024 BestGoogle. All rights reserved.</Text>
+      <Text type="secondary">
+        © {new Date().getFullYear()} AllMyTab. All rights reserved.
+      </Text>
     </Space>
   );
 };
