@@ -56,6 +56,10 @@ module.exports = {
           },
         },
       },
+      backgroundImage: {
+        "grid-gray-900":
+          "linear-gradient(to right, rgb(17 24 39 / 0.1) 1px, transparent 1px), linear-gradient(to bottom, rgb(17 24 39 / 0.1) 1px, transparent 1px)",
+      },
     },
   },
   plugins: [],

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import {
   FiSearch,
@@ -23,10 +23,79 @@ import {
 import { FlashlightOnOutlined } from "@mui/icons-material";
 import { Chrome } from "lucide-react";
 import "./Landing.css";
+const CustomCursor = () => {
+  const cursorRef = useRef(null);
+  const [isPointer, setIsPointer] = useState(false);
+
+  useEffect(() => {
+    const cursor = cursorRef.current;
+
+    const moveCursor = (e) => {
+      const { clientX, clientY } = e;
+      const mouseX = clientX;
+      const mouseY = clientY;
+
+      cursor.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0)`;
+    };
+
+    const checkHover = () => {
+      const hoveredElements = document.querySelectorAll(
+        'a, button, [role="button"]'
+      );
+
+      hoveredElements.forEach((element) => {
+        element.addEventListener("mouseenter", () => setIsPointer(true));
+        element.addEventListener("mouseleave", () => setIsPointer(false));
+      });
+    };
+
+    document.addEventListener("mousemove", moveCursor);
+    checkHover();
+
+    return () => {
+      document.removeEventListener("mousemove", moveCursor);
+    };
+  }, []);
+
+  return (
+    <div ref={cursorRef} className="fixed pointer-events-none z-[9999]">
+      {isPointer ? (
+        <img
+          src="/pointinghand.svg"
+          height={60}
+          width={60}
+          alt="pointing hand"
+        />
+      ) : (
+        <img src="/notallowed.svg" height={60} width={60} alt="cursor" />
+      )}
+    </div>
+  );
+};
+const globalStyles = `
+  * {
+    cursor: none !important;
+  }
+  
+  html:active * {
+    cursor: none !important;
+  }
+`;
 
 const AboutPage = () => {
+  useEffect(() => {
+    // Add global styles
+    const styleSheet = document.createElement("style");
+    styleSheet.innerText = globalStyles;
+    document.head.appendChild(styleSheet);
+
+    return () => {
+      document.head.removeChild(styleSheet);
+    };
+  }, []);
   return (
     <div className="min-h-screen relative scroll-smooth bg-gradient-to-b from-indigo-50 via-white to-white">
+      <CustomCursor />
       {/* Header */}
       <nav className="fixed w-[55%] px-10 rounded-full left-0 right-0 top-5 mx-auto bg-white/60 backdrop-blur-lg border-b border-gray-200/20 z-50">
         <div className="flex items-center justify-between h-16">

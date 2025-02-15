@@ -18,490 +18,27 @@ import {
 } from "lucide-react";
 import { Modal, Button, Image } from "antd";
 
-const SetHomepageButton = () => {
-  const [showInstructions, setShowInstructions] = useState(false);
-  const [browser, setBrowser] = useState("");
-
-  useEffect(() => {
-    // Detect browser
-    const userAgent = navigator.userAgent;
-    if (userAgent.includes("Chrome")) setBrowser("chrome");
-    else if (userAgent.includes("Firefox")) setBrowser("firefox");
-    else if (userAgent.includes("Safari")) setBrowser("safari");
-    else if (userAgent.includes("Edge")) setBrowser("edge");
-    else setBrowser("other");
-  }, []);
-
-  const handleSetHomepage = () => {
-    const url = "https://AllMyTab.vercel.app/search";
-
-    try {
-      // Try the old-school way (works in some browsers)
-      if (window.external && "AddSearchProvider" in window.external) {
-        window.external.SetHomePage(url);
-        message.success("Homepage set successfully!");
-      } else {
-        // Show browser-specific instructions
-        setShowInstructions(true);
-      }
-    } catch (e) {
-      setShowInstructions(true);
-    }
-  };
-
-  const getBrowserInstructions = () => {
-    switch (browser) {
-      case "chrome":
-        return (
-          <>
-            <p className="mb-2">To set AllMyTab as your homepage in Chrome:</p>
-            <ol className="list-decimal pl-5">
-              <li>Click the three dots in the top-right corner</li>
-              <Image height={150} src={"STEP 1.png"} alt="chrome" />
-              <li>Go to Settings</li>
-              <Image height={150} src={"STEP 2.png"} alt="chrome" />
-              <li>Click on "On startup" in the left menu</li>
-              <Image height={150} src={"STEP 3.png"} alt="chrome" />
-              <li>Select "Open a specific page" and Click "Add a new page"</li>
-              <Image height={150} src={"STEP 4.png"} alt="chrome" />
-              <li>Enter: {window.location.origin}</li>
-              <Image height={150} src={"STEP 5.png"} alt="chrome" />
-            </ol>
-          </>
-        );
-      case "firefox":
-        return (
-          <>
-            <p className="mb-2">To set AllMyTab as your homepage in Firefox:</p>
-            <ol className="list-decimal pl-5">
-              <li>Click the menu button (three lines) in the top-right</li>
-              <li>Click Settings</li>
-              <li>In the Home panel, click "Homepage and new windows"</li>
-              <li>Select "Custom URLs..."</li>
-              <li>Enter: {window.location.origin}</li>
-            </ol>
-          </>
-        );
-      case "edge":
-        return (
-          <>
-            <p className="mb-2">To set AllMyTab as your homepage in Edge:</p>
-            <ol className="list-decimal pl-5">
-              <li>Click the three dots in the top-right corner</li>
-              <li>Go to Settings</li>
-              <li>Click on "On startup" in the left menu</li>
-              <li>Select "Open a specific page or pages"</li>
-              <li>Click "Add a new page"</li>
-              <li>Enter: {window.location.origin}</li>
-            </ol>
-          </>
-        );
-      case "safari":
-        return (
-          <>
-            <p className="mb-2">To set AllMyTab as your homepage in Safari:</p>
-            <ol className="list-decimal pl-5">
-              <li>Click Safari in the top menu</li>
-              <li>Select Preferences</li>
-              <li>Click the General tab</li>
-              <li>Next to "Homepage", enter: {window.location.origin}</li>
-            </ol>
-          </>
-        );
-      default:
-        return (
-          <p>
-            To set AllMyTab as your homepage, please check your browser's
-            settings for homepage configuration and enter:{" "}
-            {window.location.origin}
-          </p>
-        );
-    }
-  };
-
-  return (
-    <>
-      <button
-        onClick={handleSetHomepage}
-        className="group relative flex items-center justify-center gap-2 border border-indigo-400  px-8 py-4  bg-white text-indigo-500 font-medium rounded-xl  transition-all duration-300 transform hover:scale-105 focus:outline-none"
-      >
-        <span className="relative">
-          <svg
-            className="w-5 h-5 mr-2 inline-block"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-            />
-          </svg>
-          set as default
-        </span>
-      </button>
-
-      {/* Instructions Modal */}
-      <Modal
-        title={`Set AllMyTab as Your Homepage`}
-        open={showInstructions}
-        onCancel={() => setShowInstructions(false)}
-        footer={[
-          <Button key="close" onClick={() => setShowInstructions(false)}>
-            Close
-          </Button>,
-        ]}
-      >
-        <div className="p-4 h-[60vh] overflow-y-scroll">
-          {getBrowserInstructions()}
-          <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-            <p className="text-sm text-blue-600">
-              💡 Tip: Bookmark AllMyTab for quick access! Press{" "}
-              {navigator.platform.includes("Mac") ? "⌘+D" : "Ctrl+D"} to
-              bookmark this page.
-            </p>
-          </div>
-        </div>
-      </Modal>
-    </>
-  );
-};
-
-const TestimonialCarousel = () => {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [isAutoplay, setIsAutoplay] = useState(true);
-  const containerRef = useRef(null);
-
-  const testimonials = [
-    {
-      name: "Sinod Kumar",
-      role: "Digital Content Creator",
-      image:
-        "https://crm.pizeonfly.com/employee/employeeImage-1732530813797-sino.jpeg",
-      quote:
-        "AllMyTab has completely transformed how I manage my online research.",
-      rating: 5,
-      company: "YouTube",
-      accent: "from-pink-500 to-rose-500",
-    },
-    {
-      name: "Pranjal Tiwari",
-      role: "Software Engineer",
-      image:
-        "https://crm.pizeonfly.com/employee/employeeImage-1728980580983-IMG20241007191701.jpg",
-      quote: "The command center and keyboard shortcuts are a game-changer.",
-      rating: 5,
-      company: "Google",
-      accent: "from-blue-500 to-indigo-500",
-    },
-    {
-      name: "Baluga Sir",
-      role: "Student",
-      image:
-        "https://crm.pizeonfly.com/employee/employeeImage-1729521659076-images.jpg",
-      quote: "The reading mode and tab management features are incredible.",
-      rating: 5,
-      company: "Harvard University",
-      accent: "from-green-500 to-emerald-500",
-    },
-    {
-      name: "Mohd Sharik",
-      role: "Software Engineer",
-      image:
-        "https://crm.pizeonfly.com/employee/employeeImage-1738233144046-135040117-min.png",
-      quote: "The interface is beautifully designed and intuitive.",
-      rating: 5,
-      company: "Apple",
-      accent: "from-purple-500 to-violet-500",
-    },
-    {
-      name: "Amit Kumar",
-      role: "Prompt Engineer",
-      image:
-        "https://crm.pizeonfly.com/employee/employeeImage-1733120594825-IMG_2025-1.jpg",
-      quote: "Very Good Product.",
-      rating: 5,
-      company: "ChatGpt",
-      accent: "from-amber-500 to-amber-500",
-    },
-  ];
-
-  useEffect(() => {
-    let interval;
-    if (isAutoplay) {
-      interval = setInterval(() => {
-        setActiveIndex((prev) => (prev + 1) % testimonials.length);
-      }, 5000);
-    }
-    return () => clearInterval(interval);
-  }, [isAutoplay]);
-
-  return (
-    <div className="relative h-[280px] overflow-hidden">
-      {/* Background Elements */}
-      <div className="absolute inset-0 bg-gradient-to-b from-gray-50 to-white">
-        <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-0 left-1/4 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl animate-blob" />
-          <div className="absolute top-0 right-1/4 w-72 h-72 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000" />
-          <div className="absolute bottom-0 left-1/3 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-4000" />
-        </div>
-      </div>
-
-      {/* Testimonial Cards Container */}
-      <div
-        ref={containerRef}
-        className="relative mb-1 h-full max-w-6xl mx-auto"
-      >
-        {testimonials.map((testimonial, index) => {
-          const isActive = index === activeIndex;
-          const position = index - activeIndex;
-
-          return (
-            <motion.div
-              key={index}
-              animate={{
-                scale: isActive ? 1 : 0.8,
-                opacity: isActive ? 1 : 0.5,
-                x: `${position * 120}%`,
-                zIndex: isActive ? 10 : 0,
-              }}
-              transition={{ duration: 0.5, ease: "easeInOut" }}
-              className="absolute  left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-xl"
-              onClick={() => setActiveIndex(index)}
-            >
-              <div
-                className={`
-                relative p-1 rounded-2xl cursor-pointer
-                bg-gradient-to-br ${testimonial.accent}
-                transform transition-all duration-500
-                ${isActive ? "hover:scale-95" : "hover:scale-95"}
-              `}
-              >
-                <div className="relative bg-white p-6 rounded-xl">
-                  {/* Profile Section */}
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="relative">
-                      <div className="w-12 h-12 rounded-full overflow-hidden ring-2 ring-gray-100">
-                        <motion.img
-                          whileHover={{ scale: 1.1 }}
-                          src={testimonial.image}
-                          alt={testimonial.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-900">
-                        {testimonial.name}
-                      </h4>
-                      <p className="text-sm text-gray-500">
-                        {testimonial.role}
-                      </p>
-                      <div className="flex items-center mt-1">
-                        <span
-                          className={`
-                          text-xs px-2 py-1 rounded-full font-medium
-                          bg-gradient-to-r ${testimonial.accent} text-white
-                        `}
-                        >
-                          {testimonial.company}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Quote */}
-                  <blockquote className="relative text-gray-700 text-lg italic">
-                    <span className="absolute -top-2 -left-2 text-xl text-gray-200">
-                      "
-                    </span>
-                    <p className="relative -mt-2 z-10 pl-1">
-                      {testimonial.quote}
-                    </p>
-                    <span className="absolute -bottom-4 right-0 text-xl text-gray-200">
-                      "
-                    </span>
-                  </blockquote>
-
-                  {/* Rating */}
-                  <div className="flex gap-1">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <motion.span
-                        key={i}
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: i * 0.1 }}
-                        className={`text-2xl bg-gradient-to-r ${testimonial.accent} bg-clip-text text-transparent`}
-                      >
-                        ★
-                      </motion.span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          );
-        })}
-      </div>
-
-      {/* Controls */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4 z-20">
-        <div className="flex gap-2">
-          {testimonials.map((_, index) => (
-            <motion.button
-              key={index}
-              whileHover={{ scale: 1.2 }}
-              whileTap={{ scale: 0.8 }}
-              onClick={() => setActiveIndex(index)}
-              className={`
-                w-2 h-2 rounded-full transition-all duration-300
-                ${
-                  index === activeIndex
-                    ? "w-8 bg-indigo-600"
-                    : "bg-gray-300 hover:bg-indigo-400"
-                }
-              `}
-            />
-          ))}
-        </div>
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={() => setIsAutoplay(!isAutoplay)}
-          className="p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white/90 transition-colors"
-        >
-          {isAutoplay ? (
-            <svg className="w-5 h-5 text-gray-600" viewBox="0 0 24 24">
-              <path fill="currentColor" d="M14,19H18V5H14M6,19H10V5H6V19Z" />
-            </svg>
-          ) : (
-            <svg className="w-5 h-5 text-gray-600" viewBox="0 0 24 24">
-              <path fill="currentColor" d="M8,5.14V19.14L19,12.14L8,5.14Z" />
-            </svg>
-          )}
-        </motion.button>
-      </div>
-    </div>
-  );
-};
-
-const CompanyLogos = () => (
-  <div className="mt-16 text-center">
-    <motion.p
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      className="text-gray-600 mb-8"
-    >
-      Trusted by users from leading companies
-    </motion.p>
-    <div className="flex flex-wrap justify-center items-center gap-8">
-      {/* Google */}
-      <svg
-        className="h-8 text-gray-400"
-        viewBox="0 0 272 92"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          fill="currentColor"
-          d="M115.75 47.18c0 12.77-9.99 22.18-22.25 22.18s-22.25-9.41-22.25-22.18C71.25 34.32 81.24 25 93.5 25s22.25 9.32 22.25 22.18zm-9.74 0c0-7.98-5.79-13.44-12.51-13.44S80.99 39.2 80.99 47.18c0 7.9 5.79 13.44 12.51 13.44s12.51-5.55 12.51-13.44z"
-        />
-        <path
-          fill="currentColor"
-          d="M163.75 47.18c0 12.77-9.99 22.18-22.25 22.18s-22.25-9.41-22.25-22.18c0-12.85 9.99-22.18 22.25-22.18s22.25 9.32 22.25 22.18zm-9.74 0c0-7.98-5.79-13.44-12.51-13.44s-12.51 5.46-12.51 13.44c0 7.9 5.79 13.44 12.51 13.44s12.51-5.55 12.51-13.44z"
-        />
-        <path
-          fill="currentColor"
-          d="M209.75 26.34v39.82c0 16.38-9.66 23.07-21.08 23.07-10.75 0-17.22-7.19-19.66-13.07l8.48-3.53c1.51 3.61 5.21 7.87 11.17 7.87 7.31 0 11.84-4.51 11.84-13v-3.19h-.34c-2.18 2.69-6.38 5.04-11.68 5.04-11.09 0-21.25-9.66-21.25-22.09 0-12.52 10.16-22.26 21.25-22.26 5.29 0 9.49 2.35 11.68 4.96h.34v-3.61h9.25zm-8.56 20.92c0-7.81-5.21-13.52-11.84-13.52-6.72 0-12.35 5.71-12.35 13.52 0 7.73 5.63 13.36 12.35 13.36 6.63 0 11.84-5.63 11.84-13.36z"
-        />
-        <path fill="currentColor" d="M225 3v65h-9.5V3h9.5z" />
-        <path
-          fill="currentColor"
-          d="M262.02 54.48l7.56 5.04c-2.44 3.61-8.32 9.83-18.48 9.83-12.6 0-22.01-9.74-22.01-22.18 0-13.19 9.49-22.18 20.92-22.18 11.51 0 17.14 9.16 18.98 14.11l1.01 2.52-29.65 12.28c2.27 4.45 5.8 6.72 10.75 6.72 4.96 0 8.4-2.44 10.92-6.14zm-23.27-7.98l19.82-8.23c-1.09-2.77-4.37-4.7-8.23-4.7-4.95 0-11.84 4.37-11.59 12.93z"
-        />
-        <path
-          fill="currentColor"
-          d="M35.29 41.41V32H67c.31 1.64.47 3.58.47 5.68 0 7.06-1.93 15.79-8.15 22.01-6.05 6.3-13.78 9.66-24.02 9.66C16.32 69.35.36 53.89.36 34.91.36 15.93 16.32.47 35.3.47c10.5 0 17.98 4.12 23.6 9.49l-6.64 6.64c-4.03-3.78-9.49-6.72-16.97-6.72-13.86 0-24.7 11.17-24.7 25.03 0 13.86 10.84 25.03 24.7 25.03 8.99 0 14.11-3.61 17.39-6.89 2.66-2.66 4.41-6.46 5.1-11.65l-22.49.01z"
-        />
-      </svg>
-
-      {/* Microsoft */}
-      <svg
-        className="h-8 text-gray-400"
-        viewBox="0 0 23 23"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path fill="currentColor" d="M0 0h11v11H0z" />
-        <path fill="currentColor" d="M12 0h11v11H12z" />
-        <path fill="currentColor" d="M0 12h11v11H0z" />
-        <path fill="currentColor" d="M12 12h11v11H12z" />
-      </svg>
-
-      {/* Apple */}
-      <svg
-        className="h-8 text-gray-400"
-        viewBox="0 0 16 20"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          fill="currentColor"
-          d="M13.623 7.816c-.062-5.516 4.495-8.163 4.7-8.293C16.59-1.304 14.22.02 13.86.077c-1.926.3-3.682 1.508-4.23 1.508-.587 0-2.156-1.44-4.018-1.399-1.862.04-3.724 1.235-4.644 2.91C-1.2 6.588.345 12.423 2.243 15.533c.947 1.508 2.156 3.257 3.804 3.177 1.508-.08 2.116-1.057 3.884-1.057 1.728 0 2.276 1.057 3.844 1.017 1.648-.04 2.656-1.607 3.684-3.095 1.188-1.827 1.648-3.614 1.688-3.694-.04-.02-3.242-1.368-3.282-5.317l-.242.252z"
-        />
-      </svg>
-
-      {/* Meta */}
-      <svg
-        className="h-8 text-gray-400"
-        viewBox="0 0 40 40"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          fill="currentColor"
-          d="M20 0C8.954 0 0 8.954 0 20s8.954 20 20 20 20-8.954 20-20S31.046 0 20 0zm0 7.5c4.142 0 7.5 3.358 7.5 7.5v5h-5v-5c0-1.38-1.12-2.5-2.5-2.5s-2.5 1.12-2.5 2.5v5h-5v-5c0-4.142 3.358-7.5 7.5-7.5zm-7.5 15h15v10h-15v-10z"
-        />
-      </svg>
-
-      {/* Amazon */}
-      <svg
-        className="h-8 text-gray-400"
-        viewBox="0 0 448 512"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          fill="currentColor"
-          d="M257.2 162.7c-48.7 1.8-169.5 15.5-169.5 117.5 0 109.5 138.3 114 183.5 43.2 6.5 10.2 35.4 37.5 45.3 46.8l56.8-56S341 288.9 341 261.4V114.3C341 89 316.5 32 228.7 32 140.7 32 94 87 94 136.3l73.5 6.8c16.3-49.5 54.2-49.5 54.2-49.5 40.7-.1 35.5 29.8 35.5 69.1zm0 86.8c0 80-84.2 68-84.2 17.2 0-47.2 50.5-56.7 84.2-57.8v40.6zm136 163.5c-7.7 10-70 67-174.5 67S34.2 408.5 9.7 379c-6.8-7.7 1-11.3 5.5-8.3C88.5 415.2 203 488.5 387.7 401c7.5-3.7 13.3 2 5.5 12zm39.8 2.2c-6.5 15.8-16 26.8-21.2 31-5.5 4.5-9.5 2.7-6.5-3.8s19.3-46.5 12.7-55c-6.5-8.3-37-4.3-48-3.2-10.8 1-13 2-14-.3-2.3-5.7 21.7-15.5 37.5-17.5 15.7-1.8 41-.8 46 5.7 3.7 5.1 0 27.1-6.5 43.1z"
-        />
-      </svg>
-    </div>
-  </div>
-);
-
 const BrowserPreview = () => {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const [progress, setProgress] = useState(0);
-
   return (
     <div className="mt-16 relative">
-      <div className="relative rounded-xl overflow-hidden border border-gray-200 shadow-2xl">
+      <div className="relative rounded-xl overflow-hidden p-2 bg-gray-200 border border-gray-300/80">
         {/* Browser Chrome UI */}
-        <div className="h-10 bg-gray-100 flex items-center px-4 gap-2">
+        <div className="h-10 bg-gray-100 border border-gray-300/80  border-b-0 rounded-t-xl flex items-center px-4 gap-2">
           <div className="flex gap-2">
             <div className="w-3 h-3 rounded-full bg-red-400" />
             <div className="w-3 h-3 rounded-full bg-yellow-400" />
             <div className="w-3 h-3 rounded-full bg-green-400" />
           </div>
           <div className="flex-1 ml-4">
-            <div className="h-6 w-full max-w-md mx-auto bg-white rounded-md flex items-center px-3 text-sm text-gray-400">
-              {window.location.origin}/search
-            </div>
+            <input
+              placeholder={`${window.location.origin}/search`}
+              className="h-6 w-full max-w-md mx-auto bg-white rounded-md flex items-center px-3 text-sm text-gray-400"
+            />
           </div>
         </div>
 
         {/* Images Container */}
-        <div className="relative h-[490px]">
+        <div className="relative max-h-[490px]  border border-gray-300/80 border-t-0  rounded-b-xl shadow-md">
           <img
             src={"/prev (4).png"}
             alt={`allmytab.com`}
@@ -528,32 +65,230 @@ const grainStyle = {
   zIndex: 1,
 };
 
-const LandingPage = () => {
-  const FeatureCard = ({ icon: Icon, title, description }) => (
-    <motion.div
-      whileHover={{ y: -5 }}
-      className="p-6 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all"
-    >
-      <div className="w-12 h-12 bg-indigo-50 rounded-lg flex items-center justify-center mb-4">
-        <Icon className="w-6 h-6 text-indigo-600" />
-      </div>
-      <h3 className="text-lg font-semibold mb-2">{title}</h3>
-      <p className="text-gray-600">{description}</p>
-    </motion.div>
+const CustomCursor = () => {
+  const cursorRef = useRef(null);
+  const [isPointer, setIsPointer] = useState(false);
+
+  useEffect(() => {
+    const cursor = cursorRef.current;
+
+    const moveCursor = (e) => {
+      const { clientX, clientY } = e;
+      const mouseX = clientX;
+      const mouseY = clientY;
+
+      cursor.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0)`;
+    };
+
+    const checkHover = () => {
+      const hoveredElements = document.querySelectorAll(
+        'a, button, [role="button"]'
+      );
+
+      hoveredElements.forEach((element) => {
+        element.addEventListener("mouseenter", () => setIsPointer(true));
+        element.addEventListener("mouseleave", () => setIsPointer(false));
+      });
+    };
+
+    document.addEventListener("mousemove", moveCursor);
+    checkHover();
+
+    return () => {
+      document.removeEventListener("mousemove", moveCursor);
+    };
+  }, []);
+
+  return (
+    <div ref={cursorRef} className="fixed pointer-events-none z-[9999]">
+      {isPointer ? (
+        <img
+          src="/pointinghand.svg"
+          height={60}
+          width={60}
+          alt="pointing hand"
+          className="-translate-x-[14px] -translate-y-[14px]"
+        />
+      ) : (
+        <img
+          src="/notallowed.svg"
+          height={60}
+          width={60}
+          alt="cursor"
+          className="-translate-x-[10px] -translate-y-[10px]"
+        />
+      )}
+    </div>
   );
+};
+
+// Add these styles to hide the default cursor
+const globalStyles = `
+  * {
+    cursor: none !important;
+  }
+  
+  html:active * {
+    cursor: none !important;
+  }
+`;
+
+const LandingPage = () => {
+  // const FeatureCard = ({ icon: Icon, title, description }) => (
+  //   <motion.div
+  //     whileHover={{ y: -5 }}
+  //     className="p-6 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all"
+  //   >
+  //     <div className="w-12 h-12 bg-indigo-50 rounded-lg flex items-center justify-center mb-4">
+  //       <Icon className="w-6 h-6 text-indigo-600" />
+  //     </div>
+  //     <h3 className="text-lg font-semibold mb-2">{title}</h3>
+  //     <p className="text-gray-600">{description}</p>
+  //   </motion.div>
+  // );
+  const features = [
+    {
+      name: "Push to deploy.",
+      description:
+        "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Maiores impedit perferendis suscipit eaque, iste dolor cupiditate blanditiis ratione.",
+      icon: "CloudArrowUpIcon",
+    },
+    {
+      name: "SSL certificates.",
+      description:
+        "Anim aute id magna aliqua ad ad non deserunt sunt. Qui irure qui lorem cupidatat commodo.",
+      icon: "LockClosedIcon",
+    },
+    {
+      name: "Database backups.",
+      description:
+        "Ac tincidunt sapien vehicula erat auctor pellentesque rhoncus. Et magna sit morbi lobortis.",
+      icon: "ServerIcon",
+    },
+  ];
+  const testimonials = [
+    {
+      quote:
+        "Integer id nunc sit semper purus. Bibendum at lacus ut arcu blandit montes vitae auctor libero.",
+      name: "Leslie Alexander",
+      role: "Founder",
+      company: "SavvyCal",
+      image:
+        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+      accent: "from-indigo-500 to-purple-500",
+    },
+    {
+      quote:
+        "Molestias ea earum quos nostrum doloreque sed. Quaerat quasi aut velit incidunt excepturi rerum voluptatem minus harum.",
+      name: "Leonard Krasner",
+      role: "CEO",
+      company: "Brex",
+      image:
+        "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+      accent: "from-purple-500 to-pink-500",
+    },
+    {
+      quote:
+        "Molestias ea earum quos nostrum doloreque sed. Quaerat quasi aut velit incidunt excepturi rerum voluptatem minus harum.",
+      name: "Leonard Krasner",
+      role: "CEO",
+      company: "Brex",
+      image:
+        "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+      accent: "from-purple-500 to-pink-500",
+    },
+    {
+      quote:
+        "Molestias ea earum quos nostrum doloreque sed. Quaerat quasi aut velit incidunt excepturi rerum voluptatem minus harum.",
+      name: "Leonard Krasner",
+      role: "CEO",
+      company: "Brex",
+      image:
+        "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+      accent: "from-purple-500 to-pink-500",
+    },
+    {
+      quote:
+        "Molestias ea earum quos nostrum doloreque sed. Quaerat quasi aut velit incidunt excepturi rerum voluptatem minus harum.",
+      name: "Leonard Krasner",
+      role: "CEO",
+      company: "Brex",
+      image:
+        "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+      accent: "from-purple-500 to-pink-500",
+    },
+    // Add more testimonials...
+  ];
+
+  const TestimonialsGrid = () => {
+    return (
+      <div className="relative bg-white/70 py-24">
+        <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mx-auto max-w-xl text-center">
+            <h2 className="text-lg font-semibold leading-8 tracking-tight text-indigo-600">
+              Testimonials
+            </h2>
+            <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+              We have worked with thousands of amazing people
+            </p>
+          </div>
+
+          <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 grid-rows-1 gap-8 text-sm leading-6 text-gray-900 sm:mt-20 sm:grid-cols-2 xl:mx-0 xl:max-w-none xl:grid-cols-3">
+            {testimonials.map((testimonial, index) => (
+              <div
+                key={index}
+                className="relative rounded-2xl drop-shadow-md border border-gray-200 bg-white p-6 "
+              >
+                <div className="flex gap-x-4 mb-6">
+                  <img
+                    src={testimonial.image}
+                    alt={testimonial.name}
+                    className="h-10 w-10 rounded-full bg-gray-50"
+                  />
+                  <div>
+                    <div className="font-semibold">{testimonial.name}</div>
+                    <div className="text-gray-600">
+                      {testimonial.role}, {testimonial.company}
+                    </div>
+                  </div>
+                </div>
+                <figure className="relative">
+                  <blockquote className="text-gray-900">
+                    <p>{`"${testimonial.quote}"`}</p>
+                  </blockquote>
+                </figure>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  useEffect(() => {
+    // Add global styles
+    const styleSheet = document.createElement("style");
+    styleSheet.innerText = globalStyles;
+    document.head.appendChild(styleSheet);
+
+    return () => {
+      document.head.removeChild(styleSheet);
+    };
+  }, []);
 
   return (
     <div className="relative min-h-screen overflow-hidden">
+      <CustomCursor />
       {/* Grainy overlay */}
       <div style={grainStyle} />
 
       {/* Background gradient with blur */}
-      <div className="fixed inset-0 bg-blue-50/50 backdrop-blur-3xl -z-10" />
+      <div className="fixed inset-0 x bg-blue-50/50 backdrop-blur-3xl -z-10" />
 
       {/* Content */}
       <div className="relative z-10">
         {/* Navbar with glass effect */}
-        <nav className="fixed w-[55%] px-10 rounded-full left-0 right-0 top-5 mx-auto bg-white/60 backdrop-blur-lg border-b border-gray-200/20 z-50">
+        <nav className="fixed w-[55%] px-10 border border-gray-200/80 rounded-full left-0 right-0 top-5 mx-auto bg-white/60 backdrop-blur-lg border-b  z-50">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center">
               <Link
@@ -604,8 +339,7 @@ const LandingPage = () => {
                 transition={{ delay: 0.1 }}
                 className="text-xl text-gray-600/90 mb-8 max-w-2xl mx-auto"
               >
-                Experience the future of browsing with AllMyTab's powerful suite
-                of tools
+                Experience your browser with AllMyTab's powerful suite of tools
               </motion.p>
 
               {/* Modern call-to-action buttons */}
@@ -620,218 +354,387 @@ const LandingPage = () => {
                   className="px-8 py-4 bg-[#3C5DFF] text-white rounded-xl hover:bg-blue-700 transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20"
                 >
                   <Search className="w-5 h-5" />
-                  Try Now
-                </Link>
-                <Link
-                  to="/about"
-                  className="px-8 py-4 bg-white/80 backdrop-blur-sm text-gray-900 rounded-xl hover:bg-white/90 transition-all border border-gray-200/50 shadow-lg shadow-purple-500/10"
-                >
-                  Learn More
+                  Launch App
                 </Link>
               </motion.div>
             </div>
-
-            {/* Browser Preview with glass effect */}
-            <div className="mt-20 relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-purple-500/5 rounded-2xl backdrop-blur-3xl" />
+            <div className="mt-8 relative">
               <BrowserPreview />
             </div>
           </div>
         </section>
 
-        {/* Features Grid */}
-        <section className="py-20 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                Everything You Need
-              </h2>
-              <p className="text-xl text-gray-600">
-                Powerful features to enhance your browsing experience
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <FeatureCard
-                icon={Command}
-                title="Command Center"
-                description="Access all tools and features with quick keyboard shortcuts"
-              />
-              <FeatureCard
-                icon={Sparkles}
-                title="Smart Search"
-                description="Find anything instantly with our intelligent search engine"
-              />
-              <FeatureCard
-                icon={Layout}
-                title="Tab Management"
-                description="Organize and manage your tabs efficiently"
-              />
-              <FeatureCard
-                icon={BookOpen}
-                title="Reading Mode"
-                description="Distraction-free reading experience"
-              />
-              <FeatureCard
-                icon={Shield}
-                title="Privacy Focus"
-                description="Your data stays private and secure"
-              />
-              <FeatureCard
-                icon={Settings}
-                title="Customizable"
-                description="Personalize your browsing experience"
-              />
+        <div className=" py-24 sm:py-32">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <h2 className="text-center text-base/7 font-semibold text-indigo-600">
+              Trusted by the innovative teams
+            </h2>
+            <div className="mx-auto mt-10 grid max-w-lg grid-cols-2 items-center gap-x-8 gap-y-10 sm:max-w-xl sm:grid-cols-4 sm:gap-x-10 lg:mx-0 lg:max-w-none lg:grid-cols-4">
+              <a href="https://pizeonfly.com" target="_blank">
+                <img
+                  alt="Pizeonfly"
+                  src="/pizeonfly.png"
+                  width={158}
+                  height={48}
+                  className="col-span-2 brightness-50 hover:brightness-100 max-h-12 w-full object-contain lg:col-span-1"
+                />
+              </a>
+              <a href="https://theamerica.online" target="_blank">
+                <img
+                  alt="America Online"
+                  src="/AmericaOnline.png"
+                  width={158}
+                  height={48}
+                  className="col-span-2   brightness-50 hover:brightness-100 max-h-12 w-full object-contain lg:col-span-1"
+                />
+              </a>
+              <a href="https://a2zglobix.com" target="_blank">
+                <img
+                  alt="A2zGlobix"
+                  src="/A2z.png"
+                  width={158}
+                  height={48}
+                  className="col-span-2  brightness-50 hover:brightness-100 max-h-12 w-full object-contain sm:col-start-2 lg:col-span-1"
+                />
+              </a>
+              <a href="https://thebritain.online" target="_blank">
+                <img
+                  alt="Britain Online"
+                  src="/britainaonline.png"
+                  width={158}
+                  height={48}
+                  className="col-span-2  brightness-50 hover:brightness-100 max-h-12 w-full object-contain lg:col-span-1"
+                />
+              </a>
             </div>
           </div>
-        </section>
+        </div>
 
-        {/* How It Works */}
-        <section className="py-20">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                How It Works
-              </h2>
-              <p className="text-xl text-gray-600">
-                Get started in three simple steps
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-              {[
-                {
-                  icon: Chrome,
-                  title: "1. Add to Chrome",
-                  description: "Install AllMyTab from the Chrome Web Store",
-                },
-                {
-                  icon: Compass,
-                  title: "2. Set as Homepage",
-                  description: "Make AllMyTab your default new tab page",
-                },
-                {
-                  icon: Zap,
-                  title: "3. Start Browsing",
-                  description: "Enjoy a more productive browsing experience",
-                },
-              ].map((step, index) => (
-                <div key={index} className="text-center">
-                  <div className="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <step.icon className="w-8 h-8 text-indigo-600" />
+        <div className="bg-gray-50 py-24 sm:py-32">
+          <div className="mx-auto max-w-2xl px-6 lg:max-w-7xl lg:px-8">
+            <h2 className="text-center text-base/7 font-semibold text-indigo-600">
+              Everything You Need
+            </h2>
+            <p className="mx-auto mt-2 max-w-lg text-center text-4xl font-semibold tracking-tight text-balance text-gray-950 sm:text-5xl">
+              Enhance your browsing experience
+            </p>
+            <div className="mt-10 grid gap-4 sm:mt-16 lg:grid-cols-3 lg:grid-rows-2">
+              <div className="relative lg:row-span-2">
+                <div className="absolute inset-px rounded-lg bg-white lg:rounded-l-[2rem]"></div>
+                <div className="relative flex h-full flex-col overflow-hidden rounded-[calc(var(--radius-lg)+1px)] lg:rounded-l-[calc(2rem+1px)]">
+                  <div className="px-8 pt-8 pb-3 sm:px-10 sm:pt-10 sm:pb-0">
+                    <p className="mt-2 text-lg font-medium tracking-tight text-gray-950 max-lg:text-center">
+                      Mobile friendly
+                    </p>
+                    <p className="mt-2 max-w-lg text-sm/6 text-gray-600 max-lg:text-center">
+                      Anim aute id magna aliqua ad ad non deserunt sunt. Qui
+                      irure qui lorem cupidatat commodo.
+                    </p>
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
-                  <p className="text-gray-600">{step.description}</p>
+                  <div className="@container relative min-h-[30rem] w-full grow max-lg:mx-auto max-lg:max-w-sm">
+                    <div className="absolute inset-x-10 top-10 bottom-0 overflow-hidden rounded-t-[12cqw]  border border-gray-300/80">
+                      <img
+                        className="size-full object-cover object-top"
+                        src="/Screenshot 2025-02-15 162951.png"
+                        alt=""
+                      />
+                    </div>
+                  </div>
                 </div>
-              ))}
+                <div className="pointer-events-none absolute inset-px rounded-lg ring-1 shadow-sm ring-black/5 lg:rounded-l-[2rem]"></div>
+              </div>
+              <div className="relative max-lg:row-start-1">
+                <div className="absolute inset-px rounded-lg bg-white max-lg:rounded-t-[2rem]"></div>
+                <div className="relative flex h-full flex-col overflow-hidden rounded-[calc(var(--radius-lg)+1px)] max-lg:rounded-t-[calc(2rem+1px)]">
+                  <div className="px-8 pt-8 sm:px-10 sm:pt-10">
+                    <p className="mt-2 text-lg font-medium tracking-tight text-gray-950 max-lg:text-center">
+                      Performance
+                    </p>
+                    <p className="mt-2 max-w-lg text-sm/6 text-gray-600 max-lg:text-center">
+                      Lorem ipsum, dolor sit amet consectetur adipisicing elit
+                      maiores impedit.
+                    </p>
+                  </div>
+                  <div className="flex flex-1 items-center justify-center px-8 max-lg:pt-10 max-lg:pb-12 sm:px-10 lg:pb-2">
+                    <img
+                      className="w-full max-lg:max-w-xs"
+                      src="https://tailwindui.com/plus-assets/img/component-images/bento-03-performance.png"
+                      alt=""
+                    />
+                  </div>
+                </div>
+                <div className="pointer-events-none absolute inset-px rounded-lg ring-1 shadow-sm ring-black/5 max-lg:rounded-t-[2rem]"></div>
+              </div>
+              <div className="relative max-lg:row-start-3 lg:col-start-2 lg:row-start-2">
+                <div className="absolute inset-px rounded-lg bg-white"></div>
+                <div className="relative flex h-full flex-col overflow-hidden rounded-[calc(var(--radius-lg)+1px)]">
+                  <div className="px-8 pt-8 sm:px-10 sm:pt-10">
+                    <p className="mt-2 text-lg font-medium tracking-tight text-gray-950 max-lg:text-center">
+                      Security
+                    </p>
+                    <p className="mt-2 max-w-lg text-sm/6 text-gray-600 max-lg:text-center">
+                      Morbi viverra dui mi arcu sed. Tellus semper adipiscing
+                      suspendisse semper morbi.
+                    </p>
+                  </div>
+                  <div className="@container flex flex-1 items-center max-lg:py-6 lg:pb-2">
+                    <img
+                      className="h-[min(152px,40cqw)] object-cover"
+                      src="https://tailwindui.com/plus-assets/img/component-images/bento-03-security.png"
+                      alt=""
+                    />
+                  </div>
+                </div>
+                <div className="pointer-events-none absolute inset-px rounded-lg ring-1 shadow-sm ring-black/5"></div>
+              </div>
+              <div className="relative lg:row-span-2">
+                <div className="absolute inset-px rounded-lg bg-white max-lg:rounded-b-[2rem] lg:rounded-r-[2rem]"></div>
+                <div className="relative flex h-full flex-col overflow-hidden rounded-[calc(var(--radius-lg)+1px)] max-lg:rounded-b-[calc(2rem+1px)] lg:rounded-r-[calc(2rem+1px)]">
+                  <div className="px-8 pt-8 pb-3 sm:px-10 sm:pt-10 sm:pb-0">
+                    <p className="mt-2 text-lg font-medium tracking-tight text-gray-950 max-lg:text-center">
+                      Powerful APIs
+                    </p>
+                    <p className="mt-2 max-w-lg text-sm/6 text-gray-600 max-lg:text-center">
+                      Sit quis amet rutrum tellus ullamcorper ultricies libero
+                      dolor eget sem sodales gravida.
+                    </p>
+                  </div>
+                  <div className="@container relative min-h-[30rem] w-full grow max-lg:mx-auto max-lg:max-w-sm">
+                    <div className="absolute inset-x-10 top-10 bottom-0 overflow-hidden rounded-t-[1rem]  border border-gray-300/80">
+                      <img
+                        className="size-full object-cover object-top"
+                        src="/Screenshot 2025-02-15 162951.png"
+                        alt=""
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="pointer-events-none absolute inset-px rounded-lg ring-1 shadow-sm ring-black/5 max-lg:rounded-b-[2rem] lg:rounded-r-[2rem]"></div>
+              </div>
             </div>
           </div>
-        </section>
+        </div>
+        <div className="  bg-white py-24 sm:py-32">
+          <div className="mx-auto border border-gray-200/80 rounded-3xl p-8 max-w-7xl overflow-x-hidden   lg:px-8">
+            <div className="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 sm:gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-2">
+              <div className="lg:pt-4 lg:pr-8">
+                <div className="lg:max-w-lg">
+                  <h2 className="text-base/7 font-semibold text-indigo-600">
+                    Deploy faster
+                  </h2>
+                  <p className="mt-2 text-4xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-5xl">
+                    A better workflow
+                  </p>
+                  <p className="mt-6 text-lg/8 text-gray-600">
+                    Lorem ipsum, dolor sit amet consectetur adipisicing elit.
+                    Maiores impedit perferendis suscipit eaque, iste dolor
+                    cupiditate blanditiis ratione.
+                  </p>
+                  <dl className="mt-10 max-w-xl space-y-8 text-base/7 text-gray-600 lg:max-w-none">
+                    {features.map((feature) => (
+                      <div key={feature.name} className="relative pl-9">
+                        <dt className="inline font-semibold text-gray-900">
+                          <feature.icon
+                            aria-hidden="true"
+                            className="absolute top-1 left-1 size-5 text-indigo-600"
+                          />
+                          {feature.name}
+                        </dt>{" "}
+                        <dd className="inline">{feature.description}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              </div>
+              <img
+                alt="Product screenshot"
+                src="/Screenshot 2025-02-15 162951.png"
+                className="w-[48rem] max-w-none rounded-xl  sm:w-[65rem]"
+              />
+            </div>
+          </div>
+        </div>
 
         {/* Client Testimonials */}
-        <section className="py-20 ">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="text-center mb-16">
-              <motion.span
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                className="text-indigo-600 font-semibold text-sm uppercase tracking-wider"
-              >
-                Testimonials
-              </motion.span>
-              <motion.h2
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                className="text-4xl font-bold text-gray-900 mt-2 mb-4"
-              >
-                What Our Users Say
-              </motion.h2>
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="text-xl text-gray-600"
-              >
-                Don't just take our word for it - hear from some of our
-                satisfied users
-              </motion.p>
-            </div>
-
-            <TestimonialCarousel />
-            <CompanyLogos />
-          </div>
+        <section>
+          <TestimonialsGrid />
         </section>
 
         {/* Footer */}
-        <footer className="bg-gray-900 text-gray-400 py-12">
-          <div className="max-w-7xl mx-auto justify-center text-center px-4">
-            <p className="text-3xl mb-10 font-bold">AllMyTab</p>
-
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-8 ">
-              {/* Product Links */}
-              <div>
-                <h3 className="text-white font-semibold mb-4">Product</h3>
-                <ul className="space-y-2">
-                  <li>
-                    <Link to="/features" className="hover:text-white">
-                      Features
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/pricing" className="hover:text-white">
-                      Pricing
-                    </Link>
-                  </li>
-                </ul>
+        <footer class="bg-blue-50">
+          <div class="mx-auto w-full max-w-7xl p-4  lg:py-12">
+            <div class="md:flex md:justify-between">
+              <div class="mb-6 md:mb-0">
+                <a href="https://allmytab.com/" class="flex items-center">
+                  <img src="/LOGO.svg" class="h-12 me-3" alt="FlowBite Logo" />
+                </a>
               </div>
-
-              {/* Company Links */}
-              <div>
-                <h3 className="text-white font-semibold mb-4">Company</h3>
-                <ul className="space-y-2">
-                  <li>
-                    <Link to="/about" className="hover:text-white">
-                      About
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/blog" className="hover:text-white">
-                      Blog
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-
-              {/* Legal Links */}
-              <div>
-                <h3 className="text-white font-semibold mb-4">Legal</h3>
-                <ul className="space-y-2">
-                  <li>
-                    <Link to="/privacy" className="hover:text-white">
-                      Privacy
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/terms" className="hover:text-white">
-                      Terms
-                    </Link>
-                  </li>
-                </ul>
+              <div class="grid grid-cols-2 gap-8 sm:gap-6 sm:grid-cols-3">
+                <div>
+                  <h2 class="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-white">
+                    Resources
+                  </h2>
+                  <ul class="text-gray-500 dark:text-gray-400 font-medium">
+                    <li class="mb-4">
+                      <a
+                        href="https://allmytab.com/blog"
+                        class="hover:underline"
+                      >
+                        Blog
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="https://allmytab.com/pricing"
+                        class="hover:underline"
+                      >
+                        Pricing
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h2 class="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-white">
+                    Follow us
+                  </h2>
+                  <ul class="text-gray-500 dark:text-gray-400 font-medium">
+                    <li class="mb-4">
+                      <a
+                        href="https://github.com/themesberg/flowbite"
+                        class="hover:underline "
+                      >
+                        Github
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="https://discord.gg/4eeurUVvTy"
+                        class="hover:underline"
+                      >
+                        Discord
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h2 class="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-white">
+                    Legal
+                  </h2>
+                  <ul class="text-gray-500 dark:text-gray-400 font-medium">
+                    <li class="mb-4">
+                      <a href="#" class="hover:underline">
+                        Privacy Policy
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#" class="hover:underline">
+                        Terms &amp; Conditions
+                      </a>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
-
-            {/* Bottom Section */}
-            <div className="border-t border-gray-800 mt-12 pt-8 flex justify-between items-center">
-              <p>© 2024 AllMyTab. All rights reserved.</p>
-              <div className="flex gap-4">
-                <a href="#" className="hover:text-white">
-                  Twitter
+            <hr class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
+            <div class="sm:flex sm:items-center sm:justify-between">
+              <span class="text-sm text-gray-500 sm:text-center dark:text-gray-400">
+                © {new Date().getFullYear()}{" "}
+                <a href="https://allmytab.com/" class="hover:underline">
+                  ALLMYTAB
                 </a>
-                <a href="#" className="hover:text-white">
-                  GitHub
+                . All Rights Reserved.
+              </span>
+              <div class="flex mt-4 sm:justify-center sm:mt-0">
+                <a
+                  href="#"
+                  class="text-gray-500 hover:text-gray-900 dark:hover:text-white"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 8 19"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M6.135 3H8V0H6.135a4.147 4.147 0 0 0-4.142 4.142V6H0v3h2v9.938h3V9h2.021l.592-3H5V3.591A.6.6 0 0 1 5.592 3h.543Z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <span class="sr-only">Facebook page</span>
                 </a>
-                <a href="#" className="hover:text-white">
-                  Discord
+                <a
+                  href="#"
+                  class="text-gray-500 hover:text-gray-900 dark:hover:text-white ms-5"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 21 16"
+                  >
+                    <path d="M16.942 1.556a16.3 16.3 0 0 0-4.126-1.3 12.04 12.04 0 0 0-.529 1.1 15.175 15.175 0 0 0-4.573 0 11.585 11.585 0 0 0-.535-1.1 16.274 16.274 0 0 0-4.129 1.3A17.392 17.392 0 0 0 .182 13.218a15.785 15.785 0 0 0 4.963 2.521c.41-.564.773-1.16 1.084-1.785a10.63 10.63 0 0 1-1.706-.83c.143-.106.283-.217.418-.33a11.664 11.664 0 0 0 10.118 0c.137.113.277.224.418.33-.544.328-1.116.606-1.71.832a12.52 12.52 0 0 0 1.084 1.785 16.46 16.46 0 0 0 5.064-2.595 17.286 17.286 0 0 0-2.973-11.59ZM6.678 10.813a1.941 1.941 0 0 1-1.8-2.045 1.93 1.93 0 0 1 1.8-2.047 1.919 1.919 0 0 1 1.8 2.047 1.93 1.93 0 0 1-1.8 2.045Zm6.644 0a1.94 1.94 0 0 1-1.8-2.045 1.93 1.93 0 0 1 1.8-2.047 1.918 1.918 0 0 1 1.8 2.047 1.93 1.93 0 0 1-1.8 2.045Z" />
+                  </svg>
+                  <span class="sr-only">Discord community</span>
+                </a>
+                <a
+                  href="#"
+                  class="text-gray-500 hover:text-gray-900 dark:hover:text-white ms-5"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 20 17"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M20 1.892a8.178 8.178 0 0 1-2.355.635 4.074 4.074 0 0 0 1.8-2.235 8.344 8.344 0 0 1-2.605.98A4.13 4.13 0 0 0 13.85 0a4.068 4.068 0 0 0-4.1 4.038 4 4 0 0 0 .105.919A11.705 11.705 0 0 1 1.4.734a4.006 4.006 0 0 0 1.268 5.392 4.165 4.165 0 0 1-1.859-.5v.05A4.057 4.057 0 0 0 4.1 9.635a4.19 4.19 0 0 1-1.856.07 4.108 4.108 0 0 0 3.831 2.807A8.36 8.36 0 0 1 0 14.184 11.732 11.732 0 0 0 6.291 16 11.502 11.502 0 0 0 17.964 4.5c0-.177 0-.35-.012-.523A8.143 8.143 0 0 0 20 1.892Z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <span class="sr-only">Twitter page</span>
+                </a>
+                <a
+                  href="#"
+                  class="text-gray-500 hover:text-gray-900 dark:hover:text-white ms-5"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M10 .333A9.911 9.911 0 0 0 6.866 19.65c.5.092.678-.215.678-.477 0-.237-.01-1.017-.014-1.845-2.757.6-3.338-1.169-3.338-1.169a2.627 2.627 0 0 0-1.1-1.451c-.9-.615.07-.6.07-.6a2.084 2.084 0 0 1 1.518 1.021 2.11 2.11 0 0 0 2.884.823c.044-.503.268-.973.63-1.325-2.2-.25-4.516-1.1-4.516-4.9A3.832 3.832 0 0 1 4.7 7.068a3.56 3.56 0 0 1 .095-2.623s.832-.266 2.726 1.016a9.409 9.409 0 0 1 4.962 0c1.89-1.282 2.717-1.016 2.717-1.016.366.83.402 1.768.1 2.623a3.827 3.827 0 0 1 1.02 2.659c0 3.807-2.319 4.644-4.525 4.889a2.366 2.366 0 0 1 .673 1.834c0 1.326-.012 2.394-.012 2.72 0 .263.18.572.681.475A9.911 9.911 0 0 0 10 .333Z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <span class="sr-only">GitHub account</span>
+                </a>
+                <a
+                  href="#"
+                  class="text-gray-500 hover:text-gray-900 dark:hover:text-white ms-5"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M10 0a10 10 0 1 0 10 10A10.009 10.009 0 0 0 10 0Zm6.613 4.614a8.523 8.523 0 0 1 1.93 5.32 20.094 20.094 0 0 0-5.949-.274c-.059-.149-.122-.292-.184-.441a23.879 23.879 0 0 0-.566-1.239 11.41 11.41 0 0 0 4.769-3.366ZM8 1.707a8.821 8.821 0 0 1 2-.238 8.5 8.5 0 0 1 5.664 2.152 9.608 9.608 0 0 1-4.476 3.087A45.758 45.758 0 0 0 8 1.707ZM1.642 8.262a8.57 8.57 0 0 1 4.73-5.981A53.998 53.998 0 0 1 9.54 7.222a32.078 32.078 0 0 1-7.9 1.04h.002Zm2.01 7.46a8.51 8.51 0 0 1-2.2-5.707v-.262a31.64 31.64 0 0 0 8.777-1.219c.243.477.477.964.692 1.449-.114.032-.227.067-.336.1a13.569 13.569 0 0 0-6.942 5.636l.009.003ZM10 18.556a8.508 8.508 0 0 1-5.243-1.8 11.717 11.717 0 0 1 6.7-5.332.509.509 0 0 1 .055-.02 35.65 35.65 0 0 1 1.819 6.476 8.476 8.476 0 0 1-3.331.676Zm4.772-1.462A37.232 37.232 0 0 0 13.113 11a12.513 12.513 0 0 1 5.321.364 8.56 8.56 0 0 1-3.66 5.73h-.002Z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <span class="sr-only">Dribbble account</span>
                 </a>
               </div>
             </div>
