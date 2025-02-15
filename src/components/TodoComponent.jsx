@@ -385,7 +385,9 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
         color: isAutoColor ? undefined : textColor,
       }}
     >
-      {inNotebookSheet && <h1 className="text-2xl font-bold">TodoList</h1>}
+      {inNotebookSheet && (
+        <h1 className="text-2xl font-bold px-3 py-2">Todo List</h1>
+      )}
 
       {!isCollapsed && (
         <div className="p-3">
@@ -540,15 +542,6 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
             </button>
             {renderColorPicker()}
           </form>
-          <div className="flex w-full  p-2.5 justify-between">
-            <div
-              onClick={collapse}
-              className={`text-xl cursor-pointer p-2 flex items-center  w-full font-medium ${
-                isAutoColor ? "dark:text-white" : ""
-              }`}
-              style={{ color: isAutoColor ? undefined : textColor }}
-            ></div>
-          </div>
         </div>
       )}
     </div>

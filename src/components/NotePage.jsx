@@ -409,10 +409,12 @@ const NotePage = ({ inNotebookSheet = false }) => {
       onMouseLeave={() => setIsHovered(false)}
       className={`w-full h-full backdrop-blur-sm`}
     >
-      {inNotebookSheet && <h1 className="text-2xl font-bold">Notebook</h1>}
       <div className="rounded-sm h-full">
+        {inNotebookSheet && (
+          <h1 className="text-2xl font-bold px-3 py-2">Notebook</h1>
+        )}
         <div
-          className={`overflow-hidden h-full rounded-b-sm `}
+          className={`overflow-hidden h-[calc(100%-40px)] rounded-b-sm `}
           style={{
             backgroundColor: isAutoColor ? undefined : "",
           }}
