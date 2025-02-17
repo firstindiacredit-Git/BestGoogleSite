@@ -16,11 +16,11 @@ import {
   ChevronRight,
   ArrowRight,
 } from "lucide-react";
-import { Modal, Button, Image } from "antd";
+import "./Landing.css";
 
 const BrowserPreview = () => {
   return (
-    <div className="mt-16 relative">
+    <div className="mt-16 relative" id="hero">
       <div className="relative rounded-xl overflow-hidden p-2 bg-gray-200 border border-gray-300/80">
         {/* Browser Chrome UI */}
         <div className="h-10 bg-gray-100 border border-gray-300/80  border-b-0 rounded-t-xl flex items-center px-4 gap-2">
@@ -49,20 +49,6 @@ const BrowserPreview = () => {
       </div>
     </div>
   );
-};
-
-const grainStyle = {
-  position: "fixed",
-  top: "-50%",
-  left: "-50%",
-  right: "-50%",
-  bottom: "-50%",
-  width: "200%",
-  height: "200vh",
-  background: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-  opacity: "0.15",
-  pointerEvents: "none",
-  zIndex: 1,
 };
 
 const CustomCursor = () => {
@@ -121,7 +107,7 @@ const CustomCursor = () => {
     </div>
   );
 };
-
+[];
 // Add these styles to hide the default cursor
 const globalStyles = `
   * {
@@ -279,8 +265,6 @@ const LandingPage = () => {
   return (
     <div className="relative min-h-screen overflow-hidden">
       <CustomCursor />
-      {/* Grainy overlay */}
-      <div style={grainStyle} />
 
       {/* Background gradient with blur */}
       <div className="fixed inset-0 x bg-blue-50/50 backdrop-blur-3xl -z-10" />
@@ -561,7 +545,7 @@ const LandingPage = () => {
         </section>
 
         {/* Footer */}
-        <footer class="bg-blue-50">
+        <footer class="bg-blue-50/50">
           <div class="mx-auto w-full max-w-7xl p-4  lg:py-12">
             <div class="md:flex md:justify-between">
               <div class="mb-6 md:mb-0">
