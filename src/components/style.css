@@ -119,10 +119,12 @@
   width: 20% !important;
 }
 
-/* Temporary Search Styles */
 .temporary-search {
   transition: all 300ms !important;
   padding: 2px 1px !important;
+}
+.temporary-search .dark {
+  background-color: black !important;
 }
 
 .temporary-search .ant-input-wrapper {
@@ -130,6 +132,9 @@
   border-radius: 2px !important;
   overflow: hidden !important;
   padding: 0 12px !important;
+}
+.temporary-search .dark .ant-input-wrapper {
+  background-color: black !important;
 }
 
 .temporary-search .ant-input {
@@ -140,6 +145,9 @@
   border: none !important;
   box-shadow: none !important;
   padding: 0px 12px !important;
+}
+.temporary-search .dark .ant-input {
+  background-color: black !important;
 }
 
 .temporary-search .ant-input-search-button {
@@ -153,16 +161,22 @@
   justify-content: center !important;
   margin-left: -1px !important;
 }
+.temporary-search .dark .ant-input-search-button {
+  background-color: black !important;
+}
 
 .temporary-search .ant-input-search-button .anticon-search {
   color: #4285f4 !important;
   font-size: 18px !important;
 }
+.temporary-search .dark .ant-input-search-button .anticon-search {
+  color: white !important;
+}
 
-.temporary-search.dark .ant-input,
-.temporary-search.dark .ant-input-search-button {
-  background-color: white !important;
-  color: black !important;
+.temporary-search .dark .ant-input,
+.temporary-search .dark .ant-input-search-button {
+  background-color: black !important;
+  color: white !important;
 }
 
 .temporary-search .ant-input-search-button:hover {
@@ -170,7 +184,7 @@
 }
 
 .temporary-search.dark .ant-input-search-button:hover {
-  background-color: #f8f9fa !important;
+  background-color: black !important;
 }
 
 .temporary-search .ant-input::placeholder {

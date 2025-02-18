@@ -60,15 +60,15 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
     ),
     Bookmarks1: (
       <CategoryHome
-        categoryType="Travel"
-        itemName="Travel"
+        categoryType="AI"
+        itemName="AI"
         collapsed={collapsedItems["Bookmarks1"]}
       />
     ),
     Bookmarks2: (
       <CategoryHome
-        categoryType="AI"
-        itemName="AI"
+        categoryType="Travel"
+        itemName="Travel"
         collapsed={collapsedItems["Bookmarks2"]}
       />
     ),
@@ -109,6 +109,7 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
           const layout = await getPageLayout(currentUser.uid, pageId);
           setItems(layout.widgets);
           setColumns(layout.columns);
+          setPreviewColumns(layout.columns);
           setLoading(false);
         } else {
           setLoading(false);
@@ -288,8 +289,9 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
   }, [collapsedItems]);
 
   const handleColumnChange = async (numColumns) => {
-    setPreviewColumns(numColumns);
+    if (!user) return;
 
+    setPreviewColumns(numColumns);
     const redistributedItems = sortedItems.map((item, index) => ({
       ...item,
       column: index % numColumns,
@@ -308,10 +310,16 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
     setItems(sortedItems);
     setColumns(previewColumns);
 
-    await updatePageLayout(user.uid, pageId, {
-      widgets: sortedItems,
-      columns: previewColumns,
-    });
+    try {
+      await updatePageLayout(user.uid, pageId, {
+        widgets: sortedItems,
+        columns: previewColumns,
+      });
+      message.success("Layout updated successfully");
+    } catch (error) {
+      console.error("Error saving layout:", error);
+      message.error("Failed to save layout");
+    }
 
     setIsApplying(false);
     setIsSorterOpen(false);
@@ -387,11 +395,6 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
     } finally {
       setIsResetting(false);
     }
-  };
-
-  const resetCollapsedState = () => {
-    setCollapsedItems({});
-    localStorage.removeItem("collapsedItems");
   };
 
   if (!user) {

@@ -60,8 +60,8 @@ export const allWidgets = {
   imageUploader: { id: "imageUploader", name: "Image" },
   calendar: { id: "calendar", name: "Calendar" },
   Bookmarks: { id: "Bookmarks", name: "Popular" },
-  Bookmarks1: { id: "Bookmarks1", name: "Travel" },
-  Bookmarks2: { id: "Bookmarks2", name: "AI" },
+  Bookmarks1: { id: "Bookmarks1", name: "AI" },
+  Bookmarks2: { id: "Bookmarks2", name: "Travel" },
   Bookmarks3: { id: "Bookmarks3", name: "Sports" },
   Bookmarks4: { id: "Bookmarks4", name: "Shopping" },
   Bookmarks5: { id: "Bookmarks5", name: "News" },
@@ -96,15 +96,6 @@ export const initializeUserLayout = async (userId) => {
   }
 };
 
-// Function to calculate optimal columns based on window width
-// const calculateOptimalColumns = (windowWidth) => {
-//   const minWidgetWidth = 350; // Minimum width for a widget
-//   const padding = 32; // Account for container padding
-//   const availableWidth = windowWidth - padding;
-//   const calculatedColumns = Math.floor(availableWidth / minWidgetWidth);
-//   return Math.min(Math.max(calculatedColumns, 1), 4); // Limit between 1 and 4 columns
-// };
-
 // Function to redistribute widgets across new column count
 const redistributeWidgets = (widgets, newColumnCount) => {
   if (!widgets || !widgets.length) return [];
@@ -125,45 +116,21 @@ export const getPageLayout = async (userId, pageName) => {
   try {
     const userLayoutRef = doc(db, "users", userId, "layouts", "widgets");
     const layoutDoc = await getDoc(userLayoutRef);
-    const windowWidth = window.innerWidth;
-    const optimalColumns = calculateOptimalColumns(windowWidth);
 
     if (layoutDoc.exists()) {
       const data = layoutDoc.data();
       const pageData = data[pageName] || {
         widgets: defaultWidgets[pageName] || [],
-        columns: optimalColumns,
+        columns: 4, // Default columns if not set
       };
 
-      // Redistribute widgets if column count changed
-      if (pageData.columns !== optimalColumns) {
-        pageData.widgets = redistributeWidgets(
-          pageData.widgets,
-          optimalColumns
-        );
-        pageData.columns = optimalColumns;
-
-        // Update the layout with new distribution
-        await updatePageLayout(userId, pageName, pageData);
-      }
-
-      return pageData;
+      return pageData; // Return the exact data from DB
     }
 
-    // For new layouts, use optimal column count
-    const defaultLayout = {
+    return {
       widgets: defaultWidgets[pageName] || [],
-      columns: optimalColumns,
+      columns: 4,
     };
-
-    if (defaultLayout.widgets.length) {
-      defaultLayout.widgets = redistributeWidgets(
-        defaultLayout.widgets,
-        optimalColumns
-      );
-    }
-
-    return defaultLayout;
   } catch (error) {
     console.error("Error getting page layout:", error);
     return {
@@ -178,23 +145,19 @@ export const updatePageLayout = async (userId, pageName, layout) => {
   try {
     const userLayoutRef = doc(db, "users", userId, "layouts", "widgets");
     const layoutDoc = await getDoc(userLayoutRef);
-    const windowWidth = window.innerWidth;
-    const optimalColumns = calculateOptimalColumns(windowWidth);
-
-    // Ensure layout uses optimal column count
-    if (layout.columns !== optimalColumns) {
-      layout.columns = optimalColumns;
-      layout.widgets = redistributeWidgets(layout.widgets, optimalColumns);
-    }
 
     let currentData = {};
     if (layoutDoc.exists()) {
       currentData = layoutDoc.data();
     }
 
+    // Save both widgets and columns
     await setDoc(userLayoutRef, {
       ...currentData,
-      [pageName]: layout,
+      [pageName]: {
+        widgets: layout.widgets,
+        columns: layout.columns,
+      },
     });
 
     return true;

@@ -359,7 +359,7 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
 
   return (
     <>
-      <header className=" bg-gray-200/20 backdrop-blur-sm dark:bg-[#513a7a]/10 border-b border dark:border-gray-800/20 border-gray-200/20  sticky top-0 z-50">
+      <header className=" bg-gray-200/[var(--widget-opacity)] backdrop-blur-sm dark:bg-[#513a7a]/[var(--widget-opacity)] border-b border dark:border-gray-800/20 border-gray-200/20  sticky top-0 z-50">
         {isAdmin && showAdminBanner && (
           <div className="bg-red-500/90 backdrop-blur-sm text-white py-1 px-4 text-center sticky top-0 z-50">
             <Alert
@@ -412,20 +412,7 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
                           ? "text-yellow-500"
                           : "text-gray-500 dark:text-gray-400"
                       }`}
-                >
-                  {/* <span>
-                  {subscriptionStatus !== "pro" && (
-                    <button
-                      type="button"
-                      onClick={() => navigate("/premium")}
-                      className="text-gray-900 flex items-center gap-2 cursor-pointer bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500  hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-amber-800  shadow-amber-400/20 font-medium shadow-md rounded-lg text-sm px-5 py-2 text-center transition-all duration-500"
-                    >
-                      <FaCrown className="w-5 h-5" />
-                      Go Premium
-                    </button>
-                  )}
-                </span> */}
-                </div>
+                ></div>
               </div>
             ) : (
               <div className="w-36  "></div>

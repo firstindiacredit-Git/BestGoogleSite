@@ -1,21 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import {
-  Search,
-  Chrome,
-  Command,
-  Sparkles,
-  Zap,
-  Shield,
-  BookOpen,
-  Settings,
-  Layout,
-  Compass,
-  ChevronLeft,
-  ChevronRight,
-  ArrowRight,
-} from "lucide-react";
+
+import { Search } from "lucide-react";
 import "./Landing.css";
 
 const BrowserPreview = () => {
@@ -120,18 +107,6 @@ const globalStyles = `
 `;
 
 const LandingPage = () => {
-  // const FeatureCard = ({ icon: Icon, title, description }) => (
-  //   <motion.div
-  //     whileHover={{ y: -5 }}
-  //     className="p-6 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all"
-  //   >
-  //     <div className="w-12 h-12 bg-indigo-50 rounded-lg flex items-center justify-center mb-4">
-  //       <Icon className="w-6 h-6 text-indigo-600" />
-  //     </div>
-  //     <h3 className="text-lg font-semibold mb-2">{title}</h3>
-  //     <p className="text-gray-600">{description}</p>
-  //   </motion.div>
-  // );
   const features = [
     {
       name: "Push to deploy.",
@@ -139,12 +114,12 @@ const LandingPage = () => {
         "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Maiores impedit perferendis suscipit eaque, iste dolor cupiditate blanditiis ratione.",
       icon: "CloudArrowUpIcon",
     },
-    {
-      name: "SSL certificates.",
-      description:
-        "Anim aute id magna aliqua ad ad non deserunt sunt. Qui irure qui lorem cupidatat commodo.",
-      icon: "LockClosedIcon",
-    },
+    // {
+    //   name: "SSL certificates.",
+    //   description:
+    //     "Anim aute id magna aliqua ad ad non deserunt sunt. Qui irure qui lorem cupidatat commodo.",
+    //   icon: "LockClosedIcon",
+    // },
     {
       name: "Database backups.",
       description:
@@ -156,11 +131,11 @@ const LandingPage = () => {
     {
       quote:
         "Integer id nunc sit semper purus. Bibendum at lacus ut arcu blandit montes vitae auctor libero.",
-      name: "Leslie Alexander",
+      name: "Md Sharik",
       role: "Founder",
       company: "SavvyCal",
       image:
-        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+        "https://crm.pizeonfly.com/employee/employeeImage-1738233144046-135040117-min.png",
       accent: "from-indigo-500 to-purple-500",
     },
     {
@@ -170,7 +145,7 @@ const LandingPage = () => {
       role: "CEO",
       company: "Brex",
       image:
-        "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+        "https://crm.pizeonfly.com/employee/employeeImage-1733120594825-IMG_2025-1.jpg",
       accent: "from-purple-500 to-pink-500",
     },
     {
@@ -180,7 +155,7 @@ const LandingPage = () => {
       role: "CEO",
       company: "Brex",
       image:
-        "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+        "https://crm.pizeonfly.com/employee/employeeImage-1732530813797-sino.jpeg",
       accent: "from-purple-500 to-pink-500",
     },
     {
@@ -190,7 +165,7 @@ const LandingPage = () => {
       role: "CEO",
       company: "Brex",
       image:
-        "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+        "https://crm.pizeonfly.com/employee/employeeImage-1733202653628-Untitled design (4).png",
       accent: "from-purple-500 to-pink-500",
     },
     {
@@ -200,7 +175,7 @@ const LandingPage = () => {
       role: "CEO",
       company: "Brex",
       image:
-        "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+        "https://crm.pizeonfly.com/employee/employeeImage-1728980580983-IMG20241007191701.jpg",
       accent: "from-purple-500 to-pink-500",
     },
     // Add more testimonials...
@@ -223,7 +198,7 @@ const LandingPage = () => {
             {testimonials.map((testimonial, index) => (
               <div
                 key={index}
-                className="relative rounded-2xl drop-shadow-md border border-gray-200 bg-white p-6 "
+                className="relative rounded-2xl  border border-gray-200 bg-white p-6 "
               >
                 <div className="flex gap-x-4 mb-6">
                   <img
@@ -252,7 +227,6 @@ const LandingPage = () => {
   };
 
   useEffect(() => {
-    // Add global styles
     const styleSheet = document.createElement("style");
     styleSheet.innerText = globalStyles;
     document.head.appendChild(styleSheet);
@@ -498,7 +472,7 @@ const LandingPage = () => {
             </div>
           </div>
         </div>
-        <div className="  bg-white py-24 sm:py-32">
+        <div className="  bg-white space-y-10 py-24 sm:py-32">
           <div className="mx-auto border border-gray-200/80 rounded-3xl p-8 max-w-7xl overflow-x-hidden   lg:px-8">
             <div className="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 sm:gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-2">
               <div className="lg:pt-4 lg:pr-8">
@@ -530,11 +504,96 @@ const LandingPage = () => {
                   </dl>
                 </div>
               </div>
-              <img
-                alt="Product screenshot"
-                src="/Screenshot 2025-02-15 162951.png"
-                className="w-[48rem] max-w-none rounded-xl  sm:w-[65rem]"
-              />
+              <div className=" flex items-center">
+                <img
+                  alt="Product screenshot"
+                  src="/WidgetGIF.gif"
+                  className="w-full max-w-none rounded-xl"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="mx-auto border border-gray-200/80 rounded-3xl p-8 max-w-7xl overflow-x-hidden   lg:px-8">
+            <div className="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 sm:gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-2">
+              <div className=" flex   items-center">
+                <img
+                  alt="Product screenshot"
+                  src="/WidgetLayout.gif"
+                  style={{
+                    objectFit: "fill",
+                  }}
+                  className=" h-[18.1rem] rounded-xl"
+                />
+              </div>
+              <div className="lg:pt-4 lg:pr-8">
+                <div className="lg:max-w-lg">
+                  <h2 className="text-base/7 font-semibold text-indigo-600">
+                    Change layout
+                  </h2>
+                  <p className="mt-2 text-4xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-5xl">
+                    Your choice matters.
+                  </p>
+                  <p className="mt-6 text-lg/8 text-gray-600">
+                    Lorem ipsum, dolor sit amet consectetur adipisicing elit.
+                    Maiores impedit perferendis suscipit eaque, iste dolor
+                    cupiditate blanditiis ratione.
+                  </p>
+                  <dl className="mt-10 max-w-xl space-y-8 text-base/7 text-gray-600 lg:max-w-none">
+                    {features.map((feature) => (
+                      <div key={feature.name} className="relative pl-9">
+                        <dt className="inline font-semibold text-gray-900">
+                          <feature.icon
+                            aria-hidden="true"
+                            className="absolute top-1 left-1 size-5 text-indigo-600"
+                          />
+                          {feature.name}
+                        </dt>{" "}
+                        <dd className="inline">{feature.description}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="mx-auto border border-gray-200/80 rounded-3xl p-8 max-w-7xl overflow-x-hidden   lg:px-8">
+            <div className="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 sm:gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-2">
+              <div className="lg:pt-4 lg:pr-8">
+                <div className="lg:max-w-lg">
+                  <h2 className="text-base/7 font-semibold text-indigo-600">
+                    Deploy faster
+                  </h2>
+                  <p className="mt-2 text-4xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-5xl">
+                    Choose your style.
+                  </p>
+                  <p className="mt-6 text-lg/8 text-gray-600">
+                    Lorem ipsum, dolor sit amet consectetur adipisicing elit.
+                    Maiores impedit perferendis suscipit eaque, iste dolor
+                    cupiditate blanditiis ratione.
+                  </p>
+                  <dl className="mt-10 max-w-xl space-y-8 text-base/7 text-gray-600 lg:max-w-none">
+                    {features.map((feature) => (
+                      <div key={feature.name} className="relative pl-9">
+                        <dt className="inline font-semibold text-gray-900">
+                          <feature.icon
+                            aria-hidden="true"
+                            className="absolute top-1 left-1 size-5 text-indigo-600"
+                          />
+                          {feature.name}
+                        </dt>{" "}
+                        <dd className="inline">{feature.description}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              </div>
+              <div className=" flex items-center">
+                <img
+                  alt="Product screenshot"
+                  src="/Changegb.gif"
+                  className=" rounded-xl"
+                />
+              </div>
             </div>
           </div>
         </div>

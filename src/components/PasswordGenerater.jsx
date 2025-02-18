@@ -16,6 +16,56 @@ import { AiFillEyeInvisible, AiFillEye } from "react-icons/ai";
 import { MdDelete, MdEdit, MdEditSquare } from "react-icons/md";
 import { FiPlusCircle } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
+import { message } from "antd";
+
+message.config({
+  top: 60,
+  duration: 2,
+  maxCount: 3,
+  className: "custom-message-class",
+});
+
+const styleSheet = document.createElement("style");
+styleSheet.textContent = `
+  .custom-message-class {
+    background: rgba(0, 0, 0, 0.8) !important;
+    border-radius: 8px !important;
+    backdrop-filter: blur(8px) !important;
+  }
+
+  .custom-message-class .ant-message-notice-content {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .custom-message-class .anticon {
+    color: #52c41a !important; /* Success icon color */
+  }
+
+  .custom-message-class .ant-message-success .ant-message-notice-content,
+  .custom-message-class .ant-message-error .ant-message-notice-content,
+  .custom-message-class .ant-message-warning .ant-message-notice-content {
+    color: white !important;
+  }
+
+  .dark .custom-message-class {
+    background: rgba(40, 40, 58, 0.95) !important;
+  }
+
+  .dark .custom-message-class .anticon-check-circle {
+    color: #52c41a !important;
+  }
+
+  .dark .custom-message-class .anticon-close-circle {
+    color: #ff4d4f !important;
+  }
+
+  .dark .custom-message-class .anticon-warning {
+    color: #faad14 !important;
+  }
+`;
+
+document.head.appendChild(styleSheet);
 
 const CredentialManager = () => {
   const [showPasswords, setShowPasswords] = useState({});
@@ -71,7 +121,7 @@ const CredentialManager = () => {
       setIsLocked(false);
       setOtp(["", "", "", ""]);
     } else {
-      alert("Incorrect Pin! Please try again.");
+      message.error("Incorrect Pin! Please try again.");
     }
   };
 
@@ -136,9 +186,14 @@ const CredentialManager = () => {
     `https://www.google.com/s2/favicons?sz=64&domain=${url}`;
 
   const handleCopyText = (text) => {
-    navigator.clipboard.writeText(text).then(() => {
-      alert("Copied to clipboard!");
-    });
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        message.success("Copied to clipboard");
+      })
+      .catch(() => {
+        message.error("Failed to copy to clipboard");
+      });
   };
 
   // Add filter function for search
@@ -171,12 +226,15 @@ const CredentialManager = () => {
     }
 
     setGenPass(password);
+    message.success("Password generated successfully");
   };
 
   const handleCopyPassword = () => {
-    navigator.clipboard.writeText(genPass).then(() => {
-      alert("Password copied to clipboard!");
-    });
+    if (!genPass) {
+      message.warning("Please generate a password first");
+      return;
+    }
+    handleCopyText(genPass);
   };
 
   const showModal = (credential = null) => {
@@ -219,8 +277,10 @@ const CredentialManager = () => {
       setCredentials((prevCredentials) =>
         prevCredentials.filter((cred) => cred.id !== credentialId)
       );
+      message.success("Credential deleted successfully");
     } catch (error) {
       console.error("Error deleting credential:", error);
+      message.error("Failed to delete credential");
     }
   };
 
@@ -300,26 +360,59 @@ const CredentialManager = () => {
     event.preventDefault();
     const { website, url, username, password, notes } = formValues;
 
+    if (!website || !username || !password) {
+      message.warning("Please fill in all required fields");
+      return;
+    }
+
     try {
       const newCredential = { website, url, username, password, notes };
+
       if (currentCredential) {
-        const docRef = doc(db, `users/${userId}/passwords/${entryId}`);
-        console.log(docRef.path);
-        await updateDoc(docRef, {
-          website: website,
-          url: url,
-          username: username,
-          password: password,
-          notes: notes,
-        });
+        // Update existing credential
+        const docRef = doc(
+          db,
+          `users/${userId}/passwords/${currentCredential.id}`
+        );
+        await updateDoc(docRef, newCredential);
+
+        // Update local state
+        setCredentials((prevCreds) =>
+          prevCreds.map((cred) =>
+            cred.id === currentCredential.id
+              ? { ...cred, ...newCredential }
+              : cred
+          )
+        );
+
+        message.success("Credential updated successfully");
       } else {
-        setCredentials([...credentials, newCredential]);
-        await saveCredentialToFirestore(newCredential); // Save to Firestore
+        // Add new credential
+        const docRef = await addDoc(
+          collection(db, `users/${userId}/passwords`),
+          newCredential
+        );
+
+        // Update local state
+        setCredentials((prevCreds) => [
+          ...prevCreds,
+          { id: docRef.id, ...newCredential },
+        ]);
+        message.success("Credential added successfully");
       }
+
       setIsModalVisible(false);
       setCurrentCredential(null);
+      setFormValues({
+        website: "",
+        url: "",
+        username: "",
+        password: "",
+        notes: "",
+      });
     } catch (error) {
       console.error("Error saving credential:", error);
+      message.error("Failed to save credential");
     }
   };
 
@@ -337,7 +430,7 @@ const CredentialManager = () => {
       {isLocked ? (
         <div className="flex justify-center w-[90vw] mx-auto">
           <div className="w-full  rounded-t-sm   h-[40vh]   flex items-center justify-center">
-            <div className="p-8 flex w-1/3 gap-6  items-center justify-between border bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]  border-gray-500/5 text-center rounded-sm shadow-lg ">
+            <div className="p-8 flex w-1/3 gap-6  items-center justify-between border backdrop-blur-sm bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]  border-gray-500/5 text-center rounded-sm shadow-lg ">
               <div className=" text-indigo-500 mr-10 text-6xl">
                 <img src="/undraw_secure-login_m11a.svg" alt="locker" />
               </div>
@@ -383,25 +476,25 @@ const CredentialManager = () => {
           </div>
         </div>
       ) : (
-        <div className="p-8 bg-white/[var(--widget-opacity)] dark:bg-[#28283A]/[var(--widget-opacity)] mx-auto backdrop-blur-sm min-h-[20vh] max-w-[90vw] rounded-xl ">
-          <div className="   p-4 bg-white">
-            <div className="flex justify-between w-[68%] xl:w-[79.2%]  dark:bg-[#28283A] bg-white items-center">
+        <div className="p-8 bg-white/[var(--widget-opacity)]  dark:bg-[#28283A]/[var(--widget-opacity)] mx-auto backdrop-blur-sm min-h-[20vh] max-w-[90vw] rounded-xl ">
+          <div>
+            <div className="flex justify-between w-[68%] xl:w-[79.2%]  items-center">
               <button
-                className="transition-all bg-indigo-500 text-white lg:text-lg text-sm lg:px-4 px-2 py-2 rounded-xs mb-4"
+                className="transition-all rounded-md bg-indigo-500 dark:bg-[#513a7a] text-white lg:text-lg text-sm lg:px-4 px-2 py-2 rounded-xs mb-4"
                 onClick={() => showModal()}
               >
                 <FaPlus size={15} />
               </button>
 
-              <div className="relative flex space-x-1 w-1/2 mb-4">
+              <div className="relative flex space-x-1 w-1/2  mb-4">
                 <input
                   type="text"
                   placeholder="Search credentials..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-4 py-2 dark:bg-[#513a7a] dark:border-gray-700 dark:text-white border rounded-xs focus:outline-none focus:ring-2 focus:ring-gray-800"
+                  className="w-full rounded-md px-4 py-2 dark:bg-[#513a7a] dark:border-gray-700 dark:text-white border rounded-xs focus:outline-none focus:ring-2 focus:ring-gray-800"
                 />
-                <div className="flex items-center gap-2 bg-gray-200 dark:bg-[#513a7a] p-1 rounded-sm">
+                <div className="flex items-center rounded-md gap-2 bg-gray-200 dark:bg-[#513a7a] p-1 ">
                   <button
                     onClick={() => setIsGridView(true)}
                     className={`p-2 rounded ${
@@ -447,7 +540,7 @@ const CredentialManager = () => {
               <div className="lg:space-x-2 w-fit flex justify-between  space-x-1">
                 {filteredCredentials.length > 0 && (
                   <button
-                    className="transition-all w-fit text-center dark:bg-[#513a7a] dark:hover:bg-gray-600 dark:text-gray-200  bg-gray-300 hover:bg-gray-600 hover:text-gray-100 text-gray-800 border border-black/5 px-4 py-2 rounded-xs mb-4"
+                    className="transition-all w-fit text-center rounded-md dark:bg-[#513a7a] dark:hover:bg-gray-600 dark:text-gray-200  bg-gray-300 hover:bg-gray-600 hover:text-gray-100 text-gray-800 border border-black/5 px-4 py-2 rounded-xs mb-4"
                     onClick={toggleAllPasswordVisibility}
                   >
                     {filteredCredentials.length > 0 &&
@@ -459,7 +552,7 @@ const CredentialManager = () => {
                   </button>
                 )}
                 <button
-                  className="transition-all bg-red-500 text-white px-4 py-2 rounded-xs mb-4"
+                  className="transition-all rounded-md bg-red-500 text-white px-4 py-2 rounded-xs mb-4"
                   onClick={() => {
                     setIsLocked(true);
                     setPassword("");
@@ -470,134 +563,118 @@ const CredentialManager = () => {
               </div>
             </div>
 
-            <div className="flex justify-between  space-x-4 w-full dark:bg-[#28283A] bg-white">
+            <div className="flex justify-between  space-x-4 w-full ">
               {isGridView ? (
                 filteredCredentials.length > 0 ? (
-                  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 p-5 dark:bg-gray-950/10 bg-gray-100 border h-fit border-black/5 rounded-sm gap-4 w-[70%] xl:w-[80%]">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 h-fit gap-4 w-[70%] xl:w-[80%]">
                     {filteredCredentials.map((cred, index) => {
                       const { label, color, message } =
                         calculatePasswordStrength(cred.password);
-
                       return (
                         <div
                           key={cred.id || index}
-                          className="bg-white dark:bg-[#513a7a] dark:text-gray-400 overflow-auto p-4 h-fit rounded-sm border border-black/10 relative"
+                          className="bg-white dark:bg-[#28283A] hover:dark:bg-[#513a7a] transition-colors duration-200 dark:text-gray-400 p-6 rounded-lg border dark:border-gray-800/20 border-gray-200 shadow-sm hover:shadow-md relative"
                         >
                           {/* Title and Logo */}
                           <div className="flex items-center justify-between mb-4">
-                            <h2 className="font-bold text-2xl uppercase">
+                            <h2 className="font-semibold text-xl dark:text-gray-200">
                               {cred.website}
                             </h2>
                             <img
                               src={fetchFavicon(cred.url)}
                               alt="logo"
-                              className="h-8"
+                              className="h-8 w-8 object-contain"
                             />
                           </div>
 
                           {/* URL */}
-                          <div className="text-gray-400 font-bold -mt-2 flex justify-between mb-3">
-                            URL:{" "}
+                          <div className="flex items-center gap-2 mb-4">
+                            <span className="text-sm text-gray-500 dark:text-gray-400">
+                              URL:
+                            </span>
                             <a
                               href={cred.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="truncate hover:underline transition-all text-xl text-indigo-500"
+                              className="text-sm text-indigo-500 hover:text-indigo-600 truncate transition-colors"
                             >
                               {cred.url}
                             </a>
                           </div>
 
-                          {/* Username */}
-                          <div className="flex justify-between w-full items-center mb-3">
-                            <span className="text-gray-600 w-[30%] font-bold dark:text-gray-400">
-                              Username:
-                            </span>
-                            <div className="flex dark:bg-[#28283A] w-[70%] rounded-xs justify-between bg-gray-50 px-3 items-center space-x-2">
-                              <span>{cred.username}</span>
-                              <button
-                                onClick={() => handleCopyText(cred.username)}
-                                className="text-gray-400 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-500"
-                              >
-                                <FaCopy />
-                              </button>
-                            </div>
-                          </div>
-
-                          {/* Password */}
-                          <div className="flex justify-between w-full items-center mb-4">
-                            <span className="text-gray-600 w-[30%] font-bold dark:text-gray-400">
-                              Password:
-                            </span>
-                            <div className="flex dark:bg-[#28283A] w-[70%] rounded-xs bg-gray-50 px-3 items-center justify-between space-x-2">
-                              <span className="text-gray-800 dark:text-gray-400 overflow-hidden">
-                                {showPasswords[cred.website]
-                                  ? cred.password
-                                  : "••••••••"}
+                          {/* Credentials */}
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-gray-500 dark:text-gray-400">
+                                Username:
                               </span>
-                              <div className="flex items-center space-x-2">
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium dark:text-gray-300">
+                                  {cred.username}
+                                </span>
+                                <button
+                                  onClick={() => handleCopyText(cred.username)}
+                                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-md transition-colors"
+                                >
+                                  <FaCopy className="w-4 h-4 text-gray-400 hover:text-indigo-500" />
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-gray-500 dark:text-gray-400">
+                                Password:
+                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium dark:text-gray-300">
+                                  {showPasswords[cred.website]
+                                    ? cred.password
+                                    : "••••••••"}
+                                </span>
                                 <button
                                   onClick={() =>
                                     togglePasswordVisibility(cred.website)
                                   }
-                                  className="transition-all text-gray-400 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-500"
+                                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-md transition-colors"
                                 >
                                   {showPasswords[cred.website] ? (
-                                    <FaEye />
+                                    <FaEyeSlash className="w-4 h-4 text-gray-400 hover:text-indigo-500" />
                                   ) : (
-                                    <FaEyeSlash />
+                                    <FaEye className="w-4 h-4 text-gray-400 hover:text-indigo-500" />
                                   )}
                                 </button>
                                 <button
                                   onClick={() => handleCopyText(cred.password)}
-                                  className="transition-all text-gray-400 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-500"
+                                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-md transition-colors"
                                 >
-                                  <FaCopy />
+                                  <FaCopy className="w-4 h-4 text-gray-400 hover:text-indigo-500" />
                                 </button>
                               </div>
                             </div>
                           </div>
 
-                          {/* Password Strength */}
-                          <div className="mb-4">
-                            <div className="flex items-center">
-                              <div
-                                className={`h-1 flex-grow rounded-full ${color}`}
-                              />
-                            </div>
-                            <div
-                              className={`text-sm mt-1 ${
-                                label === "Strong"
-                                  ? "text-green-600"
-                                  : label === "Medium"
-                                  ? "text-yellow-600"
-                                  : "text-red-600"
-                              }`}
-                            >
-                              <span>Strength: {label}</span>
-                            </div>
-                          </div>
-
-                          {/* Actions */}
-                          <div className="flex justify-between space-x-3 mt-2">
+                          {/* Footer */}
+                          <div className="flex items-center justify-between mt-4 pt-4 border-t dark:border-gray-800/20">
                             <div>
                               <div className="text-xs text-gray-500">
-                                Time needed to crack the Password
+                                Password Strength
                               </div>
-                              <div className="font-semibold">{message}</div>
+                              <div className="text-sm font-medium dark:text-gray-300">
+                                {message}
+                              </div>
                             </div>
-                            <div>
+                            <div className="flex items-center gap-2">
                               <button
-                                className="text-indigo-500 hover:bg-gray-100 p-[0.1rem] py-[0.12rem] transition-all rounded-sm -translate-x-1 -translate-y-[2px]"
+                                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-md transition-colors text-indigo-500"
                                 onClick={() => showModal(cred)}
                               >
-                                <MdEditSquare size={21} />
+                                <MdEditSquare size={18} />
                               </button>
                               <button
-                                className="text-red-500 hover:bg-gray-100 rounded-sm transition-all"
+                                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-md transition-colors text-red-500"
                                 onClick={() => handleDelete(cred.id)}
                               >
-                                <MdDelete size={25} />
+                                <MdDelete size={18} />
                               </button>
                             </div>
                           </div>
@@ -606,7 +683,7 @@ const CredentialManager = () => {
                     })}
                   </div>
                 ) : (
-                  <div className="flex flex-col w-[70%] xl:w-[80%] p-5 dark:bg-[#513a7a] bg-white rounded-sm border border-gray-800/10 min-h-72 justify-center items-center  text-gray-500">
+                  <div className="flex  flex-col w-[70%] xl:w-[80%] p-5 dark:bg-[#513a7a] bg-white rounded-md  border border-gray-800/10 min-h-72 justify-center items-center  text-gray-500">
                     <FiPlusCircle
                       size={80}
                       onClick={() => showModal()}
@@ -621,7 +698,7 @@ const CredentialManager = () => {
                   </div>
                 )
               ) : (
-                <div className="overflow-x-auto w-[80%] min-h-72 dark:bg-gray-950/10 bg-white border  border-black/10 rounded-sm">
+                <div className="overflow-x-auto w-[80%] min-h-72 dark:bg-[#28283A] bg-white border  border-black/10 rounded-sm">
                   {filteredCredentials.length > 0 ? (
                     <>
                       <table className="min-w-full  rounded-sm  table-auto">
@@ -778,10 +855,10 @@ const CredentialManager = () => {
                   )}
                 </div>
               )}
-              <div className="w-[30%]  dark:bg-[#28283A] bg-white xl:w-[20%] ">
+              <div className="w-[30%]   xl:w-[20%] ">
                 <div>
                   <h2
-                    className={`font-semibold dark:bg-[#28283A] bg-white ${
+                    className={`font-semibold dark:bg-[#28283A] rounded-md py-2 bg-white ${
                       window.size < 1134 ? "-translate-y-8" : "-translate-y-14"
                     } text-center dark:text-gray-100 text-lg lg:text-2xl `}
                   >
@@ -790,13 +867,13 @@ const CredentialManager = () => {
                   <div
                     className={`dark:bg-[#513a7a] bg-gray-100 ${
                       window.size < 1134 ? "-translate-y-8" : "-translate-y-16"
-                    } border border-black/5 flex flex-col justify-between -translate-y-8 text-center space-y-5  w-full h-full   text-gray-700 rounded-xs p-6`}
+                    } border border-black/5 flex flex-col rounded-md justify-between -translate-y-8 text-center space-y-5  w-full h-full   text-gray-700 rounded-xs p-6`}
                   >
-                    <div className="text-gray-700 border border-black/10 dark:bg-[#28283A] dark:text-gray-300 bg-white p-3 text-[1vw] font-mono rounded-xs">
-                      {genPass || "Generate hackproof password"}
+                    <div className="text-gray-700 border rounded-md  border-black/10 dark:bg-[#28283A] dark:text-gray-300 bg-white p-3 text-[1vw] font-mono rounded-xs">
+                      {genPass || "***********"}
                     </div>
 
-                    <div className="mt-4 text-left flex flex-col  justify-between   space-y-2">
+                    <div className="mt-4 text-left flex flex-col   justify-between   space-y-2">
                       <label className="block text-sm">
                         <input
                           type="number"
@@ -804,7 +881,7 @@ const CredentialManager = () => {
                           max="24"
                           value={length}
                           onChange={(e) => setLength(e.target.value)}
-                          className="mr-2 text-gray-700 dark:text-gray-300 text-center dark:bg-[#28283A] px-3 py-2 rounded-xs"
+                          className="mr-2 rounded-md  text-gray-700 dark:text-gray-300 text-center dark:bg-[#28283A] px-3 py-2 rounded-xs"
                         />
                         <span className="dark:text-gray-300">Length</span>
                       </label>
@@ -843,13 +920,13 @@ const CredentialManager = () => {
                     <div className="flex flex-col xl:flex-row justify-center space-y-2 xl:space-y-0  w-full xl:space-x-3 mt-4">
                       <button
                         onClick={() => generateRandomPassword(length)}
-                        className="bg-gray-300 dark:text-gray-400 dark:hover:bg-gray-900 dark:bg-[#513a7a] border  border-gray-500/5 text-gray-700 w-full xl:w-[60%] px-4 py-2 rounded-xs hover:bg-gray-800 hover:text-gray-100 transition duration-300"
+                        className="bg-gray-300 rounded-md  dark:text-gray-400 dark:hover:bg-gray-900 dark:bg-[#28283A] border  border-gray-500/5 text-gray-700 w-full xl:w-[60%] px-4 py-2 rounded-xs hover:bg-gray-800 hover:text-gray-100 transition duration-300"
                       >
                         Generate
                       </button>
                       <button
                         onClick={handleCopyPassword}
-                        className="bg-gray-300 border  dark:text-gray-400 dark:hover:bg-gray-900 dark:bg-[#513a7a] border-gray-500/5 text-gray-700 w-full xl:w-[40%] px-4 py-2 rounded-xs hover:bg-gray-800 hover:text-gray-100  transition duration-300"
+                        className="bg-gray-300 rounded-md  dark:text-gray-400 dark:hover:bg-gray-900 dark:bg-[#28283A] border-gray-500/5 text-gray-700 w-full xl:w-[40%] px-4 py-2 rounded-xs hover:bg-gray-800 hover:text-gray-100  transition duration-300"
                       >
                         Copy
                       </button>
@@ -861,73 +938,78 @@ const CredentialManager = () => {
 
             {/* Modal Component */}
             {isModalVisible && (
-              <div className="fixed inset-0 bg-black backdrop-blur-sm bg-opacity-50 flex items-center justify-center">
-                <div className="dark:bg-[#513a7a] bg-white p-8 rounded-sm w-96">
-                  <h2 className="text-2xl mb-4 dark:text-gray-100">
-                    {currentCredential ? "Edit Credential" : "Add Credential"}
-                  </h2>
-                  <form
-                    onSubmit={(event) => {
-                      handleSave(event, selectedCred);
-                    }}
-                  >
-                    <div className="space-y-4">
-                      <input
-                        type="text"
-                        name="website"
-                        value={formValues.website}
-                        onChange={handleInputChange}
-                        placeholder="Website"
-                        className="w-full p-2 dark:bg-[#28283A] dark:text-gray-400 dark:border-gray-600 border rounded"
-                      />
-                      <input
-                        type="text"
-                        name="url"
-                        value={formValues.url}
-                        onChange={handleInputChange}
-                        placeholder="URL"
-                        className="w-full p-2 dark:bg-[#28283A] dark:text-gray-400 dark:border-gray-600 border rounded"
-                      />
-                      <input
-                        type="text"
-                        name="username"
-                        value={formValues.username}
-                        onChange={handleInputChange}
-                        placeholder="Username"
-                        className="w-full p-2 dark:bg-[#28283A] dark:text-gray-400 dark:border-gray-600 border rounded"
-                      />
-                      <input
-                        type="text"
-                        name="password"
-                        value={formValues.password}
-                        onChange={handleInputChange}
-                        placeholder="Password"
-                        className="w-full p-2 dark:bg-[#28283A] dark:text-gray-400 dark:border-gray-600 border rounded"
-                      />
-                      <textarea
-                        name="notes"
-                        value={formValues.notes}
-                        onChange={handleInputChange}
-                        placeholder="Notes"
-                        className="w-full p-2 dark:bg-[#28283A] dark:text-gray-400 dark:border-gray-600 border rounded"
-                      />
-                    </div>
-                    <div className="flex justify-end space-x-2 mt-4">
-                      <button
-                        type="button"
-                        onClick={() => setIsModalVisible(false)}
-                        className="px-4 py-2 dark:bg-[#513a7a] transition-all dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-900 border rounded"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        className="px-4 py-2 bg-indigo-500 border dark:bg-indigo-700 dark:border-blue-600 transition-all dark:text-gray-300 dark:hover:bg-blue-900 text-white rounded"
-                      >
-                        Save
-                      </button>
-                    </div>
-                  </form>
+              <div className="fixed inset-0 z-[999]">
+                {/* Backdrop */}
+                <div
+                  className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                  onClick={() => setIsModalVisible(false)}
+                />
+
+                {/* Modal Content */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 max-w-[90vw]">
+                  <div className="dark:bg-[#513a7a] bg-white p-8 rounded-lg shadow-xl">
+                    <h2 className="text-2xl mb-4 dark:text-gray-100">
+                      {currentCredential ? "Edit Credential" : "Add Credential"}
+                    </h2>
+                    <form onSubmit={(event) => handleSave(event, selectedCred)}>
+                      <div className="space-y-4">
+                        <input
+                          type="text"
+                          name="website"
+                          value={formValues.website}
+                          onChange={handleInputChange}
+                          placeholder="Website"
+                          className="w-full p-2 dark:bg-[#28283A] dark:text-gray-400 dark:border-gray-600 border rounded-md"
+                        />
+                        <input
+                          type="text"
+                          name="url"
+                          value={formValues.url}
+                          onChange={handleInputChange}
+                          placeholder="URL"
+                          className="w-full p-2 dark:bg-[#28283A] dark:text-gray-400 dark:border-gray-600 border rounded-md"
+                        />
+                        <input
+                          type="text"
+                          name="username"
+                          value={formValues.username}
+                          onChange={handleInputChange}
+                          placeholder="Username"
+                          className="w-full p-2 dark:bg-[#28283A] dark:text-gray-400 dark:border-gray-600 border rounded-md"
+                        />
+                        <input
+                          type="text"
+                          name="password"
+                          value={formValues.password}
+                          onChange={handleInputChange}
+                          placeholder="Password"
+                          className="w-full p-2 dark:bg-[#28283A] dark:text-gray-400 dark:border-gray-600 border rounded-md"
+                        />
+                        <textarea
+                          name="notes"
+                          value={formValues.notes}
+                          onChange={handleInputChange}
+                          placeholder="Notes"
+                          className="w-full p-2 dark:bg-[#28283A] dark:text-gray-400 dark:border-gray-600 border rounded-md"
+                        />
+                      </div>
+                      <div className="flex justify-end space-x-2 mt-4">
+                        <button
+                          type="button"
+                          onClick={() => setIsModalVisible(false)}
+                          className="px-4 py-2 dark:bg-[#28283A] transition-all dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-900 border rounded-md"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          className="px-4 py-2 bg-indigo-500 border dark:bg-indigo-700 dark:border-blue-600 transition-all dark:text-gray-300 dark:hover:bg-blue-900 text-white rounded-md"
+                        >
+                          Save
+                        </button>
+                      </div>
+                    </form>
+                  </div>
                 </div>
               </div>
             )}
