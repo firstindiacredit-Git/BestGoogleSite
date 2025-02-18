@@ -3,7 +3,7 @@ import { Row, Col } from "antd";
 const SkeletonCard = ({ isListView }) => {
   if (isListView) {
     return (
-      <div className="animate-pulse flex items-center p-4 bg-white dark:bg-[#513a7a] rounded-lg shadow-sm">
+      <div className="animate-pulse flex items-center p-4 bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] rounded-lg shadow-sm">
         <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
         <div className="ml-4 flex-1">
           <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>

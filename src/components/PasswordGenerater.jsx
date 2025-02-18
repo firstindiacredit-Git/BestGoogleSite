@@ -430,7 +430,7 @@ const CredentialManager = () => {
       {isLocked ? (
         <div className="flex justify-center w-[90vw] mx-auto">
           <div className="w-full  rounded-t-sm   h-[40vh]   flex items-center justify-center">
-            <div className="p-8 flex w-1/3 gap-6  items-center justify-between border backdrop-blur-sm bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]  border-gray-500/5 text-center rounded-sm shadow-lg ">
+            <div className="p-8 flex w-2/5 gap-6  items-center justify-between backdrop-blur-sm bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]  text-center rounded-md ">
               <div className=" text-indigo-500 mr-10 text-6xl">
                 <img src="/undraw_secure-login_m11a.svg" alt="locker" />
               </div>
@@ -476,7 +476,7 @@ const CredentialManager = () => {
           </div>
         </div>
       ) : (
-        <div className="p-8 bg-white/[var(--widget-opacity)]  dark:bg-[#28283A]/[var(--widget-opacity)] mx-auto backdrop-blur-sm min-h-[20vh] max-w-[90vw] rounded-xl ">
+        <div className="p-8 bg-white/[var(--widget-opacity)]  dark:bg-[#28283A]/[var(--widget-opacity)] mx-auto backdrop-blur-sm min-h-[60vh] max-w-[90vw] rounded-xl ">
           <div>
             <div className="flex justify-between w-[68%] xl:w-[79.2%]  items-center">
               <button
@@ -492,13 +492,13 @@ const CredentialManager = () => {
                   placeholder="Search credentials..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full rounded-md px-4 py-2 dark:bg-[#513a7a] dark:border-gray-700 dark:text-white border rounded-xs focus:outline-none focus:ring-2 focus:ring-gray-800"
+                  className="w-full rounded-md px-4 py-2 dark:bg-[#28283a]   dark:text-white  rounded-xs focus:outline-none focus:ring-2 focus:ring-gray-800"
                 />
-                <div className="flex items-center rounded-md gap-2 bg-gray-200 dark:bg-[#513a7a] p-1 ">
+                <div className="flex items-center rounded-md gap-2 bg-gray-200 dark:bg-[#28283a]   p-1 ">
                   <button
                     onClick={() => setIsGridView(true)}
                     className={`p-2 rounded ${
-                      isGridView ? "bg-white dark:bg-gray-600 shadow-sm" : ""
+                      isGridView ? "bg-white dark:bg-[#513a7a] shadow-sm" : ""
                     }`}
                   >
                     <svg
@@ -573,7 +573,7 @@ const CredentialManager = () => {
                       return (
                         <div
                           key={cred.id || index}
-                          className="bg-white dark:bg-[#28283A] hover:dark:bg-[#513a7a] transition-colors duration-200 dark:text-gray-400 p-6 rounded-lg border dark:border-gray-800/20 border-gray-200 shadow-sm hover:shadow-md relative"
+                          className="bg-white dark:bg-[#28283A]   dark:text-gray-400 p-6 rounded-lg   relative"
                         >
                           {/* Title and Logo */}
                           <div className="flex items-center justify-between mb-4">
