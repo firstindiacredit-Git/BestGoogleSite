@@ -130,27 +130,22 @@ const SportsLeagues = () => {
                 lg={viewMode === "grid" ? 6 : 24}
                 key={league.title}
               >
-                <Card
-                  hoverable
-                  className="dark:bg-[#28283A] dark:text-gray-300 overflow-hidden transition-all duration-300 hover:shadow-xl dark:hover:shadow-purple-500/20"
-                  cover={
-                    <div className="h-48 overflow-hidden">
-                      <img
-                        alt={league.competition}
-                        src={league.thumbnail}
-                        className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-                  }
-                >
+                <div className=" p-4 rounded-lg  backdrop-blur-lg dark:bg-[#28283A]/[var(--widget-opacity)] bg-white/[var(--widget-opacity)] dark:text-gray-300 overflow-hidden transition-all duration-300 hover:shadow-xl dark:hover:shadow-purple-500/20">
+                  <div className="h-48 overflow-hidden">
+                    <img
+                      alt={league.competition}
+                      src={league.thumbnail}
+                      className="w-full rounded-lg h-full object-cover transform hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
                   <Card.Meta
                     title={
-                      <div className="text-lg font-semibold dark:text-gray-100">
+                      <div className="text-lg font-semibold px-4 py-2 dark:text-gray-100">
                         {league.competition}
                       </div>
                     }
                     description={
-                      <div className="dark:text-gray-400">
+                      <div className="dark:text-gray-400 px-4 py-2">
                         <p className="mb-2">{league.title}</p>
                         <p className="text-sm">
                           {new Date(league.date).toLocaleDateString()}
@@ -163,12 +158,12 @@ const SportsLeagues = () => {
                       type="primary"
                       href={league.matchviewUrl}
                       target="_blank"
-                      className="w-full bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 border-none"
+                      className="w-full bg-indigo-500 dark:bg-[#513a7a] border-none"
                     >
                       Watch Highlights
                     </Button>
                   </div>
-                </Card>
+                </div>
               </Col>
             ))}
           </Row>
