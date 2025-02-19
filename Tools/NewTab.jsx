@@ -139,14 +139,14 @@ const todoTools = [
 ];
 
 const calculatorTools = [
-  {
-    path: "/calculator",
-    name: "Calculator",
-    icon: <FaCalculator className="text-indigo-500" />,
-  },
+  // {
+  //   path: "/calculator",
+  //   name: "Calculator",
+  //   icon: <FaCalculator className="text-indigo-500" />,
+  // },
   {
     path: "/percentage",
-    name: "% Calculator",
+    name: "Percentage Calculator",
     icon: <FaCalculator className="text-indigo-500" />,
   },
   {

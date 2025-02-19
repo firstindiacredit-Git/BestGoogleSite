@@ -12,6 +12,7 @@ export function Back() {
                 transition-all duration-300 rounded-md hover:bg-blue-50/50 group"
         >
             <FaArrowLeftLong className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-300" />
+            Back
         </button>
     );
 }

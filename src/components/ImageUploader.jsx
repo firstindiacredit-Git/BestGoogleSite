@@ -50,7 +50,7 @@ function ImageUploader() {
       {!collapsed && (
         <div className="">
           {!image && (
-            <div className="h-72 flex items-center justify-center  dark:bg-[#28283A] rounded-sm w-full">
+            <div className="h-72 flex items-center justify-center  dark:bg-[#28283A]/[var(--widget-opacity)] rounded-sm w-full">
               <label
                 htmlFor="file-input"
                 className="cursor-pointer flex flex-col items-center"
@@ -77,7 +77,7 @@ function ImageUploader() {
                 preview={true}
                 className=" rounded-b-sm "
                 style={{
-                  objectFit: "cover",
+                  objectFit: "contain",
                   height: "100%",
                   width: "100%",
                 }}

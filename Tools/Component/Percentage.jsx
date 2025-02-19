@@ -58,17 +58,17 @@ function Percentage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 flex items-start justify-center pt-4">
-      <div className="max-w-2xl w-full px-2">
-        <div className="bg-white rounded-[30px] shadow-md overflow-hidden border-2 border-gray-100">
+    <div className="min-h-screen bg-white dark:bg-[#513a7a] flex items-start justify-center ">
+      <div className="max-w-7xl w-full  rounded-lg">
+        <div className="bg-white dark:bg-[#28283a] p-4  rounded-xl shadow-md overflow-hidden ">
           {/* Back Button */}
           <div className="p-1">
             <Back />
           </div>
 
           {/* Header */}
-          <div className="bg-gradient-to-r from-gray-50 to-white p-2 border-b border-gray-100">
-            <h1 className="text-2xl font-bold text-gray-800 text-center">
+          <div className="bg-gray-50 dark:bg-[#28283a] p-2">
+            <h1 className="text-2xl font-bold  text-gray-800 dark:text-white text-center">
               Percentage Calculator
             </h1>
           </div>
@@ -77,31 +77,33 @@ function Percentage() {
             {/* Calculator Cards Container */}
             <div className="grid grid-cols-1 gap-2">
               {/* What is X% of Y */}
-              <div className="bg-gray-50 rounded-2xl p-2 min-h-[160px]">
-                <h2 className="text-lg font-semibold text-gray-800 mb-2">What is X% of Y?</h2>
+              <div className="bg-gray-50 dark:bg-[#28283a] rounded-2xl p-2 min-h-[160px]">
+                <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">
+                  What is X% of Y?
+                </h2>
                 <form onSubmit={calculatePercentage} className="space-y-2">
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="block text-sm font-medium text-gray-600 mb-1">
+                      <label className="block text-sm font-medium text-gray-600 dark:text-white mb-1">
                         Percentage (X)
                       </label>
                       <input
                         type="number"
                         value={percentage}
                         onChange={(e) => setPercentage(e.target.value)}
-                        className="w-full px-2 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                        className="w-full px-2 py-2 rounded-lg dark:bg-gray-700 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                         placeholder="Enter percentage"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-600 mb-1">
+                      <label className="block text-sm font-medium text-gray-600 dark:text-white mb-1">
                         Value (Y)
                       </label>
                       <input
                         type="number"
                         value={value}
                         onChange={(e) => setValue(e.target.value)}
-                        className="w-full px-2 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                        className="w-full px-2 py-2 dark:bg-gray-700 rounded-lg  focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                         placeholder="Enter value"
                       />
                     </div>
@@ -116,39 +118,48 @@ function Percentage() {
                   </div>
                   {result && (
                     <div className="mt-3 p-3 bg-white rounded-lg border border-gray-200">
-                      <p className="text-xl font-bold text-indigo-600 text-center">{result}</p>
-                      <p className="text-sm text-gray-600 text-center mt-1">{out}</p>
+                      <p className="text-xl font-bold text-indigo-600 text-center">
+                        {result}
+                      </p>
+                      <p className="text-sm text-gray-600 text-center mt-1">
+                        {out}
+                      </p>
                     </div>
                   )}
                 </form>
               </div>
 
               {/* Percentage Change */}
-              <div className="bg-gray-50 rounded-2xl p-2 min-h-[160px]">
-                <h2 className="text-lg font-semibold text-gray-800 mb-2">Percentage Change</h2>
-                <form onSubmit={calculatePercentageChange} className="space-y-2">
+              <div className="bg-gray-50 dark:bg-[#28283a] rounded-2xl p-2 min-h-[160px]">
+                <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">
+                  Percentage Change
+                </h2>
+                <form
+                  onSubmit={calculatePercentageChange}
+                  className="space-y-2"
+                >
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-600 mb-1">
+                      <label className="block text-sm font-medium text-gray-600 dark:text-white mb-1">
                         Initial Value
                       </label>
                       <input
                         type="number"
                         value={initialValue}
                         onChange={(e) => setInitialValue(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                        className="w-full px-3 py-2 rounded-lg dark:bg-gray-700  focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                         placeholder="Enter initial value"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-600 mb-1">
+                      <label className="block text-sm font-medium text-gray-600 dark:text-white mb-1">
                         Final Value
                       </label>
                       <input
                         type="number"
                         value={finalValue}
                         onChange={(e) => setFinalValue(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                        className="w-full px-3 py-2 rounded-lg dark:bg-gray-700 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                         placeholder="Enter final value"
                       />
                     </div>
@@ -163,7 +174,9 @@ function Percentage() {
                   </div>
                   {percentageChange && (
                     <div className="mt-3 p-3 bg-white rounded-lg border border-gray-200">
-                      <p className="text-xl font-bold text-indigo-600 text-center">{percentageChange}%</p>
+                      <p className="text-xl font-bold text-indigo-600 text-center">
+                        {percentageChange}%
+                      </p>
                       <p className="text-sm text-gray-600 text-center mt-1">
                         Change from {initialValue} to {finalValue}
                       </p>
@@ -173,31 +186,33 @@ function Percentage() {
               </div>
 
               {/* X is what percent of Y */}
-              <div className="bg-gray-50 rounded-2xl p-2 min-h-[160px]">
-                <h2 className="text-lg font-semibold text-gray-800 mb-2">X is what percent of Y?</h2>
+              <div className="bg-gray-50 dark:bg-[#28283a] rounded-2xl p-2 min-h-[160px]">
+                <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">
+                  X is what percent of Y?
+                </h2>
                 <form onSubmit={calculateWhatPercent} className="space-y-2">
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-600 mb-1">
+                      <label className="block text-sm font-medium text-gray-600 dark:text-white mb-1">
                         Part Value (X)
                       </label>
                       <input
                         type="number"
                         value={partValue}
                         onChange={(e) => setPartValue(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                        className="w-full px-3 py-2 rounded-lg dark:bg-gray-700 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                         placeholder="Enter part value"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-600 mb-1">
+                      <label className="block text-sm font-medium text-gray-600 dark:text-white mb-1">
                         Whole Value (Y)
                       </label>
                       <input
                         type="number"
                         value={wholeValue}
                         onChange={(e) => setWholeValue(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                        className="w-full px-3 py-2 rounded-lg dark:bg-gray-700 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                         placeholder="Enter whole value"
                       />
                     </div>
@@ -212,7 +227,9 @@ function Percentage() {
                   </div>
                   {whatPercentResult && (
                     <div className="mt-3 p-3 bg-white rounded-lg border border-gray-200">
-                      <p className="text-xl font-bold text-indigo-600 text-center">{whatPercentResult}%</p>
+                      <p className="text-xl font-bold text-indigo-600 text-center">
+                        {whatPercentResult}%
+                      </p>
                       <p className="text-sm text-gray-600 text-center mt-1">
                         {partValue} is {whatPercentResult}% of {wholeValue}
                       </p>
@@ -222,31 +239,36 @@ function Percentage() {
               </div>
 
               {/* X is Y% of what */}
-              <div className="bg-gray-50 rounded-2xl p-2 min-h-[160px]">
-                <h2 className="text-lg font-semibold text-gray-800 mb-2">X is Y% of what?</h2>
-                <form onSubmit={calculateWholeFromPercent} className="space-y-2">
+              <div className="bg-gray-50 dark:bg-[#28283a] rounded-2xl p-2 min-h-[160px]">
+                <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">
+                  X is Y% of what?
+                </h2>
+                <form
+                  onSubmit={calculateWholeFromPercent}
+                  className="space-y-2"
+                >
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-600 mb-1">
+                      <label className="block text-sm font-medium text-gray-600 dark:text-white mb-1">
                         Part Value (X)
                       </label>
                       <input
                         type="number"
                         value={part}
                         onChange={(e) => setPart(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                        className="w-full px-3 py-2 rounded-lg dark:bg-gray-700 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                         placeholder="Enter part value"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-600 mb-1">
+                      <label className="block text-sm font-medium text-gray-600 dark:text-white mb-1">
                         Percentage (Y)
                       </label>
                       <input
                         type="number"
                         value={percentOfWhat}
                         onChange={(e) => setPercentOfWhat(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                        className="w-full px-3 py-2 rounded-lg dark:bg-gray-700 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                         placeholder="Enter percentage"
                       />
                     </div>
@@ -261,7 +283,9 @@ function Percentage() {
                   </div>
                   {wholeFromPercent && (
                     <div className="mt-3 p-3 bg-white rounded-lg border border-gray-200">
-                      <p className="text-xl font-bold text-indigo-600 text-center">{wholeFromPercent}</p>
+                      <p className="text-xl font-bold text-indigo-600 text-center">
+                        {wholeFromPercent}
+                      </p>
                       <p className="text-sm text-gray-600 text-center mt-1">
                         {part} is {percentOfWhat}% of {wholeFromPercent}
                       </p>

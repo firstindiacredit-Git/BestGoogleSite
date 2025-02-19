@@ -117,9 +117,7 @@ import ElectricityBill from "../Tools/Component/ElectricityBill.jsx";
 import TestScoreCalculator from "../Tools/Component/TestScoreCalculator.jsx";
 import TrafficChecker from "../Tools/Component/TrafficChecker.jsx";
 import NetworkStatus from "./components/NetworkStatus";
-import ToolWrapper from "./components/ToolWrapper";
 import ToolOutlet from "./components/ToolOutlet";
-import Header from "./components/Header.jsx";
 
 // Context Menu Items configuratio
 const menuItems = [
@@ -855,9 +853,7 @@ const App = () => {
                 <Route
                   path="/calculator"
                   element={
-                    <ToolWrapper>
                       <Calculator />
-                    </ToolWrapper>
                   }
                 />
                 <Route
