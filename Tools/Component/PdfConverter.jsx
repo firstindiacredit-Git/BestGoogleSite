@@ -135,32 +135,26 @@ const PdfConverter = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.12)] 
+    <div className="min-h-screen bg-white dark:bg-[#513a7a] py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto ">
+        <div
+          className="bg-white dark:bg-[#28283a]  
           rounded-xl transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.16)]"
         >
-          <div className="p-4 border-b border-gray-100">
-            <Back/>
+          <div className="p-4 ">
+            <Back />
           </div>
 
           <div className="p-6">
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-900">Word to PDF Converter</h1>
-              <p className="mt-2 text-sm text-gray-600">Convert Word documents to PDF with formatting preserved</p>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                Word to PDF Converter
+              </h1>
+              <p className="mt-2 text-sm text-gray-600 dark:text-white">
+                Convert Word documents to PDF with formatting preserved
+              </p>
             </div>
 
-            {/* <div className="flex items-center justify-center space-x-8 mb-8">
-              <div className="p-4 bg-blue-50 rounded-lg text-center">
-                <FaFileWord className="h-10 w-10 text-blue-500 mx-auto" />
-                <p className="text-xs mt-2 text-gray-600">WORD</p>
-              </div>
-              <FaArrowRight className="text-gray-400" />
-              <div className="p-4 bg-red-50 rounded-lg text-center">
-                <FaFilePdf className="h-10 w-10 text-red-500 mx-auto" />
-                <p className="text-xs mt-2 text-gray-600">PDF</p>
-              </div>
-            </div> */}
 
             {!file ? (
               <div
@@ -168,7 +162,11 @@ const PdfConverter = () => {
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 className={`relative border-2 border-dashed rounded-lg p-12 text-center 
-                  ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}`}
+                  ${
+                    isDragging
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-300 hover:border-gray-400"
+                  }`}
               >
                 <input
                   type="file"
@@ -177,17 +175,18 @@ const PdfConverter = () => {
                   className="hidden"
                   id="file-upload"
                 />
-                <label
-                  htmlFor="file-upload"
-                  className="cursor-pointer"
-                >
-                  <FaCloudUploadAlt className="mx-auto h-12 w-12 text-gray-400" />
+                <label htmlFor="file-upload" className="cursor-pointer">
+                  <FaCloudUploadAlt className="mx-auto h-12 w-12 mt-4 text-gray-400" />
                   <div className="mt-4">
-                    <span className="mt-2 block text-sm font-medium text-gray-900">
+                    <span className="mt-2 block text-sm font-medium text-gray-900 dark:text-white">
                       Drop your Word file here or
-                      <span className="text-blue-500 hover:text-blue-600 ml-1">browse</span>
+                      <span className="text-blue-500 hover:text-blue-600 ml-1">
+                        browse
+                      </span>
                     </span>
-                    <p className="mt-1 text-xs text-gray-500">Only .docx files are supported</p>
+                    <p className="mt-1 text-xs text-gray-500 dark:text-white mb-4">
+                      Only .docx files are supported
+                    </p>
                   </div>
                 </label>
               </div>
@@ -199,8 +198,12 @@ const PdfConverter = () => {
                       <FaFileWord className="h-8 w-8 text-blue-500" />
                     </div>
                     <div>
-                      <h3 className="text-sm font-medium text-gray-900">{file.name}</h3>
-                      <p className="text-xs text-gray-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                      <h3 className="text-sm font-medium dark:text-gray-200 text-gray-900">
+                        {file.name}
+                      </h3>
+                      <p className="text-xs text-gray-500">
+                        {(file.size / 1024 / 1024).toFixed(2)} MB
+                      </p>
                     </div>
                   </div>
                   <button
@@ -217,7 +220,9 @@ const PdfConverter = () => {
                 {loading ? (
                   <div className="flex flex-col items-center justify-center p-8">
                     <ConversionAnimation />
-                    <p className="mt-4 text-sm text-gray-600">Converting your document...</p>
+                    <p className="mt-4 text-sm text-gray-600">
+                      Converting your document...
+                    </p>
                   </div>
                 ) : (
                   <button
@@ -232,7 +237,7 @@ const PdfConverter = () => {
 
                 <AnimatePresence>
                   {pdfUrl && (
-                    <motion.div 
+                    <motion.div
                       className="bg-green-50 rounded-lg p-6"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -240,12 +245,16 @@ const PdfConverter = () => {
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="text-sm font-medium text-green-800">Conversion Complete!</h3>
-                          <p className="text-xs text-green-600 mt-1">Your document has been converted successfully</p>
+                          <h3 className="text-sm font-medium text-green-800">
+                            Conversion Complete!
+                          </h3>
+                          <p className="text-xs text-green-600 mt-1">
+                            Your document has been converted successfully
+                          </p>
                         </div>
                         <a
                           href={pdfUrl}
-                          download={`${file.name.replace('.docx', '')}.pdf`}
+                          download={`${file.name.replace(".docx", "")}.pdf`}
                           className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg 
                             hover:bg-green-700 transition-colors"
                         >

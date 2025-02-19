@@ -43,15 +43,15 @@ function RandomPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 p-2 sm:p-4 md:p-8">
+    <div className="min-h-screen bg-white dark:bg-[#513a7a] p-2 sm:p-4 md:p-8">
       <div className="max-w-3xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-[#28283a] rounded-2xl shadow-sm overflow-hidden">
           {/* Header */}
           <div className="relative p-4 sm:p-6">
             <div className="mb-8 sm:mb-0 sm:absolute sm:top-6 sm:left-6">
               <Back />
             </div>
-            <h1 className="text-xl sm:text-3xl md:text-4xl font-bold text-center bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text">
+            <h1 className="text-xl sm:text-3xl md:text-4xl font-bold text-center text-black dark:text-white">
               Random Password Generator
             </h1>
           </div>
@@ -60,9 +60,9 @@ function RandomPassword() {
           <div className="p-4 sm:p-6 md:p-8">
             <div className="space-y-6">
               {/* Password Length Control */}
-              <div className="bg-gray-50 rounded-xl p-4">
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <label className="text-gray-700 font-medium">Password Length</label>
+                  <label className="text-gray-700 dark:text-gray-200 font-medium">Password Length</label>
                   <div className="flex items-center gap-4">
                     <input 
                       type="range" 
@@ -70,7 +70,7 @@ function RandomPassword() {
                       onChange={(e) => setLength(Number(e.target.value))}
                       min="6" 
                       max="32"
-                      className="w-48 accent-blue-600"
+                      className="w-48 accent-blue-600 dark:accent-blue-400"
                     />
                     <input 
                       type="number" 
@@ -78,7 +78,7 @@ function RandomPassword() {
                       onChange={(e) => setLength(Number(e.target.value))}
                       min="6" 
                       max="32"
-                      className="w-16 px-2 py-1 border border-gray-200 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-16 px-2 py-1 border border-gray-200 dark:border-gray-600 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </div>
@@ -92,7 +92,7 @@ function RandomPassword() {
                     value={password} 
                     readOnly
                     placeholder="Your generated password will appear here"
-                    className="w-full px-4 sm:px-6 py-3 bg-gradient-to-br from-blue-50 to-gray-100 rounded-xl border border-gray-100 shadow-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono"
+                    className="w-full px-4 sm:px-6 py-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 shadow-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono"
                   />
                   {password && (
                     <button 
@@ -120,7 +120,7 @@ function RandomPassword() {
                 className={`w-full px-6 sm:px-8 py-3 rounded-xl text-white font-medium transition-all duration-200 flex items-center justify-center gap-2
                   ${isGenerating 
                     ? 'bg-gray-400 cursor-not-allowed' 
-                    : 'bg-blue-600 hover:bg-blue-700 hover:shadow-md'
+                    : 'bg-blue-600 dark:bg-[#513a7a] hover:bg-blue-700 hover:shadow-md'
                   }`}
               >
                 {isGenerating ? (

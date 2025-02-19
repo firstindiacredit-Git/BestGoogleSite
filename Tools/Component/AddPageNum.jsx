@@ -61,19 +61,24 @@ const AddPageNum = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#513a7a] py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.12)] 
+        <div
+          className="bg-white  dark:bg-[#28283a] 
           rounded-xl transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.16)]"
         >
-          <div className="p-4 border-b border-gray-100">
-            <Back/>
+          <div className="p-4 ">
+            <Back />
           </div>
 
           <div className="p-6">
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-900">Add Page Numbers</h1>
-              <p className="mt-2 text-sm text-gray-600">Automatically add page numbers to your PDF document</p>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                Add Page Numbers
+              </h1>
+              <p className="mt-2 text-sm text-gray-600 dark:text-white">
+                Automatically add page numbers to your PDF document
+              </p>
             </div>
 
             {!pdfFile ? (
@@ -82,7 +87,11 @@ const AddPageNum = () => {
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 className={`relative border-2 border-dashed rounded-lg p-12 text-center 
-                  ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}`}
+                  ${
+                    isDragging
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-300 hover:border-gray-400"
+                  }`}
               >
                 <input
                   type="file"
@@ -91,29 +100,30 @@ const AddPageNum = () => {
                   className="hidden"
                   id="file-upload"
                 />
-                <label
-                  htmlFor="file-upload"
-                  className="cursor-pointer"
-                >
-                  <FaFileUpload className="mx-auto h-12 w-12 text-gray-400" />
+                <label htmlFor="file-upload" className="cursor-pointer">
+                  <FaFileUpload className="mx-auto h-12 w-12 mt-4 text-gray-400" />
                   <div className="mt-4">
-                    <span className="mt-2 block text-sm font-medium text-gray-900">
+                    <span className="mt-2 block text-sm font-medium text-gray-900 dark:text-white">
                       Drop your PDF here or
-                      <span className="text-blue-500 hover:text-blue-600 ml-1">browse</span>
+                      <span className="text-blue-500 hover:text-blue-600 ml-1">
+                        browse
+                      </span>
                     </span>
-                    <p className="mt-1 text-xs text-gray-500">PDF files only</p>
+                    <p className="mt-1 text-xs text-red-500 mb-4">* PDF files only *</p>
                   </div>
                 </label>
               </div>
             ) : (
               <div className="space-y-6">
-                <div className="flex justify-between items-center pb-4 border-b">
+                <div className="flex justify-between items-center pb-4 ">
                   <div className="flex items-center space-x-4">
                     <div className="p-3 bg-red-50 rounded-lg">
                       <FaFilePdf className="h-8 w-8 text-red-500" />
                     </div>
                     <div>
-                      <h3 className="text-sm font-medium text-gray-900">{pdfFile.name}</h3>
+                      <h3 className="text-sm font-medium  text-gray-900 dark:text-white">
+                        {pdfFile.name}
+                      </h3>
                       <p className="text-xs text-gray-500">
                         {(pdfFile.size / 1024 / 1024).toFixed(2)} MB
                       </p>

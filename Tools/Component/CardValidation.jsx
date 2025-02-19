@@ -124,15 +124,15 @@ const CardValidation = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 p-2 sm:p-4 md:p-8">
+    <div className="min-h-screen bg-white dark:bg-[#513a7a] p-2 sm:p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-[#28283a] rounded-2xl shadow-sm overflow-hidden">
           {/* Header */}
           <div className="relative p-4 sm:p-6">
             <div className="absolute top-4 sm:top-6 left-4 sm:left-6">
               <Back />
             </div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-black dark:text-white">
               Card Validator
             </h1>
           </div>
@@ -142,14 +142,14 @@ const CardValidation = () => {
             <div className="space-y-6">
               {/* Card Input */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium dark:text-gray-200 text-gray-700 mb-2">
                   Card Numbers
                 </label>
                 <textarea
                   placeholder="Enter card numbers, separated by commas"
                   value={cardNumbers}
                   onChange={(e) => setCardNumbers(e.target.value)}
-                  className="w-full px-4 sm:px-6 py-3 bg-gradient-to-br from-blue-50 to-gray-100 rounded-xl border border-gray-100 shadow-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all h-32 resize-none"
+                  className="w-full px-4 sm:px-6 py-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 shadow-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all h-32 resize-none"
                 />
               </div>
 
@@ -168,7 +168,7 @@ const CardValidation = () => {
                   className={`px-6 sm:px-8 md:px-10 py-2.5 sm:py-3 md:py-3.5 rounded-xl text-base sm:text-lg font-medium transition-all duration-200 ${
                     isValidating || !cardNumbers.trim()
                       ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-blue-600 hover:bg-blue-700 hover:shadow-md"
+                      : "bg-blue-600 dark:bg-[#513a7a] hover:bg-blue-700 hover:shadow-md"
                   } text-white min-w-[200px]`}
                 >
                   {isValidating ? (
@@ -191,16 +191,16 @@ const CardValidation = () => {
                   <div className="overflow-x-auto">
                     <table className="w-full border-collapse">
                       <thead>
-                        <tr className="bg-gray-50">
-                          <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 border-b">Card Number</th>
-                          <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 border-b">Status</th>
-                          <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 border-b">Card Type</th>
+                        <tr className="bg-gray-50 dark:bg-gray-800">
+                          <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-200 border-b">Card Number</th>
+                          <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-200 border-b">Status</th>
+                          <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 dark:text-gray-200 border-b">Card Type</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y">
                         {currentResults.map((result, index) => (
-                          <tr key={index} className="hover:bg-gray-50">
-                            <td className="px-4 py-3 text-sm text-gray-800">{result.cardNumber}</td>
+                          <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <td className="px-4 py-3 text-sm text-gray-800 dark:text-gray-200">{result.cardNumber}</td>
                             <td className={`px-4 py-3 text-sm font-medium ${
                               result.status === "Valid" ? "text-green-600" : 
                               result.status === "Invalid" ? "text-red-600" : 
@@ -208,7 +208,7 @@ const CardValidation = () => {
                             }`}>
                               {result.status}
                             </td>
-                            <td className="px-4 py-3 text-sm text-gray-800">{result.cardType}</td>
+                            <td className="px-4 py-3 text-sm text-gray-800 dark:text-gray-200">{result.cardType}</td>
                           </tr>
                         ))}
                       </tbody>

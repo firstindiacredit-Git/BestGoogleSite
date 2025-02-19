@@ -38,15 +38,15 @@ function BulkEmailSender() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 p-2 sm:p-4 md:p-8">
+    <div className="min-h-screen bg-white dark:bg-[#513a7a] p-2 sm:p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-[#28283a] rounded-2xl shadow-sm overflow-hidden">
           {/* Header */}
           <div className="relative p-4 sm:p-6">
             <div className="absolute top-4 sm:top-6 left-4 sm:left-6">
               <Back />
             </div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-black">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-black dark:text-white">
               Send Gmail to Multiple Recipients
             </h1>
           </div>
@@ -56,12 +56,12 @@ function BulkEmailSender() {
             <form onSubmit={sendEmail} className="space-y-6">
               {/* Email Input */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium dark:text-gray-200 text-gray-700 mb-2">
                   Emails (comma-separated)
                 </label>
                 <textarea
                   rows="5"
-                  className="w-full px-4 sm:px-6 py-3 bg-gradient-to-br from-blue-50 to-gray-100 rounded-xl border border-gray-100 shadow-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                  className="w-full px-4 sm:px-6 py-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 shadow-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                   value={emails}
                   onChange={(e) => setEmails(e.target.value)}
                   required
@@ -71,12 +71,12 @@ function BulkEmailSender() {
 
               {/* Subject Input */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium dark:text-gray-200 text-gray-700 mb-2">
                   Subject
                 </label>
                 <input
                   type="text"
-                  className="w-full px-4 sm:px-6 py-3 bg-gradient-to-br from-blue-50 to-gray-100 rounded-xl border border-gray-100 shadow-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                  className="w-full px-4 sm:px-6 py-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 shadow-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
                   required
@@ -86,11 +86,11 @@ function BulkEmailSender() {
 
               {/* Message Input */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium dark:text-gray-200 text-gray-700 mb-2">
                   Message
                 </label>
                 <textarea
-                  className="w-full px-4 sm:px-6 py-3 bg-gradient-to-br from-blue-50 to-gray-100 rounded-xl border border-gray-100 shadow-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                    className="w-full px-4 sm:px-6 py-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 shadow-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   required
@@ -107,7 +107,7 @@ function BulkEmailSender() {
                   className={`px-6 sm:px-8 md:px-10 py-2.5 sm:py-3 md:py-3.5 rounded-xl text-base sm:text-lg font-medium transition-all duration-200 ${
                     isLoading
                       ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-blue-600 hover:bg-blue-700 hover:shadow-md"
+                      : "bg-blue-600 dark:bg-[#513a7a] hover:bg-blue-700 hover:shadow-md"
                   } text-white min-w-[200px]`}
                 >
                   {isLoading ? (

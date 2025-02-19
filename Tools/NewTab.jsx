@@ -58,20 +58,15 @@ const pdfTools = [
     name: "Search Excel",
     icon: <FaFilePdf className="text-red-500" />,
   },
-  {
-    path: "/editpdf",
-    name: "Edit PDF",
-    icon: <FaEdit className="text-green-500" />,
-  },
+  // {
+  //   path: "/editpdf",
+  //   name: "Edit PDF",
+  //   icon: <FaEdit className="text-green-500" />,
+  // },
   {
     path: "/extractpages",
     name: "Extract Page",
     icon: <FaStream className="text-blue-500" />,
-  },
-  {
-    path: "/pdfcropper",
-    name: "PDF Cropper",
-    icon: <FaCropAlt className="text-green-500" />,
   },
   {
     path: "/addpagenum",
@@ -87,16 +82,6 @@ const pdfTools = [
     path: "/unlockpdf",
     name: "Unlock PDF",
     icon: <FaUnlockAlt className="text-green-500" />,
-  },
-  {
-    path: "/pdftoimage",
-    name: "PDF To Image",
-    icon: <FaFileImage className="text-yellow-500" />,
-  },
-  {
-    path: "/pdftoword",
-    name: "PDF To Word",
-    icon: <FaFilePdf className="text-red-500" />,
   },
 ];
 
@@ -126,16 +111,16 @@ const todoTools = [
     name: "Card Validator",
     icon: <FaTasks className="text-yellow-500" />,
   },
-  {
-    path: "/cardgenerator",
-    name: "Card Generator",
-    icon: <FaTasks className="text-yellow-500" />,
-  },
-  {
-    path: "/templategenerator",
-    name: "HTML Template Generator",
-    icon: <FaTasks className="text-yellow-500" />,
-  },
+  // {
+  //   path: "/cardgenerator",
+  //   name: "Card Generator",
+  //   icon: <FaTasks className="text-yellow-500" />,
+  // },
+  // {
+  //   path: "/templategenerator",
+  //   name: "HTML Template Generator",
+  //   icon: <FaTasks className="text-yellow-500" />,
+  // },
   {
     path: "/phonenumberformat",
     name: "Phone Number Formatter",
@@ -146,11 +131,11 @@ const todoTools = [
     name: "Random Password Gen.",
     icon: <FaTasks className="text-yellow-500" />,
   },
-  {
-    path: "/linkedinscraper",
-    name: "LinkedIn Scraper",
-    icon: <FaTasks className="text-yellow-500" />,
-  },
+  // {
+  //   path: "/linkedinscraper",
+  //   name: "LinkedIn Scraper",
+  //   icon: <FaTasks className="text-yellow-500" />,
+  // },
 ];
 
 const calculatorTools = [
