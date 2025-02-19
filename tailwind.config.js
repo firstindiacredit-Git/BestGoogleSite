@@ -4,6 +4,10 @@ module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      colors: {
+        "mainbg": "#513a7a",
+        "secondbg": "#28283a",
+      },
       fontFamily: {
         sans: ["Poppins", "sans-serif"],
         body: ["Poppins", "sans-serif"],

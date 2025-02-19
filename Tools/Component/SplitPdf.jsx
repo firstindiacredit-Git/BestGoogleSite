@@ -1,7 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { PDFDocument } from 'pdf-lib';
-import { FaTrash, FaSearchPlus, FaRedo, FaClone, FaDownload } from 'react-icons/fa';
-import { Back } from './back';
+import React, { useState, useEffect } from "react";
+import { PDFDocument } from "pdf-lib";
+import {
+  FaTrash,
+  FaSearchPlus,
+  FaRedo,
+  FaClone,
+  FaDownload,
+} from "react-icons/fa";
+import { Back } from "./back";
 
 const SplitPdf = () => {
   const [file, setFile] = useState(null);
@@ -11,15 +17,15 @@ const SplitPdf = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [currentPage, setCurrentPage] = useState(null);
   const [zoomLevel, setZoomLevel] = useState(1);
-  const [fileName, setFileName] = useState('');
-  const [range, setRange] = useState({ start: '', end: '' });
+  const [fileName, setFileName] = useState("");
+  const [range, setRange] = useState({ start: "", end: "" });
   const [totalPages, setTotalPages] = useState(0);
-  const [pageNumbers, setPageNumbers] = useState('');
+  const [pageNumbers, setPageNumbers] = useState("");
 
   const handleFileChange = (e) => {
     const uploadedFile = e.target.files[0];
     if (uploadedFile) {
-      const originalName = uploadedFile.name.replace(/\.[^/.]+$/, ''); // Remove file extension
+      const originalName = uploadedFile.name.replace(/\.[^/.]+$/, ""); // Remove file extension
       setFileName(originalName);
       setFile(uploadedFile);
     }
@@ -45,7 +51,7 @@ const SplitPdf = () => {
       const [copiedPage] = await newPdfDoc.copyPages(pdfDoc, [i]);
       newPdfDoc.addPage(copiedPage);
       const pdfBytes = await newPdfDoc.save();
-      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const blob = new Blob([pdfBytes], { type: "application/pdf" });
       newDocuments.push(URL.createObjectURL(blob));
       pdfData.push(pdfBytes);
     }
@@ -71,7 +77,8 @@ const SplitPdf = () => {
     setRotations((prev) => {
       const newRotations = { ...prev };
       splitPages.forEach((_, index) => {
-        newRotations[index] = (newRotations[index] || 0) + (direction === 'left' ? -90 : 90);
+        newRotations[index] =
+          (newRotations[index] || 0) + (direction === "left" ? -90 : 90);
       });
       return newRotations;
     });
@@ -98,27 +105,28 @@ const SplitPdf = () => {
   const validatePageRange = (e) => {
     const { name, value } = e.target;
     const numValue = parseInt(value);
-    
+
     if (numValue < 1) return;
     if (numValue > totalPages) return;
-    
-    if (name === 'start') {
+
+    if (name === "start") {
       if (range.end && numValue > parseInt(range.end)) return;
-    } else if (name === 'end') {
+    } else if (name === "end") {
       if (range.start && numValue < parseInt(range.start)) return;
     }
-    
-    setRange(prev => ({ ...prev, [name]: value }));
+
+    setRange((prev) => ({ ...prev, [name]: value }));
   };
 
   const validatePageNumbers = (input) => {
     if (!input) return [];
-    
+
     try {
-      return input.split(',')
-        .map(num => num.trim())
-        .map(num => parseInt(num))
-        .filter(num => !isNaN(num) && num > 0 && num <= totalPages);
+      return input
+        .split(",")
+        .map((num) => num.trim())
+        .map((num) => parseInt(num))
+        .filter((num) => !isNaN(num) && num > 0 && num <= totalPages);
     } catch (error) {
       return [];
     }
@@ -126,8 +134,8 @@ const SplitPdf = () => {
 
   const mergeAndDownload = async () => {
     const mergedPdf = await PDFDocument.create();
-    const [start, end] = pageNumbers.split(',').map(num => parseInt(num));
-    
+    const [start, end] = pageNumbers.split(",").map((num) => parseInt(num));
+
     if (!start || !end || start > end) {
       // If invalid range, merge all pages
       for (let i = 0; i < pdfInstances.length; i++) {
@@ -149,20 +157,20 @@ const SplitPdf = () => {
     }
 
     const mergedPdfBytes = await mergedPdf.save();
-    const blob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
+    const blob = new Blob([mergedPdfBytes], { type: "application/pdf" });
     const url = URL.createObjectURL(blob);
 
     // Add range to filename
-    const rangeText = start && end ? `_pages_${start}-${end}` : '';
+    const rangeText = start && end ? `_pages_${start}-${end}` : "";
     const downloadFileName = `${fileName}${rangeText}(pizeonfly).pdf`;
 
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
     link.download = downloadFileName;
     link.click();
 
-    setFileName('');
-    setPageNumbers('');
+    setFileName("");
+    setPageNumbers("");
     setFile(null);
   };
 
@@ -178,18 +186,20 @@ const SplitPdf = () => {
   const zoomOut = () => setZoomLevel((prev) => prev / 1.2);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 p-2 sm:p-4 md:p-8">
+    <div className="min-h-screen dark:bg-[#513a7a] bg-white p-2 sm:p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-[#28283a] rounded-2xl shadow-sm overflow-hidden">
           {/* Header */}
           <div className="relative p-4 sm:p-6">
             <div className="mb-8 sm:mb-0 sm:absolute sm:top-6 sm:left-6">
               <Back />
             </div>
-            <h1 className="text-xl sm:text-3xl md:text-4xl font-bold text-center bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text">
+            <h1 className="text-xl sm:text-3xl md:text-4xl font-bold text-center text-gray-900 dark:text-gray-100">
               Split PDF
             </h1>
-            <p className="mt-2 text-sm text-center text-gray-600">Split, merge and organize your PDF pages</p>
+            <p className="mt-2 text-sm text-center text-gray-600">
+              Split, merge and organize your PDF pages
+            </p>
           </div>
 
           <div className="p-4 sm:p-6 md:p-8">
@@ -202,18 +212,28 @@ const SplitPdf = () => {
                   className="hidden"
                   id="fileInput"
                 />
-                <label 
-                  htmlFor="fileInput" 
-                  className="cursor-pointer block"
-                >
+                <label htmlFor="fileInput" className="cursor-pointer block">
                   <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto bg-blue-50 rounded-2xl flex items-center justify-center">
-                    <svg className="w-8 h-8 sm:w-10 sm:h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    <svg
+                      className="w-8 h-8 sm:w-10 sm:h-10 text-blue-500"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                      />
                     </svg>
                   </div>
                   <div className="mt-4">
                     <span className="text-sm sm:text-base font-medium text-gray-900">
-                      Choose PDF file or <span className="text-blue-500 hover:text-blue-600">browse</span>
+                      Choose PDF file or{" "}
+                      <span className="text-blue-500 hover:text-blue-600">
+                        browse
+                      </span>
                     </span>
                     <p className="mt-1 text-xs sm:text-sm text-gray-500">
                       PDF files only
@@ -226,8 +246,10 @@ const SplitPdf = () => {
                 {/* File Header */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b pb-4">
                   <div className="flex items-center">
-                    <span className="text-base sm:text-lg font-semibold text-gray-700 break-all">{file.name}</span>
-                    <button 
+                    <span className="text-base sm:text-lg font-semibold text-gray-700 break-all">
+                      {file.name}
+                    </span>
+                    <button
                       onClick={() => {
                         setFile(null);
                         setSplitPages([]);
@@ -240,13 +262,13 @@ const SplitPdf = () => {
                   </div>
                   <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
                     <button
-                      onClick={() => rotateAllPages('left')}
+                      onClick={() => rotateAllPages("left")}
                       className="flex-1 sm:flex-none px-3 sm:px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors text-sm sm:text-base"
                     >
                       Rotate Left
                     </button>
                     <button
-                      onClick={() => rotateAllPages('right')}
+                      onClick={() => rotateAllPages("right")}
                       className="flex-1 sm:flex-none px-3 sm:px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors text-sm sm:text-base"
                     >
                       Rotate Right
@@ -264,15 +286,22 @@ const SplitPdf = () => {
                     <div className="space-y-3">
                       <div className="flex items-center gap-4">
                         <div className="flex-1">
-                          <label className="block text-xs text-gray-500 mb-1">Start Page</label>
+                          <label className="block text-xs text-gray-500 mb-1">
+                            Start Page
+                          </label>
                           <input
                             type="number"
-                            value={pageNumbers.split(',')[0] || ''}
+                            value={pageNumbers.split(",")[0] || ""}
                             onChange={(e) => {
                               const start = e.target.value;
-                              const end = pageNumbers.split(',')[1] || '';
-                              if (parseInt(start) > 0 && parseInt(start) <= totalPages) {
-                                setPageNumbers(`${start}${end ? ',' + end : ''}`);
+                              const end = pageNumbers.split(",")[1] || "";
+                              if (
+                                parseInt(start) > 0 &&
+                                parseInt(start) <= totalPages
+                              ) {
+                                setPageNumbers(
+                                  `${start}${end ? "," + end : ""}`
+                                );
                               }
                             }}
                             placeholder="1"
@@ -283,15 +312,22 @@ const SplitPdf = () => {
                         </div>
                         <span className="text-gray-500 mt-6">to</span>
                         <div className="flex-1">
-                          <label className="block text-xs text-gray-500 mb-1">End Page</label>
+                          <label className="block text-xs text-gray-500 mb-1">
+                            End Page
+                          </label>
                           <input
                             type="number"
-                            value={pageNumbers.split(',')[1] || ''}
+                            value={pageNumbers.split(",")[1] || ""}
                             onChange={(e) => {
-                              const start = pageNumbers.split(',')[0] || '';
+                              const start = pageNumbers.split(",")[0] || "";
                               const end = e.target.value;
-                              if (parseInt(end) > 0 && parseInt(end) <= totalPages) {
-                                setPageNumbers(`${start ? start + ',' : ''}${end}`);
+                              if (
+                                parseInt(end) > 0 &&
+                                parseInt(end) <= totalPages
+                              ) {
+                                setPageNumbers(
+                                  `${start ? start + "," : ""}${end}`
+                                );
                               }
                             }}
                             placeholder={totalPages.toString()}
@@ -310,8 +346,15 @@ const SplitPdf = () => {
                         </button>
                         <button
                           onClick={() => {
-                            const evenPages = Array.from({length: Math.floor(totalPages/2)}, (_, i) => (i + 1) * 2);
-                            setPageNumbers(`${evenPages[0]},${evenPages[evenPages.length-1]}`);
+                            const evenPages = Array.from(
+                              { length: Math.floor(totalPages / 2) },
+                              (_, i) => (i + 1) * 2
+                            );
+                            setPageNumbers(
+                              `${evenPages[0]},${
+                                evenPages[evenPages.length - 1]
+                              }`
+                            );
                           }}
                           className="text-blue-500 hover:text-blue-600 text-sm"
                         >
@@ -319,8 +362,13 @@ const SplitPdf = () => {
                         </button>
                         <button
                           onClick={() => {
-                            const oddPages = Array.from({length: Math.ceil(totalPages/2)}, (_, i) => i * 2 + 1);
-                            setPageNumbers(`${oddPages[0]},${oddPages[oddPages.length-1]}`);
+                            const oddPages = Array.from(
+                              { length: Math.ceil(totalPages / 2) },
+                              (_, i) => i * 2 + 1
+                            );
+                            setPageNumbers(
+                              `${oddPages[0]},${oddPages[oddPages.length - 1]}`
+                            );
                           }}
                           className="text-blue-500 hover:text-blue-600 text-sm"
                         >
@@ -358,69 +406,85 @@ const SplitPdf = () => {
 
                 {/* PDF Pages Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                  {splitPages.map((pageUrl, index) =>
-                    pageUrl && (
-                      <div
-                        key={index}
-                        className="relative bg-gray-50 rounded-xl p-3 hover:shadow-lg transition-all duration-300 group"
-                      >
-                        <div className="aspect-[2/3] relative overflow-hidden rounded-lg">
-                          <iframe
-                            src={pageUrl}
-                            title={`Page ${index + 1}`}
-                            className="w-full h-full"
-                            style={{
-                              transform: `rotate(${rotations[index] || 0}deg)`,
-                              transformOrigin: 'center',
-                              transition: 'transform 0.3s ease',
-                              pointerEvents: 'none',
-                            }}
-                            frameBorder="0"
-                            scrolling="no"
-                          />
-                          {rotations[index] !== 0 && (
-                            <div className="absolute inset-0 -z-10 bg-gray-100 rounded-lg" />
-                          )}
-                          
-                          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent transition-all duration-300 opacity-0 group-hover:opacity-100">
-                            <div className="absolute top-2 left-1/2 transform -translate-x-1/2 flex gap-2 bg-white/90 rounded-lg shadow-lg p-1.5 transition-all duration-300 scale-90 group-hover:scale-100 opacity-0 group-hover:opacity-100">
-                              <button 
-                                onClick={() => openZoomPopup(index)} 
-                                className="p-1.5 hover:bg-blue-50 rounded-md transition-colors"
-                                title="Zoom"
-                              >
-                                <FaSearchPlus size={14} className="text-blue-500" />
-                              </button>
-                              <button 
-                                onClick={() => rotatePage(index)} 
-                                className="p-1.5 hover:bg-yellow-50 rounded-md transition-colors"
-                                title="Rotate"
-                              >
-                                <FaRedo size={14} className="text-yellow-500" />
-                              </button>
-                              <button 
-                                onClick={() => duplicatePage(index)} 
-                                className="p-1.5 hover:bg-green-50 rounded-md transition-colors"
-                                title="Duplicate"
-                              >
-                                <FaClone size={14} className="text-green-500" />
-                              </button>
-                              <button 
-                                onClick={() => deletePage(index)} 
-                                className="p-1.5 hover:bg-red-50 rounded-md transition-colors"
-                                title="Delete"
-                              >
-                                <FaTrash size={14} className="text-red-500" />
-                              </button>
+                  {splitPages.map(
+                    (pageUrl, index) =>
+                      pageUrl && (
+                        <div
+                          key={index}
+                          className="relative bg-gray-50 rounded-xl p-3 hover:shadow-lg transition-all duration-300 group"
+                        >
+                          <div className="aspect-[2/3] relative overflow-hidden rounded-lg">
+                            <iframe
+                              src={pageUrl}
+                              title={`Page ${index + 1}`}
+                              className="w-full h-full"
+                              style={{
+                                transform: `rotate(${
+                                  rotations[index] || 0
+                                }deg)`,
+                                transformOrigin: "center",
+                                transition: "transform 0.3s ease",
+                                pointerEvents: "none",
+                              }}
+                              frameBorder="0"
+                              scrolling="no"
+                            />
+                            {rotations[index] !== 0 && (
+                              <div className="absolute inset-0 -z-10 bg-gray-100 rounded-lg" />
+                            )}
+
+                            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent transition-all duration-300 opacity-0 group-hover:opacity-100">
+                              <div className="absolute top-2 left-1/2 transform -translate-x-1/2 flex gap-2 bg-white/90 rounded-lg shadow-lg p-1.5 transition-all duration-300 scale-90 group-hover:scale-100 opacity-0 group-hover:opacity-100">
+                                <button
+                                  onClick={() => openZoomPopup(index)}
+                                  className="p-1.5 hover:bg-blue-50 rounded-md transition-colors"
+                                  title="Zoom"
+                                >
+                                  <FaSearchPlus
+                                    size={14}
+                                    className="text-blue-500"
+                                  />
+                                </button>
+                                <button
+                                  onClick={() => rotatePage(index)}
+                                  className="p-1.5 hover:bg-yellow-50 rounded-md transition-colors"
+                                  title="Rotate"
+                                >
+                                  <FaRedo
+                                    size={14}
+                                    className="text-yellow-500"
+                                  />
+                                </button>
+                                <button
+                                  onClick={() => duplicatePage(index)}
+                                  className="p-1.5 hover:bg-green-50 rounded-md transition-colors"
+                                  title="Duplicate"
+                                >
+                                  <FaClone
+                                    size={14}
+                                    className="text-green-500"
+                                  />
+                                </button>
+                                <button
+                                  onClick={() => deletePage(index)}
+                                  className="p-1.5 hover:bg-red-50 rounded-md transition-colors"
+                                  title="Delete"
+                                >
+                                  <FaTrash size={14} className="text-red-500" />
+                                </button>
+                              </div>
                             </div>
                           </div>
+                          <div className="flex items-center justify-between mt-2 px-1">
+                            <span className="text-sm font-medium text-gray-600">
+                              Page {index + 1}
+                            </span>
+                            <span className="text-xs text-gray-400">
+                              {rotations[index] || 0}°
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex items-center justify-between mt-2 px-1">
-                          <span className="text-sm font-medium text-gray-600">Page {index + 1}</span>
-                          <span className="text-xs text-gray-400">{(rotations[index] || 0)}°</span>
-                        </div>
-                      </div>
-                    )
+                      )
                   )}
                 </div>
               </div>
@@ -434,7 +498,9 @@ const SplitPdf = () => {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl shadow-xl max-w-4xl mx-auto my-8 w-full">
             <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-gray-900">Page Preview</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Page Preview
+              </h3>
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
                   <button
@@ -442,18 +508,40 @@ const SplitPdf = () => {
                     className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                     title="Zoom Out"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 12H4" />
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M20 12H4"
+                      />
                     </svg>
                   </button>
-                  <span className="text-sm text-gray-600">{Math.round(zoomLevel * 100)}%</span>
+                  <span className="text-sm text-gray-600">
+                    {Math.round(zoomLevel * 100)}%
+                  </span>
                   <button
                     onClick={zoomIn}
                     className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                     title="Zoom In"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M12 4v16m8-8H4"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -462,15 +550,25 @@ const SplitPdf = () => {
                   className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                   title="Close"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
             </div>
             <div className="relative p-4 overflow-auto max-h-[calc(90vh-8rem)]">
               <div className="w-full flex items-center justify-center">
-                <div 
+                <div
                   className="relative transition-transform duration-200 ease-in-out"
                   style={{ transform: `scale(${zoomLevel})` }}
                 >

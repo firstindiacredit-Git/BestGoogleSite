@@ -77,7 +77,6 @@ import PdfCropper from "../Tools/Component/PdfCropper.jsx";
 import AddPageNum from "../Tools/Component/AddPageNum.jsx";
 import Protect from "../Tools/Component/Protect.jsx";
 import UnlockPdf from "../Tools/Component/UnlockPdf.jsx";
-import PdfToImage from "../Tools/Component/PdfToImage.jsx";
 import PdfToWord from "../Tools/Component/PdfToWord.jsx";
 import Scientific from "../Tools/Component/Scientific.jsx";
 import BulkEmailChecker from "../Tools/Component/BulkEmailChecker.jsx";
@@ -873,11 +872,7 @@ const App = () => {
               <Route path="/percentage" element={<Percentage />} />
               <Route
                 path="/imagetopdf"
-                element={
-                  <ToolWrapper>
-                    <ImageToPdf />
-                  </ToolWrapper>
-                }
+                element={<ImageToPdf />}
               />
               <Route path="/splitpdf" element={<SplitPdf />} />
               <Route path="/compress" element={<Compress />} />

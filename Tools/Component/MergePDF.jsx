@@ -2,8 +2,15 @@
 import React, { useState } from "react";
 import { PDFDocument } from "pdf-lib";
 import { Back } from "./back";
-import { FaFilePdf, FaPlus, FaTrash, FaArrowUp, FaArrowDown, FaDownload } from 'react-icons/fa';
-import { motion, AnimatePresence } from 'framer-motion';
+import {
+  FaFilePdf,
+  FaPlus,
+  FaTrash,
+  FaArrowUp,
+  FaArrowDown,
+  FaDownload,
+} from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
 
 const MergePDF = () => {
   const [files, setFiles] = useState([]);
@@ -35,24 +42,29 @@ const MergePDF = () => {
   };
 
   const addValidFiles = (newFiles) => {
-    const validFiles = newFiles.filter(file => file.type === "application/pdf");
+    const validFiles = newFiles.filter(
+      (file) => file.type === "application/pdf"
+    );
     if (validFiles.length !== newFiles.length) {
       setError("Some files were skipped. Only PDF files are allowed.");
     }
-    setFiles(prev => [...prev, ...validFiles.map(file => ({
-      file,
-      name: file.name,
-      size: formatFileSize(file.size)
-    }))]);
+    setFiles((prev) => [
+      ...prev,
+      ...validFiles.map((file) => ({
+        file,
+        name: file.name,
+        size: formatFileSize(file.size),
+      })),
+    ]);
     setMergedPdf(null);
   };
 
   const formatFileSize = (bytes) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB'];
+    const sizes = ["Bytes", "KB", "MB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   const removeFile = (index) => {
@@ -83,8 +95,11 @@ const MergePDF = () => {
       for (const fileObj of files) {
         const fileData = await fileObj.file.arrayBuffer();
         const pdfDoc = await PDFDocument.load(fileData);
-        const pages = await mergedPdfDoc.copyPages(pdfDoc, pdfDoc.getPageIndices());
-        pages.forEach(page => mergedPdfDoc.addPage(page));
+        const pages = await mergedPdfDoc.copyPages(
+          pdfDoc,
+          pdfDoc.getPageIndices()
+        );
+        pages.forEach((page) => mergedPdfDoc.addPage(page));
       }
 
       const mergedPdfBytes = await mergedPdfDoc.save();
@@ -103,23 +118,28 @@ const MergePDF = () => {
   const processingAnimation = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -20 }
+    exit: { opacity: 0, y: -20 },
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-white dark:bg-[#513a7a] py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.12)] 
+        <div
+          className="bg-white dark:bg-[#28283a] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.12)] 
           rounded-xl transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.16)]"
         >
-          <div className="p-4 border-b border-gray-100">
-            <Back/>
+          <div className="p-4 ">
+            <Back />
           </div>
 
           <div className="p-6">
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-900">Merge PDF Files</h1>
-              <p className="mt-2 text-sm text-gray-600">Combine multiple PDFs into one document</p>
+              <h1 className="text-3xl font-bold dark:text-gray-100 text-gray-900">
+                Merge PDF Files
+              </h1>
+              <p className="mt-2 text-sm dark:text-gray-300 text-gray-600">
+                Combine multiple PDFs into one document
+              </p>
             </div>
 
             {files.length === 0 ? (
@@ -128,7 +148,11 @@ const MergePDF = () => {
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 className={`relative border-2 border-dashed rounded-lg p-12 text-center 
-                  ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}`}
+                  ${
+                    isDragging
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-300 hover:border-gray-400"
+                  }`}
               >
                 <input
                   type="file"
@@ -140,31 +164,37 @@ const MergePDF = () => {
                 />
                 <label
                   htmlFor="initial-file-upload"
-                  className="cursor-pointer"
+                  className=" cursor-pointer"
                 >
-                  <FaFilePdf className="mx-auto h-12 w-12 text-gray-400" />
+                  <FaFilePdf className="mx-auto mt-5  h-12 w-12 text-gray-400" />
                   <div className="mt-4">
-                    <span className="mt-2 block text-sm font-medium text-gray-900">
+                    <span className="mt-2 block text-sm font-medium dark:text-gray-200 text-gray-900">
                       Drop PDF files here or
-                      <span className="text-blue-500 hover:text-blue-600 ml-1">browse</span>
+                      <span className="text-blue-500 hover:text-blue-600 ml-1">
+                        browse
+                      </span>
                     </span>
-                    <p className="mt-1 text-xs text-gray-500">Select multiple files to merge</p>
+                    <p className="mt-1 mb-5 text-xs text-gray-500">
+                      Select multiple files to merge
+                    </p>
                   </div>
                 </label>
               </div>
             ) : (
               <div className="space-y-6">
                 {files.map((file, index) => (
-                  <div 
-                    key={index} 
-                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:shadow-md transition-shadow"
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:shadow-md transition-shadow"
                   >
                     <div className="flex items-center space-x-4">
-                      <div className="p-3 bg-red-50 rounded-lg">
+                      <div className="p-3 dark:bg-gray-600 bg-red-50 rounded-lg">
                         <FaFilePdf className="h-6 w-6 text-red-500" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-900">{file.name}</p>
+                        <p className="text-sm font-medium dark:text-gray-200 text-gray-900">
+                          {file.name}
+                        </p>
                         <p className="text-xs text-gray-500">{file.size}</p>
                       </div>
                     </div>
@@ -213,7 +243,9 @@ const MergePDF = () => {
                       rounded-lg cursor-pointer hover:border-blue-400 hover:bg-blue-50/50 transition-colors"
                   >
                     <FaPlus className="h-5 w-5 text-gray-400 mr-2" />
-                    <span className="text-sm text-gray-600">Add more files</span>
+                    <span className="text-sm text-gray-600">
+                      Add more files
+                    </span>
                   </label>
                 </div>
 
@@ -224,7 +256,7 @@ const MergePDF = () => {
                 )}
 
                 {loading ? (
-                  <motion.div 
+                  <motion.div
                     className="flex flex-col items-center justify-center p-8"
                     initial="hidden"
                     animate="visible"
@@ -238,7 +270,7 @@ const MergePDF = () => {
                           x: [0, 50, 50],
                           y: [0, 0, 0],
                           rotate: [-12, 0, 0],
-                          scale: [1, 0.9, 1]
+                          scale: [1, 0.9, 1],
                         }}
                         transition={{ duration: 2, repeat: Infinity }}
                       >
@@ -250,7 +282,7 @@ const MergePDF = () => {
                           x: [0, -50, -50],
                           y: [0, 0, 0],
                           rotate: [12, 0, 0],
-                          scale: [1, 0.9, 1]
+                          scale: [1, 0.9, 1],
                         }}
                         transition={{ duration: 2, repeat: Infinity }}
                       >
@@ -261,7 +293,7 @@ const MergePDF = () => {
                         animate={{
                           y: [20, 0],
                           scale: [0.9, 1],
-                          opacity: [0.5, 1]
+                          opacity: [0.5, 1],
                         }}
                         transition={{ duration: 2, repeat: Infinity }}
                       >
@@ -269,7 +301,9 @@ const MergePDF = () => {
                       </motion.div>
                     </div>
                     <div className="text-center">
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">Merging PDFs...</h3>
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">
+                        Merging PDFs...
+                      </h3>
                       <div className="w-64 h-2 bg-gray-200 rounded-full overflow-hidden">
                         <motion.div
                           className="h-full bg-blue-500"
@@ -279,7 +313,9 @@ const MergePDF = () => {
                           transition={{ duration: 2, repeat: Infinity }}
                         />
                       </div>
-                      <p className="mt-2 text-sm text-gray-500">Please wait while we combine your files</p>
+                      <p className="mt-2 text-sm text-gray-500">
+                        Please wait while we combine your files
+                      </p>
                     </div>
                   </motion.div>
                 ) : (
@@ -297,7 +333,7 @@ const MergePDF = () => {
 
                 <AnimatePresence>
                   {mergedPdf && (
-                    <motion.div 
+                    <motion.div
                       className="bg-green-50 rounded-lg p-6"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -305,8 +341,12 @@ const MergePDF = () => {
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="text-sm font-medium text-green-800">Merge Complete!</h3>
-                          <p className="text-xs text-green-600 mt-1">Your PDFs have been successfully combined</p>
+                          <h3 className="text-sm font-medium text-green-800">
+                            Merge Complete!
+                          </h3>
+                          <p className="text-xs text-green-600 mt-1">
+                            Your PDFs have been successfully combined
+                          </p>
                         </div>
                         <a
                           href={mergedPdf}
