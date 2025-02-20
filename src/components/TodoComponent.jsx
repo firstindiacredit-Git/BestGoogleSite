@@ -169,7 +169,7 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
     if (showColorPicker && colorPickerRef.current) {
       const rect = colorPickerRef.current.getBoundingClientRect();
       setDropdownPosition({
-        top: rect.bottom + 8,
+        top: rect.bottom + -205,
         right: window.innerWidth - rect.right,
       });
       preventScroll(true);
@@ -178,6 +178,14 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
     }
     return () => preventScroll(false);
   }, [showColorPicker]);
+
+  useEffect(() => {
+    if (inNotebookSheet) {
+      setIsAutoColor(false);
+      setContainerColor("#E2D3aa"); // Default purple color for NotebookAndSheet
+      setTextColor("#000"); // black text for contrast
+    }
+  }, [inNotebookSheet]);
 
   const handleColorChange = (color) => {
     setContainerColor(color);
@@ -388,7 +396,6 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
       {inNotebookSheet && (
         <h1 className="text-2xl font-bold px-3 py-2">Todo List</h1>
       )}
-
       {!isCollapsed && (
         <div className="p-3">
           <div className="flex justify-between gap-4 items-center mb-1">

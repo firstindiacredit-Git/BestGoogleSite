@@ -1106,12 +1106,20 @@ function PopularBookmarks() {
   const getCategoryMenuItems = (category) => [
     {
       key: "viewOptions",
-      icon: <UnorderedListOutlined />,
+      icon: (
+        <div className="dark:text-black bg-gray-200 dark:bg-gray-400 px-2 py-1 rounded-md">
+          <UnorderedListOutlined />
+        </div>
+      ),
       label: "View Options",
       children: [
         {
           key: "list",
-          icon: <UnorderedListOutlined />,
+          icon: (
+            <div className="dark:text-black bg-gray-200 dark:bg-gray-400 px-2 py-1 rounded-md">
+              <UnorderedListOutlined />
+            </div>
+          ),
           label: "List View",
           onClick: () => {
             const newViewMode = "list";
@@ -1129,7 +1137,11 @@ function PopularBookmarks() {
         },
         {
           key: "grid",
-          icon: <AppstoreOutlined />,
+          icon: (
+            <div className="dark:text-black bg-gray-200 dark:bg-gray-400 px-2 py-1 rounded-md">
+              <AppstoreOutlined />
+            </div>
+          ),
           label: "Grid View",
           onClick: () => {
             const newViewMode = "grid";
@@ -1147,7 +1159,11 @@ function PopularBookmarks() {
         },
         {
           key: "icon",
-          icon: <PictureOutlined />,
+          icon: (
+            <div className="dark:text-black bg-gray-200 dark:bg-gray-400 px-2 py-1 rounded-md">
+              <PictureOutlined />
+            </div>
+          ),
           label: "Icon View",
           onClick: () => {
             const newViewMode = "icon";
@@ -1167,7 +1183,11 @@ function PopularBookmarks() {
     },
     {
       key: "size",
-      icon: <PictureOutlined />,
+      icon: (
+        <div className="dark:text-black bg-gray-200 dark:bg-gray-400 px-2 py-1 rounded-md">
+          <PictureOutlined />
+        </div>
+      ),
       label: "Icon Size",
       children: [
         {
@@ -1213,7 +1233,11 @@ function PopularBookmarks() {
     },
     {
       key: "rename",
-      icon: <EditOutlined />,
+      icon: (
+        <div className="dark:text-black bg-gray-200 dark:bg-gray-400 px-2 py-1 rounded-md">
+          <EditOutlined />
+        </div>
+      ),
       label: "Rename Category",
       onClick: () => {
         setSelectedCategory(category);
@@ -1223,7 +1247,11 @@ function PopularBookmarks() {
     },
     {
       key: "editMode",
-      icon: <EditOutlined />,
+      icon: (
+        <div className=" bg-gray-200 dark:bg-gray-400 px-2 py-1 rounded-md">
+          <EditOutlined />
+        </div>
+      ),
       label: "Edit Mode",
       onClick: () => {
         setSelectedCategory(category);
@@ -1238,7 +1266,11 @@ function PopularBookmarks() {
     },
     {
       key: "delete",
-      icon: <DeleteOutlined />,
+      icon: (
+        <div className=" dark:bg-red-500 bg-red-200  px-2 py-1 rounded-md">
+          <DeleteOutlined />
+        </div>
+      ),
       label: "Delete Category",
       danger: true,
       onClick: () => {

@@ -158,7 +158,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
     if (showColorPicker && colorPickerRef.current) {
       const rect = colorPickerRef.current.getBoundingClientRect();
       setDropdownPosition({
-        top: rect.bottom + 8,
+        top: rect.bottom + -215,
         right: window.innerWidth - rect.right,
       });
       preventScroll(true);
@@ -167,6 +167,14 @@ const NotePage = ({ inNotebookSheet = false }) => {
     }
     return () => preventScroll(false);
   }, [showColorPicker]);
+
+  useEffect(() => {
+    if (inNotebookSheet) {
+      setIsAutoColor(false);
+      setBackgroundColor("#f5ffe5"); // Default dark background for NotebookAndSheet
+      setTextColor("#000"); // White text for contrast
+    }
+  }, [inNotebookSheet]);
 
   const collapse = () => {
     if (!inNotebookSheet) {
@@ -410,11 +418,8 @@ const NotePage = ({ inNotebookSheet = false }) => {
       className={`w-full h-full backdrop-blur-sm`}
     >
       <div className="rounded-sm h-full">
-        {inNotebookSheet && (
-          <h1 className="text-2xl font-bold px-3 py-2">Notebook</h1>
-        )}
         <div
-          className={`overflow-hidden h-[calc(100%-40px)] rounded-b-sm `}
+          className={`overflow-hidden h-full rounded-b-sm `}
           style={{
             backgroundColor: isAutoColor ? undefined : "",
           }}
@@ -428,6 +433,9 @@ const NotePage = ({ inNotebookSheet = false }) => {
               color: isAutoColor ? undefined : textColor,
             }}
           >
+            {inNotebookSheet && (
+              <h1 className="text-2xl font-bold px-3 py-2">Notebook</h1>
+            )}
             {!isCollapsed && (
               <div className="flex ">
                 {lineNumbers && (
