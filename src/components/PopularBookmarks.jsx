@@ -1447,7 +1447,7 @@ function PopularBookmarks() {
       <div className="mb-2">
         <div className="flex justify-between mb-2">
           <button
-            className="rounded-lg flex gap-4 items-center text-black background-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]  px-3 py-2 dark:text-white mb-2"
+            className="rounded-lg flex gap-4 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]  px-3 py-2 dark:text-white mb-2"
             onClick={() => setIsAddCategoryModalVisible(true)}
           >
             <PlusOutlined />
@@ -1520,7 +1520,7 @@ function PopularBookmarks() {
                       <div
                         ref={provided.innerRef}
                         {...provided.droppableProps}
-                        className={`p-2 transition-colors duration-200 ${
+                        className={` transition-colors duration-200 ${
                           snapshot.isDraggingOver
                             ? "bg-transparent border-2 border-dashed border-blue-500"
                             : "bg-transparent border-2 border-dashed border-transparent"
@@ -2471,7 +2471,7 @@ function PopularBookmarks() {
     return (
       <div className="w-[90vw] mx-auto" style={{ padding: "24px" }}>
         <div className="flex justify-between mb-2">
-          <button className="rounded-lg flex gap-4 items-center text-black background-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]  px-3 py-2 dark:text-white mb-2">
+          <button className="rounded-lg flex gap-4 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]  px-3 py-2 dark:text-white mb-2">
             <PlusOutlined />
             Add Category
           </button>

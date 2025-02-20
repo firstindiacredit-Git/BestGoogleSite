@@ -352,7 +352,6 @@ function BookmarkPage() {
             </button>
           </div>
         }
-        className="dark:bg-[#513a7a]"
       >
         <Form
           onFinish={editingBookmark ? handleUpdateBookmark : handleAddBookmark}
