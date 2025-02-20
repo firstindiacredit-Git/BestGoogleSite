@@ -113,7 +113,7 @@ const LandingPage = () => {
       name: "Push to deploy.",
       description:
         "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Maiores impedit perferendis suscipit eaque, iste dolor cupiditate blanditiis ratione.",
-      icon: CloudArrowUpIcon,
+      icon: "CloudArrowUpIcon",
     },
     {
       name: "Database backups.",
