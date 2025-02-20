@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
-import { Search } from "lucide-react";
+import { Search, CloudArrowUpIcon } from "lucide-react";
 import "./Landing.css";
 
 const BrowserPreview = () => {
@@ -26,12 +26,13 @@ const BrowserPreview = () => {
 
         {/* Images Container */}
         <div className="relative max-h-[490px]  border border-gray-300/80 border-t-0  rounded-b-xl shadow-md">
-          <img
-            src={"/prev (4).png"}
-            alt={`allmytab.com`}
-            className="w-full h-full object-scale-down object-top"
-            transition={{ duration: 0.03, ease: "easeOut" }}
-          />
+          <video
+            src="/MainHeroVid.webm"
+            autoPlay
+            muted
+            loop
+            className="w-full h-full object-cover"
+          ></video>
         </div>
       </div>
     </div>
@@ -112,14 +113,8 @@ const LandingPage = () => {
       name: "Push to deploy.",
       description:
         "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Maiores impedit perferendis suscipit eaque, iste dolor cupiditate blanditiis ratione.",
-      icon: "CloudArrowUpIcon",
+      icon: CloudArrowUpIcon,
     },
-    // {
-    //   name: "SSL certificates.",
-    //   description:
-    //     "Anim aute id magna aliqua ad ad non deserunt sunt. Qui irure qui lorem cupidatat commodo.",
-    //   icon: "LockClosedIcon",
-    // },
     {
       name: "Database backups.",
       description:
@@ -130,19 +125,30 @@ const LandingPage = () => {
   const testimonials = [
     {
       quote:
-        "Integer id nunc sit semper purus. Bibendum at lacus ut arcu blandit montes vitae auctor libero.",
+        "AllMyTab has revolutionized how I manage my browser tabs. The ability to organize and access tabs across devices has made my workflow incredibly efficient. It's a game-changer for productivity!",
+      name: "Rizwan",
+
+      company: "SavvyCal",
+      image:
+        "https://crm.pizeonfly.com/employee/employeeImage-1740052405901-Screenshot 2025-02-20 172204.png",
+      accent: "from-indigo-500 to-purple-500",
+    },
+    {
+      quote:
+        "As someone who works with multiple projects simultaneously, AllMyTab has been invaluable. The cloud sync feature ensures I never lose important tabs, and the organization tools are simply brilliant.",
       name: "Md Sharik",
-      role: "Founder",
+
       company: "SavvyCal",
       image:
         "https://crm.pizeonfly.com/employee/employeeImage-1738233144046-135040117-min.png",
       accent: "from-indigo-500 to-purple-500",
     },
+
     {
       quote:
-        "Molestias ea earum quos nostrum doloreque sed. Quaerat quasi aut velit incidunt excepturi rerum voluptatem minus harum.",
-      name: "Leonard Krasner",
-      role: "CEO",
+        "The tab management capabilities of AllMyTab have transformed my daily workflow. Being able to categorize and quickly search through tabs has saved me countless hours. It's an essential tool for any professional.",
+      name: "Amit Kumar",
+
       company: "Brex",
       image:
         "https://crm.pizeonfly.com/employee/employeeImage-1733120594825-IMG_2025-1.jpg",
@@ -150,9 +156,9 @@ const LandingPage = () => {
     },
     {
       quote:
-        "Molestias ea earum quos nostrum doloreque sed. Quaerat quasi aut velit incidunt excepturi rerum voluptatem minus harum.",
-      name: "Leonard Krasner",
-      role: "CEO",
+        "I used to struggle with tab overload until I found AllMyTab. Now, I can easily manage hundreds of tabs across different projects. The cross-device sync feature is particularly impressive.",
+      name: "Sinod",
+
       company: "Brex",
       image:
         "https://crm.pizeonfly.com/employee/employeeImage-1732530813797-sino.jpeg",
@@ -160,9 +166,9 @@ const LandingPage = () => {
     },
     {
       quote:
-        "Molestias ea earum quos nostrum doloreque sed. Quaerat quasi aut velit incidunt excepturi rerum voluptatem minus harum.",
-      name: "Leonard Krasner",
-      role: "CEO",
+        "AllMyTab's intuitive interface and powerful organization features have made it an indispensable part of my daily routine. It's perfect for anyone who needs to maintain multiple research threads simultaneously.",
+      name: "Prakash Mehra",
+
       company: "Brex",
       image:
         "https://crm.pizeonfly.com/employee/employeeImage-1733202653628-Untitled design (4).png",
@@ -170,9 +176,9 @@ const LandingPage = () => {
     },
     {
       quote:
-        "Molestias ea earum quos nostrum doloreque sed. Quaerat quasi aut velit incidunt excepturi rerum voluptatem minus harum.",
-      name: "Leonard Krasner",
-      role: "CEO",
+        "The bookmark and tab management features in AllMyTab are exceptional. I can easily switch between work and personal projects, and the search functionality helps me find exactly what I need instantly.",
+      name: "Pranjal",
+
       company: "Brex",
       image:
         "https://crm.pizeonfly.com/employee/employeeImage-1728980580983-IMG20241007191701.jpg",
@@ -209,7 +215,7 @@ const LandingPage = () => {
                   <div>
                     <div className="font-semibold">{testimonial.name}</div>
                     <div className="text-gray-600">
-                      {testimonial.role}, {testimonial.company}
+                      {parseInt(new Date().getFullYear() - index / 2)}
                     </div>
                   </div>
                 </div>
@@ -380,20 +386,27 @@ const LandingPage = () => {
               <div className="relative lg:row-span-2">
                 <div className="absolute inset-px rounded-lg bg-white "></div>
                 <div className="relative flex h-full flex-col overflow-hidden ">
-                  <div className="px-8 pt-8 pb-3 sm:px-10 sm:pt-10 sm:pb-0">
+                  <div className="px-8   pt-8 pb-3 sm:px-10 sm:pt-10 sm:pb-0">
                     <p className="mt-2 text-lg font-medium tracking-tight text-gray-950 max-lg:text-center">
-                      Mobile friendly
+                      Powerful Widget Experience
                     </p>
                     <p className="mt-2 max-w-lg text-sm/6 text-gray-600 max-lg:text-center">
-                      Anim aute id magna aliqua ad ad non deserunt sunt. Qui
-                      irure qui lorem cupidatat commodo.
+                      • Fully customizable widgets that adapt to your needs -
+                      Drag and drop interface for easy customization - Resize
+                      and rearrange to match your workflow <br /> • Choose from
+                      multiple stunning visual styles - Modern and classic
+                      themes available - Custom color schemes and animations{" "}
+                      <br /> • Create your perfect browsing companion - Save
+                      your favorite layouts - Sync across all your devices{" "}
+                      <br /> • Seamlessly integrates with daily use - Quick
+                      access to essential tools - Optimized for productivity
                     </p>
                   </div>
-                  <div className="@container relative min-h-[30rem] w-full grow max-lg:mx-auto max-lg:max-w-sm">
-                    <div className="absolute inset-x-10 top-10 bottom-0 overflow-hidden rounded-xl   border border-gray-300/80">
+                  <div className="@container g  relative flex flex-col justify-center  w-full grow max-lg:mx-auto max-lg:max-w-sm">
+                    <div className=" h-fit relative overflow-hidden bottom-0">
                       <img
-                        className="size-full object-cover object-top"
-                        src="/Screenshot 2025-02-15 162951.png"
+                        className="  object-contain  saturate-150 brightness-95   object-top"
+                        src="/WidgetFull.png"
                         alt=""
                       />
                     </div>
@@ -409,14 +422,14 @@ const LandingPage = () => {
                       Performance
                     </p>
                     <p className="mt-2 max-w-lg text-sm/6 text-gray-600 max-lg:text-center">
-                      Lorem ipsum, dolor sit amet consectetur adipisicing elit
-                      maiores impedit.
+                      Experience lightning-fast performance with our optimized
+                      Widgets, Engineered every aspect for speed and efficiency.
                     </p>
                   </div>
                   <div className="flex flex-1 items-center justify-center px-8 max-lg:pt-10 max-lg:pb-12 sm:px-10 lg:pb-2">
                     <img
-                      className="w-full max-lg:max-w-xs"
-                      src="https://tailwindui.com/plus-assets/img/component-images/bento-03-performance.png"
+                      className="w-full  saturate-150 max-lg:max-w-xs"
+                      src="/speed.png"
                       alt=""
                     />
                   </div>
@@ -431,14 +444,15 @@ const LandingPage = () => {
                       Security
                     </p>
                     <p className="mt-2 max-w-lg text-sm/6 text-gray-600 max-lg:text-center">
-                      Morbi viverra dui mi arcu sed. Tellus semper adipiscing
-                      suspendisse semper morbi.
+                      Your data is protected with industry-standard encryption
+                      and security measures. We prioritize your privacy and
+                      safety.
                     </p>
                   </div>
                   <div className="@container flex flex-1 items-center max-lg:py-6 lg:pb-2">
                     <img
-                      className="h-[min(152px,40cqw)] object-cover"
-                      src="https://tailwindui.com/plus-assets/img/component-images/bento-03-security.png"
+                      className="h-[min(152px,40cqw)]  saturate-150 object-cover"
+                      src="/sec.png"
                       alt=""
                     />
                   </div>
@@ -460,9 +474,8 @@ const LandingPage = () => {
                     A better workflow
                   </p>
                   <p className="mt-6 text-lg/8 text-gray-600">
-                    Lorem ipsum, dolor sit amet consectetur adipisicing elit.
-                    Maiores impedit perferendis suscipit eaque, iste dolor
-                    cupiditate blanditiis ratione.
+                    experince seemless workflow with our powerful widgets.
+                    Change the layout to match your workflow.
                   </p>
                   <dl className="mt-10 max-w-xl space-y-8 text-base/7 text-gray-600 lg:max-w-none">
                     {features.map((feature) => (
@@ -510,9 +523,8 @@ const LandingPage = () => {
                     Your choice matters.
                   </p>
                   <p className="mt-6 text-lg/8 text-gray-600">
-                    Lorem ipsum, dolor sit amet consectetur adipisicing elit.
-                    Maiores impedit perferendis suscipit eaque, iste dolor
-                    cupiditate blanditiis ratione.
+                    Choose your style. Pick your favorite widgets. Drag and drop
+                    to change the layout. Customize the widgets to your liking.
                   </p>
                   <dl className="mt-10 max-w-xl space-y-8 text-base/7 text-gray-600 lg:max-w-none">
                     {features.map((feature) => (
@@ -537,15 +549,15 @@ const LandingPage = () => {
               <div className="lg:pt-4 lg:pr-8">
                 <div className="lg:max-w-lg">
                   <h2 className="text-base/7 font-semibold text-indigo-600">
-                    Deploy faster
+                    Customize easily
                   </h2>
                   <p className="mt-2 text-4xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-5xl">
                     Choose your style.
                   </p>
                   <p className="mt-6 text-lg/8 text-gray-600">
-                    Lorem ipsum, dolor sit amet consectetur adipisicing elit.
-                    Maiores impedit perferendis suscipit eaque, iste dolor
-                    cupiditate blanditiis ratione.
+                    Customize your background transparency and appearance.
+                    Choose from a variety of widgets customizations. then
+                    fine-tune each widget's settings to match your style.
                   </p>
                   <dl className="mt-10 max-w-xl space-y-8 text-base/7 text-gray-600 lg:max-w-none">
                     {features.map((feature) => (
