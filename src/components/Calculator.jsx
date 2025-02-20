@@ -11,9 +11,7 @@ function Calculator() {
   const [history, setHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
   const [lastOperation, setLastOperation] = useState(false);
-  const collapse = () => {
-    setCollapsed(!collapsed);
-  };
+ 
   useEffect(() => {
     const savedHistory = JSON.parse(localStorage.getItem("calcHistory")) || [];
     setHistory(savedHistory);

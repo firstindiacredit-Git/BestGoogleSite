@@ -47,8 +47,6 @@ import {
   EditOutlined,
   DeleteOutlined,
   MoreOutlined,
-  DragOutlined,
-  SettingOutlined,
 } from "@ant-design/icons";
 import debounce from "lodash/debounce";
 import SkeletonLoader from "./SkeletonLoader";
@@ -225,7 +223,7 @@ function PopularBookmarks() {
         previewOpacity: 0.8,
         previewScale: 1.1,
       }));
-
+      s;
       // Visual and audio feedback based on drag progress
       try {
         if (progress > 0.5) {
@@ -246,13 +244,6 @@ function PopularBookmarks() {
     // Update body class for global theme
     document.body.classList.toggle("dark-mode", isDarkMode);
   }, [isDarkMode]);
-
-  // Theme-dependent styles
-  const getThemeStyles = () => ({
-    backgroundColor: isDarkMode ? "#141414" : "#ffffff",
-    color: isDarkMode ? "#ffffff" : "#000000",
-    borderColor: isDarkMode ? "#303030" : "#f0f0f0",
-  });
 
   const getBookmarkItemStyle = (isSelected) => ({
     padding: "8px",
@@ -538,85 +529,6 @@ function PopularBookmarks() {
         setLinks(allBookmarks);
         setLoading(false);
 
-        // Save bookmark positions when dragging
-        const handleSaveBookmarkPositions = async (
-          categoryId,
-          updatedBookmarks
-        ) => {
-          try {
-            const userDocRef = doc(db, "users", user.uid);
-            const userDoc = await getDoc(userDocRef);
-            const existingPositions = userDoc.exists()
-              ? userDoc.data().bookmarkPositions || {}
-              : {};
-
-            // Update positions for the specific category
-            existingPositions[categoryId] = updatedBookmarks.map(
-              (bookmark, index) => ({
-                id: bookmark.id,
-                order: index,
-                isAdminBookmark: bookmark.isAdminBookmark,
-              })
-            );
-
-            await updateDoc(userDocRef, {
-              bookmarkPositions: existingPositions,
-            });
-
-            // Update local state to reflect new positions
-            setLinks((prevLinks) => {
-              const updatedLinks = [...prevLinks];
-              updatedBookmarks.forEach((bookmark, index) => {
-                const linkIndex = updatedLinks.findIndex(
-                  (link) => link.id === bookmark.id
-                );
-                if (linkIndex !== -1) {
-                  updatedLinks[linkIndex] = {
-                    ...updatedLinks[linkIndex],
-                    order: index,
-                  };
-                }
-              });
-              return updatedLinks;
-            });
-          } catch (error) {
-            console.error("Error saving bookmark positions:", error);
-            message.error("Failed to save bookmark positions");
-          }
-        };
-
-        // Update the handleDragEnd function to save positions
-        const handleDragEnd = async (result) => {
-          if (!result.destination) return;
-
-          const items = Array.from(editModeBookmarks);
-          const [reorderedItem] = items.splice(result.source.index, 1);
-          items.splice(result.destination.index, 0, reorderedItem);
-
-          // Update local state first for immediate feedback
-          const updatedItems = items.map((item, index) => ({
-            ...item,
-            order: index,
-          }));
-
-          setEditModeBookmarks(updatedItems);
-          setHasUnsavedChanges(true);
-
-          // Update Firestore in the background
-          if (user) {
-            const batch = writeBatch(db);
-
-            updatedItems.forEach((item, index) => {
-              if (item.isAdminBookmark) {
-                const bookmarkRef = doc(db, "bookmarks", item.id);
-                batch.update(bookmarkRef, { order: index });
-              }
-            });
-
-            await batch.commit();
-          }
-        };
-
         // Load saved positions for admin bookmarks
         const loadSavedPositions = async () => {
           try {
@@ -736,46 +648,6 @@ function PopularBookmarks() {
     });
 
     return newColumns;
-  };
-
-  // Update the redistributeCategories function
-  const redistributeCategories = async (count) => {
-    const allCategories = categories;
-    const newColumns = {};
-
-    for (let i = 1; i <= count; i++) {
-      newColumns[`column${i}`] = [];
-    }
-
-    // Use saved positions if available, otherwise distribute evenly
-    allCategories.forEach((category, index) => {
-      const savedPosition = categoryPositions[category.id];
-      if (savedPosition && savedPosition.columnIndex <= count) {
-        const columnKey = `column${savedPosition.columnIndex}`;
-        newColumns[columnKey] = newColumns[columnKey] || [];
-        newColumns[columnKey].push(category.id);
-      } else {
-        const columnIndex = (index % count) + 1;
-        newColumns[`column${columnIndex}`].push(category.id);
-      }
-    });
-
-    setCategoryColumns(newColumns);
-
-    // Save the new layout to database
-    try {
-      const userDocRef = doc(db, "users", user.uid);
-      await updateDoc(userDocRef, {
-        categoryPositions: {
-          columns: newColumns,
-          columnCount: count,
-          lastUpdated: new Date().toISOString(),
-        },
-      });
-    } catch (error) {
-      console.error("Error saving category positions:", error);
-      message.error("Failed to save layout");
-    }
   };
 
   // Update the onDragEnd function
@@ -968,36 +840,6 @@ function PopularBookmarks() {
       });
   };
 
-  const toggleBookmarkVisibility = async (bookmarkId) => {
-    if (!user) return;
-
-    try {
-      const userDocRef = doc(db, "users", user.uid);
-      let updatedHiddenIds = [...hiddenIds];
-
-      if (hiddenIds.includes(bookmarkId)) {
-        updatedHiddenIds = updatedHiddenIds.filter((id) => id !== bookmarkId);
-      } else {
-        updatedHiddenIds.push(bookmarkId);
-      }
-
-      await setDoc(
-        userDocRef,
-        { hiddenBookmarkIds: updatedHiddenIds },
-        { merge: true }
-      );
-      // setHiddenBookmarkIds(updatedHiddenIds);
-
-      setLinks((prevLinks) =>
-        prevLinks.map((link) =>
-          link.id === bookmarkId ? { ...link, isHidden: !link.isHidden } : link
-        )
-      );
-    } catch (error) {
-      console.error("Error toggling bookmark visibility:", error);
-    }
-  };
-
   const handleAddCategory = async () => {
     if (!newCategoryName.trim()) {
       message.error("Category name cannot be empty");
@@ -1117,51 +959,6 @@ function PopularBookmarks() {
     } catch (error) {
       console.error("Error deleting category:", error);
       message.error("Failed to delete category");
-    }
-  };
-
-  const handleDeleteBookmark = async (bookmarkId) => {
-    const bookmark = links.find((link) => link.id === bookmarkId);
-
-    if (bookmark.isAdminBookmark) {
-      try {
-        const userDocRef = doc(db, "users", user.uid);
-        const userDoc = await getDoc(userDocRef);
-        const currentHiddenIds = userDoc.exists()
-          ? userDoc.data().hiddenBookmarkIds || []
-          : [];
-
-        // Add the bookmark ID if it's not already hidden
-        if (!currentHiddenIds.includes(bookmarkId)) {
-          const newHiddenIds = [...currentHiddenIds, bookmarkId];
-          await updateDoc(userDocRef, { hiddenBookmarkIds: newHiddenIds });
-          setHiddenBookmarkIds(newHiddenIds);
-
-          // Update local state to reflect hidden status
-          setLinks((prevLinks) =>
-            prevLinks.map((link) =>
-              link.id === bookmarkId ? { ...link, isHidden: true } : link
-            )
-          );
-
-          message.success("Bookmark hidden successfully");
-        }
-      } catch (error) {
-        console.error("Error hiding bookmark:", error);
-        message.error("Failed to hide bookmark");
-      }
-    } else {
-      // For user bookmarks, delete as usual
-      try {
-        await deleteDoc(doc(db, "users", user.uid, "CatBookmarks", bookmarkId));
-        setLinks((prevLinks) =>
-          prevLinks.filter((link) => link.id !== bookmarkId)
-        );
-        message.success("Bookmark deleted successfully");
-      } catch (error) {
-        console.error("Error deleting bookmark:", error);
-        message.error("Failed to delete bookmark");
-      }
     }
   };
 
@@ -1296,105 +1093,6 @@ function PopularBookmarks() {
       console.error("Error handling drag end:", error);
       message.error("Failed to update bookmark order");
     }
-  };
-
-  const handleControllerDragEnd = async (result) => {
-    if (!result.destination) {
-      // Reset drag state if no valid destination
-      setDragState({
-        isDragging: false,
-        draggedItem: null,
-        sourceColumn: null,
-        destinationColumn: null,
-      });
-      return;
-    }
-
-    const { source, destination } = result;
-    const sourceColumnIndex = parseInt(source.droppableId);
-    const destColumnIndex = parseInt(destination.droppableId);
-
-    // Prevent unnecessary updates if dropped in the same position
-    if (
-      sourceColumnIndex === destColumnIndex &&
-      source.index === destination.index
-    ) {
-      return;
-    }
-
-    // Instant state update for responsive feel
-    setPreviewCategories((prevCategories) => {
-      // Create a deep clone to avoid direct mutation
-      const updatedCategories = prevCategories.map((cat) => ({ ...cat }));
-
-      // Find the category being moved
-      const movedCategory = updatedCategories.find(
-        (cat) =>
-          cat.column === sourceColumnIndex &&
-          categoryColumns[`column${sourceColumnIndex + 1}`]?.indexOf(cat.id) ===
-            source.index
-      );
-
-      if (movedCategory) {
-        // Remove from source column
-        const sourceColumnCategories = updatedCategories.filter(
-          (cat) => cat.column === sourceColumnIndex
-        );
-        sourceColumnCategories.splice(source.index, 1);
-
-        // Add to destination column
-        const destColumnCategories = updatedCategories.filter(
-          (cat) => cat.column === destColumnIndex
-        );
-        destColumnCategories.splice(destination.index, 0, movedCategory);
-
-        // Update column and reorder
-        movedCategory.column = destColumnIndex;
-        movedCategory.order = destination.index;
-
-        // Reindex categories in affected columns
-        sourceColumnCategories.forEach((cat, index) => {
-          cat.order = index;
-        });
-        destColumnCategories.forEach((cat, index) => {
-          cat.order = index;
-        });
-      }
-
-      return updatedCategories;
-    });
-
-    // Background database sync
-    if (user) {
-      const userDocRef = doc(db, "users", user.uid);
-      updateDoc(userDocRef, {
-        previewCategories: previewCategories.map((cat) => ({
-          id: cat.id,
-          column: cat.column,
-          order: cat.order,
-        })),
-      }).catch((error) => {
-        console.error("Error updating preview categories:", error);
-      });
-    }
-
-    // Optional subtle feedback
-    try {
-      // Minimal vibration
-      if ("vibrate" in navigator) {
-        navigator.vibrate(20);
-      }
-    } catch (error) {
-      console.warn("Feedback effects not supported", error);
-    }
-  };
-
-  const toggleBookmarkSelection = (bookmarkId) => {
-    setSelectedBookmarks((prev) =>
-      prev.includes(bookmarkId)
-        ? prev.filter((id) => id !== bookmarkId)
-        : [...prev, bookmarkId]
-    );
   };
 
   const selectAllBookmarks = () => {
@@ -1630,75 +1328,6 @@ function PopularBookmarks() {
     }
   };
 
-  const handleColumnCountChange = async (count) => {
-    try {
-      // Get current categories and their positions
-      const userDocRef = doc(db, "users", user.uid);
-      const userDocSnap = await getDoc(userDocRef);
-      const currentPositions = userDocSnap.exists()
-        ? userDocSnap.data().categoryPositions || {}
-        : { columns: {}, columnCount: count };
-
-      // Create new column structure while preserving all categories
-      const newColumnStructure = {};
-      const allCategories = [];
-
-      // Collect all categories from existing columns
-      Object.keys(currentPositions.columns || {}).forEach((colKey) => {
-        const columnCategories = currentPositions.columns[colKey] || [];
-        allCategories.push(...columnCategories);
-      });
-
-      // Remove duplicates
-      const uniqueCategories = [...new Set(allCategories)];
-
-      // Distribute categories across new number of columns
-      uniqueCategories.forEach((categoryId, index) => {
-        const targetColumn = `column${(index % count) + 1}`;
-        if (!newColumnStructure[targetColumn]) {
-          newColumnStructure[targetColumn] = [];
-        }
-        newColumnStructure[targetColumn].push(categoryId);
-      });
-
-      // Ensure all columns exist
-      for (let i = 1; i <= count; i++) {
-        const colKey = `column${i}`;
-        if (!newColumnStructure[colKey]) {
-          newColumnStructure[colKey] = [];
-        }
-      }
-
-      // Update database
-      await updateDoc(userDocRef, {
-        categoryPositions: {
-          columns: newColumnStructure,
-          columnCount: count,
-          lastUpdated: new Date().toISOString(),
-        },
-      });
-
-      // Update local state
-      setColumnCount(count);
-      setCategoryColumns(newColumnStructure);
-
-      // Update preview if controller is open
-      if (isControllerOpen) {
-        const updatedPreviewCategories = previewCategories.map((cat) => ({
-          ...cat,
-          column: cat.order % count,
-        }));
-        setPreviewCategories(updatedPreviewCategories);
-        setPreviewColumns(count);
-      }
-
-      message.success(`Layout updated to ${count} columns`);
-    } catch (error) {
-      console.error("Error updating column count:", error);
-      message.error("Failed to update layout");
-    }
-  };
-
   const renderBookmarkList = (categoryLinks, categoryId) => {
     const sizes = categoryBookmarkSizes[categoryId] || { list: 32 };
     return (
@@ -1817,13 +1446,13 @@ function PopularBookmarks() {
     return (
       <div className="mb-2">
         <div className="flex justify-between mb-2">
-          <Button
-            className="text-black bg-white dark:text-white"
+          <button
+            className="rounded-lg flex gap-4 items-center text-black background-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]  px-3 py-2 dark:text-white mb-2"
             onClick={() => setIsAddCategoryModalVisible(true)}
           >
             <PlusOutlined />
             Add Category
-          </Button>
+          </button>
           <div className="flex items-center gap-4">
             <div
               className={`flex items-center bg-white/[(var(--widget-opacity))] backdrop-blur-lg dark:bg-[#28283A]/[(var(--widget-opacity))] p-1 rounded-sm`}
@@ -1929,7 +1558,7 @@ function PopularBookmarks() {
                                     }`}
                                   >
                                     <Card
-                                      className="max-w-xl backdrop-blur-sm  bg-white/[var(--widget-opacity)] dark:bg-gray-800/[var(--widget-opacity)]  dark:text-white mx-auto rounded-sm"
+                                      className="max-w-xl backdrop-blur-sm  bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)]  dark:text-white mx-auto rounded-sm"
                                       title={
                                         <div
                                           className="bg-white/[(var(--widget-opacity))] dark:bg-[#513a7a]/[(var(--widget-opacity))] dark:text-white p-1 relative overflow-hidden cursor-pointer"
@@ -2276,30 +1905,6 @@ function PopularBookmarks() {
     return () => debouncedUpdate.cancel();
   }, [isControllerOpen, categories, categoryColumns, columnCount]);
 
-  // Add this function to toggle category visibility
-  const toggleCategoryVisibility = async (categoryId) => {
-    try {
-      const userDocRef = doc(db, "users", user.uid);
-      const newHiddenCategories = hiddenCategories.includes(categoryId)
-        ? hiddenCategories.filter((id) => id !== categoryId)
-        : [...hiddenCategories, categoryId];
-
-      await updateDoc(userDocRef, {
-        hiddenCategories: newHiddenCategories,
-      });
-
-      setHiddenCategories(newHiddenCategories);
-      message.success(
-        hiddenCategories.includes(categoryId)
-          ? "Category is now visible"
-          : "Category is now hidden"
-      );
-    } catch (error) {
-      console.error("Error toggling category visibility:", error);
-      message.error("Failed to update category visibility");
-    }
-  };
-
   // Add toggleDropdown function with localStorage save
   const toggleDropdown = (categoryId) => {
     setOpenCategories((prev) => {
@@ -2487,42 +2092,6 @@ function PopularBookmarks() {
     }
   };
 
-  // Function to update dashboard with new positions
-  const updateDashboardPositions = (
-    newCategories,
-    newColumnCount,
-    newColumnStructure
-  ) => {
-    // Batch all state updates together
-    const updates = {
-      categories: newCategories,
-      columnCount: newColumnCount,
-      categoryColumns: newColumnStructure,
-    };
-
-    // Update localStorage in one go
-    const storageUpdates = {
-      categories: JSON.stringify(newCategories),
-      columnCount: newColumnCount.toString(),
-      categoryColumns: JSON.stringify(newColumnStructure),
-    };
-
-    // Perform all state updates
-    Object.entries(updates).forEach(([key, value]) => {
-      const setter = {
-        categories: setCategories,
-        columnCount: setColumnCount,
-        categoryColumns: setCategoryColumns,
-      }[key];
-      setter(value);
-    });
-
-    // Perform all localStorage updates
-    Object.entries(storageUpdates).forEach(([key, value]) => {
-      localStorage.setItem(key, value);
-    });
-  };
-
   // Function to fetch and update category positions
   const fetchAndUpdateCategories = async () => {
     if (!user) return;
@@ -2581,17 +2150,6 @@ function PopularBookmarks() {
     document.body.classList.toggle("dark", isDarkMode);
     localStorage.setItem("darkMode", JSON.stringify(isDarkMode));
   }, [isDarkMode]);
-
-  // Toggle dark mode function
-  const toggleDarkMode = () => {
-    setIsDarkMode((prev) => !prev);
-  };
-
-  const handleControllerCancel = () => {
-    setIsControllerOpen(false);
-    setPreviewCategories([...categories]);
-    setPreviewColumns(columnCount);
-  };
 
   // Function to setup real-time database listeners
   const setupDatabaseListeners = () => {
@@ -2717,62 +2275,6 @@ function PopularBookmarks() {
           type="text"
           icon={<EditOutlined />}
           onClick={() => handleEditBookmark(bookmark)}
-        />
-      </div>
-    );
-  };
-
-  // Enhanced draggable category renderer
-  const renderDraggableCategory = (provided, snapshot, category) => {
-    return (
-      <div
-        ref={provided.innerRef}
-        {...provided.draggableProps}
-        {...provided.dragHandleProps}
-        style={{
-          padding: "12px",
-          margin: "8px 0",
-          backgroundColor: snapshot.isDragging ? "#f0f7ff" : "#ffffff",
-          border: snapshot.isDragging
-            ? "2px solid #1890ff"
-            : "1px solid #e8e8e8",
-          borderRadius: "8px",
-          display: "flex",
-          alignItems: "center",
-          gap: "12px",
-          boxShadow: snapshot.isDragging
-            ? "0 4px 12px rgba(0,0,0,0.1)"
-            : "none",
-          transform: snapshot.isDragging
-            ? `${provided.draggableProps.style.transform} scale(1.02)`
-            : provided.draggableProps.style.transform,
-          transition: "all 0.2s ease",
-          ...provided.draggableProps.style,
-        }}
-      >
-        <DragOutlined
-          style={{
-            color: snapshot.isDragging ? "#1890ff" : "#999",
-            fontSize: "16px",
-            cursor: "grab",
-          }}
-        />
-        <span
-          style={{
-            fontWeight: 500,
-            color: snapshot.isDragging ? "#1890ff" : "#333",
-            flex: 1,
-          }}
-        >
-          {category.name || category.newCategory}
-        </span>
-        <AntButton
-          type="text"
-          icon={<DeleteOutlined />}
-          onClick={() => handleRemoveFromColumn(category)}
-          style={{
-            color: snapshot.isDragging ? "#1890ff" : "#999",
-          }}
         />
       </div>
     );
@@ -2969,14 +2471,10 @@ function PopularBookmarks() {
     return (
       <div className="w-[90vw] mx-auto" style={{ padding: "24px" }}>
         <div className="flex justify-between mb-2">
-          <Button
-            className="text-black bg-white dark:text-white"
-            onClick={() => setIsAddCategoryModalVisible(true)}
-            style={{ marginBottom: "24px" }}
-          >
+          <button className="rounded-lg flex gap-4 items-center text-black background-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]  px-3 py-2 dark:text-white mb-2">
             <PlusOutlined />
             Add Category
-          </Button>
+          </button>
           <div className="flex items-center gap-4">
             <div
               className={`flex items-center bg-white/[(var(--widget-opacity))] backdrop-blur-lg dark:bg-[#28283A]/[(var(--widget-opacity))] p-1 rounded-sm`}
@@ -3103,37 +2601,40 @@ function PopularBookmarks() {
       >
         <div className="flex w-full mb-4  justify-between items-center gap-2">
           <div className="dark:text-white">Columns:</div>
-          <Radio.Group
-            value={previewColumns}
-            onChange={(e) => handlePreviewColumnChange(e.target.value)}
-            buttonStyle="solid"
-            className=" "
-          >
-            <Radio.Button
-              className="dark:text-white dark:bg-gray-700 border-none"
-              value={1}
+          <div className="flex gap-2">
+            <button
+              className={`px-4 py-2 rounded-md dark:text-white dark:bg-gray-700 border-none outline-none ${
+                previewColumns === 1 ? "bg-blue-500 text-white" : ""
+              }`}
+              onClick={() => handlePreviewColumnChange(1)}
             >
               1
-            </Radio.Button>
-            <Radio.Button
-              className="dark:text-white dark:bg-gray-700 border-none"
-              value={2}
+            </button>
+            <button
+              className={`px-4 py-2 rounded-md dark:text-white dark:bg-gray-700 border-none outline-none ${
+                previewColumns === 2 ? "bg-blue-500 text-white" : ""
+              }`}
+              onClick={() => handlePreviewColumnChange(2)}
             >
               2
-            </Radio.Button>
-            <Radio.Button
-              className="dark:text-white dark:bg-gray-700 border-none"
-              value={3}
+            </button>
+            <button
+              className={`px-4 py-2 rounded-md dark:text-white dark:bg-gray-700 border-none outline-none ${
+                previewColumns === 3 ? "bg-blue-500 text-white" : ""
+              }`}
+              onClick={() => handlePreviewColumnChange(3)}
             >
               3
-            </Radio.Button>
-            <Radio.Button
-              className="dark:text-white dark:bg-gray-700 border-none"
-              value={4}
+            </button>
+            <button
+              className={`px-4 py-2 rounded-md dark:text-white dark:bg-gray-700 border-none outline-none ${
+                previewColumns === 4 ? "bg-blue-500 text-white" : ""
+              }`}
+              onClick={() => handlePreviewColumnChange(4)}
             >
               4
-            </Radio.Button>
-          </Radio.Group>
+            </button>
+          </div>
         </div>
         <DragDropContext onDragEnd={handlePreviewDragEnd}>
           <div
@@ -3157,7 +2658,7 @@ function PopularBookmarks() {
                         p-4 rounded-lg min-h-[200px] transition-all duration-300
                         ${
                           snapshot.isDraggingOver
-                            ? "bg-indigo-50 border-2 border-dashed border-indigo-400 shadow-lg"
+                            ? "bg-indigo-50 dark:bg-gray-900/50 border-2 border-dashed border-indigo-400 shadow-lg"
                             : " border dark:text-white border-none dark:bg-gray-700/50 "
                         }
                       `}
@@ -3262,15 +2763,13 @@ function PopularBookmarks() {
           <div className="p-4 border-2 border-dashed dark:text-white dark:bg-gray-700/50 border-gray-300 rounded-lg bg-gray-50">
             <div className="flex flex-wrap gap-2">
               {availableCategories.map((category) => (
-                <AntButton
+                <button
                   key={category.id}
-                  size="middle"
-                  icon={<PlusOutlined />}
                   onClick={() => handleAddToColumn(category, 0)}
-                  className="flex items-center hover:scale-105 transition-transform bg-white"
+                  className="flex gap-2 items-center text-black dark:bg-[#28283a]/[var(--widget-opacity)] px-4 py-2 rounded-lg dark:text-white bg-white hover:scale-105 transition-transform "
                 >
-                  {category.name || category.newCategory}
-                </AntButton>
+                  <PlusOutlined /> {category.name || category.newCategory}
+                </button>
               ))}
               {availableCategories.length === 0 && (
                 <div className="w-full text-center py-4 text-gray-500">

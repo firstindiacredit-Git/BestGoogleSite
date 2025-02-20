@@ -196,24 +196,13 @@ export const removeWidgetFromPage = async (userId, pageName, widgetId) => {
 export const resetPageLayout = async (userId, pageName) => {
   try {
     const userLayoutRef = doc(db, "users", userId, "layouts", "widgets");
-    const windowWidth = window.innerWidth;
-    const optimalColumns = calculateOptimalColumns(windowWidth);
+    const optimalColumns = 4
 
     // Get default layout with optimal columns
     const defaultLayout = {
       widgets: defaultWidgets[pageName] || [],
       columns: optimalColumns,
     };
-
-    // Redistribute widgets if needed
-    if (defaultLayout.widgets.length) {
-      defaultLayout.widgets = redistributeWidgets(
-        defaultLayout.widgets,
-        optimalColumns
-      );
-    }
-
-    // Update the layout in Firestore
     let currentData = {};
     const layoutDoc = await getDoc(userLayoutRef);
     if (layoutDoc.exists()) {

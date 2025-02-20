@@ -17,7 +17,6 @@ import {
   StarOutlined,
   StarFilled,
 } from "@ant-design/icons";
-import { CiEdit } from "react-icons/ci";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { FaCrown } from "react-icons/fa";
 
@@ -359,7 +358,7 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
 
   return (
     <>
-      <header className=" bg-gray-200/[var(--widget-opacity)] backdrop-blur-sm dark:bg-[#513a7a]/[var(--widget-opacity)] border-b border dark:border-gray-800/20 border-gray-200/20  sticky top-0 z-50">
+      <header className=" bg-gray-200/10 backdrop-blur-sm dark:bg-[#513a7a]/10 border-b border dark:border-gray-800/20 border-gray-200/20  sticky top-0 z-50">
         {isAdmin && showAdminBanner && (
           <div className="bg-red-500/90 backdrop-blur-sm text-white py-1 px-4 text-center sticky top-0 z-50">
             <Alert
