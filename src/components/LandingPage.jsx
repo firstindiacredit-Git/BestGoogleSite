@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
-import { Search, CloudArrowUpIcon } from "lucide-react";
+import { Search } from "lucide-react";
 import "./Landing.css";
 
 const BrowserPreview = () => {
