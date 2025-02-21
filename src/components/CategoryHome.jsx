@@ -18,6 +18,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { Settings, Edit, Plus, Trash2 } from "lucide-react";
 import { Modal, message, Input } from "antd";
 import { WidgetTransparencyContext } from "../App";
+import { defaultBookmarks } from "../firebase/widgetLayouts";
 
 const CategoryHome = ({ categoryType, itemName, collapsed = false }) => {
   const [user, setUser] = useState(null);
@@ -40,6 +41,62 @@ const CategoryHome = ({ categoryType, itemName, collapsed = false }) => {
   const buttonRef = useRef(null);
   const settingsMenuRef = useRef(null);
   const componentRef = useRef(null);
+
+  // Add localStorage keys
+  const bookmarksStorageKey = `bookmarks_${categoryType}`;
+  const hiddenBookmarksStorageKey = `hidden_bookmarks_${categoryType}`;
+
+  // Add localStorage helper functions
+  const saveBookmarksToLocal = (bookmarksData) => {
+    if (!user) {
+      localStorage.setItem(bookmarksStorageKey, JSON.stringify(bookmarksData));
+    }
+  };
+
+  const getBookmarksFromLocal = () => {
+    const savedBookmarks = localStorage.getItem(bookmarksStorageKey);
+    if (savedBookmarks) {
+      return JSON.parse(savedBookmarks);
+    }
+
+    // Add console logging to debug category mapping
+    console.log("Category Type:", categoryType);
+    console.log("Available Categories:", Object.keys(defaultBookmarks));
+
+    // If no saved bookmarks, return default bookmarks for the category
+    const categoryMap = {
+      Popular: defaultBookmarks.Popular,
+      AI: defaultBookmarks.AI,
+      Travel: defaultBookmarks.Travel,
+      Sports: defaultBookmarks.Sports,
+      Shopping: defaultBookmarks.Shopping,
+      News: defaultBookmarks.News,
+    };
+
+    const defaultCategoryBookmarks = categoryMap[categoryType] || [];
+    console.log("Default bookmarks for category:", defaultCategoryBookmarks);
+
+    // Save default bookmarks to localStorage
+    localStorage.setItem(
+      bookmarksStorageKey,
+      JSON.stringify(defaultCategoryBookmarks)
+    );
+    return defaultCategoryBookmarks;
+  };
+
+  const saveHiddenBookmarksToLocal = (hiddenIds) => {
+    if (!user) {
+      localStorage.setItem(
+        hiddenBookmarksStorageKey,
+        JSON.stringify(hiddenIds)
+      );
+    }
+  };
+
+  const getHiddenBookmarksFromLocal = () => {
+    const savedHiddenIds = localStorage.getItem(hiddenBookmarksStorageKey);
+    return savedHiddenIds ? JSON.parse(savedHiddenIds) : [];
+  };
 
   const preventScroll = (prevent) => {
     document.body.style.overflow = prevent ? "hidden" : "";
@@ -150,6 +207,12 @@ const CategoryHome = ({ categoryType, itemName, collapsed = false }) => {
           unsubscribeCategory();
         };
       } else {
+        // Load from localStorage for non-logged-in users
+        const localBookmarks = getBookmarksFromLocal();
+        const localHiddenIds = getHiddenBookmarksFromLocal();
+
+        setBookmarks(localBookmarks);
+        setHiddenBookmarkIds(localHiddenIds);
         setLoading(false);
       }
     });
@@ -214,27 +277,36 @@ const CategoryHome = ({ categoryType, itemName, collapsed = false }) => {
 
   const handleDelete = async (bookmark) => {
     try {
-      if (bookmark.addedByAdmin) {
-        // Hide the admin bookmark instead of deleting
-        const newHiddenIds = [...hiddenBookmarkIds, bookmark.id];
-        setHiddenBookmarkIds(newHiddenIds);
+      if (user) {
+        // Existing Firebase logic for logged-in users
+        if (bookmark.addedByAdmin) {
+          const newHiddenIds = [...hiddenBookmarkIds, bookmark.id];
+          setHiddenBookmarkIds(newHiddenIds);
 
-        // Update user's hidden bookmarks in Firestore
-        const userDocRef = doc(db, "users", user.uid);
-        await setDoc(
-          userDocRef,
-          { hiddenCategoryBookmarks: newHiddenIds },
-          { merge: true }
-        );
-
-        // Update local state to remove the hidden bookmark
-        setBookmarks((prev) => prev.filter((b) => b.id !== bookmark.id));
-        message.success("Bookmark hidden successfully!");
+          const userDocRef = doc(db, "users", user.uid);
+          await setDoc(
+            userDocRef,
+            { hiddenCategoryBookmarks: newHiddenIds },
+            { merge: true }
+          );
+        } else {
+          await deleteDoc(doc(db, "users", user.uid, "bookmarks", bookmark.id));
+        }
       } else {
-        // Delete user's own bookmark
-        await deleteDoc(doc(db, "users", user.uid, "bookmarks", bookmark.id));
-        message.success("Bookmark deleted successfully!");
+        // Handle deletion in localStorage for non-logged-in users
+        if (bookmark.addedByAdmin) {
+          const newHiddenIds = [...hiddenBookmarkIds, bookmark.id];
+          setHiddenBookmarkIds(newHiddenIds);
+          saveHiddenBookmarksToLocal(newHiddenIds);
+        } else {
+          const updatedBookmarks = bookmarks.filter(
+            (b) => b.id !== bookmark.id
+          );
+          setBookmarks(updatedBookmarks);
+          saveBookmarksToLocal(updatedBookmarks);
+        }
       }
+      message.success("Bookmark processed successfully!");
     } catch (error) {
       message.error("Failed to process bookmark");
       console.error("Error processing bookmark:", error);
@@ -249,6 +321,7 @@ const CategoryHome = ({ categoryType, itemName, collapsed = false }) => {
       }
 
       const bookmarkData = {
+        id: Date.now().toString(), // Generate unique ID for local storage
         name: newBookmark.name,
         link: newBookmark.link,
         category: categoryType,
@@ -256,10 +329,19 @@ const CategoryHome = ({ categoryType, itemName, collapsed = false }) => {
         createdAt: new Date().toISOString(),
       };
 
-      await addDoc(
-        collection(db, "users", user.uid, "bookmarks"),
-        bookmarkData
-      );
+      if (user) {
+        // Existing Firebase logic
+        await addDoc(
+          collection(db, "users", user.uid, "bookmarks"),
+          bookmarkData
+        );
+      } else {
+        // Add to localStorage for non-logged-in users
+        const updatedBookmarks = [...bookmarks, bookmarkData];
+        setBookmarks(updatedBookmarks);
+        saveBookmarksToLocal(updatedBookmarks);
+      }
+
       message.success("Bookmark added successfully!");
       setShowAddModal(false);
       setNewBookmark({ name: "", link: "" });
@@ -276,17 +358,33 @@ const CategoryHome = ({ categoryType, itemName, collapsed = false }) => {
         return;
       }
 
-      const bookmarkRef = doc(
-        db,
-        "users",
-        user.uid,
-        "bookmarks",
-        editingBookmark.id
-      );
-      await updateDoc(bookmarkRef, {
-        name: editingBookmark.name,
-        link: editingBookmark.link,
-      });
+      if (user) {
+        // Existing Firebase logic
+        const bookmarkRef = doc(
+          db,
+          "users",
+          user.uid,
+          "bookmarks",
+          editingBookmark.id
+        );
+        await updateDoc(bookmarkRef, {
+          name: editingBookmark.name,
+          link: editingBookmark.link,
+        });
+      } else {
+        // Update in localStorage for non-logged-in users
+        const updatedBookmarks = bookmarks.map((bookmark) =>
+          bookmark.id === editingBookmark.id
+            ? {
+                ...bookmark,
+                name: editingBookmark.name,
+                link: editingBookmark.link,
+              }
+            : bookmark
+        );
+        setBookmarks(updatedBookmarks);
+        saveBookmarksToLocal(updatedBookmarks);
+      }
 
       message.success("Bookmark updated successfully!");
       setShowEditModal(false);

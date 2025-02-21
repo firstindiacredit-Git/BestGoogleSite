@@ -220,3 +220,199 @@ export const resetPageLayout = async (userId, pageName) => {
     throw error;
   }
 };
+
+// Add default bookmarks for non-logged in users
+export const defaultBookmarks = {
+  Popular: [
+    {
+      id: "popular1",
+      name: "Google",
+      link: "https://www.google.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "popular2",
+      name: "YouTube",
+      link: "https://www.youtube.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "popular3",
+      name: "Facebook",
+      link: "https://www.facebook.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "popular4",
+      name: "Amazon",
+      link: "https://www.amazon.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "popular5",
+      name: "Twitter",
+      link: "https://www.twitter.com",
+      addedByAdmin: true,
+    },
+  ],
+  AI: [
+    {
+      id: "ai1",
+      name: "ChatGPT",
+      link: "https://chat.openai.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "ai2",
+      name: "Google Bard",
+      link: "https://bard.google.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "ai3",
+      name: "Hugging Face",
+      link: "https://huggingface.co",
+      addedByAdmin: true,
+    },
+    {
+      id: "ai4",
+      name: "Midjourney",
+      link: "https://www.midjourney.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "ai5",
+      name: "Anthropic Claude",
+      link: "https://www.anthropic.com",
+      addedByAdmin: true,
+    },
+  ],
+  Travel: [
+    {
+      id: "travel1",
+      name: "Booking.com",
+      link: "https://www.booking.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "travel2",
+      name: "Airbnb",
+      link: "https://www.airbnb.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "travel3",
+      name: "Expedia",
+      link: "https://www.expedia.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "travel4",
+      name: "TripAdvisor",
+      link: "https://www.tripadvisor.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "travel5",
+      name: "Kayak",
+      link: "https://www.kayak.com",
+      addedByAdmin: true,
+    },
+  ],
+  Sports: [
+    {
+      id: "sports1",
+      name: "ESPN",
+      link: "https://www.espn.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "sports2",
+      name: "NBA",
+      link: "https://www.nba.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "sports3",
+      name: "FIFA",
+      link: "https://www.fifa.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "sports4",
+      name: "NFL",
+      link: "https://www.nfl.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "sports5",
+      name: "MLB",
+      link: "https://www.mlb.com",
+      addedByAdmin: true,
+    },
+  ],
+  Shopping: [
+    {
+      id: "shopping1",
+      name: "Amazon",
+      link: "https://www.amazon.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "shopping2",
+      name: "eBay",
+      link: "https://www.ebay.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "shopping3",
+      name: "Walmart",
+      link: "https://www.walmart.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "shopping4",
+      name: "Target",
+      link: "https://www.target.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "shopping5",
+      name: "Best Buy",
+      link: "https://www.bestbuy.com",
+      addedByAdmin: true,
+    },
+  ],
+  News: [
+    {
+      id: "news1",
+      name: "CNN",
+      link: "https://www.cnn.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "news2",
+      name: "BBC",
+      link: "https://www.bbc.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "news3",
+      name: "Reuters",
+      link: "https://www.reuters.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "news4",
+      name: "The Guardian",
+      link: "https://www.theguardian.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "news5",
+      name: "New York Times",
+      link: "https://www.nytimes.com",
+      addedByAdmin: true,
+    },
+  ],
+};
