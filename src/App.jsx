@@ -850,12 +850,7 @@ const App = () => {
                 }
               />
               <Route element={<ToolOutlet />}>
-                <Route
-                  path="/calculator"
-                  element={
-                      <Calculator />
-                  }
-                />
+                <Route path="/calculator" element={<Calculator />} />
                 <Route
                   path="/faren-to-celcius"
                   element={<FarenToCelciusAndCelciusToFaren />}

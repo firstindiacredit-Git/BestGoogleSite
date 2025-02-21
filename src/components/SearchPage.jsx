@@ -28,6 +28,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 const SearchPage = ({ isToolPage = false }) => {
   const { isDarkMode, toggleTheme } = useContext(ThemeContext);
   const [backgroundImage, setBackgroundImage] = useState("");
+  const [showWarning, setShowWarning] = useState(true);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [transparency, setTransparency] = useState(() =>
@@ -610,6 +611,44 @@ const SearchPage = ({ isToolPage = false }) => {
           </div>
           {!user ? (
             <div className="w-full">
+              {showWarning && (
+                <div className="w-[92%] mx-auto mb-4 px-4 py-2 bg-red-50 dark:bg-red-900/30 border-l-4 border-red-400 dark:border-red-600">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <svg
+                        className="w-5 h-5 text-red-400 dark:text-red-600 mr-3"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      <p className="text-sm text-red-700 dark:text-red-200">
+                        You are not logged in. Your layout changes will only be
+                        saved locally and may be lost when clearing browser
+                        data.
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-8">
+                      <a
+                        href="/signin"
+                        className="ml-4 text-sm font-medium text-red-700 dark:text-red-200 hover:text-red-600 dark:hover:text-red-300 underline"
+                      >
+                        Sign in
+                      </a>
+                      <button
+                        className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                        onClick={() => setShowWarning(false)}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
               {activeComponent === "NotebookAndSheet" ? (
                 <NotebookAndSheet />
               ) : activeComponent === "PopularBookmarks" ? (
