@@ -600,7 +600,7 @@ const LandingPage = () => {
                   <img src="/LOGO.svg" class="h-12 me-3" alt="FlowBite Logo" />
                 </a>
               </div>
-              <div class="grid grid-cols-2 gap-8 sm:gap-6 sm:grid-cols-3">
+              <div class="flex justify-between gap-10">
                 <div>
                   <h2 class="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-white">
                     Resources
@@ -624,7 +624,7 @@ const LandingPage = () => {
                     </li>
                   </ul>
                 </div>
-                <div>
+                {/* <div>
                   <h2 class="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-white">
                     Follow us
                   </h2>
@@ -646,9 +646,9 @@ const LandingPage = () => {
                       </a>
                     </li>
                   </ul>
-                </div>
+                </div> */}
                 <div>
-                  <h2 class="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-white">
+                  <h2 class="mb-6 text-sm font-semibold text-gray-900 text-center uppercase dark:text-white">
                     Legal
                   </h2>
                   <ul class="text-gray-500 dark:text-gray-400 font-medium">
