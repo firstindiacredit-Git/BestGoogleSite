@@ -81,6 +81,52 @@
     <link rel="canonical" href="https://allmytab.com" />
 
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
+    <!-- Breadcrumb Schema Markup -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://allmytab.com/search"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "About",
+            "item": "https://allmytab.com/about"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Pricing",
+            "item": "https://allmytab.com/pricing"
+          },
+          {
+            "@type": "ListItem",
+            "position": 4,
+            "name": "Privacy Policy",
+            "item": "https://allmytab.com/policy"
+          },
+          {
+            "@type": "ListItem",
+            "position": 5,
+            "name": "Terms & Services",
+            "item": "https://allmytab.com/terms"
+          },
+          {
+            "@type": "ListItem",
+            "position": 6,
+            "name": "Blog",
+            "item": "https://allmytab.com/blog"
+          }
+        ]
+      }
+    </script>
   </head>
   <body class="font-body">
     <div id="root"></div>

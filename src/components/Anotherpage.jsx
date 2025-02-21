@@ -620,7 +620,7 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
           alignItems: "center",
           justifyContent: "center",
           boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-          zIndex: 1000,
+          zIndex: 997,
         }}
         onClick={() => setIsSorterOpen(true)}
       >

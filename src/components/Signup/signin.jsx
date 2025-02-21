@@ -9,7 +9,6 @@ const SignIn = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(true);
   const [isPasswordFieldVisible, setIsPasswordFieldVisible] = useState(false);
   const [recaptchaLoaded, setRecaptchaLoaded] = useState(false);
   const [recaptchaReady, setRecaptchaReady] = useState(false);
@@ -161,97 +160,109 @@ const SignIn = () => {
   }, []);
 
   return (
-    isModalOpen && (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-sm w-full max-w-md p-6 relative shadow-xl transform transition-all duration-300 scale-100 hover:scale-105">
-          <button
-            className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
-            onClick={() => navigate(-1)}
-          >
-            &times;
-          </button>
-
-          <h2 className="text-center text-2xl font-extrabold mb-6 text-gray-800">
-            Welcome Back
-          </h2>
-          {/* more things */}
-
-          {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-
-          {!isPasswordFieldVisible ? (
-            <form onSubmit={handleEmailSubmit} className="space-y-4">
-              <input
-                type="email"
-                placeholder="Email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full p-3 border rounded-xs focus:ring-2 focus:ring-blue-500"
-                required
-              />
-
-              <div className="flex justify-center">
-                <div ref={recaptchaContainer} className="mt-4"></div>
-              </div>
-
-              <Link to="/forgot-password">
-                <div>Forgot Password?</div>
-              </Link>
-
-              <button
-                type="submit"
-                className="w-full p-3 bg-indigo-600 text-white rounded-xs hover:bg-indigo-700 focus:ring-2 focus:ring-blue-500"
-                disabled={!recaptchaLoaded}
-              >
-                Continue
-              </button>
-            </form>
-          ) : (
-            <form onSubmit={handleEmailSignIn} className="space-y-4">
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full p-3 border rounded-xs focus:ring-2 focus:ring-blue-500"
-                required
-              />
-
-              <div className="flex justify-center">
-                <div ref={recaptchaContainer} className="mt-4"></div>
-              </div>
-              <Link to="/forgot-password">
-                <div>Forgot Password?</div>
-              </Link>
-              <button
-                type="submit"
-                className={`w-full p-3 bg-indigo-600 text-white rounded-xs hover:bg-indigo-700 focus:ring-2 focus:ring-blue-500 ${
-                  loading ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                disabled={loading || !recaptchaLoaded}
-              >
-                {loading ? (
-                  <span className="spinner border-t-2 border-blue-500 border-solid w-5 h-5 block mx-auto rounded-full animate-spin"></span>
-                ) : (
-                  "Sign In"
-                )}
-              </button>
-            </form>
-          )}
-          <div className="flex items-center justify-center my-6">
-            <hr className="border-gray-300 flex-grow" />
-            <span className="px-2 text-gray-500">OR</span>
-            <hr className="border-gray-300 flex-grow" />
-          </div>
-          <button
-            className="w-full flex items-center justify-center gap-2 p-3 border rounded-xs bg-gray-100 hover:bg-gray-200 focus:ring-2 focus:ring-gray-300"
-            onClick={handleGoogleSignIn}
-          >
-            <img src="/google.png" alt="Google" className="w-5 h-5" />
-            <span className="font-medium">Continue with Google</span>
-          </button>
+    <div>
+      <div className="bg-white relative overflow-clip  dark:bg-[#101020]  border dark:border-gray-700 border-gray-100 rounded-3xl w-full max-w-lg p-6  shadow-2xl shadow-gray-500/20 ">
+        <div className="flex justify-center  rounded-full p-4 w-fit mx-auto items-center my-2">
+          <img src="/Favicon.svg" alt="logo" className="w-16" />
         </div>
+        <div className="absolute -top-20  left-10  ">
+          <img src="/ShadowBlue.png" className=" opacity-45 w-80" alt="close" />
+        </div>
+
+        <h2 className="text-center text-2xl dark:text-gray-200 text-gray-800 font-medium">
+          Welcome back
+        </h2>
+        <h3 className="text-center text-sm mb-6  text-gray-500 dark:text-gray-400">
+          Please enter your details to sign in.
+        </h3>
+        {/* more things */}
+
+        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+
+        <button
+          className="w-full flex items-center justify-center gap-2 p-3 border rounded-xs dark:bg-black dark:text-gray-200 dark:border-gray-800 bg-gray-50 rounded-xl hover:bg-gray-200 focus:ring-2 focus:ring-gray-300"
+          onClick={handleGoogleSignIn}
+        >
+          <img src="/google.png" alt="Google" className="w-5 h-5" />
+          <span className="font-medium">Continue with Google</span>
+        </button>
+        <div className="flex items-center justify-center my-6">
+          <hr className="border-gray-300  dark:border-gray-400 flex-grow" />
+          <span className="px-2 text-gray-500 dark:text-gray-400 font-bold">
+            OR
+          </span>
+          <hr className="border-gray-300 dark:border-gray-400 flex-grow" />
+        </div>
+
+        {!isPasswordFieldVisible ? (
+          <form onSubmit={handleEmailSubmit} className="space-y-4">
+            <div className="flex justify-center">
+              <div ref={recaptchaContainer} className="mt-4"></div>
+            </div>
+            <input
+              type="email"
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full p-3 border rounded-lg dark:bg-[#28283a] dark:text-gray-200 dark:border-gray-800 "
+              required
+            />
+
+            <Link to="/forgot-password">
+              <div className="underline text-gray-800 dark:text-gray-200 my-2 text-right">
+                Forgot Password?
+              </div>
+            </Link>
+
+            <button
+              type="submit"
+              className="w-full p-3 bg-indigo-500 dark:bg-black cursor-pointer text-gray-200 dark:border-gray-800 border rounded-xl hover:bg-indigo-600   "
+            >
+              Continue
+            </button>
+            <p className="text-center text-gray-500 dark:text-gray-400">
+              Don't have an account?{" "}
+              <Link to="/signup" className="text-indigo-500 dark:text-gray-200">
+                Sign up
+              </Link>
+            </p>
+          </form>
+        ) : (
+          <form onSubmit={handleEmailSignIn} className="space-y-4">
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full p-3 border rounded-lg dark:bg-blue-950 dark:text-gray-200 dark:border-gray-800 "
+              required
+            />
+
+            <div className="flex justify-center">
+              <div ref={recaptchaContainer} className="mt-4"></div>
+            </div>
+            <Link to="/forgot-password">
+              <div className="underline text-gray-800 dark:text-gray-200 my-2 text-right">
+                Forgot Password?
+              </div>
+            </Link>
+            <button
+              type="submit"
+              className={`w-full p-3 bg-indigo-600 text-white rounded-xs hover:bg-indigo-700 focus:ring-2 focus:ring-blue-500 ${
+                loading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              disabled={loading || !recaptchaLoaded}
+            >
+              {loading ? (
+                <span className="spinner border-t-2 border-blue-500 border-solid w-5 h-5 block mx-auto rounded-full animate-spin"></span>
+              ) : (
+                "Sign In"
+              )}
+            </button>
+          </form>
+        )}
       </div>
-    )
+    </div>
   );
 };
 

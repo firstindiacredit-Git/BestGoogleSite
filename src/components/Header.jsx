@@ -11,7 +11,6 @@ import {
   MenuOutlined,
   HomeOutlined,
   PlusOutlined,
-  AppstoreOutlined,
   EditOutlined,
   DeleteOutlined,
   StarOutlined,
@@ -19,9 +18,12 @@ import {
 } from "@ant-design/icons";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { FaCrown } from "react-icons/fa";
-
+import Signin from "./Signup/signin.jsx";
+import Signup from "./Signup.jsx";
 const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
   const [showButtons, setShowButtons] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [showSignup, setShowSignup] = useState(false);
   const [user, setUser] = useState(null);
   const [subscriptionStatus, setSubscriptionStatus] = useState("free");
   const [isAdmin, setIsAdmin] = useState(false);
@@ -215,6 +217,7 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
   };
 
   const [defaultPageId, setDefaultPageId] = useState(null);
+  const [showWarning, setShowWarning] = useState(true);
 
   useEffect(() => {
     const fetchDefaultPage = async () => {
@@ -274,9 +277,9 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
                 }
               >
                 {defaultPageId === page.id.toString() ? (
-                  <StarFilled className="text-yellow-500" />
+                  <StarFilled className="text-indigo-500" />
                 ) : (
-                  <StarOutlined className="text-gray-500 hover:text-yellow-500" />
+                  <StarOutlined className="text-gray-500 hover:text-indigo-500" />
                 )}
               </button>
               <button
@@ -379,6 +382,43 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
             />
           </div>
         )}
+        {showWarning && !user && (
+          <div className="w-full mx-auto mb-4 px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 border-l-4 border-indigo-400 dark:border-indigo-600">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <svg
+                  className="w-5 h-5 text-indigo-400 dark:text-indigo-600 mr-3"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <p className="text-sm text-indigo-700 dark:text-indigo-200">
+                  You are not logged in. Your layout changes will only be saved
+                  locally and may be lost when clearing browser data.
+                </p>
+              </div>
+              <div className="flex items-center gap-8">
+                <button
+                  onClick={() => setShowLogin(true)}
+                  className="ml-4 text-sm font-medium text-indigo-700 dark:text-indigo-200 hover:text-indigo-600 dark:hover:text-indigo-300 underline"
+                >
+                  Sign in
+                </button>
+                <button
+                  className="text-indigo-400 hover:text-indigo-600 dark:text-indigo-500 dark:hover:text-indigo-300"
+                  onClick={() => setShowWarning(false)}
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         <div className="flex p-2 justify-between items-center">
           <div className="flex  items-center space-x-2">
             {user ? (
@@ -408,7 +448,7 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
                   className={` p-2 rounded-lg text-sm flex items-center justify-center gap-2 
                       ${
                         subscriptionStatus === "pro"
-                          ? "text-yellow-500"
+                          ? "text-indigo-500"
                           : "text-gray-500 dark:text-gray-400"
                       }`}
                 ></div>
@@ -462,7 +502,7 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
                         className={`mt-2 text-sm flex items-center justify-center gap-2 
                       ${
                         subscriptionStatus === "pro"
-                          ? "text-yellow-500"
+                          ? "text-indigo-500"
                           : "text-gray-500 dark:text-gray-400"
                       }`}
                       >
@@ -497,23 +537,42 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
               </div>
             ) : (
               <div className="flex space-x-2">
-                <Link
-                  to="/signin"
+                <button
+                  onClick={() => setShowLogin(true)}
                   className="px-2 py-1 border  text-white bg-green-500 border-green-500 dark:border-green-500 rounded hover:bg-green-600  transition-colors duration-200"
                 >
                   Login
-                </Link>
-                <Link
-                  to="/signup"
+                </button>
+                <button
+                  onClick={() => setShowSignup(true)}
                   className="px-2 py-1 border text-white bg-blue-500 border-blue-500 dark:border-gray-500 rounded hover:bg-blue-600 transition-colors duration-200"
                 >
                   Sign Up
-                </Link>
+                </button>
               </div>
             )}
           </div>
         </div>
       </header>
+      {showLogin && (
+        <div className="fixed inset-0 backdrop-blur-md backdrop-brightness-50 z-[999]">
+          <div className="flex h-screen items-center justify-center">
+            <div>
+              <div className="relative w-fit h-fit">
+                <button
+                  className="dark:text-white text-black text-3xl absolute z-[999] top-5 right-5"
+                  onClick={() => setShowLogin(false)}
+                >
+                  &times;
+                </button>
+
+                <Signin />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {showSignup && <Signup />}
     </>
   );
 };

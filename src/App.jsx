@@ -956,8 +956,8 @@ const App = () => {
                   element={<TestScoreCalculator />}
                 />
                 <Route path="/trafficchecker" element={<TrafficChecker />} />
-                <Route path="/signin" element={<Signin />} />
-                <Route path="/signup" element={<Signup />} />
+                {/* <Route path="/signin" element={<Signin />} /> */}
+                {/* <Route path="/signup" element={<Signup />} /> */}
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/tools" element={<Tool />} />
                 <Route path="/second" element={<Second />} />
