@@ -22,6 +22,7 @@ import {
   updatePageLayout,
   getAvailableWidgets,
   resetPageLayout,
+  defaultWidgets,
 } from "../firebase/widgetLayouts";
 import TodoComponent from "./TodoComponent.jsx";
 import NewsFeed from "./NewsFeed.jsx";
@@ -98,7 +99,21 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
   };
   const [isResetting, setIsResetting] = useState(false);
 
-  // Load user and layout
+  // Add new function to handle local storage operations
+  const localStorageKey = "widget_layout";
+
+  const saveToLocalStorage = (layout) => {
+    if (!user) {
+      localStorage.setItem(localStorageKey, JSON.stringify(layout));
+    }
+  };
+
+  const getFromLocalStorage = () => {
+    const savedLayout = localStorage.getItem(localStorageKey);
+    return savedLayout ? JSON.parse(savedLayout) : null;
+  };
+
+  // Modify the useEffect for loading layout
   useEffect(() => {
     const authInstance = getAuth();
     const unsubscribe = onAuthStateChanged(
@@ -106,14 +121,28 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
       async (currentUser) => {
         setUser(currentUser);
         if (currentUser) {
+          // If user is logged in, get layout from Firebase
           const layout = await getPageLayout(currentUser.uid, pageId);
           setItems(layout.widgets);
           setColumns(layout.columns);
-          setPreviewColumns(layout.columns);
-          setLoading(false);
         } else {
-          setLoading(false);
+          // If user is not logged in, get layout from localStorage or use default
+          const localLayout = getFromLocalStorage();
+          if (localLayout) {
+            setItems(localLayout.widgets);
+            setColumns(localLayout.columns);
+          } else {
+            // Use default layout from widgetLayouts.js
+            const defaultLayout = {
+              widgets: defaultWidgets[pageId] || [],
+              columns: 4,
+            };
+            setItems(defaultLayout.widgets);
+            setColumns(defaultLayout.columns);
+            saveToLocalStorage(defaultLayout);
+          }
         }
+        setLoading(false);
       }
     );
     return () => unsubscribe();
@@ -131,9 +160,10 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
     setAvailableWidgets(getAvailableWidgets(sortedItems));
   }, [sortedItems]);
 
+  // Modify onDragEnd to handle both Firebase and localStorage
   const onDragEnd = async (result) => {
     const { source, destination } = result;
-    if (!destination || !user) return;
+    if (!destination) return;
 
     // If dropped in the same position, don't do anything
     if (
@@ -185,14 +215,22 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
         globalPosition: idx,
       }));
 
-      // Update local state immediately
+      // Update local state
       setItems(updatedItems);
 
-      // Update database
-      await updatePageLayout(user.uid, pageId, {
-        widgets: updatedItems,
-        columns: columns,
-      });
+      if (user) {
+        // Update Firebase if user is logged in
+        await updatePageLayout(user.uid, pageId, {
+          widgets: updatedItems,
+          columns: columns,
+        });
+      } else {
+        // Update localStorage if user is not logged in
+        saveToLocalStorage({
+          widgets: updatedItems,
+          columns: columns,
+        });
+      }
 
       message.success("Layout updated successfully");
     } catch (error) {
@@ -300,21 +338,27 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
     setSortedItems(redistributedItems);
   };
 
+  // Modify handleApplySorting to handle both Firebase and localStorage
   const handleApplySorting = async () => {
-    if (!user) return;
-
     setIsApplying(true);
     await new Promise((resolve) => setTimeout(resolve, 800));
 
-    // Update both local state and database
+    // Update both local state and storage
     setItems(sortedItems);
     setColumns(previewColumns);
 
     try {
-      await updatePageLayout(user.uid, pageId, {
-        widgets: sortedItems,
-        columns: previewColumns,
-      });
+      if (user) {
+        await updatePageLayout(user.uid, pageId, {
+          widgets: sortedItems,
+          columns: previewColumns,
+        });
+      } else {
+        saveToLocalStorage({
+          widgets: sortedItems,
+          columns: previewColumns,
+        });
+      }
       message.success("Layout updated successfully");
     } catch (error) {
       console.error("Error saving layout:", error);
@@ -366,12 +410,21 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
     return columnsArray;
   };
 
+  // Modify handleResetLayout to handle both Firebase and localStorage
   const handleResetLayout = async () => {
-    if (!user) return;
-
     try {
       setIsResetting(true);
-      const defaultLayout = await resetPageLayout(user.uid, pageId);
+      let defaultLayout;
+
+      if (user) {
+        defaultLayout = await resetPageLayout(user.uid, pageId);
+      } else {
+        defaultLayout = {
+          widgets: defaultWidgets[pageId] || [],
+          columns: 4,
+        };
+        saveToLocalStorage(defaultLayout);
+      }
 
       // Sort widgets by column and position
       const sortedWidgets = defaultLayout.widgets.sort((a, b) => {
@@ -397,13 +450,13 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
     }
   };
 
-  if (!user) {
-    return (
-      <div className="text-gray-500 text-5xl  my-20">
-        <h1 className="text-center font-bold">LOGIN TO UNLOCK MORE FEATURES</h1>
-      </div>
-    );
-  }
+  // if (!user) {
+  //   return (
+  //     <div className="text-gray-500 text-5xl  my-20">
+  //       <h1 className="text-center font-bold">LOGIN TO UNLOCK MORE FEATURES</h1>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div style={{ position: "relative" }}>

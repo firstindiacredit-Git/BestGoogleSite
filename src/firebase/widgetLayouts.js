@@ -2,7 +2,7 @@ import { db } from "../firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 
 // Default widget configurations for different pages
-const defaultWidgets = {
+export const defaultWidgets = {
   home: [
     // Column 0
     { id: "weather", name: "Weather", isOpen: true, column: 0, position: 0 },
@@ -196,7 +196,7 @@ export const removeWidgetFromPage = async (userId, pageName, widgetId) => {
 export const resetPageLayout = async (userId, pageName) => {
   try {
     const userLayoutRef = doc(db, "users", userId, "layouts", "widgets");
-    const optimalColumns = 4
+    const optimalColumns = 4;
 
     // Get default layout with optimal columns
     const defaultLayout = {
