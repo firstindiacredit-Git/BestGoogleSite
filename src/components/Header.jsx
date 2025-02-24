@@ -460,7 +460,7 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
 
           <div className="flex items-center">
             <Link
-              to="/"
+              to="/search"
               className="text-xl font-bold text-gray-800 dark:text-white"
             >
               <img src="/LOGO.svg" alt="Logo" className="h-10" />

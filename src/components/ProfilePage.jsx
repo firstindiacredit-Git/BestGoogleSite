@@ -8,7 +8,7 @@ import {
   FaEye,
   FaEyeSlash,
   FaPen,
-  FaCamera ,
+  FaCamera,
   FaUser,
   FaLock,
   FaShieldAlt,
@@ -332,93 +332,6 @@ const ProfilePage = () => {
     }
   };
 
-  const handleBackgroundClick = () => {
-    backgroundInputRef.current?.click();
-  };
-
-  const handleBackgroundChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-      message.error("Please upload an image file");
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      message.error("File size should not exceed 5MB");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setPreviewBackgroundUrl(reader.result);
-    };
-    reader.readAsDataURL(file);
-
-    try {
-      setIsUploadingBackground(true);
-      const currentUser = auth.currentUser;
-      if (!currentUser) throw new Error("No user logged in");
-
-      const compressedImage = await compressImage(file);
-
-      const formData = new FormData();
-      formData.append("file", compressedImage);
-      formData.append(
-        "upload_preset",
-        import.meta.env.VITE_CLOUDINARY_UPLOAD_AVATAR_PRESET
-      );
-      formData.append("folder", "browsey/backgrounds");
-      formData.append("public_id", `user_bg_${currentUser.uid}_${Date.now()}`);
-      formData.append("cloud_name", import.meta.env.VITE_CLOUDINARY_CLOUD_NAME);
-
-      const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${
-          import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
-        }/image/upload`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.error?.message || "Failed to upload background image"
-        );
-      }
-
-      const data = await response.json();
-      const imageUrl = data.secure_url;
-
-      // Update Firestore
-      const userRef = doc(db, "users", currentUser.uid);
-      await updateDoc(userRef, {
-        backgroundUrl: imageUrl,
-        searchBackgroundUrl: imageUrl,
-        lastUpdated: new Date().toISOString(),
-      });
-
-      // Update localStorage
-      localStorage.setItem("backgroundImage", imageUrl);
-
-      setBackgroundUrl(imageUrl);
-      message.success("Background image updated successfully!");
-    } catch (error) {
-      console.error("Error uploading background:", error);
-      setPreviewBackgroundUrl(backgroundUrl);
-      message.error("Failed to update background image. Please try again.");
-    } finally {
-      setIsUploadingBackground(false);
-    }
-  };
-
-  const handleGoBack = () => {
-    navigate("/search");
-  };
-
   const handleUpgrade = () => {
     navigate("/premium");
   };
@@ -429,22 +342,6 @@ const ProfilePage = () => {
 
   return (
     <div className="min-h-screen relative">
-      {/* Full-screen background */}
-      <div
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: `url(${previewBackgroundUrl || backgroundUrl})`,
-          zIndex: -2,
-        }}
-      />
-      <div
-        className="fixed inset-0 bg-black/30 backdrop-blur-sm"
-        style={{ zIndex: -1 }}
-      />
-
-      {/* Header */}
-      <Header isDarkMode={isDarkMode} toggleTheme={toggleTheme} goBack={true} />
-
       {/* Main Content */}
       <div className="relative pt-8 px-4 pb-20">
         <div className="max-w-4xl mx-auto">
@@ -767,8 +664,6 @@ const ProfilePage = () => {
           </div>
 
           {/* Background Image Upload Button */}
-          
-          
         </div>
       </div>
     </div>

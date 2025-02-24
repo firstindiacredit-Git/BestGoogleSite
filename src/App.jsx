@@ -958,7 +958,16 @@ const App = () => {
                 <Route path="/trafficchecker" element={<TrafficChecker />} />
                 {/* <Route path="/signin" element={<Signin />} /> */}
                 {/* <Route path="/signup" element={<Signup />} /> */}
-                <Route path="/profile" element={<ProfilePage />} />
+
+                <Route
+                  path="/profile"
+                  element={
+                    <ContextMenuWrapper>
+                      <ProfilePage />
+                    </ContextMenuWrapper>
+                  }
+                />
+
                 <Route path="/tools" element={<Tool />} />
                 <Route path="/second" element={<Second />} />
                 <Route path="/forgot-password" element={<Forgotpassword />} />
