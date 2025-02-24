@@ -840,6 +840,18 @@ const App = () => {
               <Route path="/contact" element={<ContactUs />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:id" element={<BlogDetail />} />
+              <Route
+                path="/profile"
+                element={
+                  <ContextMenuWrapper>
+                    <ProfilePage />
+                  </ContextMenuWrapper>
+                }
+              />
+
+              <Route path="/forgot-password" element={<Forgotpassword />} />
+              <Route path="/premium" element={<PremiumPage />} />
+              <Route path="/premium-form" element={<PremiumForm />} />
 
               <Route
                 path="/NewSearchPage"
@@ -951,6 +963,8 @@ const App = () => {
                 <Route path="/gstcalculator" element={<GSTCalculator />} />
                 <Route path="/vatcalculator" element={<VATCalculator />} />
                 <Route path="/electricitybill" element={<ElectricityBill />} />
+                <Route path="/tools" element={<Tool />} />
+                <Route path="/second" element={<Second />} />
                 <Route
                   path="/testscorecalculator"
                   element={<TestScoreCalculator />}
@@ -958,21 +972,6 @@ const App = () => {
                 <Route path="/trafficchecker" element={<TrafficChecker />} />
                 {/* <Route path="/signin" element={<Signin />} /> */}
                 {/* <Route path="/signup" element={<Signup />} /> */}
-
-                <Route
-                  path="/profile"
-                  element={
-                    <ContextMenuWrapper>
-                      <ProfilePage />
-                    </ContextMenuWrapper>
-                  }
-                />
-
-                <Route path="/tools" element={<Tool />} />
-                <Route path="/second" element={<Second />} />
-                <Route path="/forgot-password" element={<Forgotpassword />} />
-                <Route path="/premium" element={<PremiumPage />} />
-                <Route path="/premium-form" element={<PremiumForm />} />
               </Route>
 
               {/* Admin Routes with Sidebar Layout */}

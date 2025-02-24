@@ -342,11 +342,27 @@ const ProfilePage = () => {
 
   return (
     <div className="min-h-screen relative">
+      {/* Full-screen background */}
+      <div
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: `url(${previewBackgroundUrl || backgroundUrl})`,
+          zIndex: -2,
+        }}
+      />
+      <div
+        className="fixed inset-0 bg-black/30 backdrop-blur-sm"
+        style={{ zIndex: -1 }}
+      />
+
+      {/* Header */}
+      <Header isDarkMode={isDarkMode} toggleTheme={toggleTheme} goBack={true} />
+
       {/* Main Content */}
       <div className="relative pt-8 px-4 pb-20">
         <div className="max-w-4xl mx-auto">
           {/* Profile Header Card */}
-          <div className="bg-white/80 dark:bg-[#513a7a]/90 backdrop-blur-md rounded-lg shadow-xl p-6 mb-6">
+          <div className="bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] backdrop-blur-md rounded-lg shadow-xl p-6 mb-6">
             <div className="flex items-center space-x-6">
               <div className="relative">
                 <img
@@ -377,7 +393,7 @@ const ProfilePage = () => {
                 <h2 className="text-3xl font-bold dark:text-white">
                   {username}
                 </h2>
-                <p className="text-gray-600 dark:text-gray-300">{email}</p>
+                <p className="text-black dark:text-gray-300">{email}</p>
                 <div className="mt-3">
                   <span
                     className={`inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium ${
@@ -397,7 +413,7 @@ const ProfilePage = () => {
           {/* Collapsible Sections */}
           <div className="space-y-4">
             {/* Profile Section */}
-            <div className="bg-white/80 dark:bg-[#513a7a]/90 backdrop-blur-md rounded-lg shadow-lg overflow-hidden">
+            <div className="bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] backdrop-blur-md rounded-lg shadow-lg overflow-hidden">
               <button
                 onClick={() => toggleSection("profile")}
                 className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-black/5"
@@ -429,7 +445,7 @@ const ProfilePage = () => {
                 </div>
               </button>
               {activeSection === "profile" && (
-                <div className="p-6 border-t dark:border-gray-700">
+                <div className="p-6 border-t border-gray-800 ">
                   <div className="flex justify-between items-center">
                     <div>
                       <h3 className="font-semibold dark:text-white">Name</h3>
@@ -449,7 +465,7 @@ const ProfilePage = () => {
                           </button>
                         </div>
                       ) : (
-                        <p className="text-gray-600 dark:text-gray-300 mt-1">
+                        <p className=" text-black dark:text-gray-300 mt-1">
                           {username}
                         </p>
                       )}
@@ -466,7 +482,7 @@ const ProfilePage = () => {
             </div>
 
             {/* Password Section */}
-            <div className="bg-white/80 dark:bg-[#513a7a]/90 backdrop-blur-md rounded-lg shadow-lg overflow-hidden">
+            <div className="bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] backdrop-blur-md rounded-lg shadow-lg overflow-hidden">
               <button
                 onClick={() => toggleSection("password")}
                 className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-black/5"
@@ -498,7 +514,7 @@ const ProfilePage = () => {
                 </div>
               </button>
               {activeSection === "password" && (
-                <div className="p-6 border-t dark:border-gray-700">
+                <div className="p-6 border-t border-gray-700">
                   {isEditingPassword ? (
                     <div className="flex items-center space-x-2">
                       <div className="relative flex-1">
@@ -526,7 +542,7 @@ const ProfilePage = () => {
                   ) : (
                     <button
                       onClick={() => setIsEditingPassword(true)}
-                      className="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+                      className="text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300"
                     >
                       Click to change password
                     </button>
@@ -537,7 +553,7 @@ const ProfilePage = () => {
 
             {/* PIN Section */}
             {userId && (
-              <div className="bg-white/80 dark:bg-[#513a7a]/90 backdrop-blur-md rounded-lg shadow-lg overflow-hidden">
+              <div className="bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] backdrop-blur-md rounded-lg shadow-lg overflow-hidden">
                 <button
                   onClick={() => toggleSection("pin")}
                   className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-black/5"
@@ -612,7 +628,7 @@ const ProfilePage = () => {
             )}
 
             {/* Subscription Section */}
-            <div className="bg-white/80 dark:bg-[#513a7a]/90 backdrop-blur-md rounded-lg shadow-lg overflow-hidden">
+            <div className="bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] backdrop-blur-md rounded-lg shadow-lg overflow-hidden">
               <button
                 onClick={() => toggleSection("subscription")}
                 className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-black/5"
