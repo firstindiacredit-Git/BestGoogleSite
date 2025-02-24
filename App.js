@@ -1,17 +1,14 @@
-import React from 'react'
-import Newsapp from './Components/Newsapp/Newsapp'
-import Navbar from './Components/Navbar/Navbar'
-
+import React from "react";
+import Newsapp from "./Components/Newsapp/Newsapp";
+import Navbar from "./Components/Navbar/Navbar";
 
 const App = () => {
-  
   return (
     <>
-    // s
-    <Navbar/>
-    <Newsapp/>      
+      <Navbar />
+      <Newsapp />
     </>
-  )
-}
+  );
+};
 
-export default App
+export default App;

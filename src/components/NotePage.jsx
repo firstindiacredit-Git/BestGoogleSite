@@ -314,15 +314,15 @@ const NotePage = ({ inNotebookSheet = false }) => {
     }
   };
 
-  const downloadNotes = () => {
-    const element = document.createElement("a");
-    const file = new Blob([notes], { type: "text/plain" });
-    element.href = URL.createObjectURL(file);
-    element.download = "notes.txt";
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
-  };
+  // const downloadNotes = () => {
+  //   const element = document.createElement("a");
+  //   const file = new Blob([notes], { type: "text/plain" });
+  //   element.href = URL.createObjectURL(file);
+  //   element.download = "notes.txt";
+  //   document.body.appendChild(element);
+  //   element.click();
+  //   document.body.removeChild(element);
+  // };
 
   const getLineCount = () => {
     return notes.split("\n").length;

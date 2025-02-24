@@ -268,9 +268,16 @@ function BookmarkPage() {
                 className="w-7 h-7 mx-auto"
               />
             </a>
-            <h3 className="text-xs font-semibold mt-1 w-16 truncate mx-auto">
-              {bookmark.name}
-            </h3>
+            <a
+              href={bookmark.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block"
+            >
+              <h3 className="text-xs font-semibold mt-1 w-16 truncate mx-auto">
+                {bookmark.name}
+              </h3>
+            </a>
             <div className="absolute top-0 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <button
                 onClick={() => toggleMenu(bookmark.id)}

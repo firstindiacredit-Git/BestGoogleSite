@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useContext, useMemo } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { WidgetTransparencyContext } from "../App";
 import { motion } from "framer-motion";
 import { Modal, message } from "antd";
 import { Spin, Button as AntButton } from "antd";
@@ -9,6 +8,7 @@ import {
   PlusOutlined,
   ReloadOutlined,
 } from "@ant-design/icons";
+import SkeletonLoader from "./SkeletonLoader.jsx";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import Calculator from "./Calculator.jsx";
 import Clock from "./Clock.jsx";
@@ -464,8 +464,8 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
         <div className={`flex flex-col items-center w-full rounded-xl`}>
           <div className="p-4">
             {loading ? (
-              <div className="flex justify-center items-center min-h-screen">
-                <Spin size="large" />
+              <div className="w-[90vw] mx-auto" style={{ padding: "24px" }}>
+                <SkeletonLoader count={4} />
               </div>
             ) : (
               <DragDropContext onDragEnd={onDragEnd}>

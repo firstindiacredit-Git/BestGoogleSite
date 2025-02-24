@@ -292,12 +292,12 @@ const ResponsiveWorldClock = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({
-    top: 0,
-    right: 0,
+    top: null,
+    right: null,
   });
   const [addDropdownPosition, setAddDropdownPosition] = useState({
-    top: 0,
-    right: 0,
+    top: null,
+    right: null,
   });
   const settingsRef = useRef(null);
   const addButtonRef = useRef(null);
@@ -411,7 +411,7 @@ const ResponsiveWorldClock = () => {
     const settingsContent = showSettings && (
       <div
         ref={settingsMenuRef}
-        className="fixed w-48 bg-white dark:bg-[#28283A] rounded-sm shadow-lg border border-gray-200 dark:border-gray-700 z-[9999] overflow-hidden"
+        className="fixed w-48 bg-white dark:text-white dark:bg-[#28283A] rounded-sm shadow-lg border border-gray-200 dark:border-gray-700 z-[9998]"
         style={{
           top: `${dropdownPosition.top}px`,
           right: `${dropdownPosition.right}px`,
@@ -430,8 +430,8 @@ const ResponsiveWorldClock = () => {
                 }}
                 className={`p-1 rounded flex-1 ${
                   !isAnalog
-                    ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
-                    : "hover:bg-gray-100 dark:hover:bg-gray-700"
+                    ? "bg-blue-100  dark:bg-blue-900 text-blue-600 dark:text-blue-300"
+                    : "hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                 }`}
               >
                 Digital
@@ -475,8 +475,6 @@ const ResponsiveWorldClock = () => {
               ))}
             </div>
           </div>
-
-          
         </div>
       </div>
     );
@@ -561,12 +559,12 @@ const ResponsiveWorldClock = () => {
 
       {/* Bottom Options Bar */}
       {isHovering && (
-        <div className="absolute bottom-2 left-2 right-2 flex items-center justify-end gap-2">
+        <div className="absolute bottom-2 right-2 w-fit shadow-md rounded-lg p-1 dark:bg-[#1F2937] bg-gray-200  flex items-center justify-end gap-2">
           {selectedTimezones.length < 8 && (
             <button
               ref={addButtonRef}
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+              className="p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-500 transition"
               title="Add timezone"
             >
               <Plus className="w-5 h-5" />
@@ -575,7 +573,7 @@ const ResponsiveWorldClock = () => {
           <button
             ref={settingsRef}
             onClick={() => setShowSettings(!showSettings)}
-            className="p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+            className="p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-500  transition"
             title="Settings"
           >
             <Settings className="w-5 h-5" />
