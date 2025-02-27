@@ -788,19 +788,29 @@ const App = () => {
   });
 
   // Memoize theme context value to prevent unnecessary re-renders
-  const themeContextValue = useMemo(
-    () => ({
-      isDarkMode,
-      toggleTheme: () => {
-        setIsDarkMode((prev) => {
-          const newMode = !prev;
-          localStorage.setItem("theme", newMode ? "dark" : "light");
-          return newMode;
-        });
-      },
-    }),
-    [isDarkMode]
-  );
+  // const themeContextValue = useMemo(
+  //   () => ({
+  //     isDarkMode,
+  //     toggleTheme: () => {
+  //       setIsDarkMode((prev) => {
+  //         const newMode = !prev;
+  //         localStorage.setItem("theme", newMode ? "dark" : "light");
+  //         return newMode;
+  //       });
+  //     },
+  //   }),
+  //   [isDarkMode]
+  // );
+  const themeContextValue = {
+    isDarkMode,
+    toggleTheme: () => {
+      setIsDarkMode((prev) => {
+        const newMode = !prev;
+        localStorage.setItem("theme", newMode ? "dark" : "light");
+        return newMode;
+      });
+    },
+  };
 
   // Apply theme changes with optimized performance
   useEffect(() => {

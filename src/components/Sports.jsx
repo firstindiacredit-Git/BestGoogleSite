@@ -1,20 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
-import {
-  Row,
-  Col,
-  Typography,
-  Spin,
-  Button,
-  Layout,
-  Input,
-  Radio,
-  Card,
-  Image,
-} from "antd";
-import SkeletonLoader from "./SkeletonLoader";
-import { AppstoreOutlined, UnorderedListOutlined } from "@ant-design/icons";
+import { Row, Col, Button, Layout, Input, Card, Image } from "antd";
 
-const { Title } = Typography;
+import SkeletonLoader from "./SkeletonLoader";
+import { FaList, FaTh } from "react-icons/fa";
 const { Content } = Layout;
 const { Search } = Input;
 
@@ -26,19 +14,39 @@ const SportsLeagues = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState(null);
 
+  // const fetchLeagues = useCallback(async () => {
+  //   setLoading(true);
+  //   try {
+  //     // Using a more reliable free sports API
+  //     const response = await fetch(
+  //       `https://www.scorebat.com/video-api/v3/feed/?token=${
+  //         import.meta.env.VITE_MATCH_KEY
+  //       }`
+  //     );
+  //     const data = await response.json();
+  //     if (data.response) {
+  //       setLeagues(data.response);
+  //       setFilteredLeagues(data.response);
+  //     }
+  //   } catch (error) {
+  //     setError("Failed to fetch leagues, please try again.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }, []);
+
   const fetchLeagues = useCallback(async () => {
     setLoading(true);
     try {
-      // Using a more reliable free sports API
       const response = await fetch(
-        `https://www.scorebat.com/video-api/v3/feed/?token=${
-          import.meta.env.VITE_MATCH_KEY
-        }`
+        "https://bgs-backend.vercel.app/api/top100/sports"
       );
       const data = await response.json();
-      if (data.response) {
-        setLeagues(data.response);
-        setFilteredLeagues(data.response);
+      if (data.length > 0) {
+        setLeagues(data);
+        setFilteredLeagues(data);
+      } else {
+        setError("No sports data available");
       }
     } catch (error) {
       setError("Failed to fetch leagues, please try again.");
@@ -84,24 +92,30 @@ const SportsLeagues = () => {
                 style={{ width: 300 }}
                 className="dark:bg-[#28283A] dark:text-gray-300"
               />
-              <Radio.Group
-                value={viewMode}
-                onChange={(e) => setViewMode(e.target.value)}
-                className="dark:bg-[#28283A]"
-              >
-                <Radio.Button
-                  value="grid"
-                  className="dark:bg-[#513a7a] dark:text-gray-300"
+              <div className="bg-white dark:bg-[#513a7a] rounded-lg shadow-sm p-1 inline-flex">
+                <button
+                  onClick={() => setViewMode("grid")}
+                  className={`p-2 rounded-md transition-all duration-200 ${
+                    viewMode === "grid"
+                      ? "bg-blue-50 dark:bg-gray-700 text-blue-600 dark:text-blue-400"
+                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  }`}
+                  title="Grid View"
                 >
-                  <AppstoreOutlined />
-                </Radio.Button>
-                <Radio.Button
-                  value="list"
-                  className="dark:bg-[#513a7a] dark:text-gray-300"
+                  <FaTh size={15} />
+                </button>
+                <button
+                  onClick={() => setViewMode("list")}
+                  className={`p-2 rounded-md transition-all duration-200 ${
+                    viewMode === "list"
+                      ? "bg-blue-50 dark:bg-gray-700 text-blue-600 dark:text-blue-400"
+                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  }`}
+                  title="List View"
                 >
-                  <UnorderedListOutlined />
-                </Radio.Button>
-              </Radio.Group>
+                  <FaList size={15} />
+                </button>
+              </div>
             </div>
           </div>
         </Content>
@@ -122,24 +136,31 @@ const SportsLeagues = () => {
               style={{ width: 300 }}
               className="dark:bg-[#28283A] dark:text-gray-300"
             />
-            <Radio.Group
-              value={viewMode}
-              onChange={(e) => setViewMode(e.target.value)}
-              className="dark:bg-[#28283A]"
-            >
-              <Radio.Button
-                value="grid"
-                className="dark:bg-[#513a7a] dark:text-gray-300"
+
+            <div className="bg-white dark:bg-[#513a7a] rounded-lg shadow-sm p-1 inline-flex">
+              <button
+                onClick={() => setViewMode("grid")}
+                className={`p-2 rounded-md transition-all duration-200 ${
+                  viewMode === "grid"
+                    ? "bg-blue-50 dark:bg-gray-700 text-blue-600 dark:text-blue-400"
+                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                }`}
+                title="Grid View"
               >
-                <AppstoreOutlined />
-              </Radio.Button>
-              <Radio.Button
-                value="list"
-                className="dark:bg-[#513a7a] dark:text-gray-300"
+                <FaTh size={15} />
+              </button>
+              <button
+                onClick={() => setViewMode("list")}
+                className={`p-2 rounded-md transition-all duration-200 ${
+                  viewMode === "list"
+                    ? "bg-blue-50 dark:bg-gray-700 text-blue-600 dark:text-blue-400"
+                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                }`}
+                title="List View"
               >
-                <UnorderedListOutlined />
-              </Radio.Button>
-            </Radio.Group>
+                <FaList size={15} />
+              </button>
+            </div>
           </div>
 
           <Row gutter={[16, 16]}>

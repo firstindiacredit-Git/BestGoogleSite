@@ -17,10 +17,9 @@ import {
 import { onAuthStateChanged } from "firebase/auth";
 import { Settings, Edit, Plus, Trash2 } from "lucide-react";
 import { Modal, message, Input } from "antd";
-// import { WidgetTransparencyContext } from "../App";
 import { defaultBookmarks } from "../firebase/widgetLayouts";
 
-const CategoryHome = ({ categoryType, itemName, collapsed = false }) => {
+const CategoryHome = ({ categoryType, collapsed = false }) => {
   const [user, setUser] = useState(null);
   const [bookmarks, setBookmarks] = useState([]);
   const [hiddenBookmarkIds, setHiddenBookmarkIds] = useState([]);

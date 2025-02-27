@@ -522,10 +522,6 @@ const ResponsiveWorldClock = () => {
     );
   };
 
-  const collapse = () => {
-    setIsCollapsed(!isCollapsed);
-  };
-
   return (
     <div
       onMouseEnter={() => setIsHovering(true)}
@@ -559,7 +555,7 @@ const ResponsiveWorldClock = () => {
 
       {/* Bottom Options Bar */}
       {isHovering && (
-        <div className="absolute bottom-2 right-2 w-fit shadow-md rounded-lg p-1 dark:bg-[#1F2937] bg-gray-200  flex items-center justify-end gap-2">
+        <div className="absolute bottom-2 right-2 w-fit shadow-md rounded-lg p-1 dark:bg-[#1F2937] bg-white  flex items-center justify-end gap-2">
           {selectedTimezones.length < 8 && (
             <button
               ref={addButtonRef}

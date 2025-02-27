@@ -12,184 +12,17 @@ import {
   Space,
   Image,
 } from "antd";
-import { AppstoreOutlined, UnorderedListOutlined } from "@ant-design/icons";
+import { FaTh } from "react-icons/fa";
 import sportsmen from "./sportsmen.json";
 import brands from "./brand.json";
 import bikes from "./bikes.json";
 import gdp from "./gdp.json";
 import "./ToastifyNotification.css";
 import SkeletonLoader from "./SkeletonLoader";
+import { FaList } from "react-icons/fa";
 
 const { Title } = Typography;
 const { Search } = Input;
-
-function WikipediaBanks() {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState("grid");
-  const [searchQuery, setSearchQuery] = useState("");
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(
-          "https://en.wikipedia.org/w/api.php?action=parse&page=List_of_largest_banks&format=json&origin=*"
-        );
-        const result = await response.json();
-        const htmlContent = result.parse.text["*"];
-
-        // Extract table data
-        const tempDiv = document.createElement("div");
-        tempDiv.innerHTML = htmlContent;
-        const tableElement = tempDiv.querySelector(".wikitable");
-
-        // Convert HTML table to array of objects
-        const rows = Array.from(tableElement.querySelectorAll("tr"));
-        const headers = Array.from(rows[0].querySelectorAll("th")).map((th) =>
-          th.textContent.trim()
-        );
-
-        const tableData = rows.slice(1).map((row, index) => {
-          const cells = Array.from(row.querySelectorAll("td"));
-          const rowData = cells.map((cell) => cell.textContent.trim());
-          const obj = {
-            key: index,
-          };
-          headers.forEach((header, i) => {
-            obj[header] = rowData[i];
-          });
-          return obj;
-        });
-
-        setData(tableData);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const filteredData = data.filter(
-    (item) =>
-      item["Bank name"]?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item["Rank"]?.toString().includes(searchQuery) ||
-      item["Total assets(2023)(US$ billion)"]?.toString().includes(searchQuery)
-  );
-
-  const renderGridView = () => (
-    <Row gutter={[16, 16]}>
-      {filteredData.map((item, index) => (
-        <Col xs={24} sm={12} lg={8} key={index}>
-          <div className="bg-white/[(var(--widget-opacity))] dark:bg-[#513a7a]/[(var(--widget-opacity))] p-4 rounded-xl hover:shadow-sm transition-all duration-200">
-            <div>{`${index + 1}. ${item["Bank name"] || "Unknown Bank"}`}</div>
-            <div>
-              <p>Rank: {item["Rank"] || "N/A"}</p>
-              <p>
-                Total Assets: {item["Total assets(2023)(US$ billion)"] || "N/A"}{" "}
-                billion USD
-              </p>
-            </div>
-          </div>
-        </Col>
-      ))}
-    </Row>
-  );
-
-  const renderListView = () => (
-    <List
-      className="w-full"
-      itemLayout="horizontal"
-      dataSource={filteredData}
-      grid={{
-        gutter: 16,
-        xs: 1,
-        sm: 2,
-        lg: 3,
-      }}
-      renderItem={(item, index) => (
-        <List.Item className="bg-gray-200 dark:bg-[#28283A] dark:text-white rounded-sm mb-4">
-          <List.Item.Meta
-            title={
-              item["Bank name"]?.toLowerCase().includes("bank") ? (
-                <div className="dark:text-white flex justify-between items-center">
-                  <span>
-                    {index + 1}. {item["Bank name"]}
-                  </span>
-                </div>
-              ) : (
-                <div className="dark:text-white flex justify-between items-center">
-                  <span>
-                    {index + 1}. {item["Bank name"]}
-                  </span>
-                  <span>
-                    {item["Total assets(2023)(US$ billion)"]?.toString()}{" "}
-                    billion USD
-                  </span>
-                </div>
-              )
-            }
-            description={
-              <div className="dark:text-gray-300">
-                {item["Bank name"] && (
-                  <>
-                    <p>Rank: {item["Rank"] || "N/A"}</p>
-                    <p>
-                      Total Assets:{" "}
-                      {item["Total assets(2023)(US$ billion)"] || "N/A"} billion
-                      USD
-                    </p>
-                  </>
-                )}
-              </div>
-            }
-          />
-        </List.Item>
-      )}
-    />
-  );
-
-  return (
-    <div style={{ padding: "24px" }}>
-      <div
-        style={{
-          marginBottom: "20px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <Search
-          placeholder="Search banks..."
-          allowClear
-          onChange={(e) => setSearchQuery(e.target.value)}
-          style={{ width: 300 }}
-        />
-        <Radio.Group
-          value={viewMode}
-          onChange={(e) => setViewMode(e.target.value)}
-        >
-          <Radio.Button value="grid">
-            <AppstoreOutlined />
-          </Radio.Button>
-          <Radio.Button value="list">
-            <UnorderedListOutlined />
-          </Radio.Button>
-        </Radio.Group>
-      </div>
-
-      {loading ? (
-        <SkeletonLoader count={4} />
-      ) : viewMode === "grid" ? (
-        renderGridView()
-      ) : (
-        renderListView()
-      )}
-    </div>
-  );
-}
 
 const Top100Page = () => {
   const [items, setItems] = useState([]);
@@ -351,19 +184,19 @@ const Top100Page = () => {
     <Row gutter={[16, 16]}>
       {filteredItems.map((item, index) => (
         <Col xs={24} sm={12} lg={8} key={index}>
-          <div className="bg-white dark:bg-[#513a7a] p-4 rounded-xl shadow-sm hover:shadow-md transition-all duration-200">
+          <div className="bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] backdrop-blur-sm p-4 rounded-xl shadow-sm hover:shadow-md transition-all duration-200">
             <div className="flex flex-col gap-4">
               {/* Header with number and title */}
               <div className="flex items-center gap-3">
-                <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-gray-50 dark:bg-gray-800">
+                <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-gray-50/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]">
                   {category === "billionaires" && item.image ? (
                     <Image
                       src={item.image}
                       alt={item.name}
-                      className="w-8 h-8 rounded-full object-cover"
+                      className="w-8 h-8  rounded-lg object-cover"
                     />
                   ) : (
-                    <span className="text-lg font-semibold text-gray-600 dark:text-gray-400">
+                    <span className="text-lg font-semibold text-gray-600 dark:text-gray-200">
                       {index + 1}
                     </span>
                   )}
@@ -486,9 +319,9 @@ const Top100Page = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredItems.map((item, index) => (
             <div key={index} className="mb-2">
-              <div className="flex  gap-2 p-2 bg-white dark:bg-[#513a7a] rounded-lg hover:shadow-md transition-all duration-200">
+              <div className="flex  gap-2 p-2 bg-white dark:bg-[#28283a] rounded-lg hover:shadow-md transition-all duration-200">
                 {/* Number/Image Circle */}
-                <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-gray-50 dark:bg-gray-800">
+                <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-gray-50/[var(--w)] dark:bg-[#513a7a]/[var(--w)]">
                   {category === "billionaires" && item.image ? (
                     <Image
                       src={item.image}
@@ -589,74 +422,116 @@ const Top100Page = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               style={{ width: 300 }}
             />
-            <div style={{ textAlign: "center" }}>
-              <Radio.Group
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                buttonStyle="solid"
-              >
-                <Radio.Button
-                  className="dark:bg-[#28283A] dark:text-white"
-                  value="motorcycles"
+            <div className="dark:bg-[#513a7a]/10  bg-gray-200/10 backdrop-blur-sm rounded-lg border border-gray-400/10 dark:border-gray-800/10">
+              <div>
+                <button
+                  className={`px-4 py-2 m-1 rounded dark:text-white  ${
+                    category === "motorcycles"
+                      ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                      : ""
+                  }`}
+                  onClick={() => setCategory("motorcycles")}
                 >
-                  Motorcycles
-                </Radio.Button>
-                <Radio.Button
-                  className="dark:bg-[#28283A] dark:text-white"
-                  value="crypto"
+                  Bikes
+                </button>
+                <button
+                  className={`px-4 py-2 m-1 rounded dark:text-white  ${
+                    category === "crypto"
+                      ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                      : ""
+                  }`}
+                  onClick={() => setCategory("crypto")}
                 >
                   Crypto
-                </Radio.Button>
-                <Radio.Button
-                  className="dark:bg-[#28283A] dark:text-white"
-                  value="stocks"
+                </button>
+                <button
+                  className={`px-4 py-2 m-1 rounded dark:text-white  ${
+                    category === "stocks"
+                      ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                      : ""
+                  }`}
+                  onClick={() => setCategory("stocks")}
                 >
                   Stocks
-                </Radio.Button>
-                <Radio.Button
-                  className="dark:bg-[#28283A] dark:text-white"
-                  value="billionaires"
+                </button>
+                <button
+                  className={`px-4 py-2 m-1 rounded dark:text-white  ${
+                    category === "billionaires"
+                      ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                      : ""
+                  }`}
+                  onClick={() => setCategory("billionaires")}
                 >
                   Billionaires
-                </Radio.Button>
-                <Radio.Button
-                  className="dark:bg-[#28283A] dark:text-white"
-                  value="sportsmen"
+                </button>
+                <button
+                  className={`px-4 py-2 m-1 rounded dark:text-white  ${
+                    category === "sportsmen"
+                      ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                      : ""
+                  }`}
+                  onClick={() => setCategory("sportsmen")}
                 >
                   Sports Contracts
-                </Radio.Button>
-                <Radio.Button
-                  className="dark:bg-[#28283A] dark:text-white"
-                  value="movies"
+                </button>
+                <button
+                  className={`px-4 py-2 m-1 rounded dark:text-white  ${
+                    category === "movies"
+                      ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                      : ""
+                  }`}
+                  onClick={() => setCategory("movies")}
                 >
                   Movies
-                </Radio.Button>
-                <Radio.Button
-                  className="dark:bg-[#28283A] dark:text-white"
-                  value="brands"
+                </button>
+                <button
+                  className={`px-4 py-2 m-1 rounded  dark:text-white ${
+                    category === "brands"
+                      ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                      : ""
+                  }`}
+                  onClick={() => setCategory("brands")}
                 >
                   Brands
-                </Radio.Button>
-                <Radio.Button
-                  className="dark:bg-[#28283A] dark:text-white"
-                  value="gdp"
+                </button>
+                <button
+                  className={`px-4 py-2 m-1 rounded  dark:text-white ${
+                    category === "gdp"
+                      ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                      : ""
+                  }`}
+                  onClick={() => setCategory("gdp")}
                 >
                   GDP
-                </Radio.Button>
-              </Radio.Group>
+                </button>
+              </div>
             </div>
+
             <div className="w-[300px] flex justify-end">
-              <Radio.Group
-                value={viewMode}
-                onChange={(e) => setViewMode(e.target.value)}
-              >
-                <Radio.Button value="grid">
-                  <AppstoreOutlined />
-                </Radio.Button>
-                <Radio.Button value="list">
-                  <UnorderedListOutlined />
-                </Radio.Button>
-              </Radio.Group>
+              <div className="bg-white dark:bg-[#513a7a] rounded-lg shadow-sm p-1 inline-flex">
+                <button
+                  onClick={() => setViewMode("grid")}
+                  className={`p-2 rounded-md transition-all duration-200 ${
+                    viewMode === "grid"
+                      ? "bg-blue-50 dark:bg-gray-700 text-blue-600 dark:text-blue-400"
+                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  }`}
+                  title="Grid View"
+                >
+                  <FaTh size={15} />
+                </button>
+                <button
+                  onClick={() => setViewMode("list")}
+                  className={`p-2 rounded-md transition-all duration-200 ${
+                    viewMode === "list"
+                      ? "bg-blue-50 dark:bg-gray-700 text-blue-600 dark:text-blue-400"
+                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  }`}
+                  title="List View"
+                >
+                  <FaList size={15} />
+                </button>
+              </div>
             </div>
           </div>
         </Space>
@@ -665,7 +540,11 @@ const Top100Page = () => {
           style={{ textAlign: "center", marginBottom: "2rem" }}
           className="dark:text-white"
         >
-          Top 100 {category.charAt(0).toUpperCase() + category.slice(1)}
+          {category === "sportsmen"
+            ? "Top 100 Contracts"
+            : category === "motorcycles"
+            ? "Top 100 Bikes "
+            : `Top 100 ${category.charAt(0).toUpperCase() + category.slice(1)}`}
         </Title>
         {/* Skeleton Loader */}
         <SkeletonLoader count={100} isListView={viewMode === "list"} />
@@ -674,7 +553,7 @@ const Top100Page = () => {
   }
 
   return (
-    <div className="w-[90vw]  text-white mx-auto p-4">
+    <div className="w-[90vw]  text-black dark:text-white mx-auto p-4">
       <Space
         direction="vertical"
         size="middle"
@@ -694,73 +573,114 @@ const Top100Page = () => {
             style={{ width: 300 }}
           />
           <div style={{ textAlign: "center" }}>
-            <Radio.Group
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              buttonStyle="solid"
-            >
-              <Radio.Button
-                className="dark:bg-[#28283A] dark:text-white"
-                value="motorcycles"
+            <div className="dark:bg-[#513a7a]/10  bg-gray-200/10 backdrop-blur-sm rounded-lg border border-gray-400/10 dark:border-gray-800/10">
+              <button
+                className={`px-4 py-2 m-1 rounded  ${
+                  category === "motorcycles"
+                    ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                    : ""
+                }`}
+                onClick={() => setCategory("motorcycles")}
               >
-                Motorcycles
-              </Radio.Button>
-              <Radio.Button
-                className="dark:bg-[#28283A] dark:text-white"
-                value="crypto"
+                Bikes
+              </button>
+              <button
+                className={`px-4 py-2 m-1 rounded  ${
+                  category === "crypto"
+                    ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                    : ""
+                }`}
+                onClick={() => setCategory("crypto")}
               >
                 Crypto
-              </Radio.Button>
-              <Radio.Button
-                className="dark:bg-[#28283A] dark:text-white"
-                value="stocks"
+              </button>
+              <button
+                className={`px-4 py-2 m-1 rounded  ${
+                  category === "stocks"
+                    ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                    : ""
+                }`}
+                onClick={() => setCategory("stocks")}
               >
                 Stocks
-              </Radio.Button>
-              <Radio.Button
-                className="dark:bg-[#28283A] dark:text-white"
-                value="billionaires"
+              </button>
+              <button
+                className={`px-4 py-2 m-1 rounded  ${
+                  category === "billionaires"
+                    ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                    : ""
+                }`}
+                onClick={() => setCategory("billionaires")}
               >
                 Billionaires
-              </Radio.Button>
-              <Radio.Button
-                className="dark:bg-[#28283A] dark:text-white"
-                value="sportsmen"
+              </button>
+              <button
+                className={`px-4 py-2 m-1 rounded  ${
+                  category === "sportsmen"
+                    ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                    : ""
+                }`}
+                onClick={() => setCategory("sportsmen")}
               >
                 Sports Contracts
-              </Radio.Button>
-              <Radio.Button
-                className="dark:bg-[#28283A] dark:text-white"
-                value="movies"
+              </button>
+              <button
+                className={`px-4 py-2 m-1 rounded  ${
+                  category === "movies"
+                    ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                    : ""
+                }`}
+                onClick={() => setCategory("movies")}
               >
                 Movies
-              </Radio.Button>
-              <Radio.Button
-                className="dark:bg-[#28283A] dark:text-white"
-                value="brands"
+              </button>
+              <button
+                className={`px-4 py-2 m-1 rounded  ${
+                  category === "brands"
+                    ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                    : ""
+                }`}
+                onClick={() => setCategory("brands")}
               >
                 Brands
-              </Radio.Button>
-              <Radio.Button
-                className="dark:bg-[#28283A] dark:text-white"
-                value="gdp"
+              </button>
+              <button
+                className={`px-4 py-2 m-1 rounded  ${
+                  category === "gdp"
+                    ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                    : ""
+                }`}
+                onClick={() => setCategory("gdp")}
               >
                 GDP
-              </Radio.Button>
-            </Radio.Group>
+              </button>
+            </div>
           </div>
           <div className="w-[300px] flex justify-end">
-            <Radio.Group
-              value={viewMode}
-              onChange={(e) => setViewMode(e.target.value)}
-            >
-              <Radio.Button value="grid">
-                <AppstoreOutlined />
-              </Radio.Button>
-              <Radio.Button value="list">
-                <UnorderedListOutlined />
-              </Radio.Button>
-            </Radio.Group>
+            <div className="bg-white dark:bg-[#513a7a] rounded-lg shadow-sm p-1 inline-flex">
+              <button
+                onClick={() => setViewMode("grid")}
+                className={`p-2 rounded-md transition-all duration-200 ${
+                  viewMode === "grid"
+                    ? "bg-blue-50 dark:bg-gray-700 text-blue-600 dark:text-blue-400"
+                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                }`}
+                title="Grid View"
+              >
+                <FaTh size={15} />
+              </button>
+              <button
+                onClick={() => setViewMode("list")}
+                className={`p-2 rounded-md transition-all duration-200 ${
+                  viewMode === "list"
+                    ? "bg-blue-50 dark:bg-gray-700 text-blue-600 dark:text-blue-400"
+                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                }`}
+                title="List View"
+              >
+                <FaList size={15} />
+              </button>
+            </div>
           </div>
         </div>
       </Space>
@@ -771,6 +691,8 @@ const Top100Page = () => {
       >
         {category === "sportsmen"
           ? "Top 100 Contracts"
+          : category === "motorcycles"
+          ? "Top 100 Bikes "
           : `Top 100 ${category.charAt(0).toUpperCase() + category.slice(1)}`}
       </Title>
       {/* Only render content when not loading */}

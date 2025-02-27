@@ -23,10 +23,6 @@ const FullCalendar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
 
-  const collapse = () => {
-    setIsCollapsed(!isCollapsed);
-  };
-
   const months = [
     "January",
     "February",
@@ -46,7 +42,7 @@ const FullCalendar = () => {
     const firstDayOfMonth = dayjs(
       new Date(currentDate.year(), currentDate.month(), 1)
     );
-    const lastDayOfMonth = firstDayOfMonth.endOf("month");
+    // const lastDayOfMonth = firstDayOfMonth.endOf("month");
     const startDate = firstDayOfMonth.startOf("week");
 
     // Always show 6 weeks (42 days)
@@ -125,7 +121,6 @@ const FullCalendar = () => {
     >
       {/* Header */}
       <div className="">
-        
         <div className="flex items-center  justify-between ">
           {!isCollapsed && (
             <div className="flex items-center mt-2 justify-between px-2">
@@ -413,12 +408,14 @@ const FullCalendar = () => {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-1">Year</label>
-                <div className="flex gap-2">
+              <div className=" w-fit">
+                <label className="block text-sm font-medium mb-1  w-fit">
+                  Year
+                </label>
+                <div className="flex w-full ">
                   <button
                     onClick={() => setGoToYear((prev) => prev - 1)}
-                    className="p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="p-2  rounded-sm hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     <svg
                       className="w-5 h-5"
@@ -438,11 +435,11 @@ const FullCalendar = () => {
                     type="number"
                     value={goToYear}
                     onChange={(e) => setGoToYear(parseInt(e.target.value))}
-                    className="flex-1 px-3 py-2 bg-gray-50 dark:bg-[#513a7a] rounded-sm border border-gray-200 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 w-1/2 px-1 py-2  dark:bg-[#513a7a] rounded-sm border border-gray-200 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <button
                     onClick={() => setGoToYear((prev) => prev + 1)}
-                    className="p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="p-2 rounded-sm  hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     <svg
                       className="w-5 h-5"
@@ -515,7 +512,7 @@ const FullCalendar = () => {
                 >
                   <div
                     className={`
-                  relative h-10 w-full rounded-sm transition-colors
+                  relative h-10 w-full rounded-md transition-colors
                   ${
                     !day.isCurrentMonth
                       ? "text-gray-300 dark:text-gray-700"
@@ -581,7 +578,7 @@ const FullCalendar = () => {
                 setGoToMonth(currentDate.month());
                 setShowGoToModal(true);
               }}
-              className="px-4 py-1.5 text-white text-sm bg-indigo-500 hover:bg-gray-200 hover:dark:bg-[#483072] dark:bg-[#513a7a] dark:hover:bg-gray-700  dark:text-gray-300 rounded-sm transition-colors flex items-center gap-1"
+              className="px-4 py-1.5 text-white text-sm rounded-md bg-indigo-500 hover:bg-indigo-600 hover:dark:bg-[#483072] dark:bg-[#513a7a] dark:hover:bg-gray-700  dark:text-gray-300 transition-colors flex items-center gap-1"
             >
               <svg
                 className="w-4 h-4"
@@ -600,7 +597,7 @@ const FullCalendar = () => {
             </button>
             <button
               onClick={goToToday}
-              className="px-4 py-1.5 text-sm dark:bg-[#513a7a]  bg-indigo-500 hover:bg-indigo-600 hover:dark:bg-[#483072] text-white rounded-sm transition-colors flex items-center gap-1"
+              className="px-4 py-1.5 text-sm dark:bg-[#513a7a]  bg-indigo-500 hover:bg-indigo-600 hover:dark:bg-[#483072] text-white rounded-md transition-colors flex items-center gap-1"
             >
               <svg
                 className="w-4 h-4"

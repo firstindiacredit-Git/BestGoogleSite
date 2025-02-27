@@ -1,7 +1,8 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
-import { Row, Col, List, Button, Image } from "antd";
-import { AppstoreOutlined, UnorderedListOutlined } from "@ant-design/icons";
+import { Row, Col, List, Image } from "antd";
+
 import SkeletonLoader from "./SkeletonLoader";
+import { FaList, FaTh } from "react-icons/fa";
 
 // Create NewsContext
 const NewsContext = createContext(null);
@@ -11,17 +12,15 @@ const NewsProvider = ({ children }) => {
   const [newsapi, setNewsApi] = useState([]);
 
   const [loading, setLoading] = useState(false);
-  const apiKey = import.meta.env.VITE_NEWS_API_KEY;
 
   const fetchData = async (title = "") => {
     setLoading(true);
     try {
-      const query = title || "general";
       const res = await fetch(
-        `https://gnews.io/api/v4/top-headlines?q=${query}&apikey=${apiKey}`
+        `https://bgs-backend.vercel.app/api/top100/gnews?query=${title}`
       );
-      const resData = await res.json();
-      setNewsApi(resData.articles);
+      const newsData = await res.json();
+      setNewsApi(newsData);
     } catch (error) {
       console.error("Error fetching news:", error);
     } finally {
@@ -66,28 +65,36 @@ const NewsApp = () => {
         <Col xs={24} sm={12} md={8} lg={6} key={index}>
           <div
             key={index}
-            className=" bg-white overflow-hidden dark:bg-[#28283a]"
+            className=" bg-white/[var(--widget-opacity)] backdrop-blur-sm  dark:bg-[#28283a]/[var(--widget-opacity)]  flex flex-col justify-between h-[30rem] overflow-hidden  p-3 rounded-lg "
           >
-            <div>
+            <div className=" w-full">
               <img
                 alt={news.title}
                 src={news.image}
-                className="h-[190px] object-cover"
+                className=" h-[18rem] w-full object-cover "
                 onError={(e) => {
                   e.target.src =
                     "https://plus.unsplash.com/premium_photo-1707080369554-359143c6aa0b?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8bmV3cyUyMHdlYnNpdGV8ZW58MHx8MHx8fDA%3D";
                 }}
               />
             </div>
+            <div>
+              <a href={news.url} target="_blank" rel="noopener noreferrer">
+                <div className="dark:text-white font-bold py-2">
+                  {news.title}
+                </div>
+              </a>
 
+              <a href={news.url} target="_blank" rel="noopener noreferrer">
+                <div className="dark:text-gray-300 text-sm line-clamp-2 max-w-[150ch] truncate text-wrap overflow-ellipsis py-2">
+                  {news.description}
+                </div>
+              </a>
+            </div>
             <a href={news.url} target="_blank" rel="noopener noreferrer">
-              <span className="dark:text-white">{news.title}</span>
-            </a>
-
-            <a href={news.url} target="_blank" rel="noopener noreferrer">
-              <span className="dark:text-gray-300 text-sm">
-                {news.description}
-              </span>
+              <button className="bg-indigo-500 w-full rounded-lg py-2 text-white">
+                Read More
+              </button>
             </a>
           </div>
         </Col>
@@ -151,7 +158,7 @@ const NewsApp = () => {
               key={key}
               className={` cursor-pointer px-3 py-2 rounded-md   ${
                 item.label === currentSet
-                  ? "bg-gray-200 dark:bg-[#513a7a]"
+                  ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
                   : "hover:bg-gray-200/20 hover:dark:bg-[#513a7a]/20"
               } `}
               onClick={() => {
@@ -164,18 +171,30 @@ const NewsApp = () => {
           ))}
         </div>
 
-        <Button
-          type={"primary"}
-          icon={<AppstoreOutlined />}
-          onClick={() => setViewMode("grid")}
-          className="dark:bg-gray-700 text-gray-800  dark:text-white"
-        />
-        <Button
-          type={"primary"}
-          icon={<UnorderedListOutlined />}
-          onClick={() => setViewMode("list")}
-          className="dark:bg-gray-700  text-gray-800 dark:text-white"
-        />
+        <div className="bg-white dark:bg-[#513a7a] rounded-lg shadow-sm p-1 inline-flex">
+          <button
+            onClick={() => setViewMode("grid")}
+            className={`p-2 rounded-md transition-all duration-200 ${
+              viewMode === "grid"
+                ? "bg-blue-50 dark:bg-gray-700 text-blue-600 dark:text-blue-400"
+                : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+            }`}
+            title="Grid View"
+          >
+            <FaTh size={15} />
+          </button>
+          <button
+            onClick={() => setViewMode("list")}
+            className={`p-2 rounded-md transition-all duration-200 ${
+              viewMode === "list"
+                ? "bg-blue-50 dark:bg-gray-700 text-blue-600 dark:text-blue-400"
+                : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+            }`}
+            title="List View"
+          >
+            <FaList size={15} />
+          </button>
+        </div>
       </div>
       {loading ? (
         <div className="min-h-screen p-4 w-[90vw] mx-auto">
