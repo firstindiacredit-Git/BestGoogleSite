@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import { motion } from "framer-motion";
 import { Chrome } from "lucide-react";
 import { FiCheck } from "react-icons/fi";
 import PayPalSubscription from "./PayPalSubscription";
+import { ThemeContext } from "../App";
 
 const PricingCard = ({ plan, popular }) => {
   const [showPayPal, setShowPayPal] = useState(false);
@@ -119,24 +121,7 @@ const PremiumPage = () => {
       ],
     },
   ];
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "dark") {
-      setIsDarkMode(true);
-      document.documentElement.classList.add("dark");
-    }
-  }, []);
-
-  const toggleTheme = () => {
-    setIsDarkMode((prevMode) => {
-      const newMode = !prevMode;
-      document.documentElement.classList.toggle("dark", newMode);
-      localStorage.setItem("theme", newMode ? "dark" : "light");
-      return newMode;
-    });
-  };
+  const { isDarkMode, toggleTheme } = useContext(ThemeContext);
 
   return (
     <div className={`min-h-screen ${isDarkMode ? "bg-gray-900" : "bg-white"}`}>

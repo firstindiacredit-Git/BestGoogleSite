@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import styled, { keyframes } from "styled-components";
 import axios from "axios";
+import { ThemeContext } from "../App";
 
 const API_KEY = "78a1522c5ec67352674263eaaa54bffa";
 
@@ -249,12 +250,7 @@ const Weather = () => {
   const searchInputRef = useRef(null);
   const [browserInfo, setBrowserInfo] = useState(null);
   const [ipLocation, setIpLocation] = useState(null);
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const savedMode = localStorage.getItem("weatherDarkMode");
-    return savedMode
-      ? JSON.parse(savedMode)
-      : window.matchMedia("(prefers-color-scheme: dark)").matches;
-  });
+  const { isDarkMode } = useContext(ThemeContext);
 
   const fetchWeatherByCoords = async (lat, lon) => {
     try {
@@ -369,9 +365,6 @@ const Weather = () => {
     getUserLocation();
   }, [unit]);
 
-  useEffect(() => {
-    localStorage.setItem("weatherDarkMode", JSON.stringify(isDarkMode));
-  }, [isDarkMode]);
   const getDayName = (date) => {
     return new Date(date).toLocaleDateString("en-US", { weekday: "short" });
   };
@@ -427,7 +420,6 @@ const Weather = () => {
 
   return (
     <div className="p-2 backdrop-blur-sm">
-     
       {isVisible && (
         <StyledWrapper
           isDarkMode={isDarkMode}

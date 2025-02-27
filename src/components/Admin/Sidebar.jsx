@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { Link, useLocation, useNavigate, Outlet } from "react-router-dom";
 import { LuLayoutDashboard, LuUsers } from "react-icons/lu";
 import { MdOutlineAddLink, MdBook } from "react-icons/md";
@@ -8,13 +8,14 @@ import { signOut } from "firebase/auth";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../../firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import { ThemeContext } from "../../App";
 
 export default function Sidebar() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [dispName, setDispName] = useState("");
   const [link, setLink] = useState("/default-avatar.png");
-  const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
+  const { isDarkMode, toggleTheme } = useContext(ThemeContext);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showAdminBanner, setShowAdminBanner] = useState(true);
 
@@ -52,9 +53,8 @@ export default function Sidebar() {
   }, [navigate]);
 
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", theme === "dark");
-    localStorage.setItem("theme", theme);
-  }, [theme]);
+    document.documentElement.classList.toggle("dark", isDarkMode);
+  }, [isDarkMode]);
 
   useEffect(() => {
     const fetchBannerPreference = async () => {
@@ -68,10 +68,6 @@ export default function Sidebar() {
     };
     fetchBannerPreference();
   }, []);
-
-  const toggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme === "dark" ? "light" : "dark"));
-  };
 
   const toggleAdminBanner = async () => {
     if (auth.currentUser) {
@@ -215,7 +211,7 @@ export default function Sidebar() {
                       onClick={toggleTheme}
                       className="w-full px-4 py-2 text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
                     >
-                      {theme === "dark" ? (
+                      {isDarkMode ? (
                         <>
                           <IoSunny className="w-4 h-4 mr-2 text-yellow-300" />
                           Light Mode

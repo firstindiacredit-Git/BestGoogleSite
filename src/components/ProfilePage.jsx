@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { updatePassword, updateProfile } from "firebase/auth";
 import { auth, db } from "../firebase";
@@ -19,6 +19,7 @@ import imageCompression from "browser-image-compression";
 import { useSubscription } from "../hooks/useSubscription";
 import { Modal, message, Tabs } from "antd";
 import Header from "./Header";
+import { ThemeContext } from "../App";
 // https://cdn.dribbble.com/userupload/14883451/file/original-761915986636e2ae85fee541c6b9c051.jpg?resize=1200x900&vertical=center
 
 const ProfilePage = () => {
@@ -52,35 +53,9 @@ const ProfilePage = () => {
 
   const navigate = useNavigate();
 
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const savedTheme = localStorage.getItem("theme");
-    return savedTheme === "dark";
-  });
+  const { isDarkMode, toggleTheme } = useContext(ThemeContext);
 
   const [activeSection, setActiveSection] = useState(null);
-
-  // Update dark mode effect
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [isDarkMode]);
-
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-    localStorage.setItem("theme", !isDarkMode ? "dark" : "light");
-  };
-
-  // Update background image effect
-  useEffect(() => {
-    const savedBackground = localStorage.getItem("backgroundImage");
-    if (savedBackground) {
-      setBackgroundUrl(savedBackground);
-      setPreviewBackgroundUrl(savedBackground);
-    }
-  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {

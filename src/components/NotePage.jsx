@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import {
   Bold,
   Underline,
@@ -15,6 +15,7 @@ import {
 import { HiOutlineNumberedList } from "react-icons/hi2";
 import { RxHamburgerMenu } from "react-icons/rx";
 import { createPortal } from "react-dom";
+import { ThemeContext } from "../App";
 
 const preventScroll = (prevent) => {
   document.body.style.overflow = prevent ? "hidden" : "";
@@ -34,7 +35,6 @@ const NotePage = ({ inNotebookSheet = false }) => {
   const [history, setHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
   const [isAutoColor, setIsAutoColor] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [textColor, setTextColor] = useState("#000000");
   const [dropdownPosition, setDropdownPosition] = useState({
     top: null,
@@ -44,6 +44,9 @@ const NotePage = ({ inNotebookSheet = false }) => {
     top: null,
     right: null,
   });
+  const [isEditing, setIsEditing] = useState(false);
+  const { isDarkMode } = useContext(ThemeContext);
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   const textareaRef = useRef(null);
   const lineNumberRef = useRef(null);
@@ -133,26 +136,6 @@ const NotePage = ({ inNotebookSheet = false }) => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
-  useEffect(() => {
-    const darkModeMediaQuery = window.matchMedia(
-      "(prefers-color-scheme: dark)"
-    );
-    const handleThemeChange = (e) => {
-      setIsDarkMode(e.matches);
-      if (isAutoColor) {
-        setBackgroundColor(e.matches ? "#1f2937" : "#ffffff");
-        setTextColor(e.matches ? "#ffffff" : "#000000");
-      }
-    };
-
-    setIsDarkMode(darkModeMediaQuery.matches);
-    handleThemeChange(darkModeMediaQuery);
-
-    darkModeMediaQuery.addEventListener("change", handleThemeChange);
-    return () =>
-      darkModeMediaQuery.removeEventListener("change", handleThemeChange);
-  }, [isAutoColor]);
 
   useEffect(() => {
     if (showColorPicker && colorPickerRef.current) {

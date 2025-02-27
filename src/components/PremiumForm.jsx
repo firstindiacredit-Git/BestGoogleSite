@@ -1,20 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useLocation } from "react-router-dom";
 import Header from "../components/Header";
+import { ThemeContext } from "../App";
 
 const PremiumForm = () => {
   const location = useLocation();
   const initialPlan = location.state?.selectedPlan || "Standard ";
-
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "dark") {
-      setIsDarkMode(true);
-      document.documentElement.classList.add("dark");
-    }
-  }, []);
+  const { isDarkMode, toggleTheme } = useContext(ThemeContext);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -72,15 +64,6 @@ const PremiumForm = () => {
       ...prevFormData,
       [name]: value,
     }));
-  };
-
-  const toggleTheme = () => {
-    setIsDarkMode((prevMode) => {
-      const newMode = !prevMode;
-      document.documentElement.classList.toggle("dark", newMode);
-      localStorage.setItem("theme", newMode ? "dark" : "light");
-      return newMode;
-    });
   };
 
   const validate = () => {

@@ -11,7 +11,7 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
-import { WidgetTransparencyContext } from "../App";
+import { WidgetTransparencyContext, ThemeContext } from "../App";
 import { createPortal } from "react-dom";
 
 // Helper function to determine if a color is light or dark
@@ -46,7 +46,6 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
   const [containerColor, setContainerColor] = useState("#ffffff");
   const [textColor, setTextColor] = useState("#000000");
   const [isAutoColor, setIsAutoColor] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [draggedItemIndex, setDraggedItemIndex] = useState(null);
   const [backgroundColor, setBackgroundColor] = useState("#ffffff");
   const [dragOverIndex, setDragOverIndex] = useState(null);
@@ -54,6 +53,9 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
     top: null,
     right: null,
   });
+  const [isEditing, setIsEditing] = useState(false);
+  const { isDarkMode } = useContext(ThemeContext);
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   const colorPickerRef = useRef(null);
 
@@ -144,26 +146,6 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  useEffect(() => {
-    const darkModeMediaQuery = window.matchMedia(
-      "(prefers-color-scheme: dark)"
-    );
-    const handleThemeChange = (e) => {
-      setIsDarkMode(e.matches);
-      if (isAutoColor) {
-        setContainerColor(e.matches ? "#1f2937" : "#ffffff");
-        setTextColor(e.matches ? "#ffffff" : "#000000");
-      }
-    };
-
-    setIsDarkMode(darkModeMediaQuery.matches);
-    handleThemeChange(darkModeMediaQuery);
-
-    darkModeMediaQuery.addEventListener("change", handleThemeChange);
-    return () =>
-      darkModeMediaQuery.removeEventListener("change", handleThemeChange);
-  }, [isAutoColor]);
 
   useEffect(() => {
     if (showColorPicker && colorPickerRef.current) {

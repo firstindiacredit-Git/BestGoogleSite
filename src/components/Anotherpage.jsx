@@ -27,8 +27,10 @@ import {
 import TodoComponent from "./TodoComponent.jsx";
 import NewsFeed from "./NewsFeed.jsx";
 import CategoryHome from "./CategoryHome.jsx";
+import { ThemeContext } from "../App";
 
 const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
+  const { isDarkMode } = useContext(ThemeContext);
   const [user, setUser] = useState(null);
   const [items, setItems] = useState([]);
   const [columns, setColumns] = useState(4);
@@ -42,7 +44,6 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
     const savedState = localStorage.getItem("collapsedItems");
     return savedState ? JSON.parse(savedState) : {};
   });
-  const isDarkMode = localStorage.getItem("themeMode") === "dark";
   const componentMap = {
     clock: <Clock collapsed={collapsedItems["clock"]} />,
     weather: <Weather collapsed={collapsedItems["weather"]} />,

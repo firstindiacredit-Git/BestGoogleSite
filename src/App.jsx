@@ -807,6 +807,8 @@ const App = () => {
       setIsDarkMode((prev) => {
         const newMode = !prev;
         localStorage.setItem("theme", newMode ? "dark" : "light");
+        // Force a re-render of components by dispatching a custom event
+        window.dispatchEvent(new Event("themeChanged"));
         return newMode;
       });
     },

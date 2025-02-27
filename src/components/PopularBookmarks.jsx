@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import { db, auth } from "../firebase";
 import {
   collection,
@@ -50,6 +50,7 @@ import {
 } from "@ant-design/icons";
 import debounce from "lodash/debounce";
 import SkeletonLoader from "./SkeletonLoader";
+import { ThemeContext } from "../App";
 
 function PopularBookmarks() {
   const [categories, setCategories] = useState([]);
@@ -107,10 +108,7 @@ function PopularBookmarks() {
   const [isApplyingChanges, setIsApplyingChanges] = useState(false);
   const [availableCategories, setAvailableCategories] = useState([]);
   const [activeCategories, setActiveCategories] = useState([]);
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const savedTheme = localStorage.getItem("theme");
-    return savedTheme ? savedTheme === "dark" : false; // Default to light mode
-  });
+  const { isDarkMode } = useContext(ThemeContext);
 
   // Enhanced drag state with more comprehensive tracking
   const [dragState, setDragState] = useState({
