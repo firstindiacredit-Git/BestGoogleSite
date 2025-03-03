@@ -5,7 +5,6 @@ import {
   getDocs,
   doc,
   getDoc,
-  setDoc,
   addDoc,
   updateDoc,
   query,
@@ -16,18 +15,14 @@ import {
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import {
-  Spin,
   Button as AntButton,
   Modal,
   Input,
   Space,
-  Radio,
-  Slider,
   message,
   Tooltip,
   Form,
   Dropdown,
-  Menu,
   Checkbox,
   Card,
   List,
@@ -35,7 +30,6 @@ import {
   Empty,
   Row,
   Col,
-  Button,
 } from "antd";
 import { motion } from "framer-motion";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
@@ -2497,7 +2491,7 @@ function PopularBookmarks() {
     setIsControllerOpen((prev) => !prev);
   };
 
-  if (loading) {
+  if (user && loading) {
     return (
       <div className="w-[90vw] mx-auto" style={{ padding: "24px" }}>
         <div className="flex justify-between mb-2">
@@ -2561,6 +2555,26 @@ function PopularBookmarks() {
     );
   }
 
+  if (!user) {
+    return (
+      <div className=" w-[90%] mx-auto rounded-lg  relative ">
+        <div className="text-indigo-500 inset-0 flex justify-center items-center h-[60vh]  z-50 absolute top-0 left-0 right-0 w-full  backdrop-blur-md dark:text-white">
+          <div className="">
+            <span className="underline">Login</span> or{" "}
+            <span className="underline">create Account</span> to use this
+            Feature
+          </div>
+        </div>
+        <div className="flex justify-center opacity-50 -z-50 pt-24">
+          {isDarkMode ? (
+            <img src="./DOSB.png" className="h-96 " alt="" />
+          ) : (
+            <img src="./DOSW.png" className="h-96 " />
+          )}
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="w-[90vw] mx-auto" style={{ padding: "24px" }}>
       {renderBookmarksByCategory()}
