@@ -91,71 +91,70 @@ const SignIn = () => {
   };
 
   useEffect(() => {
-    // Create a unique ID for the reCAPTCHA container
-    const recaptchaId =
-      "recaptcha-container-" + Math.random().toString(36).substring(7);
-    if (recaptchaContainer.current) {
-      recaptchaContainer.current.id = recaptchaId;
-    }
+    let recaptchaId = null;
 
-    // Load reCAPTCHA script
     const loadRecaptcha = () => {
-      if (!window.grecaptcha) {
-        const script = document.createElement("script");
-        script.src = `https://www.google.com/recaptcha/api.js?render=explicit`;
-        script.async = true;
-        script.defer = true;
-        script.id = "recaptcha-script-signin";
+      // Clean up any existing reCAPTCHA elements
+      const existingScript = document.getElementById("recaptcha-script-signin");
+      if (existingScript) {
+        existingScript.remove();
+      }
 
-        script.onload = () => {
-          window.grecaptcha.ready(() => {
-            try {
+      // Create a unique ID for this instance
+      recaptchaId = "recaptcha-signin-" + Date.now();
+      if (recaptchaContainer.current) {
+        recaptchaContainer.current.innerHTML = ""; // Clear any existing content
+        recaptchaContainer.current.id = recaptchaId;
+      }
+
+      const script = document.createElement("script");
+      script.src = "https://www.google.com/recaptcha/api.js?render=explicit";
+      script.id = "recaptcha-script-signin";
+      script.async = true;
+      script.defer = true;
+
+      script.onload = () => {
+        if (window.grecaptcha && recaptchaContainer.current) {
+          try {
+            window.grecaptcha.ready(() => {
               window.grecaptcha.render(recaptchaId, {
                 sitekey: "6LdL78EqAAAAADhSJys9dchITOCB3Q6lyriJOuYF",
+                size: "normal",
                 callback: () => {
                   setRecaptchaLoaded(true);
                   setRecaptchaReady(true);
                 },
               });
-            } catch (error) {
-              console.error("reCAPTCHA render error:", error);
-            }
-          });
-        };
-
-        document.body.appendChild(script);
-      } else {
-        // If script already exists, just try to render
-        window.grecaptcha.ready(() => {
-          try {
-            window.grecaptcha.render(recaptchaId, {
-              sitekey: "6LdL78EqAAAAADhSJys9dchITOCB3Q6lyriJOuYF",
-              callback: () => {
-                setRecaptchaLoaded(true);
-                setRecaptchaReady(true);
-              },
             });
           } catch (error) {
             console.error("reCAPTCHA render error:", error);
           }
-        });
-      }
+        }
+      };
+
+      document.body.appendChild(script);
     };
 
-    loadRecaptcha();
+    // Load reCAPTCHA with a small delay to ensure DOM is ready
+    const timer = setTimeout(loadRecaptcha, 100);
 
     return () => {
-      // Cleanup
+      clearTimeout(timer);
+      // Clean up reCAPTCHA
       const script = document.getElementById("recaptcha-script-signin");
       if (script) {
-        document.body.removeChild(script);
+        script.remove();
       }
-      if (window.grecaptcha && recaptchaReady) {
+      if (window.grecaptcha) {
         try {
           window.grecaptcha.reset();
         } catch (error) {
           console.error("reCAPTCHA reset error:", error);
         }
+      }
+      // Clear the container
+      if (recaptchaContainer.current) {
+        recaptchaContainer.current.innerHTML = "";
       }
     };
   }, []);

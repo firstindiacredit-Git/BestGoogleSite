@@ -93,36 +93,73 @@ const Signup = () => {
   }, [navigate]);
 
   useEffect(() => {
-    // Load reCAPTCHA when component mounts
-    const script = document.createElement("script");
-    script.src = "https://www.google.com/recaptcha/api.js?render=explicit";
-    script.async = true;
-    script.defer = true;
+    let recaptchaId = null;
 
-    script.onload = () => {
-      if (window.grecaptcha) {
-        window.grecaptcha.ready(() => {
-          window.grecaptcha.render(recaptchaContainer.current, {
-            sitekey: "6LdL78EqAAAAADhSJys9dchITOCB3Q6lyriJOuYF",
-            callback: () => setRecaptchaLoaded(true),
-          });
-        });
+    const loadRecaptcha = () => {
+      // Clean up any existing reCAPTCHA elements
+      const existingScript = document.getElementById("recaptcha-script-signup");
+      if (existingScript) {
+        existingScript.remove();
       }
+
+      // Create a unique ID for this instance
+      recaptchaId = "recaptcha-signup-" + Date.now();
+      if (recaptchaContainer.current) {
+        recaptchaContainer.current.innerHTML = ""; // Clear any existing content
+        recaptchaContainer.current.id = recaptchaId;
+      }
+
+      const script = document.createElement("script");
+      script.src = "https://www.google.com/recaptcha/api.js?render=explicit";
+      script.id = "recaptcha-script-signup";
+      script.async = true;
+      script.defer = true;
+
+      script.onload = () => {
+        if (window.grecaptcha && recaptchaContainer.current) {
+          try {
+            window.grecaptcha.ready(() => {
+              window.grecaptcha.render(recaptchaId, {
+                sitekey: "6LdL78EqAAAAADhSJys9dchITOCB3Q6lyriJOuYF",
+                size: "normal",
+                callback: () => setRecaptchaLoaded(true),
+              });
+            });
+          } catch (error) {
+            console.error("reCAPTCHA render error:", error);
+          }
+        }
+      };
+
+      document.body.appendChild(script);
     };
 
-    document.body.appendChild(script);
+    // Load reCAPTCHA with a small delay to ensure DOM is ready
+    const timer = setTimeout(loadRecaptcha, 100);
 
     return () => {
-      document.body.removeChild(script);
-      // Reset reCAPTCHA state when component unmounts
+      clearTimeout(timer);
+      // Clean up reCAPTCHA
+      const script = document.getElementById("recaptcha-script-signup");
+      if (script) {
+        script.remove();
+      }
       if (window.grecaptcha) {
-        window.grecaptcha.reset();
+        try {
+          window.grecaptcha.reset();
+        } catch (error) {
+          console.error("reCAPTCHA reset error:", error);
+        }
+      }
+      // Clear the container
+      if (recaptchaContainer.current) {
+        recaptchaContainer.current.innerHTML = "";
       }
     };
   }, []);
 
   return (
-    <div className="bg-white relative overflow-clip  dark:bg-[#101020]  rounded-3xl  w-full max-w-lg p-6   ">
+    <div className="bg-white relative overflow-clip  dark:bg-[#101020]  rounded-3xl  w-full max-w-lg p-4   ">
       <div className="flex justify-center  rounded-full p-4 w-fit mx-auto items-center my-2">
         <img src="/Favicon.svg" alt="logo" className="w-16" />
       </div>
@@ -137,6 +174,24 @@ const Signup = () => {
 
       {error && <p className="text-red-500 text-center mb-4">{error}</p>}
 
+      <div className="flex flex-col space-y-2">
+        <button
+          onClick={handleGoogleSignIn}
+          disabled={loading || !recaptchaLoaded}
+          className="w-full flex items-center cursor-pointer justify-center gap-2 p-3 border rounded-xs dark:bg-black dark:text-gray-200 dark:border-gray-800 bg-gray-50 rounded-xl hover:bg-gray-200 focus:ring-2 focus:ring-gray-300"
+        >
+          <img src="/google.png" alt="Google" className="w-5 h-5 mr-2" />
+          Sign up with Google
+        </button>
+      </div>
+      <div className="flex items-center justify-center my-6">
+        <hr className="border-gray-300  dark:border-gray-400 flex-grow" />
+        <span className="px-2 text-gray-500 dark:text-gray-400 font-bold">
+          OR
+        </span>
+        <hr className="border-gray-300 dark:border-gray-400 flex-grow" />
+      </div>
+
       <form onSubmit={handleEmailSignUp}>
         <div className="grid grid-cols-2 gap-4 mb-4">
           <input
@@ -144,7 +199,7 @@ const Signup = () => {
             placeholder="First name"
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
-            className="w-full border border-gray-300 rounded-xs p-2 focus:ring focus:ring-blue-200"
+            className="w-full border border-gray-300 rounded-lg p-2 focus:ring focus:ring-blue-200"
             required
           />
           <input
@@ -152,7 +207,7 @@ const Signup = () => {
             placeholder="Last name"
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
-            className="w-full border border-gray-300 rounded-xs p-2 focus:ring focus:ring-blue-200"
+            className="w-full border border-gray-300 rounded-lg p-2 focus:ring focus:ring-blue-200"
             required
           />
         </div>
@@ -161,7 +216,7 @@ const Signup = () => {
           placeholder="Work Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full border border-gray-300 rounded-xs p-2 mb-4 focus:ring focus:ring-blue-200"
+          className="w-full border border-gray-300 rounded-lg p-2 mb-4 focus:ring focus:ring-blue-200"
           required
         />
         <div className="mb-4 relative">
@@ -170,7 +225,7 @@ const Signup = () => {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full border border-gray-300 rounded-xs p-2 focus:ring focus:ring-blue-200"
+            className="w-full border border-gray-300 rounded-lg p-2 focus:ring focus:ring-blue-200"
             required
           />
           <button
@@ -187,28 +242,11 @@ const Signup = () => {
         <button
           type="submit"
           disabled={loading || !recaptchaLoaded}
-          className="w-full bg-indigo-500 text-white py-2 rounded-xs hover:bg-indigo-600 focus:outline-none"
+          className="w-full bg-indigo-500 text-white py-2 rounded-lg hover:bg-indigo-600 focus:outline-none"
         >
           {loading ? "Creating account..." : "Create account"}
         </button>
       </form>
-
-      <div className="flex items-center justify-between my-4">
-        <div className="w-1/2 h-px bg-gray-300"></div>
-        <span className="text-sm text-gray-500 px-4">OR</span>
-        <div className="w-1/2 h-px bg-gray-300"></div>
-      </div>
-
-      <div className="flex flex-col space-y-2">
-        <button
-          onClick={handleGoogleSignIn}
-          disabled={loading || !recaptchaLoaded}
-          className="flex items-center justify-center w-full border border-gray-300 py-2 rounded-xs hover:bg-gray-100 focus:outline-none"
-        >
-          <img src="/google.png" alt="Google" className="w-5 h-5 mr-2" />
-          Sign up with Google
-        </button>
-      </div>
     </div>
   );
 };

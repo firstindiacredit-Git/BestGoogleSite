@@ -359,6 +359,46 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
     };
   }, []);
 
+  const closeLogin = () => {
+    // Clean up reCAPTCHA before closing
+    const script = document.getElementById("recaptcha-script-signin");
+    if (script) script.remove();
+    if (window.grecaptcha) {
+      try {
+        window.grecaptcha.reset();
+      } catch (error) {
+        console.error("reCAPTCHA reset error:", error);
+      }
+    }
+    setShowLogin(false);
+  };
+
+  const closeSignup = () => {
+    // Clean up reCAPTCHA before closing
+    const script = document.getElementById("recaptcha-script-signup");
+    if (script) script.remove();
+    if (window.grecaptcha) {
+      try {
+        window.grecaptcha.reset();
+      } catch (error) {
+        console.error("reCAPTCHA reset error:", error);
+      }
+    }
+    setShowSignup(false);
+  };
+
+  const switchToSignup = () => {
+    closeLogin();
+    // Small delay to ensure cleanup is complete
+    setTimeout(() => setShowSignup(true), 100);
+  };
+
+  const switchToLogin = () => {
+    closeSignup();
+    // Small delay to ensure cleanup is complete
+    setTimeout(() => setShowLogin(true), 100);
+  };
+
   return (
     <>
       <header className=" bg-gray-200/10 backdrop-blur-sm dark:bg-[#513a7a]/10 border-b border dark:border-gray-800/20 border-gray-200/20  sticky top-0 z-50">
@@ -561,14 +601,14 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
               <div className="relative overflow-clip shadow-2xl shadow-gray-500/20 w-fit h-fit bg-white dark:bg-[#101020] border dark:border-gray-700 border-gray-100 rounded-3xl p-4">
                 <button
                   className="dark:text-white text-black text-3xl absolute z-[999] top-5 right-5"
-                  onClick={() => setShowLogin(false)}
+                  onClick={closeLogin}
                 >
                   &times;
                 </button>
-                <div className="absolute -top-14 z-[999]  left-12  ">
+                <div className="absolute -top-14 z-[999] left-12">
                   <img
                     src="/ShadowBlue.png"
-                    className=" opacity-45 w-80"
+                    className="opacity-45 w-80"
                     alt="close"
                   />
                 </div>
@@ -576,10 +616,7 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
                 <p className="text-center text-gray-500 dark:text-gray-400">
                   Don't have an account?{" "}
                   <button
-                    onClick={() => {
-                      setShowLogin(false);
-                      setShowSignup(true);
-                    }}
+                    onClick={switchToSignup}
                     className="text-indigo-500 dark:text-gray-200"
                   >
                     Sign up
@@ -597,26 +634,22 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
               <div className="relative overflow-clip shadow-2xl shadow-gray-500/20 w-fit h-fit bg-white dark:bg-[#101020] border dark:border-gray-700 border-gray-100 rounded-3xl p-4">
                 <button
                   className="dark:text-white text-black text-3xl absolute z-[999] top-5 right-5"
-                  onClick={() => setShowLogin(false)}
+                  onClick={closeSignup}
                 >
                   &times;
                 </button>
-                <div className="absolute -top-14 z-[999]  left-12  ">
+                <div className="absolute -top-14 z-[999] left-16">
                   <img
                     src="/ShadowBlue.png"
-                    className=" opacity-45 w-80"
+                    className="opacity-45 w-80"
                     alt="close"
                   />
                 </div>
-
                 <Signup />
                 <p className="text-center text-gray-500 dark:text-gray-400">
                   Already have an account?{" "}
                   <button
-                    onClick={() => {
-                      setShowLogin(true);
-                      setShowSignup(false);
-                    }}
+                    onClick={switchToLogin}
                     className="text-indigo-500 dark:text-gray-200"
                   >
                     Sign in
