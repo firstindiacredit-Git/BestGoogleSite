@@ -558,21 +558,75 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
         <div className="fixed inset-0 backdrop-blur-md backdrop-brightness-50 z-[999]">
           <div className="flex h-screen items-center justify-center">
             <div>
-              <div className="relative w-fit h-fit">
+              <div className="relative overflow-clip shadow-2xl shadow-gray-500/20 w-fit h-fit bg-white dark:bg-[#101020] border dark:border-gray-700 border-gray-100 rounded-3xl p-4">
                 <button
                   className="dark:text-white text-black text-3xl absolute z-[999] top-5 right-5"
                   onClick={() => setShowLogin(false)}
                 >
                   &times;
                 </button>
-
+                <div className="absolute -top-14 z-[999]  left-12  ">
+                  <img
+                    src="/ShadowBlue.png"
+                    className=" opacity-45 w-80"
+                    alt="close"
+                  />
+                </div>
                 <Signin />
+                <p className="text-center text-gray-500 dark:text-gray-400">
+                  Don't have an account?{" "}
+                  <button
+                    onClick={() => {
+                      setShowLogin(false);
+                      setShowSignup(true);
+                    }}
+                    className="text-indigo-500 dark:text-gray-200"
+                  >
+                    Sign up
+                  </button>
+                </p>
               </div>
             </div>
           </div>
         </div>
       )}
-      {showSignup && <Signup />}
+      {showSignup && (
+        <div className="fixed inset-0 backdrop-blur-md backdrop-brightness-50 z-[999]">
+          <div className="flex h-screen items-center justify-center">
+            <div>
+              <div className="relative overflow-clip shadow-2xl shadow-gray-500/20 w-fit h-fit bg-white dark:bg-[#101020] border dark:border-gray-700 border-gray-100 rounded-3xl p-4">
+                <button
+                  className="dark:text-white text-black text-3xl absolute z-[999] top-5 right-5"
+                  onClick={() => setShowLogin(false)}
+                >
+                  &times;
+                </button>
+                <div className="absolute -top-14 z-[999]  left-12  ">
+                  <img
+                    src="/ShadowBlue.png"
+                    className=" opacity-45 w-80"
+                    alt="close"
+                  />
+                </div>
+
+                <Signup />
+                <p className="text-center text-gray-500 dark:text-gray-400">
+                  Already have an account?{" "}
+                  <button
+                    onClick={() => {
+                      setShowLogin(true);
+                      setShowSignup(false);
+                    }}
+                    className="text-indigo-500 dark:text-gray-200"
+                  >
+                    Sign in
+                  </button>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

@@ -68,6 +68,7 @@ const SignIn = () => {
       async () => {
         try {
           await signInWithPopup(auth, provider);
+          window.location.reload();
           localStorage.setItem("imageTrue", true);
           navigate("/search");
         } catch (err) {
@@ -161,12 +162,9 @@ const SignIn = () => {
 
   return (
     <div>
-      <div className="bg-white relative overflow-clip  dark:bg-[#101020]  border dark:border-gray-700 border-gray-100 rounded-3xl w-full max-w-lg p-6  shadow-2xl shadow-gray-500/20 ">
+      <div className="bg-white relative overflow-clip  dark:bg-[#101020]    w-full max-w-lg p-6   ">
         <div className="flex justify-center  rounded-full p-4 w-fit mx-auto items-center my-2">
           <img src="/Favicon.svg" alt="logo" className="w-16" />
-        </div>
-        <div className="absolute -top-20  left-10  ">
-          <img src="/ShadowBlue.png" className=" opacity-45 w-80" alt="close" />
         </div>
 
         <h2 className="text-center text-2xl dark:text-gray-200 text-gray-800 font-medium">
@@ -220,12 +218,6 @@ const SignIn = () => {
             >
               Continue
             </button>
-            <p className="text-center text-gray-500 dark:text-gray-400">
-              Don't have an account?{" "}
-              <Link to="/signup" className="text-indigo-500 dark:text-gray-200">
-                Sign up
-              </Link>
-            </p>
           </form>
         ) : (
           <form onSubmit={handleEmailSignIn} className="space-y-4">
