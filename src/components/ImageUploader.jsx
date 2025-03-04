@@ -7,10 +7,6 @@ function ImageUploader() {
   const [imageUrl, setImageUrl] = useState("");
   const [collapsed, setCollapsed] = useState(false);
 
-  const collapse = () => {
-    setCollapsed(!collapsed);
-  };
-
   useEffect(() => {
     const storedImage = localStorage.getItem("uploadedImage");
     const imageTrue = localStorage.getItem("imageTrue");
@@ -46,7 +42,6 @@ function ImageUploader() {
 
   return (
     <div className=" backdrop-blur-sm  rounded-b-sm w-full">
-     
       {!collapsed && (
         <div className="">
           {!image && (
@@ -70,14 +65,14 @@ function ImageUploader() {
             </div>
           )}
           {imageUrl && (
-            <div className="relative rounded-b-sm    group h-[19rem]">
+            <div className="relative rounded-b-sm group  h-[20.25rem]">
               <Image
                 src={imageUrl}
                 alt="Uploaded"
                 preview={true}
                 className=" rounded-b-sm "
                 style={{
-                  objectFit: "contain",
+                  objectFit: "cover",
                   height: "100%",
                   width: "100%",
                 }}
@@ -94,7 +89,6 @@ function ImageUploader() {
                 >
                   <Button
                     type="primary"
-                    danger
                     icon={<MdDelete className="text-lg" />}
                     className="flex items-center gap-1"
                   ></Button>

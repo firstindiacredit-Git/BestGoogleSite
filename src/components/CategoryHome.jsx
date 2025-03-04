@@ -28,6 +28,7 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
   const [showUrl, setShowUrl] = useState(true);
   const [iconSize, setIconSize] = useState("large");
   const [showSettings, setShowSettings] = useState(false);
+  const [titleLines, setTitleLines] = useState(1);
   const [dropdownPosition, setDropdownPosition] = useState({
     top: null,
     right: null,
@@ -223,7 +224,7 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
     if (showSettings && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
       setDropdownPosition({
-        top: rect.bottom - 280,
+        top: rect.bottom - 340,
         right: window.innerWidth - rect.right,
       });
       preventScroll(true);
@@ -358,18 +359,47 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
       }
 
       if (user) {
-        // Existing Firebase logic
-        const bookmarkRef = doc(
-          db,
-          "users",
-          user.uid,
-          "bookmarks",
-          editingBookmark.id
-        );
-        await updateDoc(bookmarkRef, {
-          name: editingBookmark.name,
-          link: editingBookmark.link,
-        });
+        // Handle editing based on whether it's an admin bookmark or user bookmark
+        if (editingBookmark.addedByAdmin) {
+          // For admin bookmarks, hide the original and add a new user bookmark
+          const newHiddenIds = [...hiddenBookmarkIds, editingBookmark.id];
+          setHiddenBookmarkIds(newHiddenIds);
+
+          // Hide the admin bookmark
+          const userDocRef = doc(db, "users", user.uid);
+          await setDoc(
+            userDocRef,
+            { hiddenCategoryBookmarks: newHiddenIds },
+            { merge: true }
+          );
+
+          // Add as a new user bookmark
+          const newBookmarkData = {
+            name: editingBookmark.name,
+            link: editingBookmark.link,
+            category: categoryType,
+            addedByAdmin: false,
+            createdAt: new Date().toISOString(),
+          };
+
+          await addDoc(
+            collection(db, "users", user.uid, "bookmarks"),
+            newBookmarkData
+          );
+        } else {
+          // For user bookmarks, update the existing document
+          const bookmarkRef = doc(
+            db,
+            "users",
+            user.uid,
+            "bookmarks",
+            editingBookmark.id
+          );
+          await updateDoc(bookmarkRef, {
+            name: editingBookmark.name,
+            link: editingBookmark.link,
+          });
+        }
       } else {
         // Update in localStorage for non-logged-in users
         const updatedBookmarks = bookmarks.map((bookmark) =>
@@ -481,6 +511,44 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
             </div>
           </div>
 
+          <div className="mb-4 border-t dark:border-gray-700">
+            <div className="text-sm font-medium text-gray-500 dark:text-gray-400 p-2">
+              Title Lines
+            </div>
+            <div className="flex gap-1">
+              <button
+                onClick={() => setTitleLines(1)}
+                className={`p-1 w-10 mx-2 rounded ${
+                  titleLines === 1
+                    ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
+                    : "hover:bg-gray-100 dark:hover:bg-gray-700"
+                }`}
+              >
+                1
+              </button>
+              <button
+                onClick={() => setTitleLines(2)}
+                className={`p-1 w-10 mx-2 rounded ${
+                  titleLines === 2
+                    ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
+                    : "hover:bg-gray-100 dark:hover:bg-gray-700"
+                }`}
+              >
+                2
+              </button>
+              <button
+                onClick={() => setTitleLines(0)}
+                className={`p-1 w-10 mx-2 rounded ${
+                  titleLines === 0
+                    ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
+                    : "hover:bg-gray-100 dark:hover:bg-gray-700"
+                }`}
+              >
+                All
+              </button>
+            </div>
+          </div>
+
           <div className="border-t dark:border-gray-700 p-2">
             <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
               Options
@@ -523,15 +591,21 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
     const commonClasses = {
       container: "transition-all duration-200 ease-in-out cursor-pointer",
       image: `${getIconSizeClass()} rounded`,
-      title: "font-medium text-gray-900 dark:text-gray-100",
+      title: `font-medium text-gray-900 dark:text-gray-100 break-words ${
+        viewMode === "grid"
+          ? titleLines === 0
+            ? "whitespace-normal"
+            : `line-clamp-${titleLines}`
+          : ""
+      }`,
     };
 
     const views = {
       list: {
-        container: "flex flex-col  space-y-2",
+        container: "flex flex-col space-y-2",
         item: "flex items-center p-2 rounded-sm bg-gray-50/[(var(--bg-opacity))] dark:bg-gray-700/[(var(--bg-opacity))] hover:bg-gray-100 dark:hover:bg-gray-600",
         content: "flex items-center gap-2 w-full",
-        details: "flex-grow ",
+        details: "flex-grow",
       },
       grid: {
         container: `grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4`,
@@ -570,11 +644,7 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
               />
               <div className={currentView.details}>
                 {showUrl && (
-                  <div
-                    className={`${commonClasses.title} ${
-                      viewMode === "grid" ? "truncate text-center text-sm" : ""
-                    }`}
-                  >
+                  <div className={`${commonClasses.title} text-sm`}>
                     {item.name}
                   </div>
                 )}

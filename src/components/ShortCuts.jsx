@@ -254,7 +254,7 @@ function BookmarkPage() {
         {combinedBookmarks.map((bookmark) => (
           <div
             key={bookmark.id}
-            className="text-center shadow-sm dark:bg-[#28283a]/[var(--widget-opacity)] backdrop-blur-lg border  bg-white/[var(--widget-opacity)] dark:border-gray-800/[var(--widget-opacity)] border-gray-200/[var(--widget-opacity)] cursor-pointer p-2 rounded-sm  group relative"
+            className="text-center hover:shadow-sm hover:dark:bg-[#28283a]/[var(--widget-opacity)] hover:backdrop-blur-lg  hover:bg-white/[var(--widget-opacity)]  cursor-pointer p-2 rounded-sm  group relative"
           >
             <a
               href={bookmark.link}
@@ -316,7 +316,7 @@ function BookmarkPage() {
           </div>
         ))}
       </div>
-      <div className="text-center shadow-sm dark:bg-[#28283a]/[var(--widget-opacity)] backdrop-blur-lg border  bg-white/[var(--widget-opacity)] dark:border-gray-800/[var(--widget-opacity)] border-gray-200/[var(--widget-opacity)] cursor-pointer p-2 rounded-sm">
+      <div className="text-center hover:shadow-sm hover:dark:bg-[#28283a]/[var(--widget-opacity)] hover:backdrop-blur-lg   hover:bg-white/[var(--widget-opacity)]  cursor-pointer p-2 rounded-sm">
         <button
           onClick={() => setShowModal(true)}
           className=" dark:text-white   w-12 h-12 flex items-center justify-center "

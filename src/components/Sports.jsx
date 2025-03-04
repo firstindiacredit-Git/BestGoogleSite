@@ -136,6 +136,14 @@ const SportsLeagues = () => {
               style={{ width: 300 }}
               className="dark:bg-[#28283A] dark:text-gray-300"
             />
+            <div>
+              <button className="bg-blue-500 text-white px-4 py-2 rounded-md">
+                Football
+              </button>
+              <button className="bg-blue-500 text-white px-4 py-2 rounded-md">
+                Cricket
+              </button>
+            </div>
 
             <div className="bg-white dark:bg-[#513a7a] rounded-lg shadow-sm p-1 inline-flex">
               <button
