@@ -14,6 +14,16 @@ const SportsLeagues = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("football");
+
+  // Add function to get current date in YYYY-MM-DD format
+  const getCurrentDate = () => {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   const setSHow = (a) => {
     setSelectedCategory(a);
   };
@@ -95,6 +105,67 @@ const SportsLeagues = () => {
         } else {
           setError("No cricket matches available");
         }
+      } else if (selectedCategory === "basketball") {
+        const currentDate = getCurrentDate();
+        const response = await fetch(
+          `https://v1.basketball.api-sports.io/games?date=${currentDate}`,
+          {
+            headers: {
+              "x-apisports-key": "47f4d4ae2ec97f80df18a074084c523b",
+            },
+          }
+        );
+        const basketballData = await response.json();
+
+        if (basketballData.response && basketballData.response.length > 0) {
+          // Transform basketball data to match the structure expected by the component
+          const formattedData = basketballData.response.map((game) => {
+            // Determine status color
+            let statusColor = "text-orange-500";
+            if (game.status.short === "FT") {
+              statusColor = "text-green-500";
+            } else if (game.status.short === "NS") {
+              statusColor = "text-blue-500";
+            }
+
+            // Format scores for display
+            const homeScore = game.scores.home;
+            const awayScore = game.scores.away;
+            const scoreDisplay =
+              homeScore && awayScore
+                ? `${homeScore.total} - ${awayScore.total}`
+                : "Not Started";
+
+            return {
+              id: game.id,
+              title: `${game.teams.home.name} vs ${game.teams.away.name}`,
+              competition: `${game.league.name} Basketball`,
+              date: game.date,
+              thumbnail: game.teams.home.logo || "./basketball-default.png",
+              matchviewUrl: "https://www.sportingnews.com/in/nba",
+              status: game.status.long,
+              matchState: game.status.short,
+              team1: game.teams.home.name,
+              team2: game.teams.away.name,
+              team1Score: homeScore
+                ? `${homeScore.total} (Q1: ${homeScore.quarter_1}, Q2: ${homeScore.quarter_2}, Q3: ${homeScore.quarter_3}, Q4: ${homeScore.quarter_4})`
+                : null,
+              team2Score: awayScore
+                ? `${awayScore.total} (Q1: ${awayScore.quarter_1}, Q2: ${awayScore.quarter_2}, Q3: ${awayScore.quarter_3}, Q4: ${awayScore.quarter_4})`
+                : null,
+              t1img: game.teams.home.logo,
+              t2img: game.teams.away.logo,
+              series: game.league.name,
+              statusColor: statusColor,
+              matchEnded: game.status.short === "FT",
+            };
+          });
+
+          setLeagues(formattedData);
+          setFilteredLeagues(formattedData);
+        } else {
+          setError("No basketball games available");
+        }
       }
     } catch (error) {
       console.error("API Error:", error);
@@ -133,6 +204,7 @@ const SportsLeagues = () => {
   const menuItems = [
     { key: "football", label: "Football" },
     { key: "cricket", label: "Cricket" },
+    { key: "basketball", label: "Basketball" },
   ];
 
   if (loading) {
@@ -285,7 +357,13 @@ const SportsLeagues = () => {
                           alt={league.competition || "Sports match"}
                           src={league.thumbnail}
                           className="w-full rounded-lg h-full object-cover transform hover:scale-105 transition-transform duration-300"
-                          fallback="./ODI.png"
+                          fallback={
+                            selectedCategory === "cricket"
+                              ? "./ODI.png"
+                              : selectedCategory === "basketball"
+                              ? "./NBA.jpg"
+                              : "./ODI.png"
+                          }
                         />
                       </div>
                       <Card.Meta
@@ -328,6 +406,15 @@ const SportsLeagues = () => {
                                 )}
                               </>
                             )}
+                            {selectedCategory === "basketball" && (
+                              <>
+                                <p
+                                  className={`text-sm mb-1 ${league.statusColor} font-medium`}
+                                >
+                                  {league.status}
+                                </p>
+                              </>
+                            )}
                             <p className="text-sm mt-2">
                               {league.date
                                 ? new Date(league.date).toLocaleDateString()
@@ -345,7 +432,9 @@ const SportsLeagues = () => {
                         >
                           {selectedCategory === "football"
                             ? "Watch Highlights"
-                            : "View Match"}
+                            : selectedCategory === "cricket"
+                            ? "View Match"
+                            : "View Details"}
                         </Button>
                       </div>
                     </div>
@@ -353,14 +442,24 @@ const SportsLeagues = () => {
                     <div className="flex gap-4 p-4 rounded-lg backdrop-blur-lg dark:bg-[#28283A]/[var(--widget-opacity)] bg-white/[var(--widget-opacity)] dark:text-gray-300 transition-all duration-300 hover:shadow-xl dark:hover:shadow-purple-500/20">
                       <div
                         className={`w-40 h-28  flex items-center  ${
-                          selectedCategory === "cricket" ? "mt-7" : ""
+                          selectedCategory === "cricket"
+                            ? "mt-7"
+                            : selectedCategory === "basketball"
+                            ? "mt-5"
+                            : ""
                         }  `}
                       >
                         <Image
                           alt={league.competition || "Sports match"}
                           src={league.thumbnail}
                           className="w-full h-full rounded-lg object-fill"
-                          fallback="./ODI.png"
+                          fallback={
+                            selectedCategory === "cricket"
+                              ? "./ODI.png"
+                              : selectedCategory === "basketball"
+                              ? "./NBA.jpg"
+                              : "./ODI.png"
+                          }
                         />
                       </div>
                       <div className="flex-grow flex flex-col justify-between min-w-0">
@@ -405,6 +504,16 @@ const SportsLeagues = () => {
                               </>
                             )}
 
+                            {selectedCategory === "basketball" && (
+                              <>
+                                <p
+                                  className={`text-sm mb-1 ${league.statusColor} font-medium`}
+                                >
+                                  {league.status}
+                                </p>
+                              </>
+                            )}
+
                             <span className="text-sm dark:text-gray-400 mt-1">
                               {league.date
                                 ? new Date(league.date).toLocaleDateString()
@@ -417,9 +526,15 @@ const SportsLeagues = () => {
                             <span className="px-2 py-1 text-xs rounded-full bg-purple-500/20 dark:text-purple-300 whitespace-nowrap">
                               {selectedCategory === "football"
                                 ? "Live Highlights"
-                                : league.matchEnded
-                                ? "Completed"
-                                : "Upcoming"}
+                                : selectedCategory === "cricket"
+                                ? league.matchEnded
+                                  ? "Completed"
+                                  : "Upcoming"
+                                : selectedCategory === "basketball"
+                                ? league.matchEnded
+                                  ? "Completed"
+                                  : "Upcoming"
+                                : "Live Highlights"}
                             </span>
                             <span className="px-2 py-1 text-xs rounded-full bg-blue-500/20 dark:text-blue-300 whitespace-nowrap">
                               {league.competition
@@ -436,6 +551,10 @@ const SportsLeagues = () => {
                           >
                             {selectedCategory === "football"
                               ? "Watch Now"
+                              : selectedCategory === "cricket"
+                              ? "View Match"
+                              : selectedCategory === "basketball"
+                              ? "View Details"
                               : "View Details"}
                           </Button>
                         </div>
