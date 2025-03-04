@@ -13,47 +13,93 @@ const SportsLeagues = () => {
   const [viewMode, setViewMode] = useState("grid");
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState(null);
-
-  // const fetchLeagues = useCallback(async () => {
-  //   setLoading(true);
-  //   try {
-  //     // Using a more reliable free sports API
-  //     const response = await fetch(
-  //       `https://www.scorebat.com/video-api/v3/feed/?token=${
-  //         import.meta.env.VITE_MATCH_KEY
-  //       }`
-  //     );
-  //     const data = await response.json();
-  //     if (data.response) {
-  //       setLeagues(data.response);
-  //       setFilteredLeagues(data.response);
-  //     }
-  //   } catch (error) {
-  //     setError("Failed to fetch leagues, please try again.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }, []);
+  const [selectedCategory, setSelectedCategory] = useState("football");
 
   const fetchLeagues = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetch(
-        "https://bgs-backend.vercel.app/api/top100/sports"
-      );
-      const data = await response.json();
-      if (data.length > 0) {
-        setLeagues(data);
-        setFilteredLeagues(data);
-      } else {
-        setError("No sports data available");
+      let data;
+
+      if (selectedCategory === "football") {
+        // Fetch football data from default endpoint
+        const response = await fetch(
+          "https://bgs-backend.vercel.app/api/top100/sports"
+        );
+        data = await response.json();
+
+        if (data.length > 0) {
+          setLeagues(data);
+          setFilteredLeagues(data);
+        } else {
+          setError("No football data available");
+        }
+      } else if (selectedCategory === "cricket") {
+        // Fetch cricket data from cricket API
+        const response = await fetch(
+          "https://api.cricapi.com/v1/cricScore?apikey=0da59eab-0d6c-4950-b0ea-454786bb63e2"
+        );
+        const cricketData = await response.json();
+
+        if (cricketData.data && cricketData.data.length > 0) {
+          // Transform cricket data to match the structure expected by the component
+          const formattedData = cricketData.data.map((match) => {
+            // Determine match status color and label
+            let statusColor = "text-orange-500";
+            if (match.ms === "result") {
+              statusColor = "text-green-500";
+            } else if (match.ms === "fixture") {
+              statusColor = "text-blue-500";
+            }
+
+            // Determine image based on match type
+            let thumbnailImg = "./ODI.png";
+            if (match.t1img) {
+              thumbnailImg = match.t1img.replace("w=48", "w=512");
+            } else if (match.t2img) {
+              thumbnailImg = match.t2img.replace("w=48", "w=512");
+            } else if (match.matchType === "t20") {
+              thumbnailImg = "./T20.jpg";
+            } else {
+              thumbnailImg = "./ODI.png";
+            }
+
+            return {
+              id: match.id,
+              title: `${match.t1} vs ${match.t2}`,
+              competition: match.matchType
+                ? `${match.matchType.toUpperCase()} Cricket`
+                : "Cricket Match",
+              date: match.dateTimeGMT,
+              thumbnail: thumbnailImg,
+              matchviewUrl: "https://www.cricbuzz.com/",
+              // Additional cricket-specific data
+              status: match.status,
+              matchState: match.ms,
+              team1: match.t1,
+              team2: match.t2,
+              team1Score: match.t1s,
+              team2Score: match.t2s,
+              t1img: match.t1img ? match.t1img.replace("w=48", "w=512") : null,
+              t2img: match.t2img ? match.t2img.replace("w=48", "w=512") : null,
+              series: match.series,
+              statusColor: statusColor,
+              matchEnded: match.ms === "result",
+            };
+          });
+
+          setLeagues(formattedData);
+          setFilteredLeagues(formattedData);
+        } else {
+          setError("No cricket matches available");
+        }
       }
     } catch (error) {
-      setError("Failed to fetch leagues, please try again.");
+      console.error("API Error:", error);
+      setError(`Failed to fetch ${selectedCategory} data, please try again.`);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectedCategory]);
 
   const filterLeagues = useCallback(() => {
     if (!leagues.length) return;
@@ -62,10 +108,12 @@ const SportsLeagues = () => {
     if (searchQuery) {
       filtered = filtered.filter(
         (league) =>
-          league.competition
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase()) ||
-          league.title.toLowerCase().includes(searchQuery.toLowerCase())
+          (league.competition &&
+            league.competition
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase())) ||
+          (league.title &&
+            league.title.toLowerCase().includes(searchQuery.toLowerCase()))
       );
     }
     setFilteredLeagues(filtered);
@@ -92,6 +140,28 @@ const SportsLeagues = () => {
                 style={{ width: 300 }}
                 className="dark:bg-[#28283A] dark:text-gray-300"
               />
+              <div>
+                <button
+                  className={`mr-2 px-4 py-2 rounded-md ${
+                    selectedCategory === "football"
+                      ? "bg-blue-600 text-white"
+                      : "bg-blue-500 text-white"
+                  }`}
+                  onClick={() => setSelectedCategory("football")}
+                >
+                  Football
+                </button>
+                <button
+                  className={`px-4 py-2 rounded-md ${
+                    selectedCategory === "cricket"
+                      ? "bg-blue-600 text-white"
+                      : "bg-blue-500 text-white"
+                  }`}
+                  onClick={() => setSelectedCategory("cricket")}
+                >
+                  Cricket
+                </button>
+              </div>
               <div className="bg-white dark:bg-[#513a7a] rounded-lg shadow-sm p-1 inline-flex">
                 <button
                   onClick={() => setViewMode("grid")}
@@ -137,10 +207,24 @@ const SportsLeagues = () => {
               className="dark:bg-[#28283A] dark:text-gray-300"
             />
             <div>
-              <button className="bg-blue-500 text-white px-4 py-2 rounded-md">
+              <button
+                className={`mr-2 px-4 py-2 rounded-md ${
+                  selectedCategory === "football"
+                    ? "bg-blue-600 text-white"
+                    : "bg-blue-500 text-white"
+                }`}
+                onClick={() => setSelectedCategory("football")}
+              >
                 Football
               </button>
-              <button className="bg-blue-500 text-white px-4 py-2 rounded-md">
+              <button
+                className={`px-4 py-2 rounded-md ${
+                  selectedCategory === "cricket"
+                    ? "bg-blue-600 text-white"
+                    : "bg-blue-500 text-white"
+                }`}
+                onClick={() => setSelectedCategory("cricket")}
+              >
                 Cricket
               </button>
             </div>
@@ -171,98 +255,192 @@ const SportsLeagues = () => {
             </div>
           </div>
 
-          <Row gutter={[16, 16]}>
-            {filteredLeagues.map((league) => (
-              <Col
-                xs={24}
-                sm={viewMode === "grid" ? 12 : 24}
-                lg={viewMode === "grid" ? 6 : 12}
-                xl={viewMode === "grid" ? 6 : 8}
-                key={`${league.title}-${league.competition}-${league.date}`}
-              >
-                {viewMode === "grid" ? (
-                  <div className="p-4 rounded-lg backdrop-blur-lg dark:bg-[#28283A]/[var(--widget-opacity)] bg-white/[var(--widget-opacity)] dark:text-gray-300 ">
-                    <div className="h-48 overflow-hidden">
-                      <Image
-                        alt={league.competition}
-                        src={league.thumbnail}
-                        className="w-full rounded-lg h-full object-cover transform hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-                    <Card.Meta
-                      title={
-                        <div className="text-lg font-semibold px-4 py-2 dark:text-gray-100">
-                          {league.competition}
-                        </div>
-                      }
-                      description={
-                        <div className="dark:text-gray-400 px-4 py-2">
-                          <p className="mb-2">{league.title}</p>
-                          <p className="text-sm">
-                            {new Date(league.date).toLocaleDateString()}
-                          </p>
-                        </div>
-                      }
-                    />
-                    <div className="mt-4">
-                      <Button
-                        type="primary"
-                        href={league.matchviewUrl}
-                        target="_blank"
-                        className="w-full bg-indigo-500 dark:bg-[#513a7a] border-none"
-                      >
-                        Watch Highlights
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex gap-4 p-4 rounded-lg backdrop-blur-lg dark:bg-[#28283A]/[var(--widget-opacity)] bg-white/[var(--widget-opacity)] dark:text-gray-300 transition-all duration-300 hover:shadow-xl dark:hover:shadow-purple-500/20">
-                    <div className="w-40 h-28 flex-shrink-0">
-                      <Image
-                        alt={league.competition}
-                        src={league.thumbnail}
-                        className="w-full h-full rounded-lg object-cover"
-                      />
-                    </div>
-                    <div className="flex-grow flex flex-col justify-between min-w-0">
-                      <div>
-                        <h3 className="text-lg font-semibold dark:text-gray-100 mb-2 truncate">
-                          {league.competition}
-                        </h3>
-                        <div className="flex flex-col gap-1">
-                          <span className="text-sm dark:text-gray-400 truncate">
-                            {league.title}
-                          </span>
-                          <span className="text-sm dark:text-gray-400">
-                            {new Date(league.date).toLocaleDateString()}
-                          </span>
-                        </div>
+          {error && (
+            <div className="text-red-500 mb-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+              {error}
+            </div>
+          )}
+
+          {filteredLeagues.length === 0 && !loading && !error ? (
+            <div className="text-center p-8 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+              <p className="text-gray-500 dark:text-gray-400">
+                No matches found for your search criteria.
+              </p>
+            </div>
+          ) : (
+            <Row gutter={[16, 16]}>
+              {filteredLeagues.map((league, index) => (
+                <Col
+                  xs={24}
+                  sm={viewMode === "grid" ? 12 : 24}
+                  lg={viewMode === "grid" ? 6 : 12}
+                  xl={viewMode === "grid" ? 6 : 8}
+                  key={league.id || `${league.title}-${index}`}
+                >
+                  {viewMode === "grid" ? (
+                    <div className="p-4 rounded-lg backdrop-blur-lg dark:bg-[#28283A]/[var(--widget-opacity)] bg-white/[var(--widget-opacity)] dark:text-gray-300 ">
+                      <div className="h-48 overflow-hidden">
+                        <Image
+                          alt={league.competition || "Sports match"}
+                          src={league.thumbnail}
+                          className="w-full rounded-lg h-full object-cover transform hover:scale-105 transition-transform duration-300"
+                          fallback="./ODI.png"
+                        />
                       </div>
-                      <div className="flex flex-wrap justify-between items-center gap-2 mt-2">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="px-2 py-1 text-xs rounded-full bg-purple-500/20 dark:text-purple-300 whitespace-nowrap">
-                            Live Highlights
-                          </span>
-                          <span className="px-2 py-1 text-xs rounded-full bg-blue-500/20 dark:text-blue-300 whitespace-nowrap">
-                            {league.competition.split(" ")[0]}
-                          </span>
-                        </div>
+                      <Card.Meta
+                        title={
+                          <div className="text-lg font-semibold px-4 py-2 dark:text-gray-100">
+                            {league.competition || "Match"}
+                          </div>
+                        }
+                        description={
+                          <div className="dark:text-gray-400 px-4 py-2">
+                            <p className="mb-2 font-medium">{league.title}</p>
+                            {selectedCategory === "cricket" && (
+                              <>
+                                {league.status && (
+                                  <p
+                                    className={`text-sm mb-1 ${league.statusColor} font-medium`}
+                                  >
+                                    {league.status}
+                                  </p>
+                                )}
+                                {league.series && (
+                                  <p className="text-sm mb-1">
+                                    <span className="font-medium">Series:</span>{" "}
+                                    {league.series}
+                                  </p>
+                                )}
+                                {(league.team1Score || league.team2Score) && (
+                                  <div className="text-sm mb-1 text-green-600 dark:text-green-400">
+                                    {league.team1Score && (
+                                      <p>
+                                        {league.team1}: {league.team1Score}
+                                      </p>
+                                    )}
+                                    {league.team2Score && (
+                                      <p>
+                                        {league.team2}: {league.team2Score}
+                                      </p>
+                                    )}
+                                  </div>
+                                )}
+                              </>
+                            )}
+                            <p className="text-sm mt-2">
+                              {league.date
+                                ? new Date(league.date).toLocaleDateString()
+                                : "Date not available"}
+                            </p>
+                          </div>
+                        }
+                      />
+                      <div className="mt-4">
                         <Button
                           type="primary"
                           href={league.matchviewUrl}
                           target="_blank"
-                          size="small"
-                          className="bg-indigo-500 dark:bg-[#513a7a] border-none hover:bg-indigo-600 dark:hover:bg-[#614a8a]"
+                          className="w-full bg-indigo-500 dark:bg-[#513a7a] border-none"
                         >
-                          Watch Now
+                          {selectedCategory === "football"
+                            ? "Watch Highlights"
+                            : "View Match"}
                         </Button>
                       </div>
                     </div>
-                  </div>
-                )}
-              </Col>
-            ))}
-          </Row>
+                  ) : (
+                    <div className="flex gap-4 p-4 rounded-lg backdrop-blur-lg dark:bg-[#28283A]/[var(--widget-opacity)] bg-white/[var(--widget-opacity)] dark:text-gray-300 transition-all duration-300 hover:shadow-xl dark:hover:shadow-purple-500/20">
+                      <div className="w-40 h-28 flex-shrink-0">
+                        <Image
+                          alt={league.competition || "Sports match"}
+                          src={league.thumbnail}
+                          className="w-full h-full rounded-lg object-cover"
+                          fallback="./ODI.png"
+                        />
+                      </div>
+                      <div className="flex-grow flex flex-col justify-between min-w-0">
+                        <div>
+                          <h3 className="text-lg font-semibold dark:text-gray-100 mb-2 truncate">
+                            {league.competition || "Match"}
+                          </h3>
+                          <div className="flex flex-col gap-1">
+                            <span className="text-sm dark:text-gray-400 truncate font-medium">
+                              {league.title}
+                            </span>
+
+                            {selectedCategory === "cricket" && (
+                              <>
+                                {league.status && (
+                                  <span
+                                    className={`text-sm ${league.statusColor} font-medium`}
+                                  >
+                                    {league.status}
+                                  </span>
+                                )}
+                                {league.series && (
+                                  <span className="text-sm">
+                                    <span className="font-medium">Series:</span>{" "}
+                                    {league.series}
+                                  </span>
+                                )}
+                                {(league.team1Score || league.team2Score) && (
+                                  <div className="text-sm text-green-600 dark:text-green-400">
+                                    {league.team1Score && (
+                                      <span>
+                                        {league.team1}: {league.team1Score}
+                                      </span>
+                                    )}
+                                    {league.team2Score && (
+                                      <span className="block">
+                                        {league.team2}: {league.team2Score}
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
+                              </>
+                            )}
+
+                            <span className="text-sm dark:text-gray-400 mt-1">
+                              {league.date
+                                ? new Date(league.date).toLocaleDateString()
+                                : "Date not available"}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap justify-between items-center gap-2 mt-2">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="px-2 py-1 text-xs rounded-full bg-purple-500/20 dark:text-purple-300 whitespace-nowrap">
+                              {selectedCategory === "football"
+                                ? "Live Highlights"
+                                : league.matchEnded
+                                ? "Completed"
+                                : "Live Match"}
+                            </span>
+                            <span className="px-2 py-1 text-xs rounded-full bg-blue-500/20 dark:text-blue-300 whitespace-nowrap">
+                              {league.competition
+                                ? league.competition.split(" ")[0]
+                                : selectedCategory}
+                            </span>
+                          </div>
+                          <Button
+                            type="primary"
+                            href={league.matchviewUrl}
+                            target="_blank"
+                            size="small"
+                            className="bg-indigo-500 dark:bg-[#513a7a] border-none hover:bg-indigo-600 dark:hover:bg-[#614a8a]"
+                          >
+                            {selectedCategory === "football"
+                              ? "Watch Now"
+                              : "View Details"}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </Col>
+              ))}
+            </Row>
+          )}
         </div>
       </Content>
     </Layout>
