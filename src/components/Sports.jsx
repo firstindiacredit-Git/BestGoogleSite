@@ -241,6 +241,73 @@ const SportsLeagues = () => {
         } else {
           setError("No baseball games available");
         }
+      } else if (selectedCategory === "hockey") {
+        const currentDate = getCurrentDate();
+        const response = await fetch(
+          `https://v1.hockey.api-sports.io/games?date=${currentDate}`,
+          {
+            headers: {
+              "x-apisports-key": "47f4d4ae2ec97f80df18a074084c523b",
+            },
+          }
+        );
+        const hockeyData = await response.json();
+
+        if (hockeyData.response && hockeyData.response.length > 0) {
+          // Transform hockey data to match the structure expected by the component
+          const formattedData = hockeyData.response.map((game) => {
+            // Determine status color
+            let statusColor = "text-orange-500";
+            if (game.status.short === "FT") {
+              statusColor = "text-green-500";
+            } else if (game.status.short === "NS") {
+              statusColor = "text-blue-500";
+            }
+
+            // Format periods scores for display
+            const formatPeriodScores = (periods) => {
+              if (!periods) return "";
+              const scores = [];
+              if (periods.first) scores.push(`1st: ${periods.first}`);
+              if (periods.second) scores.push(`2nd: ${periods.second}`);
+              if (periods.third) scores.push(`3rd: ${periods.third}`);
+              if (periods.overtime) scores.push(`OT: ${periods.overtime}`);
+              if (periods.penalties)
+                scores.push(`Penalties: ${periods.penalties}`);
+              return scores.join(", ");
+            };
+
+            const periodScores = formatPeriodScores(game.periods);
+
+            return {
+              id: game.id,
+              title: `${game.teams.home.name} vs ${game.teams.away.name}`,
+              competition: `${game.league.name}`,
+              date: game.date,
+              thumbnail: game.teams.home.logo || "./hockey-default.png",
+              matchviewUrl: "https://www.nhl.com/",
+              status: game.status.long,
+              matchState: game.status.short,
+              team1: game.teams.home.name,
+              team2: game.teams.away.name,
+              team1Score: `${game.scores.home} (${periodScores})`,
+              team2Score: `${game.scores.away} (${periodScores})`,
+              t1img: game.teams.home.logo,
+              t2img: game.teams.away.logo,
+              series: game.league.name,
+              statusColor: statusColor,
+              matchEnded: game.status.short === "FT",
+              venue: game.league.name,
+              scoreDisplay: `${game.scores.home} - ${game.scores.away}`,
+              periods: game.periods,
+            };
+          });
+
+          setLeagues(formattedData);
+          setFilteredLeagues(formattedData);
+        } else {
+          setError("No hockey games available");
+        }
       }
     } catch (error) {
       console.error("API Error:", error);
@@ -281,6 +348,7 @@ const SportsLeagues = () => {
     { key: "cricket", label: "Cricket" },
     { key: "basketball", label: "Basketball" },
     { key: "baseball", label: "Baseball" },
+    { key: "hockey", label: "Hockey" },
   ];
 
   if (loading) {
@@ -438,6 +506,10 @@ const SportsLeagues = () => {
                               ? "./ODI.png"
                               : selectedCategory === "basketball"
                               ? "./NBA.jpg"
+                              : selectedCategory === "baseball"
+                              ? "./MLB.jpg"
+                              : selectedCategory === "hockey"
+                              ? "./NHL.jpg"
                               : "./ODI.png"
                           }
                         />
@@ -500,6 +572,15 @@ const SportsLeagues = () => {
                                 </p>
                               </>
                             )}
+                            {selectedCategory === "hockey" && (
+                              <>
+                                <p
+                                  className={`text-sm mb-1 ${league.statusColor} font-medium`}
+                                >
+                                  {league.status}
+                                </p>
+                              </>
+                            )}
                             <p className="text-sm mt-2">
                               {league.date
                                 ? new Date(league.date).toLocaleDateString()
@@ -523,6 +604,8 @@ const SportsLeagues = () => {
                             ? "View Details"
                             : selectedCategory === "baseball"
                             ? "View Details"
+                            : selectedCategory === "hockey"
+                            ? "View Details"
                             : "View Details"}
                         </Button>
                       </div>
@@ -536,6 +619,8 @@ const SportsLeagues = () => {
                             : selectedCategory === "basketball"
                             ? "mt-5"
                             : selectedCategory === "baseball"
+                            ? "mt-5"
+                            : selectedCategory === "hockey"
                             ? "mt-5"
                             : ""
                         }  `}
@@ -551,6 +636,8 @@ const SportsLeagues = () => {
                               ? "./NBA.jpg"
                               : selectedCategory === "baseball"
                               ? "./MLB.jpg"
+                              : selectedCategory === "hockey"
+                              ? "./NHL.jpg"
                               : "./ODI.png"
                           }
                         />
@@ -617,6 +704,16 @@ const SportsLeagues = () => {
                               </>
                             )}
 
+                            {selectedCategory === "hockey" && (
+                              <>
+                                <p
+                                  className={`text-sm mb-1 ${league.statusColor} font-medium`}
+                                >
+                                  {league.status}
+                                </p>
+                              </>
+                            )}
+
                             <span className="text-sm dark:text-gray-400 mt-1">
                               {league.date
                                 ? new Date(league.date).toLocaleDateString()
@@ -638,6 +735,10 @@ const SportsLeagues = () => {
                                   ? "Completed"
                                   : "Upcoming"
                                 : selectedCategory === "baseball"
+                                ? league.matchEnded
+                                  ? "Completed"
+                                  : "Upcoming"
+                                : selectedCategory === "hockey"
                                 ? league.matchEnded
                                   ? "Completed"
                                   : "Upcoming"
@@ -663,6 +764,8 @@ const SportsLeagues = () => {
                               : selectedCategory === "basketball"
                               ? "View Details"
                               : selectedCategory === "baseball"
+                              ? "View Details"
+                              : selectedCategory === "hockey"
                               ? "View Details"
                               : "View Details"}
                           </Button>
