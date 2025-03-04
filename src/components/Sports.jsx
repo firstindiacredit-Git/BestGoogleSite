@@ -10,10 +10,13 @@ const SportsLeagues = () => {
   const [loading, setLoading] = useState(true);
   const [leagues, setLeagues] = useState([]);
   const [filteredLeagues, setFilteredLeagues] = useState([]);
-  const [viewMode, setViewMode] = useState("grid");
+  const [viewMode, setViewMode] = useState("list");
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("football");
+  const setSHow = (a) => {
+    setSelectedCategory(a);
+  };
 
   const fetchLeagues = useCallback(async () => {
     setLoading(true);
@@ -127,6 +130,11 @@ const SportsLeagues = () => {
     filterLeagues();
   }, [filterLeagues, searchQuery]);
 
+  const menuItems = [
+    { key: "football", label: "Football" },
+    { key: "cricket", label: "Cricket" },
+  ];
+
   if (loading) {
     return (
       <Layout className="min-h-screen w-[90%] mx-auto bg-transparent">
@@ -140,28 +148,87 @@ const SportsLeagues = () => {
                 style={{ width: 300 }}
                 className="dark:bg-[#28283A] dark:text-gray-300"
               />
-              <div>
-                <button
-                  className={`mr-2 px-4 py-2 rounded-md ${
-                    selectedCategory === "football"
-                      ? "bg-blue-600 text-white"
-                      : "bg-blue-500 text-white"
-                  }`}
-                  onClick={() => setSelectedCategory("football")}
-                >
-                  Football
-                </button>
-                <button
-                  className={`px-4 py-2 rounded-md ${
-                    selectedCategory === "cricket"
-                      ? "bg-blue-600 text-white"
-                      : "bg-blue-500 text-white"
-                  }`}
-                  onClick={() => setSelectedCategory("cricket")}
-                >
-                  Cricket
-                </button>
+              <div className="m-auto w-fit p-1 dark:text-white flex justify-center gap-4 rounded-md backdrop-blur-sm bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]">
+                {menuItems.map((item, key) => (
+                  <div
+                    key={key}
+                    className={` cursor-pointer px-3 py-2 rounded-md   ${
+                      item.key === selectedCategory
+                        ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                        : "hover:bg-gray-200/20 hover:dark:bg-[#513a7a]/20"
+                    } `}
+                    onClick={() => {
+                      setSHow(item.key);
+                    }}
+                  >
+                    {item.label}
+                  </div>
+                ))}
               </div>
+              <div style={{ width: 300 }} className="flex justify-end">
+                <div className="bg-white dark:bg-[#513a7a] rounded-lg shadow-sm p-1 inline-flex">
+                  <button
+                    onClick={() => setViewMode("grid")}
+                    className={`p-2 rounded-md transition-all duration-200 ${
+                      viewMode === "grid"
+                        ? "bg-blue-50 dark:bg-gray-700 text-blue-600 dark:text-blue-400"
+                        : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                    }`}
+                    title="Grid View"
+                  >
+                    <FaTh size={15} />
+                  </button>
+                  <button
+                    onClick={() => setViewMode("list")}
+                    className={`p-2 rounded-md transition-all duration-200 ${
+                      viewMode === "list"
+                        ? "bg-blue-50 dark:bg-gray-700 text-blue-600 dark:text-blue-400"
+                        : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                    }`}
+                    title="List View"
+                  >
+                    <FaList size={15} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Content>
+        <SkeletonLoader count={100} />
+      </Layout>
+    );
+  }
+
+  return (
+    <Layout className="min-h-screen w-[90%] mx-auto bg-transparent">
+      <Content className="p-6">
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-6">
+            <Search
+              placeholder="Search competitions..."
+              allowClear
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ width: 300 }}
+              className="dark:bg-[#28283A] dark:text-gray-300"
+            />
+            <div className="m-auto w-fit p-1 dark:text-white flex justify-center gap-4 rounded-md backdrop-blur-sm bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]">
+              {menuItems.map((item, key) => (
+                <div
+                  key={key}
+                  className={` cursor-pointer px-3 py-2 rounded-md   ${
+                    item.key === selectedCategory
+                      ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                      : "hover:bg-gray-200/20 hover:dark:bg-[#513a7a]/20"
+                  } `}
+                  onClick={() => {
+                    setSHow(item.key);
+                  }}
+                >
+                  {item.label}
+                </div>
+              ))}
+            </div>
+            <div style={{ width: 300 }} className="flex justify-end">
               <div className="bg-white dark:bg-[#513a7a] rounded-lg shadow-sm p-1 inline-flex">
                 <button
                   onClick={() => setViewMode("grid")}
@@ -186,72 +253,6 @@ const SportsLeagues = () => {
                   <FaList size={15} />
                 </button>
               </div>
-            </div>
-          </div>
-        </Content>
-        <SkeletonLoader count={100} />
-      </Layout>
-    );
-  }
-
-  return (
-    <Layout className="min-h-screen w-[90%] mx-auto bg-transparent">
-      <Content className="p-6">
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-6">
-            <Search
-              placeholder="Search competitions..."
-              allowClear
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ width: 300 }}
-              className="dark:bg-[#28283A] dark:text-gray-300"
-            />
-            <div>
-              <button
-                className={`mr-2 px-4 py-2 rounded-md ${
-                  selectedCategory === "football"
-                    ? "bg-blue-600 text-white"
-                    : "bg-blue-500 text-white"
-                }`}
-                onClick={() => setSelectedCategory("football")}
-              >
-                Football
-              </button>
-              <button
-                className={`px-4 py-2 rounded-md ${
-                  selectedCategory === "cricket"
-                    ? "bg-blue-600 text-white"
-                    : "bg-blue-500 text-white"
-                }`}
-                onClick={() => setSelectedCategory("cricket")}
-              >
-                Cricket
-              </button>
-            </div>
-
-            <div className="bg-white dark:bg-[#513a7a] rounded-lg shadow-sm p-1 inline-flex">
-              <button
-                onClick={() => setViewMode("grid")}
-                className={`p-2 rounded-md transition-all duration-200 ${
-                  viewMode === "grid"
-                    ? "bg-blue-50 dark:bg-gray-700 text-blue-600 dark:text-blue-400"
-                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
-                }`}
-                title="Grid View"
-              >
-                <FaTh size={15} />
-              </button>
-              <button
-                onClick={() => setViewMode("list")}
-                className={`p-2 rounded-md transition-all duration-200 ${
-                  viewMode === "list"
-                    ? "bg-blue-50 dark:bg-gray-700 text-blue-600 dark:text-blue-400"
-                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
-                }`}
-                title="List View"
-              >
-                <FaList size={15} />
-              </button>
             </div>
           </div>
 
@@ -350,11 +351,15 @@ const SportsLeagues = () => {
                     </div>
                   ) : (
                     <div className="flex gap-4 p-4 rounded-lg backdrop-blur-lg dark:bg-[#28283A]/[var(--widget-opacity)] bg-white/[var(--widget-opacity)] dark:text-gray-300 transition-all duration-300 hover:shadow-xl dark:hover:shadow-purple-500/20">
-                      <div className="w-40 h-28 flex-shrink-0">
+                      <div
+                        className={`w-40 h-28  flex items-center  ${
+                          selectedCategory === "cricket" ? "mt-7" : ""
+                        }  `}
+                      >
                         <Image
                           alt={league.competition || "Sports match"}
                           src={league.thumbnail}
-                          className="w-full h-full rounded-lg object-cover"
+                          className="w-full h-full rounded-lg object-fill"
                           fallback="./ODI.png"
                         />
                       </div>
@@ -414,7 +419,7 @@ const SportsLeagues = () => {
                                 ? "Live Highlights"
                                 : league.matchEnded
                                 ? "Completed"
-                                : "Live Match"}
+                                : "Upcoming"}
                             </span>
                             <span className="px-2 py-1 text-xs rounded-full bg-blue-500/20 dark:text-blue-300 whitespace-nowrap">
                               {league.competition
