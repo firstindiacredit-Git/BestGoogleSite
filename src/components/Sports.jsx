@@ -166,6 +166,81 @@ const SportsLeagues = () => {
         } else {
           setError("No basketball games available");
         }
+      } else if (selectedCategory === "baseball") {
+        const currentDate = getCurrentDate();
+        const response = await fetch(
+          `https://v1.baseball.api-sports.io/games?date=${currentDate}`,
+          {
+            headers: {
+              "x-apisports-key": "47f4d4ae2ec97f80df18a074084c523b",
+            },
+          }
+        );
+        const baseballData = await response.json();
+
+        if (baseballData.response && baseballData.response.length > 0) {
+          // Transform baseball data to match the structure expected by the component
+          const formattedData = baseballData.response.map((game) => {
+            // Determine status color
+            let statusColor = "text-orange-500";
+            if (game.status.short === "FT") {
+              statusColor = "text-green-500";
+            } else if (game.status.short === "NS") {
+              statusColor = "text-blue-500";
+            }
+
+            // Format innings scores for display
+            const homeScore = game.scores.home;
+            const awayScore = game.scores.away;
+
+            // Create innings display string
+            const formatInningsScore = (innings) => {
+              if (!innings) return "";
+              return Object.entries(innings)
+                .filter(([key]) => key !== "extra" && innings[key] !== null)
+                .map(([inning, score]) => `Inning ${inning}: ${score}`)
+                .join(", ");
+            };
+
+            const homeInningsScore = formatInningsScore(homeScore.innings);
+            const awayInningsScore = formatInningsScore(awayScore.innings);
+
+            return {
+              id: game.id,
+              title: `${game.teams.home.name} vs ${game.teams.away.name}`,
+              competition: `${game.league.name}`,
+              date: game.date,
+              thumbnail: game.teams.home.logo || "./baseball-default.png",
+              matchviewUrl: "https://www.mlb.com/",
+              status: game.status.long,
+              matchState: game.status.short,
+              team1: game.teams.home.name,
+              team2: game.teams.away.name,
+              team1Score: `${homeScore.total} (Hits: ${homeScore.hits}, Errors: ${homeScore.errors})\n${homeInningsScore}`,
+              team2Score: `${awayScore.total} (Hits: ${awayScore.hits}, Errors: ${awayScore.errors})\n${awayInningsScore}`,
+              t1img: game.teams.home.logo,
+              t2img: game.teams.away.logo,
+              series: game.league.name,
+              statusColor: statusColor,
+              matchEnded: game.status.short === "FT",
+              venue: game.league.name,
+              scoreDisplay: `${homeScore.total} - ${awayScore.total}`,
+              hits: {
+                home: homeScore.hits,
+                away: awayScore.hits,
+              },
+              errors: {
+                home: homeScore.errors,
+                away: awayScore.errors,
+              },
+            };
+          });
+
+          setLeagues(formattedData);
+          setFilteredLeagues(formattedData);
+        } else {
+          setError("No baseball games available");
+        }
       }
     } catch (error) {
       console.error("API Error:", error);
@@ -205,6 +280,7 @@ const SportsLeagues = () => {
     { key: "football", label: "Football" },
     { key: "cricket", label: "Cricket" },
     { key: "basketball", label: "Basketball" },
+    { key: "baseball", label: "Baseball" },
   ];
 
   if (loading) {
@@ -415,6 +491,15 @@ const SportsLeagues = () => {
                                 </p>
                               </>
                             )}
+                            {selectedCategory === "baseball" && (
+                              <>
+                                <p
+                                  className={`text-sm mb-1 ${league.statusColor} font-medium`}
+                                >
+                                  {league.status}
+                                </p>
+                              </>
+                            )}
                             <p className="text-sm mt-2">
                               {league.date
                                 ? new Date(league.date).toLocaleDateString()
@@ -434,6 +519,10 @@ const SportsLeagues = () => {
                             ? "Watch Highlights"
                             : selectedCategory === "cricket"
                             ? "View Match"
+                            : selectedCategory === "basketball"
+                            ? "View Details"
+                            : selectedCategory === "baseball"
+                            ? "View Details"
                             : "View Details"}
                         </Button>
                       </div>
@@ -445,6 +534,8 @@ const SportsLeagues = () => {
                           selectedCategory === "cricket"
                             ? "mt-7"
                             : selectedCategory === "basketball"
+                            ? "mt-5"
+                            : selectedCategory === "baseball"
                             ? "mt-5"
                             : ""
                         }  `}
@@ -458,6 +549,8 @@ const SportsLeagues = () => {
                               ? "./ODI.png"
                               : selectedCategory === "basketball"
                               ? "./NBA.jpg"
+                              : selectedCategory === "baseball"
+                              ? "./MLB.jpg"
                               : "./ODI.png"
                           }
                         />
@@ -514,6 +607,16 @@ const SportsLeagues = () => {
                               </>
                             )}
 
+                            {selectedCategory === "baseball" && (
+                              <>
+                                <p
+                                  className={`text-sm mb-1 ${league.statusColor} font-medium`}
+                                >
+                                  {league.status}
+                                </p>
+                              </>
+                            )}
+
                             <span className="text-sm dark:text-gray-400 mt-1">
                               {league.date
                                 ? new Date(league.date).toLocaleDateString()
@@ -531,6 +634,10 @@ const SportsLeagues = () => {
                                   ? "Completed"
                                   : "Upcoming"
                                 : selectedCategory === "basketball"
+                                ? league.matchEnded
+                                  ? "Completed"
+                                  : "Upcoming"
+                                : selectedCategory === "baseball"
                                 ? league.matchEnded
                                   ? "Completed"
                                   : "Upcoming"
@@ -554,6 +661,8 @@ const SportsLeagues = () => {
                               : selectedCategory === "cricket"
                               ? "View Match"
                               : selectedCategory === "basketball"
+                              ? "View Details"
+                              : selectedCategory === "baseball"
                               ? "View Details"
                               : "View Details"}
                           </Button>
