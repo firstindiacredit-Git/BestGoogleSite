@@ -308,6 +308,82 @@ const SportsLeagues = () => {
         } else {
           setError("No hockey games available");
         }
+      } else if (selectedCategory === "volleyball") {
+        const currentDate = getCurrentDate();
+        const response = await fetch(
+          `https://v1.volleyball.api-sports.io/games?date=${currentDate}`,
+          {
+            headers: {
+              "x-apisports-key": "47f4d4ae2ec97f80df18a074084c523b",
+            },
+          }
+        );
+        const volleyballData = await response.json();
+
+        if (volleyballData.response && volleyballData.response.length > 0) {
+          // Transform volleyball data to match the structure expected by the component
+          const formattedData = volleyballData.response.map((game) => {
+            // Determine status color
+            let statusColor = "text-orange-500";
+            if (game.status.short === "FT") {
+              statusColor = "text-green-500";
+            } else if (game.status.short === "NS") {
+              statusColor = "text-blue-500";
+            }
+
+            // Format set scores for display
+            const formatSetScores = (periods) => {
+              if (!periods) return "";
+              const sets = [];
+              if (periods.first)
+                sets.push(`Set 1: ${periods.first.home}-${periods.first.away}`);
+              if (periods.second)
+                sets.push(
+                  `Set 2: ${periods.second.home}-${periods.second.away}`
+                );
+              if (periods.third)
+                sets.push(`Set 3: ${periods.third.home}-${periods.third.away}`);
+              if (periods.fourth && periods.fourth.home !== null)
+                sets.push(
+                  `Set 4: ${periods.fourth.home}-${periods.fourth.away}`
+                );
+              if (periods.fifth && periods.fifth.home !== null)
+                sets.push(`Set 5: ${periods.fifth.home}-${periods.fifth.away}`);
+              return sets.join(", ");
+            };
+
+            const setScores = formatSetScores(game.periods);
+
+            return {
+              id: game.id,
+              title: `${game.teams.home.name} vs ${game.teams.away.name}`,
+              competition: `${game.league.name}`,
+              date: game.date,
+              thumbnail: game.teams.home.logo || "./volleyball-default.png",
+              matchviewUrl: "#",
+              status: game.status.long,
+              matchState: game.status.short,
+              team1: game.teams.home.name,
+              team2: game.teams.away.name,
+              team1Score: `${game.scores.home} (${setScores})`,
+              team2Score: `${game.scores.away} (${setScores})`,
+              t1img: game.teams.home.logo,
+              t2img: game.teams.away.logo,
+              series: game.league.name,
+              statusColor: statusColor,
+              matchEnded: game.status.short === "FT",
+              venue: game.league.name,
+              scoreDisplay: `${game.scores.home} - ${game.scores.away}`,
+              week: game.week,
+              periods: game.periods,
+            };
+          });
+
+          setLeagues(formattedData);
+          setFilteredLeagues(formattedData);
+        } else {
+          setError("No volleyball games available");
+        }
       }
     } catch (error) {
       console.error("API Error:", error);
@@ -349,6 +425,7 @@ const SportsLeagues = () => {
     { key: "basketball", label: "Basketball" },
     { key: "baseball", label: "Baseball" },
     { key: "hockey", label: "Hockey" },
+    { key: "volleyball", label: "Volleyball" },
   ];
 
   if (loading) {
@@ -510,6 +587,8 @@ const SportsLeagues = () => {
                               ? "./MLB.jpg"
                               : selectedCategory === "hockey"
                               ? "./NHL.jpg"
+                              : selectedCategory === "volleyball"
+                              ? "./volleyball-default.png"
                               : "./ODI.png"
                           }
                         />
@@ -581,6 +660,21 @@ const SportsLeagues = () => {
                                 </p>
                               </>
                             )}
+                            {selectedCategory === "volleyball" && (
+                              <>
+                                <p
+                                  className={`text-sm mb-1 ${league.statusColor} font-medium`}
+                                >
+                                  {league.status}
+                                </p>
+                                {league.week && (
+                                  <p className="text-sm mb-1">
+                                    <span className="font-medium">Stage:</span>{" "}
+                                    {league.week}
+                                  </p>
+                                )}
+                              </>
+                            )}
                             <p className="text-sm mt-2">
                               {league.date
                                 ? new Date(league.date).toLocaleDateString()
@@ -606,6 +700,8 @@ const SportsLeagues = () => {
                             ? "View Details"
                             : selectedCategory === "hockey"
                             ? "View Details"
+                            : selectedCategory === "volleyball"
+                            ? "View Details"
                             : "View Details"}
                         </Button>
                       </div>
@@ -621,6 +717,8 @@ const SportsLeagues = () => {
                             : selectedCategory === "baseball"
                             ? "mt-5"
                             : selectedCategory === "hockey"
+                            ? "mt-5"
+                            : selectedCategory === "volleyball"
                             ? "mt-5"
                             : ""
                         }  `}
@@ -638,6 +736,8 @@ const SportsLeagues = () => {
                               ? "./MLB.jpg"
                               : selectedCategory === "hockey"
                               ? "./NHL.jpg"
+                              : selectedCategory === "volleyball"
+                              ? "./volleyball-default.png"
                               : "./ODI.png"
                           }
                         />
@@ -714,6 +814,22 @@ const SportsLeagues = () => {
                               </>
                             )}
 
+                            {selectedCategory === "volleyball" && (
+                              <>
+                                <p
+                                  className={`text-sm mb-1 ${league.statusColor} font-medium`}
+                                >
+                                  {league.status}
+                                </p>
+                                {league.week && (
+                                  <p className="text-sm mb-1">
+                                    <span className="font-medium">Stage:</span>{" "}
+                                    {league.week}
+                                  </p>
+                                )}
+                              </>
+                            )}
+
                             <span className="text-sm dark:text-gray-400 mt-1">
                               {league.date
                                 ? new Date(league.date).toLocaleDateString()
@@ -742,6 +858,10 @@ const SportsLeagues = () => {
                                 ? league.matchEnded
                                   ? "Completed"
                                   : "Upcoming"
+                                : selectedCategory === "volleyball"
+                                ? league.matchEnded
+                                  ? "Completed"
+                                  : "Upcoming"
                                 : "Live Highlights"}
                             </span>
                             <span className="px-2 py-1 text-xs rounded-full bg-blue-500/20 dark:text-blue-300 whitespace-nowrap">
@@ -766,6 +886,8 @@ const SportsLeagues = () => {
                               : selectedCategory === "baseball"
                               ? "View Details"
                               : selectedCategory === "hockey"
+                              ? "View Details"
+                              : selectedCategory === "volleyball"
                               ? "View Details"
                               : "View Details"}
                           </Button>

@@ -422,7 +422,7 @@ const Top100Page = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               style={{ width: 300 }}
             />
-            <div className="dark:bg-[#513a7a]/10  bg-gray-200/10 backdrop-blur-sm rounded-lg border border-gray-400/10 dark:border-gray-800/10">
+            <div className="dark:bg-[#513a7a]/[var(--widget-opacity)]  bg-white/[var(--widget-opacity)] backdrop-blur-sm rounded-lg border border-gray-400/10 dark:border-gray-800/10">
               <div>
                 <button
                   className={`px-4 py-2 m-1 rounded dark:text-white  ${
@@ -573,7 +573,7 @@ const Top100Page = () => {
             style={{ width: 300 }}
           />
           <div style={{ textAlign: "center" }}>
-            <div className="dark:bg-[#513a7a]/10  bg-gray-200/10 backdrop-blur-sm rounded-lg border border-gray-400/10 dark:border-gray-800/10">
+            <div className="dark:bg-[#513a7a]/[var(--widget-opacity)]  bg-white/[var(--widget-opacity)] backdrop-blur-sm rounded-lg border border-gray-400/10 dark:border-gray-800/10">
               <button
                 className={`px-4 py-2 m-1 rounded  ${
                   category === "motorcycles"
