@@ -583,6 +583,7 @@ const Top100Page = () => {
                 onClick={() => setCategory("motorcycles")}
               >
                 Bikes
+                {/*  */}
               </button>
               <button
                 className={`px-4 py-2 m-1 rounded  ${
