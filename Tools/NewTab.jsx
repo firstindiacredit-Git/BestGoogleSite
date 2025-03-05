@@ -155,11 +155,6 @@ const calculatorTools = [
     icon: <FaCalculator className="text-indigo-500" />,
   },
   {
-    path: "/scientific",
-    name: "Scientific Calculator",
-    icon: <FaCalculator className="text-indigo-500" />,
-  },
-  {
     path: "/compareloan",
     name: "Compare Loan",
     icon: <FaCalculator className="text-indigo-500" />,

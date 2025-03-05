@@ -497,11 +497,11 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
                                 <div
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
-                                  className={`bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] mb-4 border-collapse ${
+                                  className={`bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] mb-4  ${
                                     localStorage.getItem("backgroundImage")
-                                      ? "shadow-sm dark:border-gray-700/[var(--widget-opacity)] border-gray-100/[var(--widget-opacity)]"
-                                      : "dark:border-gray-700 border-gray-100"
-                                  } border rounded-sm transition-transform duration-200 ${
+                                      ? "shadow-sm "
+                                      : ""
+                                  }  rounded-sm transition-transform duration-200 ${
                                     snapshot.isDragging
                                       ? "shadow-lg scale-[1.02] rotate-1"
                                       : ""

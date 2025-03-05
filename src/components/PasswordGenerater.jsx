@@ -448,7 +448,7 @@ const CredentialManager = () => {
                         handleInputOTPChange(e.target.value, index)
                       }
                       onKeyDown={(e) => handleKeyDown(e, index)}
-                      className="w-12 h-12 border border-gray-300 rounded-xs text-center text-lg dark:text-white dark:bg-[#513a7a]"
+                      className="w-12 h-12 border rounded-md border-gray-300 rounded-xs text-center text-lg dark:text-white dark:bg-[#513a7a]"
                       style={{
                         appearance: "none", // Removes the arrows
                         MozAppearance: "textfield", // Firefox-specific
@@ -459,13 +459,13 @@ const CredentialManager = () => {
                 </div>
                 <button
                   onClick={handleUnlock}
-                  className="bg-indigo-500 w-full hover:bg-indigo-600 transition-all text-white px-4 py-2 rounded-xs"
+                  className="rounded-md bg-indigo-500 w-full hover:bg-indigo-600 transition-all text-white px-4 py-2 rounded-xs"
                 >
                   Unlock
                 </button>
                 <div className="text-center flex justify-center gap-2 mt-3 -mb-3">
                   <button
-                    className="text-indigo-500 hover:text-indigo-700 text-xs transition duration-200"
+                    className="text-indigo-500 hover:text-indigo-600 text-xs transition duration-200"
                     onClick={() => navigate("/Profile")}
                   >
                     Forgot Pin?

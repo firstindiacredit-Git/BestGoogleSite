@@ -38,6 +38,7 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
   const location = useLocation();
   const MAX_PAGES = 3; // Maximum allowed pages for free users
   const [showAdminBanner, setShowAdminBanner] = useState(true);
+  const [showGoogleApps, setShowGoogleApps] = useState(false);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
@@ -516,6 +517,285 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
                 <FaSun className="w-5 h-5 text-white" />
               ) : (
                 <FaMoon className="w-5 h-5 " />
+              )}
+            </div>
+            <div className="relative">
+              <button
+                onClick={() => setShowGoogleApps(!showGoogleApps)}
+                className="flex items-center text-sm dark:hover:bg-gray-800/20 transition-all hover:bg-gray-200/80 p-2 cursor-pointer rounded-md"
+              >
+                <svg className="w-6 h-6 " viewBox="0 0 24 24">
+                  <path
+                    fill={isDarkMode ? "white" : "currentColor"}
+                    d="M6,8c1.1,0 2,-0.9 2,-2s-0.9,-2 -2,-2 -2,0.9 -2,2 0.9,2 2,2zM12,20c1.1,0 2,-0.9 2,-2s-0.9,-2 -2,-2 -2,0.9 -2,2 0.9,2 2,2zM6,20c1.1,0 2,-0.9 2,-2s-0.9,-2 -2,-2 -2,0.9 -2,2 0.9,2 2,2zM6,14c1.1,0 2,-0.9 2,-2s-0.9,-2 -2,-2 -2,0.9 -2,2 0.9,2 2,2zM12,14c1.1,0 2,-0.9 2,-2s-0.9,-2 -2,-2 -2,0.9 -2,2 0.9,2 2,2zM16,6c0,1.1 0.9,2 2,2s2,-0.9 2,-2 -0.9,-2 -2,-2 -2,0.9 -2,2zM12,8c1.1,0 2,-0.9 2,-2s-0.9,-2 -2,-2 -2,0.9 -2,2 0.9,2 2,2zM18,14c1.1,0 2,-0.9 2,-2s-0.9,-2 -2,-2 -2,0.9 -2,2 0.9,2 2,2zM18,20c1.1,0 2,-0.9 2,-2s-0.9,-2 -2,-2 -2,0.9 -2,2 0.9,2 2,2z"
+                  />
+                </svg>
+              </button>
+
+              {showGoogleApps && (
+                <div className=" absolute right-0 mt-2 w-80 bg-white dark:bg-[#28283A] rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-4  max-h-[400px] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-blue-500/50 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-blue-500">
+                  <div className="backdrop-blur-sm grid grid-cols-3 gap-4">
+                    <a
+                      href="https://accounts.google.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <img
+                        src={user.photoURL || "/default-avatar.png"}
+                        alt="Account"
+                        className="w-10 h-10 mb-2 rounded-full"
+                      />
+                      <span className="text-xs text-gray-700 dark:text-gray-300">
+                        Account
+                      </span>
+                    </a>
+                    <a
+                      href="https://maps.google.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <img
+                        src="/google-maps.png"
+                        alt="Maps"
+                        className="w-8 h-8 mb-2"
+                      />
+                      <span className="text-xs text-gray-700 dark:text-gray-300">
+                        Maps
+                      </span>
+                    </a>
+                    <a
+                      href="https://www.youtube.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <img
+                        src="/youtube.png"
+                        alt="YouTube"
+                        className="w-8 h-8 mb-2"
+                      />
+                      <span className="text-xs text-gray-700 dark:text-gray-300">
+                        YouTube
+                      </span>
+                    </a>
+                    <a
+                      href="https://play.google.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <img
+                        src="/google-play.png"
+                        alt="Play"
+                        className="w-8 h-8 mb-2"
+                      />
+                      <span className="text-xs text-gray-700 dark:text-gray-300">
+                        Play
+                      </span>
+                    </a>
+                    <a
+                      href="https://news.google.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <img
+                        src="/google-news.png"
+                        alt="News"
+                        className="w-8 h-8 mb-2"
+                      />
+                      <span className="text-xs text-gray-700 dark:text-gray-300">
+                        News
+                      </span>
+                    </a>
+                    <a
+                      href="https://mail.google.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <img
+                        src="/google-gmail.png"
+                        alt="Gmail"
+                        className="w-8 h-8 mb-2"
+                      />
+                      <span className="text-xs text-gray-700 dark:text-gray-300">
+                        Gmail
+                      </span>
+                    </a>
+                    <a
+                      href="https://meet.google.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <img
+                        src="/google-meet.png"
+                        alt="Meet"
+                        className="w-8 h-8 mb-2"
+                      />
+                      <span className="text-xs text-gray-700 dark:text-gray-300">
+                        Meet
+                      </span>
+                    </a>
+
+                    <a
+                      href="https://docs.google.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <img
+                        src="/google-docs.png"
+                        alt="Docs"
+                        className="w-8 h-8 mb-2"
+                      />
+                      <span className="text-xs text-gray-700 dark:text-gray-300">
+                        Docs
+                      </span>
+                    </a>
+                    <a
+                      href="https://sheets.google.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <img
+                        src="/google-sheets.png"
+                        alt="Sheets"
+                        className="w-8 h-8 mb-2"
+                      />
+                      <span className="text-xs text-gray-700 dark:text-gray-300">
+                        Sheets
+                      </span>
+                    </a>
+
+                    <a
+                      href="https://keep.google.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <img
+                        src="/google-keeps.png"
+                        alt="Keep"
+                        className="w-8 h-8 mb-2"
+                      />
+                      <span className="text-xs text-gray-700 dark:text-gray-300">
+                        Keep
+                      </span>
+                    </a>
+
+                    <a
+                      href="https://earth.google.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <img
+                        src="/google-earth.png"
+                        alt="Earth"
+                        className="w-8 h-8 mb-2"
+                      />
+                      <span className="text-xs text-gray-700 dark:text-gray-300">
+                        Earth
+                      </span>
+                    </a>
+
+                    <a
+                      href="https://ads.google.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <img
+                        src="/google-ads.png"
+                        alt="Ads"
+                        className="w-8 h-8 mb-2"
+                      />
+                      <span className="text-xs text-gray-700 dark:text-gray-300">
+                        Ads
+                      </span>
+                    </a>
+                    <a
+                      href="https://chrome.google.com/webstore"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <img
+                        src="/google-chrome-webstore.png"
+                        alt="Chrome Web Store"
+                        className="w-8 h-8 mb-2"
+                      />
+                      <span className="text-xs text-gray-700 dark:text-gray-300">
+                        Extensions
+                      </span>
+                    </a>
+                    <a
+                      href="https://drive.google.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <img
+                        src="/google-drive.png"
+                        alt="Drive"
+                        className="w-8 h-8 mb-2"
+                      />
+                      <span className="text-xs text-gray-700 dark:text-gray-300">
+                        Drive
+                      </span>
+                    </a>
+                    <a
+                      href="https://calendar.google.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <img
+                        src="/google-calendar.png"
+                        alt="Calendar"
+                        className="w-8 h-8 mb-2"
+                      />
+                      <span className="text-xs text-gray-700 dark:text-gray-300">
+                        Calendar
+                      </span>
+                    </a>
+                    <a
+                      href="https://translate.google.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <img
+                        src="/google-translate.png"
+                        alt="Translate"
+                        className="w-8 h-8 mb-2"
+                      />
+                      <span className="text-xs text-gray-700 dark:text-gray-300">
+                        Translate
+                      </span>
+                    </a>
+                    <a
+                      href="https://photos.google.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <img
+                        src="/google-photos.png"
+                        alt="Photos"
+                        className="w-8 h-8 mb-2"
+                      />
+                      <span className="text-xs text-gray-700 dark:text-gray-300">
+                        Photos
+                      </span>
+                    </a>
+                  </div>
+                </div>
               )}
             </div>
             {user ? (
