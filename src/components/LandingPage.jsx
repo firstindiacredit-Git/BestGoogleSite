@@ -39,73 +39,7 @@ const BrowserPreview = () => {
   );
 };
 
-const CustomCursor = () => {
-  const cursorRef = useRef(null);
-  const [isPointer, setIsPointer] = useState(false);
-
-  useEffect(() => {
-    const cursor = cursorRef.current;
-
-    const moveCursor = (e) => {
-      const { clientX, clientY } = e;
-      const mouseX = clientX;
-      const mouseY = clientY;
-
-      cursor.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0)`;
-    };
-
-    const checkHover = () => {
-      const hoveredElements = document.querySelectorAll(
-        'a, button, [role="button"]'
-      );
-
-      hoveredElements.forEach((element) => {
-        element.addEventListener("mouseenter", () => setIsPointer(true));
-        element.addEventListener("mouseleave", () => setIsPointer(false));
-      });
-    };
-
-    document.addEventListener("mousemove", moveCursor);
-    checkHover();
-
-    return () => {
-      document.removeEventListener("mousemove", moveCursor);
-    };
-  }, []);
-
-  return (
-    <div ref={cursorRef} className="fixed pointer-events-none z-[9999]">
-      {isPointer ? (
-        <img
-          src="/pointinghand.svg"
-          height={60}
-          width={60}
-          alt="pointing hand"
-          className="-translate-x-[14px] -translate-y-[14px]"
-        />
-      ) : (
-        <img
-          src="/notallowed.svg"
-          height={60}
-          width={60}
-          alt="cursor"
-          className="-translate-x-[10px] -translate-y-[10px]"
-        />
-      )}
-    </div>
-  );
-};
-[];
 // Add these styles to hide the default cursor
-const globalStyles = `
-  * {
-    cursor: none !important;
-  }
-  
-  html:active * {
-    cursor: none !important;
-  }
-`;
 
 const LandingPage = () => {
   const features = [
@@ -232,20 +166,8 @@ const LandingPage = () => {
     );
   };
 
-  useEffect(() => {
-    const styleSheet = document.createElement("style");
-    styleSheet.innerText = globalStyles;
-    document.head.appendChild(styleSheet);
-
-    return () => {
-      document.head.removeChild(styleSheet);
-    };
-  }, []);
-
   return (
     <div className="relative min-h-screen overflow-hidden">
-      <CustomCursor />
-
       {/* Background gradient with blur */}
       <div className="fixed inset-0 x bg-blue-50/50 backdrop-blur-3xl -z-10" />
 

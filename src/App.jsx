@@ -179,47 +179,6 @@ const menuItems = [
 
 // Add these background collections at the top of the file
 const backgroundCollections = {
-  gradients: [
-    {
-      id: "g1",
-      value: "linear-gradient(to right, #4facfe 0%, #00f2fe 100%)",
-      name: "Blue Ocean",
-    },
-    {
-      id: "g2",
-      value: "linear-gradient(to right, #43e97b 0%, #38f9d7 100%)",
-      name: "Green Beach",
-    },
-    {
-      id: "g3",
-      value: "linear-gradient(to right, #fa709a 0%, #fee140 100%)",
-      name: "Sunset Vibes",
-    },
-    {
-      id: "g4",
-      value: "linear-gradient(45deg, #85FFBD 0%, #FFFB7D 100%)",
-      name: "Fresh Lime",
-    },
-    {
-      id: "g5",
-      value: "linear-gradient(to right, #8f41e9, #578aef)",
-      name: "Purple Haze",
-    },
-  ],
-  solidColors: [
-    { id: "s1", value: "#1a1a2e", name: "Deep Dark" },
-    { id: "s2", value: "#513a7a", name: "Royal Purple" },
-    { id: "s3", value: "#2d3436", name: "Charcoal" },
-    { id: "s4", value: "#2c3e50", name: "Midnight Blue" },
-    { id: "s5", value: "#2f3640", name: "Dark Grey" },
-  ],
-  glassEffects: [
-    { id: "gl1", value: "rgba(255, 255, 255, 0.1)", name: "Light Glass" },
-    { id: "gl2", value: "rgba(81, 58, 122, 0.2)", name: "Purple Glass" },
-    { id: "gl3", value: "rgba(0, 0, 0, 0.15)", name: "Dark Glass" },
-    { id: "gl4", value: "rgba(72, 126, 176, 0.2)", name: "Blue Glass" },
-    { id: "gl5", value: "rgba(46, 204, 113, 0.2)", name: "Green Glass" },
-  ],
   images: {
     nature: [
       {
@@ -522,24 +481,7 @@ const ContextMenuWrapper = ({ children }) => {
             >
               Image Gallery
             </Button>
-            <Button
-              type={activeSection === "gradients" ? "primary" : "default"}
-              onClick={() => setActiveSection("gradients")}
-            >
-              Gradients
-            </Button>
-            <Button
-              type={activeSection === "solid" ? "primary" : "default"}
-              onClick={() => setActiveSection("solid")}
-            >
-              Solid Colors
-            </Button>
-            <Button
-              type={activeSection === "glass" ? "primary" : "default"}
-              onClick={() => setActiveSection("glass")}
-            >
-              Glass Effects
-            </Button>
+
             <Button
               type={activeSection === "custom" ? "primary" : "default"}
               onClick={() => setActiveSection("custom")}
