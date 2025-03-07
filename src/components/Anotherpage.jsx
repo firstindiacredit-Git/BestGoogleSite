@@ -457,7 +457,7 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
         <div className={`flex flex-col items-center w-full rounded-xl`}>
           <div className="p-4">
             {loading ? (
-              <div className="w-[90vw] mx-auto" style={{ padding: "24px" }}>
+              <div className="w-[80vw] mx-auto" style={{ padding: "24px" }}>
                 <SkeletonLoader count={4} />
               </div>
             ) : (
@@ -465,10 +465,9 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
                 <div
                   style={{
                     display: "grid",
-                    maxWidth: "90vw",
+                    maxWidth: "85vw",
                     gridTemplateColumns: `repeat(${columns}, 1fr)`,
-                    gap: "16px",
-                    justifyContent: columns === 4 ? "center" : "start",
+                    justifyContent: "center",
                   }}
                 >
                   {distributeItems().map((columnItems, columnIndex) => (
@@ -481,7 +480,7 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
                         <div
                           {...provided.droppableProps}
                           ref={provided.innerRef}
-                          className={`p-4 rounded-lg min-h-[200px] transition-all duration-300 ${
+                          className={`px-1 rounded-lg min-h-[200px] transition-all duration-300 ${
                             snapshot.isDraggingOver
                               ? "bg-blue-50/50 dark:bg-blue-900/20 border-2 border-dashed border-blue-300 dark:border-blue-600"
                               : "bg-transparent border-2 border-dashed border-transparent"

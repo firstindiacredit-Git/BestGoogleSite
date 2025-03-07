@@ -2162,7 +2162,6 @@ function PopularBookmarks() {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleChange = (e) => {
       setIsDarkMode(e.matches);
-      localStorage.setItem("darkMode", JSON.stringify(e.matches));
     };
 
     mediaQuery.addEventListener("change", handleChange);

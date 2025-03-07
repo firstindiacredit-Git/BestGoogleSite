@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import { ThemeContext } from "../context/ThemeContext";
 
 const BookmarksPage = () => {
   const [selectedCategory, setSelectedCategory] = useState("social");
+  const { isDarkMode } = useContext(ThemeContext);
 
   const bookmarksData = [
     {
@@ -59,7 +61,7 @@ const BookmarksPage = () => {
   );
 
   return (
-    <div className="container bg-transparent mx-auto p-4 border mt-5 rounded-sm">
+    <div className="container bg-transparent mx-auto p-4 border dark:border-gray-700 mt-5 rounded-sm">
       {/* Category Tabs */}
       <div className="flex justify-center space-x-4 mb-6">
         {categories.map((category) => (
@@ -69,7 +71,7 @@ const BookmarksPage = () => {
             className={`px-2 py-1 rounded-xs font-semibold transition duration-200 ${
               selectedCategory === category
                 ? "bg-indigo-600 text-white"
-                : "bg-gray-200 text-gray-700 hover:bg-indigo-500 hover:text-white"
+                : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-indigo-500 hover:text-white"
             }`}
           >
             {category.charAt(0).toUpperCase() + category.slice(1)}
@@ -82,7 +84,7 @@ const BookmarksPage = () => {
         {filteredBookmarks.map((bookmark) => (
           <div
             key={bookmark.id}
-            className="bg-white rounded-sm shadow-lg overflow-hidden hover:shadow-xl transition duration-300"
+            className="bg-white dark:bg-gray-800 rounded-sm shadow-lg overflow-hidden hover:shadow-xl transition duration-300"
           >
             <div className="p-3 flex flex-col items-center">
               <a href={bookmark.url} className="text-center">
@@ -91,7 +93,7 @@ const BookmarksPage = () => {
                   alt={bookmark.name}
                   className="w-8 h-8 justify-center m-auto rounded-full mb-2"
                 />
-                <h3 className="text-sm font-semibold text-gray-800 -mb-2">
+                <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 -mb-2">
                   {bookmark.name}
                 </h3>
               </a>

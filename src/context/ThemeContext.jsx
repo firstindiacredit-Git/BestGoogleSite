@@ -1,4 +1,11 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+} from "react";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "../firebase";
 
@@ -7,7 +14,6 @@ const ThemeContext = createContext();
 export const ThemeProvider = ({ children }) => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const savedTheme = localStorage.getItem("theme");
-    // awd
     return savedTheme === "dark";
   });
 
@@ -45,6 +51,9 @@ export const ThemeProvider = ({ children }) => {
       localStorage.setItem("theme", "light");
     }
 
+    // Force widget updates
+    window.dispatchEvent(new Event("themeChanged"));
+
     const user = auth.currentUser;
     if (user) {
       const userDocRef = doc(db, "users", user.uid);
@@ -54,14 +63,20 @@ export const ThemeProvider = ({ children }) => {
     }
   }, [isDarkMode]);
 
-  const toggleTheme = () => {
+  const toggleTheme = useCallback(() => {
     setIsDarkMode((prev) => !prev);
-  };
+  }, []);
+
+  const value = useMemo(
+    () => ({
+      isDarkMode,
+      toggleTheme,
+    }),
+    [isDarkMode, toggleTheme]
+  );
 
   return (
-    <ThemeContext.Provider value={{ isDarkMode, toggleTheme }}>
-      {children}
-    </ThemeContext.Provider>
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
   );
 };
 

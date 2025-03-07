@@ -143,7 +143,14 @@ const SearchPage = ({ isToolPage = false }) => {
     setSliderWidgetTransparency(widgetTransparent);
     tempTransparencyRef.current = transparency;
     tempWidgetTransparencyRef.current = widgetTransparent;
+    // Reset text color based on theme
+    handleResetTextColor();
   }, [transparency, widgetTransparent]);
+
+  const handleResetTextColor = useCallback(() => {
+    const newValue = isDarkMode ? 100 : 0; // 100 for white in dark mode, 0 for black in light mode
+    handleTextColorChange(newValue);
+  }, [isDarkMode, handleTextColorChange]);
 
   // Initialize CSS variables on mount with current values
   useEffect(() => {
@@ -187,11 +194,6 @@ const SearchPage = ({ isToolPage = false }) => {
       document.body.removeChild(script);
     };
   }, [navigate]);
-
-  const handleResetTextColor = () => {
-    const newValue = isDarkMode ? 0 : 100; // 100 for white in dark mode, 0 for black in light mode
-    handleTextColorChange(newValue);
-  };
 
   // Function to convert slider value to actual color
   const getTextColor = (value) => {
@@ -353,7 +355,7 @@ const SearchPage = ({ isToolPage = false }) => {
                     e.stopPropagation();
                     handleResetTextColor();
                   }}
-                  className="px-2 py-1 text-xs bg-gray-200 hover:bg-gray-300  rounded transition-colors duration-200"
+                  className="px-2 py-1 text-xs bg-gray-200 hover:bg-gray-300 rounded transition-colors duration-200"
                 >
                   Reset
                 </button>
@@ -510,7 +512,7 @@ const SearchPage = ({ isToolPage = false }) => {
                 <Shortcut />
                 <div>
                   <div className="flex justify-center max-w-[90vw] mb-3 w-full mx-auto">
-                    <div className="flex space-x-1 p-1 justify-between bg-gray-200/10 backdrop-blur-lg border border-gray-400/10 dark:border-gray-800/20 dark:bg-[#513a7a]/10 rounded-lg w-full">
+                    <div className="flex space-x-1 p-1 justify-between bg-gray-200/10 backdrop-blur-lg  dark:bg-[#513a7a]/10 rounded-lg w-full">
                       <button
                         className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
                           activeComponent === "Anotherpage"
