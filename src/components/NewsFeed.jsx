@@ -30,7 +30,7 @@ const FeaturedNewsItem = memo(({ news }) => (
           </div>
         )}
         <div className="flex-1">
-          <h3 className="text-base font-medium text-indigo-600 dark:text-blue-400 mb-2 line-clamp-2">
+          <h3 className="text-base  text-indigo-600 dark:text-blue-400 mb-2 line-clamp-2">
             {news.title}
           </h3>
           <p className="text-sm text-gray-600 dark:text-gray-300 mb-2 line-clamp-2">
@@ -50,7 +50,7 @@ const NewsListItem = memo(({ news }) => (
     rel="noopener noreferrer"
     className="block py-2 border-b dark:border-gray-700 last:border-b-0  dark:hover:bg-gray-800/50/[var(--widget-opacity)] transition-colors"
   >
-    <h3 className="text-sm font-medium text-indigo-600 dark:text-blue-400 hover:text-indigo-700 dark:hover:text-blue-500 line-clamp-2">
+    <h3 className="text-sm  text-indigo-600 dark:text-blue-400  dark:hover:text-blue-500 line-clamp-2">
       {news.title}
     </h3>
   </a>
@@ -143,8 +143,6 @@ const NewsFeed = () => {
       style={{ opacity: widgetTransparency }}
       className="min-[21vw] backdrop-blur-sm rounded-b-sm overflow-hidden"
     >
-      
-
       {!collapsed && mainNews && (
         <div>
           <FeaturedNewsItem news={mainNews} />

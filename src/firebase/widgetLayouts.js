@@ -1,6 +1,15 @@
 import { db } from "../firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 
+// Add debounce utility at the top of the file
+const debounce = (func, wait) => {
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+};
+
 // Default widget configurations for different pages
 export const defaultWidgets = {
   home: [
@@ -140,32 +149,34 @@ export const getPageLayout = async (userId, pageName) => {
   }
 };
 
-// Update layout for a specific page
-export const updatePageLayout = async (userId, pageName, layout) => {
-  try {
-    const userLayoutRef = doc(db, "users", userId, "layouts", "widgets");
-    const layoutDoc = await getDoc(userLayoutRef);
+// Add debounced version of updatePageLayout
+export const debouncedUpdatePageLayout = debounce(
+  async (userId, pageName, layout) => {
+    try {
+      const userLayoutRef = doc(db, "users", userId, "layouts", "widgets");
+      const layoutDoc = await getDoc(userLayoutRef);
 
-    let currentData = {};
-    if (layoutDoc.exists()) {
-      currentData = layoutDoc.data();
+      let currentData = {};
+      if (layoutDoc.exists()) {
+        currentData = layoutDoc.data();
+      }
+
+      await setDoc(userLayoutRef, {
+        ...currentData,
+        [pageName]: {
+          widgets: layout.widgets,
+          columns: layout.columns,
+        },
+      });
+
+      return true;
+    } catch (error) {
+      console.error("Error updating page layout:", error);
+      return false;
     }
-
-    // Save both widgets and columns
-    await setDoc(userLayoutRef, {
-      ...currentData,
-      [pageName]: {
-        widgets: layout.widgets,
-        columns: layout.columns,
-      },
-    });
-
-    return true;
-  } catch (error) {
-    console.error("Error updating page layout:", error);
-    return false;
-  }
-};
+  },
+  4000
+); // 1 second debounce delay
 
 // Remove widget from a page
 export const removeWidgetFromPage = async (userId, pageName, widgetId) => {

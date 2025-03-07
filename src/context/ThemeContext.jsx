@@ -17,6 +17,9 @@ export const ThemeProvider = ({ children }) => {
     return savedTheme === "dark";
   });
 
+  // Force update function
+  const [, forceUpdate] = useState();
+
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
@@ -53,6 +56,8 @@ export const ThemeProvider = ({ children }) => {
 
     // Force widget updates
     window.dispatchEvent(new Event("themeChanged"));
+    // Force a re-render of all components using the theme
+    forceUpdate({});
 
     const user = auth.currentUser;
     if (user) {
@@ -86,4 +91,15 @@ export const useTheme = () => {
     throw new Error("useTheme must be used within a ThemeProvider");
   }
   return context;
+};
+
+// Add a hook to subscribe to theme changes
+export const useThemeUpdate = (callback) => {
+  useEffect(() => {
+    const handleThemeChange = () => {
+      if (callback) callback();
+    };
+    window.addEventListener("themeChanged", handleThemeChange);
+    return () => window.removeEventListener("themeChanged", handleThemeChange);
+  }, [callback]);
 };

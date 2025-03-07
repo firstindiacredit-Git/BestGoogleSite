@@ -19,7 +19,7 @@ import NotePage from "./NotePage.jsx";
 import "./Anotherpage.css";
 import {
   getPageLayout,
-  updatePageLayout,
+  debouncedUpdatePageLayout,
   getAvailableWidgets,
   resetPageLayout,
   defaultWidgets,
@@ -161,7 +161,7 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
     setAvailableWidgets(getAvailableWidgets(sortedItems));
   }, [sortedItems]);
 
-  // Modify onDragEnd to handle both Firebase and localStorage
+  // Modify onDragEnd to use debounced update
   const onDragEnd = async (result) => {
     const { source, destination } = result;
     if (!destination) return;
@@ -216,24 +216,22 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
         globalPosition: idx,
       }));
 
-      // Update local state
+      // Update local state immediately
       setItems(updatedItems);
 
       if (user) {
-        // Update Firebase if user is logged in
-        await updatePageLayout(user.uid, pageId, {
+        // Use debounced update for Firebase
+        debouncedUpdatePageLayout(user.uid, pageId, {
           widgets: updatedItems,
           columns: columns,
         });
       } else {
-        // Update localStorage if user is not logged in
+        // Update localStorage immediately since it's not expensive
         saveToLocalStorage({
           widgets: updatedItems,
           columns: columns,
         });
       }
-
-      message.success("Layout updated successfully");
     } catch (error) {
       console.error("Error updating layout:", error);
       message.error("Failed to update layout");
@@ -339,22 +337,24 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
     setSortedItems(redistributedItems);
   };
 
-  // Modify handleApplySorting to handle both Firebase and localStorage
+  // Modify handleApplySorting to use debounced update
   const handleApplySorting = async () => {
     setIsApplying(true);
     await new Promise((resolve) => setTimeout(resolve, 800));
 
-    // Update both local state and storage
+    // Update local state immediately
     setItems(sortedItems);
     setColumns(previewColumns);
 
     try {
       if (user) {
-        await updatePageLayout(user.uid, pageId, {
+        // Use debounced update for Firebase
+        debouncedUpdatePageLayout(user.uid, pageId, {
           widgets: sortedItems,
           columns: previewColumns,
         });
       } else {
+        // Update localStorage immediately
         saveToLocalStorage({
           widgets: sortedItems,
           columns: previewColumns,
