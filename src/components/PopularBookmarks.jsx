@@ -45,6 +45,11 @@ import {
 import debounce from "lodash/debounce";
 import SkeletonLoader from "./SkeletonLoader";
 import { ThemeContext } from "../App";
+import {
+  debouncedUpdateBookmarkPositions,
+  debouncedUpdateCategoryPositions,
+  debouncedUpdateColumnLayout,
+} from "../firebase/widgetLayoutBookmarks";
 
 function PopularBookmarks() {
   const [categories, setCategories] = useState([]);
@@ -644,73 +649,116 @@ function PopularBookmarks() {
 
   // Update the onDragEnd function
   const onDragEnd = async (result) => {
+    if (!result.destination) return;
+
     const { source, destination } = result;
-    if (!destination || !user) return;
+    const sourceCategory = categories.find(
+      (cat) => cat.id === source.droppableId
+    );
+    const destCategory = categories.find(
+      (cat) => cat.id === destination.droppableId
+    );
 
-    const sourceColId = source.droppableId;
-    const destColId = destination.droppableId;
-    const newColumns = { ...categoryColumns };
-
-    // Remove from source column
-    const [movedCategoryId] = newColumns[sourceColId].splice(source.index, 1);
-
-    // Add to destination column
-    newColumns[destColId].splice(destination.index, 0, movedCategoryId);
-
-    // Update state
-    setCategoryColumns(newColumns);
+    if (!sourceCategory || !destCategory) return;
 
     try {
-      const batch = writeBatch(db);
-      const updates = {};
+      // Get source and destination bookmarks with current positions
+      const sourceBookmarks = links
+        .filter((link) => link.categoryId === source.droppableId)
+        .sort((a, b) => (a.position || 0) - (b.position || 0));
 
-      // Update positions for all categories in affected columns
-      Object.entries(newColumns).forEach(([columnId, categoryIds]) => {
-        categoryIds.forEach((categoryId, index) => {
-          const category = categories.find((c) => c.id === categoryId);
-          if (category) {
-            const columnIndex = parseInt(columnId.replace("column", ""));
-            updates[categoryId] = {
-              columnIndex,
-              order: index,
-              lastUpdated: new Date().toISOString(),
-            };
+      const destBookmarks =
+        source.droppableId === destination.droppableId
+          ? sourceBookmarks
+          : links
+              .filter((link) => link.categoryId === destination.droppableId)
+              .sort((a, b) => (a.position || 0) - (b.position || 0));
 
-            if (!category.isAdminCategory) {
-              const categoryRef = doc(
+      // Get the dragged bookmark
+      const [draggedBookmark] = sourceBookmarks.splice(source.index, 1);
+      if (!draggedBookmark) return;
+
+      // Update positions for source bookmarks
+      sourceBookmarks.forEach((bookmark, idx) => {
+        bookmark.position = idx;
+      });
+
+      // Insert bookmark at destination and update positions
+      draggedBookmark.categoryId = destination.droppableId;
+      draggedBookmark.position = destination.index;
+      destBookmarks.splice(destination.index, 0, draggedBookmark);
+
+      // Update positions for destination bookmarks
+      destBookmarks.forEach((bookmark, idx) => {
+        bookmark.position = idx;
+      });
+
+      // Create updated links array
+      const updatedLinks = links.map((link) => {
+        if (link.categoryId === source.droppableId) {
+          const updatedBookmark = sourceBookmarks.find((b) => b.id === link.id);
+          return updatedBookmark || link;
+        }
+        if (link.categoryId === destination.droppableId) {
+          const updatedBookmark = destBookmarks.find((b) => b.id === link.id);
+          return updatedBookmark || link;
+        }
+        return link;
+      });
+
+      // Update local state immediately
+      setLinks(updatedLinks);
+
+      if (user) {
+        // Prepare bookmark updates for Firebase
+        const sourceUpdates = sourceBookmarks.map((bookmark) => ({
+          id: bookmark.id,
+          position: bookmark.position,
+          categoryId: source.droppableId,
+          isAdminBookmark: bookmark.isAdminBookmark,
+        }));
+
+        const destUpdates = destBookmarks.map((bookmark) => ({
+          id: bookmark.id,
+          position: bookmark.position,
+          categoryId: destination.droppableId,
+          isAdminBookmark: bookmark.isAdminBookmark,
+        }));
+
+        // Use debounced updates for Firebase
+        debouncedUpdateBookmarkPositions(
+          user.uid,
+          source.droppableId,
+          sourceUpdates
+        );
+
+        if (source.droppableId !== destination.droppableId) {
+          debouncedUpdateBookmarkPositions(
+            user.uid,
+            destination.droppableId,
+            destUpdates
+          );
+        }
+
+        // Update the individual bookmark document if it's a user bookmark
+        if (!draggedBookmark.isAdminBookmark) {
+          const bookmarkRef = doc(
                 db,
                 "users",
                 user.uid,
-                "UserCategory",
-                categoryId
-              );
-              batch.update(categoryRef, {
-                columnIndex,
-                order: index,
+            "CatBookmarks",
+            draggedBookmark.id
+          );
+          await updateDoc(bookmarkRef, {
+            categoryId: destination.droppableId,
+            position: destination.index,
+            updatedAt: new Date().toISOString(),
               });
             }
           }
-        });
-      });
-
-      // Save all positions in user document
-      const userDocRef = doc(db, "users", user.uid);
-      batch.update(userDocRef, {
-        categoryPositions: {
-          columns: newColumns,
-          columnCount,
-          positions: updates,
-          lastUpdated: new Date().toISOString(),
-        },
-      });
-
-      await batch.commit();
-      message.success("Category position updated");
     } catch (error) {
-      console.error("Error updating category positions:", error);
-      message.error("Failed to update category position");
-      // Revert local state on error
-      setCategoryColumns(categoryColumns);
+      console.error("Error updating bookmark positions:", error);
+      message.error("Failed to update bookmark positions");
     }
   };
 
@@ -1053,37 +1101,46 @@ function PopularBookmarks() {
     if (!result.destination) return;
 
     const { source, destination } = result;
+    const column = parseInt(result.source.droppableId);
+    const newColumn = parseInt(result.destination.droppableId);
 
     try {
-      const items = Array.from(editModeBookmarks);
-      const [reorderedItem] = items.splice(source.index, 1);
-      items.splice(destination.index, 0, reorderedItem);
+      const updatedCategories = Array.from(categories);
+      const [removed] = updatedCategories.splice(source.index, 1);
+      updatedCategories.splice(destination.index, 0, removed);
 
-      // Update local state first for immediate feedback
-      const updatedItems = items.map((item, index) => ({
-        ...item,
-        order: index,
-      }));
+      // Update local state immediately
+      setCategories(updatedCategories);
 
-      setEditModeBookmarks(updatedItems);
-      setHasUnsavedChanges(true);
+      // If column changed, update column layout
+      if (column !== newColumn) {
+        const updatedColumnLayout = { ...categoryColumns };
+        // Remove from old column
+        updatedColumnLayout[column] = updatedColumnLayout[column].filter(
+          (id) => id !== removed.id
+        );
+        // Add to new column
+        if (!updatedColumnLayout[newColumn]) {
+          updatedColumnLayout[newColumn] = [];
+        }
+        updatedColumnLayout[newColumn].splice(destination.index, 0, removed.id);
 
-      // Update Firestore in the background
+        // Update local state immediately
+        setCategoryColumns(updatedColumnLayout);
+
+        // Use debounced updates for Firebase
+        if (user) {
+          debouncedUpdateColumnLayout(user.uid, updatedColumnLayout);
+        }
+      }
+
+      // Use debounced update for category positions
       if (user) {
-        const batch = writeBatch(db);
-
-        updatedItems.forEach((item, index) => {
-          if (item.isAdminBookmark) {
-            const bookmarkRef = doc(db, "bookmarks", item.id);
-            batch.update(bookmarkRef, { order: index });
-          }
-        });
-
-        await batch.commit();
+        debouncedUpdateCategoryPositions(user.uid, updatedCategories);
       }
     } catch (error) {
-      console.error("Error handling drag end:", error);
-      message.error("Failed to update bookmark order");
+      console.error("Error updating category positions:", error);
+      message.error("Failed to update category positions");
     }
   };
 
@@ -2306,128 +2363,15 @@ function PopularBookmarks() {
   // Function to handle saving changes to bookmarks
   const handleSaveChanges = async () => {
     try {
-      // Validate bookmark changes
-      if (editModeBookmarks.length === 0) {
-        message.warning("No bookmarks to save", 2);
-        return;
+      if (user) {
+        debouncedUpdateCategoryPositions(user.uid, categories);
+        debouncedUpdateColumnLayout(user.uid, categoryColumns);
       }
-
-      // Check for unsaved changes
-      if (!hasUnsavedChanges) {
-        message.info("No changes to save", 2);
-        return;
-      }
-
-      // Start loading state
-      setIsApplyingChanges(true);
-
-      // Create a batch write for efficient updates
-      const batch = writeBatch(db);
-      const userDocRef = doc(db, "users", user.uid);
-
-      // Get current positions from Firestore
-      const userDoc = await getDoc(userDocRef);
-      const existingPositions = userDoc.exists()
-        ? userDoc.data().bookmarkPositions || {}
-        : {};
-
-      // Track save progress
-      const totalBookmarks = editModeBookmarks.length;
-      let savedCount = 0;
-
-      // Prepare batch updates
-      const savePromises = editModeBookmarks.map(async (bookmark, index) => {
-        if (bookmark.isAdminBookmark) {
-          // Update admin bookmark positions
-          const bookmarkRef = doc(db, "bookmarks", bookmark.id);
-          batch.update(bookmarkRef, {
-            order: index,
-            updatedAt: new Date().toISOString(),
-          });
-        } else {
-          // Update user's personal bookmarks
-          const bookmarkRef = doc(
-            db,
-            "users",
-            user.uid,
-            "CatBookmarks",
-            bookmark.id
-          );
-          batch.update(bookmarkRef, {
-            order: index,
-            title: bookmark.title,
-            url: bookmark.url,
-            updatedAt: new Date().toISOString(),
-          });
-        }
-
-        savedCount++;
-
-        // Progress notification
-        if (savedCount % 5 === 0 || savedCount === totalBookmarks) {
-          message.info(`Saving bookmarks: ${savedCount}/${totalBookmarks}`);
-        }
-      });
-
-      // Wait for all save operations to be prepared
-      await Promise.all(savePromises);
-
-      // Commit batch updates
-      await batch.commit();
-
-      // Update local state
-      setLinks((prevLinks) => {
-        const updatedLinks = [...prevLinks];
-        editModeBookmarks.forEach((editedBookmark, index) => {
-          const linkIndex = updatedLinks.findIndex(
-            (link) => link.id === editedBookmark.id
-          );
-          if (linkIndex !== -1) {
-            updatedLinks[linkIndex] = {
-              ...updatedLinks[linkIndex],
-              order: index,
-              title: editedBookmark.title,
-              url: editedBookmark.url,
-            };
-          }
-        });
-        return updatedLinks;
-      });
-
-      // Haptic and audio feedback
-      try {
-        if ("vibrate" in navigator) {
-          navigator.vibrate([50, 100, 50]);
-        }
-
-        const saveAudio = new Audio("path/to/save-success.mp3");
-        saveAudio.volume = 0.4;
-        saveAudio.play().catch(() => {});
-      } catch (error) {
-        console.warn("Save feedback failed", error);
-      }
-
-      // Reset state
-      setHasUnsavedChanges(false);
-      message.success(`${totalBookmarks} bookmark(s) saved successfully`, 3);
-      setIsEditModePanelVisible(false);
+      message.success("Changes saved successfully");
+      setIsSorterOpen(false);
     } catch (error) {
       console.error("Error saving changes:", error);
-
-      // Detailed error handling
-      if (error.code === "permission-denied") {
-        message.error("You don't have permission to save these bookmarks", 4);
-      } else if (error.code === "unavailable") {
-        message.error(
-          "Network is unavailable. Please check your connection.",
-          4
-        );
-      } else {
-        message.error("Failed to save bookmark changes. Please try again.", 4);
-      }
-    } finally {
-      // Ensure loading state is reset
-      setIsApplyingChanges(false);
+      message.error("Failed to save changes");
     }
   };
 

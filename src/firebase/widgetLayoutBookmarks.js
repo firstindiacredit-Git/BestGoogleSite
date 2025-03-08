@@ -1,5 +1,5 @@
 import { db } from "../firebase";
-import { doc, getDoc, setDoc, collection } from "firebase/firestore";
+import { doc, getDoc, setDoc, collection, updateDoc } from "firebase/firestore";
 
 // Default widget configurations for different pages
 const defaultWidgets = {
@@ -231,3 +231,117 @@ export const removeWidgetFromPage = async (userId, pageName, widgetId) => {
     return false;
   }
 };
+
+// Debounce utility
+const debounce = (func, wait) => {
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+};
+
+// Update bookmark positions with debouncing
+export const debouncedUpdateBookmarkPositions = debounce(
+  async (userId, categoryId, bookmarks) => {
+    try {
+      const userDocRef = doc(db, "users", userId);
+      await updateDoc(userDocRef, {
+        [`bookmarkLayouts.${categoryId}`]: {
+          bookmarks,
+          lastUpdated: new Date().toISOString(),
+        },
+      });
+      return true;
+    } catch (error) {
+      console.error("Error updating bookmark positions:", error);
+      return false;
+    }
+  },
+  4000
+); // 4 second debounce delay
+
+// Get bookmark layout for a category
+export const getBookmarkLayout = async (userId, categoryId) => {
+  try {
+    const userDocRef = doc(db, "users", userId);
+    const docSnap = await getDoc(userDocRef);
+
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      return data.bookmarkLayouts?.[categoryId] || { bookmarks: [] };
+    }
+    return { bookmarks: [] };
+  } catch (error) {
+    console.error("Error getting bookmark layout:", error);
+    return { bookmarks: [] };
+  }
+};
+
+// Initialize bookmark layouts for a new user
+export const initializeBookmarkLayouts = async (userId) => {
+  try {
+    const userDocRef = doc(db, "users", userId);
+    await setDoc(
+      userDocRef,
+      {
+        bookmarkLayouts: {},
+      },
+      { merge: true }
+    );
+  } catch (error) {
+    console.error("Error initializing bookmark layouts:", error);
+  }
+};
+
+// Update a single bookmark's position
+export const updateSingleBookmark = async (
+  userId,
+  categoryId,
+  bookmarkId,
+  updates
+) => {
+  try {
+    const userDocRef = doc(db, "users", userId);
+    await updateDoc(userDocRef, {
+      [`bookmarkLayouts.${categoryId}.bookmarks.${bookmarkId}`]: {
+        ...updates,
+        updatedAt: new Date().toISOString(),
+      },
+    });
+    return true;
+  } catch (error) {
+    console.error("Error updating single bookmark:", error);
+    return false;
+  }
+};
+
+// Debounced function to update category positions
+export const debouncedUpdateCategoryPositions = debounce(
+  async (userId, categories) => {
+    try {
+      const userDocRef = doc(db, "users", userId);
+      await setDoc(userDocRef, { categories }, { merge: true });
+      return true;
+    } catch (error) {
+      console.error("Error updating category positions:", error);
+      return false;
+    }
+  },
+  2000
+); // 2 second debounce
+
+// Debounced function to update column layout
+export const debouncedUpdateColumnLayout = debounce(
+  async (userId, categoryColumns) => {
+    try {
+      const userDocRef = doc(db, "users", userId);
+      await setDoc(userDocRef, { categoryColumns }, { merge: true });
+      return true;
+    } catch (error) {
+      console.error("Error updating column layout:", error);
+      return false;
+    }
+  },
+  2000
+); // 2 second debounce
