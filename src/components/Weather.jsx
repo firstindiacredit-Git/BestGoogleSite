@@ -1,241 +1,92 @@
 import React, { useState, useEffect, useRef } from "react";
-import styled, { keyframes } from "styled-components";
 import axios from "axios";
 import { useTheme } from "../context/ThemeContext";
 
-const API_KEY = "78a1522c5ec67352674263eaaa54bffa";
+const API_KEY =
+  import.meta.env.VITE_OPENWEATHER_API_KEY ||
+  "78a1522c5ec67352674263eaaa54bffa";
 
-// Predefined neon colors
-// const neonPresets = [
-//   {
-//     label: "Neon Blue",
-//     colors: {
-//       background: "#0c1445",
-//       accent: "#00fff2",
-//       bottomBg: "#1a237e",
-//       buttonBg: "#283593",
-//     },
-//   },
-//   {
-//     label: "Neon Pink",
-//     colors: {
-//       background: "#2d0a31",
-//       accent: "#ff00ff",
-//       bottomBg: "#4a1850",
-//       buttonBg: "#6a1b9a",
-//     },
-//   },
-//   {
-//     label: "Neon Green",
-//     colors: {
-//       background: "#0a2d0a",
-//       accent: "#39ff14",
-//       bottomBg: "#1b5e20",
-//       buttonBg: "#2e7d32",
-//     },
-//   },
-//   {
-//     label: "Cyberpunk",
-//     colors: {
-//       background: "#2b213a",
-//       accent: "#f0fb3d",
-//       bottomBg: "#453750",
-//       buttonBg: "#5c4069",
-//     },
-//   },
-// ];
+// Define weather cards with monochromatic color schemes
+const WEATHER_CARDS = {
+  // Sunny (yellow)
+  SUNNY: {
+    background: "#FFD36E",
+    darkShade: "#2D2A1F", // Dark yellow-brown
+    darkerShade: "#1A1914", // Darker yellow-brown
+    color: "#FFFFFF",
+    icon: "☀️",
+  },
+  // Cloudy (light blue)
+  CLOUDY: {
+    background: "#92B4D2",
+    darkShade: "#1F2A3D", // Dark blue-gray
+    darkerShade: "#131B27", // Darker blue-gray
+    color: "#FFFFFF",
+    icon: "☁️",
+  },
+  // Rainy (darker blue)
+  RAINY: {
+    background: "#7F95D1",
+    darkShade: "#1C2542", // Dark navy blue
+    darkerShade: "#11192C", // Darker navy blue
+    color: "#FFFFFF",
+    icon: "🌧️",
+  },
+  // Snowy (light purple)
+  SNOWY: {
+    background: "#C0B3E2",
+    darkShade: "#2A2437", // Dark purple
+    darkerShade: "#1A1621", // Darker purple
+    color: "#FFFFFF",
+    icon: "❄️",
+  },
+  // Thunderstorm (dark purple)
+  THUNDER: {
+    background: "#8776B4",
+    darkShade: "#1E1A2B", // Dark deep purple
+    darkerShade: "#12101A", // Darker deep purple
+    color: "#FFFFFF",
+    icon: "⚡",
+  },
+  // Foggy/Misty (gray-blue)
+  FOGGY: {
+    background: "#B8C6DB",
+    darkShade: "#232A33", // Dark gray-blue
+    darkerShade: "#161A20", // Darker gray-blue
+    color: "#FFFFFF",
+    icon: "🌫️",
+  },
+};
 
-// Animation keyframes
-const float = keyframes`
-  0% { transform: translateY(0px) translateX(0px); }
-  50% { transform: translateY(-20px) translateX(10px); }
-  100% { transform: translateY(0px) translateX(0px); }
-`;
-
-const rain = keyframes`
-  0% { transform: translateY(-10px); opacity: 0; }
-  70% { opacity: 0.7; }
-  100% { transform: translateY(30px); opacity: 0; }
-`;
-
-const snow = keyframes`
-  0% { transform: translateY(-10px) rotate(0deg); opacity: 0; }
-  50% { opacity: 0.7; }
-  100% { transform: translateY(30px) rotate(360deg); opacity: 0; }
-`;
-
-const thunder = keyframes`
-  0% { opacity: 0; }
-  10% { opacity: 1; }
-  20% { opacity: 0; }
-  30% { opacity: 1; }
-  40% { opacity: 0; }
-  100% { opacity: 0; }
-`;
-
-const getWeatherBackground = (weatherType) => {
-  switch (weatherType) {
+const getWeatherCardStyle = (weatherType) => {
+  switch (weatherType.toLowerCase()) {
     case "clear":
-      return "https://i.imgur.com/8Kw4krW.gif"; // Sunny clear sky
-    case "cloudy":
-      return "https://i.imgur.com/Iwnj05d.gif"; // Cloudy sky
-    case "rainy":
-      return "https://i.imgur.com/g4risdG.gif"; // Rain
-    case "snowy":
-      return "https://i.imgur.com/EwQgpZY.gif"; // Snow
-    case "thunder":
-      return "https://i.imgur.com/WzI0mE7.gif"; // Thunder
+      return WEATHER_CARDS.SUNNY;
+    case "clouds":
+      return WEATHER_CARDS.CLOUDY;
+    case "rain":
+      return WEATHER_CARDS.RAINY;
+    case "snow":
+      return WEATHER_CARDS.SNOWY;
+    case "thunderstorm":
+      return WEATHER_CARDS.THUNDER;
     case "mist":
-      return "https://i.imgur.com/vH9YqyE.gif"; // Misty
+    case "fog":
+      return WEATHER_CARDS.FOGGY;
     default:
-      return "https://i.imgur.com/8Kw4krW.gif"; // Default clear sky
+      return WEATHER_CARDS.SUNNY;
   }
 };
-const getWeatherIcon = (weatherType) => {
-  const type = weatherType?.toLowerCase() || "";
-  if (type.includes("clear")) {
-    return (
-      <svg
-        viewBox="0 0 64 64"
-        xmlns="http://www.w3.org/2000/svg"
-        className="w-20 scale-[110%]"
-      >
-        <defs>
-          <linearGradient id="sun" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#fbbf24" />
-            <stop offset="100%" stopColor="#f59e0b" />
-          </linearGradient>
-        </defs>
-        <circle cx="32" cy="32" r="16" fill="url(#sun)" />
-        <g
-          fill="none"
-          stroke="#fbbf24"
-          strokeLinecap="round"
-          strokeMiterlimit="10"
-          strokeWidth="2"
-        >
-          <path d="M32 5v7M32 52v7M59 32h-7M12 32H5M51.5 12.5l-5 5M17.5 46.5l-5 5M51.5 51.5l-5-5M17.5 17.5l-5-5">
-            <animateTransform
-              attributeName="transform"
-              dur="45s"
-              repeatCount="indefinite"
-              type="rotate"
-              values="0 32 32; 360 32 32"
-            />
-          </path>
-        </g>
-      </svg>
-    );
-  }
-  if (type.includes("cloud")) {
-    return (
-      <svg
-        viewBox="0 0 64 64"
-        xmlns="http://www.w3.org/2000/svg"
-        className="w-20 scale-[110%]"
-      >
-        <defs>
-          <linearGradient id="cloud" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#f3f7fe" />
-            <stop offset="100%" stopColor="#deeafb" />
-          </linearGradient>
-        </defs>
-        <path
-          d="M46.5 31.5h-.32a10.49 10.49 0 00-19.11-8 7 7 0 00-10.57 6 7.21 7.21 0 00.1 1.14A7.5 7.5 0 0018 45.5a4.19 4.19 0 00.5 0v0h28a7 7 0 000-14z"
-          fill="url(#cloud)"
-          stroke="#e6effc"
-          strokeMiterlimit="10"
-          strokeWidth=".5"
-        />
-      </svg>
-    );
-  }
-  if (type.includes("rain")) {
-    return (
-      <svg
-        viewBox="0 0 64 64"
-        xmlns="http://www.w3.org/2000/svg"
-        className="w-20 scale-[110%]"
-      >
-        <defs>
-          <linearGradient id="rain-cloud" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#f3f7fe" />
-            <stop offset="100%" stopColor="#deeafb" />
-          </linearGradient>
-          <linearGradient id="rain-drop" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#4286ee" />
-            <stop offset="100%" stopColor="#0950bc" />
-          </linearGradient>
-        </defs>
-        <path
-          d="M46.5 31.5h-.32a10.49 10.49 0 00-19.11-8 7 7 0 00-10.57 6 7.21 7.21 0 00.1 1.14A7.5 7.5 0 0018 45.5a4.19 4.19 0 00.5 0v0h28a7 7 0 000-14z"
-          fill="url(#rain-cloud)"
-          stroke="#e6effc"
-          strokeMiterlimit="10"
-          strokeWidth=".5"
-        />
-        <g
-          fill="none"
-          stroke="url(#rain-drop)"
-          strokeLinecap="round"
-          strokeMiterlimit="10"
-          strokeWidth="2"
-        >
-          <path d="M24.39 43.03l-.78 4.94">
-            <animateTransform
-              attributeName="transform"
-              dur="0.7s"
-              repeatCount="indefinite"
-              type="translate"
-              values="1 -5; -2 10"
-            />
-          </path>
-          <path d="M31.39 43.03l-.78 4.94">
-            <animateTransform
-              attributeName="transform"
-              begin="-0.4s"
-              dur="0.7s"
-              repeatCount="indefinite"
-              type="translate"
-              values="1 -5; -2 10"
-            />
-          </path>
-          <path d="M38.39 43.03l-.78 4.94">
-            <animateTransform
-              attributeName="transform"
-              begin="-0.2s"
-              dur="0.7s"
-              repeatCount="indefinite"
-              type="translate"
-              values="1 -5; -2 10"
-            />
-          </path>
-        </g>
-      </svg>
-    );
-  }
-  // Default icon (can add more weather conditions)
-  return (
-    <svg
-      viewBox="0 0 64 64"
-      xmlns="http://www.w3.org/2000/svg"
-      className="w-20 scale-[110%]"
-    >
-      <defs>
-        <linearGradient id="default-cloud" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#f3f7fe" />
-          <stop offset="100%" stopColor="#deeafb" />
-        </linearGradient>
-      </defs>
-      <path
-        d="M46.5 31.5h-.32a10.49 10.49 0 00-19.11-8 7 7 0 00-10.57 6 7.21 7.21 0 00.1 1.14A7.5 7.5 0 0018 45.5a4.19 4.19 0 00.5 0v0h28a7 7 0 000-14z"
-        fill="url(#default-cloud)"
-        stroke="#e6effc"
-        strokeMiterlimit="10"
-        strokeWidth=".5"
-      />
-    </svg>
-  );
+
+const getWeatherAnimation = (weatherCode) => {
+  const code = weatherCode?.toLowerCase() || "";
+  if (code.includes("clear")) return "clear";
+  if (code.includes("cloud") || code.includes("haze") || code.includes("mist"))
+    return "cloudy";
+  if (code.includes("rain")) return "rainy";
+  if (code.includes("snow")) return "snowy";
+  if (code.includes("thunder")) return "thunder";
+  return "default";
 };
 
 const Weather = ({ collapsed }) => {
@@ -403,200 +254,145 @@ const Weather = ({ collapsed }) => {
 
     return browserData;
   };
-  const getWeatherAnimation = (weatherCode) => {
-    const code = weatherCode?.toLowerCase() || "";
-    if (code.includes("clear")) return "clear";
-    if (
-      code.includes("cloud") ||
-      code.includes("haze") ||
-      code.includes("mist")
-    )
-      return "cloudy";
-    if (code.includes("rain")) return "rainy";
-    if (code.includes("snow")) return "snowy";
-    if (code.includes("thunder")) return "thunder";
-    return "default";
+
+  // Current Weather Card Component
+  const CurrentWeatherCard = ({
+    temperature,
+    condition,
+    description,
+    location,
+    humidity,
+    time,
+    date,
+  }) => {
+    const cardStyle = getWeatherCardStyle(condition);
+
+    return (
+      <div className="current-weather-card overflow-hidden rounded-lg shadow-md">
+        {/* Card Header - Color Block with Temperature and Icon */}
+        <div
+          className="p-5 flex justify-between items-start"
+          style={{ background: cardStyle.background, color: cardStyle.color }}
+        >
+          <div>
+            <div className="text-6xl font-bold">{temperature}°</div>
+            <div className="text-xl mt-2 opacity-90">{condition}</div>
+          </div>
+          <div className="text-5xl">{cardStyle.icon}</div>
+        </div>
+
+        {/* Card Body - Location and Details */}
+        <div
+          style={{ background: cardStyle.darkShade, color: "#FFFFFF" }}
+          className="p-4"
+        >
+          <div className="text-lg font-medium">{location}</div>
+          <div className="text-sm opacity-80 mt-1">{description}</div>
+          <div className="text-sm opacity-70 mt-1">Humidity: {humidity}%</div>
+        </div>
+
+        {/* Card Footer - Time & Date */}
+        <div
+          style={{ background: cardStyle.darkerShade, color: "#FFFFFF" }}
+          className="p-3 flex justify-between items-center"
+        >
+          <span className="text-sm font-medium">{time}</span>
+          <span className="text-sm">{date}</span>
+        </div>
+      </div>
+    );
+  };
+
+  // Forecast Weather Card Component
+  const WeatherCard = ({ temperature, condition, location, time, date }) => {
+    const cardStyle = getWeatherCardStyle(condition);
+
+    return (
+      <div className="weather-card overflow-hidden rounded-lg shadow-md">
+        {/* Card Header - Color Block with Temperature and Icon */}
+        <div
+          className="p-4 flex justify-between items-start"
+          style={{ background: cardStyle.background, color: cardStyle.color }}
+        >
+          <div className="text-4xl font-bold">{temperature}°</div>
+          <div className="text-3xl">{cardStyle.icon}</div>
+        </div>
+
+        {/* Card Body - Location */}
+        <div
+          style={{ background: cardStyle.darkShade, color: "#FFFFFF" }}
+          className="p-3"
+        >
+          <div className="text-sm opacity-90">{location}</div>
+          <div className="text-xs opacity-70 mt-1">{condition}</div>
+        </div>
+
+        {/* Card Footer - Time & Date */}
+        <div
+          style={{ background: cardStyle.darkerShade, color: "#FFFFFF" }}
+          className="p-2 flex justify-between items-center text-xs"
+        >
+          <span>{time}</span>
+          <span>{date}</span>
+        </div>
+      </div>
+    );
   };
 
   return (
     <div className="p-2 backdrop-blur-sm">
       {isVisible && (
-        <StyledWrapper
-          isDarkMode={isDarkMode}
-          weatherType={
-            currentWeather
-              ? getWeatherAnimation(currentWeather.weather[0].main)
-              : "default"
-          }
-          weatherBackground={
-            currentWeather
-              ? getWeatherBackground(
-                  getWeatherAnimation(currentWeather.weather[0].main)
-                )
-              : getWeatherBackground("default")
-          }
-        >
-          <div className="weather-container h-[19rem]">
-            <div className="content-wrapper flex-col">
-              {/* Main Weather Card */}
-              <div className="duration-300 font-mono dark:text-white text-gray-700 group cursor-default relative overflow-hidden w-full h-[48.5%]  rounded-sm p-6 ">
-                <div className="flex justify-between -mt-4 items-center">
-                  <div className="flex-1">
-                    <h3 className="text-2xl font-bold">Today</h3>
-                    {currentWeather && (
-                      <div className="flex items-center gap-6">
-                        <h4 className="font-sans ml-2 text-6xl">
-                          {Math.round(currentWeather.main.temp)}°
-                        </h4>
-                        <div className="text-lg">
-                          <p>{currentWeather.weather[0].description}</p>
-                          <p>{currentWeather.main.humidity}% humidity</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 flex justify-center items-center">
-                    {currentWeather && (
-                      <div className="w-30 h-30">
-                        <img
-                          src={`https://openweathermap.org/img/wn/${currentWeather.weather[0].icon}@4x.png`}
-                          alt={currentWeather.weather[0].description}
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 flex justify-end items-start">
-                    <div className="text-lg text-right">
-                      <p className="text-2xl">
-                        {new Date().toLocaleTimeString("en-US", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          hour12: false,
-                        })}
-                      </p>
-                      <p>
-                        {new Date().toLocaleDateString("en-US", {
-                          weekday: "long",
-                          month: "short",
-                          day: "numeric",
-                        })}
-                      </p>
-                    </div>
-                  </div>
+        <div className="weather-container h-[19rem]">
+          <div className="content-wrapper flex-col">
+            {currentWeather && (
+              <>
+                {/* Main Weather Card */}
+                <CurrentWeatherCard
+                  temperature={Math.round(currentWeather.main.temp)}
+                  condition={currentWeather.weather[0].main}
+                  description={currentWeather.weather[0].description}
+                  location={currentWeather.name}
+                  humidity={currentWeather.main.humidity}
+                  time={new Date().toLocaleTimeString("en-US", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false,
+                  })}
+                  date={new Date().toLocaleDateString("en-US", {
+                    weekday: "long",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                />
+
+                {/* Forecast Section */}
+                <div className="forecast-container h-[48.5%] w-full flex justify-between">
+                  {forecast.map((day, index) => (
+                    <WeatherCard
+                      key={index}
+                      temperature={Math.round(day.main.temp)}
+                      condition={day.weather[0].main}
+                      location={currentWeather.name}
+                      time={new Date(day.dt_txt).toLocaleTimeString("en-US", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: false,
+                      })}
+                      date={new Date(day.dt_txt).toLocaleDateString("en-US", {
+                        weekday: "long",
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    />
+                  ))}
                 </div>
-              </div>
-              <div className="forecast-container   h-[48.5%] w-full flex justify-between">
-                {forecast.map((day, index) => (
-                  <div
-                    key={index}
-                    className=" font-mono group cursor-default dark:text-white relative overflow-hidden text-black bg-white/[(var(--widget-opacity))] h-full w-[48.5%] dark:bg-[#8163D3]/[(var(--widget-opacity))] rounded-sm  p-2  hover:bg-indigo-100/[var(--widget-opacity)] hover:dark:bg-[#0C66E4]/[(var(--widget-opacity))]"
-                  >
-                    <h3 className="text-sm text-center">
-                      {getDayName(day.dt_txt)}
-                    </h3>
-                    <div className="gap-4 relative">
-                      <img
-                        src={`https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png`}
-                        alt={day.weather[0].description}
-                        className="w-16 h-16 mx-auto"
-                      />
-                      <h4 className="font-sans duration-300 absolute left-1/2 -translate-x-1/2 text-3xl text-center group-hover:translate-x-9 group-hover:-translate-y-12 group-hover:scale-125">
-                        {Math.round(day.main.temp)}°
-                      </h4>
-                    </div>
-                    <div className="absolute duration-300 -left-32 mt-1 group-hover:left-8">
-                      <p className="text-xs">{day.weather[0].description}</p>
-                      <p className="text-xs">{day.main.humidity}% humidity</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+              </>
+            )}
           </div>
-        </StyledWrapper>
+        </div>
       )}
     </div>
   );
 };
-
-const StyledWrapper = styled.div`
-  .weather-container {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    padding: 0 2px;
-  }
-
-  .content-wrapper {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    height: 100%;
-  }
-
-  .forecast-container {
-    display: flex;
-    flex-wrap: wrap;
-  }
-
-  .mode-toggle {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
-
-    button {
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      padding: 8px;
-      border-radius: 30%;
-      font-size: 20px;
-      transition: transform 0.3s ease;
-      backdrop-filter: blur(8px);
-      background: rgba(255, 255, 255, 0.1);
-
-      &:hover {
-        transform: scale(1.1) rotate(360deg);
-      }
-    }
-  }
-
-  /* Weather Icons */
-  .weather-icon {
-    width: 50px;
-    height: 50px;
-    margin: 0 auto;
-    display: block;
-  }
-
-  /* Animations */
-  @keyframes float {
-    0%,
-    100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(-5px);
-    }
-  }
-
-  .animate-float {
-    animation: float 3s ease-in-out infinite;
-  }
-
-  /* Responsive Design */
-  @media (max-width: 768px) {
-    .content-wrapper {
-      justify-content: center;
-    }
-
-    .forecast-container {
-      justify-content: center;
-    }
-  }
-`;
 
 export default Weather;

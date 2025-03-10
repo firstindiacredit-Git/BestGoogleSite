@@ -155,7 +155,6 @@ const getTimeDifference = (baseTimeZone, targetTimeZone) => {
 const isDaytime = (time, timeZone) => {
   const date = new Date(time.toLocaleString("en-US", { timeZone }));
   const hours = date.getHours();
-  console.log(`Time in ${timeZone}: ${hours}:00`);
   return hours >= 6 && hours < 18; // Consider 6 AM to 6 PM as daytime
 };
 

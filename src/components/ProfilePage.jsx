@@ -14,14 +14,12 @@ import {
   FaShieldAlt,
   FaCrown,
   FaArrowLeft,
-  FaPalette,
 } from "react-icons/fa";
 import imageCompression from "browser-image-compression";
 import { useSubscription } from "../hooks/useSubscription";
 import { Modal, message, Tabs } from "antd";
 import Header from "./Header";
 import { useTheme } from "../context/ThemeContext";
-import ThemeColorSettings from "./ThemeColorSettings";
 // https://cdn.dribbble.com/userupload/14883451/file/original-761915986636e2ae85fee541c6b9c051.jpg?resize=1200x900&vertical=center
 
 const ProfilePage = () => {
@@ -653,41 +651,6 @@ const ProfilePage = () => {
                   </div>
                 </div>
               )}
-            </div>
-
-            {/* Theme Customization Section */}
-            <div className="bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] backdrop-blur-md rounded-lg shadow-lg overflow-hidden">
-              <button
-                onClick={() => toggleSection("theme")}
-                className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-black/5"
-              >
-                <div className="flex items-center gap-3">
-                  <FaPalette className="text-gray-400" />
-                  <span className="font-semibold dark:text-white">
-                    Theme Customization
-                  </span>
-                </div>
-                <div
-                  className={`transform transition-transform ${
-                    activeSection === "theme" ? "rotate-180" : ""
-                  }`}
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </div>
-              </button>
-              {activeSection === "theme" && <ThemeColorSettings />}
             </div>
           </div>
 

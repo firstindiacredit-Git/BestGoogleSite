@@ -12,25 +12,10 @@ import { auth, db } from "../firebase";
 
 const ThemeContext = createContext();
 
-// Default color values
-const DEFAULT_PRIMARY_COLOR = "#28283a";
-const DEFAULT_SECONDARY_COLOR = "#513a7a";
-
 export const ThemeProvider = ({ children }) => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const savedTheme = localStorage.getItem("theme");
     return savedTheme === "dark";
-  });
-
-  // Add state for primary and secondary colors
-  const [primaryColor, setPrimaryColor] = useState(() => {
-    const savedPrimaryColor = localStorage.getItem("primaryColor");
-    return savedPrimaryColor || DEFAULT_PRIMARY_COLOR;
-  });
-
-  const [secondaryColor, setSecondaryColor] = useState(() => {
-    const savedSecondaryColor = localStorage.getItem("secondaryColor");
-    return savedSecondaryColor || DEFAULT_SECONDARY_COLOR;
   });
 
   // Force update function with a more reliable approach
@@ -42,44 +27,6 @@ export const ThemeProvider = ({ children }) => {
   // Keep track of theme change timestamp for components to check
   const themeChangeTimestamp = useRef(Date.now());
 
-  // Apply colors to CSS variables
-  useEffect(() => {
-    document.documentElement.style.setProperty("--primary-color", primaryColor);
-    document.documentElement.style.setProperty(
-      "--secondary-color",
-      secondaryColor
-    );
-
-    // Save to localStorage
-    localStorage.setItem("primaryColor", primaryColor);
-    localStorage.setItem("secondaryColor", secondaryColor);
-
-    // Save to Firestore if user is logged in
-    const user = auth.currentUser;
-    if (user) {
-      const userDocRef = doc(db, "users", user.uid);
-      updateDoc(userDocRef, {
-        primaryColor,
-        secondaryColor,
-      }).catch((error) => console.error("Error updating colors:", error));
-    }
-
-    // Trigger a theme changed event
-    themeChangeTimestamp.current = Date.now();
-    const themeEvent = new CustomEvent("themeChanged", {
-      detail: {
-        isDarkMode,
-        primaryColor,
-        secondaryColor,
-        timestamp: themeChangeTimestamp.current,
-      },
-    });
-    window.dispatchEvent(themeEvent);
-
-    // Force update
-    forceUpdate();
-  }, [primaryColor, secondaryColor, forceUpdate]);
-
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
@@ -88,28 +35,13 @@ export const ThemeProvider = ({ children }) => {
 
         if (userDoc.exists()) {
           const userData = userDoc.data();
-
-          // Handle theme mode
           if (userData.theme) {
             setIsDarkMode(userData.theme === "dark");
             localStorage.setItem("theme", userData.theme);
           }
-
-          // Handle custom colors
-          if (userData.primaryColor) {
-            setPrimaryColor(userData.primaryColor);
-            localStorage.setItem("primaryColor", userData.primaryColor);
-          }
-
-          if (userData.secondaryColor) {
-            setSecondaryColor(userData.secondaryColor);
-            localStorage.setItem("secondaryColor", userData.secondaryColor);
-          }
         } else {
           await setDoc(userDocRef, {
             theme: isDarkMode ? "dark" : "light",
-            primaryColor,
-            secondaryColor,
             email: user.email,
             displayName: user.displayName,
           });
@@ -134,12 +66,7 @@ export const ThemeProvider = ({ children }) => {
 
     // Force widget updates with a more specific event
     const themeEvent = new CustomEvent("themeChanged", {
-      detail: {
-        isDarkMode,
-        primaryColor,
-        secondaryColor,
-        timestamp: themeChangeTimestamp.current,
-      },
+      detail: { isDarkMode, timestamp: themeChangeTimestamp.current },
     });
     window.dispatchEvent(themeEvent);
 
@@ -154,25 +81,10 @@ export const ThemeProvider = ({ children }) => {
         theme: isDarkMode ? "dark" : "light",
       }).catch((error) => console.error("Error updating theme:", error));
     }
-  }, [isDarkMode, forceUpdate, primaryColor, secondaryColor]);
+  }, [isDarkMode, forceUpdate]);
 
   const toggleTheme = useCallback(() => {
     setIsDarkMode((prev) => !prev);
-  }, []);
-
-  // Add color update functions
-  const updatePrimaryColor = useCallback((color) => {
-    setPrimaryColor(color);
-  }, []);
-
-  const updateSecondaryColor = useCallback((color) => {
-    setSecondaryColor(color);
-  }, []);
-
-  // Reset colors to defaults
-  const resetColors = useCallback(() => {
-    setPrimaryColor(DEFAULT_PRIMARY_COLOR);
-    setSecondaryColor(DEFAULT_SECONDARY_COLOR);
   }, []);
 
   // Include updateKey in the context value to force re-renders
@@ -180,24 +92,10 @@ export const ThemeProvider = ({ children }) => {
     () => ({
       isDarkMode,
       toggleTheme,
-      primaryColor,
-      secondaryColor,
-      updatePrimaryColor,
-      updateSecondaryColor,
-      resetColors,
       themeChangeTimestamp: themeChangeTimestamp.current,
       updateKey,
     }),
-    [
-      isDarkMode,
-      toggleTheme,
-      primaryColor,
-      secondaryColor,
-      updatePrimaryColor,
-      updateSecondaryColor,
-      resetColors,
-      updateKey,
-    ]
+    [isDarkMode, toggleTheme, updateKey]
   );
 
   return (
@@ -234,13 +132,8 @@ export const useThemeUpdate = (callback) => {
 
     // Immediately call the callback once to ensure initial state is correct
     if (callbackRef.current) {
-      const { isDarkMode, primaryColor, secondaryColor } = useTheme();
-      callbackRef.current({
-        isDarkMode,
-        primaryColor,
-        secondaryColor,
-        timestamp: Date.now(),
-      });
+      const { isDarkMode } = useTheme();
+      callbackRef.current({ isDarkMode, timestamp: Date.now() });
     }
 
     return () => window.removeEventListener("themeChanged", handleThemeChange);
@@ -249,7 +142,7 @@ export const useThemeUpdate = (callback) => {
 
 // New hook for components that need to force re-render on theme change
 export const useThemeAware = () => {
-  const { isDarkMode, updateKey, primaryColor, secondaryColor } = useTheme();
+  const { isDarkMode, updateKey } = useTheme();
   const [, forceRender] = useState(0);
 
   useEffect(() => {
@@ -261,5 +154,5 @@ export const useThemeAware = () => {
     return () => window.removeEventListener("themeChanged", handleThemeChange);
   }, []);
 
-  return { isDarkMode, updateKey, primaryColor, secondaryColor };
+  return { isDarkMode, updateKey };
 };
