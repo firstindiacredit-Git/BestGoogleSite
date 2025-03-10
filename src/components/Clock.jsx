@@ -152,76 +152,6 @@ const getTimeDifference = (baseTimeZone, targetTimeZone) => {
   return `Today: (${signToday}${diffHoursToday}h)`;
 };
 
-const CLOCK_THEMES = {
-  classic: {
-    name: "Classic",
-    analog: {
-      border: "border-gray-200 dark:border-gray-700",
-      background: "bg-white dark:bg-gray-950",
-      hourHand: "bg-indigo-500",
-      minuteHand: "bg-gray-900 dark:bg-white",
-      secondHand: "bg-gray-200 dark:bg-gray-200",
-      numbers: "text-gray-900 dark:text-white",
-    },
-    digital: {
-      container: "dark:bg-gray-950 bg-gray-100",
-      time: "dark:bg-black bg-white border-gray-800 dark:border-white",
-      text: "text-gray-800 dark:text-white",
-    },
-  },
-  neon: {
-    name: "Neon",
-    analog: {
-      border: "border-purple-500 dark:border-purple-400",
-      background: "bg-black",
-      hourHand: "bg-pink-500",
-      minuteHand: "bg-purple-500",
-      secondHand: "bg-gray-200 dark:bg-gray-200",
-
-      numbers: "text-purple-400",
-    },
-    digital: {
-      container: "bg-black",
-      time: "bg-black border-purple-500",
-      text: "text-purple-400",
-    },
-  },
-  minimal: {
-    name: "Minimal",
-    analog: {
-      border: "border-gray-300 dark:border-gray-600",
-      background: "bg-gray-50 dark:bg-[#28283A]",
-      hourHand: "bg-gray-600 dark:bg-gray-400",
-      minuteHand: "bg-gray-800 dark:bg-gray-200",
-      secondHand: "bg-gray-200 dark:bg-gray-200",
-
-      numbers: "text-gray-600 dark:text-gray-400",
-    },
-    digital: {
-      container: "bg-gray-50 dark:bg-[#28283A]",
-      time: "bg-transparent border-gray-300 dark:border-gray-600",
-      text: "text-gray-800 dark:text-gray-200",
-    },
-  },
-  ocean: {
-    name: "Ocean",
-    analog: {
-      border: "border-blue-400 dark:border-blue-500",
-      background: "bg-blue-50 dark:bg-blue-900",
-      hourHand: "bg-indigo-600",
-      minuteHand: "bg-teal-500",
-      secondHand: "bg-gray-200 dark:bg-gray-200",
-
-      numbers: "text-indigo-800 dark:text-blue-200",
-    },
-    digital: {
-      container: "bg-blue-50 dark:bg-blue-900",
-      time: "bg-white/80 dark:bg-[#513a7a] border-blue-400 dark:border-blue-300",
-      text: "text-blue-900 dark:text-blue-100",
-    },
-  },
-};
-
 const isDaytime = (time, timeZone) => {
   const date = new Date(time.toLocaleString("en-US", { timeZone }));
   const hours = date.getHours();
@@ -229,17 +159,11 @@ const isDaytime = (time, timeZone) => {
   return hours >= 6 && hours < 18; // Consider 6 AM to 6 PM as daytime
 };
 
-const TimeZoneClock = ({
-  timeZone,
-  isAnalog,
-  onRemove,
-  baseTimeZone,
-  theme = CLOCK_THEMES.classic,
-}) => {
+const TimeZoneClock = ({ timeZone, isAnalog, onRemove, baseTimeZone }) => {
   const [time, setTime] = useState(new Date());
   const isDayTimeNow = isDaytime(time, timeZone);
 
-  // Dynamically determine theme based on time of day
+  // Single theme system based on day/night
   const effectiveTheme = isDayTimeNow
     ? {
         analog: {
@@ -395,7 +319,6 @@ const preventScroll = (prevent) => {
 
 const ResponsiveWorldClock = () => {
   const [isAnalog, setIsAnalog] = useState(true);
-  const [currentTheme, setCurrentTheme] = useState(CLOCK_THEMES.classic);
   const [selectedTimezones, setSelectedTimezones] = useState(["Asia/Kolkata"]);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
@@ -409,16 +332,16 @@ const ResponsiveWorldClock = () => {
     top: null,
     right: null,
   });
+  const [searchQuery, setSearchQuery] = useState("");
   const settingsRef = useRef(null);
   const addButtonRef = useRef(null);
   const settingsMenuRef = useRef(null);
-  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     if (showSettings && settingsRef.current) {
       const rect = settingsRef.current.getBoundingClientRect();
       setDropdownPosition({
-        top: rect.bottom + 10,
+        top: rect.bottom - 120,
         right: window.innerWidth - rect.right,
       });
     }
@@ -428,7 +351,7 @@ const ResponsiveWorldClock = () => {
     if (isDropdownOpen && addButtonRef.current) {
       const rect = addButtonRef.current.getBoundingClientRect();
       setAddDropdownPosition({
-        top: rect.bottom - 280,
+        top: rect.bottom - 380,
         right: window.innerWidth - rect.right,
       });
     }
@@ -522,15 +445,15 @@ const ResponsiveWorldClock = () => {
     const settingsContent = showSettings && (
       <div
         ref={settingsMenuRef}
-        className="fixed w-48 bg-white dark:bg-[#28283A] rounded-sm shadow-lg border border-gray-200 dark:border-gray-700 z-[9998] overflow-hidden"
+        className="fixed w-48 bg-white dark:bg-[#28283A] rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-[9998] overflow-hidden"
         style={{
           top: `${dropdownPosition.top}px`,
           right: `${dropdownPosition.right}px`,
         }}
       >
-        <div className="p-2">
-          <div className="mb-4">
-            <div className="text-sm font-medium text-gray-500 dark:text-gray-400 p-2">
+        <div className="p-3">
+          <div className="mb-2">
+            <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
               Display
             </div>
             <div className="flex gap-1">
@@ -539,7 +462,7 @@ const ResponsiveWorldClock = () => {
                   setIsAnalog(false);
                   setShowSettings(false);
                 }}
-                className={`p-1 rounded flex-1 ${
+                className={`p-2 rounded flex-1 ${
                   !isAnalog
                     ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
                     : "hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
@@ -552,7 +475,7 @@ const ResponsiveWorldClock = () => {
                   setIsAnalog(true);
                   setShowSettings(false);
                 }}
-                className={`p-1 rounded flex-1 ${
+                className={`p-2 rounded flex-1 ${
                   isAnalog
                     ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
                     : "hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -560,30 +483,6 @@ const ResponsiveWorldClock = () => {
               >
                 Analog
               </button>
-            </div>
-          </div>
-
-          <div className="mb-4 border-t dark:border-gray-700">
-            <div className="text-sm font-medium text-gray-500 dark:text-gray-400 p-2">
-              Theme
-            </div>
-            <div className="grid grid-cols-2 gap-1">
-              {Object.entries(CLOCK_THEMES).map(([key, theme]) => (
-                <button
-                  key={key}
-                  onClick={() => {
-                    setCurrentTheme(theme);
-                    setShowSettings(false);
-                  }}
-                  className={`p-1 rounded text-sm ${
-                    currentTheme.name === theme.name
-                      ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
-                      : "hover:bg-gray-100 dark:hover:bg-gray-700"
-                  }`}
-                >
-                  {theme.name}
-                </button>
-              ))}
             </div>
           </div>
         </div>
@@ -701,7 +600,6 @@ const ResponsiveWorldClock = () => {
             isAnalog={isAnalog}
             onRemove={() => removeTimeZone(index)}
             baseTimeZone={selectedTimezones[0]}
-            theme={currentTheme}
           />
         ))}
       </div>
