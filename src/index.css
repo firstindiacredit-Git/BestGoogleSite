@@ -26,3 +26,31 @@ body {
 html {
   font-family: "Poppins", sans-serif;
 }
+
+/* Define CSS variables for theme colors */
+:root {
+  --primary-color: #28283a;
+  --secondary-color: #513a7a;
+  --widget-opacity: 0.2;
+}
+
+/* Adjust the variables for dark mode if needed */
+.dark {
+  --widget-opacity: 0.7;
+}
+
+/* Optional: Add a smooth transition when colors change */
+* {
+  transition: background-color 0.3s ease, border-color 0.3s ease,
+    color 0.3s ease;
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}

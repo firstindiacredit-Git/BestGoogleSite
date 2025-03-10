@@ -5,8 +5,10 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        "mainbg": "#513a7a",
-        "secondbg": "#28283a",
+        mainbg: "var(--secondary-color, #513a7a)",
+        secondbg: "var(--primary-color, #28283a)",
+        primary: "var(--primary-color, #28283a)",
+        secondary: "var(--secondary-color, #513a7a)",
       },
       fontFamily: {
         sans: ["Poppins", "sans-serif"],

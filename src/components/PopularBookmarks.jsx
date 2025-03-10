@@ -2478,7 +2478,7 @@ function PopularBookmarks() {
 
   if (loading) {
     return (
-      <div className="w-[90vw] mx-auto" style={{ padding: "24px" }}>
+      <div className="w-[85vw] mx-auto" style={{ padding: "24px" }}>
         <div className="flex justify-between mb-2">
           <button className="rounded-lg flex gap-4 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]  px-3 py-2 dark:text-white mb-2">
             <PlusOutlined />
@@ -2535,7 +2535,7 @@ function PopularBookmarks() {
             </div>
           </div>
         </div>
-        <SkeletonLoader count={4} />
+        <SkeletonLoader count={6} />
       </div>
     );
   }
@@ -2557,7 +2557,11 @@ function PopularBookmarks() {
   }
 
   return (
-    <div className={`popular-bookmarks-container ${isDarkMode ? "dark" : ""}`}>
+    <div
+      className={` w-[85vw] mx-auto popular-bookmarks-container ${
+        isDarkMode ? "dark" : ""
+      }`}
+    >
       {renderBookmarksByCategory()}
 
       {/* Floating Button for Controller */}

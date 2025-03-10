@@ -448,7 +448,7 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
                   onClick={() => setShowLogin(true)}
                   className="ml-4 text-sm font-medium text-indigo-700 dark:text-indigo-200 hover:text-indigo-600 dark:hover:text-indigo-300 underline"
                 >
-                  Sign in
+                  Login
                 </button>
                 <button
                   className="text-indigo-400 hover:text-indigo-600 dark:text-indigo-500 dark:hover:text-indigo-300"
