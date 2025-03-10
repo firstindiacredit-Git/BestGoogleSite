@@ -6,32 +6,101 @@ import { doc, updateDoc, onSnapshot } from "firebase/firestore";
 import { createPortal } from "react-dom";
 
 const AVAILABLE_TIMEZONES = [
+  // North America
   "America/New_York",
-  "Europe/London",
-  "Asia/Tokyo",
-  "Australia/Sydney",
-  "Europe/Paris",
-  "Asia/Dubai",
-  "Pacific/Auckland",
   "America/Los_Angeles",
-  "Asia/Seoul",
-  "Europe/Berlin",
-  "Africa/Johannesburg",
-  "Asia/Shanghai",
   "America/Chicago",
-  "Europe/Moscow",
-  "Africa/Nairobi",
   "America/Toronto",
-  "Asia/Kolkata",
+  "America/Vancouver",
   "America/Mexico_City",
+  "America/Phoenix",
+  "America/Denver",
+  "America/Montreal",
+  "America/Miami",
+
+  // South America
+  "America/Sao_Paulo",
+  "America/Buenos_Aires",
+  "America/Santiago",
+  "America/Lima",
+  "America/Bogota",
+  "America/Caracas",
+
+  // Europe
+  "Europe/London",
+  "Europe/Paris",
+  "Europe/Berlin",
+  "Europe/Moscow",
+  "Europe/Rome",
+  "Europe/Madrid",
+  "Europe/Amsterdam",
+  "Europe/Vienna",
+  "Europe/Stockholm",
+  "Europe/Prague",
+  "Europe/Warsaw",
+  "Europe/Istanbul",
+  "Europe/Copenhagen",
+  "Europe/Oslo",
+  "Europe/Dublin",
+  "Europe/Brussels",
+  "Europe/Zurich",
+
+  // Asia
+  "Asia/Tokyo",
+  "Asia/Shanghai",
   "Asia/Singapore",
+  "Asia/Dubai",
+  "Asia/Hong_Kong",
+  "Asia/Seoul",
+  "Asia/Kolkata",
+  "Asia/Bangkok",
+  "Asia/Jakarta",
+  "Asia/Manila",
+  "Asia/Kuala_Lumpur",
+  "Asia/Taipei",
+  "Asia/Jerusalem",
+  "Asia/Baghdad",
+  "Asia/Riyadh",
+  "Asia/Tehran",
+  "Asia/Karachi",
+  "Asia/Ho_Chi_Minh",
+
+  // Oceania
+  "Pacific/Auckland",
+  "Australia/Sydney",
+  "Australia/Melbourne",
+  "Australia/Perth",
+  "Australia/Brisbane",
+  "Pacific/Honolulu",
+  "Pacific/Fiji",
+  "Pacific/Guam",
+
+  // Africa
+  "Africa/Johannesburg",
+  "Africa/Cairo",
+  "Africa/Lagos",
+  "Africa/Nairobi",
+  "Africa/Casablanca",
+  "Africa/Accra",
+  "Africa/Addis_Ababa",
+  "Africa/Dar_es_Salaam",
+  "Africa/Khartoum",
 ];
 
 const formatTimeZoneName = (timeZone) => {
-  if (timeZone === "Asia/Kolkata") {
-    return "India";
+  const specialCases = {
+    "Asia/Kolkata": "India",
+    "Asia/Ho_Chi_Minh": "Vietnam",
+    "America/Argentina/Buenos_Aires": "Buenos Aires",
+    "America/Sao_Paulo": "São Paulo",
+    "Africa/Dar_es_Salaam": "Tanzania",
+  };
+
+  if (specialCases[timeZone]) {
+    return specialCases[timeZone];
   }
-  return timeZone.replace("_", " ").split("/")[1];
+
+  return timeZone.split("/").pop().replace(/_/g, " ");
 };
 
 const formatTimeForZone = (time, timeZone) => {
@@ -153,6 +222,13 @@ const CLOCK_THEMES = {
   },
 };
 
+const isDaytime = (time, timeZone) => {
+  const date = new Date(time.toLocaleString("en-US", { timeZone }));
+  const hours = date.getHours();
+  console.log(`Time in ${timeZone}: ${hours}:00`);
+  return hours >= 6 && hours < 18; // Consider 6 AM to 6 PM as daytime
+};
+
 const TimeZoneClock = ({
   timeZone,
   isAnalog,
@@ -161,6 +237,40 @@ const TimeZoneClock = ({
   theme = CLOCK_THEMES.classic,
 }) => {
   const [time, setTime] = useState(new Date());
+  const isDayTimeNow = isDaytime(time, timeZone);
+
+  // Dynamically determine theme based on time of day
+  const effectiveTheme = isDayTimeNow
+    ? {
+        analog: {
+          border: "border-gray-200",
+          background: "bg-white",
+          hourHand: "bg-indigo-500",
+          minuteHand: "bg-gray-900",
+          secondHand: "bg-gray-200",
+          numbers: "text-gray-900",
+        },
+        digital: {
+          container: "bg-gray-100",
+          time: "bg-white border-gray-800",
+          text: "text-gray-800",
+        },
+      }
+    : {
+        analog: {
+          border: "border-gray-600",
+          background: "bg-[#28283A]",
+          hourHand: "bg-gray-400",
+          minuteHand: "bg-gray-200",
+          secondHand: "bg-gray-200",
+          numbers: "text-gray-400",
+        },
+        digital: {
+          container: "bg-[#28283A]",
+          time: "bg-transparent border-gray-600",
+          text: "text-gray-200",
+        },
+      };
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -188,7 +298,7 @@ const TimeZoneClock = ({
           </button>
         </Popconfirm>
         <div
-          className={`w-[5.5rem] h-[5.4rem] rounded-full border-2 relative flex items-center justify-center ${theme.analog.border} ${theme.analog.background}`}
+          className={`w-[5.5rem] h-[5.4rem] rounded-full border-2 relative flex items-center justify-center ${effectiveTheme.analog.border} ${effectiveTheme.analog.background}`}
         >
           {/* Numbers */}
           {[...Array(12)].map((_, index) => {
@@ -200,7 +310,7 @@ const TimeZoneClock = ({
             return (
               <div
                 key={index}
-                className={`absolute text-[8px] mt-[1rem] ml-[0.48rem] font-medium ${theme.analog.numbers}`}
+                className={`absolute text-[8px] mt-[1rem] ml-[0.48rem] font-medium ${effectiveTheme.analog.numbers}`}
                 style={{
                   transform: `translate(-50%, -50%) translate(${x}px, ${y}px)`,
                 }}
@@ -212,23 +322,23 @@ const TimeZoneClock = ({
 
           {/* Clock hands */}
           <div
-            className={`absolute z-50 w-1 h-1 ${theme.analog.numbers} rounded-full`}
+            className={`absolute z-50 w-1 h-1 ${effectiveTheme.analog.numbers} rounded-full`}
           ></div>
           <div
-            className={`absolute -mt-5 w-0.5 h-5 ${theme.analog.hourHand} origin-bottom rounded-full`}
+            className={`absolute -mt-5 w-0.5 h-5 ${effectiveTheme.analog.hourHand} origin-bottom rounded-full`}
             style={{ transform: `rotate(${hours}deg)` }}
           />
           <div
-            className={`absolute -mt-7 w-0.5 h-7 ${theme.analog.minuteHand} origin-bottom rounded-full`}
+            className={`absolute -mt-7 w-0.5 h-7 ${effectiveTheme.analog.minuteHand} origin-bottom rounded-full`}
             style={{ transform: `rotate(${minutes}deg)` }}
           />
           <div
-            className={`absolute -mt-7 w-0.5 h-7 ${theme.analog.secondHand} origin-bottom rounded-full`}
+            className={`absolute -mt-7 w-0.5 h-7 ${effectiveTheme.analog.secondHand} origin-bottom rounded-full`}
             style={{ transform: `rotate(${seconds}deg)` }}
           />
         </div>
         <div className="text-center text-[10px] font-medium mt-1">
-          <p className={`mb-0 ${theme.analog.numbers}`}>
+          <p className={`mb-0 ${effectiveTheme.analog.numbers}`}>
             {formatTimeZoneName(timeZone)}
           </p>
           {timeDiff && (
@@ -254,16 +364,16 @@ const TimeZoneClock = ({
         </button>
       </Popconfirm>
       <div
-        className={`h-full backdrop-blur-sm min-w-28 rounded-xl  flex flex-col items-center justify-center p-2 ${theme.digital.container}`}
+        className={`h-full backdrop-blur-sm min-w-28 rounded-xl flex flex-col items-center justify-center p-2 ${effectiveTheme.digital.container}`}
       >
         <p className="text-[10px] font-medium mb-0.5 text-indigo-500">
           {formatTimeZoneName(timeZone)}
         </p>
         <div
-          className={`border px-1 rounded-xs text-nowrap ${theme.digital.time}`}
+          className={`border px-1 rounded-xs text-nowrap ${effectiveTheme.digital.time}`}
         >
           <p
-            className={`text-base font-bold tracking-wider ${theme.digital.text}`}
+            className={`text-base font-bold tracking-wider ${effectiveTheme.digital.text}`}
           >
             {formatTimeForZone(time, timeZone)}
           </p>
@@ -302,19 +412,16 @@ const ResponsiveWorldClock = () => {
   const settingsRef = useRef(null);
   const addButtonRef = useRef(null);
   const settingsMenuRef = useRef(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     if (showSettings && settingsRef.current) {
       const rect = settingsRef.current.getBoundingClientRect();
       setDropdownPosition({
-        top: rect.top - 180,
+        top: rect.bottom + 10,
         right: window.innerWidth - rect.right,
       });
-      preventScroll(true);
-    } else {
-      preventScroll(false);
     }
-    return () => preventScroll(false);
   }, [showSettings]);
 
   useEffect(() => {
@@ -322,13 +429,9 @@ const ResponsiveWorldClock = () => {
       const rect = addButtonRef.current.getBoundingClientRect();
       setAddDropdownPosition({
         top: rect.bottom - 280,
-        right: window.innerWidth - rect.right - 5,
+        right: window.innerWidth - rect.right,
       });
-      preventScroll(true);
-    } else {
-      preventScroll(false);
     }
-    return () => preventScroll(false);
   }, [isDropdownOpen]);
 
   useEffect(() => {
@@ -407,11 +510,19 @@ const ResponsiveWorldClock = () => {
     (tz) => !selectedTimezones.includes(tz)
   );
 
+  const filteredZones = availableZones.filter(
+    (tz) =>
+      formatTimeZoneName(tz)
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      tz.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const renderSettingsMenu = () => {
     const settingsContent = showSettings && (
       <div
         ref={settingsMenuRef}
-        className="fixed w-48 bg-white dark:text-white dark:bg-[#28283A] rounded-sm shadow-lg border border-gray-200 dark:border-gray-700 z-[9998]"
+        className="fixed w-48 bg-white dark:bg-[#28283A] rounded-sm shadow-lg border border-gray-200 dark:border-gray-700 z-[9998] overflow-hidden"
         style={{
           top: `${dropdownPosition.top}px`,
           right: `${dropdownPosition.right}px`,
@@ -430,7 +541,7 @@ const ResponsiveWorldClock = () => {
                 }}
                 className={`p-1 rounded flex-1 ${
                   !isAnalog
-                    ? "bg-blue-100  dark:bg-blue-900 text-blue-600 dark:text-blue-300"
+                    ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
                     : "hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                 }`}
               >
@@ -479,48 +590,102 @@ const ResponsiveWorldClock = () => {
       </div>
     );
 
-    return (
-      <div className="relative backdrop-blur-sm isolate flex justify-between w-full">
-        {settingsContent && createPortal(settingsContent, document.body)}
-      </div>
-    );
+    return createPortal(settingsContent, document.body);
   };
 
   const renderAddTimezoneMenu = () => {
     const addTimezoneContent = isDropdownOpen && (
       <div
-        className="fixed w-48 bg-white dark:bg-[#28283A] rounded-sm shadow-lg border border-gray-200 dark:border-gray-700 z-[9999] overflow-hidden"
+        className="fixed w-64 bg-white dark:bg-[#28283A] rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-[9998] overflow-hidden"
         style={{
           top: `${addDropdownPosition.top}px`,
           right: `${addDropdownPosition.right}px`,
         }}
       >
-        <div className="p-2">
-          <div className="text-sm font-medium text-gray-500 dark:text-gray-400 p-2">
+        <div className="p-3">
+          <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
             Add Timezone
           </div>
-          <div className="max-h-[200px] overflow-y-auto">
-            {availableZones.map((timeZone) => (
+          <div className="relative mb-3">
+            <input
+              type="text"
+              placeholder="Search timezone..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-3 py-1.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500"
+            />
+          </div>
+          <div
+            className="max-h-[280px] overflow-y-auto pr-1 space-y-0.5 custom-scrollbar"
+            style={{
+              "--scrollbar-thumb": "rgb(203 213 225)",
+              "--scrollbar-thumb-hover": "rgb(148 163 184)",
+              "--scrollbar-track": "rgb(241 245 249)",
+            }}
+          >
+            {filteredZones.map((timeZone) => (
               <button
                 key={timeZone}
                 onClick={() => addTimeZone(timeZone)}
-                className="w-full p-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition dark:text-white flex items-center gap-2"
+                className="w-full p-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white flex items-center gap-2 rounded-md transition-colors"
               >
-                <Plus className="w-4 h-4" />
-                {formatTimeZoneName(timeZone)}
+                <Plus className="w-4 h-4 flex-shrink-0" />
+                <span className="truncate">{formatTimeZoneName(timeZone)}</span>
               </button>
             ))}
+            {filteredZones.length === 0 && (
+              <div className="text-center py-3 text-sm text-gray-500 dark:text-gray-400">
+                No timezones found
+              </div>
+            )}
           </div>
         </div>
       </div>
     );
 
-    return (
-      <div className="relative backdrop-blur-sm isolate flex justify-between w-full">
-        {addTimezoneContent && createPortal(addTimezoneContent, document.body)}
-      </div>
-    );
+    return createPortal(addTimezoneContent, document.body);
   };
+
+  // Add this CSS at the top of your file or in your global styles
+  const customScrollbarStyles = `
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: var(--scrollbar-track);
+      border-radius: 4px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: var(--scrollbar-thumb);
+      border-radius: 4px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: var(--scrollbar-thumb-hover);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .custom-scrollbar {
+        --scrollbar-thumb: rgb(55 65 81);
+        --scrollbar-thumb-hover: rgb(75 85 99);
+        --scrollbar-track: rgb(31 41 55);
+      }
+    }
+  `;
+
+  useEffect(() => {
+    // Add the styles to the document
+    const styleSheet = document.createElement("style");
+    styleSheet.innerText = customScrollbarStyles;
+    document.head.appendChild(styleSheet);
+
+    return () => {
+      document.head.removeChild(styleSheet);
+    };
+  }, []);
 
   return (
     <div
@@ -528,34 +693,22 @@ const ResponsiveWorldClock = () => {
       onMouseLeave={() => setIsHovering(false)}
       className="w-full max-w-xl dark:text-white backdrop-blur-sm rounded-sm flex flex-col relative p-4"
     >
-      {/* Title Bar */}
-
-      {/* Main Content */}
-      <div className="w-full flex-1 mb-12">
-        {" "}
-        {/* Added margin bottom for options */}
-        {!isCollapsed && (
-          <div className="flex justify-center">
-            <div className="flex flex-wrap justify-between w-full h-fit">
-              {selectedTimezones.map((timeZone, index) => (
-                <div key={timeZone} className="mt-4">
-                  <TimeZoneClock
-                    timeZone={timeZone}
-                    isAnalog={isAnalog}
-                    onRemove={() => removeTimeZone(index)}
-                    baseTimeZone={selectedTimezones[0]}
-                    theme={currentTheme}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+      <div className="flex flex-wrap justify-center gap-8">
+        {selectedTimezones.map((tz, index) => (
+          <TimeZoneClock
+            key={tz}
+            timeZone={tz}
+            isAnalog={isAnalog}
+            onRemove={() => removeTimeZone(index)}
+            baseTimeZone={selectedTimezones[0]}
+            theme={currentTheme}
+          />
+        ))}
       </div>
 
       {/* Bottom Options Bar */}
       {isHovering && (
-        <div className="absolute bottom-2 right-2 w-fit shadow-md rounded-lg p-1 dark:bg-[#1F2937] bg-white  flex items-center justify-end gap-2">
+        <div className="absolute bottom-2 right-2 w-fit shadow-md rounded-lg p-1 dark:bg-[#1F2937] bg-white flex items-center justify-end gap-2 z-[9997]">
           {selectedTimezones.length < 8 && (
             <button
               ref={addButtonRef}
@@ -569,7 +722,7 @@ const ResponsiveWorldClock = () => {
           <button
             ref={settingsRef}
             onClick={() => setShowSettings(!showSettings)}
-            className="p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-500  transition"
+            className="p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-500 transition"
             title="Settings"
           >
             <Settings className="w-5 h-5" />
