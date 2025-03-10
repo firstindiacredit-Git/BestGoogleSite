@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Edit, Trash2, Palette } from "lucide-react";
 import { Popconfirm } from "antd";
 import { db, auth } from "../firebase";
@@ -11,7 +11,8 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
-import { WidgetTransparencyContext, ThemeContext } from "../App";
+import { WidgetTransparencyContext } from "../App";
+import { useTheme } from "../context/ThemeContext";
 import { createPortal } from "react-dom";
 
 // Helper function to determine if a color is light or dark
@@ -54,7 +55,7 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
     right: null,
   });
   const [isEditing, setIsEditing] = useState(false);
-  const { isDarkMode } = useContext(ThemeContext);
+  const { isDarkMode } = useTheme();
   const [isFullScreen, setIsFullScreen] = useState(false);
 
   const colorPickerRef = useRef(null);

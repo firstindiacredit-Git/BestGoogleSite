@@ -21,10 +21,11 @@ import Top100 from "../components/Top100";
 import "./style.css";
 import { Dropdown } from "antd";
 import { Settings } from "lucide-react";
-import { ThemeContext } from "../App";
+import { useTheme } from "../context/ThemeContext";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
-function NewSearchPage() {
-  const { isDarkMode, toggleTheme } = useContext(ThemeContext);
+function NewSearchPage({ isToolPage = false }) {
+  const { isDarkMode, toggleTheme } = useTheme();
   const [backgroundImage, setBackgroundImage] = useState("");
   const [transparency, setTransparency] = useState(() =>
     parseInt(localStorage.getItem("bgTransparency") || "85")

@@ -8,14 +8,14 @@ import { signOut } from "firebase/auth";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../../firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { ThemeContext } from "../../App";
+import { useTheme } from "../../context/ThemeContext";
 
 export default function Sidebar() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [dispName, setDispName] = useState("");
   const [link, setLink] = useState("/default-avatar.png");
-  const { isDarkMode, toggleTheme } = useContext(ThemeContext);
+  const { isDarkMode, toggleTheme } = useTheme();
   const [showDropdown, setShowDropdown] = useState(false);
   const [showAdminBanner, setShowAdminBanner] = useState(true);
 

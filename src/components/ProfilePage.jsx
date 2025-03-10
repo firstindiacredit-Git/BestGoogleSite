@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { updatePassword, updateProfile } from "firebase/auth";
 import { auth, db } from "../firebase";
@@ -19,7 +19,7 @@ import imageCompression from "browser-image-compression";
 import { useSubscription } from "../hooks/useSubscription";
 import { Modal, message, Tabs } from "antd";
 import Header from "./Header";
-import { ThemeContext } from "../App";
+import { useTheme } from "../context/ThemeContext";
 // https://cdn.dribbble.com/userupload/14883451/file/original-761915986636e2ae85fee541c6b9c051.jpg?resize=1200x900&vertical=center
 
 const ProfilePage = () => {
@@ -53,7 +53,7 @@ const ProfilePage = () => {
 
   const navigate = useNavigate();
 
-  const { isDarkMode, toggleTheme } = useContext(ThemeContext);
+  const { isDarkMode, toggleTheme } = useTheme();
 
   const [activeSection, setActiveSection] = useState(null);
 

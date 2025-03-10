@@ -1,10 +1,10 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Link } from "react-router-dom";
-import { ThemeContext } from "../App";
-import { useContext, useMemo, useState } from "react";
-import Header from "../components/Header";
+import { useTheme } from "../context/ThemeContext";
+import Header from "./Header";
 
-function NotFound() {
+const NotFound = () => {
+  const { isDarkMode, toggleTheme } = useTheme();
   const [transparency, setTransparency] = useState(() =>
     parseInt(localStorage.getItem("bgTransparency") || "85")
   );
@@ -15,7 +15,6 @@ function NotFound() {
     }),
     [transparency]
   );
-  const { isDarkMode, toggleTheme } = useContext(ThemeContext);
   return (
     <>
       <Header isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
@@ -51,6 +50,6 @@ function NotFound() {
       </div>
     </>
   );
-}
+};
 
 export default NotFound;

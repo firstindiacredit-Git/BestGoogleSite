@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styled, { keyframes } from "styled-components";
 import axios from "axios";
-import { ThemeContext } from "../App";
+import { useTheme } from "../context/ThemeContext";
 
 const API_KEY = "78a1522c5ec67352674263eaaa54bffa";
 
@@ -238,7 +238,7 @@ const getWeatherIcon = (weatherType) => {
   );
 };
 
-const Weather = () => {
+const Weather = ({ collapsed }) => {
   const [currentWeather, setCurrentWeather] = useState(null);
   const [forecast, setForecast] = useState([]);
   const [error, setError] = useState(null);
@@ -250,7 +250,7 @@ const Weather = () => {
   const searchInputRef = useRef(null);
   const [browserInfo, setBrowserInfo] = useState(null);
   const [ipLocation, setIpLocation] = useState(null);
-  const { isDarkMode } = useContext(ThemeContext);
+  const { isDarkMode } = useTheme();
 
   const fetchWeatherByCoords = async (lat, lon) => {
     try {

@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  useRef,
-  useContext,
-} from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { db, auth } from "../firebase";
 import {
   collection,
@@ -22,7 +16,12 @@ import debounce from "lodash/debounce";
 import ExcelJS from "exceljs";
 import { Button } from "antd";
 import { Palette } from "lucide-react";
-import { ThemeContext } from "../App";
+import { useTheme } from "../context/ThemeContext";
+
+// Helper function to generate unique IDs for localStorage
+const generateUniqueId = () => {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+};
 
 const Excel = () => {
   const [userId, setUserId] = useState(null);
@@ -42,7 +41,7 @@ const Excel = () => {
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [activeTableIndex, setActiveTableIndex] = useState(null);
   const [isAutoColor, setIsAutoColor] = useState(false);
-  const { isDarkMode } = useContext(ThemeContext);
+  const { isDarkMode } = useTheme();
   const colorPickerRef = useRef(null);
 
   const predefinedColors = [
@@ -255,129 +254,215 @@ const Excel = () => {
 
   // Helper function to get cell value from reference (e.g., "A1" -> value)
   const getCellValueFromRef = (tableData, ref) => {
-    const colLetter = ref.match(/[A-Z]+/)[0];
-    const rowNum = parseInt(ref.match(/\d+/)[0]) - 1;
-    const colNum = colLetter
-      .split("")
-      .reduce(
-        (acc, char) => acc * 26 + char.charCodeAt(0) - "A".charCodeAt(0),
-        0
-      );
-    return tableData[rowNum]?.[colNum] || "";
+    try {
+      const colLetter = ref.match(/[A-Z]+/)[0];
+      const rowNum = parseInt(ref.match(/\d+/)[0]) - 1;
+      const colNum = colLetter
+        .split("")
+        .reduce(
+          (acc, char) => acc * 26 + char.charCodeAt(0) - "A".charCodeAt(0),
+          0
+        );
+
+      // Make sure we have valid indices
+      if (
+        rowNum < 0 ||
+        colNum < 0 ||
+        !tableData[rowNum] ||
+        !tableData[rowNum][colNum]
+      ) {
+        return 0;
+      }
+
+      const value = tableData[rowNum][colNum];
+
+      // If the value is a formula, we need to get the result
+      if (typeof value === "string" && value.startsWith("=")) {
+        // Prevent circular references
+        return 0;
+      }
+
+      return isNaN(parseFloat(value)) ? 0 : parseFloat(value);
+    } catch (error) {
+      console.error("Error getting cell value:", error);
+      return 0;
+    }
   };
 
-  // Helper function to get range of cells (e.g., "A1:A3" -> [value1, value2, value3])
+  // Helper function to get range of cells (e.g., "A1:B1" -> [value1, value2])
   const getCellRange = (tableData, range) => {
-    const [start, end] = range.split(":");
-    const startCol = start.match(/[A-Z]+/)[0];
-    const startRow = parseInt(start.match(/\d+/)[0]) - 1;
-    const endCol = end.match(/[A-Z]+/)[0];
-    const endRow = parseInt(end.match(/\d+/)[0]) - 1;
+    try {
+      const [start, end] = range.split(":");
+      const startCol = start.match(/[A-Z]+/)[0];
+      const startRow = parseInt(start.match(/\d+/)[0]) - 1;
+      const endCol = end.match(/[A-Z]+/)[0];
+      const endRow = parseInt(end.match(/\d+/)[0]) - 1;
 
-    const startColNum = startCol
-      .split("")
-      .reduce(
-        (acc, char) => acc * 26 + char.charCodeAt(0) - "A".charCodeAt(0),
-        0
-      );
-    const endColNum = endCol
-      .split("")
-      .reduce(
-        (acc, char) => acc * 26 + char.charCodeAt(0) - "A".charCodeAt(0),
-        0
-      );
+      const startColNum = startCol
+        .split("")
+        .reduce(
+          (acc, char) => acc * 26 + char.charCodeAt(0) - "A".charCodeAt(0),
+          0
+        );
+      const endColNum = endCol
+        .split("")
+        .reduce(
+          (acc, char) => acc * 26 + char.charCodeAt(0) - "A".charCodeAt(0),
+          0
+        );
 
-    const values = [];
-    for (let row = startRow; row <= endRow; row++) {
-      for (let col = startColNum; col <= endColNum; col++) {
-        const value = tableData[row]?.[col];
-        if (value && !isNaN(parseFloat(value))) {
-          values.push(parseFloat(value));
+      const values = [];
+      for (let row = startRow; row <= endRow; row++) {
+        for (let col = startColNum; col <= endColNum; col++) {
+          if (!tableData[row] || !tableData[row][col]) continue;
+
+          const value = tableData[row][col];
+          // Skip formula cells to prevent circular references
+          if (typeof value === "string" && value.startsWith("=")) continue;
+
+          // Convert to number or use 0
+          const numValue = isNaN(parseFloat(value)) ? 0 : parseFloat(value);
+          values.push(numValue);
         }
       }
+      return values;
+    } catch (error) {
+      console.error("Error getting cell range:", error);
+      return [];
     }
-    return values;
   };
 
   // Evaluate formula
   const evaluateFormula = (formula, tableData) => {
     try {
       // Remove the leading =
-      formula = formula.substring(1).toUpperCase();
+      const cleanFormula = formula.substring(1).toUpperCase();
 
       // Handle SUM function
-      if (formula.startsWith("SUM(")) {
-        const range = formula.match(/SUM\((.*)\)/)[1];
+      if (cleanFormula.startsWith("SUM(")) {
+        const rangeMatch = cleanFormula.match(/SUM\((.*)\)/);
+        if (!rangeMatch || !rangeMatch[1]) return "#ERROR!";
+
+        const range = rangeMatch[1];
         const values = getCellRange(tableData, range);
         return values.reduce((sum, val) => sum + val, 0);
       }
 
       // Handle AVERAGE function
-      if (formula.startsWith("AVERAGE(")) {
-        const range = formula.match(/AVERAGE\((.*)\)/)[1];
+      if (cleanFormula.startsWith("AVERAGE(")) {
+        const rangeMatch = cleanFormula.match(/AVERAGE\((.*)\)/);
+        if (!rangeMatch || !rangeMatch[1]) return "#ERROR!";
+
+        const range = rangeMatch[1];
         const values = getCellRange(tableData, range);
+        if (values.length === 0) return "#DIV/0!";
         return values.reduce((sum, val) => sum + val, 0) / values.length;
       }
 
       // Handle MAX function
-      if (formula.startsWith("MAX(")) {
-        const range = formula.match(/MAX\((.*)\)/)[1];
+      if (cleanFormula.startsWith("MAX(")) {
+        const rangeMatch = cleanFormula.match(/MAX\((.*)\)/);
+        if (!rangeMatch || !rangeMatch[1]) return "#ERROR!";
+
+        const range = rangeMatch[1];
         const values = getCellRange(tableData, range);
+        if (values.length === 0) return 0;
         return Math.max(...values);
       }
 
       // Handle MIN function
-      if (formula.startsWith("MIN(")) {
-        const range = formula.match(/MIN\((.*)\)/)[1];
+      if (cleanFormula.startsWith("MIN(")) {
+        const rangeMatch = cleanFormula.match(/MIN\((.*)\)/);
+        if (!rangeMatch || !rangeMatch[1]) return "#ERROR!";
+
+        const range = rangeMatch[1];
         const values = getCellRange(tableData, range);
+        if (values.length === 0) return 0;
         return Math.min(...values);
       }
 
       // Handle basic arithmetic with cell references
       // Replace cell references with their values
-      let expression = formula.replace(/[A-Z]+\d+/g, (match) => {
+      let expression = cleanFormula.replace(/[A-Z]+\d+/g, (match) => {
         const value = getCellValueFromRef(tableData, match);
-        return isNaN(parseFloat(value)) ? "0" : value;
+        return value;
       });
 
       // Safely evaluate the arithmetic expression
-      return eval(expression);
+      // Use Function instead of eval for better security
+      const result = new Function(`return ${expression}`)();
+      return isNaN(result) ? "#ERROR!" : result;
     } catch (error) {
       console.error("Formula error:", error);
       return "#ERROR!";
     }
   };
 
-  // Handle cell change with formula support
-  const handleCellChange = async (tableIndex, rowIndex, colIndex, value) => {
-    if (!isAuthenticated) {
-      toast.error("Please sign in to edit cells");
-      return;
+  // Recalculate formulas for a table
+  const recalculateFormulas = (tableIndex) => {
+    const updatedTables = [...tables];
+    const table = updatedTables[tableIndex];
+
+    if (!table.formulas) return;
+
+    // Create a copy of the formulas to avoid modifying during iteration
+    const formulaEntries = Object.entries(table.formulas);
+
+    for (const [cellKey, formulaData] of formulaEntries) {
+      const [rowIndex, colIndex] = cellKey.split("-").map(Number);
+      const formula = formulaData.formula;
+
+      if (formula && typeof formula === "string" && formula.startsWith("=")) {
+        const result = evaluateFormula(formula, table.data);
+        table.formulas[cellKey] = {
+          formula,
+          result,
+        };
+      }
     }
 
+    setTables(updatedTables);
+  };
+
+  // Handle cell change with formula support
+  const handleCellChange = async (tableIndex, rowIndex, colIndex, value) => {
     const updatedTables = [...tables];
     const table = updatedTables[tableIndex];
 
     // Check if the value is a formula (starts with =)
     if (value.startsWith("=")) {
-      const result = evaluateFormula(value, table.data);
-      // Store both the formula and the result
+      // Store the formula in the cell
       table.data[rowIndex][colIndex] = value;
+
+      // Calculate the result
+      const result = evaluateFormula(value, table.data);
+
+      // Store both the formula and the result
       table.formulas = table.formulas || {};
       table.formulas[`${rowIndex}-${colIndex}`] = {
         formula: value,
         result: result,
       };
+
+      // Recalculate other formulas that might depend on this cell
+      recalculateFormulas(tableIndex);
     } else {
+      // Store the regular value
       table.data[rowIndex][colIndex] = value;
+
       // Clear any existing formula for this cell
-      if (table.formulas) {
+      if (table.formulas && table.formulas[`${rowIndex}-${colIndex}`]) {
         delete table.formulas[`${rowIndex}-${colIndex}`];
       }
+
+      // Recalculate formulas that might depend on this cell
+      recalculateFormulas(tableIndex);
     }
 
     setTables(updatedTables);
-    debouncedSave(table.id, table.data);
+
+    // Save the changes
+    await saveTableData(tableIndex);
   };
 
   // Handle keyboard navigation
@@ -407,23 +492,42 @@ const Excel = () => {
 
   // Clear table cells
   const clearTable = async (tableIndex) => {
-    if (!isAuthenticated) {
-      toast.error("Please sign in to clear table");
-      return;
-    }
-
-    const updatedTables = [...tables];
-    const table = updatedTables[tableIndex];
-    table.data = Array(table.rows)
-      .fill()
-      .map(() => Array(table.cols).fill(""));
-
     try {
-      const transformedData = transformTableDataToObject(table.data);
-      await updateDoc(doc(db, "users", userId, "excel", table.id), {
-        tableData: transformedData,
-      });
+      const updatedTables = [...tables];
+      const table = updatedTables[tableIndex];
+
+      // Create empty data array
+      table.data = Array(table.rows)
+        .fill()
+        .map(() => Array(table.cols).fill(""));
+
+      // Clear formulas
+      table.formulas = {};
+
+      // Update state
       setTables(updatedTables);
+
+      // Save to appropriate storage
+      if (userId) {
+        // User is logged in, save to Firebase
+        await saveTableData(tableIndex);
+      } else {
+        // No user logged in, save to localStorage
+        const localTables = JSON.parse(
+          localStorage.getItem("excelTables") || "[]"
+        );
+        const localTableIndex = localTables.findIndex((t) => t.id === table.id);
+
+        if (localTableIndex >= 0) {
+          localTables[localTableIndex] = {
+            ...localTables[localTableIndex],
+            data: convertTableDataForFirebase(table.data),
+            formulas: {},
+          };
+          localStorage.setItem("excelTables", JSON.stringify(localTables));
+        }
+      }
+
       toast.success("Table cleared successfully");
     } catch (error) {
       console.error("Error clearing table:", error);
@@ -454,22 +558,6 @@ const Excel = () => {
     );
   };
 
-  // Recalculate all formulas in the table
-  const recalculateFormulas = (tableIndex) => {
-    const updatedTables = [...tables];
-    const table = updatedTables[tableIndex];
-
-    // Update all formulas in the table
-    Object.keys(table.formulas || {}).forEach((cellKey) => {
-      const [row, col] = cellKey.split("-").map(Number);
-      const formula = table.formulas[cellKey].formula;
-      const result = evaluateFormula(formula, table.data);
-      table.formulas[cellKey].result = result;
-    });
-
-    setTables(updatedTables);
-  };
-
   // Handle cell double click for editing
   const handleCellDoubleClick = (tableIndex, rowIndex, colIndex) => {
     setEditingCell({ tableIndex, rowIndex, colIndex });
@@ -479,7 +567,23 @@ const Excel = () => {
   const handleCellEdit = (tableIndex, rowIndex, colIndex, value) => {
     const updatedTables = [...tables];
     const table = updatedTables[tableIndex];
+
+    // Update the cell value
     table.data[rowIndex][colIndex] = value;
+
+    // If it's a formula, prepare for calculation when editing is done
+    if (value.startsWith("=")) {
+      // Just store the formula text for now, calculation will happen on blur
+      table.formulas = table.formulas || {};
+      table.formulas[`${rowIndex}-${colIndex}`] = {
+        formula: value,
+        result: "#PENDING", // Will be calculated on blur
+      };
+    } else if (table.formulas && table.formulas[`${rowIndex}-${colIndex}`]) {
+      // If it was a formula before but isn't anymore, remove it from formulas
+      delete table.formulas[`${rowIndex}-${colIndex}`];
+    }
+
     setTables(updatedTables);
   };
 
@@ -603,44 +707,93 @@ const Excel = () => {
     return table;
   };
 
-  // Save table data to Firebase
+  // Save table data to Firebase or localStorage
   const saveTableData = async (tableIndex) => {
-    if (!userId) return;
-
     try {
       const table = tables[tableIndex];
       const firebaseData = convertTableDataForFirebase(table.data);
 
-      await updateDoc(doc(db, "users", userId, "excel", table.id), {
-        data: firebaseData,
-        rowCount: table.data.length,
-        colCount: table.data[0].length,
-        formulas: table.formulas || {},
-        columnWidths: columnWidths,
-        rowHeights: rowHeights,
-        cardStyle: table.cardStyle || {},
-      });
+      if (userId) {
+        // Save to Firebase if user is logged in
+        await updateDoc(doc(db, "users", userId, "excel", table.id), {
+          data: firebaseData,
+          rowCount: table.data.length,
+          colCount: table.data[0].length,
+          formulas: table.formulas || {},
+          columnWidths: columnWidths,
+          rowHeights: rowHeights,
+          cardStyle: table.cardStyle || {},
+          tableName: tableNames[table.id] || `Table ${tableIndex + 1}`,
+        });
+      } else {
+        // Save to localStorage if no user is logged in
+        const localTables = JSON.parse(
+          localStorage.getItem("excelTables") || "[]"
+        );
+        const tableIndex = localTables.findIndex((t) => t.id === table.id);
+
+        const updatedTable = {
+          id: table.id,
+          data: firebaseData,
+          rowCount: table.data.length,
+          colCount: table.data[0].length,
+          formulas: table.formulas || {},
+          columnWidths: columnWidths,
+          rowHeights: rowHeights,
+          cardStyle: table.cardStyle || {},
+          tableName: tableNames[table.id] || `Table ${tableIndex + 1}`,
+        };
+
+        if (tableIndex >= 0) {
+          localTables[tableIndex] = updatedTable;
+        } else {
+          localTables.push(updatedTable);
+        }
+
+        localStorage.setItem("excelTables", JSON.stringify(localTables));
+      }
     } catch (error) {
       console.error("Error saving table:", error);
+      toast.error("Failed to save table");
     }
   };
 
-  // Load table data from Firebase
+  // Load table data from Firebase or localStorage
   const loadTableData = async (tableId) => {
-    if (!userId) return null;
-
     try {
-      const docSnap = await getDoc(doc(db, "users", userId, "excel", tableId));
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        return {
-          ...data,
-          data: convertFirebaseDataToTable(
-            data.data,
-            data.rowCount,
-            data.colCount
-          ),
-        };
+      if (userId) {
+        // Load from Firebase if user is logged in
+        const docSnap = await getDoc(
+          doc(db, "users", userId, "excel", tableId)
+        );
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          return {
+            ...data,
+            data: convertFirebaseDataToTable(
+              data.data,
+              data.rowCount,
+              data.colCount
+            ),
+          };
+        }
+      } else {
+        // Load from localStorage if no user is logged in
+        const localTables = JSON.parse(
+          localStorage.getItem("excelTables") || "[]"
+        );
+        const table = localTables.find((t) => t.id === tableId);
+
+        if (table) {
+          return {
+            ...table,
+            data: convertFirebaseDataToTable(
+              table.data,
+              table.rowCount,
+              table.colCount
+            ),
+          };
+        }
       }
     } catch (error) {
       console.error("Error loading table:", error);
@@ -663,22 +816,16 @@ const Excel = () => {
   }, [tables, userId, columnWidths, rowHeights]);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
         setUserId(user.uid);
         setIsAuthenticated(true);
-        try {
-          await fetchTables(user.uid);
-        } catch (error) {
-          console.error("Error fetching tables:", error);
-          setError("Failed to fetch tables");
-        }
+        fetchTables(user.uid);
       } else {
         setUserId(null);
         setIsAuthenticated(false);
-        setTables([]);
+        fetchTables(null); // Fetch from localStorage when no user
       }
-      setLoading(false);
     });
 
     return () => unsubscribe();
@@ -702,65 +849,129 @@ const Excel = () => {
     }
   };
 
-  // Fetch tables from Firestore
+  // Fetch tables from Firestore or localStorage
   const fetchTables = async (uid) => {
     try {
       setLoading(true);
       setError(null);
 
-      await ensureUserDocument(uid);
+      if (uid) {
+        // User is logged in, fetch from Firebase
+        await ensureUserDocument(uid);
 
-      const tablesRef = collection(db, "users", uid, "excel");
-      const q = query(tablesRef);
-      const querySnapshot = await getDocs(q);
+        const tablesRef = collection(db, "users", uid, "excel");
+        const q = query(tablesRef);
+        const querySnapshot = await getDocs(q);
 
-      const fetchedTables = querySnapshot.docs.map((doc) => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          rows: data.rows,
-          cols: data.cols,
-          data: convertFirebaseDataToTable(data.data, data.rows, data.cols),
-          cardStyle: data.cardStyle || {},
-          tableName:
-            data.tableName || `Table ${querySnapshot.docs.indexOf(doc) + 1}`,
-          formulas: data.formulas || {},
-        };
-      });
+        const fetchedTables = querySnapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            rows: data.rowCount || 5,
+            cols: data.colCount || 5,
+            data: convertFirebaseDataToTable(
+              data.data,
+              data.rowCount || 5,
+              data.colCount || 5
+            ),
+            cardStyle: data.cardStyle || {},
+            tableName:
+              data.tableName || `Table ${querySnapshot.docs.indexOf(doc) + 1}`,
+            formulas: data.formulas || {},
+          };
+        });
 
-      if (fetchedTables.length > 0) {
-        setTables(fetchedTables);
-        setTableNames(
-          fetchedTables.reduce(
-            (acc, table) => ({ ...acc, [table.id]: table.tableName }),
-            {}
-          )
-        );
-      } else {
-        // Initialize with one empty table if none exists
-        const emptyData = Array(5)
-          .fill()
-          .map(() => Array(5).fill(""));
-        const newTable = {
-          rows: 5,
-          cols: 5,
-          tableData: convertTableDataForFirebase(emptyData),
-          cardStyle: {},
-          tableName: "Table 1",
-        };
-
-        const docRef = await addDoc(tablesRef, newTable);
-        setTables([
-          {
-            id: docRef.id,
-            rows: 5,
-            cols: 5,
-            data: emptyData,
+        if (fetchedTables.length > 0) {
+          setTables(fetchedTables);
+          setTableNames(
+            fetchedTables.reduce(
+              (acc, table) => ({ ...acc, [table.id]: table.tableName }),
+              {}
+            )
+          );
+        } else {
+          // Initialize with one empty table if none exists
+          const emptyData = Array(5)
+            .fill()
+            .map(() => Array(5).fill(""));
+          const newTable = {
+            rowCount: 5,
+            colCount: 5,
+            data: convertTableDataForFirebase(emptyData),
             cardStyle: {},
             tableName: "Table 1",
-          },
-        ]);
-        setTableNames({ [docRef.id]: "Table 1" });
+          };
+
+          const docRef = await addDoc(tablesRef, newTable);
+          setTables([
+            {
+              id: docRef.id,
+              rows: 5,
+              cols: 5,
+              data: emptyData,
+              cardStyle: {},
+              tableName: "Table 1",
+            },
+          ]);
+          setTableNames({ [docRef.id]: "Table 1" });
+        }
+      } else {
+        // No user logged in, fetch from localStorage
+        const localTables = JSON.parse(
+          localStorage.getItem("excelTables") || "[]"
+        );
+
+        if (localTables.length > 0) {
+          const processedTables = localTables.map((table) => ({
+            id: table.id,
+            rows: table.rowCount || 5,
+            cols: table.colCount || 5,
+            data: convertFirebaseDataToTable(
+              table.data,
+              table.rowCount || 5,
+              table.colCount || 5
+            ),
+            cardStyle: table.cardStyle || {},
+            tableName: table.tableName || "Untitled Table",
+            formulas: table.formulas || {},
+          }));
+
+          setTables(processedTables);
+          setTableNames(
+            processedTables.reduce(
+              (acc, table) => ({ ...acc, [table.id]: table.tableName }),
+              {}
+            )
+          );
+        } else {
+          // Initialize with one empty table if none exists
+          const emptyData = Array(5)
+            .fill()
+            .map(() => Array(5).fill(""));
+          const newTableId = generateUniqueId();
+          const newTable = {
+            id: newTableId,
+            rowCount: 5,
+            colCount: 5,
+            data: convertTableDataForFirebase(emptyData),
+            cardStyle: {},
+            tableName: "Table 1",
+          };
+
+          localStorage.setItem("excelTables", JSON.stringify([newTable]));
+
+          setTables([
+            {
+              id: newTableId,
+              rows: 5,
+              cols: 5,
+              data: emptyData,
+              cardStyle: {},
+              tableName: "Table 1",
+            },
+          ]);
+          setTableNames({ [newTableId]: "Table 1" });
+        }
       }
     } catch (error) {
       console.error("Error fetching tables:", error);
@@ -773,92 +984,211 @@ const Excel = () => {
 
   // Add new table
   const addTable = async () => {
-    if (!isAuthenticated) {
-      toast.error("Please sign in to add a table");
-      return;
-    }
-
     const emptyData = Array(5)
       .fill()
       .map(() => Array(5).fill(""));
-    const newTable = {
-      rows: 5,
-      cols: 5,
-      tableData: convertTableDataForFirebase(emptyData),
-      cardStyle: {},
-      tableName: `Table ${tables.length + 1}`,
-    };
 
-    try {
-      const tablesRef = collection(db, "users", userId, "excel");
-      const docRef = await addDoc(tablesRef, newTable);
-      setTables([
-        ...tables,
-        {
+    const newTableName = `Table ${tables.length + 1}`;
+
+    if (userId) {
+      // User is logged in, add to Firebase
+      try {
+        const tablesRef = collection(db, "users", userId, "excel");
+        const newTable = {
+          rowCount: 5,
+          colCount: 5,
+          data: convertTableDataForFirebase(emptyData),
+          cardStyle: {},
+          tableName: newTableName,
+        };
+
+        const docRef = await addDoc(tablesRef, newTable);
+
+        const tableToAdd = {
           id: docRef.id,
           rows: 5,
           cols: 5,
           data: emptyData,
           cardStyle: {},
-          tableName: `Table ${tables.length + 1}`,
-        },
-      ]);
-      setTableNames((prev) => ({
-        ...prev,
-        [docRef.id]: `Table ${tables.length + 1}`,
-      }));
-      toast.success("New table added successfully!");
-    } catch (error) {
-      console.error("Error adding table:", error);
-      toast.error("Failed to add new table");
+          tableName: newTableName,
+        };
+
+        setTables([...tables, tableToAdd]);
+        setTableNames({ ...tableNames, [docRef.id]: newTableName });
+      } catch (error) {
+        console.error("Error adding table:", error);
+        toast.error("Failed to add table");
+      }
+    } else {
+      // No user logged in, add to localStorage
+      try {
+        const newTableId = generateUniqueId();
+        const localTables = JSON.parse(
+          localStorage.getItem("excelTables") || "[]"
+        );
+
+        const newTable = {
+          id: newTableId,
+          rowCount: 5,
+          colCount: 5,
+          data: convertTableDataForFirebase(emptyData),
+          cardStyle: {},
+          tableName: newTableName,
+        };
+
+        localTables.push(newTable);
+        localStorage.setItem("excelTables", JSON.stringify(localTables));
+
+        const tableToAdd = {
+          id: newTableId,
+          rows: 5,
+          cols: 5,
+          data: emptyData,
+          cardStyle: {},
+          tableName: newTableName,
+        };
+
+        setTables([...tables, tableToAdd]);
+        setTableNames({ ...tableNames, [newTableId]: newTableName });
+      } catch (error) {
+        console.error("Error adding table to localStorage:", error);
+        toast.error("Failed to add table");
+      }
     }
   };
 
-  // Add row to specific table
-  const addRow = async (tableIndex) => {
-    if (!isAuthenticated) {
-      toast.error("Please sign in to add a row");
-      return;
-    }
-
-    const updatedTables = [...tables];
-    const table = updatedTables[tableIndex];
-    const newRow = Array(table.cols).fill("");
-    table.data.push(newRow);
-    table.rows += 1;
-
+  // Update table name
+  const updateTableName = (tableId, newName) => {
     try {
-      const firebaseData = convertTableDataForFirebase(table.data);
-      await updateDoc(doc(db, "users", userId, "excel", table.id), {
-        data: firebaseData,
-        rows: table.rows,
-      });
+      if (userId) {
+        // User is logged in, update in Firebase
+        const tableRef = doc(db, "users", userId, "excel", tableId);
+        updateDoc(tableRef, { tableName: newName });
+      } else {
+        // No user logged in, update in localStorage
+        const localTables = JSON.parse(
+          localStorage.getItem("excelTables") || "[]"
+        );
+        const tableIndex = localTables.findIndex((t) => t.id === tableId);
+
+        if (tableIndex >= 0) {
+          localTables[tableIndex].tableName = newName;
+          localStorage.setItem("excelTables", JSON.stringify(localTables));
+        }
+      }
+
+      // Update local state
+      setTableNames({ ...tableNames, [tableId]: newName });
+    } catch (error) {
+      console.error("Error updating table name:", error);
+      toast.error("Failed to update table name");
+    }
+  };
+
+  // Handle color change for table
+  const handleColorChange = async (tableIndex, color) => {
+    try {
+      const updatedTables = [...tables];
+      updatedTables[tableIndex] = {
+        ...updatedTables[tableIndex],
+        cardStyle: {
+          ...updatedTables[tableIndex].cardStyle,
+          backgroundColor: color,
+        },
+      };
       setTables(updatedTables);
+
+      if (userId) {
+        // User is logged in, update in Firebase
+        const tableRef = doc(
+          db,
+          "users",
+          userId,
+          "excel",
+          updatedTables[tableIndex].id
+        );
+        await updateDoc(tableRef, {
+          cardStyle: {
+            backgroundColor: color,
+          },
+        });
+      } else {
+        // No user logged in, update in localStorage
+        const localTables = JSON.parse(
+          localStorage.getItem("excelTables") || "[]"
+        );
+        const localTableIndex = localTables.findIndex(
+          (t) => t.id === updatedTables[tableIndex].id
+        );
+
+        if (localTableIndex >= 0) {
+          localTables[localTableIndex].cardStyle = {
+            backgroundColor: color,
+          };
+          localStorage.setItem("excelTables", JSON.stringify(localTables));
+        }
+      }
+    } catch (error) {
+      console.error("Error updating table color:", error);
+      toast.error("Failed to update table color");
+    }
+  };
+
+  // Auto-save effect
+  useEffect(() => {
+    const debouncedSave = debounce(async () => {
+      if (!tables.length) return;
+
+      for (let i = 0; i < tables.length; i++) {
+        await saveTableData(i);
+      }
+    }, 2000);
+
+    debouncedSave();
+
+    return () => debouncedSave.cancel();
+  }, [tables, userId]);
+
+  // Add row to table
+  const addRow = async (tableIndex) => {
+    try {
+      const updatedTables = [...tables];
+      const table = updatedTables[tableIndex];
+      const newRow = Array(table.data[0].length).fill("");
+
+      table.data.push(newRow);
+      table.rows = table.data.length;
+
+      setTables(updatedTables);
+
+      // Save changes
+      await saveTableData(tableIndex);
+
+      toast.success("Row added successfully");
     } catch (error) {
       console.error("Error adding row:", error);
       toast.error("Failed to add row");
     }
   };
 
-  // Add column to specific table
+  // Add column to table
   const addColumn = async (tableIndex) => {
-    if (!isAuthenticated) {
-      toast.error("Please sign in to add a column");
-      return;
-    }
-
-    const updatedTables = [...tables];
-    const table = updatedTables[tableIndex];
-    table.data.forEach((row) => row.push(""));
-    table.cols += 1;
-
     try {
-      const firebaseData = convertTableDataForFirebase(table.data);
-      await updateDoc(doc(db, "users", userId, "excel", table.id), {
-        data: firebaseData,
-        cols: table.cols,
+      const updatedTables = [...tables];
+      const table = updatedTables[tableIndex];
+
+      table.data.forEach((row) => {
+        row.push("");
       });
+
+      table.cols = table.data[0].length;
+
       setTables(updatedTables);
+
+      // Save changes
+      await saveTableData(tableIndex);
+
+      toast.success("Column added successfully");
     } catch (error) {
       console.error("Error adding column:", error);
       toast.error("Failed to add column");
@@ -867,117 +1197,88 @@ const Excel = () => {
 
   // Delete table
   const deleteTable = async (tableId) => {
-    if (!isAuthenticated) {
-      toast.error("Please sign in to delete a table");
-      return;
-    }
-
     try {
-      await deleteDoc(doc(db, "users", userId, "excel", tableId));
+      if (userId) {
+        // User is logged in, delete from Firebase
+        await deleteDoc(doc(db, "users", userId, "excel", tableId));
+      } else {
+        // No user logged in, delete from localStorage
+        const localTables = JSON.parse(
+          localStorage.getItem("excelTables") || "[]"
+        );
+        const updatedTables = localTables.filter(
+          (table) => table.id !== tableId
+        );
+        localStorage.setItem("excelTables", JSON.stringify(updatedTables));
+      }
+
+      // Update local state
       setTables(tables.filter((table) => table.id !== tableId));
-      setTableNames((prev) => {
-        const newTableNames = { ...prev };
-        delete newTableNames[tableId];
-        return newTableNames;
-      });
-      toast.success("Table deleted successfully!");
+
+      // Update table names
+      const newTableNames = { ...tableNames };
+      delete newTableNames[tableId];
+      setTableNames(newTableNames);
+
+      toast.success("Table deleted successfully");
     } catch (error) {
       console.error("Error deleting table:", error);
       toast.error("Failed to delete table");
     }
   };
 
-  // Update table name with debounce
-  const updateTableName = (tableId, newName) => {
-    if (!isAuthenticated) {
-      toast.error("Please sign in to rename table");
-      return;
-    }
-
-    setTableNames((prev) => ({ ...prev, [tableId]: newName }));
-    debouncedSaveTableName(tableId, newName);
-  };
-
-  // Add color handling functions
-  const handleColorChange = async (tableIndex, color) => {
-    if (!isAuthenticated) {
-      toast.error("Please sign in to change colors");
-      return;
-    }
-
-    const updatedTables = [...tables];
-    const table = updatedTables[tableIndex];
-    table.cardStyle = { backgroundColor: color };
-
-    try {
-      await updateDoc(doc(db, "users", userId, "excel", table.id), {
-        cardStyle: { backgroundColor: color },
-      });
-      setTables(updatedTables);
-
-      // Save to localStorage
-      const savedColors = JSON.parse(
-        localStorage.getItem("excelTableColors") || "{}"
-      );
-      savedColors[table.id] = { backgroundColor: color };
-      localStorage.setItem("excelTableColors", JSON.stringify(savedColors));
-    } catch (error) {
-      console.error("Error updating color:", error);
-      toast.error("Failed to update color");
-    }
-  };
-
+  // Handle auto theme for table
   const handleAutoTheme = async (tableIndex, colors) => {
-    if (!isAuthenticated) {
-      toast.error("Please sign in to apply theme");
-      return;
-    }
-
-    const updatedTables = [...tables];
-    const table = updatedTables[tableIndex];
-    const newStyle = {
-      background: `linear-gradient(135deg, ${colors.join(", ")})`,
-    };
-    table.cardStyle = newStyle;
-
     try {
-      await updateDoc(doc(db, "users", userId, "excel", table.id), {
+      const updatedTables = [...tables];
+      const newStyle = {
+        background: `linear-gradient(135deg, ${colors.join(", ")})`,
+      };
+
+      updatedTables[tableIndex] = {
+        ...updatedTables[tableIndex],
         cardStyle: newStyle,
-      });
+      };
+
       setTables(updatedTables);
 
-      // Save to localStorage
-      const savedColors = JSON.parse(
-        localStorage.getItem("excelTableColors") || "{}"
-      );
-      savedColors[table.id] = newStyle;
-      localStorage.setItem("excelTableColors", JSON.stringify(savedColors));
+      if (userId) {
+        // User is logged in, update in Firebase
+        const tableRef = doc(
+          db,
+          "users",
+          userId,
+          "excel",
+          updatedTables[tableIndex].id
+        );
+        await updateDoc(tableRef, {
+          cardStyle: newStyle,
+        });
+      } else {
+        // No user logged in, update in localStorage
+        const localTables = JSON.parse(
+          localStorage.getItem("excelTables") || "[]"
+        );
+        const localTableIndex = localTables.findIndex(
+          (t) => t.id === updatedTables[tableIndex].id
+        );
+
+        if (localTableIndex >= 0) {
+          localTables[localTableIndex].cardStyle = newStyle;
+          localStorage.setItem("excelTables", JSON.stringify(localTables));
+        }
+      }
+
+      toast.success("Theme applied successfully");
     } catch (error) {
       console.error("Error applying theme:", error);
       toast.error("Failed to apply theme");
     }
   };
 
-  // Add localStorage effect after other useEffects
-  useEffect(() => {
-    // Load colors from localStorage
-    const savedColors = localStorage.getItem("excelTableColors");
-    if (savedColors) {
-      const parsedColors = JSON.parse(savedColors);
-      setTables((prevTables) =>
-        prevTables.map((table) => ({
-          ...table,
-          cardStyle: parsedColors[table.id] || table.cardStyle,
-        }))
-      );
-    }
-  }, []);
-
   if (loading) return <div className="text-center py-4">Loading...</div>;
   if (error)
     return <div className="text-center py-4 text-red-500">{error}</div>;
-  if (!isAuthenticated)
-    return <div className="text-center py-4">Please sign in to use Excel</div>;
 
   return (
     <div className=" mx-auto relative">
@@ -1181,7 +1482,31 @@ const Excel = () => {
                                   currentValue &&
                                   currentValue.startsWith("=")
                                 ) {
+                                  // Calculate the formula result
+                                  const result = evaluateFormula(
+                                    currentValue,
+                                    table.data
+                                  );
+
+                                  // Update the formula result
+                                  const updatedTables = [...tables];
+                                  updatedTables[tableIndex].formulas =
+                                    updatedTables[tableIndex].formulas || {};
+                                  updatedTables[tableIndex].formulas[
+                                    `${rowIndex}-${colIndex}`
+                                  ] = {
+                                    formula: currentValue,
+                                    result: result,
+                                  };
+
+                                  // Update state
+                                  setTables(updatedTables);
+
+                                  // Recalculate other formulas that might depend on this one
                                   recalculateFormulas(tableIndex);
+
+                                  // Save changes
+                                  saveTableData(tableIndex);
                                 }
                                 setEditingCell(null);
                               }}
@@ -1214,7 +1539,9 @@ const Excel = () => {
                             <div
                               className={`w-full h-full flex items-center ${
                                 formula ||
-                                !isNaN(table.data[rowIndex][colIndex])
+                                !isNaN(
+                                  parseFloat(table.data[rowIndex][colIndex])
+                                )
                                   ? "justify-end"
                                   : "justify-start"
                               } ${
@@ -1227,7 +1554,11 @@ const Excel = () => {
                             >
                               {formula
                                 ? formula.result
-                                : table.data[rowIndex][colIndex]}
+                                : cell &&
+                                  cell.startsWith &&
+                                  cell.startsWith("=")
+                                ? "#NEED_CALC" // Indicate formula needs calculation
+                                : cell}
                             </div>
                           )}
                         </td>

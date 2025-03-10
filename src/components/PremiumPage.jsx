@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Chrome } from "lucide-react";
 import { FiCheck } from "react-icons/fi";
 import PayPalSubscription from "./PayPalSubscription";
-import { ThemeContext } from "../App";
+import { useTheme } from "../context/ThemeContext";
 
 const PricingCard = ({ plan, popular }) => {
   const [showPayPal, setShowPayPal] = useState(false);
@@ -121,7 +121,7 @@ const PremiumPage = () => {
       ],
     },
   ];
-  const { isDarkMode, toggleTheme } = useContext(ThemeContext);
+  const { isDarkMode, toggleTheme } = useTheme();
 
   return (
     <div className={`min-h-screen ${isDarkMode ? "bg-gray-900" : "bg-white"}`}>

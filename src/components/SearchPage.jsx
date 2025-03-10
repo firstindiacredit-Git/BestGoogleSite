@@ -22,11 +22,11 @@ import Top100 from "../components/Top100";
 import "./style.css";
 import { Dropdown, Skeleton, Input } from "antd";
 import { Settings } from "lucide-react";
-import { ThemeContext } from "../App";
+import { useTheme } from "../context/ThemeContext";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 const SearchPage = ({ isToolPage = false }) => {
-  const { isDarkMode, toggleTheme } = useContext(ThemeContext);
+  const { isDarkMode, toggleTheme } = useTheme();
   const [backgroundImage, setBackgroundImage] = useState("");
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -149,8 +149,9 @@ const SearchPage = ({ isToolPage = false }) => {
 
   const handleResetTextColor = useCallback(() => {
     const newValue = isDarkMode ? 100 : 0; // 100 for white in dark mode, 0 for black in light mode
-    handleTextColorChange(newValue);
-  }, [isDarkMode, handleTextColorChange]);
+    setTextColor(newValue);
+    localStorage.setItem("textColorValue", newValue.toString());
+  }, [isDarkMode]);
 
   // Initialize CSS variables on mount with current values
   useEffect(() => {
@@ -256,22 +257,16 @@ const SearchPage = ({ isToolPage = false }) => {
                 onClick={(e) => e.stopPropagation()}
               >
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleApplyChanges();
-                  }}
-                  className="flex-1 px-3 py-1.5 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition-colors"
-                >
-                  Apply
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleResetChanges();
-                  }}
-                  className="px-3 py-1.5 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                  className="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+                  onClick={() => handleTempTransparencyChange(85)}
                 >
                   Reset
+                </button>
+                <button
+                  className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 ml-auto"
+                  onClick={() => handleApplyChanges()}
+                >
+                  Apply
                 </button>
               </div>
             </>
@@ -356,6 +351,21 @@ const SearchPage = ({ isToolPage = false }) => {
       changeVisible,
     ]
   );
+
+  // Add a useEffect to handle theme changes specifically for this component
+  useEffect(() => {
+    // Force re-render of settings menu when theme changes
+    const handleThemeChange = () => {
+      // Update any theme-dependent state or calculations
+      if (textColor === 0 || textColor === 100) {
+        // If text color is at default values, update it based on new theme
+        handleResetTextColor();
+      }
+    };
+
+    window.addEventListener("themeChanged", handleThemeChange);
+    return () => window.removeEventListener("themeChanged", handleThemeChange);
+  }, [textColor, handleResetTextColor]);
 
   // Add this new useEffect for Google Search loading detection
   useEffect(() => {

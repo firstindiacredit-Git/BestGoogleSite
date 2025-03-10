@@ -6,7 +6,7 @@ import Excel from "./Excel";
 
 const NotebookAndDocumentSheet = () => {
   return (
-    <div className="dark:bg-[#28283A]/[var(--widget-opacity)] backdrop-blur-sm bg-gray-200/[var(--widget-opacity)] w-[90vw] mx-auto rounded-t-sm min-h-screen p-4">
+    <div className="   w-[90vw] mx-auto min-h-screen p-4">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Main NotePage section - 8 columns on large screens */}
         <div className="lg:col-span-8 overflow-hidden">

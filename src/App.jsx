@@ -119,6 +119,9 @@ import TrafficChecker from "../Tools/Component/TrafficChecker.jsx";
 import NetworkStatus from "./components/NetworkStatus";
 import ToolOutlet from "./components/ToolOutlet";
 
+// Import ThemeProvider from our context file
+import { ThemeProvider } from "./context/ThemeContext.jsx";
+
 // Context Menu Items configuratio
 const menuItems = [
   {
@@ -681,11 +684,10 @@ const ContextMenuWrapper = ({ children }) => {
   );
 };
 
-export const WidgetTransparencyContext = React.createContext();
+// Create context for widget transparency
+export const WidgetTransparencyContext = createContext();
 
-// Add theme context and optimized theme handling
-export const ThemeContext = createContext();
-
+// SearchPageWrapper component
 const SearchPageWrapper = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
@@ -723,63 +725,22 @@ const App = () => {
     parseInt(localStorage.getItem("widgetTransparency") || "100")
   );
 
-  // Initialize theme state from localStorage
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const savedTheme = localStorage.getItem("theme");
-    return savedTheme === "dark";
-  });
-
-  // Memoize theme context value to prevent unnecessary re-renders
-  // const themeContextValue = useMemo(
-  //   () => ({
-  //     isDarkMode,
-  //     toggleTheme: () => {
-  //       setIsDarkMode((prev) => {
-  //         const newMode = !prev;
-  //         localStorage.setItem("theme", newMode ? "dark" : "light");
-  //         return newMode;
-  //       });
-  //     },
-  //   }),
-  //   [isDarkMode]
-  // );
-  const themeContextValue = {
-    isDarkMode,
-    toggleTheme: () => {
-      setIsDarkMode((prev) => {
-        const newMode = !prev;
-        localStorage.setItem("theme", newMode ? "dark" : "light");
-        // Force a re-render of components by dispatching a custom event
-        window.dispatchEvent(new Event("themeChanged"));
-        return newMode;
-      });
-    },
-  };
-
-  // Apply theme changes with optimized performance
-  useEffect(() => {
-    // Use requestAnimationFrame to batch DOM updates
-    requestAnimationFrame(() => {
-      document.documentElement.classList.toggle("dark", isDarkMode);
-      document.documentElement.classList.toggle("theme-transition", true);
-      document.documentElement.classList.toggle("hardware-accelerated", true);
-    });
-  }, [isDarkMode]);
-
-  // Memoize the context value
-  const contextValue = useMemo(
+  // Memoize the widget transparency context value
+  const widgetTransparencyContextValue = useMemo(
     () => ({
       widgetTransparent,
       setWidgetTransparent,
     }),
     [widgetTransparent]
   );
+
   return (
-    // <PayPalProvider>
-    <ThemeContext.Provider value={themeContextValue}>
-      <WidgetTransparencyContext.Provider value={contextValue}>
+    // Use ThemeProvider from ThemeContext.jsx
+    <ThemeProvider>
+      <WidgetTransparencyContext.Provider
+        value={widgetTransparencyContextValue}
+      >
         <AuthProvider>
-          {/* <SubscriptionProvider> */}
           <Router>
             <Routes>
               {/* Public Routes */}
@@ -941,11 +902,10 @@ const App = () => {
               </Route>
             </Routes>
           </Router>
-          {/* </SubscriptionProvider> */}
+          <NetworkStatus />
         </AuthProvider>
-        <NetworkStatus />
       </WidgetTransparencyContext.Provider>
-    </ThemeContext.Provider>
+    </ThemeProvider>
   );
 };
 

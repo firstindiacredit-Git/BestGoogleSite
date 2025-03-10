@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useContext } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Bold,
   Underline,
@@ -15,7 +15,7 @@ import {
 import { HiOutlineNumberedList } from "react-icons/hi2";
 import { RxHamburgerMenu } from "react-icons/rx";
 import { createPortal } from "react-dom";
-import { ThemeContext } from "../App";
+import { useTheme } from "../context/ThemeContext";
 
 const preventScroll = (prevent) => {
   document.body.style.overflow = prevent ? "hidden" : "";
@@ -45,7 +45,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
     right: null,
   });
   const [isEditing, setIsEditing] = useState(false);
-  const { isDarkMode } = useContext(ThemeContext);
+  const { isDarkMode } = useTheme();
   const [isFullScreen, setIsFullScreen] = useState(false);
 
   const textareaRef = useRef(null);
