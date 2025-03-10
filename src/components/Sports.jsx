@@ -49,7 +49,7 @@ const SportsLeagues = () => {
       } else if (selectedCategory === "cricket") {
         // Fetch cricket data from cricket API
         const response = await fetch(
-          "https://api.cricapi.com/v1/cricScore?apikey=0da59eab-0d6c-4950-b0ea-454786bb63e2"
+          "https://bgs-backend.vercel.app/api/top100/cricket "
         );
         const cricketData = await response.json();
 
@@ -108,7 +108,7 @@ const SportsLeagues = () => {
       } else if (selectedCategory === "basketball") {
         const currentDate = getCurrentDate();
         const response = await fetch(
-          `https://v1.basketball.api-sports.io/games?date=${currentDate}`,
+          `https://bgs-backend.vercel.app/api/top100/basketball?date=${currentDate}`,
           {
             headers: {
               "x-apisports-key": "47f4d4ae2ec97f80df18a074084c523b",
@@ -169,7 +169,7 @@ const SportsLeagues = () => {
       } else if (selectedCategory === "baseball") {
         const currentDate = getCurrentDate();
         const response = await fetch(
-          `https://v1.baseball.api-sports.io/games?date=${currentDate}`,
+          `https://bgs-backend.vercel.app/api/top100/baseball?date=${currentDate}`,
           {
             headers: {
               "x-apisports-key": "47f4d4ae2ec97f80df18a074084c523b",
@@ -244,7 +244,7 @@ const SportsLeagues = () => {
       } else if (selectedCategory === "hockey") {
         const currentDate = getCurrentDate();
         const response = await fetch(
-          `https://v1.hockey.api-sports.io/games?date=${currentDate}`,
+          `https://bgs-backend.vercel.app/api/top100/hockey?date=${currentDate}`,
           {
             headers: {
               "x-apisports-key": "47f4d4ae2ec97f80df18a074084c523b",
@@ -311,7 +311,7 @@ const SportsLeagues = () => {
       } else if (selectedCategory === "volleyball") {
         const currentDate = getCurrentDate();
         const response = await fetch(
-          `https://v1.volleyball.api-sports.io/games?date=${currentDate}`,
+          `https://bgs-backend.vercel.app/api/top100/volleyball?date=${currentDate}`,
           {
             headers: {
               "x-apisports-key": "47f4d4ae2ec97f80df18a074084c523b",
