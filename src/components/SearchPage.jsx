@@ -224,133 +224,123 @@ const SearchPage = ({ isToolPage = false }) => {
   );
 
   // Memoize the settings menu configuration
-  const settingsMenu = useMemo(
-    () => ({
-      items: [
-        {
-          key: "bgOpacity",
-          label: (
-            <>
-              <div
-                className="flex flex-col gap-2"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <span className="text-sm text-gray-600 dark:text-gray-300">
-                  Background Opacity
-                </span>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={sliderTransparency}
-                  onChange={(e) =>
-                    handleTempTransparencyChange(parseInt(e.target.value))
-                  }
-                  className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
-                />
-                <span className="text-sm text-gray-600 dark:text-gray-300 text-right">
-                  {sliderTransparency}%
-                </span>
-              </div>
-              <div
-                className="flex gap-2 pt-2 border-t dark:border-gray-700"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <button
-                  className="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
-                  onClick={() => handleTempTransparencyChange(85)}
-                >
-                  Reset
-                </button>
-                <button
-                  className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 ml-auto"
-                  onClick={() => handleApplyChanges()}
-                >
-                  Apply
-                </button>
-              </div>
-            </>
-          ),
-        },
-        {
-          key: "widgetOpacity",
-          label: (
-            <>
-              <div
-                className="flex flex-col gap-2"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <span className="text-sm text-gray-600 dark:text-gray-300">
-                  Widget Opacity
-                </span>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={sliderWidgetTransparency}
-                  onChange={(e) =>
-                    handleTempWidgetTransparencyChange(parseInt(e.target.value))
-                  }
-                  className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
-                />
-                <span className="text-sm text-gray-600 dark:text-gray-300 text-right">
-                  {sliderWidgetTransparency}%
-                </span>
-              </div>
-            </>
-          ),
-        },
-        {
-          key: "textColor",
-          label: (
+  const settingsMenu = useMemo(() => ({
+    items: [
+      {
+        key: "bgOpacity",
+        label: (
+          <div className="dark:bg-black -m-1">
             <div
-              className="flex flex-col gap-2"
+              className="flex flex-col gap-2 p-3 dark:bg-black"
               onClick={(e) => e.stopPropagation()}
             >
               <span className="text-sm text-gray-600 dark:text-gray-300">
-                Text Color
+                Background Opacity
               </span>
-              <div className="flex gap-2 items-center">
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={textColor}
-                  onChange={(e) =>
-                    handleTextColorChange(parseInt(e.target.value))
-                  }
-                  className="w-full h-2 bg-gradient-to-r from-black via-gray-500 to-white rounded-lg appearance-none cursor-pointer dark:from-gray-900"
-                />
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleResetTextColor();
-                  }}
-                  className="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded transition-colors duration-200"
-                >
-                  Reset
-                </button>
-              </div>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={sliderTransparency}
+                onChange={(e) =>
+                  handleTempTransparencyChange(parseInt(e.target.value))
+                }
+                className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
+              />
+              <span className="text-sm text-gray-600 dark:text-gray-300 text-right">
+                {sliderTransparency}%
+              </span>
             </div>
-          ),
-        },
-      ],
-    }),
-    [
-      sliderTransparency,
-      sliderWidgetTransparency,
-      textColor,
-      handleTempTransparencyChange,
-      handleTempWidgetTransparencyChange,
-      handleTextColorChange,
-      handleApplyChanges,
-      handleResetChanges,
-      handleResetTextColor,
-      isDarkMode,
-      visibleHandle,
-      changeVisible,
-    ]
-  );
+            <div
+              className="flex gap-2 p-3 border-t dark:border-gray-800 dark:bg-black"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleApplyChanges();
+                }}
+                className="flex-1 px-3 py-1.5 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition-colors"
+              >
+                Apply
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleResetChanges();
+                }}
+                className="px-3 py-1.5 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+        ),
+      },
+      {
+        key: "widgetOpacity",
+        label: (
+          <div className="dark:bg-black -m-1">
+            <div
+              className="flex flex-col gap-2 p-3"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <span className="text-sm text-gray-600 dark:text-gray-300">
+                Widget Opacity
+              </span>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={sliderWidgetTransparency}
+                onChange={(e) =>
+                  handleTempWidgetTransparencyChange(parseInt(e.target.value))
+                }
+                className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
+              />
+              <span className="text-sm text-gray-600 dark:text-gray-300 text-right">
+                {sliderWidgetTransparency}%
+              </span>
+            </div>
+          </div>
+        ),
+      },
+      {
+        key: "textColor",
+        label: (
+          <div
+            className="flex flex-col gap-2 p-3 dark:bg-black -m-1"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <span className="text-sm text-gray-600 dark:text-gray-300">
+              Text Color
+            </span>
+            <div className="flex gap-2 items-center">
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={textColor}
+                onChange={(e) =>
+                  handleTextColorChange(parseInt(e.target.value))
+                }
+                className="w-full h-2 bg-gradient-to-r from-black via-gray-500 to-white rounded-lg appearance-none cursor-pointer dark:from-gray-900"
+              />
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleResetTextColor();
+                }}
+                className="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 rounded transition-colors duration-200"
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+        ),
+      },
+    ],
+  }));
 
   // Add a useEffect to handle theme changes specifically for this component
   useEffect(() => {
@@ -586,7 +576,11 @@ const SearchPage = ({ isToolPage = false }) => {
                       >
                         <span className="drop-shadow-md">TOOL</span>
                       </button>
-                      <Dropdown menu={settingsMenu} trigger={["click"]}>
+                      <Dropdown
+                        menu={settingsMenu}
+                        trigger={["click"]}
+                        overlayClassName="[&_.ant-dropdown-menu]:p-0 [&_.ant-dropdown-menu-item]:p-0 [&_ul]:dark:bg-black"
+                      >
                         <button className="px-4 py-2 text-sm font-medium rounded-md  transition-all dark:text-white hover:bg-gray-100 dark:hover:bg-[#28283A] flex items-center">
                           <Settings className="w-5 h-5" />
                         </button>

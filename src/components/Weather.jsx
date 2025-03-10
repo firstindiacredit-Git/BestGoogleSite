@@ -11,16 +11,16 @@ const WEATHER_CARDS = {
   // Sunny (yellow)
   SUNNY: {
     background: "#FFD36E",
-    darkShade: "#2D2A1F", // Dark yellow-brown
-    darkerShade: "#1A1914", // Darker yellow-brown
+    darkShade: "#ffae00", // Dark yellow-brown
+    darkerShade: "#c18400", // Darker yellow-brown
     color: "#FFFFFF",
     icon: "☀️",
   },
   // Cloudy (light blue)
   CLOUDY: {
-    background: "#92B4D2",
-    darkShade: "#1F2A3D", // Dark blue-gray
-    darkerShade: "#131B27", // Darker blue-gray
+    background: "#3aa3ff",
+    darkShade: "#0070d3", // Dark blue-gray
+    darkerShade: "#0058a5", // Darker blue-gray
     color: "#FFFFFF",
     icon: "☁️",
   },
@@ -208,17 +208,9 @@ const Weather = ({ collapsed }) => {
     }
   };
 
-  const isCollapse = () => {
-    setisVisible(!isVisible);
-  };
-
   useEffect(() => {
     getUserLocation();
   }, [unit]);
-
-  const getDayName = (date) => {
-    return new Date(date).toLocaleDateString("en-US", { weekday: "short" });
-  };
 
   const getBrowserInfo = () => {
     const userAgent = navigator.userAgent;
@@ -271,33 +263,33 @@ const Weather = ({ collapsed }) => {
       <div className="current-weather-card overflow-hidden rounded-lg shadow-md">
         {/* Card Header - Color Block with Temperature and Icon */}
         <div
-          className="p-5 flex justify-between items-start"
+          className="p-3 flex justify-between items-start"
           style={{ background: cardStyle.background, color: cardStyle.color }}
         >
           <div>
-            <div className="text-6xl font-bold">{temperature}°</div>
-            <div className="text-xl mt-2 opacity-90">{condition}</div>
+            <div className="text-5xl font-bold">{temperature}°</div>
+            <div className="text-lg mt-1 opacity-90">{condition}</div>
           </div>
-          <div className="text-5xl">{cardStyle.icon}</div>
+          <div className="text-4xl">{cardStyle.icon}</div>
         </div>
 
         {/* Card Body - Location and Details */}
         <div
           style={{ background: cardStyle.darkShade, color: "#FFFFFF" }}
-          className="p-4"
+          className="p-2"
         >
-          <div className="text-lg font-medium">{location}</div>
-          <div className="text-sm opacity-80 mt-1">{description}</div>
-          <div className="text-sm opacity-70 mt-1">Humidity: {humidity}%</div>
+          <div className="text-base font-medium">{location}</div>
+          <div className="text-xs opacity-80">{description}</div>
+          <div className="text-xs opacity-70">Humidity: {humidity}%</div>
         </div>
 
         {/* Card Footer - Time & Date */}
         <div
           style={{ background: cardStyle.darkerShade, color: "#FFFFFF" }}
-          className="p-3 flex justify-between items-center"
+          className="p-2 flex justify-between items-center"
         >
-          <span className="text-sm font-medium">{time}</span>
-          <span className="text-sm">{date}</span>
+          <span className="text-xs font-medium">{time}</span>
+          <span className="text-xs">{date}</span>
         </div>
       </div>
     );
@@ -308,29 +300,29 @@ const Weather = ({ collapsed }) => {
     const cardStyle = getWeatherCardStyle(condition);
 
     return (
-      <div className="weather-card overflow-hidden rounded-lg shadow-md">
+      <div className="weather-card w-full overflow-hidden rounded-lg shadow-md">
         {/* Card Header - Color Block with Temperature and Icon */}
         <div
-          className="p-4 flex justify-between items-start"
+          className="p-2 flex justify-between items-start"
           style={{ background: cardStyle.background, color: cardStyle.color }}
         >
-          <div className="text-4xl font-bold">{temperature}°</div>
-          <div className="text-3xl">{cardStyle.icon}</div>
+          <div className="text-2xl font-bold">{temperature}°</div>
+          <div className="text-2xl">{cardStyle.icon}</div>
         </div>
 
         {/* Card Body - Location */}
         <div
           style={{ background: cardStyle.darkShade, color: "#FFFFFF" }}
-          className="p-3"
+          className="p-1.5"
         >
-          <div className="text-sm opacity-90">{location}</div>
-          <div className="text-xs opacity-70 mt-1">{condition}</div>
+          <div className="text-xs opacity-90">{location}</div>
+          <div className="text-[10px] opacity-70">{condition}</div>
         </div>
 
         {/* Card Footer - Time & Date */}
         <div
           style={{ background: cardStyle.darkerShade, color: "#FFFFFF" }}
-          className="p-2 flex justify-between items-center text-xs"
+          className="p-1 flex justify-between items-center text-[10px]"
         >
           <span>{time}</span>
           <span>{date}</span>
@@ -340,12 +332,12 @@ const Weather = ({ collapsed }) => {
   };
 
   return (
-    <div className="p-2 backdrop-blur-sm">
+    <div className="p-3 backdrop-blur-sm">
       {isVisible && (
-        <div className="weather-container h-[19rem]">
+        <div className="weather-container min-h-[15rem]">
           <div className="content-wrapper flex-col">
             {currentWeather && (
-              <>
+              <div className="flex flex-col gap-2">
                 {/* Main Weather Card */}
                 <CurrentWeatherCard
                   temperature={Math.round(currentWeather.main.temp)}
@@ -366,7 +358,7 @@ const Weather = ({ collapsed }) => {
                 />
 
                 {/* Forecast Section */}
-                <div className="forecast-container h-[48.5%] w-full flex justify-between">
+                <div className="forecast-container h-[50%] gap-3 w-full flex justify-between mt-1">
                   {forecast.map((day, index) => (
                     <WeatherCard
                       key={index}
@@ -386,7 +378,7 @@ const Weather = ({ collapsed }) => {
                     />
                   ))}
                 </div>
-              </>
+              </div>
             )}
           </div>
         </div>
