@@ -64,7 +64,8 @@ const LandingPage = () => {
 
       company: "SavvyCal",
       image:
-        "https://crm.pizeonfly.com/employee/employeeImage-1740052405901-Screenshot 2025-02-20 172204.png",
+        // "https://crm.pizeonfly.com/employee/employeeImage-1740052405901-Screenshot 2025-02-20 172204.png",
+        "https://img.freepik.com/free-photo/portrait-white-man-isolated_53876-40306.jpg?t=st=1741669777~exp=1741673377~hmac=cf1b46d3ea3545ee4620ecdf0a62589066eca4fc9223f3f2b694c9ea9e1ccfcf&w=900",
       accent: "from-indigo-500 to-purple-500",
     },
     {
@@ -74,7 +75,8 @@ const LandingPage = () => {
 
       company: "SavvyCal",
       image:
-        "https://crm.pizeonfly.com/employee/employeeImage-1738233144046-135040117-min.png",
+        // "https://crm.pizeonfly.com/employee/employeeImage-1738233144046-135040117-min.png",
+        "https://img.freepik.com/free-photo/handsome-man-smiling-happy-face-portrait-close-up_53876-145493.jpg?t=st=1741669789~exp=1741673389~hmac=5b14aba25ae1101b3bf83a3d70a116284b016b0e139b2635dbc0766abae495f7&w=900",
       accent: "from-indigo-500 to-purple-500",
     },
 
@@ -85,7 +87,7 @@ const LandingPage = () => {
 
       company: "Brex",
       image:
-        "https://crm.pizeonfly.com/employee/employeeImage-1733120594825-IMG_2025-1.jpg",
+        "https://img.freepik.com/free-photo/indian-man-smiling-mockup-psd-cheerful-expression-closeup-portra_53876-143269.jpg?t=st=1741669790~exp=1741673390~hmac=98f47bc29b505c3178c74891efaddc8753d15c3304bdf780db7893e123ef665e&w=996",
       accent: "from-purple-500 to-pink-500",
     },
     {
@@ -95,7 +97,7 @@ const LandingPage = () => {
 
       company: "Brex",
       image:
-        "https://crm.pizeonfly.com/employee/employeeImage-1732530813797-sino.jpeg",
+        "https://img.freepik.com/free-photo/portrait-handsome-brunet-unshaven-adult-man-looks-with-calm-confident-expression-has-serious-look-wears-casual-jumper-poses-making-photo-against-white-background-being-hard-impress_273609-57668.jpg?t=st=1741669872~exp=1741673472~hmac=f82ca6a1bfe3a236ffb3d84cd42bad1ddfb081d8e24aa1b9f348e90bc8904b94&w=1060",
       accent: "from-purple-500 to-pink-500",
     },
     {
@@ -105,7 +107,7 @@ const LandingPage = () => {
 
       company: "Brex",
       image:
-        "https://crm.pizeonfly.com/employee/employeeImage-1733202653628-Untitled design (4).png",
+        "https://img.freepik.com/free-photo/young-man-white-shirt-looking-camera-looking-happy_176474-83327.jpg?t=st=1741669898~exp=1741673498~hmac=d4bfc210e000d7b574b0e78766f1ad9949fd7c65b4c97f6ca846c42029668fe1&w=1060",
       accent: "from-purple-500 to-pink-500",
     },
     {
@@ -115,7 +117,7 @@ const LandingPage = () => {
 
       company: "Brex",
       image:
-        "https://crm.pizeonfly.com/employee/employeeImage-1728980580983-IMG20241007191701.jpg",
+        "https://img.freepik.com/free-photo/close-up-portrait-handsome-unshaven-man-with-thick-beard-mustache-has-dark-hair-looks-seriously_273609-16755.jpg?t=st=1741669903~exp=1741673503~hmac=16d891bbf31286055014ca8d387ba137ba4d52e4c4c33a23a96549e1876d5b46&w=1060",
       accent: "from-purple-500 to-pink-500",
     },
     // Add more testimonials...
@@ -144,7 +146,7 @@ const LandingPage = () => {
                   <img
                     src={testimonial.image}
                     alt={testimonial.name}
-                    className="h-10 w-10 rounded-full bg-gray-50"
+                    className="h-10 w-10 rounded-full object-cover bg-gray-50"
                   />
                   <div>
                     <div className="font-semibold">{testimonial.name}</div>

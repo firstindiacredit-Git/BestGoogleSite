@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { Back } from './back';
+import React, { useState } from "react";
+import { Back } from "./back";
 
 function App() {
-  const [email, setEmail] = useState('');
-  const [description, setDescription] = useState('');
-  const [amount, setAmount] = useState('');
-  const [currency, setCurrency] = useState('USD');
-  const [generatedLink, setGeneratedLink] = useState('');
+  const [email, setEmail] = useState("");
+  const [description, setDescription] = useState("");
+  const [amount, setAmount] = useState("");
+  const [currency, setCurrency] = useState("USD");
+  const [generatedLink, setGeneratedLink] = useState("");
 
   // Function to generate the PayPal link
   const generateLink = () => {
@@ -18,35 +18,35 @@ function App() {
   // Function to copy the link to clipboard
   const copyToClipboard = () => {
     navigator.clipboard.writeText(generatedLink);
-    alert('Link copied to clipboard');
+    alert("Link copied to clipboard");
   };
 
   // Function to clear inputs and the link
   const clearInputs = () => {
-    setEmail('');
-    setDescription('');
-    setAmount('');
-    setCurrency('USD');
-    setGeneratedLink('');
+    setEmail("");
+    setDescription("");
+    setAmount("");
+    setCurrency("USD");
+    setGeneratedLink("");
   };
 
   // Function to open the generated link
   const openLink = () => {
     if (generatedLink) {
-      window.open(generatedLink, '_blank');
+      window.open(generatedLink, "_blank");
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center py-8">
+    <div className=" min-h-screen bg-white dark:bg-[#28283a] flex items-center justify-center py-8">
       <div className="w-full max-w-2xl mx-auto px-4">
-        <div className="bg-white rounded-[30px] shadow-lg overflow-hidden">
+        <div className="bg-white dark:bg-[#513a7a] rounded-lg shadow-lg overflow-hidden">
           <div className="p-5 relative">
             <div className="absolute top-8 left-5">
               <Back />
             </div>
-            
-            <h1 className="text-xl font-bold text-center text-gray-800 mb-6 pt-3">
+
+            <h1 className="text-xl font-bold text-center text-gray-800 dark:text-white mb-6 pt-3">
               PayPal Link Generator
             </h1>
 
@@ -55,7 +55,9 @@ function App() {
               <div className="space-y-4">
                 {/* Email Input */}
                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4">
-                  <label className="block text-gray-700 text-base font-semibold mb-2">PayPal Email</label>
+                  <label className="block text-gray-700 dark:text-white text-base font-semibold mb-2">
+                    PayPal Email
+                  </label>
                   <input
                     type="email"
                     value={email}
@@ -67,7 +69,9 @@ function App() {
 
                 {/* Description Input */}
                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4">
-                  <label className="block text-gray-700 text-base font-semibold mb-2">Description</label>
+                  <label className="block text-gray-700 dark:text-white text-base font-semibold mb-2">
+                    Description
+                  </label>
                   <input
                     type="text"
                     value={description}
@@ -79,7 +83,9 @@ function App() {
 
                 {/* Amount Input */}
                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4">
-                  <label className="block text-gray-700 text-base font-semibold mb-2">Amount</label>
+                  <label className="block text-gray-700 dark:text-white text-base font-semibold mb-2">
+                    Amount
+                  </label>
                   <div className="relative">
                     <input
                       type="number"
@@ -93,7 +99,9 @@ function App() {
 
                 {/* Currency Selection */}
                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4">
-                  <label className="block text-gray-700 text-base font-semibold mb-2">Currency</label>
+                  <label className="block text-gray-700 dark:text-white text-base font-semibold mb-2">
+                    Currency
+                  </label>
                   <select
                     value={currency}
                     onChange={(e) => setCurrency(e.target.value)}
@@ -112,13 +120,13 @@ function App() {
               <div className="flex justify-center gap-3 mt-2">
                 <button
                   onClick={generateLink}
-                  className="px-4 py-2 border border-bg-black text- text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                  className="px-4 py-2 border border-black dark:border-white dark:bg-gray-800 text-white  text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200"
                 >
                   Generate Link
                 </button>
                 <button
                   onClick={clearInputs}
-                  className="px-4 py-2 bg-gray-600 text-white text-sm font-semibold rounded-lg hover:bg-gray-700 transition-colors duration-200"
+                  className="px-4 py-2 bg-gray-600 dark:bg-gray-800 border border-black dark:border-white text-white text-sm font-semibold rounded-lg hover:bg-gray-700 transition-colors duration-200"
                 >
                   Clear
                 </button>
@@ -127,7 +135,9 @@ function App() {
               {/* Generated Link Section */}
               {generatedLink && (
                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 mt-2">
-                  <h2 className="text-base font-semibold text-gray-700 mb-2">Generated PayPal Link</h2>
+                  <h2 className="text-base font-semibold text-gray-700 mb-2">
+                    Generated PayPal Link
+                  </h2>
                   <textarea
                     readOnly
                     value={generatedLink}

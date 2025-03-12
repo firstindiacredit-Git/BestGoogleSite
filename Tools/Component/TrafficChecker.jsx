@@ -33,7 +33,8 @@ const TrafficChecker = () => {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            "x-rapidapi-key": "4418627201msh7986898a90dc9b9p11b3a7jsn0fc2cf19b847",
+            "x-rapidapi-key":
+              "4418627201msh7986898a90dc9b9p11b3a7jsn0fc2cf19b847",
             "x-rapidapi-host": "similarweb-traffic.p.rapidapi.com",
           },
         }
@@ -44,7 +45,8 @@ const TrafficChecker = () => {
       if (response.ok) {
         const trafficSources = data?.TrafficSources || {};
         const topCountries = data?.TopCountryShares?.map(
-          (country) => `${country.CountryCode} (${(country.Value * 100).toFixed(2)}%)`
+          (country) =>
+            `${country.CountryCode} (${(country.Value * 100).toFixed(2)}%)`
         );
 
         setTrafficData({
@@ -70,22 +72,22 @@ const TrafficChecker = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 flex justify-center pt-8">
+    <div className="min-h-screen bg-white dark:bg-[#28283a] flex justify-center pt-8">
       <div className="w-full max-w-2xl mx-auto px-4">
-        <div className="bg-white rounded-[30px] shadow-lg overflow-hidden">
+        <div className="bg-white dark:bg-[#513a7a] rounded-lg shadow-lg overflow-hidden">
           <div className="p-4 relative">
             <div className="absolute top-6 left-4">
               <Back />
             </div>
-            
-            <h1 className="text-xl font-bold text-center text-gray-800 mb-4 pt-2">
+
+            <h1 className="text-xl font-bold text-center dark:text-white text-gray-800 mb-4 pt-2">
               Website Traffic Checker
             </h1>
 
             <div className="grid gap-3 max-w-xl mx-auto">
               {/* Input Section */}
               <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-3">
-                <label className="block text-gray-700 text-base font-semibold mb-1">
+                <label className="block text-gray-700 dark:text-white text-base font-semibold mb-1">
                   Website URL
                 </label>
                 <form onSubmit={handleUrlSubmit} className="space-y-2">
@@ -99,14 +101,18 @@ const TrafficChecker = () => {
                   <div className="flex justify-center">
                     <button
                       type="submit"
-                      className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                      className="px-4 py-2  text-white text-sm font-semibold rounded-lg dark:bg-gray-800 mt-5 transition-colors duration-200"
                       disabled={loading}
                     >
                       {loading ? "Checking..." : "Check Traffic"}
                     </button>
                   </div>
                 </form>
-                {error && <p className="text-red-500 text-sm mt-2 text-center">{error}</p>}
+                {error && (
+                  <p className="text-red-500 text-sm mt-2 text-center">
+                    {error}
+                  </p>
+                )}
               </div>
 
               {/* Results Section */}
@@ -117,12 +123,18 @@ const TrafficChecker = () => {
                   </h2>
                   <div className="space-y-2">
                     <div className="bg-white rounded-lg p-2 border-2 border-gray-200">
-                      <p className="text-sm font-semibold text-gray-600">Total Visits</p>
-                      <p className="text-lg font-bold text-gray-800">{trafficData.totalVisits}</p>
+                      <p className="text-sm font-semibold text-gray-600">
+                        Total Visits
+                      </p>
+                      <p className="text-lg font-bold text-gray-800">
+                        {trafficData.totalVisits}
+                      </p>
                     </div>
-                    
+
                     <div className="bg-white rounded-lg p-2 border-2 border-gray-200">
-                      <p className="text-sm font-semibold text-gray-600">Top Countries</p>
+                      <p className="text-sm font-semibold text-gray-600">
+                        Top Countries
+                      </p>
                       <p className="text-sm text-gray-800">
                         {trafficData.topCountries.length > 0
                           ? trafficData.topCountries.join(", ")
@@ -131,16 +143,20 @@ const TrafficChecker = () => {
                     </div>
 
                     <div className="bg-white rounded-lg p-2 border-2 border-gray-200">
-                      <p className="text-sm font-semibold text-gray-600 mb-1">Traffic Sources</p>
+                      <p className="text-sm font-semibold text-gray-600 mb-1">
+                        Traffic Sources
+                      </p>
                       <div className="grid grid-cols-2 gap-2">
-                        {Object.entries(trafficData.trafficSources).map(([source, value]) => (
-                          <div key={source} className="text-sm">
-                            <span className="text-gray-600">{source}:</span>{" "}
-                            <span className="font-semibold text-gray-800">
-                              {value.toFixed(2)}%
-                            </span>
-                          </div>
-                        ))}
+                        {Object.entries(trafficData.trafficSources).map(
+                          ([source, value]) => (
+                            <div key={source} className="text-sm">
+                              <span className="text-gray-600">{source}:</span>{" "}
+                              <span className="font-semibold text-gray-800">
+                                {value.toFixed(2)}%
+                              </span>
+                            </div>
+                          )
+                        )}
                       </div>
                     </div>
                   </div>

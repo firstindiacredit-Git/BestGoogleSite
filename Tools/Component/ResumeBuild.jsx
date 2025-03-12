@@ -1,24 +1,24 @@
-import React, { useState } from 'react';
-import ResumeForm from './resume/ResumeForm';
-import ResumePreview from './resume/ResumePreview';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
-import { Back } from './back';
+import React, { useState } from "react";
+import ResumeForm from "./resume/ResumeForm";
+import ResumePreview from "./resume/ResumePreview";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import { Back } from "./back";
 
 const ResumeBuild = () => {
   const [resumeData, setResumeData] = useState(null);
-  const [themeColor, setThemeColor] = useState('#2563eb'); // Default blue theme
-  const [selectedFormat, setSelectedFormat] = useState('modern');
+  const [themeColor, setThemeColor] = useState("#2563eb"); // Default blue theme
+  const [selectedFormat, setSelectedFormat] = useState("modern");
 
   const handleDownload = () => {
-    const resume = document.getElementById('resume-preview');
+    const resume = document.getElementById("resume-preview");
     html2canvas(resume).then((canvas) => {
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save('resume.pdf');
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save("resume.pdf");
     });
   };
 
@@ -28,8 +28,8 @@ const ResumeBuild = () => {
         <div className="absolute top-0 left-4">
           <Back />
         </div>
-        
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-8 pt-2">
+
+        <h1 className="text-3xl font-bold text-center dark:text-white text-gray-800 mb-8 pt-2">
           Resume Builder
         </h1>
 
@@ -37,8 +37,8 @@ const ResumeBuild = () => {
           {/* Left Side - Form */}
           <div className="lg:w-1/2">
             <div className="bg-white rounded-[30px] shadow-lg p-6">
-              <ResumeForm 
-                onSubmit={setResumeData} 
+              <ResumeForm
+                onSubmit={setResumeData}
                 themeColor={themeColor}
                 setThemeColor={setThemeColor}
                 selectedFormat={selectedFormat}
@@ -48,12 +48,15 @@ const ResumeBuild = () => {
           </div>
 
           {/* Right Side - Preview */}
-          <div className="lg:w-1/2">
-            {resumeData && (
+          <div className="lg:w-1/2 w-full">
+            {resumeData ? (
               <div className="sticky top-8">
-                <div id="resume-preview" className="bg-white rounded-[30px] shadow-lg overflow-hidden">
-                  <ResumePreview 
-                    data={resumeData} 
+                <div
+                  id="resume-preview"
+                  className="bg-white rounded-[30px] shadow-lg overflow-hidden"
+                >
+                  <ResumePreview
+                    data={resumeData}
                     themeColor={themeColor}
                     selectedFormat={selectedFormat}
                   />
@@ -66,6 +69,12 @@ const ResumeBuild = () => {
                     Download Resume as PDF
                   </button>
                 </div>
+              </div>
+            ) : (
+              <div className="flex justify-center bg-white w-[60%] items-center h-full">
+                <p className="text-gray-800">
+                  Fill the form to generate resume
+                </p>
               </div>
             )}
           </div>

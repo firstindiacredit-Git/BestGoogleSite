@@ -86,7 +86,7 @@ const NewsApp = () => {
               </a>
 
               <a href={news.url} target="_blank" rel="noopener noreferrer">
-                <div className="dark:text-gray-300 text-sm line-clamp-2 max-w-[150ch] truncate text-wrap overflow-ellipsis py-2">
+                <div className="dark:text-gray-300 text-sm line-clamp-2 max-w-[80ch] truncate overflow-ellipsis py-2">
                   {news.description}
                 </div>
               </a>

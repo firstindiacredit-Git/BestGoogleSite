@@ -708,7 +708,7 @@ function PopularBookmarks() {
       });
 
       await batch.commit();
-      message.success("Category position updated");
+      // message.success("Category position updated");
     } catch (error) {
       console.error("Error updating category positions:", error);
       message.error("Failed to update category position");
