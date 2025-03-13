@@ -38,6 +38,16 @@ function BookmarkPage() {
     }
   };
 
+  // Add local storage functions
+  const saveToLocalStorage = (bookmarks) => {
+    localStorage.setItem("userBookmarks", JSON.stringify(bookmarks));
+  };
+
+  const getFromLocalStorage = () => {
+    const savedBookmarks = localStorage.getItem("userBookmarks");
+    return savedBookmarks ? JSON.parse(savedBookmarks) : [];
+  };
+
   const addBookmark = async (values) => {
     const bookmarkName = values.name || name;
     const bookmarkLink = values.link || link;
@@ -53,32 +63,41 @@ function BookmarkPage() {
     }
 
     try {
-      if (!user || !user.uid) {
-        alert("You must be logged in to add bookmarks.");
-        return;
+      const newBookmark = {
+        id: Date.now().toString(), // Generate unique ID for local storage
+        name: bookmarkName,
+        link: bookmarkLink,
+        category: "Popular",
+        createdAt: new Date().toISOString(),
+        createdByUser: true,
+      };
+
+      if (user) {
+        // If user is logged in, save to Firebase
+        const docRef = await addDoc(
+          collection(db, "users", user.uid, "shortcut"),
+          {
+            name: bookmarkName,
+            link: bookmarkLink,
+            category: "Popular",
+            createdAt: new Date(),
+          }
+        );
+
+        setUserBookmarks((prev) => [
+          ...prev,
+          {
+            id: docRef.id,
+            ...newBookmark,
+          },
+        ]);
+      } else {
+        // If user is not logged in, save to local storage
+        const currentBookmarks = getFromLocalStorage();
+        const updatedBookmarks = [...currentBookmarks, newBookmark];
+        saveToLocalStorage(updatedBookmarks);
+        setUserBookmarks(updatedBookmarks);
       }
-
-      const docRef = await addDoc(
-        collection(db, "users", user.uid, "shortcut"),
-        {
-          name: bookmarkName,
-          link: bookmarkLink,
-          category: "Popular",
-          createdAt: new Date(),
-        }
-      );
-
-      setUserBookmarks((prev) => [
-        ...prev,
-        {
-          id: docRef.id,
-          name: bookmarkName,
-          link: bookmarkLink,
-          category: "Popular",
-          createdAt: new Date(),
-          createdByUser: true,
-        },
-      ]);
 
       setSuccessMessage("Bookmark added successfully!");
       setName("");
@@ -94,52 +113,50 @@ function BookmarkPage() {
     addBookmark(values);
   };
 
-  // Fetch user and global bookmarks on mount
+  // Modify useEffect to handle both Firebase and local storage
   useEffect(() => {
-    const fetchBookmarks = async () => {
-      if (!user) return;
-
-      try {
-        // Fetch hidden bookmarks
-        const userDocRef = doc(db, "users", user.uid);
-        const userDocSnap = await getDoc(userDocRef);
-        const hiddenIds = userDocSnap.exists()
-          ? userDocSnap.data().hiddenBookmarkIds || []
-          : [];
-        setHiddenBookmarkIds(hiddenIds);
-
-        // Fetch user bookmarks
-        const userQuerySnapshot = await getDocs(
-          collection(db, "users", user.uid, "shortcut")
-        );
-        const userBookmarksList = userQuerySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-          createdByUser: true,
-        }));
-        setUserBookmarks(userBookmarksList);
-
-        // Fetch bookmarks set By admin
-        const globalQuerySnapshot = await getDocs(collection(db, "bookmarks"));
-        const globalBookmarksList = globalQuerySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-          createdByUser: false,
-          isHidden: hiddenIds.includes(doc.id),
-        }));
-        setGlobalBookmarks(globalBookmarksList);
-      } catch (error) {
-        console.error("Error fetching bookmarks:", error);
-      }
-    };
-
-    fetchBookmarks();
-  }, [user]);
-
-  // Track auth state
-  useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+
+      if (currentUser) {
+        // If user is logged in, fetch from Firebase
+        try {
+          const userDocRef = doc(db, "users", currentUser.uid);
+          const userDocSnap = await getDoc(userDocRef);
+          const hiddenIds = userDocSnap.exists()
+            ? userDocSnap.data().hiddenBookmarkIds || []
+            : [];
+          setHiddenBookmarkIds(hiddenIds);
+
+          const userQuerySnapshot = await getDocs(
+            collection(db, "users", currentUser.uid, "shortcut")
+          );
+          const userBookmarksList = userQuerySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+            createdByUser: true,
+          }));
+          setUserBookmarks(userBookmarksList);
+
+          const globalQuerySnapshot = await getDocs(
+            collection(db, "bookmarks")
+          );
+          const globalBookmarksList = globalQuerySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+            createdByUser: false,
+            isHidden: hiddenIds.includes(doc.id),
+          }));
+          setGlobalBookmarks(globalBookmarksList);
+        } catch (error) {
+          console.error("Error fetching bookmarks:", error);
+        }
+      } else {
+        // If user is not logged in, load from local storage
+        const localBookmarks = getFromLocalStorage();
+        setUserBookmarks(localBookmarks);
+        setGlobalBookmarks([]); // Clear global bookmarks for non-logged in users
+      }
     });
 
     return () => unsubscribeAuth();
@@ -152,12 +169,11 @@ function BookmarkPage() {
 
   const getFavicon = (url) => {
     try {
-      // const domain = new URL(url).hostname;
       return `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=64`
         ? `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=64`
         : "https://www.freeiconspng.com/uploads/web-icon-black-png-planet-web-world-icon-17.png";
     } catch (error) {
-      return "https://www.freeiconspng.com/uploads/web-icon-black-png-planet-web-world-icon-17.png"; // Fallback favicon
+      return "https://www.freeiconspng.com/uploads/web-icon-black-png-planet-web-world-icon-17.png";
     }
   };
 
@@ -173,23 +189,46 @@ function BookmarkPage() {
     if (!editingBookmark) return;
 
     try {
-      const docRef = doc(db, "users", user.uid, "shortcut", editingBookmark.id);
-      await updateDoc(docRef, {
+      const updatedData = {
         name: values.name || name,
         link: values.link || link,
-      });
+      };
 
-      setUserBookmarks((prev) =>
-        prev.map((bm) =>
+      if (user) {
+        // Update in Firebase for logged-in users
+        const docRef = doc(
+          db,
+          "users",
+          user.uid,
+          "shortcut",
+          editingBookmark.id
+        );
+        await updateDoc(docRef, updatedData);
+
+        setUserBookmarks((prev) =>
+          prev.map((bm) =>
+            bm.id === editingBookmark.id
+              ? {
+                  ...bm,
+                  ...updatedData,
+                }
+              : bm
+          )
+        );
+      } else {
+        // Update in local storage for non-logged-in users
+        const currentBookmarks = getFromLocalStorage();
+        const updatedBookmarks = currentBookmarks.map((bm) =>
           bm.id === editingBookmark.id
             ? {
                 ...bm,
-                name: values.name || name,
-                link: values.link || link,
+                ...updatedData,
               }
             : bm
-        )
-      );
+        );
+        saveToLocalStorage(updatedBookmarks);
+        setUserBookmarks(updatedBookmarks);
+      }
 
       setSuccessMessage("Bookmark updated successfully!");
       setEditingBookmark(null);
@@ -204,16 +243,21 @@ function BookmarkPage() {
   };
 
   const handleDeleteBookmark = async (bookmarkId) => {
-    const bookmark = userBookmarks.find((bm) => bm.id === bookmarkId);
-    if (!bookmark) {
-      // This is an admin bookmark, hide it instead
-      return handleHideBookmark(bookmarkId);
-    }
-
     try {
-      const docRef = doc(db, "users", user.uid, "shortcut", bookmarkId);
-      await deleteDoc(docRef);
-      setUserBookmarks((prev) => prev.filter((bm) => bm.id !== bookmarkId));
+      if (user) {
+        // Delete from Firebase for logged-in users
+        const docRef = doc(db, "users", user.uid, "shortcut", bookmarkId);
+        await deleteDoc(docRef);
+        setUserBookmarks((prev) => prev.filter((bm) => bm.id !== bookmarkId));
+      } else {
+        // Delete from local storage for non-logged-in users
+        const currentBookmarks = getFromLocalStorage();
+        const updatedBookmarks = currentBookmarks.filter(
+          (bm) => bm.id !== bookmarkId
+        );
+        saveToLocalStorage(updatedBookmarks);
+        setUserBookmarks(updatedBookmarks);
+      }
       setSuccessMessage("Bookmark deleted successfully!");
     } catch (error) {
       console.error("Error deleting bookmark:", error);
@@ -223,20 +267,29 @@ function BookmarkPage() {
 
   const handleHideBookmark = async (bookmarkId) => {
     try {
-      const newHiddenIds = [...hiddenBookmarkIds, bookmarkId];
-      setHiddenBookmarkIds(newHiddenIds);
+      if (user) {
+        const newHiddenIds = [...hiddenBookmarkIds, bookmarkId];
+        setHiddenBookmarkIds(newHiddenIds);
 
-      const userDocRef = doc(db, "users", user.uid);
-      await updateDoc(userDocRef, { hiddenBookmarkIds: newHiddenIds });
+        const userDocRef = doc(db, "users", user.uid);
+        await updateDoc(userDocRef, { hiddenBookmarkIds: newHiddenIds });
 
-      // Update the global bookmarks state to reflect the hidden status
-      setGlobalBookmarks((prev) =>
-        prev.map((bm) =>
-          bm.id === bookmarkId ? { ...bm, isHidden: true } : bm
-        )
-      );
+        setGlobalBookmarks((prev) =>
+          prev.map((bm) =>
+            bm.id === bookmarkId ? { ...bm, isHidden: true } : bm
+          )
+        );
 
-      setSuccessMessage("Bookmark hidden successfully!");
+        setSuccessMessage("Bookmark hidden successfully!");
+      } else {
+        // For non-logged-in users, just remove the bookmark from the list
+        const updatedBookmarks = userBookmarks.filter(
+          (bm) => bm.id !== bookmarkId
+        );
+        saveToLocalStorage(updatedBookmarks);
+        setUserBookmarks(updatedBookmarks);
+        setSuccessMessage("Bookmark removed successfully!");
+      }
     } catch (error) {
       console.error("Error hiding bookmark:", error);
       setErrorMessage("Failed to hide bookmark. Please try again.");
@@ -295,21 +348,12 @@ function BookmarkPage() {
                       Edit
                     </button>
                   )}
-                  {bookmark.createdByUser ? (
-                    <button
-                      onClick={() => handleDeleteBookmark(bookmark.id)}
-                      className="block w-full text-left px-2 py-1 text-sm text-red-500 hover:bg-gray-200"
-                    >
-                      Delete
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleHideBookmark(bookmark.id)}
-                      className="block w-full text-left px-2 py-1 text-sm text-red-500 hover:bg-gray-200"
-                    >
-                      Delete
-                    </button>
-                  )}
+                  <button
+                    onClick={() => handleDeleteBookmark(bookmark.id)}
+                    className="block w-full text-left px-2 py-1 text-sm text-red-500 hover:bg-gray-200"
+                  >
+                    Delete
+                  </button>
                 </div>
               )}
             </div>
@@ -392,6 +436,12 @@ function BookmarkPage() {
               className="dark:bg-[#513a7a] border dark:border-gray-600 dark:text-white"
             />
           </Form.Item>
+          {errorMessage && (
+            <div className="text-red-500 mb-4">{errorMessage}</div>
+          )}
+          {successMessage && (
+            <div className="text-green-500 mb-4">{successMessage}</div>
+          )}
         </Form>
       </Modal>
     </div>

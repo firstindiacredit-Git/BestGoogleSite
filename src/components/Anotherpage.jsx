@@ -326,8 +326,6 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
   }, [collapsedItems]);
 
   const handleColumnChange = async (numColumns) => {
-    if (!user) return;
-
     setPreviewColumns(numColumns);
     const redistributedItems = sortedItems.map((item, index) => ({
       ...item,
@@ -360,7 +358,7 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
           columns: previewColumns,
         });
       }
-      message.success("Layout updated successfully");
+      // message.success("Layout updated successfully");
     } catch (error) {
       console.error("Error saving layout:", error);
       message.error("Failed to save layout");
@@ -441,7 +439,7 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
       setSortedItems(sortedWidgets);
       setPreviewColumns(defaultLayout.columns);
 
-      message.success("Layout has been reset to default");
+      // message.success("Layout has been reset to default");
       setIsSorterOpen(false);
     } catch (error) {
       console.error("Error resetting layout:", error);

@@ -302,6 +302,29 @@ const SearchPage = ({ isToolPage = false }) => {
                 {sliderWidgetTransparency}%
               </span>
             </div>
+            <div
+              className="flex gap-2 p-3 border-t dark:border-gray-800 dark:bg-black"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleApplyChanges();
+                }}
+                className="flex-1 px-3 py-1.5 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition-colors"
+              >
+                Apply
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleResetChanges();
+                }}
+                className="px-3 py-1.5 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
+              >
+                Reset
+              </button>
+            </div>
           </div>
         ),
       },

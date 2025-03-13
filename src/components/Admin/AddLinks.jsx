@@ -41,7 +41,7 @@ function AddLinks() {
   const [editCategoryData, setEditCategoryData] = useState(null);
   const [isCategoryEditModalOpen, setIsCategoryEditModalOpen] = useState(false);
 
-  const ITEMS_PER_PAGE = 5;
+  const ITEMS_PER_PAGE = 10;
 
   // Filter categories and their links based on search term
   const filteredCategories = newCategories
