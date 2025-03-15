@@ -138,18 +138,32 @@ const getClockHandDegrees = (time, timeZone) => {
 const getTimeDifference = (baseTimeZone, targetTimeZone) => {
   const now = new Date();
 
-  // Calculate today's difference
-  const baseTimeToday = new Date(
+  // Get the time in milliseconds for both timezones
+  const baseTime = new Date(
     now.toLocaleString("en-US", { timeZone: baseTimeZone })
   );
-  const targetTimeToday = new Date(
+  const targetTime = new Date(
     now.toLocaleString("en-US", { timeZone: targetTimeZone })
   );
-  const diffHoursToday = (targetTimeToday - baseTimeToday) / (1000 * 60 * 60);
 
-  const signToday = diffHoursToday > 0 ? "+" : "";
+  // Calculate the raw offset in hours
+  const offsetHours = (targetTime - baseTime) / (1000 * 60 * 60);
 
-  return `Today: (${signToday}${diffHoursToday}h)`;
+  // Format the difference
+  const sign = offsetHours >= 0 ? "+" : "";
+  const absHours = Math.abs(offsetHours);
+
+  // Handle fractional hours (for timezones with 30/45 minute differences)
+  if (absHours % 1 !== 0) {
+    const hours = Math.floor(absHours);
+    const minutes = Math.round((absHours % 1) * 60);
+    if (hours === 0) {
+      return `${sign}${minutes}m`;
+    }
+    return `${sign}${hours}h ${minutes}m`;
+  }
+
+  return `${sign}${absHours}h`;
 };
 
 const isDaytime = (time, timeZone) => {
@@ -319,7 +333,6 @@ const preventScroll = (prevent) => {
 const ResponsiveWorldClock = () => {
   const [isAnalog, setIsAnalog] = useState(true);
   const [selectedTimezones, setSelectedTimezones] = useState(["Asia/Kolkata"]);
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -591,17 +604,33 @@ const ResponsiveWorldClock = () => {
       onMouseLeave={() => setIsHovering(false)}
       className="w-full max-w-xl dark:text-white backdrop-blur-sm rounded-sm flex flex-col relative p-4"
     >
-      <div className="flex flex-wrap justify-center gap-8">
-        {selectedTimezones.map((tz, index) => (
-          <TimeZoneClock
-            key={tz}
-            timeZone={tz}
-            isAnalog={isAnalog}
-            onRemove={() => removeTimeZone(index)}
-            baseTimeZone={selectedTimezones[0]}
-          />
-        ))}
-      </div>
+      {selectedTimezones.length > 0 ? (
+        <div className="flex flex-wrap justify-center gap-8">
+          {selectedTimezones.map((tz, index) => (
+            <TimeZoneClock
+              key={tz}
+              timeZone={tz}
+              isAnalog={isAnalog}
+              onRemove={() => removeTimeZone(index)}
+              baseTimeZone={selectedTimezones[0]}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="flex justify-center items-center min-h-[200px]">
+          <button
+            onClick={() => setIsDropdownOpen(true)}
+            className="flex flex-col items-center gap-2 p-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          >
+            <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+              <Plus className="w-8 h-8 text-gray-400 dark:text-gray-500" />
+            </div>
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              Add Clock
+            </span>
+          </button>
+        </div>
+      )}
 
       {/* Bottom Options Bar */}
       {isHovering && (

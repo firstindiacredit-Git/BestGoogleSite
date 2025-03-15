@@ -16,31 +16,35 @@ import NotebookAndSheet from "../components/NotebookAndSheet";
 import PasswordGenerator from "../components/PasswordGenerater";
 import News from "../components/News";
 import Tool from "../../Tools/Tool.jsx";
+
 import Sports from "../components/Sports";
 import Top100 from "../components/Top100";
 import "./style.css";
-import { Dropdown } from "antd";
+import { Dropdown, Skeleton, Input } from "antd";
 import { Settings } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
-function NewSearchPage({ isToolPage = false }) {
+const NewSearchPage = ({ isToolPage = false }) => {
   const { isDarkMode, toggleTheme } = useTheme();
   const [backgroundImage, setBackgroundImage] = useState("");
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [transparency, setTransparency] = useState(() =>
     parseInt(localStorage.getItem("bgTransparency") || "85")
   );
   const [textColor, setTextColor] = useState(() =>
-    parseInt(localStorage.getItem("textColorValue") || "100")
+    parseInt(localStorage.getItem("textColorValue") || "0")
   );
   const { widgetTransparent, setWidgetTransparent } = useContext(
     WidgetTransparencyContext
   );
   const [activeComponent, setActiveComponent] = useState("Anotherpage");
   const navigate = useNavigate();
-  const [visibleHandle, setVisibleHandle] = useState(
-    () => localStorage.getItem("uiMode") === "modern"
-  );
+  const [visibleHandle, setVisibleHandle] = useState(() => {
+    const savedMode = localStorage.getItem("uiMode");
+    return savedMode === null ? true : savedMode === "modern"; // Default to true (modern) if not set
+  });
 
   // Keep state for slider position
   const [sliderTransparency, setSliderTransparency] = useState(() =>
@@ -55,10 +59,33 @@ function NewSearchPage({ isToolPage = false }) {
   const tempWidgetTransparencyRef = useRef(sliderWidgetTransparency);
   const textColorRef = useRef(textColor);
 
+  const [isGoogleSearchLoaded, setIsGoogleSearchLoaded] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    const authInstance = getAuth();
+    const unsubscribe = onAuthStateChanged(
+      authInstance,
+      async (currentUser) => {
+        setUser(currentUser);
+        setLoading(false);
+      }
+    );
+    return () => unsubscribe();
+  }, []);
+
   useEffect(() => {
     const storedBackgroundImage = localStorage.getItem("backgroundImage");
     if (storedBackgroundImage) {
       setBackgroundImage(storedBackgroundImage);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Retrieve active component from localStorage on mount
+    const storedActiveComponent = localStorage.getItem("activeComponent");
+    if (storedActiveComponent) {
+      setActiveComponent(storedActiveComponent);
     }
   }, []);
 
@@ -116,7 +143,15 @@ function NewSearchPage({ isToolPage = false }) {
     setSliderWidgetTransparency(widgetTransparent);
     tempTransparencyRef.current = transparency;
     tempWidgetTransparencyRef.current = widgetTransparent;
+    // Reset text color based on theme
+    handleResetTextColor();
   }, [transparency, widgetTransparent]);
+
+  const handleResetTextColor = useCallback(() => {
+    const newValue = isDarkMode ? 100 : 0; // 100 for white in dark mode, 0 for black in light mode
+    setTextColor(newValue);
+    localStorage.setItem("textColorValue", newValue.toString());
+  }, [isDarkMode]);
 
   // Initialize CSS variables on mount with current values
   useEffect(() => {
@@ -145,6 +180,7 @@ function NewSearchPage({ isToolPage = false }) {
 
   const handleToggleComponent = (component) => {
     setActiveComponent(component); // Always set the component, don't toggle
+    localStorage.setItem("activeComponent", component); // Store active component in localStorage
   };
 
   useEffect(() => {
@@ -159,11 +195,6 @@ function NewSearchPage({ isToolPage = false }) {
       document.body.removeChild(script);
     };
   }, [navigate]);
-
-  const handleResetTextColor = () => {
-    const newValue = isDarkMode ? 100 : 0; // 100 for white in dark mode, 0 for black in light mode
-    handleTextColorChange(newValue);
-  };
 
   // Function to convert slider value to actual color
   const getTextColor = (value) => {
@@ -193,14 +224,14 @@ function NewSearchPage({ isToolPage = false }) {
   );
 
   // Memoize the settings menu configuration
-  const settingsMenu = useMemo(
-    () => ({
-      items: [
-        {
-          key: "bgOpacity",
-          label: (
+  const settingsMenu = useMemo(() => ({
+    items: [
+      {
+        key: "bgOpacity",
+        label: (
+          <div className="dark:bg-black -m-1">
             <div
-              className="flex flex-col gap-2"
+              className="flex flex-col gap-2 p-3 dark:bg-black"
               onClick={(e) => e.stopPropagation()}
             >
               <span className="text-sm text-gray-600 dark:text-gray-300">
@@ -214,45 +245,14 @@ function NewSearchPage({ isToolPage = false }) {
                 onChange={(e) =>
                   handleTempTransparencyChange(parseInt(e.target.value))
                 }
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+                className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
               />
               <span className="text-sm text-gray-600 dark:text-gray-300 text-right">
                 {sliderTransparency}%
               </span>
             </div>
-          ),
-        },
-        {
-          key: "widgetOpacity",
-          label: (
             <div
-              className="flex flex-col gap-2"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <span className="text-sm text-gray-600 dark:text-gray-300">
-                Widget Opacity
-              </span>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={sliderWidgetTransparency}
-                onChange={(e) =>
-                  handleTempWidgetTransparencyChange(parseInt(e.target.value))
-                }
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-              />
-              <span className="text-sm text-gray-600 dark:text-gray-300 text-right">
-                {sliderWidgetTransparency}%
-              </span>
-            </div>
-          ),
-        },
-        {
-          key: "actions",
-          label: (
-            <div
-              className="flex gap-2 pt-2 border-t dark:border-gray-700"
+              className="flex gap-2 p-3 border-t dark:border-gray-800 dark:bg-black"
               onClick={(e) => e.stopPropagation()}
             >
               <button
@@ -269,240 +269,406 @@ function NewSearchPage({ isToolPage = false }) {
                   e.stopPropagation();
                   handleResetChanges();
                 }}
-                className="px-3 py-1.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                className="px-3 py-1.5 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
               >
                 Reset
               </button>
             </div>
-          ),
-        },
-        {
-          key: "textColor",
-          label: (
+          </div>
+        ),
+      },
+      {
+        key: "widgetOpacity",
+        label: (
+          <div className="dark:bg-black -m-1">
             <div
-              className="flex flex-col gap-2"
+              className="flex flex-col gap-2 p-3"
               onClick={(e) => e.stopPropagation()}
             >
               <span className="text-sm text-gray-600 dark:text-gray-300">
-                Text Color
+                Widget Opacity
               </span>
-              <div className="flex gap-2 items-center">
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={textColor}
-                  onChange={(e) =>
-                    handleTextColorChange(parseInt(e.target.value))
-                  }
-                  className="w-full h-2 bg-gradient-to-r from-black via-gray-500 to-white rounded-lg appearance-none cursor-pointer"
-                />
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleResetTextColor();
-                  }}
-                  className="px-2 py-1 text-xs bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded transition-colors duration-200"
-                >
-                  Reset
-                </button>
-              </div>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={sliderWidgetTransparency}
+                onChange={(e) =>
+                  handleTempWidgetTransparencyChange(parseInt(e.target.value))
+                }
+                className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
+              />
+              <span className="text-sm text-gray-600 dark:text-gray-300 text-right">
+                {sliderWidgetTransparency}%
+              </span>
             </div>
-          ),
-        },
-        {
-          key: "cardUI",
-          label: (
             <div
-              className="flex flex-col gap-2"
+              className="flex gap-2 p-3 border-t dark:border-gray-800 dark:bg-black"
               onClick={(e) => e.stopPropagation()}
             >
-              <span className="text-sm text-gray-600 dark:text-gray-300">
-                Card UI
-              </span>
               <button
-                className="text-center bg-black/5 dark:bg-white/5 dark:text-white hover:bg-gray-50 w-full rounded-sm"
                 onClick={(e) => {
                   e.stopPropagation();
-                  changeVisible();
+                  handleApplyChanges();
                 }}
+                className="flex-1 px-3 py-1.5 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition-colors"
               >
-                {visibleHandle ? "Modern" : "Classic"}
+                Apply
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleResetChanges();
+                }}
+                className="px-3 py-1.5 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
+              >
+                Reset
               </button>
             </div>
-          ),
-        },
-      ],
-    }),
-    [
-      sliderTransparency,
-      sliderWidgetTransparency,
-      textColor,
-      handleTempTransparencyChange,
-      handleTempWidgetTransparencyChange,
-      handleTextColorChange,
-      handleApplyChanges,
-      handleResetChanges,
-      changeVisible,
-    ]
+          </div>
+        ),
+      },
+      {
+        key: "textColor",
+        label: (
+          <div
+            className="flex flex-col gap-2 p-3 dark:bg-black -m-1"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <span className="text-sm text-gray-600 dark:text-gray-300">
+              Text Color
+            </span>
+            <div className="flex gap-2 items-center">
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={textColor}
+                onChange={(e) =>
+                  handleTextColorChange(parseInt(e.target.value))
+                }
+                className="w-full h-2 bg-gradient-to-r from-black via-gray-500 to-white rounded-lg appearance-none cursor-pointer dark:from-gray-900"
+              />
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleResetTextColor();
+                }}
+                className="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 rounded transition-colors duration-200"
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+        ),
+      },
+    ],
+  }));
+
+  // Add a useEffect to handle theme changes specifically for this component
+  useEffect(() => {
+    // Force re-render of settings menu when theme changes
+    const handleThemeChange = () => {
+      // Update any theme-dependent state or calculations
+      if (textColor === 0 || textColor === 100) {
+        // If text color is at default values, update it based on new theme
+        handleResetTextColor();
+      }
+    };
+
+    window.addEventListener("themeChanged", handleThemeChange);
+    return () => window.removeEventListener("themeChanged", handleThemeChange);
+  }, [textColor, handleResetTextColor]);
+
+  // Add this new useEffect for Google Search loading detection
+  useEffect(() => {
+    const checkGoogleSearch = setInterval(() => {
+      if (document.querySelector(".gsc-control-searchbox-only")) {
+        setIsGoogleSearchLoaded(true);
+        clearInterval(checkGoogleSearch);
+      }
+    }, 100);
+
+    // Cleanup interval
+    return () => clearInterval(checkGoogleSearch);
+  }, []);
+
+  // Add handleSearch function
+  const handleSearch = useCallback((value) => {
+    if (value.trim()) {
+      const searchUrl = `https://www.google.com/search?client=ms-google-coop&qcx=80904074a37154829&q=${encodeURIComponent(
+        value
+      )}`;
+      window.location.href = searchUrl;
+    }
+  }, []);
+
+  // Add handleKeyPress function for Enter key
+  const handleKeyPress = useCallback(
+    (e) => {
+      if (e.key === "Enter" && searchQuery.trim()) {
+        handleSearch(searchQuery);
+      }
+    },
+    [searchQuery, handleSearch]
   );
 
-  return (
-    <div style={backgroundStyles}>
-      <div
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: `url(${backgroundImage})`,
-          opacity: (100 - transparency) / 100,
-          zIndex: 0,
-        }}
-      />
+  if (loading) {
+    return (
       <div
         className={`fixed inset-0 ${
           isDarkMode
-            ? "bg-[#1a1a2e]"
+            ? "bg-gradient-to-r from-[#1a1a2e] via-[#2a243f] to-[#1a1a2e]"
             : "bg-gradient-to-r from-indigo-200 via-blue-100 to-indigo-200"
         } transition-colors duration-300`}
-        style={overlayStyles}
-      />
-      <div className="relative z-10">
-        <div style={{ color: getTextColor(textColor) }}>
-          <Header
-            isDarkMode={isDarkMode}
-            toggleTheme={toggleTheme}
-            handleImageChange={handleImageChange}
-            textColor={getTextColor(textColor)}
-          />
+      >
+        <div className="container mx-auto mt-48 px-4 py-8">
+          <div className="flex justify-center mb-8">
+            <Skeleton.Input active size="large" />
+          </div>
+          <div className="space-y-4">
+            <div className="flex justify-center gap-4">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                <Skeleton.Button
+                  active
+                  key={i}
+                  size="default"
+                  className="w-24"
+                />
+              ))}
+            </div>
+            <div className="mt-20 grid  mx-auto w-fit grid-cols-4  gap-24">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                <Skeleton.Node
+                  size="large"
+                  className="w-48 scale-x-125"
+                  key={i}
+                  active
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-          <div className="w-full">
-            <div className="flex mt-14 flex-col items-center">
-              <div
-                className="gcse-searchbox-only"
-                data-resultsurl="https://www.google.com/search?client=ms-google-coop&qcx=80904074a37154829"
-                data-defaulttoimagesearch="true"
-              />
-              <Shortcut />
-              <div>
-                <div className="flex justify-center max-w-[90vw] mb-3 w-full mx-auto">
-                  <div className="flex space-x-1 p-1 justify-between bg-gray-200/10 backdrop-blur-lg border border-gray-400/10 dark:border-gray-800/20 dark:bg-[#513a7a]/10 rounded-lg w-full">
-                    <button
-                      className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
-                        activeComponent === "Anotherpage"
-                          ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
-                          : "dark:text-white hover:bg-gray-100 dark:hover:bg-[#28283A]"
-                      }`}
-                      onClick={() => handleToggleComponent("Anotherpage")}
-                    >
-                      <span className="drop-shadow-md">HOME</span>
-                    </button>
-                    <button
-                      className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
-                        activeComponent === "PopularBookmarks"
-                          ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
-                          : "dark:text-white  hover:bg-gray-100 dark:hover:bg-[#28283A]"
-                      }`}
-                      onClick={() => handleToggleComponent("PopularBookmarks")}
-                    >
-                      <span className="drop-shadow-md">BOOKMARKS </span>
-                    </button>
-                    <button
-                      className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
-                        activeComponent === "NotebookAndSheet"
-                          ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
-                          : "dark:text-white  hover:bg-gray-100 dark:hover:bg-[#28283A]"
-                      }`}
-                      onClick={() => handleToggleComponent("NotebookAndSheet")}
-                    >
-                      <span className="drop-shadow-md">NOTES </span>
-                    </button>
-                    <button
-                      className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
-                        activeComponent === "PasswordGenerator"
-                          ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
-                          : "dark:text-white  hover:bg-gray-100 dark:hover:bg-[#28283A]"
-                      }`}
-                      onClick={() => handleToggleComponent("PasswordGenerator")}
-                    >
-                      <span className="drop-shadow-md">PASSWORD </span>
-                    </button>
-                    <button
-                      className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
-                        activeComponent === "News"
-                          ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
-                          : "dark:text-white  hover:bg-gray-100 dark:hover:bg-[#28283A]"
-                      }`}
-                      onClick={() => handleToggleComponent("News")}
-                    >
-                      <span className="drop-shadow-md">NEWS </span>
-                    </button>
-                    <button
-                      className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
-                        activeComponent === "Sports"
-                          ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
-                          : "dark:text-white  hover:bg-gray-100 dark:hover:bg-[#28283A]"
-                      }`}
-                      onClick={() => handleToggleComponent("Sports")}
-                    >
-                      <span className="drop-shadow-md">SPORTS </span>
-                    </button>
-                    <button
-                      className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
-                        activeComponent === "Top100"
-                          ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
-                          : "dark:text-white  hover:bg-gray-100 dark:hover:bg-[#28283A]"
-                      }`}
-                      onClick={() => handleToggleComponent("Top100")}
-                    >
-                      <span className="drop-shadow-md">TOP 100 </span>
-                    </button>
-                    <button
-                      className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
-                        activeComponent === "Tool"
-                          ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
-                          : "dark:text-white  hover:bg-gray-100 dark:hover:bg-[#28283A]"
-                      }`}
-                      onClick={() => handleToggleComponent("Tool")}
-                    >
-                      <span className="drop-shadow-md">TOOL</span>
-                    </button>
-                    <Dropdown menu={settingsMenu} trigger={["click"]}>
-                      <button className="px-4 py-2 text-sm font-medium rounded-md  transition-all dark:text-white hover:bg-gray-100 dark:hover:bg-[#28283A] flex items-center">
-                        <Settings className="w-5 h-5" />
+  return (
+    <div className={`w-full ${isToolPage ? "h-[40vh]" : "min-h-screen"}`}>
+      <div style={backgroundStyles}>
+        <div
+          className="fixed inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: `url(${backgroundImage})`,
+            opacity: (100 - transparency) / 100,
+            zIndex: 0,
+          }}
+        />
+        <div
+          className={`fixed inset-0 ${
+            isDarkMode
+              ? "bg-gradient-to-r from-[#1a1a2e] via-[#2a243f] to-[#1a1a2e]"
+              : "bg-gradient-to-r from-indigo-200 via-blue-100 to-indigo-200"
+          } transition-colors duration-300`}
+          style={overlayStyles}
+        />
+        <div className="relative z-10">
+          <div style={{ color: getTextColor(textColor) }}>
+            <Header
+              isDarkMode={isDarkMode}
+              toggleTheme={toggleTheme}
+              handleImageChange={handleImageChange}
+            />
+
+            <div className="w-full">
+              <div className="flex mt-14 flex-col items-center">
+                {!isGoogleSearchLoaded && (
+                  <div className="w-[55%] mb-[5px]">
+                    <Input.Search
+                      placeholder="Search Google..."
+                      size="large"
+                      className={`temporary-search ${isDarkMode ? "dark" : ""}`}
+                      style={{
+                        backgroundColor: "white",
+                        padding: "8px 1rem",
+                        borderRadius: "2px",
+                        boxShadow: "0px 0px 1px rgba(0, 0, 0, 0.3)",
+                      }}
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onSearch={handleSearch}
+                      onKeyPress={handleKeyPress}
+                      enterButton
+                    />
+                  </div>
+                )}
+                <div
+                  className={`gcse-searchbox-only ${
+                    !isGoogleSearchLoaded ? "opacity-0 absolute" : "opacity-100"
+                  }`}
+                  data-resultsurl="https://www.google.com/search?client=ms-google-coop&qcx=80904074a37154829"
+                  data-defaulttoimagesearch="true"
+                />
+                <Shortcut />
+                <div>
+                  <div className="flex justify-center max-w-[90vw] mb-3 w-full mx-auto">
+                    <div className="flex space-x-1 p-1 justify-between bg-gray-200/10 backdrop-blur-lg  dark:bg-[#513a7a]/10 rounded-lg w-full">
+                      <button
+                        className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                          activeComponent === "Anotherpage"
+                            ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                            : "dark:text-white hover:bg-gray-100 dark:hover:bg-[#28283A]"
+                        }`}
+                        onClick={() => handleToggleComponent("Anotherpage")}
+                      >
+                        <span className="drop-shadow-md">HOME</span>
                       </button>
-                    </Dropdown>
+                      <button
+                        className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                          activeComponent === "PopularBookmarks"
+                            ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                            : "dark:text-white  hover:bg-gray-100 dark:hover:bg-[#28283A]"
+                        }`}
+                        onClick={() =>
+                          handleToggleComponent("PopularBookmarks")
+                        }
+                      >
+                        <span className="drop-shadow-md">BOOKMARKS </span>
+                      </button>
+                      <button
+                        className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                          activeComponent === "NotebookAndSheet"
+                            ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                            : "dark:text-white  hover:bg-gray-100 dark:hover:bg-[#28283A]"
+                        }`}
+                        onClick={() =>
+                          handleToggleComponent("NotebookAndSheet")
+                        }
+                      >
+                        <span className="drop-shadow-md">NOTES </span>
+                      </button>
+                      <button
+                        className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                          activeComponent === "PasswordGenerator"
+                            ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                            : "dark:text-white  hover:bg-gray-100 dark:hover:bg-[#28283A]"
+                        }`}
+                        onClick={() =>
+                          handleToggleComponent("PasswordGenerator")
+                        }
+                      >
+                        <span className="drop-shadow-md">PASSWORD </span>
+                      </button>
+                      <button
+                        className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                          activeComponent === "News"
+                            ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                            : "dark:text-white  hover:bg-gray-100 dark:hover:bg-[#28283A]"
+                        }`}
+                        onClick={() => handleToggleComponent("News")}
+                      >
+                        <span className="drop-shadow-md">NEWS </span>
+                      </button>
+                      <button
+                        className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                          activeComponent === "Sports"
+                            ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                            : "dark:text-white  hover:bg-gray-100 dark:hover:bg-[#28283A]"
+                        }`}
+                        onClick={() => handleToggleComponent("Sports")}
+                      >
+                        <span className="drop-shadow-md">SPORTS </span>
+                      </button>
+                      <button
+                        className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                          activeComponent === "Top100"
+                            ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                            : "dark:text-white  hover:bg-gray-100 dark:hover:bg-[#28283A]"
+                        }`}
+                        onClick={() => handleToggleComponent("Top100")}
+                      >
+                        <span className="drop-shadow-md">TOP 100 </span>
+                      </button>
+                      <button
+                        className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                          activeComponent === "Tool"
+                            ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                            : "dark:text-white  hover:bg-gray-100 dark:hover:bg-[#28283A]"
+                        }`}
+                        onClick={() => handleToggleComponent("Tool")}
+                      >
+                        <span className="drop-shadow-md">TOOL</span>
+                      </button>
+                      <Dropdown
+                        menu={settingsMenu}
+                        trigger={["click"]}
+                        overlayClassName="[&_.ant-dropdown-menu]:p-0 [&_.ant-dropdown-menu-item]:p-0 [&_ul]:dark:bg-black"
+                      >
+                        <button className="px-4 py-2 text-sm font-medium rounded-md  transition-all dark:text-white hover:bg-gray-100 dark:hover:bg-[#28283A] flex items-center">
+                          <Settings className="w-5 h-5" />
+                        </button>
+                      </Dropdown>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <div className="w-full">
-            {activeComponent === "NotebookAndSheet" ? (
-              <NotebookAndSheet />
-            ) : activeComponent === "PopularBookmarks" ? (
-              <PopularBookmarks />
-            ) : activeComponent === "PasswordGenerator" ? (
-              <PasswordGenerator />
-            ) : activeComponent === "News" ? (
-              <News />
-            ) : activeComponent === "Sports" ? (
-              <Sports />
-            ) : activeComponent === "Anotherpage" ? (
-              <Anotherpage visibleHandle={visibleHandle} />
-            ) : activeComponent === "Top100" ? (
-              <Top100 />
-            ) : activeComponent === "Tool" ? (
-              <Tool />
-            ) : (
-              <Anotherpage
-                visibleHandle={visibleHandle}
-                isDarkMode={isDarkMode}
-              />
-            )}
-          </div>
+          {!user ? (
+            <div className="w-full">
+              {activeComponent === "NotebookAndSheet" ? (
+                <NotebookAndSheet />
+              ) : activeComponent === "PopularBookmarks" ? (
+                <PopularBookmarks />
+              ) : activeComponent === "PasswordGenerator" ? (
+                <PasswordGenerator />
+              ) : activeComponent === "News" ? (
+                <News />
+              ) : activeComponent === "Sports" ? (
+                <Sports />
+              ) : activeComponent === "Anotherpage" ? (
+                <Anotherpage visibleHandle={visibleHandle} />
+              ) : activeComponent === "Top100" ? (
+                <Top100 />
+              ) : activeComponent === "Tool" ? (
+                <Tool />
+              ) : (
+                <Anotherpage
+                  visibleHandle={visibleHandle}
+                  isDarkMode={isDarkMode}
+                />
+              )}
+            </div>
+          ) : (
+            <div className="w-full">
+              {activeComponent === "NotebookAndSheet" ? (
+                <NotebookAndSheet />
+              ) : activeComponent === "PopularBookmarks" ? (
+                <PopularBookmarks />
+              ) : activeComponent === "PasswordGenerator" ? (
+                <PasswordGenerator />
+              ) : activeComponent === "News" ? (
+                <News />
+              ) : activeComponent === "Sports" ? (
+                <Sports />
+              ) : activeComponent === "Anotherpage" ? (
+                <Anotherpage visibleHandle={visibleHandle} />
+              ) : activeComponent === "Top100" ? (
+                <Top100 />
+              ) : activeComponent === "Tool" ? (
+                <Tool />
+              ) : (
+                <Anotherpage
+                  visibleHandle={visibleHandle}
+                  isDarkMode={isDarkMode}
+                />
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default NewSearchPage;

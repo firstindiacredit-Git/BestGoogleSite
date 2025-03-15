@@ -121,6 +121,7 @@ import ToolOutlet from "./components/ToolOutlet";
 
 // Import ThemeProvider from our context file
 import { ThemeProvider } from "./context/ThemeContext.jsx";
+import AdminRoute from "./components/Admin/AdminRoute.jsx";
 
 // Context Menu Items configuratio
 const menuItems = [
@@ -885,20 +886,43 @@ const App = () => {
                   element={<TestScoreCalculator />}
                 />
                 <Route path="/trafficchecker" element={<TrafficChecker />} />
-                {/* <Route path="/signin" element={<Signin />} /> */}
-                {/* <Route path="/signup" element={<Signup />} /> */}
               </Route>
 
               {/* Admin Routes with Sidebar Layout */}
-              <Route path="/admin/login" element={<Login />} />
+              <Route
+                path="/admin/login"
+                element={<AdminRoute children={<Login />} />}
+              />
+
               <Route element={<Sidebar />}>
-                <Route path="/admin/dashboard" element={<Dashboard />} />
-                <Route path="/admin/transactions" element={<Transactions />} />
-                <Route path="/admin/addblog" element={<AddBlog />} />
-                <Route path="/admin/bloglist" element={<BlogList />} />
-                <Route path="/admin/users" element={<Users />} />
-                <Route path="/admin/AddBookmark" element={<AddBookmark />} />
-                <Route path="/admin/addlinks" element={<AddLinks />} />
+                <Route
+                  path="/admin/dashboard"
+                  element={<AdminRoute children={<Dashboard />} />}
+                />
+                <Route
+                  path="/admin/transactions"
+                  element={<AdminRoute children={<Transactions />} />}
+                />
+                <Route
+                  path="/admin/addblog"
+                  element={<AdminRoute children={<AddBlog />} />}
+                />
+                <Route
+                  path="/admin/bloglist"
+                  element={<AdminRoute children={<BlogList />} />}
+                />
+                <Route
+                  path="/admin/users"
+                  element={<AdminRoute children={<Users />} />}
+                />
+                <Route
+                  path="/admin/AddBookmark"
+                  element={<AdminRoute children={<AddBookmark />} />}
+                />
+                <Route
+                  path="/admin/addlinks"
+                  element={<AdminRoute children={<AddLinks />} />}
+                />
               </Route>
             </Routes>
           </Router>

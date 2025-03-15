@@ -316,20 +316,20 @@ const BlogDetail = () => {
           alignItems: "center",
         }}
       >
-        <Button
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate(-1)}
-          sx={{
+          <Button
+            startIcon={<ArrowBackIcon />}
+            onClick={() => navigate(-1)}
+            sx={{
             color: "rgba(41, 41, 41, 1)",
-            "&:hover": {
+              "&:hover": {
               bgcolor: "rgba(0, 0, 0, 0.03)",
-            },
+              },
             fontWeight: 400,
             textTransform: "none",
-          }}
-        >
+            }}
+          >
           <Typography variant="body2">Back to Articles</Typography>
-        </Button>
+          </Button>
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <Tooltip title="Save">
             <IconButton size="small">
@@ -342,7 +342,7 @@ const BlogDetail = () => {
             </IconButton>
           </Tooltip>
         </Box>
-      </Box>
+        </Box>
 
       <Container maxWidth="md" sx={{ pt: 6, pb: 10 }}>
         {/* Article Header */}
@@ -358,25 +358,25 @@ const BlogDetail = () => {
                 fontWeight: 400,
                 borderRadius: "4px",
                 height: "24px",
-              }}
-            />
-          </Box>
+                  }}
+                />
+              </Box>
 
-          {/* Title */}
-          <Typography
-            variant="h1"
-            sx={{
+              {/* Title */}
+              <Typography
+                variant="h1"
+                sx={{
               fontFamily: "'Source Serif Pro', 'Georgia', serif",
               fontSize: { xs: "32px", sm: "36px", md: "42px" },
               fontWeight: 700,
               mb: 3,
               color: "rgba(41, 41, 41, 1)",
-              lineHeight: 1.2,
+                  lineHeight: 1.2,
               letterSpacing: "-0.016em",
-            }}
-          >
-            {blog.title}
-          </Typography>
+                }}
+              >
+                {blog.title}
+              </Typography>
 
           {/* Subtitle if available */}
           {blog.subtitle && (
@@ -397,20 +397,20 @@ const BlogDetail = () => {
           )}
 
           {/* Author Info - Minimal version */}
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
               justifyContent: "space-between",
               mb: 5,
-            }}
-          >
+                }}
+              >
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-              <Avatar
+                <Avatar
                 src={`https://ui-avatars.com/api/?name=${blog.author}&background=03a87c&color=fff`}
-                sx={{ width: 48, height: 48 }}
-              />
-              <Box>
+                  sx={{ width: 48, height: 48 }}
+                />
+                <Box>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <Typography
                     variant="subtitle1"
@@ -458,81 +458,81 @@ const BlogDetail = () => {
                   <Box component="span" sx={{ fontSize: "13px" }}>
                     ·
                   </Box>
-                  <Box
-                    component="span"
-                    sx={{
-                      display: "flex",
+                    <Box
+                      component="span"
+                      sx={{
+                        display: "flex",
                       alignItems: "center",
-                      gap: 0.5,
-                    }}
-                  >
+                        gap: 0.5,
+                      }}
+                    >
                     <Typography variant="body2" sx={{ fontSize: "13px" }}>
-                      {Math.ceil(blog.content?.length / 1000) ||
-                        blog.readTime ||
-                        "5"}{" "}
-                      min read
-                    </Typography>
+                        {Math.ceil(blog.content?.length / 1000) ||
+                          blog.readTime ||
+                          "5"}{" "}
+                        min read
+                      </Typography>
+                    </Box>
                   </Box>
                 </Box>
               </Box>
-            </Box>
           </Box>
-        </Box>
+              </Box>
 
-        {/* Featured Image */}
-        {blog.imageUrl && (
-          <Box
-            sx={{
-              width: "100%",
+              {/* Featured Image */}
+              {blog.imageUrl && (
+                <Box
+                  sx={{
+                    width: "100%",
               mb: 6,
-            }}
-          >
-            <Box
-              component="img"
-              src={blog.imageUrl}
-              alt={blog.title}
-              sx={{
-                width: "100%",
-                height: "auto",
+                  }}
+                >
+                  <Box
+                    component="img"
+                    src={blog.imageUrl}
+                    alt={blog.title}
+                    sx={{
+                      width: "100%",
+                      height: "auto",
                 maxHeight: "600px",
                 objectFit: "cover",
-              }}
-            />
-          </Box>
-        )}
+                    }}
+                  />
+                </Box>
+              )}
 
-        {/* Content */}
-        <Box sx={{ textAlign: "left" }}>
+              {/* Content */}
+              <Box sx={{ textAlign: "left" }}>
           <StyledContent dangerouslySetInnerHTML={{ __html: blog.content }} />
-        </Box>
+              </Box>
 
-        {/* Tags */}
-        {blog.tags && blog.tags.length > 0 && (
+              {/* Tags */}
+              {blog.tags && blog.tags.length > 0 && (
           <Box sx={{ mt: 6, mb: 6 }}>
-            <Box
-              sx={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 1,
-              }}
-            >
-              {blog.tags.map((tag) => (
-                <Chip
-                  key={tag}
-                  label={tag}
-                  sx={{
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: 1,
+                    }}
+                  >
+                    {blog.tags.map((tag) => (
+                      <Chip
+                        key={tag}
+                        label={tag}
+                        sx={{
                     bgcolor: "rgba(242, 242, 242, 1)",
                     color: "rgba(117, 117, 117, 1)",
                     borderRadius: "4px",
-                    "&:hover": {
+                          "&:hover": {
                       bgcolor: "rgba(230, 230, 230, 1)",
-                    },
-                  }}
-                />
-              ))}
-            </Box>
-          </Box>
-        )}
+                          },
+                        }}
+                      />
+                    ))}
+                  </Box>
+                </Box>
+              )}
 
         {/* Clap and Comment Section - Mobile only */}
         <Box
@@ -575,7 +575,7 @@ const BlogDetail = () => {
           </Box>
         </Box>
 
-        {/* Author Bio */}
+              {/* Author Bio */}
         <Box
           sx={{
             mt: 8,
@@ -585,18 +585,18 @@ const BlogDetail = () => {
             borderBottom: "1px solid rgba(230, 230, 230, 1)",
           }}
         >
-          <Box
-            sx={{
-              display: "flex",
+                <Box
+                  sx={{
+                    display: "flex",
               alignItems: "flex-start",
-              gap: 2,
-              mb: 2,
-            }}
-          >
-            <Avatar
+                    gap: 2,
+                    mb: 2,
+                  }}
+                >
+                  <Avatar
               src={`https://ui-avatars.com/api/?name=${blog.author}&background=03a87c&color=fff`}
-              sx={{ width: 64, height: 64 }}
-            />
+                    sx={{ width: 64, height: 64 }}
+                  />
             <Box sx={{ flex: 1 }}>
               <Box
                 sx={{
@@ -610,8 +610,8 @@ const BlogDetail = () => {
                   variant="h6"
                   sx={{ color: "rgba(41, 41, 41, 1)", fontWeight: 500 }}
                 >
-                  Written by {blog.author}
-                </Typography>
+                      Written by {blog.author}
+                    </Typography>
                 <Button
                   variant="outlined"
                   size="small"
@@ -629,20 +629,20 @@ const BlogDetail = () => {
                 >
                   Follow
                 </Button>
-              </Box>
-              <Typography
-                variant="body1"
+                </Box>
+                <Typography
+                  variant="body1"
                 sx={{
                   color: "rgba(117, 117, 117, 1)",
                   fontSize: "16px",
                   lineHeight: 1.6,
                 }}
-              >
-                Expert in business finance and strategic planning with over 10
-                years of experience helping companies grow and succeed in
-                today's competitive market.
-              </Typography>
-            </Box>
+                >
+                  Expert in business finance and strategic planning with over 10
+                  years of experience helping companies grow and succeed in
+                  today's competitive market.
+                </Typography>
+              </Box>
           </Box>
         </Box>
 

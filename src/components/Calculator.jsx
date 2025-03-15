@@ -18,22 +18,38 @@ function Calculator() {
   }, []);
 
   const isOperator = (value) => {
-    return ["+", "-", "*", "/", "%"].includes(value);
+    return ["+", "-", "*", "/", "x", "%"].includes(value);
+  };
+
+  // Validate the entire input
+  const validateInput = (input) => {
+    // Check for sequential operators (excluding negative numbers like "5*-2")
+    if (/[+*/x][+*/x%]/.test(input) || /\-[\+*/x%]/.test(input)) return false;
+
+    // Check for NaN
+    if (input.includes("NaN")) return false;
+
+    // Check for proper operator placement
+    if (input.length > 0 && isOperator(input[0]) && input[0] !== "-")
+      return false;
+
+    return true;
   };
 
   const handleCalcInput = (value) => {
     if (value === "=") {
       try {
-        // Don't calculate if input ends with an operator
-        if (isOperator(calcInput.slice(-1))) {
+        // Don't calculate if input is empty or ends with an operator
+        if (calcInput === "" || isOperator(calcInput.slice(-1))) {
           return;
         }
 
+        // Replace 'x' with '*' for evaluation
         const expression = calcInput.replace(/x/g, "*");
         const result = evaluate(expression);
 
         // Handle division by zero and invalid results
-        if (!isFinite(result)) {
+        if (!isFinite(result) || isNaN(result)) {
           setCalcResult("Error");
           setCalcInput("");
           return;
@@ -64,54 +80,96 @@ function Calculator() {
       setCalcInput(calcInput.slice(0, -1));
       setLastOperation(false);
     } else {
-      // Handle operators
+      let newInput = calcInput;
+
+      // Handle percentage
+      if (value === "%") {
+        // Only apply percentage if there's a number to operate on
+        if (calcInput !== "" && !isOperator(calcInput.slice(-1))) {
+          try {
+            // Extract the last number from the input
+            const match = calcInput.match(/(-?\d*\.?\d+)$/);
+            if (match) {
+              const lastNumber = match[0];
+              const percentValue = parseFloat(lastNumber) / 100;
+
+              // Replace the last number with its percentage value
+              newInput =
+                calcInput.substring(0, calcInput.length - lastNumber.length) +
+                percentValue.toString();
+              setCalcInput(newInput);
+            }
+          } catch (error) {
+            // If there's an error, don't change the input
+            return;
+          }
+        }
+        return;
+      }
+
+      // Handle operators - Critical fix for x/multiplication
       if (isOperator(value)) {
+        // Special case for minus as first character (negative number)
+        if (calcInput === "" && value === "-") {
+          setCalcInput("-");
+          return;
+        }
+
         // Don't allow operator if input is empty
         if (calcInput === "") {
-          if (value === "-") {
-            setCalcInput("-");
-          }
           return;
         }
 
         // Don't allow multiple operators in sequence
         if (isOperator(calcInput.slice(-1))) {
           // Replace the last operator with the new one
-          setCalcInput(calcInput.slice(0, -1) + value);
+          newInput = calcInput.slice(0, -1) + (value === "*" ? "x" : value);
+          if (!validateInput(newInput)) {
+            return;
+          }
+          setCalcInput(newInput);
           return;
         }
 
+        // Add the operator - THIS IS THE CRITICAL FIX
+        newInput = calcInput + (value === "*" ? "x" : value);
         setLastOperation(false);
       } else {
         // For numbers and decimal point
         if (lastOperation) {
           // If last operation was equals, start new calculation
           if (value === ".") {
-            setCalcInput("0.");
+            newInput = "0.";
           } else {
-            setCalcInput(value);
+            newInput = value;
           }
           setLastOperation(false);
-          return;
-        }
-
-        // Handle decimal points
-        if (value === ".") {
-          // Don't allow multiple decimal points in the same number
-          const parts = calcInput.split(/[\+\-\*\/]/);
-          const lastNumber = parts[parts.length - 1];
-          if (lastNumber.includes(".")) {
-            return;
-          }
-          // Add leading zero if decimal point is first character
-          if (calcInput === "" || isOperator(calcInput.slice(-1))) {
-            setCalcInput(calcInput + "0.");
-            return;
+        } else {
+          // Handle decimal points
+          if (value === ".") {
+            // Don't allow multiple decimal points in the same number
+            const parts = calcInput.split(/[\+\-\*\/x]/);
+            const lastNumber = parts[parts.length - 1];
+            if (lastNumber.includes(".")) {
+              return;
+            }
+            // Add leading zero if decimal point is first character
+            if (calcInput === "" || isOperator(calcInput.slice(-1))) {
+              newInput = calcInput + "0.";
+            } else {
+              newInput = calcInput + value;
+            }
+          } else {
+            // Regular number
+            newInput = calcInput + value;
           }
         }
       }
 
-      setCalcInput(calcInput + value);
+      // Validate the new input before setting it
+      if (validateInput(newInput)) {
+        setCalcInput(newInput);
+      }
     }
   };
 
@@ -125,9 +183,9 @@ function Calculator() {
   };
 
   return (
-    <div className="w-full  backdrop-blur-sm h-full">
+    <div className="w-full backdrop-blur-sm h-full">
       {!collapsed && (
-        <div className={` rounded-sm  h-full w-full `}>
+        <div className={` rounded-lg h-full w-full `}>
           {showHistory ? (
             <div className="dark:bg-[#28283A]/[var(--widget-opacity)] text-white w-full h-full p-6">
               <div className="flex justify-between items-center mb-4">
@@ -171,7 +229,7 @@ function Calculator() {
           ) : (
             <div className="flex flex-col h-full p-3">
               {/* Display */}
-              <div className="text-right text-gray-700 dark:text-white p-2 rounded-sm bg-gray-100/20 dark:bg-[#513a7a]/20 mb-3">
+              <div className="text-right text-gray-700 dark:text-white p-2 rounded-lg bg-gray-300/20 dark:bg-[#513a7a]/20 mb-3">
                 <div className="text-lg opacity-70">
                   {(history.length > 0 && history[0]) || "0"}
                 </div>
@@ -184,26 +242,26 @@ function Calculator() {
               <div className="grid grid-cols-4 gap-1 flex-1">
                 {/* Row 1 */}
                 <button
-                  className="p-4 rounded-sm text-base font-bold bg-gray-100/20 text-[#8163D3] dark:text-[#8163D3] dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 hover:text-gray-800 transition-all hover:bg-gray-50"
+                  className="p-4 rounded-lg text-base font-bold bg-gray-300/20 text-[#8163D3] dark:text-[#8163D3] dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 hover:text-gray-800 transition-all hover:bg-gray-200"
                   onClick={() => handleCalcInput("C")}
                 >
                   C
                 </button>
 
                 <button
-                  className="p-4 rounded-sm text-base font-bold bg-gray-100/20 text-[#8163D3] dark:text-[#8163D3] dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 hover:text-gray-800 transition-all hover:bg-gray-50"
+                  className="p-4 rounded-lg text-base font-bold bg-gray-300/20 text-[#8163D3] dark:text-[#8163D3] dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 hover:text-gray-800 transition-all hover:bg-gray-200"
                   onClick={() => handleCalcInput("backspace")}
                 >
                   <FaBackspace className="mx-auto" />
                 </button>
                 <button
-                  className="text-[#8163D3] rounded-sm p-4 dark:text-[#8163D3] font-black text-base hover:bg-gray-50 hover:text-gray-800 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 bg-gray-100/20"
+                  className="text-[#8163D3] rounded-lg p-4 dark:text-[#8163D3] font-black text-base hover:bg-gray-200 hover:text-gray-800 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 bg-gray-300/20"
                   onClick={() => handleCalcInput("%")}
                 >
                   %
                 </button>
                 <button
-                  className="text-[#8163D3] rounded-sm p-4 dark:text-[#8163D3] font-bold text-2xl hover:bg-gray-50 hover:text-gray-800 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 bg-gray-100/20"
+                  className="text-[#8163D3] rounded-lg p-4 dark:text-[#8163D3] font-bold text-2xl hover:bg-gray-200 hover:text-gray-800 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 bg-gray-300/20"
                   onClick={() => handleCalcInput("/")}
                 >
                   ÷
@@ -213,12 +271,12 @@ function Calculator() {
                 {["7", "8", "9", "*"].map((val, i) => (
                   <button
                     key={val}
-                    className={`p-4 rounded-sm text-base font-bold ${
+                    className={`p-4 rounded-lg text-base font-bold ${
                       i === 3
-                        ? "text-[#8163D3] text-2xl dark:text-[#8163D3] hover:bg-gray-50 hover:text-gray-800 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 bg-gray-100/20"
-                        : "bg-gray-100/20 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 text-gray-800 hover:text-gray-800 transition-all dark:text-white hover:bg-gray-50"
+                        ? "text-[#8163D3] text-2xl dark:text-[#8163D3] hover:bg-gray-200 hover:text-gray-800 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 bg-gray-300/20"
+                        : "bg-gray-300/20 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 text-gray-800 hover:text-gray-800 transition-all dark:text-white hover:bg-gray-200"
                     }`}
-                    onClick={() => handleCalcInput(val === "*" ? "x" : val)}
+                    onClick={() => handleCalcInput(val)}
                   >
                     {val === "*" ? "×" : val}
                   </button>
@@ -228,10 +286,10 @@ function Calculator() {
                 {["4", "5", "6", "-"].map((val, i) => (
                   <button
                     key={val}
-                    className={`p-4 rounded-sm text-base font-bold ${
+                    className={`p-4 rounded-lg text-base font-bold ${
                       i === 3
-                        ? "text-[#8163D3] text-2xl dark:text-[#8163D3] hover:bg-gray-50 hover:text-gray-800 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 bg-gray-100/20"
-                        : "bg-gray-100/20 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 text-gray-800 hover:text-gray-800 transition-all dark:text-white hover:bg-gray-50"
+                        ? "text-[#8163D3] text-2xl dark:text-[#8163D3] hover:bg-gray-200 hover:text-gray-800 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 bg-gray-300/20"
+                        : "bg-gray-300/20 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 text-gray-800 hover:text-gray-800 transition-all dark:text-white hover:bg-gray-200"
                     }`}
                     onClick={() => handleCalcInput(val)}
                   >
@@ -243,10 +301,10 @@ function Calculator() {
                 {["1", "2", "3", "+"].map((val, i) => (
                   <button
                     key={val}
-                    className={`p-4 rounded-sm text-base font-bold ${
+                    className={`p-4 rounded-lg text-base font-bold ${
                       i === 3
-                        ? "text-[#8163D3] text-2xl dark:text-[#8163D3] hover:bg-gray-50 hover:text-gray-800 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 bg-gray-100/20"
-                        : "bg-gray-100/20 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 text-gray-800 hover:text-gray-800 transition-all dark:text-white hover:bg-gray-50"
+                        ? "text-[#8163D3] text-2xl dark:text-[#8163D3] hover:bg-gray-200 hover:text-gray-800 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 bg-gray-300/20"
+                        : "bg-gray-300/20 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 text-gray-800 hover:text-gray-800 transition-all dark:text-white hover:bg-gray-200"
                     }`}
                     onClick={() => handleCalcInput(val)}
                   >
@@ -256,25 +314,25 @@ function Calculator() {
 
                 {/* Row 5 */}
                 <button
-                  className="p-4 text-base rounded-sm font-bold flex justify-center bg-gray-100/20 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 text-gray-800 hover:text-gray-800 transition-all dark:text-white hover:bg-gray-50"
+                  className="p-4 text-base rounded-lg font-bold flex justify-center bg-gray-300/20 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 text-gray-800 hover:text-gray-800 transition-all dark:text-white hover:bg-gray-200"
                   onClick={toggleHistory}
                 >
                   <FaHistory className="mt-1 text-[#8163D3] dark:text-[#8163D3]" />
                 </button>
                 <button
-                  className="p-4 text-base rounded-sm font-bold bg-gray-100/20 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 text-gray-800 hover:text-gray-800 transition-all dark:text-white hover:bg-gray-50"
+                  className="p-4 text-base rounded-lg font-bold bg-gray-300/20 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 text-gray-800 hover:text-gray-800 transition-all dark:text-white hover:bg-gray-200"
                   onClick={() => handleCalcInput("0")}
                 >
                   0
                 </button>
                 <button
-                  className="p-4 text-base rounded-sm font-bold bg-gray-100/20 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 text-gray-800 hover:text-gray-800 transition-all dark:text-white hover:bg-gray-50"
+                  className="p-4 text-base rounded-lg font-bold bg-gray-300/20 dark:bg-[#513a7a]/10 dark:hover:bg-gray-800 text-gray-800 hover:text-gray-800 transition-all dark:text-white hover:bg-gray-200"
                   onClick={() => handleCalcInput(".")}
                 >
                   .
                 </button>
                 <button
-                  className="bg-indigo-500 text-white p-4 text-base rounded-sm font-bold dark:bg-[#483072] hover:bg-indigo-600"
+                  className="bg-indigo-500 text-white p-4 text-base rounded-lg font-bold dark:bg-[#483072] hover:bg-indigo-600"
                   onClick={() => handleCalcInput("=")}
                 >
                   =

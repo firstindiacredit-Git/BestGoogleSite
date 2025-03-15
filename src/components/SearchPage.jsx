@@ -485,7 +485,7 @@ const SearchPage = ({ isToolPage = false }) => {
                 {!isGoogleSearchLoaded && (
                   <div className="w-[55%] mb-[5px]">
                     <Input.Search
-                      placeholder="Search Google..."
+                      placeholder="Search Google or type a URL"
                       size="large"
                       className={`temporary-search ${isDarkMode ? "dark" : ""}`}
                       style={{

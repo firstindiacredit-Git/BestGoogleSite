@@ -85,7 +85,7 @@ const AdminRoute = ({ children }) => {
 
   // Redirect to login if not admin
   if (!isAdmin) {
-    return <Navigate to="/Admin/login" replace />;
+    return <Navigate to="/search" />;
   }
 
   // Show actual admin content when authenticated

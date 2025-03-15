@@ -315,7 +315,7 @@ const AddBlog = ({ editBlog, onSuccess }) => {
         <Form.Item label="Tags">
           <Space wrap className="mb-2 bg-red-500">
             {tags.map((tag) => (
-               <Tag
+              <Tag
                 key={tag}
                 closable
                 onClose={() => handleTagClose(tag)}

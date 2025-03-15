@@ -2,11 +2,10 @@ import React, { useEffect, useState, useMemo } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { signOut, onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../firebase";
-import { FaSun, FaMoon, FaHome, FaArrowLeft } from "react-icons/fa";
+import { FaSun, FaMoon, FaArrowLeft } from "react-icons/fa";
 import { IoIosLogOut } from "react-icons/io";
 import { RiUserLine, RiAdminLine } from "react-icons/ri";
-import { MdAddHomeWork } from "react-icons/md";
-import { Modal, Input, Button, Dropdown, message, Alert } from "antd";
+import { Modal, Input, Dropdown, message, Alert } from "antd";
 import {
   MenuOutlined,
   HomeOutlined,
