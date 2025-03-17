@@ -451,7 +451,7 @@ const ContextMenuWrapper = ({ children }) => {
     onClick: handleMenuClick,
     style: {
       width: "200px",
-      padding: "4px 0",
+      padding: "1rem 4px",
     },
   };
 
@@ -652,10 +652,11 @@ const ContextMenuWrapper = ({ children }) => {
       <Dropdown
         menu={menu}
         trigger={["contextMenu"]}
-        overlayStyle={{
-          boxShadow:
-            "0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 9px 28px 8px rgba(0, 0, 0, 0.05)",
-        }}
+        overlayClassName="mt-1 [&_.ant-dropdown-menu]:p-0 [&_.ant-dropdown-menu-item]:p-0 [&_ul]:dark:bg-[#28283a]"
+        // overlayStyle={{
+        //   boxShadow:
+        //     "0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 9px 28px 8px rgba(0, 0, 0, 0.05)",
+        // }}
       >
         <div
           className="w-full min-h-screen"
@@ -696,7 +697,6 @@ export const WidgetTransparencyContext = createContext();
 // SearchPageWrapper component
 const SearchPageWrapper = () => {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const checkDefaultPage = async () => {
@@ -712,7 +712,6 @@ const SearchPageWrapper = () => {
           console.error("Error checking default page:", error);
         }
       }
-      setIsLoading(false);
     };
 
     checkDefaultPage();
@@ -743,7 +742,7 @@ const App = () => {
   return (
     // Use ThemeProvider from ThemeContext.jsx
     <ThemeProvider>
-        <DesignContextProvider>
+      <DesignContextProvider>
         <WidgetTransparencyContext.Provider
           value={widgetTransparencyContextValue}
         >
@@ -950,7 +949,7 @@ const App = () => {
             <NetworkStatus />
           </AuthProvider>
         </WidgetTransparencyContext.Provider>
-        </DesignContextProvider>
+      </DesignContextProvider>
     </ThemeProvider>
   );
 };
