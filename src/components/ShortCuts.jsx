@@ -245,6 +245,11 @@ function BookmarkPage() {
   const handleDeleteBookmark = async (bookmarkId) => {
     try {
       if (user) {
+        const bookmark = userBookmarks.find((bm) => bm.id === bookmarkId);
+         if (!bookmark) {
+           // This is an admin bookmark, hide it instead
+           return handleHideBookmark(bookmarkId);
+         }
         // Delete from Firebase for logged-in users
         const docRef = doc(db, "users", user.uid, "shortcut", bookmarkId);
         await deleteDoc(docRef);

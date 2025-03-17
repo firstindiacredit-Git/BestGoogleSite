@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useTheme } from "../context/ThemeContext";
 
@@ -78,30 +78,15 @@ const getWeatherCardStyle = (weatherType) => {
   }
 };
 
-const getWeatherAnimation = (weatherCode) => {
-  const code = weatherCode?.toLowerCase() || "";
-  if (code.includes("clear")) return "clear";
-  if (code.includes("cloud") || code.includes("haze") || code.includes("mist"))
-    return "cloudy";
-  if (code.includes("rain")) return "rainy";
-  if (code.includes("snow")) return "snowy";
-  if (code.includes("thunder")) return "thunder";
-  return "default";
-};
-
-const Weather = ({ collapsed }) => {
+const Weather = () => {
   const [currentWeather, setCurrentWeather] = useState(null);
   const [forecast, setForecast] = useState([]);
   const [error, setError] = useState(null);
   const [unit, setUnit] = useState("metric");
   const [city, setCity] = useState("");
-  const [isVisible, setisVisible] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
-  const settingsRef = useRef(null);
-  const searchInputRef = useRef(null);
   const [browserInfo, setBrowserInfo] = useState(null);
   const [ipLocation, setIpLocation] = useState(null);
-  const { isDarkMode } = useTheme();
 
   const fetchWeatherByCoords = async (lat, lon) => {
     try {
@@ -333,56 +318,54 @@ const Weather = ({ collapsed }) => {
 
   return (
     <div className="p-3 backdrop-blur-sm">
-      {isVisible && (
-        <div className="weather-container min-h-[15rem]">
-          <div className="content-wrapper flex-col">
-            {currentWeather && (
-              <div className="flex flex-col gap-2">
-                {/* Main Weather Card */}
-                <CurrentWeatherCard
-                  temperature={Math.round(currentWeather.main.temp)}
-                  condition={currentWeather.weather[0].main}
-                  description={currentWeather.weather[0].description}
-                  location={currentWeather.name}
-                  humidity={currentWeather.main.humidity}
-                  time={new Date().toLocaleTimeString("en-US", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: false,
-                  })}
-                  date={new Date().toLocaleDateString("en-US", {
-                    weekday: "long",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                />
+      <div className="weather-container min-h-[15rem]">
+        <div className="content-wrapper flex-col">
+          {currentWeather && (
+            <div className="flex flex-col gap-2">
+              {/* Main Weather Card */}
+              <CurrentWeatherCard
+                temperature={Math.round(currentWeather.main.temp)}
+                condition={currentWeather.weather[0].main}
+                description={currentWeather.weather[0].description}
+                location={currentWeather.name}
+                humidity={currentWeather.main.humidity}
+                time={new Date().toLocaleTimeString("en-US", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                })}
+                date={new Date().toLocaleDateString("en-US", {
+                  weekday: "long",
+                  month: "short",
+                  day: "numeric",
+                })}
+              />
 
-                {/* Forecast Section */}
-                <div className="forecast-container h-[50%] gap-3 w-full flex justify-between mt-1">
-                  {forecast.map((day, index) => (
-                    <WeatherCard
-                      key={index}
-                      temperature={Math.round(day.main.temp)}
-                      condition={day.weather[0].main}
-                      location={currentWeather.name}
-                      time={new Date(day.dt_txt).toLocaleTimeString("en-US", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: false,
-                      })}
-                      date={new Date(day.dt_txt).toLocaleDateString("en-US", {
-                        weekday: "long",
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    />
-                  ))}
-                </div>
+              {/* Forecast Section */}
+              <div className="forecast-container h-[50%] gap-3 w-full flex justify-between mt-1">
+                {forecast.map((day, index) => (
+                  <WeatherCard
+                    key={index}
+                    temperature={Math.round(day.main.temp)}
+                    condition={day.weather[0].main}
+                    location={currentWeather.name}
+                    time={new Date(day.dt_txt).toLocaleTimeString("en-US", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: false,
+                    })}
+                    date={new Date(day.dt_txt).toLocaleDateString("en-US", {
+                      weekday: "long",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  />
+                ))}
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };

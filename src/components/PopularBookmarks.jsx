@@ -2562,7 +2562,7 @@ function PopularBookmarks() {
           width: "50px",
           height: "50px",
           borderRadius: "50%",
-          backgroundColor: "#6366F1",
+          backgroundColor: isDarkMode ? "#513A7A" : "#6366F1",
           color: "#fff",
           border: "none",
           cursor: "pointer",

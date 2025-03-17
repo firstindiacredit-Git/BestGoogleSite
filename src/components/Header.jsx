@@ -19,15 +19,20 @@ import { doc, setDoc, getDoc } from "firebase/firestore";
 import { FaCrown } from "react-icons/fa";
 import Signin from "./Signup/signin.jsx";
 import Signup from "./Signup.jsx";
-const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
-  const [showButtons, setShowButtons] = useState(false);
+const Header = ({
+  isDarkMode,
+  toggleTheme,
+  onPageNameChange,
+  goBack,
+  designChange,
+  designContext,
+}) => {
   const [showLogin, setShowLogin] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
   const [user, setUser] = useState(null);
   const [subscriptionStatus, setSubscriptionStatus] = useState("free");
   const [isAdmin, setIsAdmin] = useState(false);
   const [panel, setPanel] = useState(false);
-  const [showHomeDropdown, setShowHomeDropdown] = useState(false);
   const [pages, setPages] = useState(() => {
     const savedPages = localStorage.getItem("customPages");
     return savedPages ? JSON.parse(savedPages) : [];
@@ -112,12 +117,12 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
     setPages(updatedPages);
     localStorage.setItem("customPages", JSON.stringify(updatedPages));
     navigate(`/NewSearchPage?pageId=${newPage.id}`);
-    setShowHomeDropdown(false);
+    // setShowHomeDropdown(false);
   };
 
   const handlePageClick = (pageId) => {
     navigate(`/NewSearchPage?pageId=${pageId}`);
-    setShowHomeDropdown(false);
+    // setShowHomeDropdown(false);
   };
 
   const deletePage = (pageId, event) => {
@@ -125,11 +130,12 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
     const pageToDelete = pages.find((page) => page.id === pageId);
 
     Modal.confirm({
-      title: "Delete Page",
-      content: `Are you sure you want to delete "${pageToDelete.name}"?`,
-      okText: "Yes",
-      okType: "danger",
-      cancelText: "No",
+      title: <div className="dark:text-white">Delete Page</div>,
+      content: (
+        <div className="dark:text-white">{`Are you sure you want to delete ${pageToDelete.name}`}</div>
+      ),
+      okText: <div className="dark:text-white">Yes</div>,
+      cancelText: <div>No</div>,
       onOk: async () => {
         const updatedPages = pages.filter((page) => page.id !== pageId);
         setPages(updatedPages);
@@ -163,7 +169,7 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
   const handlePageNameEdit = (pageId, currentName, event) => {
     event.stopPropagation();
     Modal.confirm({
-      title: "Edit Page Name",
+      title: <div className="dark:text-white">Edit Page Name</div>,
       content: (
         <Input
           defaultValue={currentName}
@@ -251,7 +257,11 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
       {
         key: "home",
         label: (
-          <Link to="/search" className="flex items-center gap-2">
+          <Link
+            to="/search"
+            style={{ color: isDarkMode ? "#f6f6f6" : "black" }}
+            className="flex  w-full   items-center gap-4"
+          >
             <HomeOutlined />
             Home
           </Link>
@@ -262,35 +272,40 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
         key: page.id,
         label: (
           <div className="flex items-center justify-between gap-2">
-            <span onClick={() => handlePageClick(page.id)}>{page.name}</span>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setDefaultPage(page.id);
+              }}
+              className="p-1 hover:bg-gray-100 dark:hover:bg-yellow-600 rounded"
+              title={
+                defaultPageId === page.id.toString()
+                  ? "Default page"
+                  : "Set as default"
+              }
+            >
+              {defaultPageId === page.id.toString() ? (
+                <StarFilled className="text-indigo-500" />
+              ) : (
+                <StarOutlined className="text-gray-500 hover:text-indigo-500" />
+              )}
+            </button>
+            <span
+              style={{ color: isDarkMode ? "#F2F2F2" : "black" }}
+              onClick={() => handlePageClick(page.id)}
+            >
+              {page.name}
+            </span>
             <div className="flex items-center gap-1">
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setDefaultPage(page.id);
-                }}
-                className="p-1 hover:bg-gray-100 rounded"
-                title={
-                  defaultPageId === page.id.toString()
-                    ? "Default page"
-                    : "Set as default"
-                }
-              >
-                {defaultPageId === page.id.toString() ? (
-                  <StarFilled className="text-indigo-500" />
-                ) : (
-                  <StarOutlined className="text-gray-500 hover:text-indigo-500" />
-                )}
-              </button>
-              <button
                 onClick={(e) => handlePageNameEdit(page.id, page.name, e)}
-                className="p-1 hover:bg-gray-100 rounded"
+                className="p-1 hover:bg-gray-100 rounded dark:hover:bg-blue-600"
               >
                 <EditOutlined className="text-gray-500" />
               </button>
               <button
                 onClick={(e) => deletePage(page.id, e)}
-                className="p-1 hover:bg-gray-100 rounded"
+                className="p-1 hover:bg-gray-100 rounded dark:hover:bg-red-600"
               >
                 <DeleteOutlined className="text-red-500" />
               </button>
@@ -298,24 +313,22 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
           </div>
         ),
       })),
-      { type: "divider" },
       {
         key: "new",
-        label: (
-          <button
-            onClick={createNewPage}
-            className="flex items-center gap-2 w-full"
-            disabled={pages.length >= MAX_PAGES}
-          >
-            <PlusOutlined />
-            New Page
-            {pages.length >= MAX_PAGES && (
-              <span className="text-xs text-red-500 ml-2">
-                (Maximum limit reached)
-              </span>
-            )}
-          </button>
-        ),
+        label:
+          pages.length >= MAX_PAGES ? (
+            <span className="text-sm text-red-500 ml-2">
+              Maximum limit reached: 4
+            </span>
+          ) : (
+            <button
+              onClick={createNewPage}
+              className="flex items-center gap-4 w-full dark:text-gray-200"
+            >
+              <PlusOutlined />
+              New Page
+            </button>
+          ),
       },
     ],
     [
@@ -331,13 +344,6 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
   useEffect(() => {
     const handleOutsideClick = (event) => {
       if (
-        !event.target.closest(".menu-buttons") &&
-        !event.target.closest(".menu-icon")
-      ) {
-        setShowButtons(false);
-      }
-
-      if (
         !event.target.closest(".user-panel") &&
         !event.target.closest(".user-avatar")
       ) {
@@ -346,7 +352,6 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
     };
 
     const handleScroll = () => {
-      setShowButtons(false);
       setPanel(false);
     };
 
@@ -476,9 +481,9 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
                     menu={{ items }}
                     trigger={["click"]}
                     placement="bottomLeft"
-                    overlayClassName="mt-1"
+                    overlayClassName="mt-1 [&_.ant-dropdown-menu]:p-0 [&_.ant-dropdown-menu-item]:p-0 [&_ul]:dark:bg-[#28283a]"
                   >
-                    <button className="bg-indigo-500 border-none hover:bg-indigo-600 flex items-center gap-2 px-2 py-1 rounded-md transition-all duration-200">
+                    <button className="bg-indigo-500 dark:bg-[#513a7a] border-none hover:bg-indigo-600 flex items-center gap-2 px-2 py-1 rounded-md transition-all duration-200">
                       <MenuOutlined className="text-white" />
                       <span className="text-white">{currentPageName}</span>
                     </button>
@@ -784,12 +789,11 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
                       <p className="font-bold">
                         {user.username || user.displayName || "User"}
                       </p>
-                      <p>{user.email}</p>
                       <div
                         className={`mt-2 text-sm flex items-center justify-center gap-2 
                       ${
                         subscriptionStatus === "pro"
-                          ? "text-indigo-500"
+                          ? "text-indigo-500 dark:text-yellow-500"
                           : "text-gray-500 dark:text-gray-400"
                       }`}
                       >
@@ -807,26 +811,43 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
                     </div>
                     <hr className=" border-gray-200 dark:border-gray-600" />
                     <a href="./src/components/AllMytab.com.zip" download>
-                      <div className="text-center py-2  hover:bg-gray-200 transition-all">
+                      <div className="text-center py-2  dark:text-white dark:hover:bg-gray-800 hover:bg-gray-200 transition-all">
                         <button>Download Extension</button>
                       </div>
                     </a>
 
                     <a href="./src/components/AllMytab.com.zip" download>
-                      <div className="text-center py-2  hover:bg-gray-200 transition-all">
+                      <div className="text-center py-2  dark:text-white dark:hover:bg-gray-800 hover:bg-gray-200 transition-all">
                         Learn how to use?
                       </div>
                     </a>
                     <hr className="mb-2 border-gray-200 dark:border-gray-600" />
+                    <div className="mx-auto w-fit">
+                      <label className="inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={designContext}
+                          className="sr-only peer"
+                          onChange={designChange}
+                        />
+                        <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 dark:peer-checked:bg-blue-600"></div>
+                        <span className="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">
+                          {designContext ? "Minimal Mode" : "Normal Mode"}
+                        </span>
+                      </label>
+                    </div>
+                    <hr className=" border-gray-200 dark:border-gray-600" />
+
+                    <button type="button"></button>
                     <Link to="/Profile">
-                      <button className="w-full flex items-center justify-center gap-2 px-4 py-2 text-center text-sm text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600 rounded transition-colors duration-200">
+                      <button className="w-full flex items-center justify-center gap-2 px-4 py-2 text-center text-sm text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-800 rounded transition-colors duration-200">
                         <RiUserLine />
                         <span>Profile</span>
                       </button>
                     </Link>
                     <button
                       onClick={handleSignOut}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-2 text-center text-sm text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600 rounded transition-colors duration-200"
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2 text-center text-sm text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-800 rounded transition-colors duration-200"
                     >
                       <IoIosLogOut />
                       <span>Sign Out</span>

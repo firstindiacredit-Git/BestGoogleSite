@@ -430,7 +430,7 @@ const CredentialManager = () => {
       {isLocked ? (
         <div className="flex justify-center w-[90vw] mx-auto">
           <div className="w-full  rounded-t-sm   h-[40vh]   flex items-center justify-center">
-            <div className="p-8 flex w-2/5 gap-6  items-center justify-between backdrop-blur-sm bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]  text-center rounded-md ">
+            <div className="p-8 flex w-2/5 gap-6  items-center justify-between backdrop-blur-sm bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)]  text-center rounded-md ">
               <div className=" text-indigo-500 mr-10 text-6xl">
                 <img src="/undraw_secure-login_m11a.svg" alt="locker" />
               </div>
@@ -448,7 +448,7 @@ const CredentialManager = () => {
                         handleInputOTPChange(e.target.value, index)
                       }
                       onKeyDown={(e) => handleKeyDown(e, index)}
-                      className="w-12 h-12 border rounded-md border-gray-300 rounded-xs text-center text-lg dark:text-white dark:bg-[#513a7a]"
+                      className="w-12 h-12 border rounded-md border-gray-300 rounded-xs text-center text-lg dark:text-white dark:bg-[#28283a]"
                       style={{
                         appearance: "none", // Removes the arrows
                         MozAppearance: "textfield", // Firefox-specific
@@ -459,7 +459,7 @@ const CredentialManager = () => {
                 </div>
                 <button
                   onClick={handleUnlock}
-                  className="rounded-md bg-indigo-500 w-full hover:bg-indigo-600 transition-all text-white px-4 py-2 rounded-xs"
+                  className="rounded-md bg-indigo-500 dark:bg-[#513a7a] w-full hover:bg-indigo-600 transition-all text-white px-4 py-2 rounded-xs"
                 >
                   Unlock
                 </button>

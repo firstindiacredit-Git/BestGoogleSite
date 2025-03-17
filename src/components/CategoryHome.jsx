@@ -623,12 +623,12 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
     const currentView = views[viewMode];
 
     return (
-      <div className={currentView.container}>
+      <div className={`${currentView.container} pt-3`}>
         {bookmarks.map((item) => (
           <a
             key={item.id}
             href={item.link}
-            className={`${commonClasses.container} ${currentView.item}`}
+            className={`${commonClasses.container} ${currentView.item} `}
           >
             <div className={currentView.content}>
               <img
@@ -730,7 +730,7 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
                       key={bookmark.id}
                       className="flex items-center justify-between p-4 rounded-sm bg-gray-50 dark:bg-gray-700"
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center  gap-3">
                         <img
                           src={getFaviconUrl(bookmark.link)}
                           alt=""
