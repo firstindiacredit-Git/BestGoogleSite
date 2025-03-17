@@ -839,7 +839,19 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
                         </span>
                       </div>
                     </div>
-                    <hr className="my-2 border-gray-200 dark:border-gray-600" />
+                    <hr className=" border-gray-200 dark:border-gray-600" />
+                    <a href="./src/components/AllMytab.com.zip" download>
+                      <div className="text-center py-2  hover:bg-gray-200 transition-all">
+                        <button>Download Extension</button>
+                      </div>
+                    </a>
+
+                    <a href="./src/components/AllMytab.com.zip" download>
+                      <div className="text-center py-2  hover:bg-gray-200 transition-all">
+                        Learn how to use?
+                      </div>
+                    </a>
+                    <hr className="mb-2 border-gray-200 dark:border-gray-600" />
                     <Link to="/Profile">
                       <button className="w-full flex items-center justify-center gap-2 px-4 py-2 text-center text-sm text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600 rounded transition-colors duration-200">
                         <RiUserLine />
