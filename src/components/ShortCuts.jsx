@@ -309,24 +309,14 @@ function BookmarkPage() {
             key={bookmark.id}
             className="text-center hover:shadow-sm hover:dark:bg-[#28283a]/[var(--widget-opacity)] hover:backdrop-blur-lg  hover:bg-white/[var(--widget-opacity)]  cursor-pointer p-2 rounded-sm  group relative"
           >
-            <a
-              href={bookmark.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block"
-            >
+            <a href={bookmark.link} className="block">
               <img
                 src={getFavicon(bookmark.link)}
                 alt={bookmark.name}
                 className="w-7 h-7 mx-auto"
               />
             </a>
-            <a
-              href={bookmark.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block"
-            >
+            <a href={bookmark.link} className="block">
               <h3 className="text-xs font-semibold mt-1 w-16 truncate mx-auto">
                 {bookmark.name}
               </h3>

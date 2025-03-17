@@ -500,8 +500,7 @@ function DraggableDropdown({
             )}
             <a
               href={link.link}
-              target="_blank"
-              rel="noopener noreferrer"
+              
               className="dark:text-white text-[12px] truncate "
             >
               {settings.viewMode !== "icon" && (

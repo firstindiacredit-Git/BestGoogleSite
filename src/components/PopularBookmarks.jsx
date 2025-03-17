@@ -1375,8 +1375,6 @@ function PopularBookmarks() {
               title={
                 <a
                   href={link.url || link.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="text-black dark:text-white"
                 >
                   {link.title || link.name}
@@ -1400,12 +1398,7 @@ function PopularBookmarks() {
               className="flex flex-col items-center p-2 bg-white/[(var(--widget-opacity))] dark:bg-[#513a7a]/[(var(--widget-opacity))] hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all duration-300 group relative"
             >
               <div className="relative w-full flex justify-center mb-2">
-                <a
-                  href={link.url || link.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block"
-                >
+                <a href={link.url || link.link} className="block">
                   <img
                     src={getFaviconUrl(link.url || link.link)}
                     alt={link.title || link.name}
@@ -1420,8 +1413,6 @@ function PopularBookmarks() {
               <Tooltip title={link.title || link.name}>
                 <a
                   href={link.url || link.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="w-full text-center text-black dark:text-white hover:text-blue-500"
                 >
                   <span className="text-sm truncate block">
@@ -1444,12 +1435,7 @@ function PopularBookmarks() {
           {categoryLinks.map((link) => (
             <div key={link.id} className="relative group flex justify-center">
               <Tooltip title={link.title || link.name}>
-                <a
-                  href={link.url || link.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block"
-                >
+                <a href={link.url || link.link} className="block">
                   <img
                     src={getFaviconUrl(link.url || link.link)}
                     alt={link.title || link.name}

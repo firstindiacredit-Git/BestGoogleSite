@@ -935,8 +935,6 @@ const Category = ({ data = [] }) => {
                                         <div className="flex-grow">
                                           <a
                                             href={bookmark.link}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
                                             className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                                           >
                                             {bookmark.name}

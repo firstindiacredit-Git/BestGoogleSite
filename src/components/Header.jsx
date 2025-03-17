@@ -401,7 +401,7 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
 
   return (
     <>
-      <header className=" bg-gray-200/10 backdrop-blur-sm dark:bg-[#513a7a]/10 border-b border dark:border-gray-800/20 border-gray-200/20  sticky top-0 z-50">
+      <header className=" bg-gray-200/10 backdrop-blur-sm dark:bg-[#513a7a]/10  sticky top-0 z-50">
         {isAdmin && showAdminBanner && (
           <div className="bg-red-500/90 backdrop-blur-sm text-white py-1 px-4 text-center sticky top-0 z-50">
             <Alert
@@ -537,8 +537,6 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
                     <div className="backdrop-blur-sm grid grid-cols-3 gap-4">
                       <a
                         href="https://accounts.google.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
                         className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                       >
                         <img
@@ -552,8 +550,6 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
                       </a>
                       <a
                         href="https://maps.google.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
                         className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                       >
                         <img
@@ -567,8 +563,6 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
                       </a>
                       <a
                         href="https://www.youtube.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
                         className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                       >
                         <img
@@ -582,8 +576,6 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
                       </a>
                       <a
                         href="https://play.google.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
                         className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                       >
                         <img
@@ -597,8 +589,6 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
                       </a>
                       <a
                         href="https://news.google.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
                         className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                       >
                         <img
@@ -612,8 +602,6 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
                       </a>
                       <a
                         href="https://mail.google.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
                         className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                       >
                         <img
@@ -627,8 +615,6 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
                       </a>
                       <a
                         href="https://meet.google.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
                         className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                       >
                         <img
@@ -643,8 +629,6 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
 
                       <a
                         href="https://docs.google.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
                         className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                       >
                         <img
@@ -658,8 +642,6 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
                       </a>
                       <a
                         href="https://sheets.google.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
                         className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                       >
                         <img
@@ -674,8 +656,6 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
 
                       <a
                         href="https://keep.google.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
                         className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                       >
                         <img
@@ -690,8 +670,6 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
 
                       <a
                         href="https://earth.google.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
                         className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                       >
                         <img
@@ -706,8 +684,6 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
 
                       <a
                         href="https://ads.google.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
                         className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                       >
                         <img
@@ -721,8 +697,6 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
                       </a>
                       <a
                         href="https://chrome.google.com/webstore"
-                        target="_blank"
-                        rel="noopener noreferrer"
                         className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                       >
                         <img
@@ -736,8 +710,6 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
                       </a>
                       <a
                         href="https://drive.google.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
                         className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                       >
                         <img
@@ -751,8 +723,6 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
                       </a>
                       <a
                         href="https://calendar.google.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
                         className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                       >
                         <img
@@ -766,8 +736,6 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
                       </a>
                       <a
                         href="https://translate.google.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
                         className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                       >
                         <img
@@ -781,8 +749,6 @@ const Header = ({ isDarkMode, toggleTheme, onPageNameChange, goBack }) => {
                       </a>
                       <a
                         href="https://photos.google.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
                         className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                       >
                         <img

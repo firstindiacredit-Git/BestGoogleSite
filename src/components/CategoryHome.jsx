@@ -628,8 +628,6 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
           <a
             key={item.id}
             href={item.link}
-            target="_blank"
-            rel="noopener noreferrer"
             className={`${commonClasses.container} ${currentView.item}`}
           >
             <div className={currentView.content}>
