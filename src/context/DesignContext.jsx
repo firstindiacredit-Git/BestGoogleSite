@@ -9,7 +9,8 @@ const DesignContext = createContext();
 
 function DesignContextProvider({ children }) {
   const [simple, setIsSimple] = useState(() => {
-    localStorage.getItem("design") === "true";
+    const savedDesign = localStorage.getItem("design");
+    return savedDesign ? savedDesign === "true" : false;
   });
 
   const changeSimple = useCallback(() => {
