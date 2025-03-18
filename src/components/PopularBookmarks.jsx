@@ -887,6 +887,7 @@ function PopularBookmarks() {
       // Add the new category to the local state immediately
       const newCategory = {
         id: docRef.id,
+        name: newCategoryName.trim(),
         userId: user.uid,
         newCategory: newCategoryName.trim(),
         order: categories.length,
@@ -906,6 +907,53 @@ function PopularBookmarks() {
           [docRef.id]: true,
         })
       );
+
+      // Also add the new category to a column
+      setCategoryColumns((prevColumns) => {
+        // Find the column with the least categories
+        let targetColumn = "column1";
+        let minCount = prevColumns.column1 ? prevColumns.column1.length : 0;
+
+        Object.keys(prevColumns).forEach((colKey) => {
+          const count = prevColumns[colKey] ? prevColumns[colKey].length : 0;
+          if (count < minCount) {
+            minCount = count;
+            targetColumn = colKey;
+          }
+        });
+
+        // Add new category to the target column
+        const newColumns = { ...prevColumns };
+        newColumns[targetColumn] = [
+          ...(newColumns[targetColumn] || []),
+          newCategory.id,
+        ];
+
+        // Also update in Firestore
+        const userDocRef = doc(db, "users", user.uid);
+        updateDoc(userDocRef, {
+          "categoryPositions.columns": newColumns,
+        }).catch((error) => console.error("Error updating columns:", error));
+
+        return newColumns;
+      });
+
+      // Make sure this category is not in hiddenCategories
+      setHiddenCategories((prev) => {
+        const filtered = prev.filter((id) => id !== newCategory.id);
+
+        // Update in Firestore if there was a change
+        if (prev.length !== filtered.length) {
+          const userDocRef = doc(db, "users", user.uid);
+          updateDoc(userDocRef, {
+            hiddenCategories: filtered,
+          }).catch((error) =>
+            console.error("Error updating hidden categories:", error)
+          );
+        }
+
+        return filtered;
+      });
 
       message.success("Category added successfully");
       setNewCategoryName("");
@@ -955,21 +1003,80 @@ function PopularBookmarks() {
 
   const handleDeleteCategory = async (categoryId) => {
     try {
-      // Delete the category
+      // Set loading state
+      setLoading(true);
+
+      // Delete the category document
       await deleteDoc(doc(db, "users", user.uid, "UserCategory", categoryId));
 
-      // Delete all bookmarks in this category
-      const categoryLinks = links.filter(
+      // Get all bookmarks in this category
+      const categoryBookmarks = links.filter(
         (link) => link.categoryId === categoryId
       );
-      for (const link of categoryLinks) {
-        await deleteDoc(doc(db, "links", link.id));
+
+      console.log(
+        `Found ${categoryBookmarks.length} bookmarks to delete in category ${categoryId}`
+      );
+
+      // Separate admin and user bookmarks
+      const adminBookmarks = categoryBookmarks.filter(
+        (link) => link.isAdminBookmark
+      );
+      const userBookmarks = categoryBookmarks.filter(
+        (link) => !link.isAdminBookmark
+      );
+
+      // Use a batch for efficient deletion of user bookmarks
+      if (userBookmarks.length > 0) {
+        const batch = writeBatch(db);
+
+        // Add all user bookmarks to the deletion batch
+        userBookmarks.forEach((bookmark) => {
+          const bookmarkRef = doc(
+            db,
+            "users",
+            user.uid,
+            "CatBookmarks",
+            bookmark.id
+          );
+          batch.delete(bookmarkRef);
+        });
+
+        // Commit the batch deletion
+        await batch.commit();
+        console.log(`Deleted ${userBookmarks.length} user bookmarks`);
+      }
+
+      // For admin bookmarks, hide them instead of deleting (add to hidden bookmarks)
+      if (adminBookmarks.length > 0) {
+        const userDocRef = doc(db, "users", user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        const currentHiddenIds = userDocSnap.exists()
+          ? userDocSnap.data().hiddenBookmarkIds || []
+          : [];
+
+        // Add all admin bookmark IDs to hidden list
+        const newHiddenIds = [
+          ...new Set([
+            ...currentHiddenIds,
+            ...adminBookmarks.map((bookmark) => bookmark.id),
+          ]),
+        ];
+
+        // Update the user document with the new hidden IDs
+        await updateDoc(userDocRef, {
+          hiddenBookmarkIds: newHiddenIds,
+        });
+
+        console.log(`Hid ${adminBookmarks.length} admin bookmarks`);
       }
 
       // Update local state
       setCategories((prevCategories) =>
         prevCategories.filter((cat) => cat.id !== categoryId)
       );
+
+      // Remove all bookmarks for this category from the link state
       setLinks((prevLinks) =>
         prevLinks.filter((link) => link.categoryId !== categoryId)
       );
@@ -982,10 +1089,32 @@ function PopularBookmarks() {
         return newState;
       });
 
+      // Update column state to remove the category
+      setCategoryColumns((prevColumns) => {
+        const newColumns = { ...prevColumns };
+        Object.keys(newColumns).forEach((colKey) => {
+          if (Array.isArray(newColumns[colKey])) {
+            newColumns[colKey] = newColumns[colKey].filter(
+              (id) => id !== categoryId
+            );
+          }
+        });
+
+        // Update Firestore with new column layout
+        const userDocRef = doc(db, "users", user.uid);
+        updateDoc(userDocRef, {
+          "categoryPositions.columns": newColumns,
+        }).catch((err) => console.error("Error updating column layout:", err));
+
+        return newColumns;
+      });
+
       message.success("Category and its bookmarks deleted successfully");
     } catch (error) {
       console.error("Error deleting category:", error);
       message.error("Failed to delete category");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -1660,13 +1789,17 @@ function PopularBookmarks() {
                             const category = categories.find(
                               (c) => c.id === categoryId
                             );
-                            if (!category) return null;
+                            if (!category) {
+                              console.log(`Category not found: ${categoryId}`);
+                              return null;
+                            }
 
+                            // Get bookmarks for this category
                             const categoryLinks = links
                               .filter(
                                 (link) =>
                                   link.categoryId === category.id &&
-                                  !link.isHidden
+                                  !hiddenBookmarkIds.includes(link.id)
                               )
                               .sort((a, b) => (a.order || 0) - (b.order || 0));
 
@@ -1915,6 +2048,44 @@ function PopularBookmarks() {
 
             if (docSnapshot.exists()) {
               const data = docSnapshot.data();
+
+              // Update hidden categories
+              if (data.hiddenCategories) {
+                setHiddenCategories((prev) => {
+                  // Only update if there's a change
+                  if (
+                    JSON.stringify(prev) !==
+                    JSON.stringify(data.hiddenCategories)
+                  ) {
+                    console.log(
+                      "Updating hidden categories from snapshot:",
+                      data.hiddenCategories
+                    );
+                    return data.hiddenCategories;
+                  }
+                  return prev;
+                });
+              }
+
+              // Update hidden bookmark IDs
+              if (data.hiddenBookmarkIds) {
+                setHiddenBookmarkIds((prev) => {
+                  // Only update if there's a change
+                  if (
+                    JSON.stringify(prev) !==
+                    JSON.stringify(data.hiddenBookmarkIds)
+                  ) {
+                    console.log(
+                      "Updating hidden bookmark IDs from snapshot:",
+                      data.hiddenBookmarkIds
+                    );
+                    return data.hiddenBookmarkIds;
+                  }
+                  return prev;
+                });
+              }
+
+              // Update category positions
               if (data.categoryPositions) {
                 const { columns, columnCount: newCount } =
                   data.categoryPositions;
@@ -2711,6 +2882,50 @@ function PopularBookmarks() {
   const toggleController = () => {
     setIsControllerOpen((prev) => !prev);
   };
+
+  // Add a new useEffect to load hidden categories
+  useEffect(() => {
+    const loadHiddenCategories = async () => {
+      if (!user) return;
+
+      try {
+        const userDocRef = doc(db, "users", user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data();
+
+          // Load hidden categories
+          if (
+            userData.hiddenCategories &&
+            Array.isArray(userData.hiddenCategories)
+          ) {
+            console.log(
+              "Loading hidden categories:",
+              userData.hiddenCategories
+            );
+            setHiddenCategories(userData.hiddenCategories);
+          }
+
+          // Also load hidden bookmark IDs
+          if (
+            userData.hiddenBookmarkIds &&
+            Array.isArray(userData.hiddenBookmarkIds)
+          ) {
+            console.log(
+              "Loading hidden bookmark IDs:",
+              userData.hiddenBookmarkIds
+            );
+            setHiddenBookmarkIds(userData.hiddenBookmarkIds);
+          }
+        }
+      } catch (error) {
+        console.error("Error loading hidden categories:", error);
+      }
+    };
+
+    loadHiddenCategories();
+  }, [user]);
 
   if (loading) {
     return (
