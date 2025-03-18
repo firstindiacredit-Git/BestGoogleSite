@@ -479,7 +479,7 @@ function PopularBookmarks() {
       if (!user) return;
 
       try {
-        // Fetch hidden bookmarks
+        // Fetch hidden bookmarks first
         const userDocRef = doc(db, "users", user.uid);
         const userDocSnap = await getDoc(userDocRef);
         const hiddenIds = userDocSnap.exists()
@@ -488,112 +488,80 @@ function PopularBookmarks() {
 
         setHiddenBookmarkIds(hiddenIds);
 
+        // Create a Set to track unique URLs per category
+        const uniqueUrlsPerCategory = new Map();
+
         // Fetch all user bookmarks
         const userBookmarksSnapshot = await getDocs(
           collection(db, "users", user.uid, "CatBookmarks")
         );
-        const userBookmarks = userBookmarksSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-          isHidden: hiddenIds.includes(doc.id),
-          isAdminBookmark: false,
-        }));
+        const userBookmarks = userBookmarksSnapshot.docs
+          .map((doc) => {
+            const data = doc.data();
+            const key = `${data.categoryId}-${data.url}`;
+            if (!uniqueUrlsPerCategory.has(key)) {
+              uniqueUrlsPerCategory.set(key, doc.id);
+              return {
+                id: doc.id,
+                ...data,
+                isHidden: hiddenIds.includes(doc.id),
+                isAdminBookmark: false,
+              };
+            }
+            return null;
+          })
+          .filter(Boolean)
+          .filter((bookmark) => !hiddenIds.includes(bookmark.id));
 
         // Store user bookmark IDs for deduplication
         const userBookmarkIds = new Set(userBookmarks.map((b) => b.id));
+        const userBookmarkUrls = new Set(
+          userBookmarks.map((b) => `${b.categoryId}-${b.url}`)
+        );
 
         // Fetch admin bookmarks for each admin category
         const adminBookmarksPromises = categories.map(async (category) => {
           const bookmarksSnapshot = await getDocs(
             query(collection(db, "links"), where("category", "==", category.id))
           );
-          return bookmarksSnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-            title: doc.data().name,
-            url: doc.data().link,
-            categoryId: doc.data().category,
-            isHidden: hiddenIds.includes(doc.id),
-            isAdminBookmark: true,
-            createdBy: doc.data().createdBy,
-            updatedAt: doc.data().updatedAt,
-            order: doc.data().order || 0,
-          }));
+          return bookmarksSnapshot.docs
+            .map((doc) => {
+              const data = doc.data();
+              const key = `${category.id}-${data.link}`;
+              // Skip if we already have this URL in user bookmarks or if it's a duplicate
+              if (userBookmarkUrls.has(key) || uniqueUrlsPerCategory.has(key)) {
+                return null;
+              }
+              uniqueUrlsPerCategory.set(key, doc.id);
+              return {
+                id: doc.id,
+                ...data,
+                title: data.name,
+                url: data.link,
+                categoryId: category.id,
+                isHidden: hiddenIds.includes(doc.id),
+                isAdminBookmark: true,
+                createdBy: data.createdBy,
+                updatedAt: data.updatedAt,
+                order: data.order || 0,
+              };
+            })
+            .filter(Boolean)
+            .filter((bookmark) => !hiddenIds.includes(bookmark.id));
         });
 
         const adminBookmarks = (
           await Promise.all(adminBookmarksPromises)
         ).flat();
 
-        // Filter out any duplicates between admin and user bookmarks
-        const filteredAdminBookmarks = adminBookmarks.filter(
-          (bookmark) => !userBookmarkIds.has(bookmark.id)
-        );
-
         // Combine all bookmarks
-        const allBookmarks = [...userBookmarks, ...filteredAdminBookmarks];
+        const allBookmarks = [...userBookmarks, ...adminBookmarks];
         console.log(
-          `Loaded ${userBookmarks.length} user bookmarks and ${filteredAdminBookmarks.length} admin bookmarks`
+          `Loaded ${userBookmarks.length} user bookmarks and ${adminBookmarks.length} admin bookmarks`
         );
 
         setLinks(allBookmarks);
         setLoading(false);
-
-        // Load saved positions for admin bookmarks
-        const loadSavedPositions = async () => {
-          try {
-            const userDocRef = doc(db, "users", user.uid);
-            const userDocSnap = await getDoc(userDocRef);
-
-            if (userDocSnap.exists() && userDocSnap.data().bookmarkPositions) {
-              const savedPositions = userDocSnap.data().bookmarkPositions;
-
-              // Apply saved positions to links
-              setLinks((prevLinks) => {
-                const updatedLinks = [...prevLinks];
-                Object.entries(savedPositions).forEach(
-                  ([categoryId, categoryPositions]) => {
-                    // Ensure categoryPositions is an array before using forEach
-                    if (
-                      categoryPositions &&
-                      typeof categoryPositions === "object"
-                    ) {
-                      // If it's an object, convert it to array format
-                      const positionsArray = Object.entries(
-                        categoryPositions
-                      ).map(([bookmarkId, data]) => ({
-                        id: bookmarkId,
-                        ...data,
-                      }));
-                      positionsArray.forEach((pos) => {
-                        const linkIndex = updatedLinks.findIndex(
-                          (link) =>
-                            link.id === pos.id &&
-                            link.categoryId === categoryId &&
-                            link.isAdminBookmark === pos.isAdminBookmark
-                        );
-                        if (linkIndex !== -1) {
-                          updatedLinks[linkIndex] = {
-                            ...updatedLinks[linkIndex],
-                            order: pos.order,
-                          };
-                        }
-                      });
-                    }
-                  }
-                );
-                return updatedLinks.sort(
-                  (a, b) => (a.order || 0) - (b.order || 0)
-                );
-              });
-            }
-          } catch (error) {
-            console.error("Error loading saved positions:", error);
-          }
-        };
-
-        // Call loadSavedPositions after fetching links
-        await loadSavedPositions();
       } catch (error) {
         console.error("Error fetching bookmark data:", error);
         message.error("Failed to load bookmarks");
@@ -1045,35 +1013,76 @@ function PopularBookmarks() {
         return;
       }
 
-      // Add error handling and validation
+      // Check for duplicates in the same category
+      const normalizedUrl = validateUrl(newBookmark.url.trim());
+
+      // Create a predictable key for deduplication
+      const urlKey = `${selectedCategory.id}-${normalizedUrl}`;
+
+      // Check for duplicates more thoroughly
+      const isDuplicate = links.some((link) => {
+        if (link.categoryId !== selectedCategory.id) return false;
+        try {
+          const linkUrl = validateUrl(link.url);
+          return linkUrl === normalizedUrl;
+        } catch (e) {
+          return false;
+        }
+      });
+
+      if (isDuplicate) {
+        message.warning("This URL already exists in this category");
+        return;
+      }
+
+      // Generate a predictable temporary ID that includes the URL key
+      // This helps the Firestore listener match this temp bookmark with the real one
+      const tempId = `temp_${btoa(urlKey).replace(
+        /[^a-zA-Z0-9]/g,
+        ""
+      )}_${Date.now()}`;
+
+      // Prepare bookmark data
       const bookmarkData = {
         title: newBookmark.title.trim(),
-        url: validateUrl(newBookmark.url.trim()),
-        favicon:
-          newBookmark.favicon || (await fetchFavicon(newBookmark.url.trim())),
+        url: normalizedUrl,
+        favicon: newBookmark.favicon || (await fetchFavicon(normalizedUrl)),
         categoryId: selectedCategory.id,
         userId: user.uid,
         createdAt: new Date().toISOString(),
         order: links.filter((link) => link.categoryId === selectedCategory.id)
           .length,
-        isAdminCategory: category.isAdminCategory || false,
+        isAdminBookmark: false,
+        _tempUrlKey: urlKey, // Add this to help with deduplication during listener updates
       };
 
-      // Add the document with retry logic
+      // Add optimistically to UI with tempId
+      setLinks((prevLinks) => {
+        // Make sure we don't already have this bookmark (additional safety check)
+        const existingBookmark = prevLinks.find(
+          (link) =>
+            link.categoryId === selectedCategory.id &&
+            link.url === normalizedUrl
+        );
+
+        if (existingBookmark) {
+          // Already exists, don't add it again
+          console.log("Prevented duplicate bookmark:", urlKey);
+          return prevLinks;
+        }
+
+        return [...prevLinks, { ...bookmarkData, id: tempId }];
+      });
+
+      // Add to Firestore - this will trigger the listener
       const docRef = await addDoc(
         collection(db, "users", user.uid, "CatBookmarks"),
         bookmarkData
       );
 
-      // Update local state with optimistic update
-      setLinks((prevLinks) => [
-        ...prevLinks,
-        {
-          id: docRef.id,
-          ...bookmarkData,
-          isAdminBookmark: false,
-        },
-      ]);
+      console.log(
+        `Added bookmark with temp ID ${tempId}, real ID ${docRef.id}`
+      );
 
       // Clear form and close modal
       setNewBookmark({ title: "", url: "", favicon: "" });
@@ -1081,56 +1090,31 @@ function PopularBookmarks() {
       message.success("Bookmark added successfully");
     } catch (error) {
       console.error("Error adding bookmark:", error);
-      // More specific error messages
-      if (error.code === "permission-denied") {
-        // message.error("You don't have permission to add bookmarks");
+
+      // Clean up the temp bookmark if operation failed
+      const normalizedUrl = validateUrl(newBookmark.url.trim());
+      setLinks((prevLinks) =>
+        prevLinks.filter(
+          (link) =>
+            !(
+              link.id.startsWith("temp_") &&
+              link.categoryId === selectedCategory.id &&
+              link.url === normalizedUrl
+            )
+        )
+      );
+
+      if (error.message === "Invalid URL format") {
+        message.error("Please enter a valid URL");
+      } else if (error.code === "permission-denied") {
+        message.error("You don't have permission to add bookmarks");
       } else if (error.code === "unavailable") {
         message.error("Network is unavailable. Please check your connection.");
-      } else if (error.message === "Invalid URL format") {
-        message.error("Please enter a valid URL");
       } else {
         message.error("Failed to add bookmark. Please try again.");
       }
     }
   };
-
-  // const handleDragEnd = async (result) => {
-  //   if (!result.destination) return;
-
-  //   const { source, destination } = result;
-
-  //   try {
-  //     const items = Array.from(editModeBookmarks);
-  //     const [reorderedItem] = items.splice(source.index, 1);
-  //     items.splice(destination.index, 0, reorderedItem);
-
-  //     // Update local state first for immediate feedback
-  //     const updatedItems = items.map((item, index) => ({
-  //       ...item,
-  //       order: index,
-  //     }));
-
-  //     setEditModeBookmarks(updatedItems);
-  //     setHasUnsavedChanges(true);
-
-  //     // Update Firestore in the background
-  //     if (user) {
-  //       const batch = writeBatch(db);
-
-  //       updatedItems.forEach((item, index) => {
-  //         if (item.isAdminBookmark) {
-  //           const bookmarkRef = doc(db, "bookmarks", item.id);
-  //           batch.update(bookmarkRef, { order: index });
-  //         }
-  //       });
-
-  //       await batch.commit();
-  //     }
-  //   } catch (error) {
-  //     console.error("Error handling drag end:", error);
-  //     message.error("Failed to update bookmark order");
-  //   }
-  // };
 
   const selectAllBookmarks = () => {
     if (selectedBookmarks.length === editModeBookmarks.length) {
@@ -1141,6 +1125,32 @@ function PopularBookmarks() {
   };
 
   const getCategoryMenuItems = (category) => [
+    {
+      key: "editMode",
+      icon: (
+        <div className=" bg-gray-200 dark:bg-gray-400 px-2 py-1 rounded-md">
+          <EditOutlined />
+        </div>
+      ),
+      label: "Edit Mode",
+      onClick: () => {
+        setSelectedCategory(category);
+        // Filter out hidden bookmarks when setting editModeBookmarks
+        const visibleBookmarks = links
+          .filter((link) => {
+            // Check if the bookmark is not hidden
+            const isNotHidden = !hiddenBookmarkIds.includes(link.id);
+            // Check if it belongs to the selected category
+            const belongsToCategory = link.categoryId === category.id;
+            return isNotHidden && belongsToCategory;
+          })
+          .sort((a, b) => (a.order || 0) - (b.order || 0))
+          .map((link) => ({ ...link, isEditing: false }));
+
+        setEditModeBookmarks(visibleBookmarks);
+        setIsEditModePanelVisible(true);
+      },
+    },
     {
       key: "viewOptions",
       icon: (
@@ -1280,25 +1290,6 @@ function PopularBookmarks() {
         setSelectedCategory(category);
         setNewCategoryName(category.name || category.newCategory);
         setIsRenameCategoryModalVisible(true);
-      },
-    },
-    {
-      key: "editMode",
-      icon: (
-        <div className=" bg-gray-200 dark:bg-gray-400 px-2 py-1 rounded-md">
-          <EditOutlined />
-        </div>
-      ),
-      label: "Edit Mode",
-      onClick: () => {
-        setSelectedCategory(category);
-        setEditModeBookmarks(
-          links
-            .filter((link) => link.categoryId === category.id)
-            .sort((a, b) => (a.order || 0) - (b.order || 0))
-            .map((link) => ({ ...link, isEditing: false }))
-        );
-        setIsEditModePanelVisible(true);
       },
     },
     {
@@ -2301,7 +2292,19 @@ function PopularBookmarks() {
 
           // Process the changes in batches to avoid performance issues
           setLinks((prevLinks) => {
+            // Create map of existing category-URL combinations to prevent duplicates
+            const existingUrlsByCategory = new Map();
+
+            // First pass - track all existing bookmarks by category and URL
+            prevLinks.forEach((link) => {
+              if (link.categoryId && link.url) {
+                const key = `${link.categoryId}-${link.url}`;
+                existingUrlsByCategory.set(key, link.id);
+              }
+            });
+
             let updatedLinks = [...prevLinks];
+            let hasChanges = false;
 
             changes.forEach((change) => {
               const bookmarkData = {
@@ -2310,13 +2313,53 @@ function PopularBookmarks() {
                 isAdminBookmark: false,
               };
 
+              // Create a unique key for this bookmark
+              const key = `${bookmarkData.categoryId}-${bookmarkData.url}`;
+
               if (change.type === "added") {
-                // Check if it's already in the array
-                const exists = updatedLinks.some(
-                  (link) => link.id === bookmarkData.id
+                // Check if it's a temporary ID being replaced
+                const tempIndex = updatedLinks.findIndex(
+                  (link) =>
+                    link.id.startsWith("temp_") &&
+                    link.categoryId === bookmarkData.categoryId &&
+                    link.url === bookmarkData.url
                 );
-                if (!exists) {
-                  updatedLinks.push(bookmarkData);
+
+                if (tempIndex !== -1) {
+                  // Replace the temporary bookmark with the real one
+                  updatedLinks[tempIndex] = bookmarkData;
+                  hasChanges = true;
+                }
+                // Check if URL already exists in this category
+                else if (existingUrlsByCategory.has(key)) {
+                  const existingId = existingUrlsByCategory.get(key);
+                  // If this is a different document with the same URL, skip it
+                  if (existingId !== bookmarkData.id) {
+                    console.warn(
+                      `Duplicate URL detected in category ${bookmarkData.categoryId}: ${bookmarkData.url}`
+                    );
+                  } else {
+                    // Update the existing bookmark if it's the same document
+                    const index = updatedLinks.findIndex(
+                      (link) => link.id === existingId
+                    );
+                    if (index !== -1) {
+                      updatedLinks[index] = bookmarkData;
+                      hasChanges = true;
+                    }
+                  }
+                }
+                // Add as new bookmark if it doesn't exist
+                else {
+                  // Check if it's already in the array by ID
+                  const exists = updatedLinks.some(
+                    (link) => link.id === bookmarkData.id
+                  );
+                  if (!exists) {
+                    updatedLinks.push(bookmarkData);
+                    existingUrlsByCategory.set(key, bookmarkData.id);
+                    hasChanges = true;
+                  }
                 }
               } else if (change.type === "modified") {
                 const index = updatedLinks.findIndex(
@@ -2327,15 +2370,22 @@ function PopularBookmarks() {
                     ...updatedLinks[index],
                     ...bookmarkData,
                   };
+                  hasChanges = true;
                 }
               } else if (change.type === "removed") {
+                const initialLength = updatedLinks.length;
                 updatedLinks = updatedLinks.filter(
                   (link) => link.id !== bookmarkData.id
                 );
+                if (initialLength !== updatedLinks.length) {
+                  existingUrlsByCategory.delete(key);
+                  hasChanges = true;
+                }
               }
             });
 
-            return updatedLinks;
+            // Only update state if something changed
+            return hasChanges ? updatedLinks : prevLinks;
           });
         }
       },
