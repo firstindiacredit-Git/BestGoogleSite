@@ -346,7 +346,7 @@ function PopularBookmarks() {
       );
     } catch (error) {
       console.error("Error fetching categories:", error);
-      message.error("Failed to fetch categories");
+      //error("Failed to fetch categories");
       return [];
     }
   };
@@ -416,12 +416,12 @@ function PopularBookmarks() {
             }
           } catch (error) {
             console.error("Error processing category changes:", error);
-            message.error("Failed to process category updates");
+            //error("Failed to process category updates");
           }
         },
         error: (error) => {
           console.error("Error in category snapshot:", error);
-          message.error("Failed to listen for category updates");
+          //error("Failed to listen for category updates");
         },
       }
     );
@@ -455,12 +455,12 @@ function PopularBookmarks() {
           }
         } catch (error) {
           console.error("Error processing position changes:", error);
-          message.error("Failed to process layout updates");
+          //error("Failed to process layout updates");
         }
       },
       error: (error) => {
         console.error("Error in positions snapshot:", error);
-        message.error("Failed to listen for layout updates");
+        //error("Failed to listen for layout updates");
       },
     });
 
@@ -502,7 +502,7 @@ function PopularBookmarks() {
         setOpenCategories(initialOpenStates);
       } catch (error) {
         console.error("Error initializing data:", error);
-        message.error("Failed to load initial data");
+        //error("Failed to load initial data");
       } finally {
         setLoading(false);
       }
@@ -612,7 +612,7 @@ function PopularBookmarks() {
         setLoading(false);
       } catch (error) {
         console.error("Error fetching bookmark data:", error);
-        message.error("Failed to load bookmarks");
+        //error("Failed to load bookmarks");
         setLoading(false);
       }
     };
@@ -740,10 +740,10 @@ function PopularBookmarks() {
       });
 
       await batch.commit();
-      // message.success("Category position updated");
+      // //success("Category position updated");
     } catch (error) {
       console.error("Error updating category positions:", error);
-      message.error("Failed to update category position");
+      //error("Failed to update category position");
       // Revert local state on error
       setCategoryColumns(categoryColumns);
     }
@@ -869,7 +869,7 @@ function PopularBookmarks() {
 
   const handleAddCategory = async () => {
     if (!newCategoryName.trim()) {
-      message.error("Category name cannot be empty");
+      //error("Category name cannot be empty");
       return;
     }
 
@@ -955,18 +955,18 @@ function PopularBookmarks() {
         return filtered;
       });
 
-      message.success("Category added successfully");
+      //success("Category added successfully");
       setNewCategoryName("");
       setIsAddCategoryModalVisible(false);
     } catch (error) {
       console.error("Error adding category:", error);
-      message.error("Failed to add category");
+      //error("Failed to add category");
     }
   };
 
   const handleRenameCategory = async () => {
     if (!newCategoryName.trim() || !selectedCategory) {
-      message.error("Category name cannot be empty");
+      //error("Category name cannot be empty");
       return;
     }
 
@@ -991,13 +991,13 @@ function PopularBookmarks() {
         )
       );
 
-      message.success("Category renamed successfully");
+      //success("Category renamed successfully");
       setNewCategoryName("");
       setIsRenameCategoryModalVisible(false);
       setSelectedCategory(null);
     } catch (error) {
       console.error("Error renaming category:", error);
-      message.error("Failed to rename category");
+      //error("Failed to rename category");
     }
   };
 
@@ -1109,10 +1109,10 @@ function PopularBookmarks() {
         return newColumns;
       });
 
-      message.success("Category and its bookmarks deleted successfully");
+      //success("Category and its bookmarks deleted successfully");
     } catch (error) {
       console.error("Error deleting category:", error);
-      message.error("Failed to delete category");
+      //error("Failed to delete category");
     } finally {
       setLoading(false);
     }
@@ -1171,19 +1171,19 @@ function PopularBookmarks() {
 
   const handleAddBookmark = async () => {
     if (!selectedCategory) {
-      message.error("Please select a category first");
+      //error("Please select a category first");
       return;
     }
 
     if (!newBookmark.title.trim() || !newBookmark.url.trim()) {
-      message.error("Title and URL are required");
+      //error("Title and URL are required");
       return;
     }
 
     try {
       const category = categories.find((cat) => cat.id === selectedCategory.id);
       if (!category) {
-        message.error("Selected category not found");
+        //error("Selected category not found");
         return;
       }
 
@@ -1205,7 +1205,7 @@ function PopularBookmarks() {
       });
 
       if (isDuplicate) {
-        message.warning("This URL already exists in this category");
+        //warning("This URL already exists in this category");
         return;
       }
 
@@ -1261,7 +1261,7 @@ function PopularBookmarks() {
       // Clear form and close modal
       setNewBookmark({ title: "", url: "", favicon: "" });
       setIsAddBookmarkModalVisible(false);
-      message.success("Bookmark added successfully");
+      //success("Bookmark added successfully");
     } catch (error) {
       console.error("Error adding bookmark:", error);
 
@@ -1279,13 +1279,13 @@ function PopularBookmarks() {
       );
 
       if (error.message === "Invalid URL format") {
-        message.error("Please enter a valid URL");
+        //error("Please enter a valid URL");
       } else if (error.code === "permission-denied") {
-        message.error("You don't have permission to add bookmarks");
+        //error("You don't have permission to add bookmarks");
       } else if (error.code === "unavailable") {
-        message.error("Network is unavailable. Please check your connection.");
+        //error("Network is unavailable. Please check your connection.");
       } else {
-        message.error("Failed to add bookmark. Please try again.");
+        //error("Failed to add bookmark. Please try again.");
       }
     }
   };
@@ -1353,7 +1353,7 @@ function PopularBookmarks() {
               "categoryViewModes",
               JSON.stringify(updatedModes)
             );
-            message.success("View mode to List");
+            //success("View mode to List");
           },
         },
         {
@@ -1375,7 +1375,7 @@ function PopularBookmarks() {
               "categoryViewModes",
               JSON.stringify(updatedModes)
             );
-            message.success("View mode to Grid");
+            //success("View mode to Grid");
           },
         },
         {
@@ -1397,7 +1397,7 @@ function PopularBookmarks() {
               "categoryViewModes",
               JSON.stringify(updatedModes)
             );
-            message.success("View mode to Icon");
+            //success("View mode to Icon");
           },
         },
       ],
@@ -1590,13 +1590,13 @@ function PopularBookmarks() {
         );
       }
 
-      message.success("Bookmark updated successfully");
+      //success("Bookmark updated successfully");
       setEditingBookmark(null);
       setIsEditBookmarkModalVisible(false);
       editBookmarkForm.resetFields();
     } catch (error) {
       console.error("Error updating bookmark:", error);
-      message.error(`Failed to update bookmark: ${error.message}`);
+      //error(`Failed to update bookmark: ${error.message}`);
     }
   };
 
@@ -2141,7 +2141,7 @@ function PopularBookmarks() {
       } catch (error) {
         console.error("Error setting up listeners:", error);
         if (isComponentMounted) {
-          message.error("Failed to load data. Please refresh the page.");
+          //error("Failed to load data. Please refresh the page.");
         }
       }
     };
@@ -2383,11 +2383,11 @@ function PopularBookmarks() {
         JSON.stringify(newColumnStructure)
       );
 
-      message.success("Changes applied successfully");
+      //success("Changes applied successfully");
       setIsControllerOpen(false);
     } catch (error) {
       console.error("Error applying changes:", error);
-      message.error("Failed to apply changes");
+      //error("Failed to apply changes");
     } finally {
       setIsApplyingChanges(false);
     }
@@ -2423,7 +2423,7 @@ function PopularBookmarks() {
       }
     } catch (error) {
       console.error("Error fetching categories:", error);
-      message.error("Failed to fetch latest category positions");
+      //error("Failed to fetch latest category positions");
     }
   };
 
@@ -2498,7 +2498,7 @@ function PopularBookmarks() {
       },
       (error) => {
         console.error("Error in real-time sync:", error);
-        message.error("Failed to sync with latest changes");
+        //error("Failed to sync with latest changes");
       }
     );
 
@@ -2680,13 +2680,13 @@ function PopularBookmarks() {
     try {
       // Validate bookmark changes
       if (editModeBookmarks.length === 0) {
-        message.warning("No bookmarks to save", 2);
+        //warning("No bookmarks to save", 2);
         return;
       }
 
       // Check for unsaved changes
       if (!hasUnsavedChanges) {
-        message.info("No changes to save", 2);
+        //info("No changes to save", 2);
         return;
       }
 
@@ -2737,7 +2737,7 @@ function PopularBookmarks() {
 
         // Progress notification
         if (savedCount % 5 === 0 || savedCount === totalBookmarks) {
-          message.info(`Saving bookmarks: ${savedCount}/${totalBookmarks}`);
+          //info(`Saving bookmarks: ${savedCount}/${totalBookmarks}`);
         }
       });
 
@@ -2781,7 +2781,7 @@ function PopularBookmarks() {
 
       // Reset state
       setHasUnsavedChanges(false);
-      message.success(`${totalBookmarks} bookmark(s) saved successfully`, 3);
+      //success(`${totalBookmarks} bookmark(s) saved successfully`, 3);
       setIsEditModePanelVisible(false);
     } catch (error) {
       console.error("Error saving changes:", error);
@@ -2794,7 +2794,7 @@ function PopularBookmarks() {
   // Function to handle deletion of selected bookmarks
   const handleDeleteSelected = () => {
     if (selectedBookmarks.length === 0) {
-      message.warning("No bookmarks selected for deletion");
+      //warning("No bookmarks selected for deletion");
       return;
     }
 
@@ -2864,13 +2864,9 @@ function PopularBookmarks() {
           );
           setSelectedBookmarks([]);
           setHasUnsavedChanges(true);
-
-          message.success(
-            `Successfully processed ${bookmarksToDelete.length} bookmark(s)`
-          );
         } catch (error) {
           console.error("Error processing bookmarks:", error);
-          message.error(`Failed to process bookmarks: ${error.message}`);
+          //error(`Failed to process bookmarks: ${error.message}`);
         } finally {
           setLoading(false);
         }
