@@ -816,11 +816,37 @@ const Header = ({
                       </div>
                     </a>
 
-                    <a href="./src/components/AllMytab.com.zip" download>
-                      <div className="text-center py-2  dark:text-white dark:hover:bg-gray-800 hover:bg-gray-200 transition-all">
-                        Learn how to use?
-                      </div>
-                    </a>
+                    <div
+                      onClick={() => {
+                        const modal = document.createElement("div");
+                        modal.className =
+                          "fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50";
+                        modal.onclick = (e) => {
+                          if (e.target === modal)
+                            document.body.removeChild(modal);
+                        };
+
+                        const iframe = document.createElement("iframe");
+                        iframe.src =
+                          "https://www.youtube.com/embed/sStANg8CU2I";
+                        iframe.className = "w-1/3 h-4/5 max-w-4xl";
+                        iframe.allowFullscreen = true;
+
+                        const closeBtn = document.createElement("button");
+                        closeBtn.innerHTML = "&times;";
+                        closeBtn.className =
+                          "absolute top-4 right-4 text-white text-2xl font-bold";
+                        closeBtn.onclick = () =>
+                          document.body.removeChild(modal);
+
+                        modal.appendChild(iframe);
+                        modal.appendChild(closeBtn);
+                        document.body.appendChild(modal);
+                      }}
+                      className="text-center py-2 dark:text-white dark:hover:bg-gray-800 hover:bg-gray-200 transition-all cursor-pointer"
+                    >
+                      Learn how to use?
+                    </div>
                     <hr className="mb-2 border-gray-200 dark:border-gray-600" />
                     <div className="mx-auto w-fit">
                       <label className="inline-flex items-center cursor-pointer">
