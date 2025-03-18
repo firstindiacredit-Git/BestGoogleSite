@@ -133,11 +133,11 @@ const menuItems = [
   {
     key: "group1",
     type: "group",
-    label: "Page Actions",
+    label: <div className="dark:text-white/40">Page Actions</div>,
     children: [
       {
         key: "refresh",
-        label: "Refresh Page",
+        label: <div className="dark:text-white">Refresh Page</div>,
         icon: <ReloadOutlined />,
         shortcut: "Ctrl+R",
       },
@@ -149,16 +149,16 @@ const menuItems = [
   {
     key: "group2",
     type: "group",
-    label: "Background",
+    label: <div className="dark:text-white/40">Background</div>,
     children: [
       {
         key: "chBG",
-        label: "Change Background",
+        label: <div className="dark:text-white">Change Background</div>,
         icon: <BgColorsOutlined />,
       },
       {
         key: "dlBG",
-        label: "Remove Background",
+        label: <div className="dark:text-white">Remove Background</div>,
         icon: <ClearOutlined />,
       },
     ],
@@ -169,16 +169,16 @@ const menuItems = [
   {
     key: "group4",
     type: "group",
-    label: "Page Management",
+    label: <div className="dark:text-white/40">Page Management</div>,
     children: [
       {
         key: "addPage",
-        label: "New Page",
+        label: <div className="dark:text-white">New Page</div>,
         icon: <PlusOutlined />,
       },
       {
         key: "deletePage",
-        label: "Delete Page",
+        label: <div className="dark:text-white ">Delete Page</div>,
         icon: <DeleteOutlined />,
         danger: true,
       },

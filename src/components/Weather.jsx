@@ -10,7 +10,7 @@ const API_KEY =
 const WEATHER_CARDS = {
   // Sunny (yellow)
   SUNNY: {
-    background: "#FFD36E",
+    background: "#FFB900",
     darkShade: "#ffae00", // Dark yellow-brown
     darkerShade: "#c18400", // Darker yellow-brown
     color: "#FFFFFF",
@@ -83,7 +83,7 @@ const Weather = () => {
   const [forecast, setForecast] = useState([]);
   const [error, setError] = useState(null);
   const [unit, setUnit] = useState("metric");
-  const [city, setCity] = useState("");
+  // const [city, setCity] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [browserInfo, setBrowserInfo] = useState(null);
   const [ipLocation, setIpLocation] = useState(null);
@@ -100,11 +100,11 @@ const Weather = () => {
       );
 
       setCurrentWeather(currentResponse.data);
-      const dailyForecast = forecastResponse.data.list
-        .filter((_, index) => index % 8 === 0)
-        .slice(1, 3); // Get next 4 days
-      setForecast(dailyForecast);
-      setCity(currentResponse.data.name);
+      // const dailyForecast = forecastResponse.data.list
+      //   .filter((_, index) => index % 8 === 0)
+      //   .slice(1, 3); // Get next 4 days
+      // setForecast(dailyForecast);
+      // setCity(currentResponse.data.name);
       setError(null);
     } catch (error) {
       setError("Could not fetch weather data. Please try again later.");
@@ -315,10 +315,40 @@ const Weather = () => {
       </div>
     );
   };
-
+  if (isLoading) {
+    return (
+      <div className="p-3 backdrop-blur-sm">
+        <div className="weather-container ">
+          <div className="content-wrapper flex-col">
+            {currentWeather && (
+              <div className="flex flex-col gap-2">
+                <CurrentWeatherCard
+                  temperature={"00"}
+                  condition={"Unknown"}
+                  description={"currentWeather.weather[0].description"}
+                  location={"Unknown"}
+                  humidity={"00"}
+                  time={new Date().toLocaleTimeString("en-US", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false,
+                  })}
+                  date={new Date().toLocaleDateString("en-US", {
+                    weekday: "long",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="p-3 backdrop-blur-sm">
-      <div className="weather-container min-h-[15rem]">
+      <div className="weather-container ">
         <div className="content-wrapper flex-col">
           {currentWeather && (
             <div className="flex flex-col gap-2">
@@ -342,7 +372,7 @@ const Weather = () => {
               />
 
               {/* Forecast Section */}
-              <div className="forecast-container h-[50%] gap-3 w-full flex justify-between mt-1">
+              {/* <div className="forecast-container h-[50%] gap-3 w-full flex justify-between mt-1">
                 {forecast.map((day, index) => (
                   <WeatherCard
                     key={index}
@@ -361,7 +391,7 @@ const Weather = () => {
                     })}
                   />
                 ))}
-              </div>
+              </div> */}
             </div>
           )}
         </div>

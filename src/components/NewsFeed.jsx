@@ -4,7 +4,6 @@ import { WidgetTransparencyContext } from "../App";
 
 // Featured news item component
 const FeaturedNewsItem = memo(({ news }) => {
-  console.log("Rendering featured news item:", news);
   return (
     <div
       className={`pb-4 pt-2 px-4 border-b dark:border-gray-700/[var(--widget-opacity)]`}
@@ -264,7 +263,7 @@ const NewsFeed = () => {
         <div>
           <FeaturedNewsItem news={mainNews} />
           <div className="px-4 py-2">
-            {remainingNews.slice(0, 5).map((item, index) => (
+            {remainingNews.map((item, index) => (
               <NewsListItem key={index} news={item} />
             ))}
           </div>
