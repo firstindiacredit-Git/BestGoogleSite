@@ -2235,12 +2235,8 @@ function PopularBookmarks() {
   const renderDraggableBookmark = (provided, snapshot, bookmark) => {
     return (
       <div
-        ref={provided.innerRef}
-        {...provided.draggableProps}
-        {...provided.dragHandleProps}
         style={{
           ...getBookmarkItemStyle(selectedBookmarks.includes(bookmark.id)),
-          ...provided.draggableProps.style,
         }}
       >
         <Checkbox
@@ -3002,30 +2998,13 @@ function PopularBookmarks() {
           </AntButton>,
         ]}
       >
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <Droppable droppableId="bookmarks">
-            {(provided) => (
-              <div
-                {...provided.droppableProps}
-                ref={provided.innerRef}
-                style={{ minHeight: "100px" }}
-              >
-                {editModeBookmarks.map((bookmark, index) => (
-                  <Draggable
-                    key={bookmark.id}
-                    draggableId={bookmark.id}
-                    index={index}
-                  >
-                    {(provided, snapshot) =>
-                      renderDraggableBookmark(provided, snapshot, bookmark)
-                    }
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        </DragDropContext>
+        <div style={{ minHeight: "100px" }}>
+          {editModeBookmarks.map((bookmark, index) => (
+            <div key={bookmark.id}>
+              {renderDraggableBookmark(null, null, bookmark)}
+            </div>
+          ))}
+        </div>
       </Modal>
     </div>
   );
