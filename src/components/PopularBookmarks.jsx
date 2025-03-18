@@ -57,6 +57,54 @@ import { useTheme, useThemeAware } from "../context/ThemeContext";
 // Import the BookmarkErrorBoundary component
 import BookmarkErrorBoundary from "./BookmarkErrorBoundary";
 
+// Add this debounce utility near the top of the file, after imports
+// Add a debounced version of fetchFavicon to avoid excessive network requests
+const debouncedFetchFavicon = debounce(async (url, callback) => {
+  try {
+    if (!url) return;
+    const validatedUrl = validateUrl(url);
+    const favicon = await fetchFavicon(validatedUrl);
+    callback(favicon);
+  } catch (error) {
+    console.warn("Favicon fetch failed:", error);
+    callback("");
+  }
+}, 500); // Wait 500ms after typing stops
+
+// Add this memoized form component near the top of the file, before the PopularBookmarks function
+const MemoizedBookmarkForm = React.memo(
+  ({ newBookmark, handleTitleChange, handleUrlChange }) => (
+    <Form layout="vertical">
+      <Form.Item
+        label={<span className="dark:text-white">Title</span>}
+        required
+      >
+        <Input
+          placeholder="Enter bookmark title"
+          value={newBookmark.title}
+          onChange={handleTitleChange}
+          className="text-black bg-white dark:text-white"
+        />
+      </Form.Item>
+      <Form.Item label={<span className="dark:text-white">URL</span>} required>
+        <Input
+          placeholder="Enter bookmark URL"
+          value={newBookmark.url}
+          onChange={handleUrlChange}
+          className=" "
+        />
+      </Form.Item>
+    </Form>
+  ),
+  // Only re-render if title or URL actually changed
+  (prevProps, nextProps) => {
+    return (
+      prevProps.newBookmark.title === nextProps.newBookmark.title &&
+      prevProps.newBookmark.url === nextProps.newBookmark.url
+    );
+  }
+);
+
 function PopularBookmarks() {
   const [categories, setCategories] = useState([]);
   const [links, setLinks] = useState([]);
@@ -979,19 +1027,16 @@ function PopularBookmarks() {
     }
   };
 
-  const handleUrlChange = async (e) => {
+  const handleUrlChange = (e) => {
     const url = e.target.value;
+    // Just update the URL immediately, without fetching favicon on every keystroke
     setNewBookmark((prev) => ({ ...prev, url }));
 
+    // Only fetch favicon after user stops typing for a bit
     if (url) {
-      try {
-        const validatedUrl = validateUrl(url);
-        const favicon = await fetchFavicon(validatedUrl);
+      debouncedFetchFavicon(url, (favicon) => {
         setNewBookmark((prev) => ({ ...prev, favicon }));
-      } catch (error) {
-        console.warn("Invalid URL or favicon fetch failed:", error);
-        setNewBookmark((prev) => ({ ...prev, favicon: "" }));
-      }
+      });
     }
   };
 
@@ -1128,11 +1173,11 @@ function PopularBookmarks() {
     {
       key: "editMode",
       icon: (
-        <div className=" bg-gray-200 dark:bg-gray-400 px-2 py-1 rounded-md">
+        <div className=" bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
           <EditOutlined />
         </div>
       ),
-      label: "Edit Mode",
+      label: <div className="dark:text-white">Edit Mode</div>,
       onClick: () => {
         setSelectedCategory(category);
         // Filter out hidden bookmarks when setting editModeBookmarks
@@ -1154,19 +1199,19 @@ function PopularBookmarks() {
     {
       key: "viewOptions",
       icon: (
-        <div className="dark:text-black bg-gray-200 dark:bg-gray-400 px-2 py-1 rounded-md">
+        <div className="dark:text-black bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
           <UnorderedListOutlined />
         </div>
       ),
-      label: "View Options",
+      label: <div className="dark:text-white">View Options</div>,
       children: [
         {
           key: "list",
-          icon: (
-            <div className="dark:text-black bg-gray-200 dark:bg-gray-400 px-2 py-1 rounded-md">
-              <UnorderedListOutlined />
-            </div>
-          ),
+          // icon: (
+          //   <div className="dark:text-black bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
+          //     <UnorderedListOutlined />
+          //   </div>
+          // ),
           label: "List View",
           onClick: () => {
             const newViewMode = "list";
@@ -1184,11 +1229,11 @@ function PopularBookmarks() {
         },
         {
           key: "grid",
-          icon: (
-            <div className="dark:text-black bg-gray-200 dark:bg-gray-400 px-2 py-1 rounded-md">
-              <AppstoreOutlined />
-            </div>
-          ),
+          // icon: (
+          //   <div className="dark:text-black bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
+          //     <AppstoreOutlined />
+          //   </div>
+          // ),
           label: "Grid View",
           onClick: () => {
             const newViewMode = "grid";
@@ -1206,11 +1251,11 @@ function PopularBookmarks() {
         },
         {
           key: "icon",
-          icon: (
-            <div className="dark:text-black bg-gray-200 dark:bg-gray-400 px-2 py-1 rounded-md">
-              <PictureOutlined />
-            </div>
-          ),
+          // icon: (
+          //   <div className="dark:text-black bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
+          //     <PictureOutlined />
+          //   </div>
+          // ),
           label: "Icon View",
           onClick: () => {
             const newViewMode = "icon";
@@ -1231,11 +1276,11 @@ function PopularBookmarks() {
     {
       key: "size",
       icon: (
-        <div className="dark:text-black bg-gray-200 dark:bg-gray-400 px-2 py-1 rounded-md">
+        <div className="dark:text-black bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
           <PictureOutlined />
         </div>
       ),
-      label: "Icon Size",
+      label: <div className="dark:text-white">Icon Size</div>,
       children: [
         {
           key: "small",
@@ -1281,11 +1326,11 @@ function PopularBookmarks() {
     {
       key: "rename",
       icon: (
-        <div className="dark:text-black bg-gray-200 dark:bg-gray-400 px-2 py-1 rounded-md">
+        <div className="dark:text-black bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
           <EditOutlined />
         </div>
       ),
-      label: "Rename Category",
+      label: <div className="dark:text-white">Rename Category</div>,
       onClick: () => {
         setSelectedCategory(category);
         setNewCategoryName(category.name || category.newCategory);
@@ -1303,9 +1348,13 @@ function PopularBookmarks() {
       danger: true,
       onClick: () => {
         Modal.confirm({
-          title: "Delete Category",
-          content:
-            "Are you sure you want to delete this category and all its bookmarks?",
+          title: <div className="dark:text-white">Delete Category</div>,
+          content: (
+            <div className="dark:text-white">
+              Are you sure you want to delete this category and all its
+              bookmarks?
+            </div>
+          ),
           okText: "Yes",
           okType: "danger",
           cancelText: "No",
@@ -1710,6 +1759,7 @@ function PopularBookmarks() {
                                                     ),
                                                 }}
                                                 trigger={["click"]}
+                                                overlayClassName="[&_.ant-dropdown-menu]:p-0 [&_.ant-dropdown-menu-item]:p-0 [&_ul]:dark:bg-[#28283a]"
                                                 onClick={(e) =>
                                                   e.stopPropagation()
                                                 }
@@ -3038,32 +3088,19 @@ function PopularBookmarks() {
           setNewBookmark({ title: "", url: "", favicon: "" });
         }}
       >
-        <Form layout="vertical">
-          <Form.Item
-            label={<span className="dark:text-white">Title</span>}
-            required
-          >
-            <Input
-              placeholder="Enter bookmark title"
-              value={newBookmark.title}
-              onChange={(e) =>
-                setNewBookmark((prev) => ({ ...prev, title: e.target.value }))
-              }
-              className="text-black bg-white dark:text-white"
-            />
-          </Form.Item>
-          <Form.Item
-            label={<span className="dark:text-white">URL</span>}
-            required
-          >
-            <Input
-              placeholder="Enter bookmark URL"
-              value={newBookmark.url}
-              onChange={handleUrlChange}
-              className=" "
-            />
-          </Form.Item>
-        </Form>
+        <MemoizedBookmarkForm
+          newBookmark={newBookmark}
+          handleTitleChange={(e) => {
+            const title = e.target.value;
+            // Avoid unnecessary re-renders by using functional state update
+            setNewBookmark((prev) => {
+              // Only update if value actually changed
+              if (prev.title === title) return prev;
+              return { ...prev, title };
+            });
+          }}
+          handleUrlChange={handleUrlChange}
+        />
       </Modal>
 
       <Modal
@@ -3191,14 +3228,6 @@ function PopularBookmarks() {
             }}
           >
             Cancel
-          </AntButton>,
-          <AntButton
-            key="save"
-            type="primary"
-            disabled={!hasUnsavedChanges}
-            onClick={handleSaveChanges}
-          >
-            <span className="dark:text-white"> Save Changes</span>
           </AntButton>,
         ]}
       >
