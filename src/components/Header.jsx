@@ -810,7 +810,7 @@ const Header = ({
                       </div>
                     </div>
                     <hr className=" border-gray-200 dark:border-gray-600" />
-                    <a href="./src/components/AllMytab.com.zip" download>
+                    <a href="./AllMytab.com.zip" download>
                       <div className="text-center py-2  dark:text-white dark:hover:bg-gray-800 hover:bg-gray-200 transition-all">
                         <button>Download Extension</button>
                       </div>
