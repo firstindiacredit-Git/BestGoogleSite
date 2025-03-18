@@ -281,40 +281,7 @@ const Weather = () => {
   };
 
   // Forecast Weather Card Component
-  const WeatherCard = ({ temperature, condition, location, time, date }) => {
-    const cardStyle = getWeatherCardStyle(condition);
 
-    return (
-      <div className="weather-card w-full overflow-hidden rounded-lg shadow-md">
-        {/* Card Header - Color Block with Temperature and Icon */}
-        <div
-          className="p-2 flex justify-between items-start"
-          style={{ background: cardStyle.background, color: cardStyle.color }}
-        >
-          <div className="text-2xl font-bold">{temperature}°</div>
-          <div className="text-2xl">{cardStyle.icon}</div>
-        </div>
-
-        {/* Card Body - Location */}
-        <div
-          style={{ background: cardStyle.darkShade, color: "#FFFFFF" }}
-          className="p-1.5"
-        >
-          <div className="text-xs opacity-90">{location}</div>
-          <div className="text-[10px] opacity-70">{condition}</div>
-        </div>
-
-        {/* Card Footer - Time & Date */}
-        <div
-          style={{ background: cardStyle.darkerShade, color: "#FFFFFF" }}
-          className="p-1 flex justify-between items-center text-[10px]"
-        >
-          <span>{time}</span>
-          <span>{date}</span>
-        </div>
-      </div>
-    );
-  };
   if (isLoading) {
     return (
       <div className="p-3 backdrop-blur-sm">

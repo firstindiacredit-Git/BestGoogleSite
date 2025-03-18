@@ -617,7 +617,7 @@ const SearchPage = ({ isToolPage = false }) => {
                         <Dropdown
                           menu={settingsMenu}
                           trigger={["click"]}
-                          overlayClassName="[&_.ant-dropdown-menu]:p-0 [&_.ant-dropdown-menu-item]:p-0 [&_ul]:dark:bg-black"
+                          overlayClassName="[&_.ant-dropdown-menu]:p-0 [&_.ant-dropdown-menu-item]:p-0 [&_ul]:dark:bg-[#28283a]"
                         >
                           <button className="px-4 py-2 text-sm font-medium rounded-md  transition-all dark:text-white hover:bg-gray-100 dark:hover:bg-[#28283A] flex items-center">
                             <Settings className="w-5 h-5" />

@@ -89,6 +89,7 @@ const Header = ({
     try {
       await signOut(auth);
       localStorage.setItem("imageTrue", false);
+      localStorage.setItem("design", false);
       window.location.reload();
     } catch (error) {
       console.error("Sign out error:", error.message);

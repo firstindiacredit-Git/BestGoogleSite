@@ -742,11 +742,11 @@ const App = () => {
   return (
     // Use ThemeProvider from ThemeContext.jsx
     <ThemeProvider>
-      <DesignContextProvider>
-        <WidgetTransparencyContext.Provider
-          value={widgetTransparencyContextValue}
-        >
-          <AuthProvider>
+      <WidgetTransparencyContext.Provider
+        value={widgetTransparencyContextValue}
+      >
+        <AuthProvider>
+          <DesignContextProvider>
             <Router>
               <Routes>
                 {/* Public Routes */}
@@ -947,9 +947,9 @@ const App = () => {
               </Routes>
             </Router>
             <NetworkStatus />
-          </AuthProvider>
-        </WidgetTransparencyContext.Provider>
-      </DesignContextProvider>
+          </DesignContextProvider>
+        </AuthProvider>
+      </WidgetTransparencyContext.Provider>
     </ThemeProvider>
   );
 };

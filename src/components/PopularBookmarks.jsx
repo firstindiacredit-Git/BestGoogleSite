@@ -54,6 +54,9 @@ import SkeletonLoader from "./SkeletonLoader";
 // Import the ThemeContext and useThemeAware hook
 import { useTheme, useThemeAware } from "../context/ThemeContext";
 
+// Import the BookmarkErrorBoundary component
+import BookmarkErrorBoundary from "./BookmarkErrorBoundary";
+
 function PopularBookmarks() {
   const [categories, setCategories] = useState([]);
   const [links, setLinks] = useState([]);
@@ -496,6 +499,9 @@ function PopularBookmarks() {
           isAdminBookmark: false,
         }));
 
+        // Store user bookmark IDs for deduplication
+        const userBookmarkIds = new Set(userBookmarks.map((b) => b.id));
+
         // Fetch admin bookmarks for each admin category
         const adminBookmarksPromises = categories.map(async (category) => {
           const bookmarksSnapshot = await getDocs(
@@ -519,8 +525,17 @@ function PopularBookmarks() {
           await Promise.all(adminBookmarksPromises)
         ).flat();
 
+        // Filter out any duplicates between admin and user bookmarks
+        const filteredAdminBookmarks = adminBookmarks.filter(
+          (bookmark) => !userBookmarkIds.has(bookmark.id)
+        );
+
         // Combine all bookmarks
-        const allBookmarks = [...userBookmarks, ...adminBookmarks];
+        const allBookmarks = [...userBookmarks, ...filteredAdminBookmarks];
+        console.log(
+          `Loaded ${userBookmarks.length} user bookmarks and ${filteredAdminBookmarks.length} admin bookmarks`
+        );
+
         setLinks(allBookmarks);
         setLoading(false);
 
@@ -580,7 +595,8 @@ function PopularBookmarks() {
         // Call loadSavedPositions after fetching links
         await loadSavedPositions();
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching bookmark data:", error);
+        message.error("Failed to load bookmarks");
         setLoading(false);
       }
     };
@@ -982,13 +998,32 @@ function PopularBookmarks() {
     }
   };
 
+  const validateUrl = (url) => {
+    try {
+      let cleanUrl = url.trim();
+      if (!cleanUrl.match(/^https?:\/\//i)) {
+        cleanUrl = `http://${cleanUrl}`;
+      }
+      new URL(cleanUrl);
+      return cleanUrl;
+    } catch (error) {
+      throw new Error("Invalid URL format");
+    }
+  };
+
   const handleUrlChange = async (e) => {
     const url = e.target.value;
     setNewBookmark((prev) => ({ ...prev, url }));
 
     if (url) {
-      const favicon = await fetchFavicon(url);
-      setNewBookmark((prev) => ({ ...prev, favicon }));
+      try {
+        const validatedUrl = validateUrl(url);
+        const favicon = await fetchFavicon(validatedUrl);
+        setNewBookmark((prev) => ({ ...prev, favicon }));
+      } catch (error) {
+        console.warn("Invalid URL or favicon fetch failed:", error);
+        setNewBookmark((prev) => ({ ...prev, favicon: "" }));
+      }
     }
   };
 
@@ -1010,85 +1045,92 @@ function PopularBookmarks() {
         return;
       }
 
+      // Add error handling and validation
+      const bookmarkData = {
+        title: newBookmark.title.trim(),
+        url: validateUrl(newBookmark.url.trim()),
+        favicon:
+          newBookmark.favicon || (await fetchFavicon(newBookmark.url.trim())),
+        categoryId: selectedCategory.id,
+        userId: user.uid,
+        createdAt: new Date().toISOString(),
+        order: links.filter((link) => link.categoryId === selectedCategory.id)
+          .length,
+        isAdminCategory: category.isAdminCategory || false,
+      };
+
+      // Add the document with retry logic
       const docRef = await addDoc(
         collection(db, "users", user.uid, "CatBookmarks"),
-        {
-          title: newBookmark.title.trim(),
-          url: newBookmark.url.trim(),
-          favicon: newBookmark.favicon,
-          categoryId: selectedCategory.id,
-          userId: user.uid,
-          createdAt: new Date().toISOString(),
-          order: links.filter((link) => link.categoryId === selectedCategory.id)
-            .length,
-          isAdminCategory: category.isAdminCategory || false,
-        }
+        bookmarkData
       );
 
-      // Add to local state while preserving open states
+      // Update local state with optimistic update
       setLinks((prevLinks) => [
         ...prevLinks,
         {
           id: docRef.id,
-          title: newBookmark.title.trim(),
-          url: newBookmark.url.trim(),
-          favicon: newBookmark.favicon,
-          categoryId: selectedCategory.id,
-          userId: user.uid,
-          createdAt: new Date().toISOString(),
-          order: links.filter((link) => link.categoryId === selectedCategory.id)
-            .length,
-          isAdminCategory: category.isAdminCategory || false,
+          ...bookmarkData,
           isAdminBookmark: false,
         },
       ]);
 
+      // Clear form and close modal
       setNewBookmark({ title: "", url: "", favicon: "" });
       setIsAddBookmarkModalVisible(false);
       message.success("Bookmark added successfully");
     } catch (error) {
       console.error("Error adding bookmark:", error);
-      message.error("Failed to add bookmark");
-    }
-  };
-
-  const handleDragEnd = async (result) => {
-    if (!result.destination) return;
-
-    const { source, destination } = result;
-
-    try {
-      const items = Array.from(editModeBookmarks);
-      const [reorderedItem] = items.splice(source.index, 1);
-      items.splice(destination.index, 0, reorderedItem);
-
-      // Update local state first for immediate feedback
-      const updatedItems = items.map((item, index) => ({
-        ...item,
-        order: index,
-      }));
-
-      setEditModeBookmarks(updatedItems);
-      setHasUnsavedChanges(true);
-
-      // Update Firestore in the background
-      if (user) {
-        const batch = writeBatch(db);
-
-        updatedItems.forEach((item, index) => {
-          if (item.isAdminBookmark) {
-            const bookmarkRef = doc(db, "bookmarks", item.id);
-            batch.update(bookmarkRef, { order: index });
-          }
-        });
-
-        await batch.commit();
+      // More specific error messages
+      if (error.code === "permission-denied") {
+        // message.error("You don't have permission to add bookmarks");
+      } else if (error.code === "unavailable") {
+        message.error("Network is unavailable. Please check your connection.");
+      } else if (error.message === "Invalid URL format") {
+        message.error("Please enter a valid URL");
+      } else {
+        message.error("Failed to add bookmark. Please try again.");
       }
-    } catch (error) {
-      console.error("Error handling drag end:", error);
-      message.error("Failed to update bookmark order");
     }
   };
+
+  // const handleDragEnd = async (result) => {
+  //   if (!result.destination) return;
+
+  //   const { source, destination } = result;
+
+  //   try {
+  //     const items = Array.from(editModeBookmarks);
+  //     const [reorderedItem] = items.splice(source.index, 1);
+  //     items.splice(destination.index, 0, reorderedItem);
+
+  //     // Update local state first for immediate feedback
+  //     const updatedItems = items.map((item, index) => ({
+  //       ...item,
+  //       order: index,
+  //     }));
+
+  //     setEditModeBookmarks(updatedItems);
+  //     setHasUnsavedChanges(true);
+
+  //     // Update Firestore in the background
+  //     if (user) {
+  //       const batch = writeBatch(db);
+
+  //       updatedItems.forEach((item, index) => {
+  //         if (item.isAdminBookmark) {
+  //           const bookmarkRef = doc(db, "bookmarks", item.id);
+  //           batch.update(bookmarkRef, { order: index });
+  //         }
+  //       });
+
+  //       await batch.commit();
+  //     }
+  //   } catch (error) {
+  //     console.error("Error handling drag end:", error);
+  //     message.error("Failed to update bookmark order");
+  //   }
+  // };
 
   const selectAllBookmarks = () => {
     if (selectedBookmarks.length === editModeBookmarks.length) {
@@ -1303,17 +1345,54 @@ function PopularBookmarks() {
   const handleEditBookmarkSubmit = async () => {
     try {
       const values = await editBookmarkForm.validateFields();
+      console.log("Editing bookmark:", editingBookmark);
+      console.log("New values:", values);
 
       if (editingBookmark.isAdminBookmark) {
-        // Update admin bookmark in links collection
-        const docRef = doc(db, "links", editingBookmark.id);
-        await updateDoc(docRef, {
-          name: values.title, // Changed from title to name
-          link: values.url, // Changed from url to link
-          updatedAt: new Date().toISOString(),
-        });
+        // For admin bookmarks, create a user-owned copy instead of modifying the original
+        const userBookmarkData = {
+          title: values.title,
+          url: values.url,
+          favicon: editingBookmark.favicon || getFaviconUrl(values.url),
+          categoryId: editingBookmark.categoryId,
+          userId: user.uid,
+          createdAt: new Date().toISOString(),
+          order: editingBookmark.order || 0,
+          originalBookmarkId: editingBookmark.id, // Reference to original bookmark
+          isAdminBookmark: false, // Mark as user bookmark
+        };
+
+        // Add to user's collection
+        const docRef = await addDoc(
+          collection(db, "users", user.uid, "CatBookmarks"),
+          userBookmarkData
+        );
+
+        // Hide the original admin bookmark
+        const userDocRef = doc(db, "users", user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        const hiddenIds = userDocSnap.exists()
+          ? userDocSnap.data().hiddenBookmarkIds || []
+          : [];
+
+        if (!hiddenIds.includes(editingBookmark.id)) {
+          await updateDoc(userDocRef, {
+            hiddenBookmarkIds: [...hiddenIds, editingBookmark.id],
+          });
+        }
+
+        console.log("Created user copy of admin bookmark");
+
+        // Update local state to show the new bookmark
+        setLinks((prevLinks) => [
+          ...prevLinks.filter((link) => link.id !== editingBookmark.id), // Remove original from view
+          {
+            ...userBookmarkData,
+            id: docRef.id,
+          },
+        ]);
       } else {
-        // Update user bookmark in CatBookmarks collection
+        // User bookmarks can be updated directly
         const docRef = doc(
           db,
           "users",
@@ -1326,32 +1405,29 @@ function PopularBookmarks() {
           url: values.url,
           updatedAt: new Date().toISOString(),
         });
+        console.log("Updated user bookmark");
+
+        // Update local state
+        setLinks((prevLinks) =>
+          prevLinks.map((link) =>
+            link.id === editingBookmark.id
+              ? {
+                  ...link,
+                  title: values.title,
+                  url: values.url,
+                }
+              : link
+          )
+        );
       }
 
-      // Update local state
-      setLinks((prevLinks) => {
-        return prevLinks.map((link) => {
-          if (link.id === editingBookmark.id) {
-            return {
-              ...link,
-              title: values.title,
-              url: values.url,
-              name: values.title, // Update both title and name
-              link: values.url, // Update both url and link
-              updatedAt: new Date().toISOString(),
-            };
-          }
-          return link;
-        });
-      });
-
+      message.success("Bookmark updated successfully");
       setEditingBookmark(null);
       setIsEditBookmarkModalVisible(false);
       editBookmarkForm.resetFields();
-      message.success("Bookmark updated successfully");
     } catch (error) {
       console.error("Error updating bookmark:", error);
-      message.error("Failed to update bookmark");
+      message.error(`Failed to update bookmark: ${error.message}`);
     }
   };
 
@@ -2153,7 +2229,7 @@ function PopularBookmarks() {
     const userDocRef = doc(db, "users", user.uid);
 
     // Setup real-time listener for user document
-    const unsubscribe = onSnapshot(
+    const unsubscribeUserDoc = onSnapshot(
       userDocRef,
       (docSnapshot) => {
         if (docSnapshot.exists()) {
@@ -2214,20 +2290,77 @@ function PopularBookmarks() {
       }
     );
 
-    return unsubscribe;
+    // Add a listener for user bookmarks
+    const unsubscribeBookmarks = onSnapshot(
+      collection(db, "users", user.uid, "CatBookmarks"),
+      (snapshot) => {
+        const changes = snapshot.docChanges();
+
+        if (changes.length > 0) {
+          console.log("Bookmark changes detected:", changes.length);
+
+          // Process the changes in batches to avoid performance issues
+          setLinks((prevLinks) => {
+            let updatedLinks = [...prevLinks];
+
+            changes.forEach((change) => {
+              const bookmarkData = {
+                id: change.doc.id,
+                ...change.doc.data(),
+                isAdminBookmark: false,
+              };
+
+              if (change.type === "added") {
+                // Check if it's already in the array
+                const exists = updatedLinks.some(
+                  (link) => link.id === bookmarkData.id
+                );
+                if (!exists) {
+                  updatedLinks.push(bookmarkData);
+                }
+              } else if (change.type === "modified") {
+                const index = updatedLinks.findIndex(
+                  (link) => link.id === bookmarkData.id
+                );
+                if (index !== -1) {
+                  updatedLinks[index] = {
+                    ...updatedLinks[index],
+                    ...bookmarkData,
+                  };
+                }
+              } else if (change.type === "removed") {
+                updatedLinks = updatedLinks.filter(
+                  (link) => link.id !== bookmarkData.id
+                );
+              }
+            });
+
+            return updatedLinks;
+          });
+        }
+      },
+      (error) => {
+        console.error("Error in bookmarks sync:", error);
+      }
+    );
+
+    return () => {
+      unsubscribeUserDoc();
+      unsubscribeBookmarks();
+    };
   };
 
   // Effect to setup and cleanup database listeners
   useEffect(() => {
-    let unsubscribe = null;
+    let cleanupFn = null;
 
     if (user) {
-      unsubscribe = setupDatabaseListeners();
+      cleanupFn = setupDatabaseListeners();
     }
 
     return () => {
-      if (unsubscribe) {
-        unsubscribe();
+      if (cleanupFn) {
+        cleanupFn();
       }
     };
   }, [user]); // Only re-run when user changes
@@ -2381,18 +2514,6 @@ function PopularBookmarks() {
       setIsEditModePanelVisible(false);
     } catch (error) {
       console.error("Error saving changes:", error);
-
-      // Detailed error handling
-      if (error.code === "permission-denied") {
-        message.error("You don't have permission to save these bookmarks", 4);
-      } else if (error.code === "unavailable") {
-        message.error(
-          "Network is unavailable. Please check your connection.",
-          4
-        );
-      } else {
-        message.error("Failed to save bookmark changes. Please try again.", 4);
-      }
     } finally {
       // Ensure loading state is reset
       setIsApplyingChanges(false);
@@ -2415,23 +2536,56 @@ function PopularBookmarks() {
       onOk: async () => {
         try {
           setLoading(true);
-          const batch = writeBatch(db);
 
-          // Delete each selected bookmark
-          for (const bookmarkId of selectedBookmarks) {
-            const bookmarkRef = doc(
-              db,
-              "users",
-              user.uid,
-              "CatBookmarks",
-              bookmarkId
-            );
-            batch.delete(bookmarkRef);
+          // Get the bookmarks to delete
+          const bookmarksToDelete = editModeBookmarks.filter((bookmark) =>
+            selectedBookmarks.includes(bookmark.id)
+          );
+
+          // Separate admin and user bookmarks
+          const adminBookmarks = bookmarksToDelete.filter(
+            (b) => b.isAdminBookmark
+          );
+          const userBookmarks = bookmarksToDelete.filter(
+            (b) => !b.isAdminBookmark
+          );
+
+          // Delete user bookmarks
+          if (userBookmarks.length > 0) {
+            const userBatch = writeBatch(db);
+            for (const bookmark of userBookmarks) {
+              const bookmarkRef = doc(
+                db,
+                "users",
+                user.uid,
+                "CatBookmarks",
+                bookmark.id
+              );
+              userBatch.delete(bookmarkRef);
+            }
+            await userBatch.commit();
           }
 
-          await batch.commit();
+          // Hide admin bookmarks
+          if (adminBookmarks.length > 0 && user) {
+            const userDocRef = doc(db, "users", user.uid);
+            const userDoc = await getDoc(userDocRef);
+            const currentHiddenIds = userDoc.data()?.hiddenBookmarkIds || [];
+            const newHiddenIds = [
+              ...new Set([
+                ...currentHiddenIds,
+                ...adminBookmarks.map((b) => b.id),
+              ]),
+            ];
+            await updateDoc(userDocRef, {
+              hiddenBookmarkIds: newHiddenIds,
+            });
+          }
 
           // Update local state
+          setLinks((prevLinks) =>
+            prevLinks.filter((link) => !selectedBookmarks.includes(link.id))
+          );
           setEditModeBookmarks((prevBookmarks) =>
             prevBookmarks.filter(
               (bookmark) => !selectedBookmarks.includes(bookmark.id)
@@ -2441,11 +2595,11 @@ function PopularBookmarks() {
           setHasUnsavedChanges(true);
 
           message.success(
-            `Successfully deleted ${selectedBookmarks.length} bookmark(s)`
+            `Successfully processed ${bookmarksToDelete.length} bookmark(s)`
           );
         } catch (error) {
-          console.error("Error deleting bookmarks:", error);
-          message.error("Failed to delete bookmarks. Please try again.");
+          console.error("Error processing bookmarks:", error);
+          message.error(`Failed to process bookmarks: ${error.message}`);
         } finally {
           setLoading(false);
         }
@@ -3010,4 +3164,13 @@ function PopularBookmarks() {
   );
 }
 
-export default PopularBookmarks;
+// Wrap the main component with error boundary
+function PopularBookmarksWithErrorBoundary() {
+  return (
+    <BookmarkErrorBoundary>
+      <PopularBookmarks />
+    </BookmarkErrorBoundary>
+  );
+}
+
+export default PopularBookmarksWithErrorBoundary;
