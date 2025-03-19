@@ -100,28 +100,28 @@ const NewsFeed = () => {
     setError(null);
 
     try {
-      console.log("Fetching news data...");
+      //"Fetching news data...");
 
       // Check if we have recently fetched news (within last hour)
       const lastFetch = localStorage.getItem("lastNewsFetch");
       const now = Date.now();
 
       if (lastFetch && now - parseInt(lastFetch) < 3600000) {
-        console.log("Using cached news data from localStorage");
+        //"Using cached news data from localStorage");
         const savedNews = localStorage.getItem("newsData");
 
         if (savedNews) {
           try {
             const parsedNews = JSON.parse(savedNews);
             if (Array.isArray(parsedNews) && parsedNews.length > 0) {
-              console.log(`Found ${parsedNews.length} cached news items`);
+              //`Found ${parsedNews.length} cached news items`);
               setNews(parsedNews);
               setLoading(false);
               return;
             } else {
-              console.log(
-                "Cached news is empty or invalid, fetching fresh data"
-              );
+              //
+              //   "Cached news is empty or invalid, fetching fresh data"
+              // );
             }
           } catch (e) {
             console.error("Error parsing cached news:", e);
@@ -129,7 +129,7 @@ const NewsFeed = () => {
         }
       }
 
-      console.log("Making API request for fresh news data");
+      //"Making API request for fresh news data");
       const response = await fetch(
         "https://bgs-backend.vercel.app/api/top100/news"
       );
@@ -140,15 +140,15 @@ const NewsFeed = () => {
       }
 
       const data = await response.json();
-      console.log("News API raw response:", data);
+      //"News API raw response:", data);
 
       // Handle newsdata.io format (results array)
       if (data && data.results && Array.isArray(data.results)) {
-        console.log("Detected newsdata.io format with results array");
+        //"Detected newsdata.io format with results array");
         const newsItems = data.results.filter((item) => item.title);
-        console.log(
-          `Found ${newsItems.length} valid news items in results array`
-        );
+        //
+        //   `Found ${newsItems.length} valid news items in results array`
+        // );
 
         if (newsItems.length > 0) {
           setNews(newsItems);
@@ -161,11 +161,11 @@ const NewsFeed = () => {
 
       // Handle direct array format
       if (Array.isArray(data)) {
-        console.log("Detected direct array format");
+        //"Detected direct array format");
         const newsItems = data.filter((item) => item.title);
-        console.log(
-          `Found ${newsItems.length} valid news items in direct array`
-        );
+        //
+        //   `Found ${newsItems.length} valid news items in direct array`
+        // );
 
         if (newsItems.length > 0) {
           setNews(newsItems);
@@ -177,7 +177,7 @@ const NewsFeed = () => {
       }
 
       // If we get here, try the gnews endpoint as fallback
-      console.log("No valid news items found, trying gnews endpoint");
+      //"No valid news items found, trying gnews endpoint");
       const gnewsResponse = await fetch(
         "https://bgs-backend.vercel.app/api/top100/gnews?query=general"
       );
@@ -190,10 +190,10 @@ const NewsFeed = () => {
       }
 
       const gnewsData = await gnewsResponse.json();
-      console.log("GNews API response:", gnewsData);
+      //"GNews API response:", gnewsData);
 
       if (Array.isArray(gnewsData) && gnewsData.length > 0) {
-        console.log(`Found ${gnewsData.length} news items from GNews`);
+        //`Found ${gnewsData.length} news items from GNews`);
 
         // Transform gnews format to match our expected format
         const transformedNews = gnewsData.map((item) => ({

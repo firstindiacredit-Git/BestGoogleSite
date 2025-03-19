@@ -13,12 +13,28 @@ import { auth, db } from "../firebase";
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
+  // Initialize from localStorage for immediate rendering without flash
   const [isDarkMode, setIsDarkMode] = useState(() => {
-    const savedTheme = localStorage.getItem("theme");
-    return savedTheme === "dark";
+    // Use a try-catch to handle localStorage errors
+    try {
+      const savedTheme = localStorage.getItem("theme");
+      // Apply theme to document root immediately during initialization
+      if (savedTheme === "dark") {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+      return savedTheme === "dark";
+    } catch (error) {
+      console.error("Error accessing localStorage:", error);
+      return false;
+    }
   });
 
-  // Force update function with a more reliable approach
+  // Use debouncedThemeUpdate for Firestore writes to reduce database operations
+  const debouncedThemeUpdateRef = useRef(null);
+
+  // Force update function - kept more focused and only used when needed
   const [updateKey, setUpdateKey] = useState(0);
   const forceUpdate = useCallback(() => {
     setUpdateKey((prev) => prev + 1);
@@ -27,24 +43,29 @@ export const ThemeProvider = ({ children }) => {
   // Keep track of theme change timestamp for components to check
   const themeChangeTimestamp = useRef(Date.now());
 
+  // Load user theme from Firestore only once on auth state change
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
-        const userDocRef = doc(db, "users", user.uid);
-        const userDoc = await getDoc(userDocRef);
+        try {
+          const userDocRef = doc(db, "users", user.uid);
+          const userDoc = await getDoc(userDocRef);
 
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          if (userData.theme) {
-            setIsDarkMode(userData.theme === "dark");
-            localStorage.setItem("theme", userData.theme);
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            if (userData.theme) {
+              setIsDarkMode(userData.theme === "dark");
+            }
+          } else {
+            // Create user doc if it doesn't exist
+            await setDoc(userDocRef, {
+              theme: isDarkMode ? "dark" : "light",
+              email: user.email,
+              displayName: user.displayName,
+            });
           }
-        } else {
-          await setDoc(userDocRef, {
-            theme: isDarkMode ? "dark" : "light",
-            email: user.email,
-            displayName: user.displayName,
-          });
+        } catch (error) {
+          console.error("Error fetching user theme:", error);
         }
       }
     });
@@ -52,42 +73,51 @@ export const ThemeProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
+  // Apply theme changes to DOM and localStorage
   useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
+    try {
+      if (isDarkMode) {
+        document.documentElement.classList.add("dark");
+        localStorage.setItem("theme", "dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+        localStorage.setItem("theme", "light");
+      }
+
+      // Update timestamp for theme change
+      themeChangeTimestamp.current = Date.now();
+
+      // Use a more targeted custom event
+      const themeEvent = new CustomEvent("themeChanged", {
+        detail: { isDarkMode, timestamp: themeChangeTimestamp.current },
+      });
+      window.dispatchEvent(themeEvent);
+
+      // Debounce Firestore updates to reduce writes
+      if (debouncedThemeUpdateRef.current) {
+        clearTimeout(debouncedThemeUpdateRef.current);
+      }
+
+      debouncedThemeUpdateRef.current = setTimeout(() => {
+        const user = auth.currentUser;
+        if (user) {
+          const userDocRef = doc(db, "users", user.uid);
+          updateDoc(userDocRef, {
+            theme: isDarkMode ? "dark" : "light",
+          }).catch((error) => console.error("Error updating theme:", error));
+        }
+        debouncedThemeUpdateRef.current = null;
+      }, 2000); // Only update after 2 seconds of no changes
+    } catch (error) {
+      console.error("Error applying theme:", error);
     }
-
-    // Update timestamp for theme change
-    themeChangeTimestamp.current = Date.now();
-
-    // Force widget updates with a more specific event
-    const themeEvent = new CustomEvent("themeChanged", {
-      detail: { isDarkMode, timestamp: themeChangeTimestamp.current },
-    });
-    window.dispatchEvent(themeEvent);
-
-    // Force a re-render of all components using the theme
-    forceUpdate();
-
-    // Update theme in database
-    const user = auth.currentUser;
-    if (user) {
-      const userDocRef = doc(db, "users", user.uid);
-      updateDoc(userDocRef, {
-        theme: isDarkMode ? "dark" : "light",
-      }).catch((error) => console.error("Error updating theme:", error));
-    }
-  }, [isDarkMode, forceUpdate]);
+  }, [isDarkMode]);
 
   const toggleTheme = useCallback(() => {
     setIsDarkMode((prev) => !prev);
   }, []);
 
-  // Include updateKey in the context value to force re-renders
+  // Highly optimized context value with useMemo
   const value = useMemo(
     () => ({
       isDarkMode,
@@ -111,7 +141,7 @@ export const useTheme = () => {
   return context;
 };
 
-// Enhanced hook to subscribe to theme changes with more reliable updates
+// Enhanced hook to subscribe to theme changes with better performance
 export const useThemeUpdate = (callback) => {
   const callbackRef = useRef(callback);
 
@@ -123,36 +153,17 @@ export const useThemeUpdate = (callback) => {
   useEffect(() => {
     const handleThemeChange = (event) => {
       if (callbackRef.current) {
-        // Pass theme data to the callback
         callbackRef.current(event.detail);
       }
     };
 
     window.addEventListener("themeChanged", handleThemeChange);
-
-    // Immediately call the callback once to ensure initial state is correct
-    if (callbackRef.current) {
-      const { isDarkMode } = useTheme();
-      callbackRef.current({ isDarkMode, timestamp: Date.now() });
-    }
-
     return () => window.removeEventListener("themeChanged", handleThemeChange);
   }, []);
 };
 
-// New hook for components that need to force re-render on theme change
+// Optimized hook for components that need to be aware of theme changes
 export const useThemeAware = () => {
   const { isDarkMode, updateKey } = useTheme();
-  const [, forceRender] = useState(0);
-
-  useEffect(() => {
-    const handleThemeChange = () => {
-      forceRender((prev) => prev + 1);
-    };
-
-    window.addEventListener("themeChanged", handleThemeChange);
-    return () => window.removeEventListener("themeChanged", handleThemeChange);
-  }, []);
-
   return { isDarkMode, updateKey };
 };

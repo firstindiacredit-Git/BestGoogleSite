@@ -604,9 +604,9 @@ function PopularBookmarks() {
 
         // Combine all bookmarks
         const allBookmarks = [...userBookmarks, ...adminBookmarks];
-        console.log(
-          `Loaded ${userBookmarks.length} user bookmarks and ${adminBookmarks.length} admin bookmarks`
-        );
+        // console.log(
+        //   `Loaded ${userBookmarks.length} user bookmarks and ${adminBookmarks.length} admin bookmarks`
+        // );
 
         setLinks(allBookmarks);
         setLoading(false);
@@ -1790,7 +1790,7 @@ function PopularBookmarks() {
                               (c) => c.id === categoryId
                             );
                             if (!category) {
-                              console.log(`Category not found: ${categoryId}`);
+                              // console.log(`Category not found: ${categoryId}`);
                               return null;
                             }
 
@@ -2509,7 +2509,7 @@ function PopularBookmarks() {
         const changes = snapshot.docChanges();
 
         if (changes.length > 0) {
-          console.log("Bookmark changes detected:", changes.length);
+          // console.log("Bookmark changes detected:", changes.length);
 
           // Process the changes in batches to avoid performance issues
           setLinks((prevLinks) => {
@@ -2896,10 +2896,10 @@ function PopularBookmarks() {
             userData.hiddenCategories &&
             Array.isArray(userData.hiddenCategories)
           ) {
-            console.log(
-              "Loading hidden categories:",
-              userData.hiddenCategories
-            );
+            // console.log(
+            //   "Loading hidden categories:",
+            //   userData.hiddenCategories
+            // );
             setHiddenCategories(userData.hiddenCategories);
           }
 
@@ -2908,10 +2908,10 @@ function PopularBookmarks() {
             userData.hiddenBookmarkIds &&
             Array.isArray(userData.hiddenBookmarkIds)
           ) {
-            console.log(
-              "Loading hidden bookmark IDs:",
-              userData.hiddenBookmarkIds
-            );
+            // console.log(
+            //   "Loading hidden bookmark IDs:",
+            //   userData.hiddenBookmarkIds
+            // );
             setHiddenBookmarkIds(userData.hiddenBookmarkIds);
           }
         }

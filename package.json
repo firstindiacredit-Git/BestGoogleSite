@@ -123,6 +123,7 @@
     "tailwindcss": "^3.4.17",
     "vite": "^5.4.14",
     "vite-plugin-node": "^4.0.0",
+    "vite-plugin-pwa": "^0.19.8",
     "worker-loader": "^3.0.8"
   },
   "homepage": "https://allmytab.com"
