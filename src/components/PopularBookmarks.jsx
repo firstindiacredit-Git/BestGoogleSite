@@ -41,7 +41,7 @@ import { motion } from "framer-motion";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import {
   UnorderedListOutlined,
-  AppstoreOutlined,
+  FontSizeOutlined,
   PictureOutlined,
   PlusOutlined,
   EditOutlined,
@@ -110,6 +110,10 @@ function PopularBookmarks() {
   const [links, setLinks] = useState([]);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [lineOptions, setLineOptions] = useState(() => {
+    const savedLineOptions = localStorage.getItem("bookmarkLineOptions");
+    return savedLineOptions ? parseInt(savedLineOptions) : 1;
+  });
   // Use the global theme context instead of local state
   const { isDarkMode } = useThemeAware();
 
@@ -176,14 +180,14 @@ function PopularBookmarks() {
   });
 
   // Enhanced drag preview state
-  const [dragsPreview, setDragsPreview] = useState({
-    isPreviewActive: false,
-    sourceItem: null,
-    destinationColumn: null,
-    previewPosition: null,
-    previewOpacity: 0,
-    previewScale: 1,
-  });
+  // const [dragsPreview, setDragsPreview] = useState({
+  //   isPreviewActive: false,
+  //   sourceItem: null,
+  //   destinationColumn: null,
+  //   previewPosition: null,
+  //   previewOpacity: 0,
+  //   previewScale: 1,
+  // });
 
   const dropdownRef = useRef(null); // Create a ref for the dropdown
 
@@ -201,95 +205,95 @@ function PopularBookmarks() {
   }, []);
 
   // Advanced drag start handler with precise tracking and preview
-  const handleDragStart = (category, columnIndex, event) => {
-    // Capture initial drag position
-    const startX = event.clientX || (event.touches && event.touches[0].clientX);
-    const startY = event.clientY || (event.touches && event.touches[0].clientY);
+  // const handleDragStart = (category, columnIndex, event) => {
+  //   // Capture initial drag position
+  //   const startX = event.clientX || (event.touches && event.touches[0].clientX);
+  //   const startY = event.clientY || (event.touches && event.touches[0].clientY);
 
-    // Update drag state
-    setDragState({
-      isDragging: true,
-      draggedItem: category,
-      sourceColumn: columnIndex,
-      destinationColumn: null,
-      dragPosition: { x: startX, y: startY },
-      dragProgress: 0,
-    });
+  //   // Update drag state
+  //   setDragState({
+  //     isDragging: true,
+  //     draggedItem: category,
+  //     sourceColumn: columnIndex,
+  //     destinationColumn: null,
+  //     dragPosition: { x: startX, y: startY },
+  //     dragProgress: 0,
+  //   });
 
-    // Initialize preview state
-    setDragsPreview({
-      isPreviewActive: true,
-      sourceItem: category,
-      destinationColumn: null,
-      previewPosition: { x: startX, y: startY },
-      previewOpacity: 0.5,
-      previewScale: 1.05,
-    });
+  //   // Initialize preview state
+  //   setDragsPreview({
+  //     isPreviewActive: true,
+  //     sourceItem: category,
+  //     destinationColumn: null,
+  //     previewPosition: { x: startX, y: startY },
+  //     previewOpacity: 0.5,
+  //     previewScale: 1.05,
+  //   });
 
-    // Enhanced feedback
-    try {
-      // Haptic feedback
-      if ("vibrate" in navigator) {
-        navigator.vibrate([25, 50, 25]);
-      }
+  //   // Enhanced feedback
+  //   try {
+  //     // Haptic feedback
+  //     if ("vibrate" in navigator) {
+  //       navigator.vibrate([25, 50, 25]);
+  //     }
 
-      // Spatial audio feedback
-      const startDragAudio = new Audio("path/to/drag-start-spatial.mp3");
-      startDragAudio.playbackRate = 1.2;
-      startDragAudio.volume = 0.3;
-      startDragAudio.play().catch(() => {});
-    } catch (error) {
-      console.warn("Drag start feedback failed", error);
-    }
-  };
+  //     // Spatial audio feedback
+  //     const startDragAudio = new Audio("path/to/drag-start-spatial.mp3");
+  //     startDragAudio.playbackRate = 1.2;
+  //     startDragAudio.volume = 0.3;
+  //     startDragAudio.play().catch(() => {});
+  //   } catch (error) {
+  //     console.warn("Drag start feedback failed", error);
+  //   }
+  // };
 
   // Advanced drag update with progress tracking
-  const handleDragUpdate = (result, provided) => {
-    if (result.destination) {
-      // Calculate drag progress based on movement
-      const progress = Math.min(
-        1,
-        Math.abs(
-          (result.destination.index - result.source.index) /
-            Math.max(1, result.destination.droppableId.length)
-        )
-      );
+  // const handleDragUpdate = (result, provided) => {
+  //   if (result.destination) {
+  //     // Calculate drag progress based on movement
+  //     const progress = Math.min(
+  //       1,
+  //       Math.abs(
+  //         (result.destination.index - result.source.index) /
+  //           Math.max(1, result.destination.droppableId.length)
+  //       )
+  //     );
 
-      setDragState((prev) => ({
-        ...prev,
-        destinationColumn: parseInt(result.destination.droppableId),
-        dragProgress: progress,
-        dragPosition: {
-          x: provided.clientX || prev.dragPosition.x,
-          y: provided.clientY || prev.dragPosition.y,
-        },
-      }));
+  //     setDragState((prev) => ({
+  //       ...prev,
+  //       destinationColumn: parseInt(result.destination.droppableId),
+  //       dragProgress: progress,
+  //       dragPosition: {
+  //         x: provided.clientX || prev.dragPosition.x,
+  //         y: provided.clientY || prev.dragPosition.y,
+  //       },
+  //     }));
 
-      // Update preview state
-      setDragsPreview((prev) => ({
-        ...prev,
-        destinationColumn: parseInt(result.destination.droppableId),
-        previewPosition: {
-          x: provided.clientX || prev.previewPosition.x,
-          y: provided.clientY || prev.previewPosition.y,
-        },
-        previewOpacity: 0.8,
-        previewScale: 1.1,
-      }));
-      s;
-      // Visual and audio feedback based on drag progress
-      try {
-        if (progress > 0.5) {
-          const progressAudio = new Audio("path/to/drag-progress.mp3");
-          progressAudio.volume = progress * 0.3;
-          progressAudio.playbackRate = 1 + progress * 0.5;
-          progressAudio.play().catch(() => {});
-        }
-      } catch (error) {
-        console.warn("Drag update feedback failed", error);
-      }
-    }
-  };
+  //     // Update preview state
+  //     setDragsPreview((prev) => ({
+  //       ...prev,
+  //       destinationColumn: parseInt(result.destination.droppableId),
+  //       previewPosition: {
+  //         x: provided.clientX || prev.previewPosition.x,
+  //         y: provided.clientY || prev.previewPosition.y,
+  //       },
+  //       previewOpacity: 0.8,
+  //       previewScale: 1.1,
+  //     }));
+  //     s;
+  //     // Visual and audio feedback based on drag progress
+  //     try {
+  //       if (progress > 0.5) {
+  //         const progressAudio = new Audio("path/to/drag-progress.mp3");
+  //         progressAudio.volume = progress * 0.3;
+  //         progressAudio.playbackRate = 1 + progress * 0.5;
+  //         progressAudio.play().catch(() => {});
+  //       }
+  //     } catch (error) {
+  //       console.warn("Drag update feedback failed", error);
+  //     }
+  //   }
+  // };
 
   const getBookmarkItemStyle = (isSelected) => ({
     padding: "8px",
@@ -1325,6 +1329,7 @@ function PopularBookmarks() {
         setIsEditModePanelVisible(true);
       },
     },
+
     {
       key: "viewOptions",
       icon: (
@@ -1398,6 +1403,53 @@ function PopularBookmarks() {
               JSON.stringify(updatedModes)
             );
             //success("View mode to Icon");
+          },
+        },
+      ],
+    },
+    {
+      key: "lineOptions",
+      icon: (
+        <div className="dark:text-black bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
+          <FontSizeOutlined />
+        </div>
+      ),
+      label: <div className="dark:text-white">Line Options</div>,
+      children: [
+        {
+          key: "line",
+          // icon: (
+          //   <div className="dark:text-black bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
+          //     <UnorderedListOutlined />
+          //   </div>
+          // ),
+          label: "1 line",
+          onClick: () => {
+            setLineOptions(1);
+          },
+        },
+        {
+          key: "2 lines",
+          // icon: (
+          //   <div className="dark:text-black bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
+          //     <AppstoreOutlined />
+          //   </div>
+          // ),
+          label: "2 lines",
+          onClick: () => {
+            setLineOptions(2);
+          },
+        },
+        {
+          key: "3 lines",
+          // icon: (
+          //   <div className="dark:text-black bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
+          //     <PictureOutlined />
+          //   </div>
+          // ),
+          label: "Full lines",
+          onClick: () => {
+            setLineOptions("none");
           },
         },
       ],
@@ -1603,32 +1655,31 @@ function PopularBookmarks() {
   const renderBookmarkList = (categoryLinks, categoryId) => {
     const sizes = categoryBookmarkSizes[categoryId] || { list: 32 };
     return (
-      <List
-        className="bg-white/[(var(--widget-opacity))]"
-        itemLayout="horizontal"
-        dataSource={categoryLinks}
-        renderItem={(link) => (
-          <List.Item>
-            <List.Item.Meta
-              avatar={
-                <Avatar
-                  src={getFaviconUrl(link.url || link.link)}
-                  size={sizes.list}
-                  style={{ padding: "2px" }}
-                />
-              }
-              title={
-                <a
-                  href={link.url || link.link}
-                  className="text-black dark:text-white"
-                >
-                  {link.title || link.name}
-                </a>
-              }
+      <ul className="bg-white/[(var(--widget-opacity))] dark:bg-[#28283a]/[(var(--widget-opacity))]">
+        {categoryLinks.map((link) => (
+          <li
+            key={link.id}
+            className="flex items-center py-2 px-4 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg"
+          >
+            <img
+              src={getFaviconUrl(link.url || link.link)}
+              alt=""
+              style={{
+                width: `${sizes.list}px`,
+                height: `${sizes.list}px`,
+                padding: "2px",
+              }}
+              className="flex-shrink-0"
             />
-          </List.Item>
-        )}
-      />
+            <a
+              href={link.url || link.link}
+              className="ml-3 text-black dark:text-white hover:text-blue-500"
+            >
+              {link.title || link.name}
+            </a>
+          </li>
+        ))}
+      </ul>
     );
   };
 
@@ -1636,7 +1687,7 @@ function PopularBookmarks() {
     const sizes = categoryBookmarkSizes[categoryId] || { grid: 32 };
     return (
       <div className="w-full">
-        <div className="grid grid-cols-2  sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {categoryLinks.map((link) => (
             <div
               key={link.id}
@@ -1655,16 +1706,20 @@ function PopularBookmarks() {
                   />
                 </a>
               </div>
-              <Tooltip title={link.title || link.name}>
-                <a
-                  href={link.url || link.link}
-                  className="w-full text-center text-black dark:text-white hover:text-blue-500"
+              <a
+                href={link.url || link.link}
+                className="w-full text-center text-black dark:text-white hover:text-blue-500"
+              >
+                <span
+                  className={`text-sm break-words block ${
+                    lineOptions === 0
+                      ? "whitespace-normal"
+                      : `line-clamp-${lineOptions}`
+                  }`}
                 >
-                  <span className="text-sm truncate block">
-                    {link.title || link.name}
-                  </span>
-                </a>
-              </Tooltip>
+                  {link.title || link.name}
+                </span>
+              </a>
             </div>
           ))}
         </div>
@@ -2675,122 +2730,6 @@ function PopularBookmarks() {
     );
   };
 
-  // Function to handle saving changes to bookmarks
-  const handleSaveChanges = async () => {
-    try {
-      // Validate bookmark changes
-      if (editModeBookmarks.length === 0) {
-        //warning("No bookmarks to save", 2);
-        return;
-      }
-
-      // Check for unsaved changes
-      if (!hasUnsavedChanges) {
-        //info("No changes to save", 2);
-        return;
-      }
-
-      // Start loading state
-      setIsApplyingChanges(true);
-
-      // Create a batch write for efficient updates
-      const batch = writeBatch(db);
-      const userDocRef = doc(db, "users", user.uid);
-
-      // Get current positions from Firestore
-      const userDoc = await getDoc(userDocRef);
-      const existingPositions = userDoc.exists()
-        ? userDoc.data().bookmarkPositions || {}
-        : {};
-
-      // Track save progress
-      const totalBookmarks = editModeBookmarks.length;
-      let savedCount = 0;
-
-      // Prepare batch updates
-      const savePromises = editModeBookmarks.map(async (bookmark, index) => {
-        if (bookmark.isAdminBookmark) {
-          // Update admin bookmark positions
-          const bookmarkRef = doc(db, "bookmarks", bookmark.id);
-          batch.update(bookmarkRef, {
-            order: index,
-            updatedAt: new Date().toISOString(),
-          });
-        } else {
-          // Update user's personal bookmarks
-          const bookmarkRef = doc(
-            db,
-            "users",
-            user.uid,
-            "CatBookmarks",
-            bookmark.id
-          );
-          batch.update(bookmarkRef, {
-            order: index,
-            title: bookmark.title,
-            url: bookmark.url,
-            updatedAt: new Date().toISOString(),
-          });
-        }
-
-        savedCount++;
-
-        // Progress notification
-        if (savedCount % 5 === 0 || savedCount === totalBookmarks) {
-          //info(`Saving bookmarks: ${savedCount}/${totalBookmarks}`);
-        }
-      });
-
-      // Wait for all save operations to be prepared
-      await Promise.all(savePromises);
-
-      // Commit batch updates
-      await batch.commit();
-
-      // Update local state
-      setLinks((prevLinks) => {
-        const updatedLinks = [...prevLinks];
-        editModeBookmarks.forEach((editedBookmark, index) => {
-          const linkIndex = updatedLinks.findIndex(
-            (link) => link.id === editedBookmark.id
-          );
-          if (linkIndex !== -1) {
-            updatedLinks[linkIndex] = {
-              ...updatedLinks[linkIndex],
-              order: index,
-              title: editedBookmark.title,
-              url: editedBookmark.url,
-            };
-          }
-        });
-        return updatedLinks;
-      });
-
-      // Haptic and audio feedback
-      try {
-        if ("vibrate" in navigator) {
-          navigator.vibrate([50, 100, 50]);
-        }
-
-        const saveAudio = new Audio("path/to/save-success.mp3");
-        saveAudio.volume = 0.4;
-        saveAudio.play().catch(() => {});
-      } catch (error) {
-        console.warn("Save feedback failed", error);
-      }
-
-      // Reset state
-      setHasUnsavedChanges(false);
-      //success(`${totalBookmarks} bookmark(s) saved successfully`, 3);
-      setIsEditModePanelVisible(false);
-    } catch (error) {
-      console.error("Error saving changes:", error);
-    } finally {
-      // Ensure loading state is reset
-      setIsApplyingChanges(false);
-    }
-  };
-
   // Function to handle deletion of selected bookmarks
   const handleDeleteSelected = () => {
     if (selectedBookmarks.length === 0) {
@@ -2922,6 +2861,11 @@ function PopularBookmarks() {
 
     loadHiddenCategories();
   }, [user]);
+
+  // Add this useEffect to save line options to localStorage
+  useEffect(() => {
+    localStorage.setItem("bookmarkLineOptions", lineOptions.toString());
+  }, [lineOptions]);
 
   if (loading) {
     return (
