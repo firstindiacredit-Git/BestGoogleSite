@@ -476,55 +476,56 @@ const SearchPage = ({ isToolPage = false }) => {
 
             <div className="w-full">
               <div className="flex mt-14 flex-col items-center">
-                {!isGoogleSearchLoaded && (
-                  <div className="w-[55%] mb-[5px]">
-                    <Input.Search
-                      placeholder="Search Google or type a URL"
-                      size="large"
-                      className={`temporary-search ${isDarkMode ? "dark" : ""}`}
-                      style={{
-                        backgroundColor: "white",
-                        padding: "8px 1rem",
-                        borderRadius: "2px",
-                        boxShadow: "0px 0px 1px rgba(0, 0, 0, 0.3)",
-                      }}
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onSearch={handleSearch}
-                      onKeyPress={handleKeyPress}
-                      enterButton
-                    />
-                  </div>
-                )}
-                <div
-                  className={`gcse-searchbox-only ${
-                    !isGoogleSearchLoaded ? "opacity-0 absolute" : "opacity-100"
-                  }`}
-                  data-resultsurl="https://www.google.com/search?client=ms-google-coop&qcx=80904074a37154829"
-                  data-defaulttoimagesearch="true"
-                />
-                <Shortcut />
-                {simple ? (
-                  <div>
-                    <div className="flex justify-center max-w-[90vw] mb-3 w-full mx-auto">
-                      <div className="flex space-x-1 p-1 justify-between bg-gray-200/10 backdrop-blur-lg  dark:bg-[#513a7a]/10 rounded-lg w-full">
-                        <span className="drop-shadow-md px-4 py-2 text-sm font-medium rounded-md transition-all bg-indigo-500 text-white dark:bg-[#513a7a]">
-                          BOOKMARKS
-                        </span>
-
+                <div className="flex justify-center w-full gap-1">
+                  {!isGoogleSearchLoaded && (
+                    <div className="w-[55%] mb-[5px]">
+                      <Input.Search
+                        placeholder="Search Google or type a URL"
+                        size="large"
+                        className={`temporary-search ${
+                          isDarkMode ? "dark" : ""
+                        }`}
+                        style={{
+                          backgroundColor: "white",
+                          padding: "8px 1rem",
+                          borderRadius: "2px",
+                          boxShadow: "0px 0px 1px rgba(0, 0, 0, 0.3)",
+                        }}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onSearch={handleSearch}
+                        onKeyPress={handleKeyPress}
+                        enterButton
+                      />
+                    </div>
+                  )}
+                  <div
+                    className={`gcse-searchbox-only ${
+                      !isGoogleSearchLoaded
+                        ? "opacity-0 absolute"
+                        : "opacity-100"
+                    }`}
+                    data-resultsurl="https://www.google.com/search?client=ms-google-coop&qcx=80904074a37154829"
+                    data-defaulttoimagesearch="true"
+                  />
+                  {simple && (
+                    <div>
+                      <div className="flex justify-center max-w-[90vw] mb-3 w-full mx-auto">
                         <Dropdown
                           menu={settingsMenu}
                           trigger={["click"]}
                           overlayClassName="[&_.ant-dropdown-menu]:p-0 [&_.ant-dropdown-menu-item]:p-0 [&_ul]:dark:bg-[#28283a]"
                         >
-                          <button className="px-4 py-2 text-sm font-medium rounded-md  transition-all dark:text-white hover:bg-gray-100 dark:hover:bg-[#28283A] flex items-center">
+                          <button className="p-5 text-sm font-medium rounded-md  transition-all bg-gray-50/50 dark:bg-[#28283a]/50 dark:text-white hover:bg-gray-100 dark:hover:bg-[#2F2F3F] flex items-center">
                             <Settings className="w-5 h-5" />
                           </button>
                         </Dropdown>
                       </div>
                     </div>
-                  </div>
-                ) : (
+                  )}
+                </div>
+                <Shortcut />
+                {!simple && (
                   <div>
                     <div className="flex justify-center max-w-[90vw] mb-3 w-full mx-auto">
                       <div className="flex space-x-1 p-1 justify-between bg-gray-200/10 backdrop-blur-lg  dark:bg-[#513a7a]/10 rounded-lg w-full">
@@ -631,9 +632,11 @@ const SearchPage = ({ isToolPage = false }) => {
             </div>
           </div>
           {simple ? (
-            <div className="w-full">
-              <PopularBookmarks />
-            </div>
+            <>
+              <div className="w-full ">
+                <PopularBookmarks />
+              </div>
+            </>
           ) : (
             <div className="w-full">
               {activeComponent === "NotebookAndSheet" ? (
