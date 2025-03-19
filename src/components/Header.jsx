@@ -407,7 +407,7 @@ const Header = ({
 
   return (
     <>
-      <header className=" bg-gray-200/10 backdrop-blur-sm dark:bg-[#513a7a]/10  sticky top-0 z-50">
+      <header className=" backdrop-blur-sm  sticky top-0 z-50">
         {isAdmin && showAdminBanner && (
           <div className="bg-red-500/90 backdrop-blur-sm text-white py-1 px-4 text-center sticky top-0 z-50">
             <Alert

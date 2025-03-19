@@ -479,24 +479,38 @@ const SearchPage = ({ isToolPage = false }) => {
                 <div className="flex justify-center w-full gap-1">
                   {!isGoogleSearchLoaded && (
                     <div className="w-[55%] mb-[5px]">
-                      <Input.Search
-                        placeholder="Search Google or type a URL"
-                        size="large"
-                        className={`temporary-search ${
-                          isDarkMode ? "dark" : ""
-                        }`}
-                        style={{
-                          backgroundColor: "white",
-                          padding: "8px 1rem",
-                          borderRadius: "2px",
-                          boxShadow: "0px 0px 1px rgba(0, 0, 0, 0.3)",
-                        }}
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        onSearch={handleSearch}
-                        onKeyPress={handleKeyPress}
-                        enterButton
-                      />
+                      <div className="relative w-full">
+                        <input
+                          type="text"
+                          placeholder="Search Google or type a URL"
+                          className={`w-full h-14 px-4 rounded-md shadow-sm outline-none ${
+                            isDarkMode
+                              ? "bg-white text-black"
+                              : "bg-white text-black"
+                          }`}
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          onKeyPress={handleKeyPress}
+                        />
+                        <button
+                          onClick={handleSearch}
+                          className="absolute right-0 top-0 h-full px-4 text-gray-500 hover:text-gray-700"
+                        >
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                            />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                   )}
                   <div
@@ -516,7 +530,7 @@ const SearchPage = ({ isToolPage = false }) => {
                           trigger={["click"]}
                           overlayClassName="[&_.ant-dropdown-menu]:p-0 [&_.ant-dropdown-menu-item]:p-0 [&_ul]:dark:bg-[#28283a]"
                         >
-                          <button className="p-5 text-sm font-medium rounded-md  transition-all bg-gray-50/50 dark:bg-[#28283a]/50 dark:text-white hover:bg-gray-100 dark:hover:bg-[#2F2F3F] flex items-center">
+                          <button className="py-[1.2rem] px-5 text-sm font-medium rounded-md  transition-all bg-gray-50/50 dark:bg-[#28283a]/50 dark:text-white hover:bg-gray-100 dark:hover:bg-[#2F2F3F] flex items-center">
                             <Settings className="w-5 h-5" />
                           </button>
                         </Dropdown>
@@ -633,7 +647,7 @@ const SearchPage = ({ isToolPage = false }) => {
           </div>
           {simple ? (
             <>
-              <div className="w-full ">
+              <div className="w-full mt-20 ">
                 <PopularBookmarks />
               </div>
             </>
