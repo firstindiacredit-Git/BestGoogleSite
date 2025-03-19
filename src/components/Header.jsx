@@ -19,14 +19,10 @@ import { doc, setDoc, getDoc } from "firebase/firestore";
 import { FaCrown } from "react-icons/fa";
 import Signin from "./Signup/signin.jsx";
 import Signup from "./Signup.jsx";
-const Header = ({
-  isDarkMode,
-  toggleTheme,
-  onPageNameChange,
-  goBack,
-  designChange,
-  designContext,
-}) => {
+import { useTheme } from "../context/ThemeContext";
+
+const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
+  const { isDarkMode, toggleTheme } = useTheme();
   const [showLogin, setShowLogin] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
   const [user, setUser] = useState(null);

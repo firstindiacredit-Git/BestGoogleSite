@@ -13,11 +13,14 @@ import {
   FaLock,
   FaShieldAlt,
   FaCrown,
-  FaArrowLeft,
+  FaCog,
+  FaRegListAlt,
+  FaSave,
+  FaTimes,
 } from "react-icons/fa";
 import imageCompression from "browser-image-compression";
 import { useSubscription } from "../hooks/useSubscription";
-import { Modal, message, Tabs } from "antd";
+import { Modal, message, Tabs, Spin, Button, Tooltip } from "antd";
 import Header from "./Header";
 import { useTheme } from "../context/ThemeContext";
 // https://cdn.dribbble.com/userupload/14883451/file/original-761915986636e2ae85fee541c6b9c051.jpg?resize=1200x900&vertical=center
@@ -26,7 +29,6 @@ const ProfilePage = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [accountType, setAccountType] = useState("Free");
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingPassword, setIsEditingPassword] = useState(false);
   const [isEditingPin, setIsEditingPin] = useState(false);
@@ -39,29 +41,24 @@ const ProfilePage = () => {
   const [userPin, setUserPin] = useState("");
   const [newPin, setNewPin] = useState(["", "", "", ""]);
   const [showPin, setShowPin] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // const [showPaymentModal, setShowPaymentModal] = useState(false);
   const { isPro } = useSubscription();
-
   const [previewUrl, setPreviewUrl] = useState(null);
-
-  const [activeTab, setActiveTab] = useState("profile");
   const [backgroundUrl, setBackgroundUrl] = useState(null);
   const [isUploadingBackground, setIsUploadingBackground] = useState(false);
   const backgroundInputRef = useRef(null);
   const [previewBackgroundUrl, setPreviewBackgroundUrl] = useState(null);
 
   const navigate = useNavigate();
-
-  const { isDarkMode, toggleTheme } = useTheme();
-
-  const [activeSection, setActiveSection] = useState(null);
+  const { isDarkMode } = useTheme();
+  const [activeSection, setActiveSection] = useState("profile");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        setUsername(user.displayName || "Alexis Hill");
-        setEmail(user.email || "example@mail.com");
+        setUsername(user.displayName || "");
+        setEmail(user.email || "");
         setAvatarUrl(
           user.photoURL ||
             "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"
@@ -93,14 +90,23 @@ const ProfilePage = () => {
 
         setUserId(user.uid);
         fetchUserPin(user.uid);
+        setLoading(false);
+      } else {
+        // Redirect if not logged in
+        navigate("/");
+        message.warning("You need to be logged in to view your profile");
       }
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [navigate]);
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
+  };
+
+  const handleBackgroundClick = () => {
+    backgroundInputRef.current?.click();
   };
 
   const compressImage = async (file) => {
@@ -214,6 +220,82 @@ const ProfilePage = () => {
     }
   };
 
+  const handleBackgroundChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      message.error("Please upload an image file");
+      return;
+    }
+
+    if (file.size > 8 * 1024 * 1024) {
+      message.error("File size should not exceed 8MB");
+      return;
+    }
+
+    // Show preview immediately
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreviewBackgroundUrl(reader.result);
+    };
+    reader.readAsDataURL(file);
+
+    try {
+      setIsUploadingBackground(true);
+      const currentUser = auth.currentUser;
+      if (!currentUser) throw new Error("No user logged in");
+
+      const compressedImage = await compressImage(file);
+
+      const formData = new FormData();
+      formData.append("file", compressedImage);
+      formData.append(
+        "upload_preset",
+        import.meta.env.VITE_CLOUDINARY_UPLOAD_BACKGROUND_PRESET ||
+          "browsey_backgrounds"
+      );
+      formData.append("folder", "browsey/backgrounds");
+      formData.append("public_id", `bg_${currentUser.uid}_${Date.now()}`);
+      formData.append("cloud_name", import.meta.env.VITE_CLOUDINARY_CLOUD_NAME);
+
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${
+          import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
+        }/image/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || "Upload failed");
+      }
+
+      const data = await response.json();
+      const imageUrl = data.secure_url;
+
+      // Update Firestore document
+      const userRef = doc(db, "users", currentUser.uid);
+      await updateDoc(userRef, {
+        backgroundUrl: imageUrl,
+        lastUpdated: new Date().toISOString(),
+      });
+
+      setBackgroundUrl(imageUrl);
+      localStorage.setItem("backgroundImage", imageUrl);
+      message.success("Background updated successfully!");
+    } catch (error) {
+      console.error("Error uploading background:", error);
+      setPreviewBackgroundUrl(backgroundUrl); // Revert preview on error
+      message.error("Failed to update background. Please try again.");
+    } finally {
+      setIsUploadingBackground(false);
+    }
+  };
+
   const fetchUserPin = async (userId) => {
     try {
       const docRef = doc(db, "users", userId);
@@ -235,11 +317,11 @@ const ProfilePage = () => {
         pin: newPin,
       });
       setUserPin(newPin);
-      alert("PIN updated successfully!");
+      message.success("PIN updated successfully!");
       setIsEditingPin(false);
     } catch (error) {
       console.error("Error saving new pin:", error);
-      alert("Failed to update PIN. Please try again.");
+      message.error("Failed to update PIN. Please try again.");
     }
   };
 
@@ -248,7 +330,7 @@ const ProfilePage = () => {
     if (newPinValue.length === 4) {
       saveNewPin(newPinValue);
     } else {
-      alert("PIN should be 4 digits.");
+      message.warning("PIN should be 4 digits.");
     }
   };
 
@@ -268,7 +350,7 @@ const ProfilePage = () => {
 
   const handleSaveName = async () => {
     if (!username.trim()) {
-      alert("Name cannot be empty");
+      message.error("Name cannot be empty");
       return;
     }
 
@@ -279,17 +361,17 @@ const ProfilePage = () => {
         const userDoc = doc(db, "users", currentUser.uid);
         await setDoc(userDoc, { username }, { merge: true });
         setIsEditingName(false);
-        alert("Name updated successfully!");
+        message.success("Name updated successfully!");
       }
     } catch (error) {
       console.error("Error saving name:", error);
-      alert("Failed to update name. Please try again.");
+      message.error("Failed to update name. Please try again.");
     }
   };
 
   const handleSavePassword = async () => {
     if (password.length < 6) {
-      alert("Password must be at least 6 characters long");
+      message.error("Password must be at least 6 characters long");
       return;
     }
 
@@ -299,11 +381,13 @@ const ProfilePage = () => {
         await updatePassword(currentUser, password);
         setIsEditingPassword(false);
         setPassword("");
-        alert("Password updated successfully!");
+        message.success("Password updated successfully!");
       }
     } catch (error) {
       console.error("Error saving password:", error);
-      alert("Failed to update password. Please try again.");
+      message.error(
+        "Failed to update password. Please try again later or reauthenticate."
+      );
     }
   };
 
@@ -311,51 +395,61 @@ const ProfilePage = () => {
     navigate("/premium");
   };
 
-  const toggleSection = (section) => {
-    setActiveSection(activeSection === section ? null : section);
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Spin size="large" tip="Loading profile..." />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen relative">
-      {/* Full-screen background */}
-      <div
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: `url(${previewBackgroundUrl || backgroundUrl})`,
-          zIndex: -2,
-        }}
-      />
-      <div
-        className="fixed inset-0 bg-black/30 backdrop-blur-sm"
-        style={{ zIndex: -1 }}
-      />
-
-      {/* Header */}
-      <Header isDarkMode={isDarkMode} toggleTheme={toggleTheme} goBack={true} />
+    <div
+      className={`fixed inset-0 ${
+        isDarkMode
+          ? "bg-gradient-to-r from-[#1a1a2e] via-[#2a243f] to-[#1a1a2e]"
+          : "bg-gradient-to-r from-indigo-200 via-blue-100 to-indigo-200"
+      } transition-colors duration-300`}
+    >
+      <Header goBack={true} />
 
       {/* Main Content */}
-      <div className="relative pt-8 px-4 pb-20">
+      <div className="relative py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           {/* Profile Header Card */}
-          <div className="bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] backdrop-blur-md rounded-lg shadow-xl p-6 mb-6">
-            <div className="flex items-center space-x-6">
+          <div className="relative bg-white dark:bg-[#28283a] backdrop-blur-md rounded-xl shadow-xl p-6 mb-8 overflow-hidden">
+            {/* Change background button */}
+
+            <input
+              type="file"
+              ref={backgroundInputRef}
+              onChange={handleBackgroundChange}
+              accept="image/*"
+              className="hidden"
+            />
+
+            <div className="flex flex-col sm:flex-row items-center gap-6">
               <div className="relative">
-                <img
-                  src={previewUrl || avatarUrl}
-                  alt="Avatar"
-                  className="w-24 h-24 rounded-full border-4 border-white dark:border-gray-800 object-cover shadow-lg"
-                />
-                <button
-                  onClick={handleAvatarClick}
-                  className="absolute bottom-0 right-0 bg-indigo-600 rounded-full p-2 text-white hover:bg-indigo-700 shadow-lg"
-                  disabled={isUploading}
-                >
-                  {isUploading ? (
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  ) : (
-                    <FaCamera size={14} />
-                  )}
-                </button>
+                <div className="w-28 h-28 rounded-full border-4 border-white dark:border-gray-800 overflow-hidden shadow-lg">
+                  <img
+                    src={previewUrl || avatarUrl}
+                    alt="Avatar"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <Tooltip title="Change Profile Picture">
+                  <button
+                    onClick={handleAvatarClick}
+                    className="absolute bottom-0 right-0 bg-indigo-600 rounded-full p-2 text-white hover:bg-indigo-700 shadow-lg transition-all"
+                    disabled={isUploading}
+                  >
+                    {isUploading ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      <FaCamera size={14} />
+                    )}
+                  </button>
+                </Tooltip>
                 <input
                   type="file"
                   ref={fileInputRef}
@@ -364,297 +458,260 @@ const ProfilePage = () => {
                   className="hidden"
                 />
               </div>
-              <div>
-                <h2 className="text-3xl font-bold dark:text-white">
+
+              <div className="text-center sm:text-left">
+                <h2 className="text-3xl font-bold dark:text-white mb-1">
                   {username}
                 </h2>
-                <p className="text-black dark:text-gray-300">{email}</p>
-                <div className="mt-3">
+                <p className="text-gray-600 dark:text-gray-300 mb-3">{email}</p>
+                <div className="flex items-center justify-center sm:justify-start space-x-2">
                   <span
                     className={`inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium ${
                       isPro
-                        ? "bg-yellow-100 text-yellow-800"
+                        ? "bg-gradient-to-r from-yellow-300 to-yellow-500 text-yellow-900"
                         : "bg-green-100 text-green-800"
                     }`}
                   >
                     {isPro ? <FaCrown className="mr-2" /> : null}
                     {isPro ? "Pro Account" : "Free Account"}
                   </span>
-                </div>
-              </div>
-            </div>
-          </div>
 
-          {/* Collapsible Sections */}
-          <div className="space-y-4">
-            {/* Profile Section */}
-            <div className="bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] backdrop-blur-md rounded-lg shadow-lg overflow-hidden">
-              <button
-                onClick={() => toggleSection("profile")}
-                className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-black/5"
-              >
-                <div className="flex items-center gap-3">
-                  <FaUser className="text-gray-400" />
-                  <span className="font-semibold dark:text-white">
-                    Profile Information
-                  </span>
-                </div>
-                <div
-                  className={`transform transition-transform ${
-                    activeSection === "profile" ? "rotate-180" : ""
-                  }`}
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </div>
-              </button>
-              {activeSection === "profile" && (
-                <div className="p-6 border-t border-gray-800 ">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h3 className="font-semibold dark:text-white">Name</h3>
-                      {isEditingName ? (
-                        <div className="flex items-center mt-2 space-x-2">
-                          <input
-                            type="text"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            className="border dark:border-gray-600 dark:bg-[#513a7a] rounded p-2"
-                          />
-                          <button
-                            onClick={handleSaveName}
-                            className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
-                          >
-                            Save
-                          </button>
-                        </div>
-                      ) : (
-                        <p className=" text-black dark:text-gray-300 mt-1">
-                          {username}
-                        </p>
-                      )}
-                    </div>
+                  {!isPro && (
                     <button
-                      onClick={() => setIsEditingName(!isEditingName)}
-                      className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                      onClick={handleUpgrade}
+                      className="px-4 py-1.5 rounded-full text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
                     >
-                      <FaPen />
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Password Section */}
-            <div className="bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] backdrop-blur-md rounded-lg shadow-lg overflow-hidden">
-              <button
-                onClick={() => toggleSection("password")}
-                className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-black/5"
-              >
-                <div className="flex items-center gap-3">
-                  <FaLock className="text-gray-400" />
-                  <span className="font-semibold dark:text-white">
-                    Password Settings
-                  </span>
-                </div>
-                <div
-                  className={`transform transition-transform ${
-                    activeSection === "password" ? "rotate-180" : ""
-                  }`}
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </div>
-              </button>
-              {activeSection === "password" && (
-                <div className="p-6 border-t border-gray-700">
-                  {isEditingPassword ? (
-                    <div className="flex items-center space-x-2">
-                      <div className="relative flex-1">
-                        <input
-                          type={showPassword ? "text" : "password"}
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          className="w-full border dark:border-gray-600 dark:bg-[#513a7a] rounded p-2 pr-10"
-                          placeholder="Enter new password"
-                        />
-                        <button
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400"
-                        >
-                          {showPassword ? <FaEyeSlash /> : <FaEye />}
-                        </button>
-                      </div>
-                      <button
-                        onClick={handleSavePassword}
-                        className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
-                      >
-                        Update Password
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setIsEditingPassword(true)}
-                      className="text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300"
-                    >
-                      Click to change password
+                      Upgrade
                     </button>
                   )}
                 </div>
-              )}
+              </div>
             </div>
+          </div>
 
-            {/* PIN Section */}
-            {userId && (
-              <div className="bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] backdrop-blur-md rounded-lg shadow-lg overflow-hidden">
-                <button
-                  onClick={() => toggleSection("pin")}
-                  className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-black/5"
-                >
-                  <div className="flex items-center gap-3">
-                    <FaShieldAlt className="text-gray-400" />
-                    <span className="font-semibold dark:text-white">
-                      Security PIN
-                    </span>
+          {/* Settings Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="md:col-span-2">
+              {/* Main Settings Panel */}
+              <div className="bg-white dark:bg-[#28283a] backdrop-blur-md rounded-xl shadow-lg overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center space-x-2">
+                    <FaCog className="text-gray-400" />
+                    <h3 className="font-semibold text-lg dark:text-white">
+                      Account Settings
+                    </h3>
                   </div>
-                  <div
-                    className={`transform transition-transform ${
-                      activeSection === "pin" ? "rotate-180" : ""
-                    }`}
-                  >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </div>
-                </button>
-                {activeSection === "pin" && (
-                  <div className="p-6 border-t dark:border-gray-700">
-                    {isEditingPin ? (
-                      <div className="flex items-center space-x-2">
-                        <div className="flex gap-2">
-                          {newPin.map((digit, index) => (
-                            <input
-                              key={index}
-                              id={`pin-input-${index}`}
-                              type={showPin ? "text" : "password"}
-                              value={digit}
-                              maxLength="1"
-                              onChange={(e) => handleInputChange(e, index)}
-                              className="w-12 h-12 text-center text-xl border dark:border-gray-600 dark:bg-[#513a7a] rounded"
-                            />
-                          ))}
-                        </div>
-                        <button
-                          onClick={() => setShowPin(!showPin)}
-                          className="text-gray-400"
+                </div>
+
+                <div className="p-6 space-y-6">
+                  {/* Name Setting */}
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <h4 className="font-medium dark:text-white">
+                        Display Name
+                      </h4>
+                      <button
+                        onClick={() => setIsEditingName(!isEditingName)}
+                        className="text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300"
+                      >
+                        {isEditingName ? "Cancel" : "Edit"}
+                      </button>
+                    </div>
+
+                    {isEditingName ? (
+                      <div className="flex items-center mt-2 space-x-2">
+                        <input
+                          type="text"
+                          value={username}
+                          onChange={(e) => setUsername(e.target.value)}
+                          className="flex-1 border dark:border-gray-600 dark:bg-[#3a2c58] dark:text-white rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
+                          placeholder="Enter your name"
+                        />
+                        <Button
+                          type="primary"
+                          onClick={handleSaveName}
+                          icon={<FaSave />}
+                          className="bg-indigo-600 hover:bg-indigo-700"
                         >
-                          {showPin ? <FaEyeSlash /> : <FaEye />}
-                        </button>
-                        <button
-                          onClick={handleChangePin}
-                          className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
-                        >
-                          Update PIN
-                        </button>
+                          Save
+                        </Button>
                       </div>
                     ) : (
-                      <button
-                        onClick={() => setIsEditingPin(true)}
-                        className="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
-                      >
-                        Click to change PIN
-                      </button>
+                      <p className="text-gray-700 dark:text-gray-300">
+                        {username}
+                      </p>
                     )}
                   </div>
-                )}
-              </div>
-            )}
 
-            {/* Subscription Section */}
-            <div className="bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] backdrop-blur-md rounded-lg shadow-lg overflow-hidden">
-              <button
-                onClick={() => toggleSection("subscription")}
-                className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-black/5"
-              >
-                <div className="flex items-center gap-3">
-                  <FaCrown className="text-gray-400" />
-                  <span className="font-semibold dark:text-white">
-                    Subscription
-                  </span>
-                </div>
-                <div
-                  className={`transform transition-transform ${
-                    activeSection === "subscription" ? "rotate-180" : ""
-                  }`}
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </div>
-              </button>
-              {activeSection === "subscription" && (
-                <div className="p-6 border-t dark:border-gray-700">
-                  <div className="flex justify-between items-center">
-                    <p className="text-gray-600 dark:text-gray-300">
-                      {isPro ? "Pro Account" : "Free Account"}
-                    </p>
-                    {!isPro && (
+                  {/* Password Setting */}
+                  <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div className="flex justify-between items-center">
+                      <h4 className="font-medium dark:text-white">Password</h4>
                       <button
-                        onClick={handleUpgrade}
-                        className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white px-6 py-2 rounded-full hover:from-yellow-500 hover:to-yellow-700"
+                        onClick={() => setIsEditingPassword(!isEditingPassword)}
+                        className="text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300"
                       >
-                        Upgrade to Pro
+                        {isEditingPassword ? "Cancel" : "Change Password"}
                       </button>
+                    </div>
+
+                    {isEditingPassword && (
+                      <div className="flex items-center space-x-2">
+                        <div className="relative flex-1">
+                          <input
+                            type={showPassword ? "text" : "password"}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full border dark:border-gray-600 dark:bg-[#3a2c58] dark:text-white rounded-lg p-2 pr-10 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
+                            placeholder="Enter new password"
+                          />
+                          <button
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                            type="button"
+                          >
+                            {showPassword ? <FaEyeSlash /> : <FaEye />}
+                          </button>
+                        </div>
+                        <Button
+                          type="primary"
+                          onClick={handleSavePassword}
+                          className="bg-indigo-600 hover:bg-indigo-700"
+                        >
+                          Update
+                        </Button>
+                      </div>
                     )}
+                  </div>
+
+                  {/* PIN Setting */}
+                  <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div className="flex justify-between items-center">
+                      <h4 className="font-medium dark:text-white">
+                        Security PIN
+                      </h4>
+                      <button
+                        onClick={() => setIsEditingPin(!isEditingPin)}
+                        className="text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300"
+                      >
+                        {isEditingPin ? "Cancel" : "Change PIN"}
+                      </button>
+                    </div>
+
+                    {isEditingPin ? (
+                      <div className="space-y-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="flex gap-2">
+                            {newPin.map((digit, index) => (
+                              <input
+                                key={index}
+                                id={`pin-input-${index}`}
+                                type={showPin ? "text" : "password"}
+                                value={digit}
+                                maxLength="1"
+                                onChange={(e) => handleInputChange(e, index)}
+                                className="w-14 h-14 text-center text-xl border dark:border-gray-600 dark:bg-[#3a2c58] dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
+                              />
+                            ))}
+                          </div>
+                          <button
+                            onClick={() => setShowPin(!showPin)}
+                            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-2"
+                            type="button"
+                          >
+                            {showPin ? (
+                              <FaEyeSlash size={18} />
+                            ) : (
+                              <FaEye size={18} />
+                            )}
+                          </button>
+                        </div>
+                        <Button
+                          type="primary"
+                          onClick={handleChangePin}
+                          icon={<FaSave />}
+                          className="bg-indigo-600 hover:bg-indigo-700"
+                        >
+                          Update PIN
+                        </Button>
+                      </div>
+                    ) : (
+                      <p className="text-gray-700 dark:text-gray-300">••••</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Side Panel */}
+            <div className="space-y-6">
+              {/* Account Info */}
+              <div className="bg-white dark:bg-[#28283a] backdrop-blur-md rounded-xl shadow-lg overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center space-x-2">
+                    <FaUser className="text-gray-400" />
+                    <h3 className="font-semibold text-lg dark:text-white">
+                      Account Info
+                    </h3>
+                  </div>
+                </div>
+                <div className="p-6 space-y-4">
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Email
+                    </p>
+                    <p className="text-gray-700 dark:text-gray-300">{email}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Account Type
+                    </p>
+                    <p className="text-gray-700 dark:text-gray-300 flex items-center">
+                      {isPro ? (
+                        <>
+                          <FaCrown className="text-yellow-500 mr-2" /> Pro
+                          Account
+                        </>
+                      ) : (
+                        "Free Account"
+                      )}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Pro Features */}
+              {!isPro && (
+                <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg overflow-hidden">
+                  <div className="p-6 text-white">
+                    <h3 className="font-bold text-xl mb-3 flex items-center">
+                      <FaCrown className="mr-2" /> Upgrade to Pro
+                    </h3>
+                    <ul className="space-y-2">
+                      <li className="flex items-center">
+                        <span className="mr-2">✓</span> Unlimited pages
+                      </li>
+                      <li className="flex items-center">
+                        <span className="mr-2">✓</span> Ad-free experience
+                      </li>
+                      <li className="flex items-center">
+                        <span className="mr-2">✓</span> Priority support
+                      </li>
+                      <li className="flex items-center">
+                        <span className="mr-2">✓</span> Premium widgets
+                      </li>
+                    </ul>
+                    <button
+                      onClick={handleUpgrade}
+                      className="mt-4 w-full px-4 py-2 bg-white text-indigo-600 font-medium rounded-lg hover:bg-gray-100 transition-colors"
+                    >
+                      Upgrade Now
+                    </button>
                   </div>
                 </div>
               )}
             </div>
           </div>
-
-          {/* Background Image Upload Button */}
         </div>
       </div>
     </div>
