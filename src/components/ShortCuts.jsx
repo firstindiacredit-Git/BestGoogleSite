@@ -435,7 +435,7 @@ const Shortcut = () => {
             <a
               href={bookmark.link}
               className="block"
-              target="_blank"
+              //
               rel="noopener noreferrer"
             >
               <img
@@ -451,7 +451,7 @@ const Shortcut = () => {
             <a
               href={bookmark.link}
               className="block"
-              target="_blank"
+              //
               rel="noopener noreferrer"
             >
               <h3 className="text-xs font-semibold mt-1 w-16 truncate mx-auto">

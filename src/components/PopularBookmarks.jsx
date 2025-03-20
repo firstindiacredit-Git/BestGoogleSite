@@ -157,10 +157,10 @@ function PopularBookmarks() {
     const savedState = localStorage.getItem("categoryOpenStates");
     return savedState ? JSON.parse(savedState) : {};
   });
-  const [grid, setGrid] = useState(() => {
-    const savedGridView = localStorage.getItem("bookmarksGridView");
-    return savedGridView ? JSON.parse(savedGridView) : false;
-  });
+  // const [grid, setGrid] = useState(() => {
+  //   const savedGridView = localStorage.getItem("bookmarksGridView");
+  //   return savedGridView ? JSON.parse(savedGridView) : false;
+  // });
   const [hiddenBookmarkIds, setHiddenBookmarkIds] = useState([]);
   const [isControllerOpen, setIsControllerOpen] = useState(false);
   const [previewCategories, setPreviewCategories] = useState([]);
@@ -1770,29 +1770,7 @@ function PopularBookmarks() {
             <div
               className={`flex items-center bg-white/[(var(--widget-opacity))] backdrop-blur-lg dark:bg-[#28283A]/[(var(--widget-opacity))] p-1 rounded-sm`}
             >
-              <button
-                onClick={() => handleGridViewChange(true)}
-                className={`p-2 rounded ${
-                  grid
-                    ? "bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] shadow-sm"
-                    : "hover:bg-white/[var(--widget-opacity)] dark:hover:bg-gray-700/[var(--widget-opacity)]"
-                }`}
-              >
-                <svg
-                  className="w-5 h-5 dark:text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
-                  />
-                </svg>
-              </button>
-              <button
+              {/* <button
                 onClick={() => handleGridViewChange(false)}
                 className={`p-2 rounded ${
                   !grid
@@ -1813,7 +1791,7 @@ function PopularBookmarks() {
                     d="M4 6h16M4 12h16M4 18h16"
                   />
                 </svg>
-              </button>
+              </button> */}
             </div>
           </div>
         </div>
@@ -1879,16 +1857,8 @@ function PopularBookmarks() {
                                       title={
                                         <div
                                           className="bg-white/[(var(--widget-opacity))] dark:bg-[#513a7a]/[(var(--widget-opacity))] dark:text-white p-1 relative overflow-hidden cursor-pointer"
-                                          onClick={(e) => {
-                                            if (
-                                              !grid &&
-                                              (e.target === e.currentTarget ||
-                                                e.target.closest(
-                                                  ".category-header-content"
-                                                ))
-                                            ) {
-                                              toggleDropdown(category.id);
-                                            }
+                                          onClick={() => {
+                                            toggleDropdown(category.id);
                                           }}
                                         >
                                           <div className="absolute left-0 w-full h-full">
@@ -1976,10 +1946,9 @@ function PopularBookmarks() {
                                           padding: "16px",
                                           maxHeight: "400px",
                                           overflowY: "auto",
-                                          display:
-                                            grid || openCategories[category.id]
-                                              ? "block"
-                                              : "none",
+                                          display: openCategories[category.id]
+                                            ? "block"
+                                            : "none",
                                         },
                                       }}
                                       style={{
@@ -2275,10 +2244,10 @@ function PopularBookmarks() {
   };
 
   // Add function to handle grid view changes
-  const handleGridViewChange = (isGrid) => {
-    setGrid(isGrid);
-    localStorage.setItem("bookmarksGridView", JSON.stringify(isGrid));
-  };
+  // const handleGridViewChange = (isGrid) => {
+  //   setGrid(isGrid);
+  //   localStorage.setItem("bookmarksGridView", JSON.stringify(isGrid));
+  // };
 
   // Handle column count changes in preview mode
   const handlePreviewColumnChange = (numColumns) => {
@@ -2879,7 +2848,7 @@ function PopularBookmarks() {
             <div
               className={`flex items-center bg-white/[(var(--widget-opacity))] backdrop-blur-lg dark:bg-[#28283A]/[(var(--widget-opacity))] p-1 rounded-sm`}
             >
-              <button
+              {/* <button
                 onClick={() => handleGridViewChange(true)}
                 className={`p-2 rounded ${
                   grid
@@ -2900,8 +2869,8 @@ function PopularBookmarks() {
                     d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
                   />
                 </svg>
-              </button>
-              <button
+              </button> */}
+              {/* <button
                 onClick={() => handleGridViewChange(false)}
                 className={`p-2 rounded ${
                   !grid
@@ -2922,7 +2891,7 @@ function PopularBookmarks() {
                     d="M4 6h16M4 12h16M4 18h16"
                   />
                 </svg>
-              </button>
+              </button> */}
             </div>
           </div>
         </div>

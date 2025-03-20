@@ -789,7 +789,7 @@ const App = () => {
                 <div className="fixed bottom-6 left-6 z-50">
                   <div
                     onClick={toggleChatbot}
-                    className="w-14 h-14 rounded-full bg-blue-500 text-white flex items-center justify-center shadow-lg hover:bg-blue-600 cursor-pointer font-semibold"
+                    className="w-14 h-14 rounded-full bg-indigo-500 dark:bg-[#513a7a] text-white flex items-center justify-center shadow-lg hover:bg-blue-600 cursor-pointer font-semibold"
                     title="Chat with AI Assistant"
                   >
                     AI
