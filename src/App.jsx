@@ -21,6 +21,8 @@ import {
   PlusOutlined,
   BgColorsOutlined,
   ClearOutlined,
+  MessageOutlined,
+  CloseOutlined,
 } from "@ant-design/icons";
 import { AuthProvider } from "./hooks/AuthContext.jsx";
 import { DesignContextProvider } from "./context/DesignContext.jsx";
@@ -35,6 +37,8 @@ import NetworkStatus from "./components/NetworkStatus";
 import ToolOutlet from "./components/ToolOutlet";
 import Login from "./components/Admin/Login.jsx";
 import Sidebar from "./components/Admin/Sidebar.jsx";
+import ShortcutTest from "./components/ShortcutTest";
+import ChatbotAI from "./components/ChatbotAi";
 
 // Lazy load non-critical components
 const NotFound = lazy(() => import("./components/NotFound.jsx"));
@@ -734,11 +738,29 @@ const LoadingFallback = () => (
   </div>
 );
 
+// Add this CSS class definition right before the App component
+const pulseAnimation = {
+  animation: "pulse 2s infinite",
+  boxShadow: "0 0 0 rgba(0, 123, 255, 0.4)",
+  "@keyframes pulse": {
+    "0%": {
+      boxShadow: "0 0 0 0 rgba(0, 123, 255, 0.4)",
+    },
+    "70%": {
+      boxShadow: "0 0 0 15px rgba(0, 123, 255, 0)",
+    },
+    "100%": {
+      boxShadow: "0 0 0 0 rgba(0, 123, 255, 0)",
+    },
+  },
+};
+
 // App Component
 const App = () => {
   const [widgetTransparent, setWidgetTransparent] = useState(() =>
     parseInt(localStorage.getItem("widgetTransparency") || "100")
   );
+  const [showChatbot, setShowChatbot] = useState(false);
 
   // Memoize the widget transparency context value
   const widgetTransparencyContextValue = useMemo(
@@ -748,6 +770,10 @@ const App = () => {
     }),
     [widgetTransparent]
   );
+
+  const toggleChatbot = () => {
+    setShowChatbot(!showChatbot);
+  };
 
   return (
     // Use ThemeProvider from ThemeContext.jsx
@@ -759,6 +785,45 @@ const App = () => {
           <DesignContextProvider>
             <Router>
               <Suspense fallback={<LoadingFallback />}>
+                {/* Floating Chatbot Button */}
+                <div className="fixed bottom-6 left-6 z-50">
+                  <div
+                    onClick={toggleChatbot}
+                    className="w-14 h-14 rounded-full bg-blue-500 text-white flex items-center justify-center shadow-lg hover:bg-blue-600 cursor-pointer font-semibold"
+                    title="Chat with AI Assistant"
+                  >
+                    AI
+                  </div>
+                </div>
+
+                {/* Chatbot Modal */}
+                {showChatbot && (
+                  <div className="fixed bottom-0 left-0 md:bottom-24 md:left-6 w-full md:w-[30vw] h-[80vh] md:h-[80vh] z-50 rounded-t-lg md:rounded-lg shadow-2xl overflow-hidden bg-white dark:bg-gray-800">
+                    {/* Chat header */}
+                    <div className="bg-indigo-500 dark:bg-[#28283a] text-white p-3 flex justify-between items-center">
+                      <div className="flex items-center">
+                        <div className="bg-white rounded-full h-6 w-6 flex items-center justify-center mr-2">
+                          <MessageOutlined
+                            style={{ fontSize: "16px", color: "#1890ff" }}
+                          />
+                        </div>
+                        <span className="font-medium">Grobo AI</span>
+                      </div>
+                      <div
+                        onClick={toggleChatbot}
+                        className="w-6 h-6 flex items-center justify-center hover:bg-blue-600 cursor-pointer"
+                      >
+                        <CloseOutlined style={{ fontSize: "14px" }} />
+                      </div>
+                    </div>
+
+                    {/* Chat content */}
+                    <div className="h-[calc(100%-48px)] bg-white dark:bg-gray-800">
+                      <ChatbotAI />
+                    </div>
+                  </div>
+                )}
+
                 <Routes>
                   {/* Public Routes */}
                   <Route path="/" element={<LandingPage />} />
@@ -967,6 +1032,8 @@ const App = () => {
                       element={<AdminRoute children={<AddLinks />} />}
                     />
                   </Route>
+
+                  <Route path="/shortcut-test" element={<ShortcutTest />} />
                 </Routes>
               </Suspense>
             </Router>

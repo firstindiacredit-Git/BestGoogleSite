@@ -20,7 +20,7 @@ import {
 } from "react-icons/fa";
 import imageCompression from "browser-image-compression";
 import { useSubscription } from "../hooks/useSubscription";
-import { Modal, message, Tabs, Spin, Button, Tooltip } from "antd";
+import { Modal, message, Tabs, Spin, Button, Tooltip, Image } from "antd";
 import Header from "./Header";
 import { useTheme } from "../context/ThemeContext";
 // https://cdn.dribbble.com/userupload/14883451/file/original-761915986636e2ae85fee541c6b9c051.jpg?resize=1200x900&vertical=center
@@ -431,7 +431,7 @@ const ProfilePage = () => {
             <div className="flex flex-col sm:flex-row items-center gap-6">
               <div className="relative">
                 <div className="w-28 h-28 rounded-full border-4 border-white dark:border-gray-800 overflow-hidden shadow-lg">
-                  <img
+                  <Image
                     src={previewUrl || avatarUrl}
                     alt="Avatar"
                     className="w-full h-full object-cover"

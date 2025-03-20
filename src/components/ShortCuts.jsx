@@ -12,7 +12,8 @@ import {
 import { onAuthStateChanged } from "firebase/auth";
 import { Modal, Input, Form, message } from "antd";
 
-function BookmarkPage() {
+// Renamed to match import in SearchPage.jsx
+const Shortcut = () => {
   const [userBookmarks, setUserBookmarks] = useState([]);
   const [globalBookmarks, setGlobalBookmarks] = useState([]);
   const [name, setName] = useState("");
@@ -24,6 +25,7 @@ function BookmarkPage() {
   const [editMode, setEditMode] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [formRef] = Form.useForm();
 
   const [menuVisible, setMenuVisible] = useState(null);
 
@@ -34,7 +36,7 @@ function BookmarkPage() {
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      addBookmark({ name, link });
+      formRef.submit();
     }
   };
 
@@ -48,13 +50,40 @@ function BookmarkPage() {
     return savedBookmarks ? JSON.parse(savedBookmarks) : [];
   };
 
+  // Add a function to check user auth status that can be called directly
+  const checkUserAuth = () => {
+    console.log("Current user auth status:", !!auth.currentUser);
+    console.log("User state in component:", !!user);
+    return !!user;
+  };
+
   const addBookmark = async (values) => {
-    const bookmarkName = values.name || name;
-    const bookmarkLink = values.link || link;
+    console.log("Adding bookmark with values:", values);
+
+    if (!values) {
+      console.error("Form values are undefined");
+      setErrorMessage("Form submission error. Please try again.");
+      return;
+    }
+
+    const bookmarkName = values.name;
+    let bookmarkLink = values.link;
 
     if (!bookmarkName || !bookmarkLink) {
+      console.error("Missing required fields:", {
+        name: bookmarkName,
+        link: bookmarkLink,
+      });
       setErrorMessage("Both name and link fields are required!");
       return;
+    }
+
+    // Improve URL validation by adding protocol if missing
+    if (
+      !bookmarkLink.startsWith("http://") &&
+      !bookmarkLink.startsWith("https://")
+    ) {
+      bookmarkLink = "https://" + bookmarkLink;
     }
 
     if (!validateURL(bookmarkLink)) {
@@ -72,51 +101,94 @@ function BookmarkPage() {
         createdByUser: true,
       };
 
-      if (user) {
-        // If user is logged in, save to Firebase
-        const docRef = await addDoc(
-          collection(db, "users", user.uid, "shortcut"),
-          {
-            name: bookmarkName,
-            link: bookmarkLink,
-            category: "Popular",
-            createdAt: new Date(),
-          }
-        );
+      // Re-check auth status just before saving
+      const isUserLoggedIn = checkUserAuth();
+      console.log("Is user logged in before saving:", isUserLoggedIn);
 
-        setUserBookmarks((prev) => [
-          ...prev,
-          {
-            id: docRef.id,
-            ...newBookmark,
-          },
-        ]);
+      if (isUserLoggedIn) {
+        // If user is logged in, save to Firebase
+        console.log("Adding bookmark to Firebase for user:", user.uid);
+
+        try {
+          // Verify the shortcut collection path
+          const collectionPath = `users/${user.uid}/shortcut`;
+          console.log("Using collection path:", collectionPath);
+
+          const docRef = await addDoc(
+            collection(db, "users", user.uid, "shortcut"),
+            {
+              name: bookmarkName,
+              link: bookmarkLink,
+              category: "Popular",
+              createdAt: new Date(),
+            }
+          );
+          console.log("Firebase bookmark added with ID:", docRef.id);
+
+          setUserBookmarks((prev) => [
+            ...prev,
+            {
+              id: docRef.id,
+              ...newBookmark,
+              link: bookmarkLink,
+            },
+          ]);
+
+          // Show success message
+          message.success("Bookmark added successfully!");
+
+          // Close modal and reset form
+          setShowModal(false);
+          setName("");
+          setLink("");
+          formRef.resetFields();
+        } catch (firebaseError) {
+          console.error("Firebase error:", firebaseError);
+          setErrorMessage(`Firebase error: ${firebaseError.message}`);
+          message.error(
+            "Failed to save to Firebase. Check console for details."
+          );
+        }
       } else {
         // If user is not logged in, save to local storage
+        console.log("Adding bookmark to local storage");
         const currentBookmarks = getFromLocalStorage();
-        const updatedBookmarks = [...currentBookmarks, newBookmark];
+        const updatedBookmarks = [
+          ...currentBookmarks,
+          {
+            ...newBookmark,
+            link: bookmarkLink,
+          },
+        ];
         saveToLocalStorage(updatedBookmarks);
         setUserBookmarks(updatedBookmarks);
+
+        // Show success message
+        message.success("Bookmark added to local storage!");
+
+        // Close modal and reset form
+        setShowModal(false);
+        setName("");
+        setLink("");
+        formRef.resetFields();
       }
 
-      setSuccessMessage("Bookmark added successfully!");
-      setName("");
-      setLink("");
-      setShowModal(false);
+      setErrorMessage("");
     } catch (error) {
       console.error("Error adding bookmark:", error);
-      setErrorMessage("Failed to add bookmark. Please try again.");
+      setErrorMessage(`Error: ${error.message}`);
+      message.error("Failed to add bookmark. Please try again.");
     }
-  };
-
-  const handleAddBookmark = (values) => {
-    addBookmark(values);
   };
 
   // Modify useEffect to handle both Firebase and local storage
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+      console.log(
+        "Auth state changed, user:",
+        currentUser?.uid || "not logged in"
+      );
 
       if (currentUser) {
         // If user is logged in, fetch from Firebase
@@ -128,6 +200,7 @@ function BookmarkPage() {
             : [];
           setHiddenBookmarkIds(hiddenIds);
 
+          console.log("Fetching user shortcuts from Firebase");
           const userQuerySnapshot = await getDocs(
             collection(db, "users", currentUser.uid, "shortcut")
           );
@@ -136,6 +209,7 @@ function BookmarkPage() {
             ...doc.data(),
             createdByUser: true,
           }));
+          console.log("Fetched user bookmarks:", userBookmarksList.length);
           setUserBookmarks(userBookmarksList);
 
           const globalQuerySnapshot = await getDocs(
@@ -150,10 +224,15 @@ function BookmarkPage() {
           setGlobalBookmarks(globalBookmarksList);
         } catch (error) {
           console.error("Error fetching bookmarks:", error);
+          message.error("Failed to load bookmarks. Please refresh the page.");
         }
       } else {
         // If user is not logged in, load from local storage
         const localBookmarks = getFromLocalStorage();
+        console.log(
+          "Loaded bookmarks from local storage:",
+          localBookmarks.length
+        );
         setUserBookmarks(localBookmarks);
         setGlobalBookmarks([]); // Clear global bookmarks for non-logged in users
       }
@@ -163,15 +242,17 @@ function BookmarkPage() {
   }, []);
 
   const validateURL = (url) => {
-    const pattern = /^(http|https):\/\/[^\s$.?#].[^\s]*$/;
-    return pattern.test(url);
+    try {
+      new URL(url);
+      return true;
+    } catch (error) {
+      return false;
+    }
   };
 
   const getFavicon = (url) => {
     try {
-      return `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=64`
-        ? `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=64`
-        : "https://www.freeiconspng.com/uploads/web-icon-black-png-planet-web-world-icon-17.png";
+      return `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=64`;
     } catch (error) {
       return "https://www.freeiconspng.com/uploads/web-icon-black-png-planet-web-world-icon-17.png";
     }
@@ -179,8 +260,10 @@ function BookmarkPage() {
 
   const handleEditBookmark = (bookmark) => {
     setEditingBookmark(bookmark);
-    setName(bookmark.name);
-    setLink(bookmark.link);
+    formRef.setFieldsValue({
+      name: bookmark.name,
+      link: bookmark.link,
+    });
     setEditMode(true);
     setShowModal(true);
   };
@@ -188,10 +271,25 @@ function BookmarkPage() {
   const handleUpdateBookmark = async (values) => {
     if (!editingBookmark) return;
 
+    let bookmarkLink = values.link;
+
+    // Add protocol if missing
+    if (
+      !bookmarkLink.startsWith("http://") &&
+      !bookmarkLink.startsWith("https://")
+    ) {
+      bookmarkLink = "https://" + bookmarkLink;
+    }
+
+    if (!validateURL(bookmarkLink)) {
+      setErrorMessage("Please enter a valid URL.");
+      return;
+    }
+
     try {
       const updatedData = {
-        name: values.name || name,
-        link: values.link || link,
+        name: values.name,
+        link: bookmarkLink,
       };
 
       if (user) {
@@ -215,6 +313,7 @@ function BookmarkPage() {
               : bm
           )
         );
+        message.success("Bookmark updated successfully!");
       } else {
         // Update in local storage for non-logged-in users
         const currentBookmarks = getFromLocalStorage();
@@ -228,17 +327,21 @@ function BookmarkPage() {
         );
         saveToLocalStorage(updatedBookmarks);
         setUserBookmarks(updatedBookmarks);
+        message.success("Bookmark updated successfully!");
       }
 
+      setErrorMessage("");
       setSuccessMessage("Bookmark updated successfully!");
       setEditingBookmark(null);
       setName("");
       setLink("");
       setEditMode(false);
       setShowModal(false);
+      formRef.resetFields();
     } catch (error) {
       console.error("Error updating bookmark:", error);
       setErrorMessage("Failed to update bookmark. Please try again.");
+      message.error("Failed to update bookmark. Please try again.");
     }
   };
 
@@ -246,14 +349,15 @@ function BookmarkPage() {
     try {
       if (user) {
         const bookmark = userBookmarks.find((bm) => bm.id === bookmarkId);
-         if (!bookmark) {
-           // This is an admin bookmark, hide it instead
-           return handleHideBookmark(bookmarkId);
-         }
+        if (!bookmark) {
+          // This is an admin bookmark, hide it instead
+          return handleHideBookmark(bookmarkId);
+        }
         // Delete from Firebase for logged-in users
         const docRef = doc(db, "users", user.uid, "shortcut", bookmarkId);
         await deleteDoc(docRef);
         setUserBookmarks((prev) => prev.filter((bm) => bm.id !== bookmarkId));
+        message.success("Bookmark deleted successfully!");
       } else {
         // Delete from local storage for non-logged-in users
         const currentBookmarks = getFromLocalStorage();
@@ -262,11 +366,13 @@ function BookmarkPage() {
         );
         saveToLocalStorage(updatedBookmarks);
         setUserBookmarks(updatedBookmarks);
+        message.success("Bookmark deleted successfully!");
       }
       setSuccessMessage("Bookmark deleted successfully!");
     } catch (error) {
       console.error("Error deleting bookmark:", error);
       setErrorMessage("Failed to delete bookmark. Please try again.");
+      message.error("Failed to delete bookmark. Please try again.");
     }
   };
 
@@ -285,7 +391,7 @@ function BookmarkPage() {
           )
         );
 
-        setSuccessMessage("Bookmark hidden successfully!");
+        message.success("Bookmark hidden successfully!");
       } else {
         // For non-logged-in users, just remove the bookmark from the list
         const updatedBookmarks = userBookmarks.filter(
@@ -293,11 +399,12 @@ function BookmarkPage() {
         );
         saveToLocalStorage(updatedBookmarks);
         setUserBookmarks(updatedBookmarks);
-        setSuccessMessage("Bookmark removed successfully!");
+        message.success("Bookmark removed successfully!");
       }
     } catch (error) {
       console.error("Error hiding bookmark:", error);
       setErrorMessage("Failed to hide bookmark. Please try again.");
+      message.error("Failed to hide bookmark. Please try again.");
     }
   };
 
@@ -306,29 +413,58 @@ function BookmarkPage() {
     ...globalBookmarks.filter((bm) => !bm.isHidden),
   ];
 
+  const openAddModal = () => {
+    formRef.resetFields();
+    setName("");
+    setLink("");
+    setErrorMessage("");
+    setSuccessMessage("");
+    setEditMode(false);
+    setShowModal(true);
+    console.log("Add modal opened, form reset");
+  };
+
   return (
     <div className="flex items-center gap-2 max-w-7xl dark:text-white justify-center mb-10 w-full">
-      <div className="flex gap-2  flex-wrap">
+      <div className="flex gap-2 flex-wrap">
         {combinedBookmarks.map((bookmark) => (
           <div
             key={bookmark.id}
-            className="text-center hover:shadow-sm hover:dark:bg-[#28283a]/[var(--widget-opacity)] hover:backdrop-blur-lg  hover:bg-white/[var(--widget-opacity)]  cursor-pointer p-2 rounded-sm  group relative"
+            className="text-center hover:shadow-sm hover:dark:bg-[#28283a]/[var(--widget-opacity)] hover:backdrop-blur-lg hover:bg-white/[var(--widget-opacity)] cursor-pointer p-2 rounded-sm group relative"
           >
-            <a href={bookmark.link} className="block">
+            <a
+              href={bookmark.link}
+              className="block"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <img
                 src={getFavicon(bookmark.link)}
                 alt={bookmark.name}
                 className="w-7 h-7 mx-auto"
+                onError={(e) => {
+                  e.target.src =
+                    "https://www.freeiconspng.com/uploads/web-icon-black-png-planet-web-world-icon-17.png";
+                }}
               />
             </a>
-            <a href={bookmark.link} className="block">
+            <a
+              href={bookmark.link}
+              className="block"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <h3 className="text-xs font-semibold mt-1 w-16 truncate mx-auto">
                 {bookmark.name}
               </h3>
             </a>
             <div className="absolute top-0 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <button
-                onClick={() => toggleMenu(bookmark.id)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  toggleMenu(bookmark.id);
+                }}
                 className="font-bold"
               >
                 ⋮
@@ -337,14 +473,22 @@ function BookmarkPage() {
                 <div className="absolute bg-white right-0 top-6 backdrop-blur border rounded shadow-md text-left z-10">
                   {bookmark.createdByUser && (
                     <button
-                      onClick={() => handleEditBookmark(bookmark)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleEditBookmark(bookmark);
+                      }}
                       className="block w-full text-left px-2 py-1 dark:text-black text-sm hover:bg-gray-200"
                     >
                       Edit
                     </button>
                   )}
                   <button
-                    onClick={() => handleDeleteBookmark(bookmark.id)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleDeleteBookmark(bookmark.id);
+                    }}
                     className="block w-full text-left px-2 py-1 text-sm text-red-500 hover:bg-gray-200"
                   >
                     Delete
@@ -355,10 +499,11 @@ function BookmarkPage() {
           </div>
         ))}
       </div>
-      <div className="text-center hover:shadow-sm hover:dark:bg-[#28283a]/[var(--widget-opacity)] hover:backdrop-blur-lg   hover:bg-white/[var(--widget-opacity)]  cursor-pointer p-2 rounded-sm">
+      <div className="text-center hover:shadow-sm hover:dark:bg-[#28283a]/[var(--widget-opacity)] hover:backdrop-blur-lg hover:bg-white/[var(--widget-opacity)] cursor-pointer p-2 rounded-sm">
         <button
-          onClick={() => setShowModal(true)}
-          className=" dark:text-white   w-12 h-12 flex items-center justify-center "
+          onClick={openAddModal}
+          className="dark:text-white w-12 h-12 flex items-center justify-center"
+          aria-label="Add shortcut"
         >
           +
         </button>
@@ -373,9 +518,58 @@ function BookmarkPage() {
           setLink("");
           setErrorMessage("");
           setSuccessMessage("");
+          formRef.resetFields();
+          console.log("Modal closed and form reset");
         }}
-        footer={
-          <div className="flex justify-between gap-2">
+        footer={null} // Remove default footer for custom submit handling
+      >
+        <Form
+          form={formRef}
+          onFinish={editMode ? handleUpdateBookmark : addBookmark}
+          layout="vertical"
+          initialValues={{
+            name: name,
+            link: link,
+          }}
+        >
+          <Form.Item
+            label={<span className="dark:text-white">Name</span>}
+            name="name"
+            rules={[{ required: true, message: "Please enter bookmark name" }]}
+          >
+            <Input
+              placeholder="Enter bookmark name"
+              className="dark:bg-[#513a7a] border dark:border-gray-600 dark:text-white"
+              onChange={(e) => {
+                setName(e.target.value);
+                console.log("Name input changed:", e.target.value);
+              }}
+            />
+          </Form.Item>
+          <Form.Item
+            label={<span className="dark:text-white">URL</span>}
+            name="link"
+            rules={[{ required: true, message: "Please enter URL" }]}
+            help={
+              <span className="text-xs text-gray-500">
+                Tip: You can enter with or without https://
+              </span>
+            }
+          >
+            <Input
+              onKeyDown={handleKeyDown}
+              placeholder="Enter URL (e.g. google.com)"
+              className="dark:bg-[#513a7a] border dark:border-gray-600 dark:text-white"
+              onChange={(e) => {
+                setLink(e.target.value);
+                console.log("Link input changed:", e.target.value);
+              }}
+            />
+          </Form.Item>
+          {errorMessage && (
+            <div className="text-red-500 mb-4">{errorMessage}</div>
+          )}
+          <div className="flex justify-end gap-2 mt-4">
             <button
               type="button"
               onClick={() => {
@@ -385,62 +579,58 @@ function BookmarkPage() {
                 setLink("");
                 setErrorMessage("");
                 setSuccessMessage("");
+                formRef.resetFields();
               }}
               className="px-4 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 dark:bg-[#513a7a] dark:hover:bg-gray-600 dark:text-white rounded transition-colors"
             >
               Cancel
             </button>
             <button
-              type="submit"
+              type="button"
               className="px-4 py-1.5 text-sm bg-indigo-500 text-white rounded hover:bg-indigo-600 transition-colors"
+              onClick={() => {
+                console.log(
+                  "Add button clicked, current form values:",
+                  formRef.getFieldsValue()
+                );
+                checkUserAuth(); // Log auth status before validation
+
+                // Manually trigger form validation and submission
+                formRef
+                  .validateFields()
+                  .then((values) => {
+                    console.log("Form validation successful, values:", values);
+                    if (editMode) {
+                      handleUpdateBookmark(values);
+                    } else {
+                      addBookmark(values);
+                    }
+                  })
+                  .catch((info) => {
+                    console.log("Validate Failed:", info);
+                    // Display specific field errors
+                    const fieldErrors = info.errorFields
+                      .map(
+                        (field) =>
+                          `${field.name.join(".")}: ${field.errors.join(", ")}`
+                      )
+                      .join("; ");
+
+                    setErrorMessage(
+                      `Please correct these errors: ${
+                        fieldErrors || "Missing required fields"
+                      }`
+                    );
+                  });
+              }}
             >
               {editMode ? "Update" : "Add"}
             </button>
           </div>
-        }
-      >
-        <Form
-          onFinish={editingBookmark ? handleUpdateBookmark : handleAddBookmark}
-          layout="vertical"
-        >
-          <Form.Item
-            label={<span className="dark:text-white">Name</span>}
-            name="name"
-            rules={[{ required: true, message: "Please enter bookmark name" }]}
-            initialValue={name}
-          >
-            <Input
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter bookmark name"
-              className="dark:bg-[#513a7a] border dark:border-gray-600 dark:text-white"
-            />
-          </Form.Item>
-          <Form.Item
-            label={<span className="dark:text-white">URL</span>}
-            name="link"
-            rules={[
-              { required: true, message: "Please enter URL" },
-              { type: "url", message: "Please enter a valid URL" },
-            ]}
-            initialValue={link}
-          >
-            <Input
-              onChange={(e) => setLink(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Enter URL"
-              className="dark:bg-[#513a7a] border dark:border-gray-600 dark:text-white"
-            />
-          </Form.Item>
-          {errorMessage && (
-            <div className="text-red-500 mb-4">{errorMessage}</div>
-          )}
-          {successMessage && (
-            <div className="text-green-500 mb-4">{successMessage}</div>
-          )}
         </Form>
       </Modal>
     </div>
   );
-}
+};
 
-export default BookmarkPage;
+export default Shortcut;

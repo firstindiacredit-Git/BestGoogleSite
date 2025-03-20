@@ -176,17 +176,53 @@ const SearchPage = ({ isToolPage = false }) => {
   };
 
   useEffect(() => {
+    // Remove any existing script first
+    const existingScript = document.getElementById("google-cse");
+    if (existingScript) {
+      existingScript.remove();
+    }
+
+    // Create and add the script
     const script = document.createElement("script");
     script.id = "google-cse";
     script.src = "https://cse.google.com/cse.js?cx=80904074a37154829";
     script.async = true;
     script.defer = true;
+
+    // Handle loading success/failure
+    script.onload = () => {
+      console.log("Google CSE script loaded successfully");
+      // Give it a little time to initialize
+      setTimeout(() => {
+        const searchBox = document.querySelector(".gsc-control-searchbox-only");
+        setIsGoogleSearchLoaded(!!searchBox);
+      }, 1000);
+    };
+
+    script.onerror = () => {
+      console.error("Failed to load Google CSE script");
+      setIsGoogleSearchLoaded(false);
+    };
+
     document.body.appendChild(script);
 
+    // Add a timeout for detection
+    const timeout = setTimeout(() => {
+      if (!document.querySelector(".gsc-control-searchbox-only")) {
+        console.warn("Google CSE not detected after timeout");
+        setIsGoogleSearchLoaded(false);
+      }
+    }, 5000);
+
     return () => {
-      document.body.removeChild(script);
+      clearTimeout(timeout);
+      // Only remove if we're the ones who added it
+      const currentScript = document.getElementById("google-cse");
+      if (currentScript && currentScript === script) {
+        document.body.removeChild(script);
+      }
     };
-  }, [navigate]);
+  }, []);
 
   // Function to convert slider value to actual color
   const getTextColor = (value) => {
@@ -372,19 +408,6 @@ const SearchPage = ({ isToolPage = false }) => {
     return () => window.removeEventListener("themeChanged", handleThemeChange);
   }, [textColor, handleResetTextColor]);
 
-  // Add this new useEffect for Google Search loading detection
-  useEffect(() => {
-    const checkGoogleSearch = setInterval(() => {
-      if (document.querySelector(".gsc-control-searchbox-only")) {
-        setIsGoogleSearchLoaded(true);
-        clearInterval(checkGoogleSearch);
-      }
-    }, 100);
-
-    // Cleanup interval
-    return () => clearInterval(checkGoogleSearch);
-  }, []);
-
   // Add handleSearch function
   const handleSearch = useCallback((value) => {
     if (value.trim()) {
@@ -477,7 +500,7 @@ const SearchPage = ({ isToolPage = false }) => {
             <div className="w-full">
               <div className="flex mt-14 flex-col items-center">
                 <div className="flex justify-center w-full gap-1">
-                  {!isGoogleSearchLoaded && (
+                  {!isGoogleSearchLoaded ? (
                     <div className="w-[55%] mb-[5px]">
                       <div className="relative w-full">
                         <input
@@ -493,7 +516,7 @@ const SearchPage = ({ isToolPage = false }) => {
                           onKeyPress={handleKeyPress}
                         />
                         <button
-                          onClick={handleSearch}
+                          onClick={() => handleSearch(searchQuery)}
                           className="absolute right-0 top-0 h-full px-4 text-gray-500 hover:text-gray-700"
                         >
                           <svg
@@ -512,16 +535,16 @@ const SearchPage = ({ isToolPage = false }) => {
                         </button>
                       </div>
                     </div>
+                  ) : (
+                    <div
+                      className="gcse-searchbox-only"
+                      style={{
+                        width: "55%",
+                        margin: "0 auto",
+                      }}
+                      data-resultsurl="https://www.google.com/search?client=ms-google-coop&qcx=80904074a37154829"
+                    />
                   )}
-                  <div
-                    className={`gcse-searchbox-only ${
-                      !isGoogleSearchLoaded
-                        ? "opacity-0 absolute"
-                        : "opacity-100"
-                    }`}
-                    data-resultsurl="https://www.google.com/search?client=ms-google-coop&qcx=80904074a37154829"
-                    data-defaulttoimagesearch="true"
-                  />
                   {simple && (
                     <div>
                       <div className="flex justify-center max-w-[90vw] mb-3 w-full mx-auto">
