@@ -337,28 +337,6 @@ const Weather = () => {
                   day: "numeric",
                 })}
               />
-
-              {/* Forecast Section */}
-              {/* <div className="forecast-container h-[50%] gap-3 w-full flex justify-between mt-1">
-                {forecast.map((day, index) => (
-                  <WeatherCard
-                    key={index}
-                    temperature={Math.round(day.main.temp)}
-                    condition={day.weather[0].main}
-                    location={currentWeather.name}
-                    time={new Date(day.dt_txt).toLocaleTimeString("en-US", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: false,
-                    })}
-                    date={new Date(day.dt_txt).toLocaleDateString("en-US", {
-                      weekday: "long",
-                      month: "short",
-                      day: "numeric",
-                    })}
-                  />
-                ))}
-              </div> */}
             </div>
           )}
         </div>
