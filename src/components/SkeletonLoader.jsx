@@ -15,13 +15,13 @@ const SkeletonCard = ({ isListView }) => {
   }
 
   return (
-    <div className="animate-pulse bg-white dark:bg-[#513a7a] p-4 rounded-xl shadow-sm">
+    <div className="animate-pulse bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] p-4 rounded-xl shadow-sm">
       <div className="flex flex-col ">
-        <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-lg mb-3"></div>
+        <div className="w-12 h-12 bg-gray-200/[var(--widget-opacity)] dark:bg-gray-700/[var(--widget-opacity)] rounded-lg mb-3"></div>
         <div className="flex flex-col gap-2">
-          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
-          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
-          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          <div className="h-8 bg-gray-200/[var(--widget-opacity)] dark:bg-gray-700/[var(--widget-opacity)] rounded"></div>
+          <div className="h-8 bg-gray-200/[var(--widget-opacity)] dark:bg-gray-700/[var(--widget-opacity)] rounded"></div>
+          <div className="h-8 bg-gray-200/[var(--widget-opacity)] dark:bg-gray-700/[var(--widget-opacity)] rounded"></div>
         </div>
       </div>
     </div>

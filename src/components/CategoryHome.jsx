@@ -56,25 +56,19 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
   const getBookmarksFromLocal = () => {
     const savedBookmarks = localStorage.getItem(bookmarksStorageKey);
     if (savedBookmarks) {
-      return JSON.parse(savedBookmarks);
+      try {
+        const parsed = JSON.parse(savedBookmarks);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      } catch (e) {
+        console.error("Error parsing saved bookmarks:", e);
+      }
     }
 
-    // Add console logging to debug category mapping
-    console.log("Category Type:", categoryType);
-    console.log("Available Categories:", Object.keys(defaultBookmarks));
-
-    // If no saved bookmarks, return default bookmarks for the category
-    const categoryMap = {
-      Popular: defaultBookmarks.Popular,
-      AI: defaultBookmarks.AI,
-      Travel: defaultBookmarks.Travel,
-      Sports: defaultBookmarks.Sports,
-      Shopping: defaultBookmarks.Shopping,
-      News: defaultBookmarks.News,
-    };
-
-    const defaultCategoryBookmarks = categoryMap[categoryType] || [];
-    console.log("Default bookmarks for category:", defaultCategoryBookmarks);
+    // If no saved bookmarks or invalid data, return default bookmarks for the category
+    const defaultCategoryBookmarks =
+      getDefaultBookmarksForCategory(categoryType);
 
     // Save default bookmarks to localStorage
     localStorage.setItem(
@@ -103,121 +97,202 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
   };
 
   useEffect(() => {
+    let unsubscribes = [];
+
     const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+      setLoading(true); // Set loading to true when authentication state changes
+
       if (currentUser) {
         // First, fetch user's hidden bookmarks
         const userDocRef = doc(db, "users", currentUser.uid);
-        const userDocSnap = await getDoc(userDocRef);
-        const hiddenIds = userDocSnap.exists()
-          ? userDocSnap.data().hiddenCategoryBookmarks || []
-          : [];
-        setHiddenBookmarkIds(hiddenIds);
 
-        // Then fetch admin categories
-        const categoryQuery = query(
-          collection(db, "category"),
-          where("newCategory", "==", categoryType)
-        );
+        try {
+          const userDocSnap = await getDoc(userDocRef);
+          const hiddenIds = userDocSnap.exists()
+            ? userDocSnap.data().hiddenCategoryBookmarks || []
+            : [];
+          setHiddenBookmarkIds(hiddenIds);
 
-        const unsubscribeCategory = onSnapshot(
-          categoryQuery,
-          async (categorySnapshot) => {
-            if (!categorySnapshot.empty) {
-              const categoryDoc = categorySnapshot.docs[0];
-              const categoryId = categoryDoc.id;
+          // Then fetch admin categories
+          const categoryQuery = query(
+            collection(db, "category"),
+            where("newCategory", "==", categoryType)
+          );
 
-              // Fetch admin links for this category
-              const adminLinksQuery = query(
-                collection(db, "links"),
-                where("category", "==", categoryId)
-              );
+          const unsubscribeCategory = onSnapshot(
+            categoryQuery,
+            async (categorySnapshot) => {
+              // Clean up previous listeners
+              unsubscribes.forEach((unsub) => {
+                if (typeof unsub === "function") unsub();
+              });
+              unsubscribes = [];
 
-              const adminLinksUnsubscribe = onSnapshot(
-                adminLinksQuery,
-                (adminLinksSnapshot) => {
-                  const adminLinks = adminLinksSnapshot.docs
-                    .map((doc) => ({
-                      id: doc.id,
-                      ...doc.data(),
-                      addedByAdmin: true,
-                    }))
-                    .filter((bookmark) => !hiddenIds.includes(bookmark.id)); // Filter out hidden admin bookmarks
+              if (!categorySnapshot.empty) {
+                const categoryDoc = categorySnapshot.docs[0];
+                const categoryId = categoryDoc.id;
 
-                  // Then fetch user's personal bookmarks
-                  const userBookmarksQuery = query(
-                    collection(db, "users", currentUser.uid, "bookmarks"),
-                    where("category", "==", categoryType)
-                  );
+                // Fetch admin links for this category
+                const adminLinksQuery = query(
+                  collection(db, "links"),
+                  where("category", "==", categoryId)
+                );
 
-                  const userBookmarksUnsubscribe = onSnapshot(
-                    userBookmarksQuery,
-                    (userSnapshot) => {
-                      const userBookmarks = userSnapshot.docs.map((doc) => ({
+                const adminLinksUnsubscribe = onSnapshot(
+                  adminLinksQuery,
+                  (adminLinksSnapshot) => {
+                    // Get the latest hiddenIds to ensure we filter properly
+                    getDoc(userDocRef)
+                      .then((latestUserDoc) => {
+                        const latestHiddenIds = latestUserDoc.exists()
+                          ? latestUserDoc.data().hiddenCategoryBookmarks || []
+                          : [];
+
+                        const adminLinks = adminLinksSnapshot.docs
+                          .map((doc) => ({
+                            id: doc.id,
+                            ...doc.data(),
+                            addedByAdmin: true,
+                          }))
+                          .filter(
+                            (bookmark) => !latestHiddenIds.includes(bookmark.id)
+                          ); // Filter with latest hidden ids
+
+                        // Then fetch user's personal bookmarks
+                        const userBookmarksQuery = query(
+                          collection(db, "users", currentUser.uid, "bookmarks"),
+                          where("category", "==", categoryType)
+                        );
+
+                        const userBookmarksUnsubscribe = onSnapshot(
+                          userBookmarksQuery,
+                          (userSnapshot) => {
+                            const userBookmarks = userSnapshot.docs.map(
+                              (doc) => ({
+                                id: doc.id,
+                                ...doc.data(),
+                                addedByAdmin: false,
+                              })
+                            );
+
+                            // Combine admin links and user bookmarks
+                            const allBookmarks = [
+                              ...adminLinks,
+                              ...userBookmarks,
+                            ];
+                            console.log(
+                              `Loaded ${allBookmarks.length} bookmarks for ${categoryType}`
+                            );
+                            setBookmarks(allBookmarks);
+                            setLoading(false);
+                          },
+                          (error) => {
+                            console.error(
+                              "Error in user bookmarks listener:",
+                              error
+                            );
+                            // Add error handling for user bookmarks listener
+                            message.error(
+                              "Error loading bookmarks. Please refresh the page."
+                            );
+                            setLoading(false);
+                          }
+                        );
+
+                        unsubscribes.push(userBookmarksUnsubscribe);
+                      })
+                      .catch((error) => {
+                        console.error(
+                          "Error fetching latest hidden IDs:",
+                          error
+                        );
+                        setLoading(false);
+                      });
+                  },
+                  (error) => {
+                    console.error("Error in admin links listener:", error);
+                    // Add error handling for admin links listener
+                    message.error(
+                      "Error loading admin links. Please refresh the page."
+                    );
+                    setLoading(false);
+                  }
+                );
+
+                unsubscribes.push(adminLinksUnsubscribe);
+              } else {
+                // If no admin category found, just fetch user bookmarks
+                const userBookmarksQuery = query(
+                  collection(db, "users", currentUser.uid, "bookmarks"),
+                  where("category", "==", categoryType)
+                );
+
+                const userBookmarksUnsubscribe = onSnapshot(
+                  userBookmarksQuery,
+                  (userSnapshot) => {
+                    const userBookmarks = userSnapshot.docs
+                      .map((doc) => ({
                         id: doc.id,
                         ...doc.data(),
                         addedByAdmin: false,
-                      }));
+                      }))
+                      .filter((bookmark) => !bookmark.hidden);
 
-                      // Combine admin links and user bookmarks
-                      const allBookmarks = [...adminLinks, ...userBookmarks];
-                      setBookmarks(allBookmarks);
-                      setLoading(false);
-                    }
-                  );
+                    console.log(
+                      `Loaded ${userBookmarks.length} user bookmarks for ${categoryType}`
+                    );
+                    setBookmarks(userBookmarks);
+                    setLoading(false);
+                  },
+                  (error) => {
+                    console.error("Error in user bookmarks listener:", error);
+                    setLoading(false);
+                  }
+                );
 
-                  return () => {
-                    userBookmarksUnsubscribe();
-                  };
-                }
-              );
-
-              return () => {
-                adminLinksUnsubscribe();
-              };
-            } else {
-              // If no admin category found, just fetch user bookmarks
-              const userBookmarksQuery = query(
-                collection(db, "users", currentUser.uid, "bookmarks"),
-                where("category", "==", categoryType)
-              );
-
-              const userBookmarksUnsubscribe = onSnapshot(
-                userBookmarksQuery,
-                (userSnapshot) => {
-                  const userBookmarks = userSnapshot.docs
-                    .map((doc) => ({
-                      id: doc.id,
-                      ...doc.data(),
-                      addedByAdmin: false,
-                    }))
-                    .filter((bookmark) => !bookmark.hidden);
-
-                  setBookmarks(userBookmarks);
-                  setLoading(false);
-                }
-              );
-
-              return () => userBookmarksUnsubscribe();
+                unsubscribes.push(userBookmarksUnsubscribe);
+              }
+            },
+            (error) => {
+              console.error("Error in category listener:", error);
+              setLoading(false);
             }
-          }
-        );
+          );
 
-        return () => {
-          unsubscribeCategory();
-        };
+          unsubscribes.push(unsubscribeCategory);
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+          // Add error handling for fetching user data
+          message.error("Error loading bookmarks. Please refresh the page.");
+          setLoading(false);
+
+          // Load defaults as fallback
+          const fallbackBookmarks =
+            getDefaultBookmarksForCategory(categoryType);
+          setBookmarks(fallbackBookmarks);
+        }
       } else {
         // Load from localStorage for non-logged-in users
         const localBookmarks = getBookmarksFromLocal();
         const localHiddenIds = getHiddenBookmarksFromLocal();
 
+        console.log(
+          `Loaded ${localBookmarks.length} local bookmarks for ${categoryType}`
+        );
         setBookmarks(localBookmarks);
         setHiddenBookmarkIds(localHiddenIds);
         setLoading(false);
       }
     });
 
-    return () => unsubscribeAuth();
+    return () => {
+      unsubscribeAuth();
+      // Clean up all snapshot listeners
+      unsubscribes.forEach((unsub) => {
+        if (typeof unsub === "function") unsub();
+      });
+    };
   }, [categoryType]);
 
   useEffect(() => {
@@ -278,26 +353,73 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
   const handleDelete = async (bookmark) => {
     try {
       if (user) {
-        // Existing Firebase logic for logged-in users
+        // For logged-in users
         if (bookmark.addedByAdmin) {
+          // For admin-added bookmarks, we hide them rather than delete
           const newHiddenIds = [...hiddenBookmarkIds, bookmark.id];
-          setHiddenBookmarkIds(newHiddenIds);
 
+          // Update Firestore first
           const userDocRef = doc(db, "users", user.uid);
           await setDoc(
             userDocRef,
             { hiddenCategoryBookmarks: newHiddenIds },
             { merge: true }
           );
+
+          // Only update local state after the Firebase operation completes successfully
+          setHiddenBookmarkIds(newHiddenIds);
+          setBookmarks((prevBookmarks) =>
+            prevBookmarks.filter((item) => item.id !== bookmark.id)
+          );
+
+          message.success("Bookmark hidden successfully!");
         } else {
-          await deleteDoc(doc(db, "users", user.uid, "bookmarks", bookmark.id));
+          // For user-added bookmarks, delete the document
+          try {
+            const bookmarkRef = doc(
+              db,
+              "users",
+              user.uid,
+              "bookmarks",
+              bookmark.id
+            );
+
+            // Check if bookmark exists before attempting to delete
+            const bookmarkDoc = await getDoc(bookmarkRef);
+            if (bookmarkDoc.exists()) {
+              console.log("Deleting bookmark:", bookmark.name);
+              await deleteDoc(bookmarkRef);
+
+              // Manually update UI state to reflect deletion immediately
+              // This prevents the need to wait for the onSnapshot to update
+              setBookmarks((prevBookmarks) =>
+                prevBookmarks.filter((item) => item.id !== bookmark.id)
+              );
+
+              message.success("Bookmark deleted successfully!");
+            } else {
+              console.log("Bookmark not found:", bookmark.id);
+              // Remove it from the UI regardless since it doesn't exist in Firestore
+              setBookmarks((prevBookmarks) =>
+                prevBookmarks.filter((item) => item.id !== bookmark.id)
+              );
+              message.info("Bookmark was already removed from the database");
+            }
+          } catch (deleteError) {
+            console.error("Error during bookmark deletion:", deleteError);
+            message.error(`Failed to delete bookmark: ${deleteError.message}`);
+          }
         }
       } else {
-        // Handle deletion in localStorage for non-logged-in users
+        // For non-logged-in users (localStorage)
         if (bookmark.addedByAdmin) {
           const newHiddenIds = [...hiddenBookmarkIds, bookmark.id];
           setHiddenBookmarkIds(newHiddenIds);
           saveHiddenBookmarksToLocal(newHiddenIds);
+
+          setBookmarks((prevBookmarks) =>
+            prevBookmarks.filter((item) => item.id !== bookmark.id)
+          );
         } else {
           const updatedBookmarks = bookmarks.filter(
             (b) => b.id !== bookmark.id
@@ -305,11 +427,11 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
           setBookmarks(updatedBookmarks);
           saveBookmarksToLocal(updatedBookmarks);
         }
+        message.success("Bookmark deleted successfully!");
       }
-      message.success("Bookmark processed successfully!");
     } catch (error) {
-      message.error("Failed to process bookmark");
-      console.error("Error processing bookmark:", error);
+      console.error("Error in handleDelete:", error);
+      message.error(`Failed to process bookmark: ${error.message}`);
     }
   };
 
@@ -320,21 +442,39 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
         return;
       }
 
+      // Validate URL format
+      let formattedUrl = newBookmark.link;
+      if (!/^https?:\/\//i.test(formattedUrl)) {
+        formattedUrl = `https://${formattedUrl}`;
+      }
+
       const bookmarkData = {
         id: Date.now().toString(), // Generate unique ID for local storage
         name: newBookmark.name,
-        link: newBookmark.link,
+        link: formattedUrl,
         category: categoryType,
         addedByAdmin: false,
         createdAt: new Date().toISOString(),
       };
 
       if (user) {
-        // Existing Firebase logic
-        await addDoc(
+        // Remove id field as Firestore will generate its own
+        const { id, ...firestoreData } = bookmarkData;
+
+        // Add to Firestore
+        const docRef = await addDoc(
           collection(db, "users", user.uid, "bookmarks"),
-          bookmarkData
+          firestoreData
         );
+
+        // Manually update the bookmarks state to avoid waiting for onSnapshot
+        // Include the Firestore-generated ID
+        const newBookmarkWithId = {
+          ...bookmarkData,
+          id: docRef.id,
+        };
+
+        setBookmarks((prevBookmarks) => [...prevBookmarks, newBookmarkWithId]);
       } else {
         // Add to localStorage for non-logged-in users
         const updatedBookmarks = [...bookmarks, bookmarkData];
@@ -346,8 +486,8 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
       setShowAddModal(false);
       setNewBookmark({ name: "", link: "" });
     } catch (error) {
-      message.error("Failed to add bookmark");
       console.error("Error adding bookmark:", error);
+      message.error(`Failed to add bookmark: ${error.message}`);
     }
   };
 
@@ -652,6 +792,123 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
         ))}
       </div>
     );
+  };
+
+  // Helper function to get default bookmarks for a category
+  const getDefaultBookmarksForCategory = (category) => {
+    // Fallback default data in case the defaultBookmarks is undefined
+    const fallbackDefaults = {
+      Popular: [
+        {
+          id: "google",
+          name: "Google",
+          link: "https://www.google.com",
+          addedByAdmin: true,
+        },
+        {
+          id: "youtube",
+          name: "YouTube",
+          link: "https://www.youtube.com",
+          addedByAdmin: true,
+        },
+      ],
+      Shopping: [
+        {
+          id: "amazon",
+          name: "Amazon",
+          link: "https://www.amazon.com",
+          addedByAdmin: true,
+        },
+        {
+          id: "walmart",
+          name: "Walmart",
+          link: "https://www.walmart.com",
+          addedByAdmin: true,
+        },
+        {
+          id: "target",
+          name: "Target",
+          link: "https://www.target.com",
+          addedByAdmin: true,
+        },
+        {
+          id: "bestbuy",
+          name: "Best Buy",
+          link: "https://www.bestbuy.com",
+          addedByAdmin: true,
+        },
+        {
+          id: "ebay",
+          name: "Ebay",
+          link: "https://www.ebay.com",
+          addedByAdmin: true,
+        },
+      ],
+      AI: [
+        {
+          id: "chatgpt",
+          name: "ChatGPT",
+          link: "https://chat.openai.com",
+          addedByAdmin: true,
+        },
+        {
+          id: "bard",
+          name: "Google Bard",
+          link: "https://bard.google.com",
+          addedByAdmin: true,
+        },
+      ],
+      News: [
+        {
+          id: "cnn",
+          name: "CNN",
+          link: "https://www.cnn.com",
+          addedByAdmin: true,
+        },
+        {
+          id: "bbc",
+          name: "BBC",
+          link: "https://www.bbc.com",
+          addedByAdmin: true,
+        },
+      ],
+      Travel: [
+        {
+          id: "expedia",
+          name: "Expedia",
+          link: "https://www.expedia.com",
+          addedByAdmin: true,
+        },
+        {
+          id: "booking",
+          name: "Booking.com",
+          link: "https://www.booking.com",
+          addedByAdmin: true,
+        },
+      ],
+      Sports: [
+        {
+          id: "espn",
+          name: "ESPN",
+          link: "https://www.espn.com",
+          addedByAdmin: true,
+        },
+        {
+          id: "nba",
+          name: "NBA",
+          link: "https://www.nba.com",
+          addedByAdmin: true,
+        },
+      ],
+    };
+
+    // Try to get from imported defaults first
+    const fromImported = defaultBookmarks[category] || [];
+
+    // If imported defaults are empty, use our fallback defaults
+    return fromImported.length > 0
+      ? fromImported
+      : fallbackDefaults[category] || [];
   };
 
   return (

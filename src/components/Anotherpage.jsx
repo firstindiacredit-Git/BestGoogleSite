@@ -502,7 +502,7 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
                                   <div
                                     ref={provided.innerRef}
                                     {...provided.draggableProps}
-                                    className={`bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] mb-4  ${
+                                    className={`bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] mb-4  ${
                                       localStorage.getItem("backgroundImage")
                                         ? "shadow-sm "
                                         : ""
@@ -525,7 +525,7 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
                                     <div>
                                       {visibleHandle && (
                                         <motion.div
-                                          className={`w-full max-w-xl min-w-[21vw] text-left py-4 px-4 rounded-t-sm bg-gray-100/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] dark:text-white font-semibold flex justify-between items-center cursor-pointer select-none ${
+                                          className={`w-full max-w-xl min-w-[21vw] text-left py-4 px-4 rounded-t-sm bg-gray-100/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] dark:text-white font-semibold flex justify-between items-center cursor-pointer select-none ${
                                             snapshot.isDragging
                                               ? "cursor-grabbing"
                                               : ""
@@ -612,7 +612,7 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
             width: "50px",
             height: "50px",
             borderRadius: "50%",
-            backgroundColor: isDarkMode ? "#513A7A" : "#6366F1",
+            backgroundColor: isDarkMode ? "#28283a" : "#6366F1",
             color: "#fff",
             border: "none",
             cursor: "pointer",

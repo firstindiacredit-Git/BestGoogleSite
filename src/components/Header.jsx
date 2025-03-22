@@ -480,7 +480,7 @@ const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
                     placement="bottomLeft"
                     overlayClassName="mt-1 [&_.ant-dropdown-menu]:p-0 [&_.ant-dropdown-menu-item]:p-0 [&_ul]:dark:bg-[#28283a]"
                   >
-                    <button className="bg-indigo-500 dark:bg-[#513a7a] border-none hover:bg-indigo-600 flex items-center gap-2 px-2 py-1 rounded-md transition-all duration-200">
+                    <button className="bg-indigo-500 dark:bg-[#28283a] border-none hover:bg-indigo-600 flex items-center gap-2 px-2 py-1 rounded-md transition-all duration-200">
                       <MenuOutlined className="text-white" />
                       <span className="text-white">{currentPageName}</span>
                     </button>
@@ -781,7 +781,7 @@ const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
                 </div>
 
                 {panel && (
-                  <div className="absolute right-0 mt-2 w-60 py-2 bg-white shadow-lg rounded-lg text-sm dark:bg-[#513a7a] user-panel">
+                  <div className="absolute right-0 mt-2 w-60 py-2 bg-white shadow-lg rounded-lg text-sm dark:bg-[#28283a] user-panel">
                     <div className="px-4 py-2 text-center dark:text-white">
                       <p className="font-bold">
                         {user.username || user.displayName || "User"}
