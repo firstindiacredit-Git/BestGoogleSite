@@ -192,10 +192,10 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
                               "Error in user bookmarks listener:",
                               error
                             );
-                            // Add error handling for user bookmarks listener
-                            message.error(
-                              "Error loading bookmarks. Please refresh the page."
-                            );
+                            // // Add error handling for user bookmarks listener
+                            // //(
+                            //   "Error loading bookmarks. Please refresh the page."
+                            // );
                             setLoading(false);
                           }
                         );
@@ -213,9 +213,9 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
                   (error) => {
                     console.error("Error in admin links listener:", error);
                     // Add error handling for admin links listener
-                    message.error(
-                      "Error loading admin links. Please refresh the page."
-                    );
+                    // //(
+                    //   "Error loading admin links. Please refresh the page."
+                    // );
                     setLoading(false);
                   }
                 );
@@ -264,7 +264,7 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
         } catch (error) {
           console.error("Error fetching user data:", error);
           // Add error handling for fetching user data
-          message.error("Error loading bookmarks. Please refresh the page.");
+          //("Error loading bookmarks. Please refresh the page.");
           setLoading(false);
 
           // Load defaults as fallback
@@ -372,7 +372,7 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
             prevBookmarks.filter((item) => item.id !== bookmark.id)
           );
 
-          message.success("Bookmark hidden successfully!");
+          //("Bookmark hidden successfully!");
         } else {
           // For user-added bookmarks, delete the document
           try {
@@ -396,18 +396,17 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
                 prevBookmarks.filter((item) => item.id !== bookmark.id)
               );
 
-              message.success("Bookmark deleted successfully!");
+              //("Bookmark deleted successfully!");
             } else {
               console.log("Bookmark not found:", bookmark.id);
               // Remove it from the UI regardless since it doesn't exist in Firestore
               setBookmarks((prevBookmarks) =>
                 prevBookmarks.filter((item) => item.id !== bookmark.id)
               );
-              message.info("Bookmark was already removed from the database");
             }
           } catch (deleteError) {
             console.error("Error during bookmark deletion:", deleteError);
-            message.error(`Failed to delete bookmark: ${deleteError.message}`);
+            //(`Failed to delete bookmark: ${deleteError.message}`);
           }
         }
       } else {
@@ -427,18 +426,18 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
           setBookmarks(updatedBookmarks);
           saveBookmarksToLocal(updatedBookmarks);
         }
-        message.success("Bookmark deleted successfully!");
+        //("Bookmark deleted successfully!");
       }
     } catch (error) {
       console.error("Error in handleDelete:", error);
-      message.error(`Failed to process bookmark: ${error.message}`);
+      //(`Failed to process bookmark: ${error.message}`);
     }
   };
 
   const handleAdd = async () => {
     try {
       if (!newBookmark.name || !newBookmark.link) {
-        message.error("Please fill in all fields");
+        //("Please fill in all fields");
         return;
       }
 
@@ -462,19 +461,12 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
         const { id, ...firestoreData } = bookmarkData;
 
         // Add to Firestore
-        const docRef = await addDoc(
+        await addDoc(
           collection(db, "users", user.uid, "bookmarks"),
           firestoreData
         );
 
-        // Manually update the bookmarks state to avoid waiting for onSnapshot
-        // Include the Firestore-generated ID
-        const newBookmarkWithId = {
-          ...bookmarkData,
-          id: docRef.id,
-        };
-
-        setBookmarks((prevBookmarks) => [...prevBookmarks, newBookmarkWithId]);
+        // Don't manually update the state - let the onSnapshot listener handle it
       } else {
         // Add to localStorage for non-logged-in users
         const updatedBookmarks = [...bookmarks, bookmarkData];
@@ -482,19 +474,19 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
         saveBookmarksToLocal(updatedBookmarks);
       }
 
-      message.success("Bookmark added successfully!");
+      //("Bookmark added successfully!");
       setShowAddModal(false);
       setNewBookmark({ name: "", link: "" });
     } catch (error) {
       console.error("Error adding bookmark:", error);
-      message.error(`Failed to add bookmark: ${error.message}`);
+      // //(`Failed to add bookmark: ${error.message}`);
     }
   };
 
   const handleEdit = async () => {
     try {
       if (!editingBookmark.name || !editingBookmark.link) {
-        message.error("Please fill in all fields");
+        // //("Please fill in all fields");
         return;
       }
 
@@ -555,11 +547,11 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
         saveBookmarksToLocal(updatedBookmarks);
       }
 
-      message.success("Bookmark updated successfully!");
+      //("Bookmark updated successfully!");
       setShowEditModal(false);
       setEditingBookmark(null);
     } catch (error) {
-      message.error("Failed to update bookmark");
+      // //("Failed to update bookmark");
       console.error("Error updating bookmark:", error);
     }
   };
@@ -689,11 +681,8 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
             </div>
           </div>
 
-          <div className="border-t dark:border-gray-700 p-2">
-            <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-              Options
-            </div>
-            <label className="flex items-center gap-2 text-sm cursor-pointer">
+          <div className="border-t dark:border-gray-700 p-2 rounded ">
+            <label className="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 py-2 rounded">
               <input
                 type="checkbox"
                 checked={showUrl}
@@ -710,7 +699,7 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
                 setShowSettings(false);
                 setShowEditModal(true);
               }}
-              className="flex items-center gap-2 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-sm"
+              className="flex items-center gap-2 p-2 w-full rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-sm"
             >
               <Edit className="w-4 h-4" />
               Edit Bookmarks

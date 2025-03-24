@@ -773,11 +773,11 @@ const SearchPageWrapper = () => {
 };
 
 // Add a loading component
-const LoadingFallback = () => (
-  <div className="flex items-center justify-center h-screen w-full bg-white dark:bg-gray-900">
-    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-  </div>
-);
+// const LoadingFallback = () => (
+//   <div className="flex items-center justify-center h-screen w-full bg-white dark:bg-gray-900">
+//     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+//   </div>
+// );
 
 // App Component
 const App = () => {
@@ -803,7 +803,7 @@ const App = () => {
         <AuthProvider>
           <DesignContextProvider>
             <Router>
-              <Suspense fallback={<LoadingFallback />}>
+              <Suspense>
                 {/* Chatbot Modal */}
 
                 <Routes>

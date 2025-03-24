@@ -5,7 +5,6 @@ import {
   getDocs,
   doc,
   getDoc,
-  setDoc,
   addDoc,
   updateDoc,
   query,
@@ -16,26 +15,18 @@ import {
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import {
-  Spin,
   Button as AntButton,
   Modal,
   Input,
   Space,
-  Radio,
-  Slider,
-  message,
   Tooltip,
   Form,
   Dropdown,
-  Menu,
   Checkbox,
   Card,
-  List,
-  Avatar,
   Empty,
   Row,
   Col,
-  Button,
 } from "antd";
 import { motion } from "framer-motion";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
@@ -52,7 +43,7 @@ import debounce from "lodash/debounce";
 import SkeletonLoader from "./SkeletonLoader";
 
 // Import the ThemeContext and useThemeAware hook
-import { useTheme, useThemeAware } from "../context/ThemeContext";
+import { useThemeAware } from "../context/ThemeContext";
 
 // Import the BookmarkErrorBoundary component
 import BookmarkErrorBoundary from "./BookmarkErrorBoundary";
@@ -968,43 +959,6 @@ function PopularBookmarks() {
     }
   };
 
-  const handleRenameCategory = async () => {
-    if (!newCategoryName.trim() || !selectedCategory) {
-      //error("Category name cannot be empty");
-      return;
-    }
-
-    try {
-      const categoryRef = doc(
-        db,
-        "users",
-        user.uid,
-        "UserCategory",
-        selectedCategory.id
-      );
-      await updateDoc(categoryRef, {
-        newCategory: newCategoryName.trim(),
-      });
-
-      // Update local state while preserving open state
-      setCategories((prevCategories) =>
-        prevCategories.map((cat) =>
-          cat.id === selectedCategory.id
-            ? { ...cat, newCategory: newCategoryName.trim() }
-            : cat
-        )
-      );
-
-      //success("Category renamed successfully");
-      setNewCategoryName("");
-      setIsRenameCategoryModalVisible(false);
-      setSelectedCategory(null);
-    } catch (error) {
-      console.error("Error renaming category:", error);
-      //error("Failed to rename category");
-    }
-  };
-
   const handleDeleteCategory = async (categoryId) => {
     try {
       // Set loading state
@@ -1504,20 +1458,7 @@ function PopularBookmarks() {
         },
       ],
     },
-    {
-      key: "rename",
-      icon: (
-        <div className="dark:text-black bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
-          <EditOutlined />
-        </div>
-      ),
-      label: <div className="dark:text-white">Rename Category</div>,
-      onClick: () => {
-        setSelectedCategory(category);
-        setNewCategoryName(category.name || category.newCategory);
-        setIsRenameCategoryModalVisible(true);
-      },
-    },
+
     {
       key: "delete",
       icon: (
@@ -3181,23 +3122,6 @@ function PopularBookmarks() {
       >
         <Input
           placeholder="Enter category name"
-          value={newCategoryName}
-          onChange={(e) => setNewCategoryName(e.target.value)}
-        />
-      </Modal>
-
-      <Modal
-        title="Rename Category"
-        open={isRenameCategoryModalVisible}
-        onOk={handleRenameCategory}
-        onCancel={() => {
-          setIsRenameCategoryModalVisible(false);
-          setNewCategoryName("");
-          setSelectedCategory(null);
-        }}
-      >
-        <Input
-          placeholder="Enter new category name"
           value={newCategoryName}
           onChange={(e) => setNewCategoryName(e.target.value)}
         />
