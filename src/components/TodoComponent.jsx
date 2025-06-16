@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Edit, Trash2, Palette } from "lucide-react";
-import { Popconfirm } from "antd";
+import { Popconfirm, message } from "antd";
 import { db, auth } from "../firebase";
 import {
   collection,
@@ -112,6 +112,13 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      if (!currentUser) {
+        // Load todos from localStorage when user is not logged in
+        const localTodos = localStorage.getItem('todos');
+        if (localTodos) {
+          setTodos(JSON.parse(localTodos));
+        }
+      }
     });
     return () => unsubscribeAuth();
   }, []);
@@ -136,6 +143,13 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
 
     fetchTodos();
   }, [user]);
+
+  // Save todos to localStorage when user is not logged in
+  useEffect(() => {
+    if (!user) {
+      localStorage.setItem('todos', JSON.stringify(todos));
+    }
+  }, [todos, user]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -198,7 +212,20 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
 
   const addTodo = async (e) => {
     e.preventDefault();
-    if (!inputValue.trim() || !user) return;
+    if (!inputValue.trim()) return;
+
+    if (!user) {
+      message.warning('You are not logged in. Your todos will be saved locally only.');
+      const newTodo = {
+        id: Date.now().toString(),
+        text: inputValue,
+        completed: false,
+        createdAt: new Date(),
+      };
+      setTodos([...todos, newTodo]);
+      setInputValue("");
+      return;
+    }
 
     try {
       const docRef = await addDoc(
@@ -224,6 +251,15 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
   };
 
   const toggleComplete = async (id) => {
+    if (!user) {
+      setTodos(
+        todos.map((todo) =>
+          todo.id === id ? { ...todo, completed: !todo.completed } : todo
+        )
+      );
+      return;
+    }
+
     try {
       const todoRef = doc(db, "users", user.uid, "TodoList", id);
       const todo = todos.find((t) => t.id === id);
@@ -242,6 +278,11 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
   };
 
   const deleteTodo = async (id) => {
+    if (!user) {
+      setTodos(todos.filter((todo) => todo.id !== id));
+      return;
+    }
+
     try {
       await deleteDoc(doc(db, "users", user.uid, "TodoList", id));
       setTodos(todos.filter((todo) => todo.id !== id));
@@ -258,6 +299,17 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
   const submitEdit = async (e) => {
     e.preventDefault();
     if (!inputValue.trim()) return;
+
+    if (!user) {
+      setTodos(
+        todos.map((todo) =>
+          todo.id === editingId ? { ...todo, text: inputValue } : todo
+        )
+      );
+      setEditingId(null);
+      setInputValue("");
+      return;
+    }
 
     try {
       const todoRef = doc(db, "users", user.uid, "TodoList", editingId);

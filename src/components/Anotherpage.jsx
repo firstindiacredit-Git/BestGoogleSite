@@ -382,6 +382,12 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
       position: sortedItems.length,
     };
     setSortedItems([...sortedItems, newWidget]);
+    
+    // Close the widget notification if it's open
+    const notificationElement = document.querySelector('.ant-notification-notice');
+    if (notificationElement) {
+      notificationElement.remove();
+    }
   };
 
   const distributeItems = () => {

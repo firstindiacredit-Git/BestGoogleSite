@@ -17,6 +17,7 @@ import { MdDelete, MdEdit, MdEditSquare } from "react-icons/md";
 import { FiPlusCircle } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { message } from "antd";
+import { useTheme } from "../context/ThemeContext";
 
 message.config({
   top: 60,
@@ -68,6 +69,8 @@ styleSheet.textContent = `
 document.head.appendChild(styleSheet);
 
 const CredentialManager = () => {
+  const { isDarkMode } = useTheme();
+  const [user, setUser] = useState(null);
   const [showPasswords, setShowPasswords] = useState({});
   const [isGridView, setIsGridView] = useState(true);
   const [credentials, setCredentials] = useState([]);
@@ -315,16 +318,16 @@ const CredentialManager = () => {
   // Handle auth state changes and fetch PIN once the user is authenticated
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
+      setUser(user);
       if (user) {
         setUserId(user.uid);
-        fetchPin(user.uid); // Fetch user's PIN from Firestore
+        fetchPin(user.uid);
       } else {
         setUserId(null);
-        setCorrectPassword(""); // Clear the PIN if the user logs out
+        setCorrectPassword("");
       }
     });
 
-    // Cleanup subscription
     return () => unsubscribe();
   }, []);
   useEffect(() => {
@@ -425,11 +428,28 @@ const CredentialManager = () => {
     setPassword(e.target.value);
   };
 
+  if (!user) {
+    return (
+      <div className="w-[90%] mx-auto rounded-lg relative">
+        <div className="text-indigo-500 inset-0 flex justify-center items-center h-[60vh] z-50 absolute top-0 left-0 right-0 w-full backdrop-blur-md dark:text-white">
+          <div className="text-xl -mt-24">Login to use this Feature</div>
+        </div>
+        <div className="flex justify-center opacity-50 -z-50 pt-24">
+          {isDarkMode ? (
+            <img src="./DOSB.png" className="h-96" alt="" />
+          ) : (
+            <img src="./DOSW.png" className="h-96" alt="" />
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       {isLocked ? (
-        <div className="flex justify-center w-[90vw] mx-auto">
-          <div className="w-full  rounded-t-sm   h-[40vh]   flex items-center justify-center">
+        <div className="flex justify-center  w-[90vw] mx-auto">
+          <div className="w-full  rounded-t-sm  h-[40vh]   flex items-center justify-center">
             <div className="p-8 flex w-2/5 gap-6  items-center justify-between backdrop-blur-sm bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)]  text-center rounded-md ">
               <div className=" text-indigo-500 mr-10 text-6xl">
                 <img src="/undraw_secure-login_m11a.svg" alt="locker" />
@@ -476,7 +496,7 @@ const CredentialManager = () => {
           </div>
         </div>
       ) : (
-        <div className="p-8 bg-white/[var(--widget-opacity)]  dark:bg-[#28283A]/[var(--widget-opacity)] mx-auto backdrop-blur-sm min-h-[60vh] max-w-[90vw] rounded-xl ">
+        <div className="p-8 bg-white/[var(--widget-opacity)] mb-8  dark:bg-[#28283A]/[var(--widget-opacity)] mx-auto backdrop-blur-sm min-h-[60vh] max-w-[90vw] rounded-xl ">
           <div>
             <div className="flex justify-between w-[68%] xl:w-[79.2%]  items-center">
               <button

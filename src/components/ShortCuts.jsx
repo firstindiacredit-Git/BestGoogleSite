@@ -13,7 +13,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { Modal, Input, Form, message } from "antd";
 
 // Renamed to match import in SearchPage.jsx
-const Shortcut = () => {
+const ShortCuts = () => {
   const [userBookmarks, setUserBookmarks] = useState([]);
   const [globalBookmarks, setGlobalBookmarks] = useState([]);
   const [name, setName] = useState("");
@@ -36,7 +36,25 @@ const Shortcut = () => {
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      formRef.submit();
+      formRef.validateFields()
+        .then((values) => {
+          if (editMode) {
+            handleUpdateBookmark(values);
+          } else {
+            addBookmark(values);
+          }
+          // Clear form after submission
+          formRef.resetFields();
+          setName("");
+          setLink("");
+        })
+        .catch((info) => {
+          console.log("Validate Failed:", info);
+          const fieldErrors = info.errorFields
+            .map((field) => `${field.name.join(".")}: ${field.errors.join(", ")}`)
+            .join("; ");
+          setErrorMessage(`Please correct these errors: ${fieldErrors || "Missing required fields"}`);
+        });
     }
   };
 
@@ -93,7 +111,7 @@ const Shortcut = () => {
 
     try {
       const newBookmark = {
-        id: Date.now().toString(), // Generate unique ID for local storage
+        id: Date.now().toString(),
         name: bookmarkName,
         link: bookmarkLink,
         category: "Popular",
@@ -101,16 +119,11 @@ const Shortcut = () => {
         createdByUser: true,
       };
 
-      // Re-check auth status just before saving
       const isUserLoggedIn = checkUserAuth();
       console.log("Is user logged in before saving:", isUserLoggedIn);
 
       if (isUserLoggedIn) {
-        // If user is logged in, save to Firebase
-        console.log("Adding bookmark to Firebase for user:", user.uid);
-
         try {
-          // Verify the shortcut collection path
           const collectionPath = `users/${user.uid}/shortcut`;
           console.log("Using collection path:", collectionPath);
 
@@ -134,23 +147,18 @@ const Shortcut = () => {
             },
           ]);
 
-          // Show success message
           message.success("Bookmark added successfully!");
-
-          // Close modal and reset form
           setShowModal(false);
+          formRef.resetFields();
           setName("");
           setLink("");
-          formRef.resetFields();
+          setErrorMessage("");
         } catch (firebaseError) {
           console.error("Firebase error:", firebaseError);
           setErrorMessage(`Firebase error: ${firebaseError.message}`);
-          message.error(
-            "Failed to save to Firebase. Check console for details."
-          );
+          message.error("Failed to save to Firebase. Check console for details.");
         }
       } else {
-        // If user is not logged in, save to local storage
         console.log("Adding bookmark to local storage");
         const currentBookmarks = getFromLocalStorage();
         const updatedBookmarks = [
@@ -163,17 +171,13 @@ const Shortcut = () => {
         saveToLocalStorage(updatedBookmarks);
         setUserBookmarks(updatedBookmarks);
 
-        // Show success message
         message.success("Bookmark added to local storage!");
-
-        // Close modal and reset form
         setShowModal(false);
+        formRef.resetFields();
         setName("");
         setLink("");
-        formRef.resetFields();
+        setErrorMessage("");
       }
-
-      setErrorMessage("");
     } catch (error) {
       console.error("Error adding bookmark:", error);
       setErrorMessage(`Error: ${error.message}`);
@@ -425,8 +429,8 @@ const Shortcut = () => {
   };
 
   return (
-    <div className="flex items-center gap-2 max-w-7xl dark:text-white justify-center mb-10 w-full">
-      <div className="flex gap-2 flex-wrap">
+    <div className="flex items-start gap-2 max-w-7xl dark:text-white justify-center mb-10 w-full">
+      <div className="flex gap-2 flex-wrap items-start">
         {combinedBookmarks.map((bookmark) => (
           <div
             key={bookmark.id}
@@ -435,7 +439,6 @@ const Shortcut = () => {
             <a
               href={bookmark.link}
               className="block"
-              //
               rel="noopener noreferrer"
             >
               <img
@@ -451,7 +454,6 @@ const Shortcut = () => {
             <a
               href={bookmark.link}
               className="block"
-              //
               rel="noopener noreferrer"
             >
               <h3 className="text-xs font-semibold mt-1 w-16 truncate mx-auto">
@@ -498,15 +500,15 @@ const Shortcut = () => {
             </div>
           </div>
         ))}
-      </div>
-      <div className="text-center hover:shadow-sm hover:dark:bg-[#28283a]/[var(--widget-opacity)] hover:backdrop-blur-lg hover:bg-white/[var(--widget-opacity)] cursor-pointer p-2 rounded-sm">
-        <button
-          onClick={openAddModal}
-          className="dark:text-white w-12 h-12 flex items-center justify-center"
-          aria-label="Add shortcut"
-        >
-          +
-        </button>
+        <div className="text-center hover:shadow-sm hover:dark:bg-[#28283a]/[var(--widget-opacity)] hover:backdrop-blur-lg hover:bg-white/[var(--widget-opacity)] cursor-pointer p-2 rounded-sm">
+          <button
+            onClick={openAddModal}
+            className="dark:text-white w-12 h-12 flex items-center justify-center"
+            aria-label="Add shortcut"
+          >
+            +
+          </button>
+        </div>
       </div>
       <Modal
         title={editMode ? "Edit Bookmark" : "Add Bookmark"}
@@ -562,7 +564,6 @@ const Shortcut = () => {
               className="dark:bg-[#513a7a] border dark:border-gray-600 dark:text-white"
               onChange={(e) => {
                 setLink(e.target.value);
-                console.log("Link input changed:", e.target.value);
               }}
             />
           </Form.Item>
@@ -589,38 +590,25 @@ const Shortcut = () => {
               type="button"
               className="px-4 py-1.5 text-sm bg-indigo-500 text-white rounded hover:bg-indigo-600 transition-colors"
               onClick={() => {
-                console.log(
-                  "Add button clicked, current form values:",
-                  formRef.getFieldsValue()
-                );
-                checkUserAuth(); // Log auth status before validation
-
-                // Manually trigger form validation and submission
                 formRef
                   .validateFields()
                   .then((values) => {
-                    console.log("Form validation successful, values:", values);
                     if (editMode) {
                       handleUpdateBookmark(values);
                     } else {
                       addBookmark(values);
                     }
+                    // Clear form after submission
+                    formRef.resetFields();
+                    setName("");
+                    setLink("");
                   })
                   .catch((info) => {
                     console.log("Validate Failed:", info);
-                    // Display specific field errors
                     const fieldErrors = info.errorFields
-                      .map(
-                        (field) =>
-                          `${field.name.join(".")}: ${field.errors.join(", ")}`
-                      )
+                      .map((field) => `${field.name.join(".")}: ${field.errors.join(", ")}`)
                       .join("; ");
-
-                    setErrorMessage(
-                      `Please correct these errors: ${
-                        fieldErrors || "Missing required fields"
-                      }`
-                    );
+                    setErrorMessage(`Please correct these errors: ${fieldErrors || "Missing required fields"}`);
                   });
               }}
             >
@@ -633,4 +621,4 @@ const Shortcut = () => {
   );
 };
 
-export default Shortcut;
+export default ShortCuts;

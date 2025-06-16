@@ -944,6 +944,12 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
                       onChange={(e) =>
                         setNewBookmark({ ...newBookmark, name: e.target.value })
                       }
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAdd();
+                        }
+                      }}
                       placeholder="Enter bookmark name"
                     />
                   </div>
@@ -956,6 +962,12 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
                       onChange={(e) =>
                         setNewBookmark({ ...newBookmark, link: e.target.value })
                       }
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAdd();
+                        }
+                      }}
                       placeholder="Enter bookmark URL"
                     />
                   </div>

@@ -483,7 +483,10 @@ const FullCalendar = () => {
       {/* Calendar Grid */}
       {!isCollapsed && (
         <>
-          <div className="grid grid-cols-7 gap-1">
+          <div
+            className="grid grid-cols-7 gap-1"
+            onMouseLeave={() => setShowTooltip(null)}
+          >
             {/* Weekday headers */}
             {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
               <div
@@ -501,13 +504,24 @@ const FullCalendar = () => {
               const dayHoliday = getHolidayDetails(day.date);
               const isSunday = day.date.day() === 0;
 
+              const colIndex = index % 7;
+              const rowIndex = Math.floor(index / 7);
+              const isRight = colIndex >= 5;
+              const isBottom = rowIndex >= 4;
+              // Tooltip position classes
+              const horizontalClass = isRight ? 'right-0' : 'left-0';
+              const verticalClass = isBottom ? 'bottom-full mb-1' : 'top-full mt-1';
+              const originClass = isRight ? 'origin-right' : 'origin-left';
+
               return (
                 <div
                   key={index}
                   className="relative"
-                  onMouseEnter={() =>
-                    dayHoliday && day.isCurrentMonth && setShowTooltip(index)
-                  }
+                  onMouseEnter={() => {
+                    if (dayHoliday && day.isCurrentMonth) {
+                      setShowTooltip(index);
+                    }
+                  }}
                   onMouseLeave={() => setShowTooltip(null)}
                 >
                   <div
@@ -554,8 +568,10 @@ const FullCalendar = () => {
                   </div>
                   {showTooltip === index && dayHoliday && (
                     <div
-                      style={{ zIndex: "999" }}
-                      className="absolute w-48 p-2 mb-1 text-sm bg-white dark:bg-[#513a7a] text-gray-900 dark:text-gray-100 rounded-sm shadow-lg border border-gray-200 dark:border-gray-700"
+                      className={`absolute w-40 max-h-36 overflow-y-auto p-2 text-sm bg-white dark:bg-[#513a7a] text-gray-900 dark:text-gray-100 rounded-sm shadow-lg border border-gray-200 dark:border-gray-700 ${horizontalClass} ${verticalClass} ${originClass}`}
+                      style={{ zIndex: 999 }}
+                      onMouseEnter={() => setShowTooltip(index)}
+                      onMouseLeave={() => setShowTooltip(null)}
                     >
                       <div className="font-bold">{dayHoliday.name}</div>
                       <div className="text-xs mt-1">

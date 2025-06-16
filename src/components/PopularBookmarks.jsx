@@ -64,28 +64,31 @@ const debouncedFetchFavicon = debounce(async (url, callback) => {
 
 // Add this memoized form component near the top of the file, before the PopularBookmarks function
 const MemoizedBookmarkForm = React.memo(
-  ({ newBookmark, handleTitleChange, handleUrlChange }) => (
-    <Form layout="vertical">
-      <Form.Item
-        label={<span className="dark:text-white">Title</span>}
-        required
-      >
+  ({ newBookmark, handleTitleChange, handleUrlChange, onKeyDown }) => (
+    <div className="space-y-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Title
+        </label>
         <Input
-          placeholder="Enter bookmark title"
           value={newBookmark.title}
           onChange={handleTitleChange}
-          className="text-black bg-white dark:text-white"
+          onKeyDown={onKeyDown}
+          placeholder="Enter bookmark title"
         />
-      </Form.Item>
-      <Form.Item label={<span className="dark:text-white">URL</span>} required>
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          URL
+        </label>
         <Input
-          placeholder="Enter bookmark URL"
           value={newBookmark.url}
           onChange={handleUrlChange}
-          className=" "
+          onKeyDown={onKeyDown}
+          placeholder="Enter URL (e.g. google.com)"
         />
-      </Form.Item>
-    </Form>
+      </div>
+    </div>
   ),
   // Only re-render if title or URL actually changed
   (prevProps, nextProps) => {
@@ -1371,41 +1374,41 @@ function PopularBookmarks() {
       label: <div className="dark:text-white">Line Options</div>,
       children: [
         {
-          key: "line",
+          key: "Short name",
           // icon: (
           //   <div className="dark:text-black bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
           //     <UnorderedListOutlined />
           //   </div>
           // ),
-          label: "1 line",
+          label: "Short name",
           onClick: () => {
             setLineOptions(1);
           },
         },
         {
-          key: "2 lines",
+          key: "Full name",
           // icon: (
           //   <div className="dark:text-black bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
           //     <AppstoreOutlined />
           //   </div>
           // ),
-          label: "2 lines",
+          label: "Full name",
           onClick: () => {
             setLineOptions(2);
           },
         },
-        {
-          key: "3 lines",
-          // icon: (
-          //   <div className="dark:text-black bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
-          //     <PictureOutlined />
-          //   </div>
-          // ),
-          label: "Full lines",
-          onClick: () => {
-            setLineOptions("none");
-          },
-        },
+        // {
+        //   key: "3 lines",
+        //   // icon: (
+        //   //   <div className="dark:text-black bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
+        //   //     <PictureOutlined />
+        //   //   </div>
+        //   // ),
+        //   label: "Full lines",
+        //   onClick: () => {
+        //     setLineOptions("none");
+        //   },
+        // },
       ],
     },
     {
@@ -1653,10 +1656,13 @@ function PopularBookmarks() {
               >
                 <span
                   className={`text-sm break-words block ${
-                    lineOptions === 0
+                    lineOptions === 2
                       ? "whitespace-normal"
-                      : `line-clamp-${lineOptions}`
+                      : lineOptions === "none"
+                      ? "whitespace-normal"
+                      : "line-clamp-1 truncate"
                   }`}
+                  title={lineOptions !== 2 ? link.title || link.name : undefined}
                 >
                   {link.title || link.name}
                 </span>
@@ -3124,6 +3130,12 @@ function PopularBookmarks() {
           placeholder="Enter category name"
           value={newCategoryName}
           onChange={(e) => setNewCategoryName(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              handleAddCategory();
+            }
+          }}
         />
       </Modal>
 
@@ -3140,14 +3152,18 @@ function PopularBookmarks() {
           newBookmark={newBookmark}
           handleTitleChange={(e) => {
             const title = e.target.value;
-            // Avoid unnecessary re-renders by using functional state update
             setNewBookmark((prev) => {
-              // Only update if value actually changed
               if (prev.title === title) return prev;
               return { ...prev, title };
             });
           }}
           handleUrlChange={handleUrlChange}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              handleAddBookmark();
+            }
+          }}
         />
       </Modal>
 

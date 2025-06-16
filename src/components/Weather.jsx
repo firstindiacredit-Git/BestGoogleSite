@@ -1,10 +1,84 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useTheme } from "../context/ThemeContext";
+import { Modal, Tabs, Radio, Space, Button, Alert } from "antd";
+import { PictureOutlined, BgColorsOutlined, DeleteOutlined, SyncOutlined } from "@ant-design/icons";
+import { auth } from "../firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
 const API_KEY =
   import.meta.env.VITE_OPENWEATHER_API_KEY ||
   "78a1522c5ec67352674263eaaa54bffa";
+
+// Background images array
+const BACKGROUND_IMAGES = [
+  // {
+  //   id: 1,
+  //   url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+  // },
+  // {
+  //   id: 2,
+  //   url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2073&q=80",
+  // },
+  {
+    id: 3,
+    url: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2071&q=80",
+  },
+  {
+    id: 4,
+    url: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+  },
+  {
+    id: 5,
+    url: "https://images.unsplash.com/photo-1593045893612-da9b9db1d88c?q=80&w=1631&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  },
+  {
+    id: 6,
+    url: "https://images.unsplash.com/photo-1676029461383-215556e79bc8?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fEJlYXV0aWZ1bCUyMHN1bnNldCUyMG92ZXIlMjBtb3VudGFpbnN8ZW58MHx8MHx8fDA%3D",
+  },
+  {
+    id: 7,
+    url: "https://plus.unsplash.com/premium_photo-1679784157152-87caa598bacb?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8YmxhY2t8ZW58MHx8MHx8fDA%3D",
+  },
+  {
+    id: 8,
+    url: "https://plus.unsplash.com/premium_photo-1686730540270-93f2c33351b6?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8YmxhY2slMjBjYXJ8ZW58MHx8MHx8fDA%3D",
+  },
+];
+
+// Add gradient options
+const GRADIENT_OPTIONS = [
+  {
+    id: 'gradient-1',
+    name: 'Sunset',
+    style: 'linear-gradient(45deg, #ff6b6b, #ffd93d)'
+  },
+  {
+    id: 'gradient-2',
+    name: 'Ocean',
+    style: 'linear-gradient(45deg, #2193b0, #6dd5ed)'
+  },
+  {
+    id: 'gradient-3',
+    name: 'Forest',
+    style: 'linear-gradient(45deg, #11998e, #38ef7d)'
+  },
+  {
+    id: 'gradient-4',
+    name: 'Purple',
+    style: 'linear-gradient(45deg, #8e2de2, #4a00e0)'
+  },
+  {
+    id: 'gradient-5',
+    name: 'Midnight',
+    style: 'linear-gradient(45deg, #232526, #414345)'
+  },
+  {
+    id: 'gradient-6',
+    name: 'Cherry',
+    style: 'linear-gradient(45deg, #eb3349, #f45c43)'
+  }
+];
 
 // Define weather cards with monochromatic color schemes
 const WEATHER_CARDS = {
@@ -18,7 +92,7 @@ const WEATHER_CARDS = {
   },
   // Cloudy (light blue)
   CLOUDY: {
-    background: "#3aa3ff",
+    background: "#e7e0cc",
     darkShade: "#0070d3", // Dark blue-gray
     darkerShade: "#0058a5", // Darker blue-gray
     color: "#FFFFFF",
@@ -78,15 +152,60 @@ const getWeatherCardStyle = (weatherType) => {
   }
 };
 
+const DEFAULT_BG = '/sunny.png';
+
 const Weather = () => {
   const [currentWeather, setCurrentWeather] = useState(null);
   const [forecast, setForecast] = useState([]);
   const [error, setError] = useState(null);
   const [unit, setUnit] = useState("metric");
-  // const [city, setCity] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [browserInfo, setBrowserInfo] = useState(null);
   const [ipLocation, setIpLocation] = useState(null);
+  const [selectedCity, setSelectedCity] = useState("New Delhi");
+  const [hourlyIndex, setHourlyIndex] = useState(0);
+  const [currentBackground, setCurrentBackground] = useState(null);
+  const [showBackgroundSelector, setShowBackgroundSelector] = useState(false);
+  const [user, setUser] = useState(null);
+  const [showWarning, setShowWarning] = useState(true);
+
+  // Dummy hourly forecast data for UI demo (replace with real API data if available)
+  const dummyHourly = [
+    { time: "4 PM", temp: 41, icon: "🌤️", rain: 0 },
+    { time: "5 PM", temp: 40, icon: "🌤️", rain: 0 },
+    { time: "6 PM", temp: 39, icon: "🌤️", rain: 1 },
+    { time: "7 PM", temp: 38, icon: "🌤️", rain: 1 },
+    { time: "8 PM", temp: 37, icon: "🌤️", rain: 3 },
+    { time: "9 PM", temp: 36, icon: "🌤️", rain: 5 },
+    { time: "10 PM", temp: 35, icon: "🌤️", rain: 7 },
+  ];
+
+  // Function to get random background
+  const getRandomBackground = () => {
+    const randomIndex = Math.floor(Math.random() * BACKGROUND_IMAGES.length);
+    return BACKGROUND_IMAGES[randomIndex];
+  };
+
+  // Function to select background
+  const selectBackground = (background) => {
+    setCurrentBackground(background);
+    localStorage.setItem('weatherBg', JSON.stringify(background));
+    setShowBackgroundSelector(false);
+  };
+
+  // Function to set random background
+  const setRandomBackground = () => {
+    const randomBg = getRandomBackground();
+    setCurrentBackground(randomBg);
+    localStorage.setItem('weatherBg', JSON.stringify(randomBg));
+  };
+
+  // Function to remove background
+  const removeBackground = () => {
+    setCurrentBackground(null);
+    localStorage.removeItem('weatherBg');
+    setShowBackgroundSelector(false);
+  };
 
   const fetchWeatherByCoords = async (lat, lon) => {
     try {
@@ -195,7 +314,22 @@ const Weather = () => {
 
   useEffect(() => {
     getUserLocation();
+    // Set random background on component mount
+    const savedBg = localStorage.getItem('weatherBg');
+    if (savedBg) {
+      setCurrentBackground(JSON.parse(savedBg));
+    } else {
+      setCurrentBackground(null);
+    }
   }, [unit]);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const getBrowserInfo = () => {
     const userAgent = navigator.userAgent;
@@ -280,67 +414,212 @@ const Weather = () => {
     );
   };
 
-  // Forecast Weather Card Component
+  // Hourly Forecast Card
+  const HourlyForecastCard = ({ time, temp, icon, rain }) => (
+    <div className="flex flex-col items-center bg-white/10 rounded-lg px-2 py-2 min-w-[60px] mx-1">
+      <span className="text-xs font-medium mb-1">{time}</span>
+      <span className="text-lg">{icon}</span>
+      <span className="text-base font-semibold">{temp}°</span>
+      <span className="text-xs opacity-70">💧 {rain}%</span>
+    </div>
+  );
+
+  // Background Selector Component
+  const BackgroundSelector = () => {
+    const items = [
+      {
+        key: 'images',
+        label: (
+          <span className="flex items-center gap-2">
+            <PictureOutlined />
+            Images
+          </span>
+        ),
+        children: (
+          <div className="grid grid-cols-2 gap-3 mt-4">
+            {BACKGROUND_IMAGES.map((bg) => (
+              <div
+                key={bg.id}
+                onClick={() => selectBackground(bg)}
+                className="cursor-pointer rounded-lg overflow-hidden border-2 hover:border-blue-500 transition-colors"
+              >
+                <img
+                  src={bg.url}
+                  alt={bg.name}
+                  className="w-full h-24 object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        ),
+      },
+      {
+        key: 'gradients',
+        label: (
+          <span className="flex items-center gap-2">
+            <BgColorsOutlined />
+            Gradients
+          </span>
+        ),
+        children: (
+          <div className="grid grid-cols-2 gap-3 mt-4">
+            {GRADIENT_OPTIONS.map((gradient) => (
+              <div
+                key={gradient.id}
+                onClick={() => selectBackground(gradient)}
+                className="cursor-pointer rounded-lg overflow-hidden border-2 hover:border-blue-500 transition-colors h-24"
+                style={{ background: gradient.style }}
+              >
+                <div className="h-full flex items-center justify-center">
+                  <span className="text-white font-medium drop-shadow-lg">{gradient.name}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ),
+      },
+    ];
+
+    return (
+      <Modal
+        title="Select Background"
+        open={showBackgroundSelector}
+        onCancel={() => setShowBackgroundSelector(false)}
+        footer={null}
+        width={600}
+        className="dark:bg-[#28283A]"
+      >
+        <Tabs
+          items={items}
+          className="dark:[&_.ant-tabs-tab]:text-gray-400 dark:[&_.ant-tabs-tab-active]:text-white"
+        />
+        
+        <div className="mt-6 flex justify-between items-center">
+          <Space>
+            <Button
+              type="primary"
+              icon={<SyncOutlined />}
+              onClick={setRandomBackground}
+            >
+              Random
+            </Button>
+            <Button
+              danger
+              icon={<DeleteOutlined />}
+              onClick={removeBackground}
+            >
+              Remove
+            </Button>
+          </Space>
+          <Button onClick={() => setShowBackgroundSelector(false)}>
+            Cancel
+          </Button>
+        </div>
+      </Modal>
+    );
+  };
 
   if (isLoading) {
     return (
-      <div className="p-3 backdrop-blur-sm">
-        <div className="weather-container ">
-          <div className="content-wrapper flex-col">
-            {currentWeather && (
-              <div className="flex flex-col gap-2">
-                <CurrentWeatherCard
-                  temperature={"00"}
-                  condition={"Unknown"}
-                  description={"currentWeather.weather[0].description"}
-                  location={"Unknown"}
-                  humidity={"00"}
-                  time={new Date().toLocaleTimeString("en-US", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: false,
-                  })}
-                  date={new Date().toLocaleDateString("en-US", {
-                    weekday: "long",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                />
-              </div>
-            )}
-          </div>
+      <div className="p-3">
+        <div className="backdrop-blur-md bg-white/30 rounded-2xl shadow-xl max-w-md mx-auto w-full">
+          <div className="animate-pulse h-64 flex items-center justify-center">Loading...</div>
         </div>
       </div>
     );
   }
+
   return (
-    <div className="p-3 backdrop-blur-sm">
-      <div className="weather-container ">
-        <div className="content-wrapper flex-col">
-          {currentWeather && (
-            <div className="flex flex-col gap-2">
-              {/* Main Weather Card */}
-              <CurrentWeatherCard
-                temperature={Math.round(currentWeather.main.temp)}
-                condition={currentWeather.weather[0].main}
-                description={currentWeather.weather[0].description}
-                location={currentWeather.name}
-                humidity={currentWeather.main.humidity}
-                time={new Date().toLocaleTimeString("en-US", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: false,
-                })}
-                date={new Date().toLocaleDateString("en-US", {
-                  weekday: "long",
-                  month: "short",
-                  day: "numeric",
-                })}
-              />
+    <div 
+      className="p-3 h-[100px] relative"
+      style={{
+        backgroundImage: currentBackground?.url ? `url(${currentBackground.url})` : 'none',
+        background: currentBackground?.style || 'none',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        minHeight: '170px',
+        backgroundColor: !currentBackground ? 'rgba(0, 0, 0, 0.1)' : 'transparent'
+      }}
+    >
+      {/* Background overlay for better text readability */}
+      <div className="absolute inset-0 bg-black/30"></div>
+      
+      {/* Login Warning */}
+      {showWarning && !user && (
+        <div className="w-full mx-auto mb-4 px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 border-l-4 border-indigo-400 dark:border-indigo-600">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <svg
+                className="w-5 h-5 text-indigo-400 dark:text-indigo-600 mr-3"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <p className="text-sm text-indigo-700 dark:text-indigo-200">
+                You are not logged in. Your background preferences will only be saved locally and may be lost when clearing browser data.
+              </p>
             </div>
-          )}
+            <div className="flex items-center gap-8">
+              <button
+                onClick={() => window.location.href = '/search'}
+                className="ml-4 text-sm font-medium text-indigo-700 dark:text-indigo-200 hover:text-indigo-600 dark:hover:text-indigo-300 underline"
+              >
+                Login
+              </button>
+              <button
+                className="text-indigo-400 hover:text-indigo-600 dark:text-indigo-500 dark:hover:text-indigo-300"
+                onClick={() => setShowWarning(false)}
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Background selector button */}
+      <div className="absolute top-1 right-1 z-20">
+        <Button
+          type="text"
+          icon={<BgColorsOutlined />}
+          onClick={() => setShowBackgroundSelector(true)}
+          className="text-white hover:bg-white/30"
+        />
+      </div>
+
+      {/* Weather content */}
+      <div className="flex items-center justify-center h-full relative z-10">
+        <div
+          className=" w-full flex items-center"
+          // style={{ boxShadow: "0 4px 32px 0 rgba(0,0,0,0.15)" }}
+        >
+          {/* Left: Icon, Temp, City */}
+          <div className="flex flex-col items-center justify-center px-6 py-4 min-w-[120px]">
+            <span className="text-6xl mb-2" style={{color:'#FFB900'}}>{getWeatherCardStyle(currentWeather.weather[0].main).icon}</span>
+            <span className="text-4xl font-bold text-white drop-shadow">{Math.round(currentWeather.main.temp)}°C</span>
+            <span className="text-base text-white/90 font-medium mt-1 drop-shadow">{currentWeather.name}, {currentWeather.sys?.country}</span>
+          </div>
+          {/* Right: Main Details */}
+          <div className="flex-1 flex flex-col gap-2 px-4 py-2">
+            <div className="text-lg text-white font-semibold capitalize flex items-center gap-2">
+              <span>{currentWeather.weather[0].main}</span>
+              <span className="text-xs text-white/70 font-normal">({currentWeather.weather[0].description})</span>
+            </div>
+            <div className="flex items-center gap-2 text-white text-sm"><span className="text-lg">🌡️</span>Feels like: <span className="font-semibold">{Math.round(currentWeather.main.feels_like)}°C</span></div>
+            <div className="flex items-center gap-2 text-white text-sm"><span className="text-lg">💧</span>Humidity: <span className="font-semibold">{currentWeather.main.humidity}%</span></div>
+            <div className="flex items-center gap-2 text-white text-sm"><span className="text-lg">💨</span>Wind: <span className="font-semibold">{currentWeather.wind.speed} m/s</span> <span className="text-xs">({currentWeather.wind.deg}°)</span></div>
+          </div>
         </div>
       </div>
+
+      {/* Background selector modal */}
+      {showBackgroundSelector && <BackgroundSelector />}
     </div>
   );
 };

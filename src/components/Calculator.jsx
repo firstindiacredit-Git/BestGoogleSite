@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FaHistory } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
 import { FaBackspace } from "react-icons/fa";
@@ -11,6 +11,7 @@ function Calculator() {
   const [history, setHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
   const [lastOperation, setLastOperation] = useState(false);
+  const displayRef = useRef(null);
 
   useEffect(() => {
     const savedHistory = JSON.parse(localStorage.getItem("calcHistory")) || [];
@@ -80,6 +81,11 @@ function Calculator() {
       setCalcInput(calcInput.slice(0, -1));
       setLastOperation(false);
     } else {
+      // Check if input would exceed maximum length (15 characters)
+      if (calcInput.length >= 25 && !isOperator(value)) {
+        return;
+      }
+
       let newInput = calcInput;
 
       // Handle percentage
@@ -182,6 +188,25 @@ function Calculator() {
     localStorage.removeItem("calcHistory");
   };
 
+  const handleKeyPress = (e) => {
+    e.preventDefault();
+    
+    // Handle number keys (0-9)
+    if (/^[0-9]$/.test(e.key)) {
+      handleCalcInput(e.key);
+    }
+    // Handle operators
+    else if (e.key === "+") handleCalcInput("+");
+    else if (e.key === "-") handleCalcInput("-");
+    else if (e.key === "*") handleCalcInput("*");
+    else if (e.key === "/") handleCalcInput("/");
+    else if (e.key === "%") handleCalcInput("%");
+    else if (e.key === ".") handleCalcInput(".");
+    else if (e.key === "Enter" || e.key === "=") handleCalcInput("=");
+    else if (e.key === "Backspace") handleCalcInput("backspace");
+    else if (e.key === "Escape") handleCalcInput("C");
+  };
+
   return (
     <div className="w-full backdrop-blur-sm h-full">
       {!collapsed && (
@@ -229,7 +254,13 @@ function Calculator() {
           ) : (
             <div className="flex flex-col h-full p-3">
               {/* Display */}
-              <div className="text-right text-gray-700 dark:text-white p-2 rounded-lg bg-gray-300/20 dark:bg-[#513a7a]/20 mb-3">
+              <div 
+                ref={displayRef}
+                tabIndex={0}
+                onKeyDown={handleKeyPress}
+                onClick={() => displayRef.current?.focus()}
+                className="text-right text-gray-700 dark:text-white p-2 rounded-lg bg-gray-300/20 dark:bg-[#513a7a]/20 mb-3 cursor-text focus:outline-none focus:ring-2 focus:ring-[#8163D3]"
+              >
                 <div className="text-lg opacity-70">
                   {(history.length > 0 && history[0]) || "0"}
                 </div>

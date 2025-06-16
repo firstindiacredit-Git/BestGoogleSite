@@ -194,3 +194,12 @@
   color: #70757a !important;
   opacity: 1 !important;
 }
+
+.ant-notification-bottomRight.ant-notification-stack>.ant-notification-notice-wrapper {
+  bottom: 23px;
+  right: 40px;
+}
+
+.ant-notification-notice-message {
+  color: white !important;
+}

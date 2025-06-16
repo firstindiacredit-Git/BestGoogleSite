@@ -11,15 +11,16 @@ import {
   List,
   Space,
   Image,
+  Dropdown,
 } from "antd";
 import { FaTh } from "react-icons/fa";
+import { FaList, FaEllipsisV } from "react-icons/fa";
 import sportsmen from "./sportsmen.json";
 import brands from "./brand.json";
 import bikes from "./bikes.json";
 import gdp from "./gdp.json";
 import "./ToastifyNotification.css";
 import SkeletonLoader from "./SkeletonLoader";
-import { FaList } from "react-icons/fa";
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -45,6 +46,38 @@ const Top100Page = () => {
         item.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         ""
     );
+
+  const mainCategories = [
+    { key: "motorcycles", label: "Bikes" },
+    { key: "crypto", label: "Crypto" },
+    { key: "stocks", label: "Stocks" },
+    { key: "billionaires", label: "Billionaires" },
+    { key: "sportsmen", label: "Sports Contracts" },
+    { key: "movies", label: "Movies" },
+  ];
+
+  const additionalCategories = [
+    { key: "brands", label: "Brands" },
+    { key: "gdp", label: "GDP" },
+    { key: "cars", label: "Cars" },
+    { key: "banks", label: "Banks" },
+  ];
+
+  const dropdownItems = [
+    // ...mainCategories.map(cat => ({
+    //   key: cat.key,
+    //   label: cat.label,
+    //   onClick: () => setCategory(cat.key),
+    // })),
+    // {
+    //   type: 'divider',
+    // },
+    ...additionalCategories.map(cat => ({
+      key: cat.key,
+      label: cat.label,
+      onClick: () => setCategory(cat.key),
+    })),
+  ];
 
   const fetchTop100 = async (category) => {
     try {
@@ -573,88 +606,29 @@ const Top100Page = () => {
             style={{ width: 300 }}
           />
           <div style={{ textAlign: "center" }}>
-            <div className="dark:bg-[#513a7a]/[var(--widget-opacity)]  bg-white/[var(--widget-opacity)] backdrop-blur-sm rounded-lg border border-gray-400/10 dark:border-gray-800/10">
-              <button
-                className={`px-4 py-2 m-1 rounded  ${
-                  category === "motorcycles"
-                    ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
-                    : ""
-                }`}
-                onClick={() => setCategory("motorcycles")}
+            <div className="dark:bg-[#513a7a]/[var(--widget-opacity)] bg-white/[var(--widget-opacity)] backdrop-blur-sm rounded-lg border border-gray-400/10 dark:border-gray-800/10">
+              {mainCategories.map((cat) => (
+                <button
+                  key={cat.key}
+                  className={`px-4 py-2 m-1 rounded ${
+                    category === cat.key
+                      ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                      : ""
+                  }`}
+                  onClick={() => setCategory(cat.key)}
+                >
+                  {cat.label}
+                </button>
+              ))}
+              <Dropdown
+                menu={{ items: dropdownItems }}
+                placement="bottomRight"
+                trigger={["click"]}
               >
-                Bikes
-                {/*  */}
-              </button>
-              <button
-                className={`px-4 py-2 m-1 rounded  ${
-                  category === "crypto"
-                    ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
-                    : ""
-                }`}
-                onClick={() => setCategory("crypto")}
-              >
-                Crypto
-              </button>
-              <button
-                className={`px-4 py-2 m-1 rounded  ${
-                  category === "stocks"
-                    ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
-                    : ""
-                }`}
-                onClick={() => setCategory("stocks")}
-              >
-                Stocks
-              </button>
-              <button
-                className={`px-4 py-2 m-1 rounded  ${
-                  category === "billionaires"
-                    ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
-                    : ""
-                }`}
-                onClick={() => setCategory("billionaires")}
-              >
-                Billionaires
-              </button>
-              <button
-                className={`px-4 py-2 m-1 rounded  ${
-                  category === "sportsmen"
-                    ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
-                    : ""
-                }`}
-                onClick={() => setCategory("sportsmen")}
-              >
-                Sports Contracts
-              </button>
-              <button
-                className={`px-4 py-2 m-1 rounded  ${
-                  category === "movies"
-                    ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
-                    : ""
-                }`}
-                onClick={() => setCategory("movies")}
-              >
-                Movies
-              </button>
-              <button
-                className={`px-4 py-2 m-1 rounded  ${
-                  category === "brands"
-                    ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
-                    : ""
-                }`}
-                onClick={() => setCategory("brands")}
-              >
-                Brands
-              </button>
-              <button
-                className={`px-4 py-2 m-1 rounded  ${
-                  category === "gdp"
-                    ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
-                    : ""
-                }`}
-                onClick={() => setCategory("gdp")}
-              >
-                GDP
-              </button>
+                <button className="px-4 py-2 m-1 rounded">
+                  <FaEllipsisV />
+                </button>
+              </Dropdown>
             </div>
           </div>
           <div className="w-[300px] flex justify-end">

@@ -6,7 +6,7 @@ import React, {
   useMemo,
   useRef,
 } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Header from "../components/Header";
 import Shortcut from "./ShortCuts";
 import { WidgetTransparencyContext } from "../App";
@@ -20,7 +20,8 @@ import Tool from "../../Tools/Tool.jsx";
 import Sports from "../components/Sports";
 import Top100 from "../components/Top100";
 import "./style.css";
-import { Dropdown, Skeleton, Input } from "antd";
+import { Dropdown, Skeleton, Input, notification } from "antd";
+import { PlusCircleOutlined } from "@ant-design/icons";
 import { Settings } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { DesignContext } from "../context/DesignContext.jsx";
@@ -42,6 +43,12 @@ const NewSearchPage = ({ isToolPage = false }) => {
   );
   const [activeComponent, setActiveComponent] = useState("Anotherpage");
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Extract pageId from URL
+  const urlParams = new URLSearchParams(location.search);
+  const pageId = urlParams.get("pageId") || "home";
+
   const [visibleHandle, setVisibleHandle] = useState(() => {
     const savedMode = localStorage.getItem("uiMode");
     return savedMode === null ? true : savedMode === "modern"; // Default to true (modern) if not set
@@ -62,6 +69,7 @@ const NewSearchPage = ({ isToolPage = false }) => {
 
   const [isGoogleSearchLoaded, setIsGoogleSearchLoaded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [hasShownWidgetNotification, setHasShownWidgetNotification] = useState(false);
 
   useEffect(() => {
     const authInstance = getAuth();
@@ -428,6 +436,47 @@ const NewSearchPage = ({ isToolPage = false }) => {
     [searchQuery, handleSearch]
   );
 
+  useEffect(() => {
+    // Show widget notification for new pages
+    const isNewPage = pageId && !hasShownWidgetNotification;
+
+    // Get the current widgets from localStorage
+    const currentLayout = localStorage.getItem(`layout_${pageId}`);
+    const hasWidgets = currentLayout ? JSON.parse(currentLayout).widgets?.length > 0 : false;
+
+    if (isNewPage && !hasWidgets) {
+      notification.open({
+        message: (
+          <div className="flex items-center  gap-2">
+            <PlusCircleOutlined className="text-blue-500 dark:text-blue-400" />
+            <span className="font-medium">Add Widgets to Your Page</span>
+          </div>
+        ),
+        description: (
+          <div className="mt-2 text-gray-600 dark:text-gray-300">
+            Click the button in the bottom right to add widgets to your new page.
+          </div>
+        ),
+        duration: 0,
+        placement: 'bottomRight',
+        className: isDarkMode ? 'dark-notification' : '',
+        style: {
+          backgroundColor: isDarkMode ? '#28283a' : '#fff',
+          border: isDarkMode ? '1px solid #3a3a4a' : '1px solid #f0f0f0',
+          borderRadius: '8px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+        },
+        icon: null,
+        closeIcon: (
+          <div className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+            ×
+          </div>
+        ),
+      });
+      setHasShownWidgetNotification(true);
+    }
+  }, [location.search, hasShownWidgetNotification, isDarkMode, pageId]);
+
   if (loading) {
     return (
       <div
@@ -687,7 +736,7 @@ const NewSearchPage = ({ isToolPage = false }) => {
               ) : activeComponent === "Sports" ? (
                 <Sports />
               ) : activeComponent === "Anotherpage" ? (
-                <Anotherpage visibleHandle={visibleHandle} />
+                <Anotherpage visibleHandle={visibleHandle} pageId={pageId} />
               ) : activeComponent === "Top100" ? (
                 <Top100 />
               ) : activeComponent === "Tool" ? (
@@ -696,6 +745,7 @@ const NewSearchPage = ({ isToolPage = false }) => {
                 <Anotherpage
                   visibleHandle={visibleHandle}
                   isDarkMode={isDarkMode}
+                  pageId={pageId}
                 />
               )}
             </div>

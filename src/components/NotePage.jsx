@@ -11,6 +11,10 @@ import {
   Edit2,
   Trash2,
   X,
+  Plus,
+  ChevronDown,
+  Pencil,
+  AlertCircle,
 } from "lucide-react";
 import { HiOutlineNumberedList } from "react-icons/hi2";
 import { RxHamburgerMenu } from "react-icons/rx";
@@ -22,6 +26,13 @@ const preventScroll = (prevent) => {
 };
 
 const NotePage = ({ inNotebookSheet = false }) => {
+  const [tabs, setTabs] = useState([
+    { id: 1, title: "Tab 1", content: "" }
+  ]);
+  const [activeTabId, setActiveTabId] = useState(1);
+  const [showTabDropdown, setShowTabDropdown] = useState(false);
+  const [editingTabId, setEditingTabId] = useState(null);
+  const [editingTitle, setEditingTitle] = useState("");
   const [notes, setNotes] = useState("");
   const [isBold, setIsBold] = useState(false);
   const [isUnderline, setIsUnderline] = useState(false);
@@ -47,11 +58,16 @@ const NotePage = ({ inNotebookSheet = false }) => {
   const [isEditing, setIsEditing] = useState(false);
   const { isDarkMode } = useTheme();
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const [showWarning, setShowWarning] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const MAX_TABS_FOR_GUEST = 5;
 
   const textareaRef = useRef(null);
   const lineNumberRef = useRef(null);
   const colorPickerRef = useRef(null);
   const historyButtonRef = useRef(null);
+  const tabDropdownRef = useRef(null);
+  const editInputRef = useRef(null);
 
   const predefinedColors = [
     "#000000",
@@ -97,11 +113,24 @@ const NotePage = ({ inNotebookSheet = false }) => {
   ];
 
   useEffect(() => {
-    const savedNotes = localStorage.getItem("notes");
-    const savedColor = localStorage.getItem("backgroundColor");
-    if (savedNotes) setNotes(savedNotes);
-    if (savedColor) setBackgroundColor(savedColor);
+    const savedTabs = localStorage.getItem("noteTabs");
+    if (savedTabs) {
+      const parsedTabs = JSON.parse(savedTabs);
+      setTabs(parsedTabs);
+      setActiveTabId(parsedTabs[0]?.id || 1);
+    }
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem("noteTabs", JSON.stringify(tabs));
+  }, [tabs]);
+
+  useEffect(() => {
+    const activeTab = tabs.find(tab => tab.id === activeTabId);
+    if (activeTab) {
+      setNotes(activeTab.content);
+    }
+  }, [activeTabId, tabs]);
 
   useEffect(() => {
     const savedHistory = localStorage.getItem("notesHistory");
@@ -158,6 +187,22 @@ const NotePage = ({ inNotebookSheet = false }) => {
       setTextColor("#000"); // White text for contrast
     }
   }, [inNotebookSheet]);
+
+  useEffect(() => {
+    if (editingTabId && editInputRef.current) {
+      editInputRef.current.focus();
+    }
+  }, [editingTabId]);
+
+  useEffect(() => {
+    // Check if user is logged in (this should be connected to your auth system)
+    const checkLoginStatus = () => {
+      // Replace this with your actual auth check
+      const userToken = localStorage.getItem('userToken');
+      setIsLoggedIn(!!userToken);
+    };
+    checkLoginStatus();
+  }, []);
 
   const collapse = () => {
     if (!inNotebookSheet) {
@@ -223,7 +268,15 @@ const NotePage = ({ inNotebookSheet = false }) => {
   };
 
   const handleNotesChange = (e) => {
-    setNotes(e.target.value);
+    const newContent = e.target.value;
+    setNotes(newContent);
+    setTabs(prevTabs => 
+      prevTabs.map(tab => 
+        tab.id === activeTabId 
+          ? { ...tab, content: newContent }
+          : tab
+      )
+    );
   };
 
   const saveToHistory = () => {
@@ -394,6 +447,68 @@ const NotePage = ({ inNotebookSheet = false }) => {
     );
   };
 
+  const createNewTab = () => {
+    if (!isLoggedIn && tabs.length >= MAX_TABS_FOR_GUEST) {
+      setShowWarning(true);
+      setTimeout(() => setShowWarning(false), 3000);
+      return;
+    }
+
+    const newTabId = Math.max(...tabs.map(tab => tab.id), 0) + 1;
+    const newTab = {
+      id: newTabId,
+      title: `Tab ${newTabId}`,
+      content: ""
+    };
+    setTabs(prevTabs => [...prevTabs, newTab]);
+    setActiveTabId(newTabId);
+    setShowTabDropdown(false);
+  };
+
+  const switchTab = (tabId) => {
+    setActiveTabId(tabId);
+    setShowTabDropdown(false);
+  };
+
+  const deleteTab = (tabId, e) => {
+    e.stopPropagation();
+    if (tabs.length === 1) return;
+    
+    setTabs(prevTabs => prevTabs.filter(tab => tab.id !== tabId));
+    if (activeTabId === tabId) {
+      const remainingTabs = tabs.filter(tab => tab.id !== tabId);
+      setActiveTabId(remainingTabs[0].id);
+    }
+  };
+
+  const startEditingTab = (tabId, title, e) => {
+    e.stopPropagation();
+    setEditingTabId(tabId);
+    setEditingTitle(title);
+  };
+
+  const saveTabTitle = (tabId, e) => {
+    e.stopPropagation();
+    if (editingTitle.trim()) {
+      setTabs(prevTabs =>
+        prevTabs.map(tab =>
+          tab.id === tabId ? { ...tab, title: editingTitle.trim() } : tab
+        )
+      );
+    }
+    setEditingTabId(null);
+    setEditingTitle("");
+  };
+
+  const handleTitleKeyDown = (tabId, e) => {
+    if (e.key === 'Enter') {
+      saveTabTitle(tabId, e);
+    } else if (e.key === 'Escape') {
+      setEditingTabId(null);
+      setEditingTitle("");
+    }
+  };
+
   return (
     <div
       onMouseEnter={() => setIsHovered(true)}
@@ -420,100 +535,181 @@ const NotePage = ({ inNotebookSheet = false }) => {
               <h1 className="text-2xl font-bold px-3 py-2">Notebook</h1>
             )}
             {!isCollapsed && (
-              <div className="flex ">
-                {lineNumbers && (
-                  <div
-                    ref={lineNumberRef}
-                    className={`text-right pr-2 overflow-hidden h-[345px] ${
-                      isAutoColor ? "text-gray-500 dark:text-gray-400" : ""
-                    }`}
-                    style={{
-                      fontSize: `${fontSize}px`,
-                      lineHeight: "3",
-                      color: !isAutoColor ? textColor : undefined,
-                      opacity: !isAutoColor ? 0.5 : undefined,
-                    }}
-                  >
-                    {Array.from(
-                      { length: getLineCount() },
-                      (_, i) => i + 1
-                    ).map((line) => (
-                      <div key={line} style={{ height: `${fontSize * 2.3}px` }}>
-                        {line}
-                      </div>
-                    ))}
+              <>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="relative" ref={tabDropdownRef}>
+                      <button
+                        onClick={() => setShowTabDropdown(!showTabDropdown)}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700 rounded-sm text-sm min-w-[120px]"
+                      >
+                        {tabs.find(tab => tab.id === activeTabId)?.title}
+                        <ChevronDown className="w-4 h-4" />
+                      </button>
+                      {showTabDropdown && (
+                        <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-[#28283A] border border-gray-200 dark:border-gray-700 rounded-sm shadow-lg z-50">
+                          {tabs.map(tab => (
+                            <div
+                              key={tab.id}
+                              className="flex items-center justify-between px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                              onClick={() => switchTab(tab.id)}
+                            >
+                              {editingTabId === tab.id ? (
+                                <input
+                                  ref={editInputRef}
+                                  type="text"
+                                  value={editingTitle}
+                                  onChange={(e) => setEditingTitle(e.target.value)}
+                                  onBlur={(e) => saveTabTitle(tab.id, e)}
+                                  onKeyDown={(e) => handleTitleKeyDown(tab.id, e)}
+                                  className="flex-1 bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400"
+                                  onClick={(e) => e.stopPropagation()}
+                                />
+                              ) : (
+                                <div className="flex items-center gap-2 flex-1">
+                                  <span className="text-sm">{tab.title}</span>
+                                  <button
+                                    onClick={(e) => startEditingTab(tab.id, tab.title, e)}
+                                    className="text-gray-500 hover:text-blue-500"
+                                    title="Rename tab"
+                                  >
+                                    <Pencil className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              )}
+                              {tabs.length > 1 && (
+                                <button
+                                  onClick={(e) => deleteTab(tab.id, e)}
+                                  className="text-gray-500 hover:text-red-500 ml-2"
+                                  title="Delete tab"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      onClick={createNewTab}
+                      className="flex items-center gap-1 px-2 py-1.5 bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700 rounded-sm text-sm"
+                      title="New Tab"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* {!isLoggedIn && (
+                  <div className="flex items-center gap-2 px-3 py-1.5 mb-2 text-sm text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 rounded-sm">
+                    <AlertCircle className="w-4 h-4" />
+                    <span>You are not logged in. Data will be saved locally only.</span>
+                  </div>
+                )} */}
+
+                {showWarning && (
+                  <div className="fixed top-4 right-4 flex items-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-sm shadow-lg z-50 animate-fade-in">
+                    <AlertCircle className="w-4 h-4" />
+                    <span>Guest users can only create up to {MAX_TABS_FOR_GUEST} tabs. Please log in to create more.</span>
                   </div>
                 )}
 
-                <textarea
-                  ref={textareaRef}
-                  value={notes}
-                  onChange={handleNotesChange}
-                  onScroll={handleScroll}
-                  className={`hindi-paper ${
-                    isAutoColor
-                      ? "text-gray-900 dark:text-white auto-lines"
-                      : ""
-                  }`}
-                  style={{
-                    height: "350px",
-                    marginBottom: "20px",
-                    resize: "none",
-                    color: isAutoColor ? undefined : textColor,
-                    backgroundColor: "transparent",
-                    border: `1px solid ${textColor}`,
-                    padding: "10px 10px 10px 10px",
-                    borderRadius: "5px",
-                    fontSize: `${fontSize}px`,
-                    lineHeight: "32px",
-                    fontFamily: "Arial, sans-serif",
-                    position: "relative",
-                    backgroundAttachment: "local",
-                    width: "100%",
-                    transformOrigin: "left top",
-                    fontWeight: isBold ? "bold" : "normal",
-                    textDecoration: isUnderline ? "underline" : "none",
-                    backgroundImage: !isAutoColor
-                      ? `linear-gradient(to bottom,transparent 30px,${getLineColor()} 31px,transparent 49px)`
-                      : undefined,
-                  }}
-                  placeholder="Start typing your notes here..."
-                />
-                <style>
-                  {`
-                    .hindi-paper {
-                      background-size: 100% 32px;
-                      background-position-y: -1px;
-                      line-height: 20px;
-                      padding: 0 8px;
-                      overflow-y: scroll;
-                      scrollbar-width: none;
-                    }
+                <div className="flex ">
+                  {lineNumbers && (
+                    <div
+                      ref={lineNumberRef}
+                      className={`text-right pr-2 overflow-hidden h-[345px] ${
+                        isAutoColor ? "text-gray-500 dark:text-gray-400" : ""
+                      }`}
+                      style={{
+                        fontSize: `${fontSize}px`,
+                        lineHeight: "3",
+                        color: !isAutoColor ? textColor : undefined,
+                        opacity: !isAutoColor ? 0.5 : undefined,
+                      }}
+                    >
+                      {Array.from(
+                        { length: getLineCount() },
+                        (_, i) => i + 1
+                      ).map((line) => (
+                        <div key={line} style={{ height: `${fontSize * 2.3}px` }}>
+                          {line}
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
-                    .hindi-paper.auto-lines {
-                      background-image: linear-gradient(
-                        to bottom,
-                        transparent 30px,
-                        rgba(0, 0, 0, 0.15) 31px,
-                        transparent 49px
-                      );
-                    }
+                  <textarea
+                    ref={textareaRef}
+                    value={notes}
+                    onChange={handleNotesChange}
+                    onScroll={handleScroll}
+                    className={`hindi-paper ${
+                      isAutoColor
+                        ? "text-gray-900 dark:text-white auto-lines"
+                        : ""
+                    }`}
+                    style={{
+                      height: "350px",
+                      marginBottom: "20px",
+                      resize: "none",
+                      color: isAutoColor ? undefined : textColor,
+                      backgroundColor: "transparent",
+                      border: `1px solid ${textColor}`,
+                      padding: "10px 10px 10px 10px",
+                      borderRadius: "5px",
+                      fontSize: `${fontSize}px`,
+                      lineHeight: "32px",
+                      fontFamily: "Arial, sans-serif",
+                      position: "relative",
+                      backgroundAttachment: "local",
+                      width: "100%",
+                      transformOrigin: "left top",
+                      fontWeight: isBold ? "bold" : "normal",
+                      textDecoration: isUnderline ? "underline" : "none",
+                      backgroundImage: !isAutoColor
+                        ? `linear-gradient(to bottom,transparent 30px,${getLineColor()} 31px,transparent 49px)`
+                        : undefined,
+                    }}
+                    placeholder="Start typing your notes here..."
+                  />
+                  <style>
+                    {`
+                      .hindi-paper {
+                        background-size: 100% 32px;
+                        background-position-y: -1px;
+                        line-height: 20px;
+                        padding: 0 8px;
+                        overflow-y: scroll;
+                        scrollbar-width: none;
+                      }
 
-                    .dark .hindi-paper.auto-lines {
-                      background-image: linear-gradient(
-                        to bottom,
-                        transparent 30px,
-                        rgba(255, 255, 255, 0.15) 31px,
-                        transparent 49px
-                      );
-                    }
+                      .hindi-paper.auto-lines {
+                        background-image: linear-gradient(
+                          to bottom,
+                          transparent 30px,
+                          rgba(0, 0, 0, 0.15) 31px,
+                          transparent 49px
+                        );
+                      }
 
-                    .hindi-paper::-webkit-scrollbar {
-                      display: none;
-                    }
-                  `}
-                </style>
-              </div>
+                      .dark .hindi-paper.auto-lines {
+                        background-image: linear-gradient(
+                          to bottom,
+                          transparent 30px,
+                          rgba(255, 255, 255, 0.15) 31px,
+                          transparent 49px
+                        );
+                      }
+
+                      .hindi-paper::-webkit-scrollbar {
+                        display: none;
+                      }
+                    `}
+                  </style>
+                </div>
+              </>
             )}
 
             {!isCollapsed && (
@@ -720,6 +916,13 @@ const NotePage = ({ inNotebookSheet = false }) => {
               transform: scale(1) translateY(0);
             }
           }
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          .animate-fade-in {
+            animation: fadeIn 0.3s ease-out;
+          }
         `}
       </style>
     </div>
@@ -727,3 +930,4 @@ const NotePage = ({ inNotebookSheet = false }) => {
 };
 
 export default NotePage;
+

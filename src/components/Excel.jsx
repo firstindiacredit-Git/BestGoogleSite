@@ -1513,15 +1513,22 @@ const Excel = () => {
                               onKeyDown={(e) => {
                                 if (e.key === "Enter") {
                                   e.preventDefault();
-                                  const currentValue =
-                                    table.data[rowIndex][colIndex];
-                                  if (
-                                    currentValue &&
-                                    currentValue.startsWith("=")
-                                  ) {
+                                  const currentValue = table.data[rowIndex][colIndex];
+                                  if (currentValue && currentValue.startsWith("=")) {
                                     recalculateFormulas(tableIndex);
                                   }
                                   setEditingCell(null);
+                                  
+                                  // Move to the next row
+                                  const nextRow = rowIndex + 1;
+                                  if (nextRow < table.data.length) {
+                                    handleCellDoubleClick(tableIndex, nextRow, colIndex);
+                                  } else {
+                                    // If we're at the last row, add a new row and move to it
+                                    addRow(tableIndex).then(() => {
+                                      handleCellDoubleClick(tableIndex, nextRow, colIndex);
+                                    });
+                                  }
                                 }
                               }}
                               className="w-full h-full outline-none border-none"
