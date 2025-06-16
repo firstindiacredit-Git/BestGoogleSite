@@ -6,7 +6,7 @@ import React, {
   useMemo,
   useRef,
 } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Header from "../components/Header";
 import Shortcut from "./ShortCuts";
 import { WidgetTransparencyContext } from "../App";
@@ -42,6 +42,12 @@ const NewSearchPage = ({ isToolPage = false }) => {
   );
   const [activeComponent, setActiveComponent] = useState("Anotherpage");
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Extract pageId from URL
+  const urlParams = new URLSearchParams(location.search);
+  const pageId = urlParams.get("pageId") || "home";
+
   const [visibleHandle, setVisibleHandle] = useState(() => {
     const savedMode = localStorage.getItem("uiMode");
     return savedMode === null ? true : savedMode === "modern"; // Default to true (modern) if not set
@@ -687,7 +693,7 @@ const NewSearchPage = ({ isToolPage = false }) => {
               ) : activeComponent === "Sports" ? (
                 <Sports />
               ) : activeComponent === "Anotherpage" ? (
-                <Anotherpage visibleHandle={visibleHandle} />
+                <Anotherpage visibleHandle={visibleHandle} pageId={pageId} />
               ) : activeComponent === "Top100" ? (
                 <Top100 />
               ) : activeComponent === "Tool" ? (
@@ -696,6 +702,7 @@ const NewSearchPage = ({ isToolPage = false }) => {
                 <Anotherpage
                   visibleHandle={visibleHandle}
                   isDarkMode={isDarkMode}
+                  pageId={pageId}
                 />
               )}
             </div>

@@ -20,6 +20,13 @@ import { FaCrown } from "react-icons/fa";
 import Signin from "./Signup/signin.jsx";
 import Signup from "./Signup.jsx";
 import { useTheme } from "../context/ThemeContext";
+import { 
+  getCustomPages, 
+  createCustomPage, 
+  updateCustomPage, 
+  deleteCustomPage,
+  syncLocalPagesToFirebase 
+} from "../firebase/customPages";
 
 const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
   const { isDarkMode, toggleTheme } = useTheme();
@@ -29,16 +36,40 @@ const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
   const [subscriptionStatus, setSubscriptionStatus] = useState("free");
   const [isAdmin, setIsAdmin] = useState(false);
   const [panel, setPanel] = useState(false);
-  const [pages, setPages] = useState(() => {
-    const savedPages = localStorage.getItem("customPages");
-    return savedPages ? JSON.parse(savedPages) : [];
-  });
+  const [pages, setPages] = useState([]);
   const [currentPageName, setCurrentPageName] = useState("Home");
   const navigate = useNavigate();
   const location = useLocation();
   const MAX_PAGES = 3; // Maximum allowed pages for free users
   const [showAdminBanner, setShowAdminBanner] = useState(true);
   const [showGoogleApps, setShowGoogleApps] = useState(false);
+
+  // Load pages from Firebase or localStorage
+  const loadPages = async (currentUser) => {
+    if (currentUser) {
+      try {
+        // First try to sync any local pages to Firebase
+        await syncLocalPagesToFirebase(currentUser.uid);
+        
+        // Then load pages from Firebase
+        const firebasePages = await getCustomPages(currentUser.uid);
+        setPages(firebasePages);
+      } catch (error) {
+        console.error("Error loading pages from Firebase:", error);
+        // Fallback to localStorage if Firebase fails
+        const savedPages = localStorage.getItem("customPages");
+        if (savedPages) {
+          setPages(JSON.parse(savedPages));
+        }
+      }
+    } else {
+      // For non-logged in users, use localStorage
+      const savedPages = localStorage.getItem("customPages");
+      if (savedPages) {
+        setPages(JSON.parse(savedPages));
+      }
+    }
+  };
 
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
@@ -63,16 +94,23 @@ const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
         setShowAdminBanner(userData?.showAdminBanner !== false);
 
         setUser({
+          uid: currentUser.uid,
           displayName: currentUser.displayName,
           email: currentUser.email,
           photoURL: currentUser.photoURL,
           username: currentUser.username || null,
         });
+
+        // Load pages for logged in user
+        await loadPages(currentUser);
       } else {
         setUser(null);
         setSubscriptionStatus("free");
         setIsAdmin(false);
         setShowAdminBanner(true);
+        
+        // Load pages for non-logged in user
+        await loadPages(null);
       }
     });
 
@@ -92,8 +130,8 @@ const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
     }
   };
 
-  const createNewPage = () => {
-    if (!user) {
+  const createNewPage = async () => {
+    if (!user || !user.uid) {
       message.error("Please sign in to create pages");
       return;
     }
@@ -103,26 +141,41 @@ const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
       return;
     }
 
-    const newPageNumber = pages.length + 1;
-    const newPage = {
-      id: Date.now(),
-      name: `My Page ${newPageNumber}`,
-      widgets: [],
-    };
+    try {
+      const newPageNumber = pages.length + 1;
+      const pageData = {
+        name: `My Page ${newPageNumber}`,
+        widgets: [],
+      };
 
-    const updatedPages = [...pages, newPage];
-    setPages(updatedPages);
-    localStorage.setItem("customPages", JSON.stringify(updatedPages));
-    navigate(`/NewSearchPage?pageId=${newPage.id}`);
-    // setShowHomeDropdown(false);
+      if (user && user.uid) {
+        // Save to Firebase for logged in users
+        const newPage = await createCustomPage(user.uid, pageData);
+        setPages(prevPages => [...prevPages, newPage]);
+        navigate(`/NewSearchPage?pageId=${newPage.id}`);
+      } else {
+        // Save to localStorage for non-logged in users
+        const newPage = {
+          id: Date.now(),
+          name: pageData.name,
+          widgets: pageData.widgets,
+        };
+        const updatedPages = [...pages, newPage];
+        setPages(updatedPages);
+        localStorage.setItem("customPages", JSON.stringify(updatedPages));
+        navigate(`/NewSearchPage?pageId=${newPage.id}`);
+      }
+    } catch (error) {
+      console.error("Error creating page:", error);
+      message.error("Failed to create page. Please try again.");
+    }
   };
 
   const handlePageClick = (pageId) => {
     navigate(`/NewSearchPage?pageId=${pageId}`);
-    // setShowHomeDropdown(false);
   };
 
-  const deletePage = (pageId, event) => {
+  const deletePage = async (pageId, event) => {
     event.stopPropagation();
     const pageToDelete = pages.find((page) => page.id === pageId);
 
@@ -134,58 +187,110 @@ const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
       okText: <div className="dark:text-white">Yes</div>,
       cancelText: <div>No</div>,
       onOk: async () => {
-        const updatedPages = pages.filter((page) => page.id !== pageId);
-        setPages(updatedPages);
-        localStorage.setItem("customPages", JSON.stringify(updatedPages));
-
-        // Reset default page if the deleted page was default
-        if (pageId.toString() === defaultPageId?.toString()) {
-          const currentUser = auth.currentUser;
-          if (currentUser) {
-            const userDocRef = doc(db, "users", currentUser.uid);
-            await setDoc(
-              userDocRef,
-              {
-                defaultPageId: "",
-              },
-              { merge: true }
-            );
-            setDefaultPageId("");
+        try {
+          if (user && user.uid) {
+            // Delete from Firebase for logged in users
+            await deleteCustomPage(user.uid, pageId);
+            message.success("Page deleted successfully from Firebase");
+          } else {
+            // Delete from localStorage for non-logged in users
+            const updatedPages = pages.filter((page) => page.id !== pageId);
+            localStorage.setItem("customPages", JSON.stringify(updatedPages));
+            message.success("Page deleted successfully from local storage");
           }
-        }
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const currentPageId = urlParams.get("pageId");
-        if (currentPageId === pageId.toString()) {
-          navigate("/search");
+          const updatedPages = pages.filter((page) => page.id !== pageId);
+          setPages(updatedPages);
+
+          // Reset default page if the deleted page was default
+          if (pageId.toString() === defaultPageId?.toString()) {
+            const currentUser = auth.currentUser;
+            if (currentUser) {
+              const userDocRef = doc(db, "users", currentUser.uid);
+              await setDoc(
+                userDocRef,
+                {
+                  defaultPageId: "",
+                },
+                { merge: true }
+              );
+              setDefaultPageId("");
+            }
+          }
+
+          const urlParams = new URLSearchParams(window.location.search);
+          const currentPageId = urlParams.get("pageId");
+          if (currentPageId === pageId.toString()) {
+            navigate("/search");
+          }
+        } catch (error) {
+          console.error("Error deleting page:", error);
+          message.error("Failed to delete page. Please try again.");
         }
       },
     });
   };
 
-  const handlePageNameEdit = (pageId, currentName, event) => {
+  const handlePageNameEdit = async (pageId, currentName, event) => {
     event.stopPropagation();
-    Modal.confirm({
+    let newNameValue = currentName;
+
+    let modalInstance = null;
+
+    const onInputChange = (e) => {
+      newNameValue = e.target.value;
+    };
+
+    modalInstance = Modal.confirm({
       title: <div className="dark:text-white">Edit Page Name</div>,
       content: (
         <Input
           defaultValue={currentName}
           id="pageNameInput"
           placeholder="Enter new page name"
+          autoFocus
+          onChange={onInputChange}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              modalInstance.destroy(); // Close the modal
+              if (newNameValue.trim()) {
+                updatePageName(pageId, newNameValue.trim());
+              }
+            }
+          }}
         />
       ),
-      onOk() {
-        const newName = document.getElementById("pageNameInput").value;
+      onOk: async () => {
+        const input = document.getElementById("pageNameInput");
+        const newName = input ? input.value : newNameValue;
         if (newName.trim()) {
-          const updatedPages = pages.map((page) =>
-            page.id === pageId ? { ...page, name: newName.trim() } : page
-          );
-          setPages(updatedPages);
-          localStorage.setItem("customPages", JSON.stringify(updatedPages));
-          onPageNameChange && onPageNameChange(pageId, newName.trim());
+          await updatePageName(pageId, newName.trim());
         }
       },
+      maskClosable: true, // Allow closing on outside click
     });
+
+    // Helper to update the page name
+    async function updatePageName(pageId, newName) {
+      try {
+        if (user && user.uid) {
+          await updateCustomPage(user.uid, pageId, { name: newName });
+        } else {
+          const updatedPages = pages.map((page) =>
+            page.id === pageId ? { ...page, name: newName } : page
+          );
+          localStorage.setItem("customPages", JSON.stringify(updatedPages));
+        }
+        const updatedPages = pages.map((page) =>
+          page.id === pageId ? { ...page, name: newName } : page
+        );
+        setPages(updatedPages);
+        onPageNameChange && onPageNameChange(pageId, newName);
+      } catch (error) {
+        console.error("Error updating page name:", error);
+        message.error("Failed to update page name. Please try again.");
+      }
+    }
   };
 
   const Back = () => {

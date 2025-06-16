@@ -433,7 +433,7 @@ const Weather = () => {
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
-        minHeight: '170px'
+        minHeight: '200px'
       }}
     >
       {/* Background overlay for better text readability */}

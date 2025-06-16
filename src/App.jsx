@@ -39,6 +39,12 @@ import Login from "./components/Admin/Login.jsx";
 import Sidebar from "./components/Admin/Sidebar.jsx";
 import ShortcutTest from "./components/ShortcutTest";
 import ChatbotAI from "./components/ChatbotAi";
+import { onAuthStateChanged } from "firebase/auth";
+import { 
+  getCustomPages, 
+  createCustomPage, 
+  deleteCustomPage 
+} from "./firebase/customPages";
 
 // Lazy load non-critical components
 const NotFound = lazy(() => import("./components/NotFound.jsx"));
@@ -325,26 +331,42 @@ const ContextMenuWrapper = ({ children }) => {
   const openModal = () => setIsModalVisible(true);
   const closeModal = () => setIsModalVisible(false);
 
-  const createNewPage = () => {
-    const pages = JSON.parse(localStorage.getItem("customPages") || "[]");
-    const newPageNumber = pages.length + 1;
-    const newPage = {
-      id: Date.now(),
-      name: `Page ${newPageNumber}`,
-      widgets: [],
-    };
+  const createNewPage = async () => {
+    const currentUser = auth.currentUser;
+    
+    if (!currentUser) {
+      message.error("Please sign in to create pages");
+      return;
+    }
 
-    const updatedPages = [...pages, newPage];
-    localStorage.setItem("customPages", JSON.stringify(updatedPages));
-    navigate(`/NewSearchPage?pageId=${newPage.id}`);
+    try {
+      const pages = await getCustomPages(currentUser.uid);
+      const newPageNumber = pages.length + 1;
+      const pageData = {
+        name: `Page ${newPageNumber}`,
+        widgets: [],
+      };
+
+      const newPage = await createCustomPage(currentUser.uid, pageData);
+      navigate(`/NewSearchPage?pageId=${newPage.id}`);
+    } catch (error) {
+      console.error("Error creating page:", error);
+      message.error("Failed to create page. Please try again.");
+    }
   };
 
-  const deletePage = () => {
+  const deletePage = async () => {
     const urlParams = new URLSearchParams(location.search);
     const currentPageId = urlParams.get("pageId");
 
     if (!currentPageId) {
       message.error("Cannot delete the home page");
+      return;
+    }
+
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      message.error("Please sign in to delete pages");
       return;
     }
 
@@ -354,13 +376,14 @@ const ContextMenuWrapper = ({ children }) => {
       okText: "Yes",
       okType: "danger",
       cancelText: "No",
-      onOk() {
-        const pages = JSON.parse(localStorage.getItem("customPages") || "[]");
-        const updatedPages = pages.filter(
-          (page) => page.id.toString() !== currentPageId
-        );
-        localStorage.setItem("customPages", JSON.stringify(updatedPages));
-        navigate("/search");
+      onOk: async () => {
+        try {
+          await deleteCustomPage(currentUser.uid, parseInt(currentPageId));
+          navigate("/search");
+        } catch (error) {
+          console.error("Error deleting page:", error);
+          message.error("Failed to delete page. Please try again.");
+        }
       },
     });
   };
