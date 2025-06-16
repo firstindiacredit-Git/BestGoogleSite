@@ -91,21 +91,21 @@ const todoTools = [
     name: "Grocery List",
     icon: <FaTasks className="text-yellow-500" />,
   },
-  {
-    path: "/bulkemailchecker",
-    name: "Email Checker",
-    icon: <FaTasks className="text-yellow-500" />,
-  },
-  {
-    path: "/bulkemailsender",
-    name: "Email Sender",
-    icon: <FaTasks className="text-yellow-500" />,
-  },
-  {
-    path: "/googlemap",
-    name: "Google Map Extractor",
-    icon: <FaTasks className="text-yellow-500" />,
-  },
+  // {
+  //   path: "/bulkemailchecker",
+  //   name: "Email Checker",
+  //   icon: <FaTasks className="text-yellow-500" />,
+  // },
+  // {
+  //   path: "/bulkemailsender",
+  //   name: "Email Sender",
+  //   icon: <FaTasks className="text-yellow-500" />,
+  // },
+  // {
+  //   path: "/googlemap",
+  //   name: "Google Map Extractor",
+  //   icon: <FaTasks className="text-yellow-500" />,
+  // },
   {
     path: "/cardvalidation",
     name: "Card Validator",
@@ -320,11 +320,11 @@ const miscTools = [
     name: "Resume Builder",
     icon: <FaFilePdf className="text-green-500" />,
   },
-  {
-    path: "/linkchecker",
-    name: "Website Link Checker",
-    icon: <FaFilePdf className="text-green-500" />,
-  },
+  // {
+  //   path: "/linkchecker",
+  //   name: "Website Link Checker",
+  //   icon: <FaFilePdf className="text-green-500" />,
+  // },
   {
     path: "/wordcounter",
     name: "Word Counter",

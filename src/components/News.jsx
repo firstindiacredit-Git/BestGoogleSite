@@ -1,8 +1,8 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
-import { Row, Col, List, Image } from "antd";
+import { Row, Col, List, Image, Dropdown } from "antd";
 
 import SkeletonLoader from "./SkeletonLoader";
-import { FaList, FaTh } from "react-icons/fa";
+import { FaList, FaTh, FaEllipsisH } from "react-icons/fa";
 
 // Create NewsContext
 const NewsContext = createContext(null);
@@ -13,14 +13,14 @@ const NewsProvider = ({ children }) => {
 
   const [loading, setLoading] = useState(false);
 
-  const fetchData = async (title = "") => {
+  const fetchData = async (category = "latest") => {
     setLoading(true);
     try {
       const res = await fetch(
-        `https://bgs-backend.vercel.app/api/top100/gnews?query=${title}`
+        `https://gnews.io/api/v4/top-headlines?q=${category}&lang=en&country=us&max=10&apikey=d1561b9a1c352425b78fd42024da7255`
       );
       const newsData = await res.json();
-      setNewsApi(newsData);
+      setNewsApi(newsData.articles || []);
     } catch (error) {
       console.error("Error fetching news:", error);
     } finally {
@@ -43,35 +43,56 @@ const NewsProvider = ({ children }) => {
 const NewsApp = () => {
   const { newsapi, loading, fetchData } = useContext(NewsContext);
   const [viewMode, setViewMode] = useState("grid");
-  const [currentSet, setCurrentSet] = useState("World");
+  const [currentSet, setCurrentSet] = useState("Latest");
   const setSHow = (a) => {
     setCurrentSet(a);
   };
   const menuItems = [
+    { key: "india", label: "India" },
     { key: "latest", label: "Latest" },
     { key: "world", label: "World" },
     { key: "business", label: "Business" },
     { key: "technology", label: "Technology" },
+    { key: "sports", label: "Sports" },
     { key: "entertainment", label: "Entertainment" },
     { key: "health", label: "Health" },
     { key: "science", label: "Science" },
-    { key: "sports", label: "Sports" },
     { key: "politics", label: "Politics" },
+    { key: "education", label: "Education" },
+    { key: "crime", label: "Crime" },
+    { key: "lifestyle", label: "Lifestyle" },
+    { key: "automobile", label: "Automobile" },
+    { key: "weather", label: "Weather" }
   ];
+
+  // Split menu items into main and dropdown items
+  const mainMenuItems = menuItems.slice(0, 8);
+  const dropdownItems = menuItems.slice(8).map(item => ({
+    key: item.key,
+    label: (
+      <div
+        onClick={() => {
+          fetchData(item.key);
+          setSHow(item.label);
+        }}
+      >
+        {item.label}
+      </div>
+    ),
+  }));
 
   const renderGridView = () => (
     <Row gutter={[20, 20]}>
       {newsapi?.map((news, index) => (
         <Col xs={24} sm={12} md={8} lg={6} key={index}>
           <div
-            key={index}
-            className=" bg-white/[var(--widget-opacity)] backdrop-blur-sm  dark:bg-[#28283a]/[var(--widget-opacity)]  flex flex-col justify-between h-[30rem] overflow-hidden  p-3 rounded-lg "
+            className="bg-white/[var(--widget-opacity)] backdrop-blur-sm dark:bg-[#28283a]/[var(--widget-opacity)] flex flex-col justify-between h-[30rem] overflow-hidden p-3 rounded-lg"
           >
-            <div className=" w-full">
+            <div className="w-full">
               <img
                 alt={news.title}
                 src={news.image}
-                className=" h-[18rem] w-full object-cover "
+                className="h-[18rem] w-full object-cover"
                 onError={(e) => {
                   e.target.src =
                     "https://plus.unsplash.com/premium_photo-1707080369554-359143c6aa0b?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8bmV3cyUyMHdlYnNpdGV8ZW58MHx8MHx8fDA%3D";
@@ -107,9 +128,9 @@ const NewsApp = () => {
       itemLayout="vertical"
       size="large"
       dataSource={newsapi || []}
-      renderItem={(news) => (
+      renderItem={(news, index) => (
         <List.Item
-          key={news.title}
+          key={index}
           className="dark:bg-[#332B4A] mb-3 bg-white dark:text-white rounded-lg"
           extra={
             <Image
@@ -129,6 +150,7 @@ const NewsApp = () => {
           }
           actions={[
             <a
+              key="read-more"
               href={news.url}
               target="_blank"
               rel="noopener noreferrer"
@@ -151,16 +173,16 @@ const NewsApp = () => {
 
   return (
     <div className="p-6">
-      <div className="flex mb-5 ">
-        <div className="m-auto w-fit p-1 dark:text-white flex justify-center gap-4 rounded-md backdrop-blur-sm bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]">
-          {menuItems.map((item, key) => (
+      <div className="flex mb-5 flex-wrap gap-2">
+        <div className="m-auto w-fit p-1 dark:text-white flex flex-wrap justify-center gap-2 rounded-md backdrop-blur-sm bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]">
+          {mainMenuItems.map((item, key) => (
             <div
               key={key}
-              className={` cursor-pointer px-3 py-2 rounded-md   ${
+              className={`cursor-pointer px-3 py-2 rounded-md ${
                 item.label === currentSet
                   ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
                   : "hover:bg-gray-200/20 hover:dark:bg-[#513a7a]/20"
-              } `}
+              }`}
               onClick={() => {
                 fetchData(item.key);
                 setSHow(item.label);
@@ -169,6 +191,15 @@ const NewsApp = () => {
               {item.label}
             </div>
           ))}
+          <Dropdown
+            menu={{ items: dropdownItems }}
+            placement="bottomRight"
+            trigger={['click']}
+          >
+            <div className="cursor-pointer px-3 py-2 rounded-md hover:bg-gray-200/20 hover:dark:bg-[#513a7a]/20">
+              <FaEllipsisH />
+            </div>
+          </Dropdown>
         </div>
 
         <div className="bg-white dark:bg-[#513a7a] rounded-lg shadow-sm p-1 inline-flex">
@@ -213,7 +244,7 @@ const NewsApp = () => {
 const News = () => {
   return (
     <div className="pb-9">
-      <div className="   w-[90vw] mx-auto bg-transparent ">
+      <div className="w-[90vw] mx-auto bg-transparent">
         <NewsProvider>
           <NewsApp />
         </NewsProvider>

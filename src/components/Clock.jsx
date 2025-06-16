@@ -332,7 +332,7 @@ const preventScroll = (prevent) => {
 
 const ResponsiveWorldClock = () => {
   const [isAnalog, setIsAnalog] = useState(true);
-  const [selectedTimezones, setSelectedTimezones] = useState(["Asia/Kolkata"]);
+  const [selectedTimezones, setSelectedTimezones] = useState(["Asia/Kolkata", "America/New_York"]);
   const [isHovering, setIsHovering] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -371,6 +371,7 @@ const ResponsiveWorldClock = () => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
+      // Check if click is outside settings menu and settings button
       if (
         settingsMenuRef.current &&
         !settingsMenuRef.current.contains(event.target) &&
@@ -378,6 +379,15 @@ const ResponsiveWorldClock = () => {
         !settingsRef.current.contains(event.target)
       ) {
         setShowSettings(false);
+      }
+
+      // Check if click is outside add timezone dropdown and add button
+      if (
+        isDropdownOpen &&
+        addButtonRef.current &&
+        !addButtonRef.current.contains(event.target) &&
+        !event.target.closest('.add-timezone-dropdown')
+      ) {
         setIsDropdownOpen(false);
       }
     };
@@ -387,7 +397,13 @@ const ResponsiveWorldClock = () => {
       document.removeEventListener("mousedown", handleClickOutside);
       preventScroll(false);
     };
-  }, []);
+  }, [isDropdownOpen]);
+
+  // Add new effect to handle scroll prevention
+  useEffect(() => {
+    preventScroll(isDropdownOpen);
+    return () => preventScroll(false);
+  }, [isDropdownOpen]);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -507,7 +523,7 @@ const ResponsiveWorldClock = () => {
   const renderAddTimezoneMenu = () => {
     const addTimezoneContent = isDropdownOpen && (
       <div
-        className="fixed w-64 bg-white dark:bg-[#28283A] rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-[9998] overflow-hidden"
+        className="fixed w-64 bg-white dark:bg-[#28283A] rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-[9998] overflow-hidden add-timezone-dropdown"
         style={{
           top: `${addDropdownPosition.top}px`,
           right: `${addDropdownPosition.right}px`,

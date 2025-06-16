@@ -428,8 +428,8 @@ const CredentialManager = () => {
   return (
     <>
       {isLocked ? (
-        <div className="flex justify-center w-[90vw] mx-auto">
-          <div className="w-full  rounded-t-sm   h-[40vh]   flex items-center justify-center">
+        <div className="flex justify-center  w-[90vw] mx-auto">
+          <div className="w-full  rounded-t-sm  h-[40vh]   flex items-center justify-center">
             <div className="p-8 flex w-2/5 gap-6  items-center justify-between backdrop-blur-sm bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)]  text-center rounded-md ">
               <div className=" text-indigo-500 mr-10 text-6xl">
                 <img src="/undraw_secure-login_m11a.svg" alt="locker" />
@@ -476,7 +476,7 @@ const CredentialManager = () => {
           </div>
         </div>
       ) : (
-        <div className="p-8 bg-white/[var(--widget-opacity)]  dark:bg-[#28283A]/[var(--widget-opacity)] mx-auto backdrop-blur-sm min-h-[60vh] max-w-[90vw] rounded-xl ">
+        <div className="p-8 bg-white/[var(--widget-opacity)] mb-8  dark:bg-[#28283A]/[var(--widget-opacity)] mx-auto backdrop-blur-sm min-h-[60vh] max-w-[90vw] rounded-xl ">
           <div>
             <div className="flex justify-between w-[68%] xl:w-[79.2%]  items-center">
               <button
