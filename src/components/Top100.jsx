@@ -112,6 +112,7 @@ const Top100Page = () => {
           const processedData = bikes.motorcycles.map((bike) => ({
             name: bike.motorcycle,
             description: `Year: ${bike.model_year}, Time: ${bike.time_seconds}s, Mph Speed: ${bike.speed_mph}mph, Kmh Speed: ${bike.speed_kmh}km/h`,
+            image: bike.logo,
           }));
           setItems(processedData);
           setError(null);
@@ -227,6 +228,12 @@ const Top100Page = () => {
                       src={item.image}
                       alt={item.name}
                       className="w-8 h-8  rounded-lg object-cover"
+                    />
+                  ) : category === "motorcycles" && item.image ? (
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      className="w-8 h-8 rounded-lg object-cover"
                     />
                   ) : (
                     <span className="text-lg font-semibold text-gray-600 dark:text-gray-200">
