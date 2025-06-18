@@ -98,7 +98,8 @@ const Top100Page = () => {
 
         if (category === "brands") {
           const processedData = brands.map((brand) => ({
-            name: `${brand.Brand}`,
+            logo: brand.logo || null,
+            name: brand.Brand,
             description: `Rank: ${brand.Rank}, Change: ${brand.Change}, Value: ${brand.Value}`,
             value: `$${brand.Value}M`,
           }));
@@ -144,6 +145,62 @@ const Top100Page = () => {
           return;
         }
       }
+
+      // Handle crypto category with CoinGecko API
+      if (category === "crypto") {
+        const response = await fetch(
+          "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100"
+        );
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const processedData = data.map((coin) => ({
+          name: coin.name,
+          image: coin.image,
+          value: `$${coin.current_price?.toLocaleString() || "N/A"}`,
+          marketCap: `$${(coin.market_cap / 1000000000).toFixed(2)}B`,
+          change24h: `${coin.price_change_percentage_24h?.toFixed(2) || "N/A"}%`,
+        }));
+        setItems(processedData);
+        setError(null);
+        setLoading(false);
+        return;
+      }
+
+      // Handle movies category with IMDB RapidAPI
+      if (category === "movies") {
+        const response = await fetch(
+          "https://imdb-top-100-movies.p.rapidapi.com/",
+          {
+            headers: {
+              "x-rapidapi-key": "ed98e198d3msha2890b3dde9a12dp1e7caejsnf255bf4ce34c",
+              "x-rapidapi-host": "imdb-top-100-movies.p.rapidapi.com",
+            },
+          }
+        );
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const processedData = data.map((movie) => ({
+          name: movie.title,
+          // description: `Year: ${movie.year || "N/A"}, Rating: ${movie.rating || "N/A"}, Director: ${movie.director || "N/A"}`,
+          image: movie.image || null,
+          value: movie.rating ? `${movie.rating}/10` : "N/A",
+          year: movie.year || "N/A",
+          imdb_link: movie.imdb_link || "N/A",
+          // description: movie.description || "N/A"
+        }));
+        setItems(processedData);
+        setError(null);
+        setLoading(false);
+        return;
+      }
+
+      // Handle other categories with existing backend API
       const response = await fetch(
         `https://bgs-backend.vercel.app/api/top100/${category}?year=${year}`
       );
@@ -173,12 +230,6 @@ const Top100Page = () => {
                           FIGI: ${stock.figi || "N/A"}`,
           }));
           break;
-        case "crypto":
-          processedData = data.map((coin) => ({
-            name: coin.name,
-            description: `Price: $${coin.current_price}, Market Cap: $${coin.market_cap}`,
-          }));
-          break;
         case "billionaires":
           processedData = data.map((person) => ({
             name: person.personName,
@@ -188,12 +239,6 @@ const Top100Page = () => {
               .split(",")[0]
               .trim()}, Country: ${person.countryOfCitizenship}`,
             image: person.person?.squareImage || null,
-          }));
-          break;
-        case "movies":
-          processedData = data.map((movie) => ({
-            name: movie.title,
-            description: `Rating: ${movie.rating}, Year: ${movie.year}`,
           }));
           break;
       }
@@ -223,27 +268,26 @@ const Top100Page = () => {
               {/* Header with number and title */}
               <div className="flex items-center gap-3">
                 <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-gray-50/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]">
-                  {category === "billionaires" && item.image ? (
-                    <Image
-                      src={item.image}
-                      alt={item.name}
-                      className="w-8 h-8  rounded-lg object-cover"
-                    />
-                  ) : category === "motorcycles" && item.image ? (
-                    <Image
-                      src={item.image}
-                      alt={item.name}
-                      className="w-8 h-8 rounded-lg object-cover"
-                    />
-                  ) : (
-                    <span className="text-lg font-semibold text-gray-600 dark:text-gray-200">
-                      {index + 1}
-                    </span>
-                  )}
+                  <span className="text-lg font-semibold text-gray-600 dark:text-gray-200">
+                    {index + 1}
+                  </span>
                 </div>
                 <h3 className="font-medium text-gray-900 dark:text-white flex-grow truncate">
                   {item.name}
                 </h3>
+                {(category === "brands" && item.logo) || 
+                 (category === "billionaires" && item.image) || 
+                 (category === "motorcycles" && item.image) ||
+                 (category === "crypto" && item.image) ||
+                 (category === "movies" && item.image) ? (
+                  <div className="flex-shrink-0 w-10 h-10">
+                    <Image
+                      src={category === "brands" ? item.logo : item.image}
+                      alt={item.name}
+                      className="w-10 h-10 rounded-lg object-cover"
+                    />
+                  </div>
+                ) : null}
               </div>
 
               {/* Details Section */}
@@ -256,14 +300,10 @@ const Top100Page = () => {
                     {category === "billionaires" && "Net Worth"}
                     {category === "motorcycles" && "Speed"}
                     {category === "gdp" && "GDP"}
+                    {category === "movies" && "Rating"}
                   </span>
                   <span className="font-medium">
-                    {category === "crypto" &&
-                      (item.description?.includes("Price: $")
-                        ? `$${
-                            item.description.split("Price: $")[1]?.split(",")[0]
-                          }`
-                        : "N/A")}
+                    {category === "crypto" && item.value}
                     {category === "brands" && item.value}
                     {category === "billionaires" &&
                       item.description?.split("Net Worth: ")[1]?.split(",")[0]}
@@ -274,8 +314,41 @@ const Top100Page = () => {
                           ?.split("km/h")[0]
                       } km/h`}
                     {category === "gdp" && item.value}
+                    {category === "movies" && item.value}
                   </span>
                 </div>
+
+                {/* Crypto specific data */}
+                {category === "crypto" && (
+                  <>
+                    <div className="flex justify-between items-center text-gray-500 dark:text-gray-300">
+                      <span>Market Cap</span>
+                      <span className="font-medium">{item.marketCap}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-gray-500 dark:text-gray-300">
+                      <span>24h Change</span>
+                      <span className={`font-medium ${
+                        parseFloat(item.change24h) >= 0 ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        {item.change24h}
+                      </span>
+                    </div>
+                  </>
+                )}
+
+                {/* Movie specific data */}
+                {category === "movies" && (
+                  <>
+                    <div className="flex justify-between items-center text-gray-500 dark:text-gray-300">
+                      <span>Year</span>
+                      <span className="font-medium">{item.year}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-gray-500 dark:text-gray-300">
+                      <span>IMBD</span>
+                      <span className="font-medium">{item.imdb_link}</span>
+                    </div>
+                  </>
+                )}
 
                 {/* Sources Section */}
                 {item.description?.split(",").map((info, i) => {
@@ -290,6 +363,13 @@ const Top100Page = () => {
                   if (
                     category === "motorcycles" &&
                     info.includes("Kmh Speed:")
+                  ) {
+                    return null;
+                  }
+                  // Skip crypto data that's already displayed above
+                  if (
+                    category === "crypto" &&
+                    (info.includes("Price:") || info.includes("Market Cap:") || info.includes("24h Change:"))
                   ) {
                     return null;
                   }
@@ -362,17 +442,9 @@ const Top100Page = () => {
               <div className="flex  gap-2 p-2 bg-white dark:bg-[#28283a] rounded-lg hover:shadow-md transition-all duration-200">
                 {/* Number/Image Circle */}
                 <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-gray-50/[var(--w)] dark:bg-[#513a7a]/[var(--w)]">
-                  {category === "billionaires" && item.image ? (
-                    <Image
-                      src={item.image}
-                      alt={item.name}
-                      className="w-8 h-8 rounded-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-lg font-semibold text-gray-600 dark:text-gray-400">
-                      {index + 1}
-                    </span>
-                  )}
+                  <span className="text-lg font-semibold text-gray-600 dark:text-gray-400">
+                    {index + 1}
+                  </span>
                 </div>
 
                 {/* Content */}
@@ -384,13 +456,7 @@ const Top100Page = () => {
                     {/* Category-specific values */}
                     {category === "crypto" && (
                       <span className="text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
-                        {item.description?.includes("Price: $")
-                          ? `$${
-                              item.description
-                                .split("Price: $")[1]
-                                ?.split(",")[0]
-                            }`
-                          : ""}
+                        {item.value}
                       </span>
                     )}
                     {category === "brands" && (
@@ -422,16 +488,59 @@ const Top100Page = () => {
                         {item.value}
                       </span>
                     )}
+                    {category === "movies" && (
+                      <span className="text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
+                        {item.value}
+                      </span>
+                    )}
                   </div>
                   {/* Description */}
                   <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    {item.description?.split(",").map((info, i) => (
-                      <p key={i} className="line-clamp-1">
-                        {info.trim()}
-                      </p>
-                    ))}
+                    {category === "crypto" ? (
+                      <div className="space-y-1">
+                        <p className="line-clamp-1">Market Cap: {item.marketCap}</p>
+                        <p className={`line-clamp-1 ${
+                          parseFloat(item.change24h) >= 0 ? 'text-green-600' : 'text-red-600'
+                        }`}>
+                          24h Change: {item.change24h}
+                        </p>
+                      </div>
+                    ) : category === "movies" ? (
+                      <div className="space-y-1">
+                        <p className="line-clamp-1">Year: {item.year}</p>
+                        <p className="line-clamp-1">Director: {item.director}</p>
+                      </div>
+                    ) : (
+                      item.description?.split(",").map((info, i) => (
+                        <p key={i} className="line-clamp-1">
+                          {info.trim()}
+                        </p>
+                      ))
+                    )}
                   </div>
                 </div>
+                
+                {/* Crypto Logo */}
+                {category === "crypto" && item.image && (
+                  <div className="flex-shrink-0 w-10 h-10">
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      className="w-10 h-10 rounded-lg object-cover"
+                    />
+                  </div>
+                )}
+                
+                {/* Movie Logo */}
+                {category === "movies" && item.image && (
+                  <div className="flex-shrink-0 w-10 h-10">
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      className="w-10 h-10 rounded-lg object-cover"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           ))}
