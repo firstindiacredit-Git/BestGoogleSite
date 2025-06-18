@@ -17,7 +17,7 @@ const NewsProvider = ({ children }) => {
     setLoading(true);
     try {
       const res = await fetch(
-        `https://gnews.io/api/v4/top-headlines?q=${category}&lang=en&country=us&max=10&apikey=d1561b9a1c352425b78fd42024da7255`
+        `https://gnews.io/api/v4/top-headlines?q=${category}&lang=en&country=${category === 'india' ? 'in' : 'us'}&max=10&apikey=d1561b9a1c352425b78fd42024da7255`
       );
       const newsData = await res.json();
       setNewsApi(newsData.articles || []);
