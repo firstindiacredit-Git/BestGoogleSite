@@ -91,8 +91,8 @@ const Grocery = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#513a7a] p-2 sm:p-4 md:p-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-white mt-16 dark:bg-[#513a7a] p-2 sm:p-4 md:p-8">
+      <div className="max-w-4xl mt-16 mx-auto">
         <div className="bg-white dark:bg-[#28283a] rounded-2xl shadow-sm overflow-hidden">
           {/* Header */}
           <div className="relative p-4 sm:p-6">

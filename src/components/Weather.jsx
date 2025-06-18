@@ -545,43 +545,7 @@ const Weather = () => {
       {/* Background overlay for better text readability */}
       <div className="absolute inset-0 bg-black/30"></div>
       
-      {/* Login Warning */}
-      {showWarning && !user && (
-        <div className="w-full mx-auto mb-4 px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 border-l-4 border-indigo-400 dark:border-indigo-600">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <svg
-                className="w-5 h-5 text-indigo-400 dark:text-indigo-600 mr-3"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <p className="text-sm text-indigo-700 dark:text-indigo-200">
-                You are not logged in. Your background preferences will only be saved locally and may be lost when clearing browser data.
-              </p>
-            </div>
-            <div className="flex items-center gap-8">
-              <button
-                onClick={() => window.location.href = '/search'}
-                className="ml-4 text-sm font-medium text-indigo-700 dark:text-indigo-200 hover:text-indigo-600 dark:hover:text-indigo-300 underline"
-              >
-                Login
-              </button>
-              <button
-                className="text-indigo-400 hover:text-indigo-600 dark:text-indigo-500 dark:hover:text-indigo-300"
-                onClick={() => setShowWarning(false)}
-              >
-                ✕
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      
       
       {/* Background selector button */}
       <div className="absolute top-1 right-1 z-20">
@@ -603,7 +567,7 @@ const Weather = () => {
           <div className="flex flex-col items-center justify-center px-6 py-4 min-w-[120px]">
             <span className="text-6xl mb-2" style={{color:'#FFB900'}}>{getWeatherCardStyle(currentWeather.weather[0].main).icon}</span>
             <span className="text-4xl font-bold text-white drop-shadow">{Math.round(currentWeather.main.temp)}°C</span>
-            <span className="text-base text-white/90 font-medium mt-1 drop-shadow">{currentWeather.name}, {currentWeather.sys?.country}</span>
+            <span className="text-base text-white/90 font-medium mt-1 drop-shadow">in {currentWeather.sys?.country === 'IN' ? 'India' : currentWeather.sys?.country}, {currentWeather.name.toLowerCase().includes('delhi') ? 'Delhi' : currentWeather.name}</span>
           </div>
           {/* Right: Main Details */}
           <div className="flex-1 flex flex-col gap-2 px-4 py-2">

@@ -120,7 +120,7 @@ const TestCalculator = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 py-4 px-2 sm:px-4">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mt-10 mx-auto">
         <div className="bg-white rounded-[20px] sm:rounded-[30px] shadow-md border-2 border-gray-100 overflow-hidden">
           <Back />
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-4 sm:mb-8 px-4">

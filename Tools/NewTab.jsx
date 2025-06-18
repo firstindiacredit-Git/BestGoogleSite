@@ -73,16 +73,16 @@ const pdfTools = [
     name: "Add Page No.",
     icon: <AiOutlineNumber className="text-blue-500" />,
   },
-  {
-    path: "/protect",
-    name: "Protect PDF",
-    icon: <FaLock className="text-red-500" />,
-  },
-  {
-    path: "/unlockpdf",
-    name: "Unlock PDF",
-    icon: <FaUnlockAlt className="text-green-500" />,
-  },
+  // {
+  //   path: "/protect",
+  //   name: "Protect PDF",
+  //   icon: <FaLock className="text-red-500" />,
+  // },
+  // {
+  //   path: "/unlockpdf",
+  //   name: "Unlock PDF",
+  //   icon: <FaUnlockAlt className="text-green-500" />,
+  // },
 ];
 
 const todoTools = [
@@ -121,11 +121,11 @@ const todoTools = [
   //   name: "HTML Template Generator",
   //   icon: <FaTasks className="text-yellow-500" />,
   // },
-  {
-    path: "/phonenumberformat",
-    name: "Phone Number Formatter",
-    icon: <FaTasks className="text-yellow-500" />,
-  },
+  // {
+  //   path: "/phonenumberformat",
+  //   name: "Phone Number Formatter",
+  //   icon: <FaTasks className="text-yellow-500" />,
+  // },
   {
     path: "/randompassword",
     name: "Random Password Gen.",
@@ -346,7 +346,16 @@ const toolCategories = [
 ];
 
 const NewTab = () => {
-  const [viewType, setViewType] = useState("grid");
+  const [viewType, setViewType] = useState(() => {
+    // Initialize from localStorage or default to "grid"
+    return localStorage.getItem('viewType') || "grid";
+  });
+
+  // Save viewType to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('viewType', viewType);
+  }, [viewType]);
+
   const [searchTerm, setSearchTerm] = useState("");
 
   const filterTools = (tool) => {

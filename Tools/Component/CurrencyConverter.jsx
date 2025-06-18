@@ -145,8 +145,8 @@ const CurrencyConverter = () => {
       <div className="max-w-2xl mx-auto px-4">
         <div className="bg-white rounded-[30px] shadow-md border-2 border-gray-100">
           {/* Back Button */}
-          <div className="p-1">
-            <Back />
+          <div className="p-1 dark:text-red-500">
+            <Back  />
           </div>
 
           {/* Header */}

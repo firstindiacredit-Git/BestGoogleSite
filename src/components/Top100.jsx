@@ -98,7 +98,8 @@ const Top100Page = () => {
 
         if (category === "brands") {
           const processedData = brands.map((brand) => ({
-            name: `${brand.Brand}`,
+            logo: brand.logo || null,
+            name: brand.Brand,
             description: `Rank: ${brand.Rank}, Change: ${brand.Change}, Value: ${brand.Value}`,
             value: `$${brand.Value}M`,
           }));
@@ -112,6 +113,7 @@ const Top100Page = () => {
           const processedData = bikes.motorcycles.map((bike) => ({
             name: bike.motorcycle,
             description: `Year: ${bike.model_year}, Time: ${bike.time_seconds}s, Mph Speed: ${bike.speed_mph}mph, Kmh Speed: ${bike.speed_kmh}km/h`,
+            image: bike.logo,
           }));
           setItems(processedData);
           setError(null);
@@ -222,21 +224,24 @@ const Top100Page = () => {
               {/* Header with number and title */}
               <div className="flex items-center gap-3">
                 <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-gray-50/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]">
-                  {category === "billionaires" && item.image ? (
-                    <Image
-                      src={item.image}
-                      alt={item.name}
-                      className="w-8 h-8  rounded-lg object-cover"
-                    />
-                  ) : (
-                    <span className="text-lg font-semibold text-gray-600 dark:text-gray-200">
-                      {index + 1}
-                    </span>
-                  )}
+                  <span className="text-lg font-semibold text-gray-600 dark:text-gray-200">
+                    {index + 1}
+                  </span>
                 </div>
                 <h3 className="font-medium text-gray-900 dark:text-white flex-grow truncate">
                   {item.name}
                 </h3>
+                {(category === "brands" && item.logo) || 
+                 (category === "billionaires" && item.image) || 
+                 (category === "motorcycles" && item.image) ? (
+                  <div className="flex-shrink-0 w-10 h-10">
+                    <Image
+                      src={category === "brands" ? item.logo : item.image}
+                      alt={item.name}
+                      className="w-10 h-10 rounded-lg object-cover"
+                    />
+                  </div>
+                ) : null}
               </div>
 
               {/* Details Section */}

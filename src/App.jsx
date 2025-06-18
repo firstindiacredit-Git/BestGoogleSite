@@ -28,7 +28,7 @@ import { AuthProvider } from "./hooks/AuthContext.jsx";
 import { DesignContextProvider } from "./context/DesignContext.jsx";
 import AdminRoute from "./components/Admin/AdminRoute.jsx";
 import { ThemeProvider } from "./context/ThemeContext.jsx";
-import galleryupload from "../public/galleryupload.png";
+const galleryupload = "/galleryupload.png";
 import { auth, db } from "./firebase";
 import { doc, getDoc } from "firebase/firestore";
 import SearchPage from "./components/SearchPage.jsx";
@@ -739,7 +739,7 @@ const SearchPageWrapper = () => {
       <div className="fixed bottom-6 left-6 z-50">
         <div
           onClick={toggleChatbot}
-          className="w-14 h-14 rounded-full bg-indigo-500 dark:bg-[#28283a] text-white flex items-center justify-center shadow-lg hover:bg-blue-600 cursor-pointer font-semibold"
+          className="w-14 h-14 rounded-full bg-indigo-500 dark:bg-[#28283a] text-white flex items-center justify-center shadow-lg hover:bg-blue-600 cursor-pointer font-semibold transition-all duration-300 hover:scale-110 hover:-translate-y-2 active:scale-95"
           title="Chat with AI Assistant"
         >
           AI

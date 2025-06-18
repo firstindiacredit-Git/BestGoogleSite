@@ -67,7 +67,7 @@ const Hours = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mt-16 mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-[30px] shadow-lg border-2 border-gray-100">
           <Back />
           <div className="p-6">

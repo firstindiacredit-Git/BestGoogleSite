@@ -76,6 +76,7 @@ const Bmi = () => {
     <div className="min-h-screen bg-gray-100 dark:bg-[#513a7a]">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-md mx-auto bg-white dark:bg-[#28283a] rounded-lg shadow-md p-6 dark:text-gray-200">
+          <Back />
           <h2 className="text-2xl font-bold mb-6 text-center">
             BMI Calculator
           </h2>

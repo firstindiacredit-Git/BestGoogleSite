@@ -59,8 +59,8 @@ function Percentage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#513a7a] flex items-start justify-center ">
-      <div className="max-w-7xl w-full  rounded-lg">
-        <div className="bg-white dark:bg-[#28283a] p-4  rounded-xl shadow-md overflow-hidden ">
+      <div className="max-w-7xl w-full mt-16 rounded-lg">
+        <div className="bg-white dark:bg-[#28283a] p-4 mt-16  rounded-xl shadow-md overflow-hidden ">
           {/* Back Button */}
           <div className="p-1">
             <Back />

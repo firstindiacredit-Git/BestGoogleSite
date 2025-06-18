@@ -87,7 +87,7 @@ const ChatbotAI = () => {
           : currentMessage;
         console.log("Sanitized prompt:", prompt);
 
-        const response = await fetch(`https://chatai.nouvous.com/${endpoint}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${"AIzaSyCdUfYEBIhbt8eCcwp-thTgl8kNmVITbhA"}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

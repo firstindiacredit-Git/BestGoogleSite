@@ -1,8 +1,17 @@
-import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 const GridComponent = ({ path, name, icon, onToolUse }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    // Scroll to top when the component mounts
+    window.scrollTo({
+      top: 0,
+      behavior: "instant"
+    });
+  }, [location.pathname]);
 
   const handleClick = (e) => {
     e.preventDefault();
@@ -12,6 +21,9 @@ const GridComponent = ({ path, name, icon, onToolUse }) => {
       localStorage.setItem("usedTools", JSON.stringify(usedTools));
       if (onToolUse) onToolUse();
     }
+    // Force scroll to top before navigation
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
     navigate(path);
   };
 

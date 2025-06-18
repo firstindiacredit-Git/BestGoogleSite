@@ -56,7 +56,7 @@ const DraggableImage = ({
           ? "0 8px 20px rgba(0,0,0,0.2)"
           : "0 2px 4px rgba(0,0,0,0.1)",
       }}
-      className="group relative aspect-[3/4] rounded-lg overflow-hidden cursor-move"
+      className="group relative aspect-[3/4] rounded-lg mt-16 overflow-hidden cursor-move"
     >
       <img
         src={image.url}

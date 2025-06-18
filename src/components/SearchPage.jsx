@@ -165,6 +165,11 @@ const SearchPage = ({ isToolPage = false }) => {
         const imageData = reader.result;
         setBackgroundImage(imageData);
         localStorage.setItem("backgroundImage", imageData);
+        // Reset background opacity to 0 when new image is uploaded
+        setTransparency(0);
+        setSliderTransparency(0);
+        localStorage.setItem("bgTransparency", "0");
+        document.documentElement.style.setProperty("--bg-opacity", "0");
       };
       reader.readAsDataURL(file);
     }
@@ -270,37 +275,21 @@ const SearchPage = ({ isToolPage = false }) => {
                 min="0"
                 max="100"
                 value={sliderTransparency}
-                onChange={(e) =>
-                  handleTempTransparencyChange(parseInt(e.target.value))
-                }
+                onChange={(e) => {
+                  const newValue = parseInt(e.target.value);
+                  setSliderTransparency(newValue);
+                  setTransparency(newValue);
+                  localStorage.setItem("bgTransparency", newValue.toString());
+                  document.documentElement.style.setProperty(
+                    "--bg-opacity",
+                    `${newValue / 100}`
+                  );
+                }}
                 className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
               />
               <span className="text-sm text-gray-600 dark:text-gray-300 text-right">
                 {sliderTransparency}%
               </span>
-            </div>
-            <div
-              className="flex gap-2 p-3 border-b dark:border-gray-800 dark:bg-[#28283a]"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleApplyChanges();
-                }}
-                className="flex-1 px-3 py-1.5 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition-colors"
-              >
-                Apply
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleResetChanges();
-                }}
-                className="px-3 py-1.5 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
-              >
-                Reset
-              </button>
             </div>
           </div>
         ),
@@ -321,37 +310,21 @@ const SearchPage = ({ isToolPage = false }) => {
                 min="0"
                 max="100"
                 value={sliderWidgetTransparency}
-                onChange={(e) =>
-                  handleTempWidgetTransparencyChange(parseInt(e.target.value))
-                }
+                onChange={(e) => {
+                  const newValue = parseInt(e.target.value);
+                  setSliderWidgetTransparency(newValue);
+                  setWidgetTransparent(newValue);
+                  localStorage.setItem("widgetTransparency", newValue.toString());
+                  document.documentElement.style.setProperty(
+                    "--widget-opacity",
+                    `${newValue / 100}`
+                  );
+                }}
                 className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
               />
               <span className="text-sm text-gray-600 dark:text-gray-300 text-right">
                 {sliderWidgetTransparency}%
               </span>
-            </div>
-            <div
-              className="flex gap-2 p-3 border-b dark:border-gray-800 dark:bg-[#28283a]"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleApplyChanges();
-                }}
-                className="flex-1 px-3 py-1.5 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition-colors"
-              >
-                Apply
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleResetChanges();
-                }}
-                className="px-3 py-1.5 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
-              >
-                Reset
-              </button>
             </div>
           </div>
         ),

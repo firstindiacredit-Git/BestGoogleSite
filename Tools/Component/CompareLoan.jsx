@@ -75,7 +75,7 @@ const CompareLoan = () => {
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#28283a] flex items-start justify-center pt-4">
-      <div className="max-w-4xl w-full px-2">
+      <div className="max-w-4xl mt-16 w-full px-2">
         <div className="bg-white dark:bg-[#513a7a] rounded-lg shadow-md overflow-hidden">
           {/* Back Button */}
           <div className="p-1">
