@@ -3,600 +3,702 @@
         "Rank": 1,
         "Brand": "Apple",
         "Change": "-3%",
-        "Value": "488.9 $B"
+        "Value": "488.9 $B",
+        "logo":"https://cdn-icons-png.flaticon.com/512/0/747.png"
     },
     {
         "Rank": 2,
         "Brand": "Microsoft",
         "Change": "+11%",
-        "Value": "352.5 $B"
+        "Value": "352.5 $B",
+        "logo" :"https://purepng.com/public/uploads/large/purepng.com-microsoft-logo-iconlogobrand-logoiconslogos-251519939091wmudn.png"
     },
     {
         "Rank": 3,
         "Brand": "Amazon",
         "Change": "+8%",
-        "Value": "298.1 $B"
+        "Value": "298.1 $B",
+        "logo" : "https://www.citypng.com/public/uploads/preview/square-amazon-app-logo-icon-701751695133387c8mdvsejvz.png"
+
     },
     {
         "Rank": 4,
         "Brand": "Google",
         "Change": "+12%",
-        "Value": "291.3 $B"
+        "Value": "291.3 $B",
+        "logo" : "https://upload.wikimedia.org/wikipedia/commons/3/3a/Google-favicon-vector.png"
     },
     {
         "Rank": 5,
         "Brand": "Samsung",
         "Change": "+10%",
-        "Value": "100.8 $B"
+        "Value": "100.8 $B",
+        "logo" : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTVcD6BUP0xnW08x7FdMF0NMQm0YwYPqdINFQ&s"
     },
     {
         "Rank": 6,
         "Brand": "Toyota",
         "Change": "+13%",
-        "Value": "72.8 $B"
+        "Value": "72.8 $B",
+        "logo" :"https://cdn.iconscout.com/icon/free/png-256/free-toyota-logo-icon-download-in-svg-png-gif-file-formats--label-automobile-auto-car-brand-logos-pack-icons-827471.png?f=webp"
     },
     {
         "Rank": 7,
         "Brand": "Coca-Cola",
         "Change": "+5%",
-        "Value": "61.2 $B"
+        "Value": "61.2 $B",
+        "logo": "https://static.vecteezy.com/system/resources/thumbnails/020/190/670/small_2x/cocacola-logo-cocacola-icon-free-free-vector.jpg"
     },
     {
         "Rank": 8,
         "Brand": "Mercedes-Benz",
         "Change": "-4%",
-        "Value": "58.9 $B"
+        "Value": "58.9 $B",
+        "logo" :"https://static-00.iconduck.com/assets.00/mercedes-benz-alt-icon-2048x2048-ps1d95md.png" 
     },
     {
         "Rank": 9,
         "Brand": "McDonald’s",
         "Change": "+4%",
-        "Value": "53.0 $B"
+        "Value": "53.0 $B",
+        "logo" : "https://www.citypng.com/public/uploads/preview/hd-mcdonalds-red-round-circular-circle-logo-icon-png-image-7017516947898359qtpcakiqi.png"
     },
     {
         "Rank": 10,
         "Brand": "BMW",
         "Change": "+2%",
-        "Value": "52.0 $B"
-    },
+        "Value": "52.0 $B",
+        "logo" :"https://cdn0.iconfinder.com/data/icons/car-brands/550/BMW_logo-512.png"
+     },
     {
         "Rank": 11,
         "Brand": "Louis Vuitton",
         "Change": "+9%",
-        "Value": "50.9 $B"
+        "Value": "50.9 $B",
+        "logo" : "https://static.vecteezy.com/system/resources/previews/027/127/578/non_2x/louis-vuitton-logo-louis-vuitton-icon-transparent-free-png.png"
     },
     {
         "Rank": 12,
         "Brand": "Tesla",
         "Change": "-9%",
-        "Value": "45.5 $B"
+        "Value": "45.5 $B",
+        "logo" :"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSEL1N35Jywntk9j5PUtD7A9RLdzKgpRZ7F9A&s"
     },
     {
         "Rank": 13,
         "Brand": "Cisco",
         "Change": "+5%",
-        "Value": "45.5 $B"
+        "Value": "45.5 $B",
+        "logo" :"https://static-00.iconduck.com/assets.00/cisco-icon-256x256-ak8734rd.png"
     },
     {
         "Rank": 14,
         "Brand": "Nike",
         "Change": "-5%",
-        "Value": "45.4 $B"
+        "Value": "45.4 $B",
+        "logo" : "https://freepngimg.com/download/nike/71292-onitsuka-adidas-nike-tiger-swoosh-logo.png"
     },
     {
         "Rank": 15,
         "Brand": "Instagram",
         "Change": "+15%",
-        "Value": "45.1 $B"
+        "Value": "45.1 $B",
+        "logo": "https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png"
     },
     {
         "Rank": 16,
         "Brand": "Disney",
         "Change": "-11%",
-        "Value": "42.8 $B"
+        "Value": "42.8 $B",
+        "log": "https://images.icon-icons.com/2657/PNG/256/disney_plus_icon_161064.png"
     },
     {
         "Rank": 17,
         "Brand": "Adobe",
         "Change": "+12%",
-        "Value": "39.4 $B"
+        "Value": "39.4 $B",
+        "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSQUCBvHwlY99HvkiT-NFmM00-03tUqejMJjQ&s"
     },
     {
         "Rank": 18,
         "Brand": "Oracle",
         "Change": "+9%",
-        "Value": "37.7 $B"
+        "Value": "37.7 $B",
+        "logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTPW7MCOrC8vxDWwZyduc0-gp9SyxkOcJHSEw&s"
     },
     {
         "Rank": 19,
         "Brand": "IBM",
         "Change": "+7%",
-        "Value": "37.3 $B"
+        "Value": "37.3 $B",
+        "logo":"https://cdn-icons-png.flaticon.com/512/5969/5969147.png"
     },
     {
         "Rank": 20,
         "Brand": "SAP",
         "Change": "+11%",
-        "Value": "36.8 $B"
+        "Value": "36.8 $B",
+        "logo" :"https://www.svgrepo.com/show/331567/sap.svg"
     },
     {
         "Rank": 21,
         "Brand": "Facebook",
         "Change": "+10%",
-        "Value": "34.9 $B"
+        "Value": "34.9 $B",
+        "logo": "https://www.citypng.com/public/uploads/preview/square-flat-facebook-fb-logo-icon-button-701751695134158wdkclxremc.png"
     },
     {
         "Rank": 22,
         "Brand": "Hermès",
         "Change": "+15%",
-        "Value": "34.7 $B"
+        "Value": "34.7 $B",
+        "logo":"https://s3-eu-west-1.amazonaws.com/tpd/logos/4be80131000064000509ed0b/0x0.png"
     },
     {
         "Rank": 23,
         "Brand": "Chanel",
         "Change": "+7%",
-        "Value": "33.2 $B"
+        "Value": "33.2 $B",
+        "logo":"https://cdn.iconscout.com/icon/free/png-256/free-chanel-logo-icon-download-in-svg-png-gif-file-formats--fashion-brand-brands-and-logos-pack-icons-2673799.png?f=webp&w=256"
     },
     {
         "Rank": 24,
         "Brand": "YouTube",
         "Change": "+16%",
-        "Value": "30.1 $B"
+        "Value": "30.1 $B",
+        "logo":"https://static.vecteezy.com/system/resources/previews/018/930/572/non_2x/youtube-logo-youtube-icon-transparent-free-png.png"
     },
     {
         "Rank": 25,
         "Brand": "J.P. Morgan",
         "Change": "+5%",
-        "Value": "27.1 $B"
+        "Value": "27.1 $B",
+        "logo":"https://altaseamedia.s3.us-west-1.amazonaws.com/wp-content/uploads/2023/09/13122618/JP-Morgan-Chase-Emblem.png"
     },
     {
         "Rank": 26,
         "Brand": "Honda",
         "Change": "+9%",
-        "Value": "26.7 $B"
+        "Value": "26.7 $B",
+        "logo":"https://cdn.iconscout.com/icon/free/png-256/free-honda-icon-download-in-svg-png-gif-file-formats--logo-brand-car-brands-pack-logos-icons-202784.png"
     },
     {
         "Rank": 27,
         "Brand": "American Express",
         "Change": "+11%",
-        "Value": "26.7 $B"
+        "Value": "26.7 $B",
+        "logo":"https://cdn2.iconfinder.com/data/icons/credit-cards-6/156/american_express-512.png"
+
     },
     {
         "Rank": 28,
         "Brand": "IKEA",
         "Change": "+6%",
-        "Value": "24.3 $B"
+        "Value": "24.3 $B",
+        "logo":"https://logowik.com/content/uploads/images/527_ikea.jpg"
     },
     {
         "Rank": 29,
         "Brand": "Allianz",
         "Change": "+13%",
-        "Value": "23.5 $B"
+        "Value": "23.5 $B",
+        "logo":"https://cdn.iconscout.com/icon/free/png-256/free-allianz-logo-icon-download-in-svg-png-gif-file-formats--company-brand-world-logos-vol-6-pack-icons-282695.png"
     },
     {
         "Rank": 30,
         "Brand": "Hyundai",
         "Change": "+13%",
-        "Value": "23.0 $B"
+        "Value": "23.0 $B",
+        "logo":"https://static.vecteezy.com/system/resources/previews/020/336/748/non_2x/hyundai-logo-hyundai-icon-free-free-vector.jpg"
     },
     {
         "Rank": 31,
         "Brand": "Accenture",
         "Change": "+3%",
-        "Value": "21.9 $B"
+        "Value": "21.9 $B",
+        "logo" :"https://discovertemplate.com/wp-content/uploads/2024/01/Accenture.jpg"
     },
     {
         "Rank": 32,
         "Brand": "Visa",
         "Change": "+13%",
-        "Value": "21.1 $B"
+        "Value": "21.1 $B",
+        "logo":"https://cdn-icons-png.flaticon.com/512/217/217425.png"
     },
     {
         "Rank": 33,
         "Brand": "Pepsi",
         "Change": "+6%",
-        "Value": "21.0 $B"
+        "Value": "21.0 $B",
+        "logo":"https://www.freeiconspng.com/uploads/pepsi-icon-24.jpg"
     },
     {
         "Rank": 34,
         "Brand": "Sony",
         "Change": "+9%",
-        "Value": "20.8 $B"
+        "Value": "20.8 $B",
+        "logo":"https://www.hatchwise.com/wp-content/uploads/2023/04/image-15.png"
     },
     {
         "Rank": 35,
         "Brand": "UPS",
         "Change": "-2%",
-        "Value": "20.0 $B"
+        "Value": "20.0 $B",
+        "logo":"https://img.icons8.com/color/512/ups.png"
     },
     {
         "Rank": 36,
         "Brand": "Nvidia",
         "Change": "NEW",
-        "Value": "20.0 $B"
+        "Value": "20.0 $B",
+        "logo": "https://www.nvidia.com/content/dam/en-zz/Solutions/about-nvidia/logo-and-brand/nvidia-og-image-white-bg-1200x630.jpg"
     },
     {
         "Rank": 37,
         "Brand": "Intel",
         "Change": "-30%",
-        "Value": "19.7 $B"
+        "Value": "19.7 $B",
+        "logo":"https://static-00.iconduck.com/assets.00/intel-icon-2048x2048-ce7cerj1.png"
     },
     {
         "Rank": 38,
         "Brand": "Netflix",
         "Change": "+10%",
-        "Value": "19.7 $B"
+        "Value": "19.7 $B",
+        "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Netflix_icon.svg/1200px-Netflix_icon.svg.png"
     },
     {
         "Rank": 39,
         "Brand": "MasterCard",
         "Change": "+8%",
-        "Value": "18.5 $B"
+        "Value": "18.5 $B",
+        "logo":"https://static-00.iconduck.com/assets.00/mastercard-icon-2048x1225-3kb6axel.png"
     },
     {
         "Rank": 40,
         "Brand": "PayPal",
         "Change": "+3%",
-        "Value": "18.3 $B"
+        "Value": "18.3 $B",
+        "logo":"https://www.feuerwehr-wembach-hahn.de/wp-content/uploads/2024/01/paypal-1.png"
     },
     {
         "Rank": 41,
         "Brand": "Gucci",
         "Change": "-10%",
-        "Value": "17.9 $B"
+        "Value": "17.9 $B",
+        "logo": ""
     },
     {
         "Rank": 42,
         "Brand": "Zara",
         "Change": "+8%",
-        "Value": "17.8 $B"
+        "Value": "17.8 $B",
+        "logo":"https://cdn.iconscout.com/icon/free/png-256/free-zara-icon-download-in-svg-png-gif-file-formats--fashion-logo-brand-brands-and-logos-pack-icons-2673947.png"
     },
     {
         "Rank": 43,
         "Brand": "Porsche",
         "Change": "+7%",
-        "Value": "17.4 $B"
+        "Value": "17.4 $B",
+        "logo":"https://p1.hiclipart.com/preview/108/554/561/car-logos-with-tamplate-porsche-icon-png-icon.jpg"
     },
     {
         "Rank": 44,
         "Brand": "Airbnb",
         "Change": "+6%",
-        "Value": "17.3 $B"
+        "Value": "17.3 $B",
+        "logo" :"https://download.logo.wine/logo/Airbnb/Airbnb-Logo.wine.png"
     },
     {
         "Rank": 45,
         "Brand": "Audi",
         "Change": "+6%",
-        "Value": "17.3 $B"
+        "Value": "17.3 $B",
+        "logo":"https://e7.pngegg.com/pngimages/905/811/png-clipart-audi-logo-audi-logo-transport-cars-thumbnail.png"
     },
     {
         "Rank": 46,
         "Brand": "Salesforce",
         "Change": "-7%",
-        "Value": "17.1 $B"
+        "Value": "17.1 $B",
+        "logo":"https://static-00.iconduck.com/assets.00/salesforce-icon-2048x1434-jxt80iiu.png"
     },
     {
         "Rank": 47,
         "Brand": "GE",
         "Change": "+12%",
-        "Value": "17.1 $B"
+        "Value": "17.1 $B",
+        "logo":"https://cdn4.iconfinder.com/data/icons/flat-brand-logo-2/512/ge-512.png"
     },
     {
         "Rank": 48,
         "Brand": "AXA",
         "Change": "+2%",
-        "Value": "16.8 $B"
+        "Value": "16.8 $B",
+        "logo":"https://logos-world.net/wp-content/uploads/2020/07/AXA-Logo.png"
     },
     {
         "Rank": 49,
         "Brand": "Volkswagen",
         "Change": "+9%",
-        "Value": "16.5 $B"
+        "Value": "16.5 $B",
+        "logo":"https://cdn4.iconfinder.com/data/icons/logo-cars/512/58.png"
     },
     {
         "Rank": 50,
         "Brand": "Siemens",
         "Change": "+9%",
-        "Value": "15.8 $B"
+        "Value": "15.8 $B",
+        "logo":"https://cdn-icons-png.flaticon.com/512/5969/5969139.png"
     },
     {
         "Rank": 51,
         "Brand": "adidas",
         "Change": "-6%",
-        "Value": "15.5 $B"
+        "Value": "15.5 $B",
+        "logo":"https://w7.pngwing.com/pngs/405/768/png-transparent-adidas-logo-logos-logos-and-brands-icon.png"
     },
     {
         "Rank": 52,
         "Brand": "Starbucks",
         "Change": "-1%",
-        "Value": "15.3 $B"
+        "Value": "15.3 $B",
+        "logo":"https://cdn.dribbble.com/userupload/19117876/file/original-da1d3cde8db3fddb6f72159eb98e9f3a.png"
     },
     {
         "Rank": 53,
         "Brand": "L’Oréal Paris",
         "Change": "+9%",
-        "Value": "14.8 $B"
+        "Value": "14.8 $B",
+        "logo":"https://images.seeklogo.com/logo-png/8/2/loreal-paris-logo-png_seeklogo-85584.png"
     },
     {
         "Rank": 54,
         "Brand": "Pampers",
         "Change": "+5%",
-        "Value": "14.5 $B"
+        "Value": "14.5 $B",
+        "logo":"https://cdnlogo.com/logos/p/51/pampers.svg"
     },
     {
         "Rank": 55,
         "Brand": "Citi",
         "Change": "+6%",
-        "Value": "14.5 $B"
+        "Value": "14.5 $B",
+        "logo":"https://cdn.iconscout.com/icon/free/png-256/free-citi-logo-icon-download-in-svg-png-gif-file-formats--bank-payment-method-gateway-logos-pack-icons-675714.png?f=webp"
     },
     {
         "Rank": 56,
         "Brand": "Ford",
         "Change": "-3%",
-        "Value": "14.4 $B"
+        "Value": "14.4 $B",
+        "logio":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQW8gq0ia3BuTkTi7YKmag873eGTIezrvnz5w&s"
     },
     {
         "Rank": 57,
         "Brand": "Goldman Sachs",
         "Change": "+1%",
-        "Value": "14.4 $B"
+        "Value": "14.4 $B",
+        "logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6sEwXZYicEdeUfSrnCS0GLMj9_uTQKD9auw&s"
     },
     {
         "Rank": 58,
         "Brand": "LEGO",
         "Change": "+7%",
-        "Value": "14.0 $B"
+        "Value": "14.0 $B",
+        "logo":"https://img.icons8.com/?size=512&id=13628&format=png"
     },
     {
         "Rank": 59,
         "Brand": "Nissan",
         "Change": "+10%",
-        "Value": "13.9 $B"
+        "Value": "13.9 $B",
+        "logo":"https://w7.pngwing.com/pngs/567/493/png-transparent-nissan-nissan-car-standard-logo-nissan-nissan-motor-vehicle-standard-thumbnail.png"
     },
     {
         "Rank": 60,
         "Brand": "H&M",
         "Change": "NEW",
-        "Value": "13.6 $B"
+        "Value": "13.6 $B",
+        "logo":"https://www.sunwaypyramid.com/static/shops/fc82d21588e8021f95a494c75ec57886/w768.png"
     },
     {
         "Rank": 61,
         "Brand": "Nescafé",
         "Change": "-9%",
-        "Value": "13.5 $B"
+        "Value": "13.5 $B",
+        "logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQo0Jk194Rb4IuegF75sWAJzhpGj1KAhGT4VA&s"
     },
     {
         "Rank": 62,
         "Brand": "Ferrari",
         "Change": "+21%",
-        "Value": "13.1 $B"
+        "Value": "13.1 $B",
+        "logo":"https://img.icons8.com/color/512w/ferrari-badge.png"
     },
     {
         "Rank": 63,
         "Brand": "eBay",
         "Change": "+1%",
-        "Value": "12.9 $B"
+        "Value": "12.9 $B",
+        "logo":"https://images.prismic.io/ebayevo/Zm_StJm069VX1ywC_logo_I6728-54758-3626-50811.png?auto=format,compress"
     },
     {
         "Rank": 64,
         "Brand": "HSBC",
         "Change": "+6%",
-        "Value": "12.5 $B"
+        "Value": "12.5 $B",
+        "logo":"https://icons.veryicon.com/png/o/business/online-payment/hsbc.png"
     },
     {
         "Rank": 65,
         "Brand": "Spotify",
         "Change": "+12%",
-        "Value": "12.4 $B"
+        "Value": "12.4 $B",
+        "logo":"https://images.rawpixel.com/image_png_800/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvdjk4Mi1kMS0xMi5wbmc.png"
     },
     {
         "Rank": 66,
         "Brand": "Morgan Stanley",
         "Change": "+9%",
-        "Value": "12.4 $B"
+        "Value": "12.4 $B",
+        "logo":"https://avatars.githubusercontent.com/u/72878956?s=280&v=4"
     },
     {
         "Rank": 67,
         "Brand": "Budweiser",
         "Change": "-8%",
-        "Value": "12.0 $B"
+        "Value": "12.0 $B",
+        "logo":"https://www.shutterstock.com/image-vector/budweiser-red-frame-antique-floral-600nw-2317068719.jpg"
     },
     {
         "Rank": 68,
         "Brand": "HP",
         "Change": "-2%",
-        "Value": "11.6 $B"
+        "Value": "11.6 $B",
+        "logo":"https://static.vecteezy.com/system/resources/previews/020/190/678/non_2x/hp-logo-hp-icon-free-free-vector.jpg"
     },
     {
         "Rank": 69,
         "Brand": "Philips",
         "Change": "+2%",
-        "Value": "11.5 $B"
+        "Value": "11.5 $B",
+        "logo":"https://www.svgrepo.com/show/331533/philips.svg"
     },
     {
         "Rank": 70,
         "Brand": "Nintendo",
         "Change": "+9%",
-        "Value": "11.5 $B"
+        "Value": "11.5 $B",
+        "logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ4mCeA_sPcl0Tploz9My9trO877EqvOil3oA&s"
     },
     {
         "Rank": 71,
         "Brand": "Nestlé",
         "Change": "-1%",
-        "Value": "11.3 $B"
+        "Value": "11.3 $B",
+        "logo":"https://fabrikbrands.com/wp-content/uploads/Nestle-Logo-1.png"
     },
     {
         "Rank": 72,
         "Brand": "Colgate",
         "Change": "+3%",
-        "Value": "10.7 $B"
+        "Value": "10.7 $B",
+        "logo":"https://1000logos.net/wp-content/uploads/2016/12/Colgate-logo.jpg"
     },
     {
         "Rank": 73,
         "Brand": "Cartier",
         "Change": "+7%",
-        "Value": "10.6 $B"
+        "Value": "10.6 $B",
+        "logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS3NNMhW5Hh7X7yEp18LrpztUUHGBzEU-4OWw&s"
     },
     {
         "Rank": 74,
         "Brand": "Dior",
         "Change": "+8%",
-        "Value": "10.4 $B"
+        "Value": "10.4 $B",
+        "logo":"https://cdn.creazilla.com/icons/3269772/dior-icon-lg.png"
     },
     {
         "Rank": 75,
         "Brand": "Gillette",
         "Change": "-3%",
-        "Value": "10.1 $B"
+        "Value": "10.1 $B",
+        "logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQT_kOejXeODAOl_-GyR_U0ownjYNC7uLj9Mg&s"
     },
     {
         "Rank": 76,
         "Brand": "Santander",
         "Change": "+5%",
-        "Value": "10.0 $B"
+        "Value": "10.0 $B",
+        "logo":"https://upload.wikimedia.org/wikipedia/commons/3/35/Santander_Logo.PNG"
     },
     {
         "Rank": 77,
         "Brand": "LinkedIn",
         "Change": "+11%",
-        "Value": "9.5 $B"
+        "Value": "9.5 $B",
+        "logo":"https://cdn-icons-png.freepik.com/256/3992/3992606.png?semt=ais_hybrid"
     },
     {
         "Rank": 78,
         "Brand": "Uber",
         "Change": "NEW",
-        "Value": "9.2 $B"
+        "Value": "9.2 $B",
+        "logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSlJIOGtHi6yLhWs9gI0Bz1T83KoUzuqCQ7IQ&s"
     },
     {
         "Rank": 79,
         "Brand": "3M",
         "Change": "-10%",
-        "Value": "8.9 $B"
+        "Value": "8.9 $B",
+        "logo":"https://cdn-icons-png.flaticon.com/512/5968/5968227.png"
     },
     {
         "Rank": 80,
         "Brand": "Corona",
         "Change": "+8%",
-        "Value": "8.7 $B"
+        "Value": "8.7 $B",
+        "logo":"https://www.shutterstock.com/image-vector/corona-extra-icon-logo-symbol-600nw-2317183167.jpg"
     },
     {
         "Rank": 81,
         "Brand": "Caterpillar",
         "Change": "+8%",
-        "Value": "8.7 $B"
+        "Value": "8.7 $B",
+        "logo":"https://www.citypng.com/public/uploads/preview/hd-caterpillar-logo-transparent-background-701751694710438qpeomndc5s.png"
     },
     {
         "Rank": 82,
         "Brand": "Danone",
         "Change": "-8%",
-        "Value": "8.4 $B"
+        "Value": "8.4 $B",
+        "logo":"https://images.seeklogo.com/logo-png/3/2/danone-logo-png_seeklogo-38529.png"
     },
     {
         "Rank": 83,
         "Brand": "Prada",
         "Change": "+14%",
-        "Value": "8.3 $B"
+        "Value": "8.3 $B",
+        "logo":"https://i.pinimg.com/736x/41/a7/e1/41a7e13cade4741dce880837c2a63f7e.jpg"
     },
     {
         "Rank": 84,
         "Brand": "FedEx",
         "Change": "+3%",
-        "Value": "8.3 $B"
+        "Value": "8.3 $B",
+        "logo":"https://cdn4.iconfinder.com/data/icons/logos-and-brands/512/125_Fedex_logo_logos-512.png"
     },
     {
         "Rank": 85,
         "Brand": "Kellogg’s",
         "Change": "-7%",
-        "Value": "8.2 $B"
+        "Value": "8.2 $B",
+        "logo":"https://inkbotdesign.com/wp-content/uploads/2025/02/kelloggs-logo-design-in-1920-1024x559.webp"
     },
     {
         "Rank": 86,
         "Brand": "Kia",
         "Change": "+15%",
-        "Value": "8.1 $B"
+        "Value": "8.1 $B",
+        "logo":"https://cdn4.iconfinder.com/data/icons/logos-brands-in-colors/660/kia-logo-new-512.png"
     },
     {
         "Rank": 87,
         "Brand": "Xiaomi",
         "Change": "+10%",
-        "Value": "8.0 $B"
+        "Value": "8.0 $B",
+        "logo":"https://cdn4.iconfinder.com/data/icons/logos-brands-in-colors/660/kia-logo-new-512.png"
     },
     {
         "Rank": 88,
         "Brand": "DHL",
         "Change": "-5%",
-        "Value": "7.3 $B"
+        "Value": "7.3 $B",
+        "logo":"https://cdn-icons-png.flaticon.com/512/5977/5977580.png"
     },
     {
         "Rank": 89,
         "Brand": "Tiffany & Co.",
         "Change": "+4%",
-        "Value": "7.3 $B"
+        "Value": "7.3 $B",
+        "logo":"https://i.pinimg.com/474x/40/2c/ee/402cee9f6c89a5621e9857ff0109fcd9.jpg"
     },
     {
         "Rank": 90,
         "Brand": "Sephora",
         "Change": "+13%",
-        "Value": "7.2 $B"
+        "Value": "7.2 $B",
+        "logo":"https://play-lh.googleusercontent.com/6ZsiMRgnp8vHb1WmAJqkqVjGCsUtd5n7YfIMKjPBTsAYhveaXTVWUKz5MNTkxEJ7axs"
     },
     {
         "Rank": 91,
         "Brand": "Pandora",
         "Change": "NEW",
-        "Value": "7.1 $B"
+        "Value": "7.1 $B",
+        "logo":"https://pandoragroup.com/-/media/images/media/logo/pandora_logo_blank-high.jpg"
     },
     {
         "Rank": 92,
         "Brand": "Hewlett Packard Enterprise",
         "Change": "+3%",
-        "Value": "6.8 $B"
+        "Value": "6.8 $B",
+        "logo" :"https://cdn.creazilla.com/icons/3236838/hpe-icon-md.png"
     },
     {
         "Rank": 93,
         "Brand": "Huawei",
         "Change": "+4%",
-        "Value": "6.8 $B"
+        "Value": "6.8 $B",
+        "logo":"https://static.vecteezy.com/system/resources/previews/020/190/713/non_2x/huawei-logo-huawei-icon-free-free-vector.jpg"
     },
     {
         "Rank": 94,
         "Brand": "Nespresso",
         "Change": "+9%",
-        "Value": "6.7 $B"
+        "Value": "6.7 $B",
+        "logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS39f_ExWh_xYbA9OvUA9UgB87Jz88AcqvNlw&s"
     },
     {
         "Rank": 95,
         "Brand": "KFC",
         "Change": "+4%",
-        "Value": "6.7 $B"
+        "Value": "6.7 $B",
+        "logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXtFRQ9HZaFj-rhvF_W7H-nDP6dSiY2Cgieg&s"
     },
     {
         "Rank": 96,
         "Brand": "Range Rover",
         "Change": "NEW",
-        "Value": "6.6 $B"
+        "Value": "6.6 $B",
+        "logo":"https://images.seeklogo.com/logo-png/42/2/range-rover-logo-png_seeklogo-428443.png"
     },
     {
         "Rank": 97,
         "Brand": "LG Electronics",
         "Change": "NEW",
-        "Value": "6.5 $B"
+        "Value": "6.5 $B",
+        "logo":"https://cdn4.iconfinder.com/data/icons/flat-brand-logo-2/512/lg-512.png"
     },
     {
         "Rank": 98,
         "Brand": "Panasonic",
         "Change": "-4%",
-        "Value": "6.4 $B"
+        "Value": "6.4 $B",
+        "logo":"https://static.vecteezy.com/system/resources/previews/020/336/721/non_2x/panasonic-logo-panasonic-icon-free-free-vector.jpg"
     },
     {
         "Rank": 99,
         "Brand": "Jordan",
         "Change": "NEW",
-        "Value": "6.4 $B"
+        "Value": "6.4 $B",
+        "logo":"https://img.icons8.com/?size=512&id=45774&format=png"
     },
     {
         "Rank": 100,
         "Brand": "Heineken",
         "Change": "+4%",
-        "Value": "6.3 $B"
+        "Value": "6.3 $B",
+        "logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLNk2lQAlH41kJUl5ifjoFXHAml6oM1YIgvQ&s"
     }
 ]

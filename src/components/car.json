@@ -1,0 +1,802 @@
+[
+    {
+        "rank": 1,
+        "name": "Toyota",
+        "country": "Japan",
+        "icon_url": "https://logo.clearbit.com/toyota.com",
+        "ceo": "Koji Sato",
+        "founded": 1937
+    },
+    {
+        "rank": 2,
+        "name": "Volkswagen",
+        "country": "Germany",
+        "icon_url": "https://logo.clearbit.com/volkswagen.com",
+        "ceo": "Oliver Blume",
+        "founded": 1937
+    },
+    {
+        "rank": 3,
+        "name": "Ford",
+        "country": "USA",
+        "icon_url": "https://logo.clearbit.com/ford.com",
+        "ceo": "Jim Farley",
+        "founded": 1903
+    },
+    {
+        "rank": 4,
+        "name": "Hyundai",
+        "country": "South Korea",
+        "icon_url": "https://logo.clearbit.com/hyundai.com",
+        "ceo": "Jaehoon Chang",
+        "founded": 1967
+    },
+    {
+        "rank": 5,
+        "name": "Honda",
+        "country": "Japan",
+        "icon_url": "https://logo.clearbit.com/honda.com",
+        "ceo": "Toshihiro Mibe",
+        "founded": 1948
+    },
+    {
+        "rank": 6,
+        "name": "Nissan",
+        "country": "Japan",
+        "icon_url": "https://logo.clearbit.com/nissanusa.com",
+        "ceo": "Makoto Uchida",
+        "founded": 1933
+    },
+    {
+        "rank": 7,
+        "name": "Kia",
+        "country": "South Korea",
+        "icon_url": "https://logo.clearbit.com/kia.com",
+        "ceo": "Ho Sung Song",
+        "founded": 1944
+    },
+    {
+        "rank": 8,
+        "name": "Suzuki",
+        "country": "Japan",
+        "icon_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTK5k0Z0ocIUC17_yVxldvmFn4too_s5YEbeg&s",
+        "ceo": "Toshihiro Suzuki",
+        "founded": 1909
+    },
+    {
+        "rank": 9,
+        "name": "BYD",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/byd.com",
+        "ceo": "Wang Chuanfu",
+        "founded": 1995
+    },
+    {
+        "rank": 10,
+        "name": "Chevrolet",
+        "country": "USA",
+        "icon_url": "https://logo.clearbit.com/chevrolet.com",
+        "ceo": "Mary Barra (GM)",
+        "founded": 1911
+    },
+    {
+        "rank": 11,
+        "name": "BMW",
+        "country": "Germany",
+        "icon_url": "https://logo.clearbit.com/bmw.com",
+        "ceo": "Oliver Zipse",
+        "founded": 1916
+    },
+    {
+        "rank": 12,
+        "name": "Mercedes-Benz",
+        "country": "Germany",
+        "icon_url": "https://logo.clearbit.com/mercedes-benz.com",
+        "ceo": "Ola Källenius",
+        "founded": 1926
+    },
+    {
+        "rank": 13,
+        "name": "Audi",
+        "country": "Germany",
+        "icon_url": "https://logo.clearbit.com/audi.com",
+        "ceo": "Gernot Döllner",
+        "founded": 1909
+    },
+    {
+        "rank": 14,
+        "name": "Tesla",
+        "country": "USA",
+        "icon_url": "https://logo.clearbit.com/tesla.com",
+        "ceo": "Elon Musk",
+        "founded": 2003
+    },
+    {
+        "rank": 15,
+        "name": "Renault",
+        "country": "France",
+        "icon_url": "https://logo.clearbit.com/renault.com",
+        "ceo": "Luca de Meo",
+        "founded": 1899
+    },
+    {
+        "rank": 16,
+        "name": "Fiat",
+        "country": "Italy",
+        "icon_url": "https://logo.clearbit.com/fiat.com",
+        "ceo": "Olivier François",
+        "founded": 1899
+    },
+    {
+        "rank": 17,
+        "name": "Mazda",
+        "country": "Japan",
+        "icon_url": "https://logo.clearbit.com/mazda.com",
+        "ceo": "Masahiro Moro",
+        "founded": 1920
+    },
+    {
+        "rank": 18,
+        "name": "Peugeot",
+        "country": "France",
+        "icon_url": "https://logo.clearbit.com/peugeot.com",
+        "ceo": "Linda Jackson",
+        "founded": 1810
+    },
+    {
+        "rank": 19,
+        "name": "Changan",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/changan.com.cn",
+        "ceo": "Zhu Huarong",
+        "founded": 1862
+    },
+    {
+        "rank": 20,
+        "name": "Jeep",
+        "country": "USA",
+        "icon_url": "https://logo.clearbit.com/jeep.com",
+        "ceo": "Antonio Filosa",
+        "founded": 1941
+    },
+    {
+        "rank": 21,
+        "name": "Geely",
+        "country": "China",
+        "icon_url": "https://www.shutterstock.com/image-vector/vinnytsia-ukraine-december-06-2023-260nw-2397953335.jpg",
+        "ceo": "Li Shufu",
+        "founded": 1986
+    },
+    {
+        "rank": 22,
+        "name": "Tata",
+        "country": "India",
+        "icon_url": "https://logo.clearbit.com/tatamotors.com",
+        "ceo": "Guenter Butschek",
+        "founded": 1945
+    },
+    {
+        "rank": 23,
+        "name": "Subaru",
+        "country": "Japan",
+        "icon_url": "https://logo.clearbit.com/subaru.com",
+        "ceo": "Atsushi Osaki",
+        "founded": 1953
+    },
+    {
+        "rank": 24,
+        "name": "Wuling",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/wuling.com.cn",
+        "ceo": "Chen Hong (SAIC)",
+        "founded": 2002
+    },
+    {
+        "rank": 25,
+        "name": "GAC",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com.gac.com.cn",
+        "ceo": "Feng Xingya",
+        "founded": 1997
+    },
+    {
+        "rank": 26,
+        "name": "Skoda",
+        "country": "Czech Republic",
+        "icon_url": "https://logo.clearbit.com/skoda-auto.com",
+        "ceo": "Klaus Zellmer",
+        "founded": 1895
+    },
+    {
+        "rank": 27,
+        "name": "Chery",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/cheryinternational.com",
+        "ceo": "Yin Tongyue",
+        "founded": 1997
+    },
+    {
+        "rank": 28,
+        "name": "Daihatsu",
+        "country": "Japan",
+        "icon_url": "https://logo.clearbit.com.daihatsu.com",
+        "ceo": "Soichiro Okudaira",
+        "founded": 1907
+    },
+    {
+        "rank": 29,
+        "name": "Volvo",
+        "country": "Sweden",
+        "icon_url": "https://logo.clearbit.com/volvo.com",
+        "ceo": "Jim Rowan",
+        "founded": 1927
+    },
+    {
+        "rank": 30,
+        "name": "Buick",
+        "country": "USA",
+        "icon_url": "https://logo.clearbit.com/buick.com",
+        "ceo": "Mary Barra (GM)",
+        "founded": 1899
+    },
+    {
+        "rank": 31,
+        "name": "GMC",
+        "country": "USA",
+        "icon_url": "https://logo.clearbit.com.gmc.com",
+        "ceo": "Mary Barra (GM)",
+        "founded": 1911
+    },
+    {
+        "rank": 32,
+        "name": "Mitsubishi",
+        "country": "Japan",
+        "icon_url": "https://logo.clearbit.com.mitsubishi-motors.com",
+        "ceo": "Takao Kato",
+        "founded": 1970
+    },
+    {
+        "rank": 33,
+        "name": "Haval",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/haval-global.com",
+        "ceo": "Wei Jianjun (Great Wall)",
+        "founded": 2013
+    },
+    {
+        "rank": 34,
+        "name": "Citroen",
+        "country": "France",
+        "icon_url": "https://logo.clearbit.com.citroen.com",
+        "ceo": "Thierry Koskas",
+        "founded": 1919
+    },
+    {
+        "rank": 35,
+        "name": "Ram",
+        "country": "USA",
+        "icon_url": "https://logo.clearbit.com.ramtrucks.com",
+        "ceo": "Tim Kuniskis",
+        "founded": 2010
+    },
+    {
+        "rank": 36,
+        "name": "Perodua",
+        "country": "Malaysia",
+        "icon_url": "https://logo.clearbit.com.perodua.com.my",
+        "ceo": "Zainal Abidin Ahmad",
+        "founded": 1993
+    },
+    {
+        "rank": 37,
+        "name": "Opel/Vauxhall",
+        "country": "Germany/UK",
+        "icon_url": "https://logo.clearbit.com/opel.com",
+        "ceo": "Florian Huettl",
+        "founded": 1862
+    },
+    {
+        "rank": 38,
+        "name": "Dacia",
+        "country": "Romania",
+        "icon_url": "https://logo.clearbit.com.dacia.com",
+        "ceo": "Denis Le Vot",
+        "founded": 1966
+    },
+    {
+        "rank": 39,
+        "name": "MG",
+        "country": "UK/China",
+        "icon_url": "https://logo.clearbit.com.mgmotor.co.uk",
+        "ceo": "William Wang (SAIC)",
+        "founded": 1924
+    },
+    {
+        "rank": 40,
+        "name": "Lexus",
+        "country": "Japan",
+        "icon_url": "https://logo.clearbit.com.lexus.com",
+        "ceo": "Koji Sato",
+        "founded": 1989
+    },
+    {
+        "rank": 41,
+        "name": "Li Auto",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/liauto.com",
+        "ceo": "Li Xiang",
+        "founded": 2015
+    },
+    {
+        "rank": 42,
+        "name": "Hongqi",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/hongqiauto.com",
+        "ceo": "Qiu Xiandong (FAW Group)",
+        "founded": 1958
+    },
+    {
+        "rank": 43,
+        "name": "Lada",
+        "country": "Russia",
+        "icon_url": "https://logo.clearbit.com/lada.ru",
+        "ceo": "Maxim Sokolov",
+        "founded": 1966
+    },
+    {
+        "rank": 44,
+        "name": "Cadillac",
+        "country": "USA",
+        "icon_url": "https://logo.clearbit.com/cadillac.com",
+        "ceo": "Mary Barra (GM)",
+        "founded": 1902
+    },
+    {
+        "rank": 45,
+        "name": "MINI",
+        "country": "UK/Germany",
+        "icon_url": "https://logo.clearbit.com/mini.com",
+        "ceo": "Stefanie Wurst",
+        "founded": 1959
+    },
+    {
+        "rank": 46,
+        "name": "Land Rover",
+        "country": "UK",
+        "icon_url": "https://logo.clearbit.com/landrover.com",
+        "ceo": "Adrian Mardell (JLR)",
+        "founded": 1948
+    },
+    {
+        "rank": 47,
+        "name": "Porsche",
+        "country": "Germany",
+        "icon_url": "https://logo.clearbit.com/porsche.com",
+        "ceo": "Oliver Blume",
+        "founded": 1931
+    },
+    {
+        "rank": 48,
+        "name": "Dodge",
+        "country": "USA",
+        "icon_url": "https://logo.clearbit.com/dodge.com",
+        "ceo": "Tim Kuniskis",
+        "founded": 1900
+    },
+    {
+        "rank": 49,
+        "name": "Changan Auchan",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/changan.com.cn",
+        "ceo": "Zhu Huarong (Changan)",
+        "founded": 2014
+    },
+    {
+        "rank": 50,
+        "name": "Jetour",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/jetour.com.cn",
+        "ceo": "Yin Tongyue (Chery)",
+        "founded": 2018
+    },
+    {
+        "rank": 51,
+        "name": "Genesis",
+        "country": "South Korea",
+        "icon_url": "https://logo.clearbit.com/genesis.com",
+        "ceo": "Jaehoon Chang (Hyundai)",
+        "founded": 2015
+    },
+    {
+        "rank": 52,
+        "name": "Chrysler",
+        "country": "USA",
+        "icon_url": "https://logo.clearbit.com/chrysler.com",
+        "ceo": "Christine Feuell",
+        "founded": 1925
+    },
+    {
+        "rank": 53,
+        "name": "Lynk&Co",
+        "country": "China/Sweden",
+        "icon_url": "https://logo.clearbit.com/lynkco.com",
+        "ceo": "Alain Visser",
+        "founded": 2016
+    },
+    {
+        "rank": 54,
+        "name": "Dongfeng",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/dongfengmotor.com",
+        "ceo": "Zhu Yanfeng",
+        "founded": 1969
+    },
+    {
+        "rank": 55,
+        "name": "Lincoln",
+        "country": "USA",
+        "icon_url": "https://logo.clearbit.com/lincoln.com",
+        "ceo": "Joy Falotico",
+        "founded": 1917
+    },
+    {
+        "rank": 56,
+        "name": "Nio",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/nio.com",
+        "ceo": "William Li",
+        "founded": 2014
+    },
+    {
+        "rank": 57,
+        "name": "Jetta",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/jetta.com",
+        "ceo": "Harald Müller (FAW-Volkswagen)",
+        "founded": 2019
+    },
+    {
+        "rank": 58,
+        "name": "Freightliner",
+        "country": "USA",
+        "icon_url": "https://logo.clearbit.com/freightliner.com",
+        "ceo": "John O'Leary (Daimler Truck North America)",
+        "founded": 1942
+    },
+    {
+        "rank": 59,
+        "name": "Acura",
+        "country": "Japan",
+        "icon_url": "https://logo.clearbit.com/acura.com",
+        "ceo": "Toshihiro Mibe (Honda)",
+        "founded": 1986
+    },
+    {
+        "rank": 60,
+        "name": "Roewe",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/roewe.com.cn",
+        "ceo": "Chen Hong (SAIC)",
+        "founded": 2006
+    },
+    {
+        "rank": 61,
+        "name": "Proton",
+        "country": "Malaysia",
+        "icon_url": "https://logo.clearbit.com/proton.com",
+        "ceo": "Li Chunrong",
+        "founded": 1983
+    },
+    {
+        "rank": 62,
+        "name": "Tank",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/tank.com.cn",
+        "ceo": "Wei Jianjun (Great Wall)",
+        "founded": 2021
+    },
+    {
+        "rank": 63,
+        "name": "XPeng",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/xpeng.com",
+        "ceo": "He Xiaopeng",
+        "founded": 2014
+    },
+    {
+        "rank": 64,
+        "name": "Denza",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/denza.cn",
+        "ceo": "Zhao Changjiang",
+        "founded": 2010
+    },
+    {
+        "rank": 65,
+        "name": "Shenlan",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/shenlan.cn",
+        "ceo": "Zhu Huarong (Changan)",
+        "founded": 2022
+    },
+    {
+        "rank": 66,
+        "name": "Zeekr",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/zeekr.com",
+        "ceo": "Andy An",
+        "founded": 2021
+    },
+    {
+        "rank": 67,
+        "name": "Hino",
+        "country": "Japan",
+        "icon_url": "https://logo.clearbit.com/hino.com",
+        "ceo": "Satoshi Ogiso",
+        "founded": 1942
+    },
+    {
+        "rank": 68,
+        "name": "Exeed",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/exeed.cn",
+        "ceo": "Yin Tongyue (Chery)",
+        "founded": 2017
+    },
+    {
+        "rank": 69,
+        "name": "Iveco",
+        "country": "Italy",
+        "icon_url": "https://logo.clearbit.com/iveco.com",
+        "ceo": "Gerrit Marx",
+        "founded": 1975
+    },
+    {
+        "rank": 70,
+        "name": "Ora",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/oraev.com",
+        "ceo": "Wei Jianjun (Great Wall)",
+        "founded": 2018
+    },
+    {
+        "rank": 71,
+        "name": "FAW",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/faw.com",
+        "ceo": "Qiu Xiandong",
+        "founded": 1953
+    },
+    {
+        "rank": 72,
+        "name": "AITO",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/aito.com.cn",
+        "ceo": "Richard Yu (Yu Chengdong, Huawei)",
+        "founded": 2021
+    },
+    {
+        "rank": 73,
+        "name": "Leap Motor",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/leapmotor.com",
+        "ceo": "Zhu Jiangming",
+        "founded": 2015
+    },
+    {
+        "rank": 74,
+        "name": "Neta",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/netaauto.com",
+        "ceo": "Zhang Yong",
+        "founded": 2014
+    },
+    {
+        "rank": 75,
+        "name": "Geely Galaxy",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/geely.com",
+        "ceo": "Li Shufu",
+        "founded": 2023
+    },
+    {
+        "rank": 76,
+        "name": "SAIC",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com.saicmotor.com",
+        "ceo": "Chen Hong",
+        "founded": 1955
+    },
+    {
+        "rank": 77,
+        "name": "JAC",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com.jac.com.cn",
+        "ceo": "An Jin",
+        "founded": 1964
+    },
+    {
+        "rank": 78,
+        "name": "Infiniti",
+        "country": "Japan",
+        "icon_url": "https://logo.clearbit.com.infiniti.com",
+        "ceo": "Makoto Uchida (Nissan)",
+        "founded": 1989
+    },
+    {
+        "rank": 79,
+        "name": "Sehol",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/seholauto.com",
+        "ceo": "An Jin (JAC)",
+        "founded": 2021
+    },
+    {
+        "rank": 80,
+        "name": "JinBei",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com.jinbei.com",
+        "ceo": "Zhu Yanfeng (Brilliance Auto)",
+        "founded": 1991
+    },
+    {
+        "rank": 81,
+        "name": "Polestar",
+        "country": "Sweden/China",
+        "icon_url": "https://logo.clearbit.com/polestar.com",
+        "ceo": "Thomas Ingenlath",
+        "founded": 1996
+    },
+    {
+        "rank": 82,
+        "name": "Mahindra",
+        "country": "India",
+        "icon_url": "https://logo.clearbit.com.mahindra.com",
+        "ceo": "Anish Shah",
+        "founded": 1945
+    },
+    {
+        "rank": 83,
+        "name": "Maruti Suzuki",
+        "country": "India",
+        "icon_url": "https://logo.clearbit.com.marutisuzuki.com",
+        "ceo": "Hisashi Takeuchi",
+        "founded": 1981
+    },
+    {
+        "rank": 84,
+        "name": "Isuzu",
+        "country": "Japan",
+        "icon_url": "https://logo.clearbit.com.isuzu.com",
+        "ceo": "Shinsuke Minami",
+        "founded": 1916
+    },
+    {
+        "rank": 85,
+        "name": "Alfa Romeo",
+        "country": "Italy",
+        "icon_url": "https://logo.clearbit.com.alfaromeo.com",
+        "ceo": "Jean-Philippe Imparato",
+        "founded": 1910
+    },
+    {
+        "rank": 86,
+        "name": "Maserati",
+        "country": "Italy",
+        "icon_url": "https://logo.clearbit.com.maserati.com",
+        "ceo": "Davide Grasso",
+        "founded": 1914
+    },
+    {
+        "rank": 87,
+        "name": "Lamborghini",
+        "country": "Italy",
+        "icon_url": "https://logo.clearbit.com.lamborghini.com",
+        "ceo": "Stephan Winkelmann",
+        "founded": 1963
+    },
+    {
+        "rank": 88,
+        "name": "Bentley",
+        "country": "UK",
+        "icon_url": "https://logo.clearbit.com.bentleymotors.com",
+        "ceo": "Adrian Hallmark",
+        "founded": 1919
+    },
+    {
+        "rank": 89,
+        "name": "Rolls‑Royce",
+        "country": "UK",
+        "icon_url": "https://logo.clearbit.com.rolls-roycemotorcars.com",
+        "ceo": "Chris Brownridge",
+        "founded": 1904
+    },
+    {
+        "rank": 90,
+        "name": "Bugatti",
+        "country": "France",
+        "icon_url": "https://logo.clearbit.com.bugatti.com",
+        "ceo": "Mate Rimac",
+        "founded": 1909
+    },
+    {
+        "rank": 91,
+        "name": "Pagani",
+        "country": "Italy",
+        "icon_url": "https://logo.clearbit.com.pagani.com",
+        "ceo": "Horacio Pagani",
+        "founded": 1992
+    },
+    {
+        "rank": 92,
+        "name": "McLaren",
+        "country": "UK",
+        "icon_url": "https://logo.clearbit.com.mclaren.com",
+        "ceo": "Michael Leiters",
+        "founded": 1985
+    },
+    {
+        "rank": 93,
+        "name": "Koenigsegg",
+        "country": "Sweden",
+        "icon_url": "https://logo.clearbit.com.koenigsegg.com",
+        "ceo": "Christian von Koenigsegg",
+        "founded": 1994
+    },
+    {
+        "rank": 94,
+        "name": "Aston Martin",
+        "country": "UK",
+        "icon_url": "https://logo.clearbit.com.astonmartin.com",
+        "ceo": "Amedeo Felisa",
+        "founded": 1913
+    },
+    {
+        "rank": 95,
+        "name": "Ferrari",
+        "country": "Italy",
+        "icon_url": "https://logo.clearbit.com.ferrari.com",
+        "ceo": "Benedetto Vigna",
+        "founded": 1939
+    },
+    {
+        "rank": 96,
+        "name": "Lexus (separate)",
+        "country": "Japan",
+        "icon_url": "https://logo.clearbit.com.lexus.com",
+        "ceo": "Koji Sato",
+        "founded": 1989
+    },
+    {
+        "rank": 97,
+        "name": "Mini (separate)",
+        "country": "UK/Germany",
+        "icon_url": "https://logo.clearbit.com.mini.com",
+        "ceo": "Stefanie Wurst",
+        "founded": 1959
+    },
+    {
+        "rank": 98,
+        "name": "Infiniti (separate)",
+        "country": "Japan",
+        "icon_url": "https://logo.clearbit.com.infiniti.com",
+        "ceo": "Makoto Uchida (Nissan)",
+        "founded": 1989
+    },
+    {
+        "rank": 99,
+        "name": "Genesis (separate)",
+        "country": "South Korea",
+        "icon_url": "https://logo.clearbit.com.genesis.com",
+        "ceo": "Jaehoon Chang (Hyundai)",
+        "founded": 2015
+    },
+    {
+        "rank": 100,
+        "name": "Polestar (EV spin-off)",
+        "country": "Sweden/China",
+        "icon_url": "https://logo.clearbit.com.polestar.com",
+        "ceo": "Thomas Ingenlath",
+        "founded": 2017
+    }
+]

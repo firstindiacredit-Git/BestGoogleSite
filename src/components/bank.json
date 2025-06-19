@@ -1,0 +1,802 @@
+[
+    {
+        "rank": 1,
+        "name": "Industrial and Commercial Bank of China",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/icbc.com.cn",
+        "stock_price": "$0.58",
+        "founded": 1984
+    },
+    {
+        "rank": 2,
+        "name": "Agricultural Bank of China",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/abchina.com",
+        "stock_price": "$0.34",
+        "founded": 1951
+    },
+    {
+        "rank": 3,
+        "name": "China Construction Bank",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/ccb.com",
+        "stock_price": "$0.67",
+        "founded": 1954
+    },
+    {
+        "rank": 4,
+        "name": "Bank of China",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/boc.cn",
+        "stock_price": "$0.42",
+        "founded": 1912
+    },
+    {
+        "rank": 5,
+        "name": "JPMorgan Chase",
+        "country": "USA",
+        "icon_url": "https://logo.clearbit.com/jpmorganchase.com",
+        "stock_price": "$172.45",
+        "founded": 1799
+    },
+    {
+        "rank": 6,
+        "name": "Bank of America",
+        "country": "USA",
+        "icon_url": "https://logo.clearbit.com/bankofamerica.com",
+        "stock_price": "$33.78",
+        "founded": 1904
+    },
+    {
+        "rank": 7,
+        "name": "HSBC",
+        "country": "UK",
+        "icon_url": "https://logo.clearbit.com/hsbc.com",
+        "stock_price": "$6.89",
+        "founded": 1865
+    },
+    {
+        "rank": 8,
+        "name": "BNP Paribas",
+        "country": "France",
+        "icon_url": "https://logo.clearbit.com/bnpparibas.com",
+        "stock_price": "€58.23",
+        "founded": 1848
+    },
+    {
+        "rank": 9,
+        "name": "Mitsubishi UFJ Financial Group",
+        "country": "Japan",
+        "icon_url": "https://logo.clearbit.com/mufg.jp",
+        "stock_price": "¥1,234",
+        "founded": 1880
+    },
+    {
+        "rank": 10,
+        "name": "Crédit Agricole",
+        "country": "France",
+        "icon_url": "https://logo.clearbit.com/credit-agricole.com",
+        "stock_price": "€12.45",
+        "founded": 1894
+    },
+    {
+        "rank": 11,
+        "name": "Postal Savings Bank of China",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/psbc.com.cn",
+        "stock_price": "$0.48",
+        "founded": 2007
+    },
+    {
+        "rank": 12,
+        "name": "Citigroup",
+        "country": "USA",
+        "icon_url": "https://logo.clearbit.com/citigroup.com",
+        "stock_price": "$54.32",
+        "founded": 1812
+    },
+    {
+        "rank": 13,
+        "name": "Sumitomo Mitsui Financial Group",
+        "country": "Japan",
+        "icon_url": "https://logo.clearbit.com/smfg.co.jp",
+        "stock_price": "¥8,567",
+        "founded": 2001
+    },
+    {
+        "rank": 14,
+        "name": "Banco Santander",
+        "country": "Spain",
+        "icon_url": "https://logo.clearbit.com/santander.com",
+        "stock_price": "€3.89",
+        "founded": 1857
+    },
+    {
+        "rank": 15,
+        "name": "Bank of Communications",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/bocomm.com",
+        "stock_price": "$0.56",
+        "founded": 1908
+    },
+    {
+        "rank": 16,
+        "name": "Wells Fargo",
+        "country": "USA",
+        "icon_url": "https://logo.clearbit.com/wellsfargo.com",
+        "stock_price": "$48.91",
+        "founded": 1852
+    },
+    {
+        "rank": 17,
+        "name": "Mizuho Financial Group",
+        "country": "Japan",
+        "icon_url": "https://logo.clearbit.com/mizuho-fg.co.jp",
+        "stock_price": "¥2,345",
+        "founded": 2003
+    },
+    {
+        "rank": 18,
+        "name": "Goldman Sachs",
+        "country": "USA",
+        "icon_url": "https://logo.clearbit.com/goldmansachs.com",
+        "stock_price": "$378.45",
+        "founded": 1869
+    },
+    {
+        "rank": 19,
+        "name": "China Merchants Bank",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/cmbchina.com",
+        "stock_price": "$0.89",
+        "founded": 1987
+    },
+    {
+        "rank": 20,
+        "name": "BPCE Group",
+        "country": "France",
+        "icon_url": "https://logo.clearbit.com/bpce.fr",
+        "stock_price": "€15.67",
+        "founded": 2009
+    },
+    {
+        "rank": 21,
+        "name": "Sparkassen-Finanzgruppe",
+        "country": "Germany",
+        "icon_url": "https://logo.clearbit.com/sparkasse.de",
+        "stock_price": "€12.34",
+        "founded": 1778
+    },
+    {
+        "rank": 22,
+        "name": "Goldman Sachs",
+        "country": "USA",
+        "icon_url": "https://logo.clearbit.com/goldmansachs.com",
+        "stock_price": "$378.45",
+        "founded": 1869
+    },
+    {
+        "rank": 23,
+        "name": "China Merchants Bank",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/cmbchina.com",
+        "stock_price": "$0.89",
+        "founded": 1987
+    },
+    {
+        "rank": 24,
+        "name": "Deutsche Bank",
+        "country": "Germany",
+        "icon_url": "https://logo.clearbit.com/db.com",
+        "stock_price": "€11.23",
+        "founded": 1870
+    },
+    {
+        "rank": 25,
+        "name": "Industrial Bank (China)",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/cib.com.cn",
+        "stock_price": "$0.34",
+        "founded": 1988
+    },
+    {
+        "rank": 26,
+        "name": "Royal Bank of Canada",
+        "country": "Canada",
+        "icon_url": "https://logo.clearbit.com.rbc.com",
+        "stock_price": "C$132.45",
+        "founded": 1864
+    },
+    {
+        "rank": 27,
+        "name": "Agricultural Development Bank of China",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/adbc.com.cn",
+        "stock_price": "$0.23",
+        "founded": 1994
+    },
+    {
+        "rank": 28,
+        "name": "Toronto-Dominion Bank",
+        "country": "Canada",
+        "icon_url": "https://logo.clearbit.com.td.com",
+        "stock_price": "C$78.90",
+        "founded": 1855
+    },
+    {
+        "rank": 29,
+        "name": "China CITIC Bank",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com.citicbank.com",
+        "stock_price": "$0.45",
+        "founded": 1987
+    },
+    {
+        "rank": 30,
+        "name": "Shanghai Pudong Development Bank",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com.spdb.com.cn",
+        "stock_price": "$0.67",
+        "founded": 1993
+    },
+    {
+        "rank": 31,
+        "name": "Morgan Stanley",
+        "country": "USA",
+        "icon_url": "https://logo.clearbit.com.morganstanley.com",
+        "stock_price": "$89.12",
+        "founded": 1935
+    },
+    {
+        "rank": 32,
+        "name": "UBS",
+        "country": "Switzerland",
+        "icon_url": "https://logo.clearbit.com.ubs.com",
+        "stock_price": "CHF 23.45",
+        "founded": 1862
+    },
+    {
+        "rank": 33,
+        "name": "Caisse des Dépôts et Consignations",
+        "country": "France",
+        "icon_url": "https://logo.clearbit.com.caissedesdepots.fr",
+        "stock_price": "€12.78",
+        "founded": 1816
+    },
+    {
+        "rank": 34,
+        "name": "Lloyds Banking Group",
+        "country": "UK",
+        "icon_url": "https://logo.clearbit.com.lloydsbankinggroup.com",
+        "stock_price": "£0.45",
+        "founded": 1765
+    },
+    {
+        "rank": 35,
+        "name": "China Minsheng Bank",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com.cmsb.com.cn",
+        "stock_price": "$0.34",
+        "founded": 1996
+    },
+    {
+        "rank": 36,
+        "name": "ING Groep",
+        "country": "Netherlands",
+        "icon_url": "https://logo.clearbit.com.ing.com",
+        "stock_price": "€14.56",
+        "founded": 1991
+    },
+    {
+        "rank": 37,
+        "name": "Intesa Sanpaolo",
+        "country": "Italy",
+        "icon_url": "https://logo.clearbit.com.intesasanpaolo.com",
+        "stock_price": "€2.89",
+        "founded": 2007
+    },
+    {
+        "rank": 38,
+        "name": "Bank of Nova Scotia",
+        "country": "Canada",
+        "icon_url": "https://logo.clearbit.com.scotiabank.com",
+        "stock_price": "C$67.89",
+        "founded": 1832
+    },
+    {
+        "rank": 39,
+        "name": "Bank of Montreal",
+        "country": "Canada",
+        "icon_url": "https://logo.clearbit.com.bmo.com",
+        "stock_price": "C$98.76",
+        "founded": 1817
+    },
+    {
+        "rank": 40,
+        "name": "China Everbright Bank",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com.cebbank.com",
+        "stock_price": "$0.23",
+        "founded": 1992
+    },
+    {
+        "rank": 41,
+        "name": "Export‑Import Bank of China",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/eximbank.gov.cn",
+        "stock_price": "$0.12",
+        "founded": 1994
+    },
+    {
+        "rank": 42,
+        "name": "NatWest Group",
+        "country": "United Kingdom",
+        "icon_url": "https://logo.clearbit.com/natwestgroup.com",
+        "stock_price": "£2.34",
+        "founded": 1968
+    },
+    {
+        "rank": 43,
+        "name": "UniCredit",
+        "country": "Italy",
+        "icon_url": "https://logo.clearbit.com/unicredit.eu",
+        "stock_price": "€23.45",
+        "founded": 1998
+    },
+    {
+        "rank": 44,
+        "name": "BBVA",
+        "country": "Spain",
+        "icon_url": "https://logo.clearbit.com/bbva.com",
+        "stock_price": "€7.89",
+        "founded": 1857
+    },
+    {
+        "rank": 45,
+        "name": "Standard Chartered",
+        "country": "United Kingdom",
+        "icon_url": "https://logo.clearbit.com/sc.com",
+        "stock_price": "£6.78",
+        "founded": 1853
+    },
+    {
+        "rank": 46,
+        "name": "Commonwealth Bank of Australia",
+        "country": "Australia",
+        "icon_url": "https://logo.clearbit.com/commbank.com.au",
+        "stock_price": "A$98.76",
+        "founded": 1911
+    },
+    {
+        "rank": 47,
+        "name": "Banque Fédérative du Crédit Mutuel",
+        "country": "France",
+        "icon_url": "https://logo.clearbit.com.creditmutuel.fr",
+        "stock_price": "€15.67",
+        "founded": 1883
+    },
+    {
+        "rank": 48,
+        "name": "Ping An Bank",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com/pingan.com",
+        "stock_price": "$0.45",
+        "founded": 1987
+    },
+    {
+        "rank": 49,
+        "name": "State Bank of India",
+        "country": "India",
+        "icon_url": "https://logo.clearbit.com/sbi.co.in",
+        "stock_price": "₹567.89",
+        "founded": 1955
+    },
+    {
+        "rank": 50,
+        "name": "ANZ Group",
+        "country": "Australia",
+        "icon_url": "https://logo.clearbit.com/anz.com",
+        "stock_price": "A$23.45",
+        "founded": 1835
+    },
+    {
+        "rank": 51,
+        "name": "Canadian Imperial Bank of Commerce",
+        "country": "Canada",
+        "icon_url": "https://logo.clearbit.com.cibc.com",
+        "stock_price": "C$67.89",
+        "founded": 1961
+    },
+    {
+        "rank": 52,
+        "name": "DZ Bank",
+        "country": "Germany",
+        "icon_url": "https://logo.clearbit.com/dzbank.com",
+        "stock_price": "€12.34",
+        "founded": 1929
+    },
+    {
+        "rank": 53,
+        "name": "Norinchukin Bank",
+        "country": "Japan",
+        "icon_url": "https://logo.clearbit.com.nochubank.or.jp",
+        "stock_price": "¥1,234",
+        "founded": 1923
+    },
+    {
+        "rank": 54,
+        "name": "National Australia Bank",
+        "country": "Australia",
+        "icon_url": "https://logo.clearbit.com.nab.com.au",
+        "stock_price": "A$28.90",
+        "founded": 1893
+    },
+    {
+        "rank": 55,
+        "name": "Rabobank",
+        "country": "Netherlands",
+        "icon_url": "https://logo.clearbit.com/rabobank.com",
+        "stock_price": "€12.34",
+        "founded": 1898
+    },
+    {
+        "rank": 56,
+        "name": "CaixaBank",
+        "country": "Spain",
+        "icon_url": "https://logo.clearbit.com/caixabank.com",
+        "stock_price": "€4.56",
+        "founded": 2011
+    },
+    {
+        "rank": 57,
+        "name": "Westpac",
+        "country": "Australia",
+        "icon_url": "https://logo.clearbit.com/westpac.com.au",
+        "stock_price": "A$21.34",
+        "founded": 1817
+    },
+    {
+        "rank": 58,
+        "name": "U.S. Bancorp",
+        "country": "USA",
+        "icon_url": "https://logo.clearbit.com.usbank.com",
+        "stock_price": "$42.67",
+        "founded": 1863
+    },
+    {
+        "rank": 59,
+        "name": "Nordea",
+        "country": "Finland",
+        "icon_url": "https://logo.clearbit.com.nordea.com",
+        "stock_price": "€9.87",
+        "founded": 2000
+    },
+    {
+        "rank": 60,
+        "name": "Sberbank",
+        "country": "Russia",
+        "icon_url": "https://logo.clearbit.com.sberbank.ru",
+        "stock_price": "₽234.56",
+        "founded": 1841
+    },
+    {
+        "rank": 61,
+        "name": "Commerzbank",
+        "country": "Germany",
+        "icon_url": "https://logo.clearbit.com/commerzbank.de",
+        "stock_price": "€5.67",
+        "founded": 1870
+    },
+    {
+        "rank": 62,
+        "name": "Hua Xia Bank",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com.huaxiabank.com.cn",
+        "stock_price": "$0.34",
+        "founded": 1992
+    },
+    {
+        "rank": 63,
+        "name": "PNC Financial Services",
+        "country": "USA",
+        "icon_url": "https://logo.clearbit.com/pnc.com",
+        "stock_price": "$145.67",
+        "founded": 1845
+    },
+    {
+        "rank": 64,
+        "name": "DBS Group",
+        "country": "Singapore",
+        "icon_url": "https://logo.clearbit.com/dbs.com",
+        "stock_price": "S$32.45",
+        "founded": 1968
+    },
+    {
+        "rank": 65,
+        "name": "Itaú Unibanco",
+        "country": "Brazil",
+        "icon_url": "https://logo.clearbit.com.itau.com.br",
+        "stock_price": "R$28.90",
+        "founded": 1944
+    },
+    {
+        "rank": 66,
+        "name": "KB Financial Group",
+        "country": "South Korea",
+        "icon_url": "https://logo.clearbit.com.kbfg.com",
+        "stock_price": "₩67,890",
+        "founded": 2008
+    },
+    {
+        "rank": 67,
+        "name": "Danske Bank",
+        "country": "Denmark",
+        "icon_url": "https://logo.clearbit.com.danskebank.com",
+        "stock_price": "kr 123.45",
+        "founded": 1871
+    },
+    {
+        "rank": 68,
+        "name": "Truist Financial",
+        "country": "USA",
+        "icon_url": "https://logo.clearbit.com.truist.com",
+        "stock_price": "$34.56",
+        "founded": 2019
+    },
+    {
+        "rank": 69,
+        "name": "Shinhan Financial Group",
+        "country": "South Korea",
+        "icon_url": "https://logo.clearbit.com.shinhangroup.com",
+        "stock_price": "₩45,678",
+        "founded": 2001
+    },
+    {
+        "rank": 70,
+        "name": "Resona Holdings",
+        "country": "Japan",
+        "icon_url": "https://logo.clearbit.com.resona-gr.co.jp",
+        "stock_price": "¥567",
+        "founded": 2003
+    },
+    {
+        "rank": 71,
+        "name": "Sumitomo Mitsui Trust Holdings",
+        "country": "Japan",
+        "icon_url": "https://logo.clearbit.com.smtb.jp",
+        "stock_price": "¥3,456",
+        "founded": 2002
+    },
+    {
+        "rank": 72,
+        "name": "Bank of Beijing",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com.bankofbeijing.com.cn",
+        "stock_price": "$0.23",
+        "founded": 1996
+    },
+    {
+        "rank": 73,
+        "name": "China Guangfa Bank",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com.cgbchina.com.cn",
+        "stock_price": "$0.34",
+        "founded": 1988
+    },
+    {
+        "rank": 74,
+        "name": "Charles Schwab",
+        "country": "USA",
+        "icon_url": "https://logo.clearbit.com.schwab.com",
+        "stock_price": "$67.89",
+        "founded": 1971
+    },
+    {
+        "rank": 75,
+        "name": "HDFC Bank",
+        "country": "India",
+        "icon_url": "https://logo.clearbit.com.hdfcbank.com",
+        "stock_price": "₹1,567.89",
+        "founded": 1994
+    },
+    {
+        "rank": 76,
+        "name": "Bank of Jiangsu",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com.bojchina.com.cn",
+        "stock_price": "$0.45",
+        "founded": 2007
+    },
+    {
+        "rank": 77,
+        "name": "Hana Financial Group",
+        "country": "South Korea",
+        "icon_url": "https://logo.clearbit.com.hanafn.com",
+        "stock_price": "₩34,567",
+        "founded": 2005
+    },
+    {
+        "rank": 78,
+        "name": "Banco do Brasil",
+        "country": "Brazil",
+        "icon_url": "https://logo.clearbit.com.bb.com.br",
+        "stock_price": "R$56.78",
+        "founded": 1808
+    },
+    {
+        "rank": 79,
+        "name": "Nationwide Building Society",
+        "country": "UK",
+        "icon_url": "https://logo.clearbit.com.nationwide.co.uk",
+        "stock_price": "£1.23",
+        "founded": 1884
+    },
+    {
+        "rank": 80,
+        "name": "China Zheshang Bank",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com.czbank.com",
+        "stock_price": "$0.23",
+        "founded": 2004
+    },
+    {
+        "rank": 81,
+        "name": "Oversea‑Chinese Banking Corporation",
+        "country": "Singapore",
+        "icon_url": "https://logo.clearbit.com.ocbc.com",
+        "stock_price": "S$12.34",
+        "founded": 1932
+    },
+    {
+        "rank": 82,
+        "name": "Bank of Shanghai",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com.bankofshanghai.com.cn",
+        "stock_price": "$0.34",
+        "founded": 1995
+    },
+    {
+        "rank": 83,
+        "name": "ABN AMRO",
+        "country": "Netherlands",
+        "icon_url": "https://logo.clearbit.com.abnamro.com",
+        "stock_price": "€15.67",
+        "founded": 1991
+    },
+    {
+        "rank": 84,
+        "name": "Bank of New York Mellon",
+        "country": "USA",
+        "icon_url": "https://logo.clearbit.com.bnymellon.com",
+        "stock_price": "$45.67",
+        "founded": 1784
+    },
+    {
+        "rank": 85,
+        "name": "United Overseas Bank",
+        "country": "Singapore",
+        "icon_url": "https://logo.clearbit.com.uobgroup.com",
+        "stock_price": "S$28.90",
+        "founded": 1935
+    },
+    {
+        "rank": 86,
+        "name": "Banco Bradesco",
+        "country": "Brazil",
+        "icon_url": "https://logo.clearbit.com.bradesco.com.br",
+        "stock_price": "R$12.34",
+        "founded": 1943
+    },
+    {
+        "rank": 87,
+        "name": "NongHyup Financial Group",
+        "country": "South Korea",
+        "icon_url": "https://logo.clearbit.com.nonghyup.com",
+        "stock_price": "₩23,456",
+        "founded": 1961
+    },
+    {
+        "rank": 88,
+        "name": "Nomura Holdings",
+        "country": "Japan",
+        "icon_url": "https://logo.clearbit.com.nomuraholdings.com",
+        "stock_price": "¥789",
+        "founded": 1925
+    },
+    {
+        "rank": 89,
+        "name": "Woori Financial Group",
+        "country": "South Korea",
+        "icon_url": "https://logo.clearbit.com.woorifg.com",
+        "stock_price": "₩12,345",
+        "founded": 2001
+    },
+    {
+        "rank": 90,
+        "name": "KBC Group",
+        "country": "Belgium",
+        "icon_url": "https://logo.clearbit.com.kbc.com",
+        "stock_price": "€67.89",
+        "founded": 1935
+    },
+    {
+        "rank": 91,
+        "name": "Caixa Econômica Federal",
+        "country": "Brazil",
+        "icon_url": "https://logo.clearbit.com.caixa.gov.br",
+        "stock_price": "R$4.56",
+        "founded": 1861
+    },
+    {
+        "rank": 92,
+        "name": "Erste Group",
+        "country": "Austria",
+        "icon_url": "https://logo.clearbit.com.erstegroup.com",
+        "stock_price": "€23.45",
+        "founded": 1819
+    },
+    {
+        "rank": 93,
+        "name": "Landesbank Baden‑Württemberg",
+        "country": "Germany",
+        "icon_url": "https://logo.clearbit.com.lbbw.de",
+        "stock_price": "€12.34",
+        "founded": 1999
+    },
+    {
+        "rank": 94,
+        "name": "Bank of Ningbo",
+        "country": "China",
+        "icon_url": "https://logo.clearbit.com.bankofningbo.com.cn",
+        "stock_price": "$0.45",
+        "founded": 1997
+    },
+    {
+        "rank": 95,
+        "name": "Skandinaviska Enskilda Banken (SEB)",
+        "country": "Sweden",
+        "icon_url": "https://logo.clearbit.com.sebgroup.com",
+        "stock_price": "kr 123.45",
+        "founded": 1972
+    },
+    {
+        "rank": 96,
+        "name": "Raiffeisen Schweiz",
+        "country": "Switzerland",
+        "icon_url": "https://logo.clearbit.com.raiffeisen.ch",
+        "stock_price": "CHF 45.67",
+        "founded": 1899
+    },
+    {
+        "rank": 97,
+        "name": "Svenska Handelsbanken",
+        "country": "Sweden",
+        "icon_url": "https://logo.clearbit.com.handelsbanken.se",
+        "stock_price": "kr 89.12",
+        "founded": 1871
+    },
+    {
+        "rank": 98,
+        "name": "Industrial Bank of Korea",
+        "country": "South Korea",
+        "icon_url": "https://logo.clearbit.com.ibk.co.kr",
+        "stock_price": "₩12,345",
+        "founded": 1961
+    },
+    {
+        "rank": 99,
+        "name": "DNB ASA",
+        "country": "Norway",
+        "icon_url": "https://logo.clearbit.com.dnb.no",
+        "stock_price": "kr 234.56",
+        "founded": 1822
+    },
+    {
+        "rank": 100,
+        "name": "Qatar National Bank",
+        "country": "Qatar",
+        "icon_url": "https://logo.clearbit.com.qnb.com",
+        "stock_price": "QAR 15.67",
+        "founded": 1964
+    }
+]
