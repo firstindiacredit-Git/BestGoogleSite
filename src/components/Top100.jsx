@@ -200,7 +200,7 @@ const Top100Page = () => {
           "https://imdb-top-100-movies.p.rapidapi.com/",
           {
             headers: {
-              "x-rapidapi-key": "ed98e198d3msha2890b3dde9a12dp1e7caejsnf255bf4ce34c",
+              "x-rapidapi-key": "3751719246mshae6c08f97e9873fp141a5ajsncde31041dcdb",
               "x-rapidapi-host": "imdb-top-100-movies.p.rapidapi.com",
             },
           }
@@ -235,6 +235,7 @@ const Top100Page = () => {
 
       const data = await response.json();
       // Process the data based on category
+      let processedData;
       switch (category) {
         case "stocks":
           processedData = data.map((stock) => ({

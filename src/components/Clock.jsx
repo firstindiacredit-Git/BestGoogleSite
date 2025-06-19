@@ -204,7 +204,7 @@ const TimeZoneClock = ({ timeZone, isAnalog, onRemove, baseTimeZone }) => {
         digital: {
           container: "bg-[#28283A]",
           time: "bg-transparent border-gray-600",
-          text: "text-gray-200",
+          text: "text-white",
         },
       };
 
@@ -302,8 +302,8 @@ const TimeZoneClock = ({ timeZone, isAnalog, onRemove, baseTimeZone }) => {
       <div
         className={`h-full backdrop-blur-sm min-w-28 rounded-xl flex flex-col items-center justify-center p-2 ${effectiveTheme.digital.container}`}
       >
-        <p className="text-[10px] font-medium mb-0 text-indigo-500">
-          <span className="text-black dark:text-white">{formatTimeZoneName(timeZone)}</span>
+        <p className="text-[10px] font-medium mb-0">
+          <span className={effectiveTheme.digital.text}>{formatTimeZoneName(timeZone)}</span>
         </p>
         <div
           className={`border px-1 rounded-xs text-nowrap ${effectiveTheme.digital.time}`}

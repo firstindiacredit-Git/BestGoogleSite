@@ -341,7 +341,8 @@
             "motorcycle": "MV Agusta F4RR",
             "time_seconds": 10.40,
             "speed_mph": 140.98,
-            "speed_kmh": 226.89
+            "speed_kmh": 226.89,
+            "logo":"https://tse2.mm.bing.net/th?id=OIP.-KTE540z0Q3y97LakmCrnQHaFz&pid=Api&P=0&h=180 "
         },
         {
             "model_year": 2013,
@@ -388,14 +389,16 @@
             "motorcycle": "MV Agusta Brutale 1090RR",
             "time_seconds": 10.50,
             "speed_mph": 130.98,
-            "speed_kmh": 210.79
+            "speed_kmh": 210.79,
+            "logo":"https://tse4.mm.bing.net/th?id=OIP.e4hUsDKWBoqtBndiAaJG6gHaE5&pid=Api&P=0&h=180"
         },
         {
             "model_year": 2008,
             "motorcycle": "Buell 1125R",
             "time_seconds": 10.51,
             "speed_mph": 134.32,
-            "speed_kmh": 216.17
+            "speed_kmh": 216.17,
+            "logo":"https://tse4.mm.bing.net/th?id=OIP.8pRS8iWCEExpHyYtm1nKoAHaHE&pid=Api&P=0&h=180"
         },
         {
             "model_year": 1991,
@@ -410,7 +413,8 @@
             "motorcycle": "Triumph Speed Triple R",
             "time_seconds": 10.55,
             "speed_mph": 129.32,
-            "speed_kmh": 208.12
+            "speed_kmh": 208.12,
+            "logo":"https://tse3.mm.bing.net/th?id=OIP.A79CznyGjXjQ_tXm0oE0DwHaGl&pid=Api&P=0&h=180"
         },
         {
             "model_year": 2011,
@@ -560,7 +564,8 @@
             "motorcycle": "MV Agusta F4 Senna",
             "time_seconds": 10.85,
             "speed_mph": 131.85,
-            "speed_kmh": 212.19
+            "speed_kmh": 212.19,
+            "logo":"https://tse4.mm.bing.net/th?id=OIP.PRbnmQJskXK7KfEhKvMP7wHaFN&pid=Api&P=0&h=180"
         },
         {
             "model_year": 1997,
@@ -623,7 +628,8 @@
             "motorcycle": "Triumph Daytona 675",
             "time_seconds": 10.96,
             "speed_mph": 127.32,
-            "speed_kmh": 204.90
+            "speed_kmh": 204.90,
+            "logo":"https://tse4.mm.bing.net/th?id=OIP.yx-6mukXcY7fhXS26sVIqQHaD5&pid=Api&P=0&h=180"
         },
         {
             "model_year": 2015,
@@ -662,7 +668,8 @@
             "motorcycle": "Triumph Street Triple RS",
             "time_seconds": 11.05,
             "speed_mph": 128.80,
-            "speed_kmh": 207.28
+            "speed_kmh": 207.28,
+            "logo":"https://tse1.mm.bing.net/th?id=OIP.pDan-eSTBQ0yeUuPZ4r6wwHaEK&pid=Api&P=0&h=180"
         },
         {
             "model_year": 1983,
@@ -796,7 +803,8 @@
             "motorcycle": "Triumph Tiger Explorer 1200",
             "time_seconds": 11.32,
             "speed_mph": 118.07,
-            "speed_kmh": 190.02
+            "speed_kmh": 190.02,
+            "logo":"https://tse1.mm.bing.net/th?id=OIP.rRbyswBWfjNct0GFuoGuvQHaB2&pid=Api&P=0&h=180"
         },
         {
             "model_year": 1979,
@@ -811,7 +819,8 @@
             "motorcycle": "Harley-Davidson VRSC V-Rod",
             "time_seconds": 11.38,
             "speed_mph": 119.07,
-            "speed_kmh": 191.62
+            "speed_kmh": 191.62,
+            "logo":"https://tse2.mm.bing.net/th?id=OIP.P-sCpL8p-NGOkOy5JN5YxAHaGB&pid=Api&P=0&h=180"
         },
         {
             "model_year": 1980,
@@ -842,21 +851,24 @@
             "motorcycle": "Triumph Daytona 900",
             "time_seconds": 11.40,
             "speed_mph": 119.10,
-            "speed_kmh": 191.67
+            "speed_kmh": 191.67,
+            "logo":"https://tse3.mm.bing.net/th?id=OIP.A79CznyGjXjQ_tXm0oE0DwHaGl&pid=Api&P=0&h=180"
         },
         {
             "model_year": 2004,
             "motorcycle": "Triumph Rocket III",
             "time_seconds": 11.44,
             "speed_mph": 118.33,
-            "speed_kmh": 190.43
+            "speed_kmh": 190.43,
+            "logo":"https://tse3.mm.bing.net/th?id=OIP.A79CznyGjXjQ_tXm0oE0DwHaGl&pid=Api&P=0&h=180"
         },
         {
             "model_year": 2010,
             "motorcycle": "Triumph Rocket III Roadster",
             "time_seconds": 11.48,
             "speed_mph": 115.00,
-            "speed_kmh": 185.00
+            "speed_kmh": 185.00,
+            "logo":"https://tse3.mm.bing.net/th?id=OIP.A79CznyGjXjQ_tXm0oE0DwHaGl&pid=Api&P=0&h=180"
         },
         {
             "model_year": 2008,
@@ -886,14 +898,16 @@
             "motorcycle": "Suzuki Boulevard M109R",
             "time_seconds": 11.62,
             "speed_mph": 114.91,
-            "speed_kmh": 184.93
+            "speed_kmh": 184.93,
+            "logo":"https://tse2.mm.bing.net/th?id=OIP.ZOdzGUl15wJnfFCJ_GyK4gHaDt&pid=Api&P=0&h=180"
         },
         {
             "model_year": 2003,
             "motorcycle": "Suzuki SV650s",
             "time_seconds": 11.63,
             "speed_mph": 114.41,
-            "speed_kmh": 184.13
+            "speed_kmh": 184.13,
+            "logo":"https://tse2.mm.bing.net/th?id=OIP.ZOdzGUl15wJnfFCJ_GyK4gHaDt&pid=Api&P=0&h=180"
         },
         {
             "model_year": 2009,
@@ -908,7 +922,8 @@
             "motorcycle": "Triumph Speed Four",
             "time_seconds": 11.65,
             "speed_mph": 114.90,
-            "speed_kmh": 184.91
+            "speed_kmh": 184.91,
+            "logo":"https://tse3.mm.bing.net/th?id=OIP.A79CznyGjXjQ_tXm0oE0DwHaGl&pid=Api&P=0&h=180"
         },
         {
             "model_year": 1985,
@@ -923,7 +938,8 @@
             "motorcycle": "Triumph Trophy 1200 (120ps)",
             "time_seconds": 11.70,
             "speed_mph": 120.00,
-            "speed_kmh": 190.00
+            "speed_kmh": 190.00,
+            "logo":"https://tse3.mm.bing.net/th?id=OIP.A79CznyGjXjQ_tXm0oE0DwHaGl&pid=Api&P=0&h=180"
         },
         {
             "model_year": 1983,
@@ -954,7 +970,8 @@
             "motorcycle": "Suzuki GS1000",
             "time_seconds": 11.83,
             "speed_mph": 107.88,
-            "speed_kmh": 173.62
+            "speed_kmh": 173.62,
+            "logo":"https://tse2.mm.bing.net/th?id=OIP.ZOdzGUl15wJnfFCJ_GyK4gHaDt&pid=Api&P=0&h=180"
         },
         {
             "model_year": 2005,
@@ -977,14 +994,16 @@
             "motorcycle": "Norton Dunstall 810",
             "time_seconds": 11.90,
             "speed_mph": 107.88,
-            "speed_kmh": 173.62
+            "speed_kmh": 173.62,
+            "logo":"https://tse2.mm.bing.net/th?id=OIP.GfUYLRiy6NG31uGFFUtcdQAAAA&pid=Api&P=0&h=180"
         },
         {
             "model_year": 2007,
             "motorcycle": "Victory 8-Ball",
             "time_seconds": 11.91,
             "speed_mph": 113.26,
-            "speed_kmh": 182.27
+            "speed_kmh": 182.27,
+            "logo":"https://tse2.mm.bing.net/th?id=OIP.h6xL6I3rXYWGzt0OQqfGaAHaEH&pid=Api&P=0&h=180"
         },
         {
             "model_year": 1979,
@@ -1015,7 +1034,8 @@
             "motorcycle": "Indian Scout",
             "time_seconds": 11.93,
             "speed_mph": 110.05,
-            "speed_kmh": 177.11
+            "speed_kmh": 177.11,
+            "logo":"https://tse3.mm.bing.net/th?id=OIP.Rm2AUARaLqXk5xQGERQVTgHaFj&pid=Api&P=0&h=180"
         },
         {
             "model_year": 1987,
@@ -1046,7 +1066,8 @@
             "motorcycle": "Triumph Trophy 1200 (110ps)",
             "time_seconds": 12.00,
             "speed_mph": 117.00,
-            "speed_kmh": 188.00
+            "speed_kmh": 188.00,
+            "logo":"https://tse3.mm.bing.net/th?id=OIP.A79CznyGjXjQ_tXm0oE0DwHaGl&pid=Api&P=0&h=180"
         }
     ]
 }
