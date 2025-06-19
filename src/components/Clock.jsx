@@ -16,7 +16,6 @@ const AVAILABLE_TIMEZONES = [
   "America/Phoenix",
   "America/Denver",
   "America/Montreal",
-  "America/Miami",
 
   // South America
   "America/Sao_Paulo",
@@ -184,8 +183,8 @@ const TimeZoneClock = ({ timeZone, isAnalog, onRemove, baseTimeZone }) => {
           background: "bg-white",
           hourHand: "bg-indigo-500",
           minuteHand: "bg-gray-900",
-          secondHand: "bg-gray-200",
-          numbers: "text-gray-900",
+          secondHand: "bg-orange-500",
+          numbers: "text-black font-semibold drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)] scale-110",
         },
         digital: {
           container: "bg-gray-100",
@@ -199,8 +198,8 @@ const TimeZoneClock = ({ timeZone, isAnalog, onRemove, baseTimeZone }) => {
           background: "bg-[#28283A]",
           hourHand: "bg-gray-400",
           minuteHand: "bg-gray-200",
-          secondHand: "bg-gray-200",
-          numbers: "text-gray-400",
+          secondHand: "bg-orange-500",
+          numbers: "text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.45)] scale-1",
         },
         digital: {
           container: "bg-[#28283A]",
@@ -235,7 +234,7 @@ const TimeZoneClock = ({ timeZone, isAnalog, onRemove, baseTimeZone }) => {
           </button>
         </Popconfirm>
         <div
-          className={`w-[5.5rem] h-[5.4rem] rounded-full border-2 relative flex items-center justify-center ${effectiveTheme.analog.border} ${effectiveTheme.analog.background}`}
+          className={`w-[6.5rem] h-[6.4rem] rounded-full border-2 relative flex items-center justify-center p-2 ${effectiveTheme.analog.border} ${effectiveTheme.analog.background}`}
         >
           {/* Numbers */}
           {[...Array(12)].map((_, index) => {
@@ -247,9 +246,9 @@ const TimeZoneClock = ({ timeZone, isAnalog, onRemove, baseTimeZone }) => {
             return (
               <div
                 key={index}
-                className={`absolute text-[8px] mt-[1rem] ml-[0.48rem] font-medium ${effectiveTheme.analog.numbers}`}
+                className={`absolute text-[11px] mt-[1.2rem] ml-[0.48rem] ${effectiveTheme.analog.numbers}`}
                 style={{
-                  transform: `translate(-50%, -50%) translate(${x}px, ${y}px)`,
+                  transform: `translate(-50%, -50%) translate(${x * 1.13}px, ${y * 1.13}px)`,
                 }}
               >
                 {index + 1}
@@ -275,7 +274,7 @@ const TimeZoneClock = ({ timeZone, isAnalog, onRemove, baseTimeZone }) => {
           />
         </div>
         <div className="text-center text-[10px] font-medium mt-1">
-          <p className={`mb-0 ${effectiveTheme.analog.numbers}`}>
+          <p className={"mb-0 text-black dark:text-white"}>
             {formatTimeZoneName(timeZone)}
           </p>
           {timeDiff && (
@@ -303,8 +302,8 @@ const TimeZoneClock = ({ timeZone, isAnalog, onRemove, baseTimeZone }) => {
       <div
         className={`h-full backdrop-blur-sm min-w-28 rounded-xl flex flex-col items-center justify-center p-2 ${effectiveTheme.digital.container}`}
       >
-        <p className="text-[10px] font-medium mb-0.5 text-indigo-500">
-          {formatTimeZoneName(timeZone)}
+        <p className="text-[10px] font-medium mb-0 text-indigo-500">
+          <span className="text-black dark:text-white">{formatTimeZoneName(timeZone)}</span>
         </p>
         <div
           className={`border px-1 rounded-xs text-nowrap ${effectiveTheme.digital.time}`}
@@ -331,12 +330,13 @@ const preventScroll = (prevent) => {
 };
 
 const ResponsiveWorldClock = () => {
-  const [isAnalog, setIsAnalog] = useState(() => {
-    // Get the stored preference from localStorage, default to true (analog) if not found
-    const storedPreference = localStorage.getItem('clockViewPreference');
-    return storedPreference ? JSON.parse(storedPreference) : true;
-  });
-  const [selectedTimezones, setSelectedTimezones] = useState(["Asia/Kolkata", "America/New_York"]);
+  const [isAnalog, setIsAnalog] = useState(true);
+  const [selectedTimezones, setSelectedTimezones] = useState([
+    "Asia/Kolkata", // India
+    "America/New_York", // USA (New York)
+    "Pacific/Auckland", // Los 
+    "Europe/Paris" // Paris
+  ]);
   const [isHovering, setIsHovering] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -492,7 +492,6 @@ const ResponsiveWorldClock = () => {
               <button
                 onClick={() => {
                   setIsAnalog(false);
-                  localStorage.setItem('clockViewPreference', JSON.stringify(false));
                   setShowSettings(false);
                 }}
                 className={`p-2 rounded flex-1 ${
@@ -506,7 +505,6 @@ const ResponsiveWorldClock = () => {
               <button
                 onClick={() => {
                   setIsAnalog(true);
-                  localStorage.setItem('clockViewPreference', JSON.stringify(true));
                   setShowSettings(false);
                 }}
                 className={`p-2 rounded flex-1 ${

@@ -50,6 +50,22 @@ const ChatbotAI = () => {
     );
   };
 
+  // Check if the message is asking about the AI's name
+  const isNameQuestion = (message) => {
+    const trimmedMessage = message.trim().toLowerCase();
+    const nameQuestions = [
+      "what is your name",
+      "who are you",
+      "what should i call you",
+      "what's your name",
+      "whats your name",
+      "tell me your name",
+      "who is grobo",
+      "what is grobo"
+    ];
+    return nameQuestions.some(question => trimmedMessage.includes(question));
+  };
+
   // Remove the command prefix from the message
   const sanitizeImagePrompt = (message) => {
     const trimmedMessage = message.trim();
@@ -84,15 +100,27 @@ const ChatbotAI = () => {
 
         const prompt = isImageRequest
           ? sanitizeImagePrompt(currentMessage)
+          : isNameQuestion(currentMessage)
+          ? "My name is Grobo. I'm an AI assistant here to help you with your questions and tasks. How can I assist you today?"
           : currentMessage;
         console.log("Sanitized prompt:", prompt);
 
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${"AIzaSyCdUfYEBIhbt8eCcwp-thTgl8kNmVITbhA"}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyCdUfYEBIhbt8eCcwp-thTgl8kNmVITbhA`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ message: prompt }),
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  {
+                    text: prompt
+                  }
+                ]
+              }
+            ]
+          }),
         });
 
         if (!response.ok) {
@@ -107,7 +135,7 @@ const ChatbotAI = () => {
         if (isImageRequest) {
           if (data.image) {
             // Show typing indicator for a moment
-            await new Promise((resolve) => setTimeout(resolve, 1000));
+            await new Promise((resolve) => setTimeout(resolve, 2000));
 
             // Add the image response
             setMessages((prev) => [
@@ -123,11 +151,12 @@ const ChatbotAI = () => {
             throw new Error("No image generated");
           }
         } else {
-          const responseText =
-            data.response || "Sorry, I couldn't process that request.";
+          // Extract the response text from the Gemini API response format
+          const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || 
+            "Sorry, I couldn't process that request.";
 
-          // Show typing indicator for 1 second
-          await new Promise((resolve) => setTimeout(resolve, 1000));
+          // Show typing indicator for 2 seconds
+          await new Promise((resolve) => setTimeout(resolve, 2000));
 
           setMessages((prev) => [
             ...prev,

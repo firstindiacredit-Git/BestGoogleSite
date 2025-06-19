@@ -2,324 +2,347 @@
     "GDP_by_country": [
         {
             "Country": "United States",
+            "logo": "https://cdn.britannica.com/79/4479-050-6EF87027/flag-Stars-and-Stripes-May-1-1795.jpg",
             "IMF": {
                 "Forecast": 29167779,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 27360935,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 25744100,
-                "Year": 2022
+                "Year":  2025
             }
+            
         },
         {
             "Country": "China",
+            "logo":"https://media.istockphoto.com/id/1409691380/vector/national-flag-of-china.jpg?s=612x612&w=0&k=20&c=eZj7NFRw2cEdNkJ063WDDIYsa_42-bCGsVOw9upABPA=",
             "IMF": {
                 "Forecast": 18273357,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 17794782,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 17963170,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Germany",
+            "logo":"https://media.istockphoto.com/id/880562790/vector/national-symbol-of-germany-flag.jpg?s=612x612&w=0&k=20&c=Xm8HdYbf50AoSvvOZfxFomG8rLiIOoPHqj97EB5Zxt4=",
             "IMF": {
                 "Forecast": 4710032,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 4456081,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 4076923,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Japan",
+            "logo":"https://upload.wikimedia.org/wikipedia/en/thumb/9/9e/Flag_of_Japan.svg/1200px-Flag_of_Japan.svg.png",
             "IMF": {
                 "Forecast": 4070094,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 4212945,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 4232173,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "India",
+            "logo":"https://t3.ftcdn.net/jpg/02/95/05/10/360_F_295051081_kLAUYvkdsMR3jRFLPShl9WrGgRV9zSda.jpg",
             "IMF": {
                 "Forecast": 3889130,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 3549919,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 3465541,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "United Kingdom",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/a/a5/Flag_of_the_United_Kingdom_%281-2%29.svg",
             "IMF": {
                 "Forecast": 3587545,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 3340032,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 3089072,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "France",
+            "logo":"https://upload.wikimedia.org/wikipedia/en/thumb/c/c3/Flag_of_France.svg/800px-Flag_of_France.svg.png",
             "IMF": {
                 "Forecast": 3174099,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 3030904,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 2775316,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Italy",
+            "logo":"https://static.vecteezy.com/system/resources/previews/027/002/928/non_2x/italian-flag-flag-of-italy-italy-flag-wave-vector.jpg",
             "IMF": {
                 "Forecast": 2376510,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 2254851,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 2046952,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Canada",
+            "logo":"https://img.freepik.com/premium-photo/canada-national-fabric-flag-symbol-international-world-north-america-country_113767-1642.jpg?semt=ais_hybrid&w=740",
             "IMF": {
                 "Forecast": 2214796,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 2140086,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 2137939,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Brazil",
+            "logo":"https://upload.wikimedia.org/wikipedia/en/thumb/0/05/Flag_of_Brazil.svg/1200px-Flag_of_Brazil.svg.png",
             "IMF": {
                 "Forecast": 2188419,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 2173666,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 1920095,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Russia",
+            "logo":"https://upload.wikimedia.org/wikipedia/en/thumb/f/f3/Flag_of_Russia.svg/1200px-Flag_of_Russia.svg.png",
             "IMF": {
                 "Forecast": 2184316,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 2021421,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 2240422,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "South Korea",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Flag_of_South_Korea.svg/1200px-Flag_of_South_Korea.svg.png",
             "IMF": {
                 "Forecast": 1869916,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 1712793,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 1673916,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Mexico",
+            "logo":"https://i.ebayimg.com/images/g/wjwAAOSwmxVeHiAE/s-l1600.jpg",
             "IMF": {
                 "Forecast": 1848125,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 1788887,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 1463323,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Australia",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/8/88/Flag_of_Australia_%28converted%29.svg",
             "IMF": {
                 "Forecast": 1802006,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 1723827,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 1776577,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Spain",
+            "logo":"https://upload.wikimedia.org/wikipedia/en/thumb/9/9a/Flag_of_Spain.svg/1200px-Flag_of_Spain.svg.png",
             "IMF": {
                 "Forecast": 1731469,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 1580695,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 1415874,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Indonesia",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Flag_of_Indonesia.svg/1200px-Flag_of_Indonesia.svg.png",
             "IMF": {
                 "Forecast": 1402590,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 1371171,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 1319100,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Turkey",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Flag_of_Turkey.svg/1200px-Flag_of_Turkey.svg.png",
             "IMF": {
                 "Forecast": 1344318,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 1108022,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 907118,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Netherlands",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Flag_of_the_Netherlands.svg/2560px-Flag_of_the_Netherlands.svg.png",
             "IMF": {
                 "Forecast": 1218401,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 1118125,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 1008027,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Saudi Arabia",
+            "logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTSJwTflvoWdvzBTtLU3orDkzHVYFnJnjUb3A&s",
             "IMF": {
                 "Forecast": 1100706,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 1067583,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 1108148,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Switzerland",
+            "logo":"https://img.freepik.com/premium-vector/swiss-flag_592324-6978.jpg?semt=ais_hybrid&w=740",
             "IMF": {
                 "Forecast": 942265,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 884940,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 818426,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Poland",
+            "logo":"https://upload.wikimedia.org/wikipedia/en/thumb/1/12/Flag_of_Poland.svg/250px-Flag_of_Poland.svg.png",
             "IMF": {
                 "Forecast": 862908,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 811229,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 688125,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Taiwan",
+            "logo":"https://cdn.britannica.com/62/4562-050-A3B1915F/Flag-Taiwan.jpg",
             "IMF": {
                 "Forecast": 775017,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": null,
@@ -332,576 +355,615 @@
         },
         {
             "Country": "Belgium",
+            "logo":"https://cdn.britannica.com/08/6408-050-03D00EC3/Flag-Belgium.jpg",
             "IMF": {
                 "Forecast": 662183,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 632217,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 582643,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Sweden",
+            "logo":"https://upload.wikimedia.org/wikipedia/en/thumb/4/4c/Flag_of_Sweden.svg/250px-Flag_of_Sweden.svg.png",
             "IMF": {
                 "Forecast": 609039,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 593268,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 591188,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Argentina",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/1/1a/Flag_of_Argentina.svg",
             "IMF": {
                 "Forecast": 604382,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 640591,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 631133,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Ireland",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Flag_of_Ireland.svg/960px-Flag_of_Ireland.svg.png?20160516044543",
             "IMF": {
                 "Forecast": 560566,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 545629,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 532415,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Singapore",
+            "logo":"https://img.freepik.com/premium-vector/singapore-detailed-flag-white-background-vector-illustration_508524-1618.jpg?semt=ais_hybrid&w=740",
             "IMF": {
                 "Forecast": 548708,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 501428,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 466788,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Thailand",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Flag_of_Thailand.svg/640px-Flag_of_Thailand.svg.png",
             "IMF": {
                 "Forecast": 545340,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 514945,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 495340,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "United Arab Emirates",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/c/cb/Flag_of_the_United_Arab_Emirates.svg",
             "IMF": {
                 "Forecast": 545100,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 504173,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 507063,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Austria",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Flag_of_Austria.svg/800px-Flag_of_Austria.svg.png",
             "IMF": {
                 "Forecast": 535804,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 516034,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 470302,
-                "Year": 2022
+                "Year": 2025
             }
         },
         {
             "Country": "Israel",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Flag_of_Israel.svg/1200px-Flag_of_Israel.svg.png",
             "IMF": {
                 "Forecast": 528067,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 509902,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 525002,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Norway",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Flag_of_Norway.svg/1200px-Flag_of_Norway.svg.png",
             "IMF": {
                 "Forecast": 503752,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 485513,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 579422,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Malaysia",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Flag_of_Malaysia.svg/1200px-Flag_of_Malaysia.svg.png",
             "IMF": {
                 "Forecast": 488700,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 399649,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 406305,
-                "Year": 2022
+                "Year": 2025
             }
         },
         {
             "Country": "Philippines",
+            "logo":"https://images.seeklogo.com/logo-png/10/2/philippines-flag-logo-png_seeklogo-108439.png",
             "IMF": {
                 "Forecast": 471062,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 437146,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 404284,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Vietnam",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Flag_of_Vietnam.svg/2560px-Flag_of_Vietnam.svg.png",
             "IMF": {
                 "Forecast": 468485,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 429717,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 408802,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Bangladesh",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Flag_of_Bangladesh.svg/1200px-Flag_of_Bangladesh.svg.png",
             "IMF": {
                 "Forecast": 451468,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 437415,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 432677,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Iran",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Flag_of_Iran.svg/800px-Flag_of_Iran.svg.png",
             "IMF": {
                 "Forecast": 434243,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 401505,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 398047,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Colombia",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Flag_of_Colombia.svg/640px-Flag_of_Colombia.svg.png",
             "IMF": {
                 "Forecast": 417207,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 363540,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 343939,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Denmark",
+            "logo":"https://seeklogo.com/images/F/flag-of-denmark-logo-953CD8658B-seeklogo.com.png",
             "IMF": {
                 "Forecast": 412293,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 404199,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 400167,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Egypt",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Flag_of_Egypt.svg/800px-Flag_of_Egypt.svg.png",
             "IMF": {
                 "Forecast": 410800,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 395926,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 409306,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "South Africa",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Flag_of_South_Africa.svg/1024px-Flag_of_South_Africa.svg.png",
             "IMF": {
                 "Forecast": 403045,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 377782,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 405270,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Hong Kong",
+            "logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRjSyrF6N4pyTQjIKeP4BijWuehaADpNVwccQ&s",
             "IMF": {
                 "Forecast": 401751,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 382055,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 359838,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Romania",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Flag_of_Romania.svg/330px-Flag_of_Romania.svg.png",
             "IMF": {
                 "Forecast": 380561,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 351003,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 300690,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Pakistan",
+            "logo":"https://cdn.britannica.com/46/3346-050-DE92F66A/flag-symbolism-Pakistan-design-Islamic.jpg",
             "IMF": {
                 "Forecast": 374595,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 338368,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 326796,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Czech Republic",
+            "logo":"https://i.pinimg.com/736x/05/bb/5d/05bb5d3cc73dd567808d76517b598987.jpg",
             "IMF": {
                 "Forecast": 342992,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 330858,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 290527,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Chile",
+            "logo":"https://cdn.britannica.com/85/7485-050-2615417F/Flag-Chile.jpg?w=400&h=300&c=crop",
             "IMF": {
                 "Forecast": 328720,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 335533,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 300686,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Finland",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/b/bc/Flag_of_Finland.svg",
             "IMF": {
                 "Forecast": 306083,
-                "Year": 2024
+                "Year": 2025
             },
             "World_Bank": {
                 "Estimate": 300187,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 282511,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Portugal",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/5/5c/Flag_of_Portugal.svg",
             "IMF": {
                 "Forecast": 303032,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 287080,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 254849,
-                "Year": 2022
+                "Year": 2025
             }
         },
         {
             "Country": "Kazakhstan",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/d/d3/Flag_of_Kazakhstan.svg",
             "IMF": {
                 "Forecast": 292553,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 261421,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 225496,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Peru",
+            "logo":"https://cdn.britannica.com/48/3448-050-1EFC8CF3/Flag-Peru.jpg",
             "IMF": {
                 "Forecast": 283309,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 267603,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 242631,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Iraq",
+            "logo":"https://cdn.britannica.com/28/1728-050-FC0FCF9D/Flag-Iraq.jpg",
             "IMF": {
                 "Forecast": 264149,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 250843,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 264182,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Algeria",
+            "logo":"https://media.istockphoto.com/id/466068984/vector/flag-of-algeria.jpg?s=612x612&w=0&k=20&c=uAXMRJg6UDp5n4mwzPw2KEToT6w9Dp456AKoqw4qJnw=",
             "IMF": {
                 "Forecast": 260134,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 239899,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 191912,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Greece",
+            "logo":"https://cdn.britannica.com/49/1049-050-3AD6578E/Flag-Greece.jpg",
             "IMF": {
                 "Forecast": 252732,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 238206,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 217285,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "New Zealand",
+            "logo":"https://media.istockphoto.com/id/951984490/vector/new-zealand-flag.jpg?s=612x612&w=0&k=20&c=KddU0iFFtGJo2WycII8daFYTC7juZEeUaxGS6TRUjSs=",
             "IMF": {
                 "Forecast": 252236,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 253466,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 245845,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Hungary",
+            "logo":"https://myflag.com.au/wp-content/uploads/hungary-national-flag.jpg",
             "IMF": {
                 "Forecast": 228806,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 212389,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 177337,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Qatar",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/6/65/Flag_of_Qatar.svg",
             "IMF": {
                 "Forecast": 221406,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 235770,
-                "Year": 2022
+                "Year":  2025
             },
             "United_Nations": {
                 "Estimate": 237101,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Nigeria",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/7/79/Flag_of_Nigeria.svg",
             "IMF": {
                 "Forecast": 199721,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 362815,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 475058,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Ukraine",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/7/79/Flag_of_Nigeria.svg",
             "IMF": {
                 "Forecast": 184099,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 178757,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 160502,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Kuwait",
+            "logo":"https://cdn.britannica.com/70/5770-050-BD7FAEFD/Flag-Kuwait.jpg",
             "IMF": {
                 "Forecast": 161822,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 161772,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 175363,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Morocco",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Flag_of_Morocco.svg/1200px-Flag_of_Morocco.svg.png",
             "IMF": {
                 "Forecast": 157087,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 141109,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 130912,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Cuba",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Flag_of_Cuba.svg/1200px-Flag_of_Cuba.svg.png",
             "IMF": {
                 "Forecast": null,
                 "Year": null
@@ -912,179 +974,191 @@
             },
             "United_Nations": {
                 "Estimate": 147193,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Ethiopia",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Flag_of_Ethiopia.svg/1200px-Flag_of_Ethiopia.svg.png",
             "IMF": {
                 "Forecast": 145031,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 163698,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 118971,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Slovakia",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Flag_of_Slovakia.svg/1200px-Flag_of_Slovakia.svg.png",
             "IMF": {
                 "Forecast": 142617,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 132794,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 115304,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Dominican Republic",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/9/9f/Flag_of_the_Dominican_Republic.svg",
             "IMF": {
                 "Forecast": 126238,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 121444,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 113537,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Ecuador",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Flag_of_Ecuador.svg/1200px-Flag_of_Ecuador.svg.png",
             "IMF": {
                 "Forecast": 121425,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 118845,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 115049,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Puerto Rico",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Flag_of_Puerto_Rico.svg/500px-Flag_of_Puerto_Rico.svg.png",
             "IMF": {
                 "Forecast": 120971,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 117902,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 113434,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Kenya",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Flag_of_Kenya.svg/1200px-Flag_of_Kenya.svg.png",
             "IMF": {
                 "Forecast": 116321,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 107441,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 113419,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Angola",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Flag_of_Angola.svg/1200px-Flag_of_Angola.svg.png",
             "IMF": {
                 "Forecast": 113286,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 84773,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 113304,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Uzbekistan",
+            "logo":"https://cdn.britannica.com/47/7247-050-BEEDE5E3/Flag-Uzbekistan.jpg",
             "IMF": {
                 "Forecast": 112653,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 90889,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 80391,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Guatemala",
+            "logo":"https://cdn.britannica.com/13/7213-050-B24C9649/Flag-Guatemala.jpg",
             "IMF": {
                 "Forecast": 112369,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 102050,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 95003,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Oman",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/3/3d/Flag_of_Oman_%282004%29.jpg",
             "IMF": {
                 "Forecast": 109993,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 108192,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 114666,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Bulgaria",
+            "logo":"https://cdn.britannica.com/04/6204-050-532576DB/Flag-Bulgaria.jpg",
             "IMF": {
                 "Forecast": 108425,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 101584,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 90213,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Venezuela",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/0/06/Flag_of_Venezuela.svg",
             "IMF": {
                 "Forecast": 106327,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": null,
@@ -1092,457 +1166,487 @@
             },
             "United_Nations": {
                 "Estimate": 129313,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Costa Rica",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Flag_of_Costa_Rica.svg/1200px-Flag_of_Costa_Rica.svg.png",
             "IMF": {
                 "Forecast": 95149,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 86498,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 68380,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Luxembourg",
+            "logo":"https://www.rjtravelagency.com/wp-content/uploads/2024/06/Luxembourg-Flag.jpg",
             "IMF": {
                 "Forecast": 91210,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 85755,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 81530,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Croatia",
+            "logo":"https://cdn.britannica.com/06/6206-050-4A54E70D/Flag-Croatia.jpg",
             "IMF": {
                 "Forecast": 89665,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 82689,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 71552,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Panama",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Flag_of_Panama.svg/500px-Flag_of_Panama.svg.png",
             "IMF": {
                 "Forecast": 87347,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 83382,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 76522,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Ivory Coast",
+            "logo":"https://cdn.britannica.com/48/5048-050-69610380/Flag-Cote-dIvoire.jpg",
             "IMF": {
                 "Forecast": 86993,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 78789,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 70018,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Sri Lanka",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/1/11/Flag_of_Sri_Lanka.svg",
             "IMF": {
                 "Forecast": null,
                 "Year": null
             },
             "World_Bank": {
                 "Estimate": 84357,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 76187,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Turkmenistan",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Flag_of_Turkmenistan.svg/500px-Flag_of_Turkmenistan.svg.png",
             "IMF": {
                 "Forecast": 83883,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 59887,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 67009,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Lithuania",
+            "logo":"https://cdn.britannica.com/52/6252-050-A3423929/Flag-Lithuania.jpg",
             "IMF": {
                 "Forecast": 82789,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 77836,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 70878,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Uruguay",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Flag_of_Uruguay.svg/1200px-Flag_of_Uruguay.svg.png",
             "IMF": {
                 "Forecast": 82605,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 77241,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 71171,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Serbia",
+            "logo":"https://cdn.britannica.com/39/94839-050-6827FB80/Flag-Serbia.jpg",
             "IMF": {
                 "Forecast": 82550,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 75187,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 63563,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Tanzania",
+            "logo":"https://toppng.com/uploads/preview/tanzania-large-flag-11547890873pflp7ozuck.png",
             "IMF": {
                 "Forecast": 79867,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 79158,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 73535,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Azerbaijan",
+            "logo":"https://img.freepik.com/premium-vector/azerbaijan-flag-with-waving-effect-official-proportion_292608-961.jpg",
             "IMF": {
                 "Forecast": 75649,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 72356,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 78721,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Ghana",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/1/19/Flag_of_Ghana.svg",
             "IMF": {
                 "Forecast": 75307,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 76370,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 73766,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Slovenia",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/Flag_of_Slovenia.svg/1200px-Flag_of_Slovenia.svg.png",
             "IMF": {
                 "Forecast": 73198,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 68217,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 59981,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Belarus",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Flag_of_Belarus.svg/1200px-Flag_of_Belarus.svg.png",
             "IMF": {
                 "Forecast": 73129,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 71857,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 72873,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "DR Congo",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Flag_of_the_Democratic_Republic_of_the_Congo.svg/500px-Flag_of_the_Democratic_Republic_of_the_Congo.svg.png",
             "IMF": {
                 "Forecast": 72483,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 66383,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 62551,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Myanmar",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Flag_of_Myanmar.svg/2560px-Flag_of_Myanmar.svg.png",
             "IMF": {
                 "Forecast": 64284,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 64815,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 65211,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Uganda",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Flag_of_Uganda.svg/500px-Flag_of_Uganda.svg.png",
             "IMF": {
                 "Forecast": 55587,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 49273,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 48243,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Macau",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Flag_of_Macau.svg/1200px-Flag_of_Macau.svg.png",
             "IMF": {
                 "Forecast": 53447,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 47062,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 24042,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Cameroon",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Flag_of_Cameroon.svg/500px-Flag_of_Cameroon.svg.png",
             "IMF": {
                 "Forecast": 53391,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 47946,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 44341,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Jordan",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Flag_of_Jordan.svg/500px-Flag_of_Jordan.svg.png",
             "IMF": {
                 "Forecast": 53305,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 50814,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 47452,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Tunisia",
+            "logo":"https://media.istockphoto.com/id/1393393847/vector/the-national-flag-of-turkey.jpg?s=612x612&w=0&k=20&c=XG4V4oo0jvNOkzAf-SgAbmMaZqx_KYllmIAfXbMWjho=",
             "IMF": {
                 "Forecast": 52636,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 48530,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 46181,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Bolivia",
+            "logo":"https://cdn.britannica.com/54/6754-050-897FBD93/Flag-Bolivia.jpg",
             "IMF": {
                 "Forecast": 48172,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 45850,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 44008,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Bahrain",
+            "logo":"https://cdn.britannica.com/67/5767-050-CF112244/Flag-Bahrain.jpg",
             "IMF": {
                 "Forecast": 47812,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 43205,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 44382,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Cambodia",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Flag_of_Cambodia.svg/1200px-Flag_of_Cambodia.svg.png",
             "IMF": {
                 "Forecast": 47147,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 31773,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 29504,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Latvia",
+            "logo":"https://flagdom.com/image/cache/catalog/international/latvia-228x228.jpg",
             "IMF": {
                 "Forecast": 45521,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 43627,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 40876,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Paraguay",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Flag_of_Paraguay.svg/1200px-Flag_of_Paraguay.svg.png",
             "IMF": {
                 "Forecast": 44937,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 42956,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 41722,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Libya",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Flag_of_Libya.svg/1200px-Flag_of_Libya.svg.png",
             "IMF": {
                 "Forecast": 44812,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 50492,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 40537,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Nepal",
+            "logo":"https://media.gettyimages.com/id/1396992727/vector/nepal-flag.jpg?s=170667a&w=gi&k=20&c=i-4xxdkk0sX-WyBWb553Tqlb37ooKaix4IBlMOtI2v8=",
             "IMF": {
                 "Forecast": 43673,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 40908,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 39406,
-                "Year": 2022
+                "Year":  2025
             }
         },
         {
             "Country": "Estonia",
+            "logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Flag_of_Estonia.svg/1200px-Flag_of_Estonia.svg.png",
             "IMF": {
                 "Forecast": 43044,
-                "Year": 2024
+                "Year":  2025
             },
             "World_Bank": {
                 "Estimate": 40745,
-                "Year": 2023
+                "Year": 2025
             },
             "United_Nations": {
                 "Estimate": 38049,
-                "Year": 2022
+                "Year":  2025
             }
         }
     ]

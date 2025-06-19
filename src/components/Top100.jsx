@@ -19,6 +19,8 @@ import sportsmen from "./sportsmen.json";
 import brands from "./brand.json";
 import bikes from "./bikes.json";
 import gdp from "./gdp.json";
+import banks from "./bank.json";
+import cars from "./car.json";
 import "./ToastifyNotification.css";
 import SkeletonLoader from "./SkeletonLoader";
 
@@ -82,7 +84,7 @@ const Top100Page = () => {
   const fetchTop100 = async (category) => {
     try {
       setLoading(true);
-      if (["sportsmen", "brands", "motorcycles", "gdp"].includes(category)) {
+      if (["sportsmen", "brands", "motorcycles", "gdp", "banks", "cars"].includes(category)) {
         if (category === "sportsmen") {
           const processedData = sportsmen.map((person) => ({
             name: `${person.name} ${" "} $${(
@@ -124,15 +126,12 @@ const Top100Page = () => {
         if (category === "gdp") {
           const processedData = gdp.GDP_by_country.map((country) => ({
             name: country.Country,
+            logo: country.logo || null,
             description: `IMF Forecast (${country.IMF?.Year || "N/A"}): $${(
               country.IMF?.Forecast / 1000
-            ).toFixed(2)}T
-                          World Bank (${
-                            country.World_Bank?.Year || "N/A"
-                          }): $${(country.World_Bank?.Estimate / 1000).toFixed(
+            ).toFixed(2)}T\n                          World Bank (${country.World_Bank?.Year || "N/A"}): $${(country.World_Bank?.Estimate / 1000).toFixed(
               2
-            )}T
-                          UN (${country.United_Nations?.Year || "N/A"}): $${(
+            )}T\n                          UN (${country.United_Nations?.Year || "N/A"}): $${(
               country.United_Nations?.Estimate / 1000
             ).toFixed(2)}T`,
             value: country.IMF?.Forecast
@@ -144,7 +143,89 @@ const Top100Page = () => {
           setLoading(false);
           return;
         }
+
+        if (category === "banks") {
+          const processedData = banks.map((bank) => ({
+            name: bank.name,
+            description: `Country: ${bank.country}, Stock Price: ${bank.stock_price}, Founded: ${bank.founded}`,
+            image: bank.icon_url || null,
+            value: `#${bank.rank}`,
+          }));
+          setItems(processedData);
+          setError(null);
+          setLoading(false);
+          return;
+        }
+
+        if (category === "cars") {
+          const processedData = cars.map((car) => ({
+            name: car.name,
+            description: `Country: ${car.country}, CEO: ${car.ceo}, Foounded: ${car.founded}`,
+            image: car.icon_url || null,
+            value: `#${car.rank}`,
+          }));
+          setItems(processedData);
+          setError(null);
+          setLoading(false);
+          return;
+        }
       }
+
+      // Handle crypto category with CoinGecko API
+      if (category === "crypto") {
+        const response = await fetch(
+          "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100"
+        );
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const processedData = data.map((coin) => ({
+          name: coin.name,
+          image: coin.image,
+          value: `$${coin.current_price?.toLocaleString() || "N/A"}`,
+          marketCap: `$${(coin.market_cap / 1000000000).toFixed(2)}B`,
+          change24h: `${coin.price_change_percentage_24h?.toFixed(2) || "N/A"}%`,
+        }));
+        setItems(processedData);
+        setError(null);
+        setLoading(false);
+        return;
+      }
+
+      // Handle movies category with IMDB RapidAPI
+      if (category === "movies") {
+        const response = await fetch(
+          "https://imdb-top-100-movies.p.rapidapi.com/",
+          {
+            headers: {
+              "x-rapidapi-key": "ed98e198d3msha2890b3dde9a12dp1e7caejsnf255bf4ce34c",
+              "x-rapidapi-host": "imdb-top-100-movies.p.rapidapi.com",
+            },
+          }
+        );
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const processedData = data.map((movie) => ({
+          name: movie.title,
+          // description: `Year: ${movie.year || "N/A"}, Rating: ${movie.rating || "N/A"}, Director: ${movie.director || "N/A"}`,
+          image: movie.image || null,
+          value: movie.rating ? `${movie.rating}/10` : "N/A",
+          year: movie.year || "N/A",
+          imdb_link: movie.imdb_link || "N/A",
+          // description: movie.description || "N/A"
+        }));
+        setItems(processedData);
+        setError(null);
+        setLoading(false);
+        return;
+      }
+
+      // Handle other categories with existing backend API
       const response = await fetch(
         `https://bgs-backend.vercel.app/api/top100/${category}?year=${year}`
       );
@@ -154,16 +235,7 @@ const Top100Page = () => {
 
       const data = await response.json();
       // Process the data based on category
-      let processedData = [];
       switch (category) {
-        case "cars":
-          processedData = data.map((vehicle) => ({
-            name: `${vehicle.make} ${vehicle.model}`,
-            description: `Year: ${vehicle.year}, Class: ${
-              vehicle.class || "N/A"
-            }`,
-          }));
-          break;
         case "stocks":
           processedData = data.map((stock) => ({
             name: `${stock.symbol} (${stock.displaySymbol})`,
@@ -172,12 +244,6 @@ const Top100Page = () => {
                           Description: ${stock.description || "N/A"}
                           MIC: ${stock.mic || "N/A"}
                           FIGI: ${stock.figi || "N/A"}`,
-          }));
-          break;
-        case "crypto":
-          processedData = data.map((coin) => ({
-            name: coin.name,
-            description: `Price: $${coin.current_price}, Market Cap: $${coin.market_cap}`,
           }));
           break;
         case "billionaires":
@@ -189,12 +255,6 @@ const Top100Page = () => {
               .split(",")[0]
               .trim()}, Country: ${person.countryOfCitizenship}`,
             image: person.person?.squareImage || null,
-          }));
-          break;
-        case "movies":
-          processedData = data.map((movie) => ({
-            name: movie.title,
-            description: `Rating: ${movie.rating}, Year: ${movie.year}`,
           }));
           break;
       }
@@ -231,12 +291,17 @@ const Top100Page = () => {
                 <h3 className="font-medium text-gray-900 dark:text-white flex-grow truncate">
                   {item.name}
                 </h3>
-                {(category === "brands" && item.logo) || 
-                 (category === "billionaires" && item.image) || 
-                 (category === "motorcycles" && item.image) ? (
+                {(category === "brands" && item.logo) ||
+                  (category === "billionaires" && item.image) ||
+                  (category === "motorcycles" && item.image) ||
+                  (category === "crypto" && item.image) ||
+                  (category === "movies" && item.image) ||
+                  (category === "banks" && item.image) ||
+                  (category === "cars" && item.image) ||
+                  (category === "gdp" && item.logo) ? (
                   <div className="flex-shrink-0 w-10 h-10">
                     <Image
-                      src={category === "brands" ? item.logo : item.image}
+                      src={category === "brands" ? item.logo : category === "gdp" ? item.logo : item.image}
                       alt={item.name}
                       className="w-10 h-10 rounded-lg object-cover"
                     />
@@ -254,26 +319,59 @@ const Top100Page = () => {
                     {category === "billionaires" && "Net Worth"}
                     {category === "motorcycles" && "Speed"}
                     {category === "gdp" && "GDP"}
+                    {category === "movies" && "Rating"}
+                    {category === "banks" && "Rank"}
+                    {category === "cars" && "Rank"}
                   </span>
                   <span className="font-medium">
-                    {category === "crypto" &&
-                      (item.description?.includes("Price: $")
-                        ? `$${
-                            item.description.split("Price: $")[1]?.split(",")[0]
-                          }`
-                        : "N/A")}
+                    {category === "crypto" && item.value}
                     {category === "brands" && item.value}
                     {category === "billionaires" &&
                       item.description?.split("Net Worth: ")[1]?.split(",")[0]}
-                    {category === "motorcycles" &&
-                      `${
-                        item.description
-                          .split("Kmh Speed: ")[1]
-                          ?.split("km/h")[0]
-                      } km/h`}
+                    {category === "motorcycles" && (() => {
+                      if (!item.description) return null;
+                      const speedPart = item.description.split("Kmh Speed: ")[1];
+                      if (!speedPart) return null;
+                      const kmh = speedPart.split("km/h")[0];
+                      return `${kmh} km/h`;
+                    })()}
                     {category === "gdp" && item.value}
+                    {category === "movies" && item.value}
+                    {category === "banks" && item.value}
+                    {category === "cars" && item.value}
                   </span>
                 </div>
+
+                {/* Crypto specific data */}
+                {category === "crypto" && (
+                  <>
+                    <div className="flex justify-between items-center text-gray-500 dark:text-gray-300">
+                      <span>Market Cap</span>
+                      <span className="font-medium">{item.marketCap}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-gray-500 dark:text-gray-300">
+                      <span>24h Change</span>
+                      <span className={`font-medium ${parseFloat(item.change24h) >= 0 ? 'text-green-600' : 'text-red-600'
+                        }`}>
+                        {item.change24h}
+                      </span>
+                    </div>
+                  </>
+                )}
+
+                {/* Movie specific data */}
+                {category === "movies" && (
+                  <>
+                    <div className="flex justify-between items-center text-gray-500 dark:text-gray-300">
+                      <span>Year</span>
+                      <span className="font-medium">{item.year}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-gray-500 dark:text-gray-300">
+                      <span>IMBD</span>
+                      <span className="font-medium">{item.imdb_link}</span>
+                    </div>
+                  </>
+                )}
 
                 {/* Sources Section */}
                 {item.description?.split(",").map((info, i) => {
@@ -288,6 +386,13 @@ const Top100Page = () => {
                   if (
                     category === "motorcycles" &&
                     info.includes("Kmh Speed:")
+                  ) {
+                    return null;
+                  }
+                  // Skip crypto data that's already displayed above
+                  if (
+                    category === "crypto" &&
+                    (info.includes("Price:") || info.includes("Market Cap:") || info.includes("24h Change:"))
                   ) {
                     return null;
                   }
@@ -360,17 +465,9 @@ const Top100Page = () => {
               <div className="flex  gap-2 p-2 bg-white dark:bg-[#28283a] rounded-lg hover:shadow-md transition-all duration-200">
                 {/* Number/Image Circle */}
                 <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-gray-50/[var(--w)] dark:bg-[#513a7a]/[var(--w)]">
-                  {category === "billionaires" && item.image ? (
-                    <Image
-                      src={item.image}
-                      alt={item.name}
-                      className="w-8 h-8 rounded-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-lg font-semibold text-gray-600 dark:text-gray-400">
-                      {index + 1}
-                    </span>
-                  )}
+                  <span className="text-lg font-semibold text-gray-600 dark:text-gray-400">
+                    {index + 1}
+                  </span>
                 </div>
 
                 {/* Content */}
@@ -382,13 +479,7 @@ const Top100Page = () => {
                     {/* Category-specific values */}
                     {category === "crypto" && (
                       <span className="text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
-                        {item.description?.includes("Price: $")
-                          ? `$${
-                              item.description
-                                .split("Price: $")[1]
-                                ?.split(",")[0]
-                            }`
-                          : ""}
+                        {item.value}
                       </span>
                     )}
                     {category === "brands" && (
@@ -405,17 +496,29 @@ const Top100Page = () => {
                         }
                       </span>
                     )}
-                    {category === "motorcycles" && (
+                    {category === "motorcycles" && (() => {
+                      if (!item.description) return null;
+                      const speedPart = item.description.split("Kmh Speed: ")[1];
+                      if (!speedPart) return null;
+                      const kmh = speedPart.split("km/h")[0];
+                      return `${kmh} km/h`;
+                    })()}
+                    {category === "gdp" && (
                       <span className="text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
-                        {
-                          item.description
-                            .split("Kmh Speed: ")[1]
-                            ?.split("km/h")[0]
-                        }{" "}
-                        km/h
+                        {item.value}
                       </span>
                     )}
-                    {category === "gdp" && (
+                    {category === "movies" && (
+                      <span className="text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
+                        {item.value}
+                      </span>
+                    )}
+                    {category === "banks" && (
+                      <span className="text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
+                        {item.value}
+                      </span>
+                    )}
+                    {category === "cars" && (
                       <span className="text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
                         {item.value}
                       </span>
@@ -423,13 +526,83 @@ const Top100Page = () => {
                   </div>
                   {/* Description */}
                   <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    {item.description?.split(",").map((info, i) => (
-                      <p key={i} className="line-clamp-1">
-                        {info.trim()}
-                      </p>
-                    ))}
+                    {category === "crypto" ? (
+                      <div className="space-y-1">
+                        <p className="line-clamp-1">Market Cap: {item.marketCap}</p>
+                        <p className={`line-clamp-1 ${parseFloat(item.change24h) >= 0 ? 'text-green-600' : 'text-red-600'
+                          }`}>
+                          24h Change: {item.change24h}
+                        </p>
+                      </div>
+                    ) : category === "movies" ? (
+                      <div className="space-y-1">
+                        <p className="line-clamp-1">Year: {item.year}</p>
+                        <p className="line-clamp-1">Director: {item.director}</p>
+                      </div>
+                    ) : (
+                      item.description?.split(",").map((info, i) => (
+                        <p key={i} className="line-clamp-1">
+                          {info.trim()}
+                        </p>
+                      ))
+                    )}
                   </div>
                 </div>
+
+                {/* Crypto Logo */}
+                {category === "crypto" && item.image && (
+                  <div className="flex-shrink-0 w-10 h-10">
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      className="w-10 h-10 rounded-lg object-cover"
+                    />
+                  </div>
+                )}
+
+                {/* Movie Logo */}
+                {category === "movies" && item.image && (
+                  <div className="flex-shrink-0 w-10 h-10">
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      className="w-10 h-10 rounded-lg object-cover"
+                    />
+                  </div>
+                )}
+
+                {/* Bank Logo */}
+                {category === "banks" && item.image && (
+                  <div className="flex-shrink-0 w-10 h-10">
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      className="w-10 h-10 rounded-lg object-cover"
+                    />
+                  </div>
+                )}
+
+                {/* Car Logo */}
+                {category === "cars" && item.image && (
+                  <div className="flex-shrink-0 w-10 h-10">
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      className="w-10 h-10 rounded-lg object-cover"
+                    />
+                  </div>
+                )}
+
+                {/* GDP Country Logo */}
+                {category === "gdp" && item.logo && (
+                  <div className="flex-shrink-0 w-10 h-10">
+                    <Image
+                      src={item.logo}
+                      alt={item.name}
+                      className="w-10 h-10 rounded-lg object-cover"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           ))}
@@ -463,81 +636,73 @@ const Top100Page = () => {
             <div className="dark:bg-[#513a7a]/[var(--widget-opacity)]  bg-white/[var(--widget-opacity)] backdrop-blur-sm rounded-lg border border-gray-400/10 dark:border-gray-800/10">
               <div>
                 <button
-                  className={`px-4 py-2 m-1 rounded dark:text-white  ${
-                    category === "motorcycles"
-                      ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
-                      : ""
-                  }`}
+                  className={`px-4 py-2 m-1 rounded dark:text-white  ${category === "motorcycles"
+                    ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                    : ""
+                    }`}
                   onClick={() => setCategory("motorcycles")}
                 >
                   Bikes
                 </button>
                 <button
-                  className={`px-4 py-2 m-1 rounded dark:text-white  ${
-                    category === "crypto"
-                      ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
-                      : ""
-                  }`}
+                  className={`px-4 py-2 m-1 rounded dark:text-white  ${category === "crypto"
+                    ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                    : ""
+                    }`}
                   onClick={() => setCategory("crypto")}
                 >
                   Crypto
                 </button>
                 <button
-                  className={`px-4 py-2 m-1 rounded dark:text-white  ${
-                    category === "stocks"
-                      ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
-                      : ""
-                  }`}
+                  className={`px-4 py-2 m-1 rounded dark:text-white  ${category === "stocks"
+                    ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                    : ""
+                    }`}
                   onClick={() => setCategory("stocks")}
                 >
                   Stocks
                 </button>
                 <button
-                  className={`px-4 py-2 m-1 rounded dark:text-white  ${
-                    category === "billionaires"
-                      ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
-                      : ""
-                  }`}
+                  className={`px-4 py-2 m-1 rounded dark:text-white  ${category === "billionaires"
+                    ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                    : ""
+                    }`}
                   onClick={() => setCategory("billionaires")}
                 >
                   Billionaires
                 </button>
                 <button
-                  className={`px-4 py-2 m-1 rounded dark:text-white  ${
-                    category === "sportsmen"
-                      ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
-                      : ""
-                  }`}
+                  className={`px-4 py-2 m-1 rounded dark:text-white  ${category === "sportsmen"
+                    ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                    : ""
+                    }`}
                   onClick={() => setCategory("sportsmen")}
                 >
                   Sports Contracts
                 </button>
                 <button
-                  className={`px-4 py-2 m-1 rounded dark:text-white  ${
-                    category === "movies"
-                      ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
-                      : ""
-                  }`}
+                  className={`px-4 py-2 m-1 rounded dark:text-white  ${category === "movies"
+                    ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                    : ""
+                    }`}
                   onClick={() => setCategory("movies")}
                 >
                   Movies
                 </button>
                 <button
-                  className={`px-4 py-2 m-1 rounded  dark:text-white ${
-                    category === "brands"
-                      ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
-                      : ""
-                  }`}
+                  className={`px-4 py-2 m-1 rounded  dark:text-white ${category === "brands"
+                    ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                    : ""
+                    }`}
                   onClick={() => setCategory("brands")}
                 >
                   Brands
                 </button>
                 <button
-                  className={`px-4 py-2 m-1 rounded  dark:text-white ${
-                    category === "gdp"
-                      ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
-                      : ""
-                  }`}
+                  className={`px-4 py-2 m-1 rounded  dark:text-white ${category === "gdp"
+                    ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                    : ""
+                    }`}
                   onClick={() => setCategory("gdp")}
                 >
                   GDP
@@ -549,22 +714,20 @@ const Top100Page = () => {
               <div className="bg-white dark:bg-[#513a7a] rounded-lg shadow-sm p-1 inline-flex">
                 <button
                   onClick={() => setViewMode("grid")}
-                  className={`p-2 rounded-md transition-all duration-200 ${
-                    viewMode === "grid"
-                      ? "bg-blue-50 dark:bg-gray-700 text-blue-600 dark:text-blue-400"
-                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
-                  }`}
+                  className={`p-2 rounded-md transition-all duration-200 ${viewMode === "grid"
+                    ? "bg-blue-50 dark:bg-gray-700 text-blue-600 dark:text-blue-400"
+                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                    }`}
                   title="Grid View"
                 >
                   <FaTh size={15} />
                 </button>
                 <button
                   onClick={() => setViewMode("list")}
-                  className={`p-2 rounded-md transition-all duration-200 ${
-                    viewMode === "list"
-                      ? "bg-blue-50 dark:bg-gray-700 text-blue-600 dark:text-blue-400"
-                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
-                  }`}
+                  className={`p-2 rounded-md transition-all duration-200 ${viewMode === "list"
+                    ? "bg-blue-50 dark:bg-gray-700 text-blue-600 dark:text-blue-400"
+                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                    }`}
                   title="List View"
                 >
                   <FaList size={15} />
@@ -581,8 +744,8 @@ const Top100Page = () => {
           {category === "sportsmen"
             ? "Top 100 Contracts"
             : category === "motorcycles"
-            ? "Top 100 Bikes "
-            : `Top 100 ${category.charAt(0).toUpperCase() + category.slice(1)}`}
+              ? "Top 100 Bikes "
+              : `Top 100 ${category.charAt(0).toUpperCase() + category.slice(1)}`}
         </Title>
         {/* Skeleton Loader */}
         <SkeletonLoader count={100} isListView={viewMode === "list"} />
@@ -615,11 +778,10 @@ const Top100Page = () => {
               {mainCategories.map((cat) => (
                 <button
                   key={cat.key}
-                  className={`px-4 py-2 m-1 rounded ${
-                    category === cat.key
-                      ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
-                      : ""
-                  }`}
+                  className={`px-4 py-2 m-1 rounded ${category === cat.key
+                    ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                    : ""
+                    }`}
                   onClick={() => setCategory(cat.key)}
                 >
                   {cat.label}
@@ -640,22 +802,20 @@ const Top100Page = () => {
             <div className="bg-white dark:bg-[#513a7a] rounded-lg shadow-sm p-1 inline-flex">
               <button
                 onClick={() => setViewMode("grid")}
-                className={`p-2 rounded-md transition-all duration-200 ${
-                  viewMode === "grid"
-                    ? "bg-blue-50 dark:bg-gray-700 text-blue-600 dark:text-blue-400"
-                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
-                }`}
+                className={`p-2 rounded-md transition-all duration-200 ${viewMode === "grid"
+                  ? "bg-blue-50 dark:bg-gray-700 text-blue-600 dark:text-blue-400"
+                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  }`}
                 title="Grid View"
               >
                 <FaTh size={15} />
               </button>
               <button
                 onClick={() => setViewMode("list")}
-                className={`p-2 rounded-md transition-all duration-200 ${
-                  viewMode === "list"
-                    ? "bg-blue-50 dark:bg-gray-700 text-blue-600 dark:text-blue-400"
-                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
-                }`}
+                className={`p-2 rounded-md transition-all duration-200 ${viewMode === "list"
+                  ? "bg-blue-50 dark:bg-gray-700 text-blue-600 dark:text-blue-400"
+                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  }`}
                 title="List View"
               >
                 <FaList size={15} />
@@ -672,20 +832,14 @@ const Top100Page = () => {
         {category === "sportsmen"
           ? "Top 100 Contracts"
           : category === "motorcycles"
-          ? "Top 100 Bikes "
-          : `Top 100 ${category.charAt(0).toUpperCase() + category.slice(1)}`}
+            ? "Top 100 Bikes "
+            : `Top 100 ${category.charAt(0).toUpperCase() + category.slice(1)}`}
       </Title>
       {/* Only render content when not loading */}
       {!loading && (
-        <>
-          {category === "banks" ? (
-            <WikipediaBanks />
-          ) : (
-            <div style={{ minHeight: "200px" }}>
-              {viewMode === "grid" ? renderGridView() : renderListView()}
-            </div>
-          )}
-        </>
+        <div style={{ minHeight: "200px" }}>
+          {viewMode === "grid" ? renderGridView() : renderListView()}
+        </div>
       )}
     </div>
   );
