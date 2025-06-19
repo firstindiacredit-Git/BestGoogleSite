@@ -54,7 +54,7 @@ const Top100Page = () => {
     { key: "crypto", label: "Crypto" },
     { key: "stocks", label: "Stocks" },
     { key: "billionaires", label: "Billionaires" },
-    { key: "sportsmen", label: "Sports Contracts" },
+    { key: "sportsmen", label: "Sports" },
     { key: "movies", label: "Movies" },
   ];
 
@@ -200,7 +200,7 @@ const Top100Page = () => {
           "https://imdb-top-100-movies.p.rapidapi.com/",
           {
             headers: {
-              "x-rapidapi-key": "ed98e198d3msha2890b3dde9a12dp1e7caejsnf255bf4ce34c",
+              "x-rapidapi-key": "3751719246mshae6c08f97e9873fp141a5ajsncde31041dcdb",
               "x-rapidapi-host": "imdb-top-100-movies.p.rapidapi.com",
             },
           }
@@ -235,6 +235,7 @@ const Top100Page = () => {
 
       const data = await response.json();
       // Process the data based on category
+      let processedData;
       switch (category) {
         case "stocks":
           processedData = data.map((stock) => ({
@@ -678,7 +679,7 @@ const Top100Page = () => {
                     }`}
                   onClick={() => setCategory("sportsmen")}
                 >
-                  Sports Contracts
+                  Sports
                 </button>
                 <button
                   className={`px-4 py-2 m-1 rounded dark:text-white  ${category === "movies"

@@ -206,7 +206,7 @@
             "time_seconds": 10.12,
             "speed_mph": 140.29,
             "speed_kmh": 225.77,
-            "logo": "https://i0.wp.com/www.bike-urious.com/wp-content/uploads/EBR-Logo.jpg?ssl=1"
+            "logo": "data:image/png;base64,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"
         },
         {
             "model_year": 2012,
@@ -341,7 +341,8 @@
             "motorcycle": "MV Agusta F4RR",
             "time_seconds": 10.40,
             "speed_mph": 140.98,
-            "speed_kmh": 226.89
+            "speed_kmh": 226.89,
+            "logo":"https://tse2.mm.bing.net/th?id=OIP.-KTE540z0Q3y97LakmCrnQHaFz&pid=Api&P=0&h=180 "
         },
         {
             "model_year": 2013,
@@ -388,14 +389,16 @@
             "motorcycle": "MV Agusta Brutale 1090RR",
             "time_seconds": 10.50,
             "speed_mph": 130.98,
-            "speed_kmh": 210.79
+            "speed_kmh": 210.79,
+            "logo":"https://tse4.mm.bing.net/th?id=OIP.e4hUsDKWBoqtBndiAaJG6gHaE5&pid=Api&P=0&h=180"
         },
         {
             "model_year": 2008,
             "motorcycle": "Buell 1125R",
             "time_seconds": 10.51,
             "speed_mph": 134.32,
-            "speed_kmh": 216.17
+            "speed_kmh": 216.17,
+            "logo":"https://tse4.mm.bing.net/th?id=OIP.8pRS8iWCEExpHyYtm1nKoAHaHE&pid=Api&P=0&h=180"
         },
         {
             "model_year": 1991,
@@ -410,7 +413,8 @@
             "motorcycle": "Triumph Speed Triple R",
             "time_seconds": 10.55,
             "speed_mph": 129.32,
-            "speed_kmh": 208.12
+            "speed_kmh": 208.12,
+            "logo":"https://tse3.mm.bing.net/th?id=OIP.A79CznyGjXjQ_tXm0oE0DwHaGl&pid=Api&P=0&h=180"
         },
         {
             "model_year": 2011,
@@ -560,7 +564,8 @@
             "motorcycle": "MV Agusta F4 Senna",
             "time_seconds": 10.85,
             "speed_mph": 131.85,
-            "speed_kmh": 212.19
+            "speed_kmh": 212.19,
+            "logo":"https://tse4.mm.bing.net/th?id=OIP.PRbnmQJskXK7KfEhKvMP7wHaFN&pid=Api&P=0&h=180"
         },
         {
             "model_year": 1997,
@@ -623,7 +628,8 @@
             "motorcycle": "Triumph Daytona 675",
             "time_seconds": 10.96,
             "speed_mph": 127.32,
-            "speed_kmh": 204.90
+            "speed_kmh": 204.90,
+            "logo":"https://tse4.mm.bing.net/th?id=OIP.yx-6mukXcY7fhXS26sVIqQHaD5&pid=Api&P=0&h=180"
         },
         {
             "model_year": 2015,
@@ -662,7 +668,8 @@
             "motorcycle": "Triumph Street Triple RS",
             "time_seconds": 11.05,
             "speed_mph": 128.80,
-            "speed_kmh": 207.28
+            "speed_kmh": 207.28,
+            "logo":"https://tse1.mm.bing.net/th?id=OIP.pDan-eSTBQ0yeUuPZ4r6wwHaEK&pid=Api&P=0&h=180"
         },
         {
             "model_year": 1983,
@@ -796,7 +803,8 @@
             "motorcycle": "Triumph Tiger Explorer 1200",
             "time_seconds": 11.32,
             "speed_mph": 118.07,
-            "speed_kmh": 190.02
+            "speed_kmh": 190.02,
+            "logo":"https://tse1.mm.bing.net/th?id=OIP.rRbyswBWfjNct0GFuoGuvQHaB2&pid=Api&P=0&h=180"
         },
         {
             "model_year": 1979,
@@ -811,7 +819,8 @@
             "motorcycle": "Harley-Davidson VRSC V-Rod",
             "time_seconds": 11.38,
             "speed_mph": 119.07,
-            "speed_kmh": 191.62
+            "speed_kmh": 191.62,
+            "logo":"https://tse2.mm.bing.net/th?id=OIP.P-sCpL8p-NGOkOy5JN5YxAHaGB&pid=Api&P=0&h=180"
         },
         {
             "model_year": 1980,
@@ -842,21 +851,24 @@
             "motorcycle": "Triumph Daytona 900",
             "time_seconds": 11.40,
             "speed_mph": 119.10,
-            "speed_kmh": 191.67
+            "speed_kmh": 191.67,
+            "logo":"https://tse3.mm.bing.net/th?id=OIP.A79CznyGjXjQ_tXm0oE0DwHaGl&pid=Api&P=0&h=180"
         },
         {
             "model_year": 2004,
             "motorcycle": "Triumph Rocket III",
             "time_seconds": 11.44,
             "speed_mph": 118.33,
-            "speed_kmh": 190.43
+            "speed_kmh": 190.43,
+            "logo":"https://tse3.mm.bing.net/th?id=OIP.A79CznyGjXjQ_tXm0oE0DwHaGl&pid=Api&P=0&h=180"
         },
         {
             "model_year": 2010,
             "motorcycle": "Triumph Rocket III Roadster",
             "time_seconds": 11.48,
             "speed_mph": 115.00,
-            "speed_kmh": 185.00
+            "speed_kmh": 185.00,
+            "logo":"https://tse3.mm.bing.net/th?id=OIP.A79CznyGjXjQ_tXm0oE0DwHaGl&pid=Api&P=0&h=180"
         },
         {
             "model_year": 2008,
@@ -886,14 +898,16 @@
             "motorcycle": "Suzuki Boulevard M109R",
             "time_seconds": 11.62,
             "speed_mph": 114.91,
-            "speed_kmh": 184.93
+            "speed_kmh": 184.93,
+            "logo":"https://tse2.mm.bing.net/th?id=OIP.ZOdzGUl15wJnfFCJ_GyK4gHaDt&pid=Api&P=0&h=180"
         },
         {
             "model_year": 2003,
             "motorcycle": "Suzuki SV650s",
             "time_seconds": 11.63,
             "speed_mph": 114.41,
-            "speed_kmh": 184.13
+            "speed_kmh": 184.13,
+            "logo":"https://tse2.mm.bing.net/th?id=OIP.ZOdzGUl15wJnfFCJ_GyK4gHaDt&pid=Api&P=0&h=180"
         },
         {
             "model_year": 2009,
@@ -908,7 +922,8 @@
             "motorcycle": "Triumph Speed Four",
             "time_seconds": 11.65,
             "speed_mph": 114.90,
-            "speed_kmh": 184.91
+            "speed_kmh": 184.91,
+            "logo":"https://tse3.mm.bing.net/th?id=OIP.A79CznyGjXjQ_tXm0oE0DwHaGl&pid=Api&P=0&h=180"
         },
         {
             "model_year": 1985,
@@ -923,7 +938,8 @@
             "motorcycle": "Triumph Trophy 1200 (120ps)",
             "time_seconds": 11.70,
             "speed_mph": 120.00,
-            "speed_kmh": 190.00
+            "speed_kmh": 190.00,
+            "logo":"https://tse3.mm.bing.net/th?id=OIP.A79CznyGjXjQ_tXm0oE0DwHaGl&pid=Api&P=0&h=180"
         },
         {
             "model_year": 1983,
@@ -954,7 +970,8 @@
             "motorcycle": "Suzuki GS1000",
             "time_seconds": 11.83,
             "speed_mph": 107.88,
-            "speed_kmh": 173.62
+            "speed_kmh": 173.62,
+            "logo":"https://tse2.mm.bing.net/th?id=OIP.ZOdzGUl15wJnfFCJ_GyK4gHaDt&pid=Api&P=0&h=180"
         },
         {
             "model_year": 2005,
@@ -977,14 +994,16 @@
             "motorcycle": "Norton Dunstall 810",
             "time_seconds": 11.90,
             "speed_mph": 107.88,
-            "speed_kmh": 173.62
+            "speed_kmh": 173.62,
+            "logo":"https://tse2.mm.bing.net/th?id=OIP.GfUYLRiy6NG31uGFFUtcdQAAAA&pid=Api&P=0&h=180"
         },
         {
             "model_year": 2007,
             "motorcycle": "Victory 8-Ball",
             "time_seconds": 11.91,
             "speed_mph": 113.26,
-            "speed_kmh": 182.27
+            "speed_kmh": 182.27,
+            "logo":"https://tse2.mm.bing.net/th?id=OIP.h6xL6I3rXYWGzt0OQqfGaAHaEH&pid=Api&P=0&h=180"
         },
         {
             "model_year": 1979,
@@ -1015,7 +1034,8 @@
             "motorcycle": "Indian Scout",
             "time_seconds": 11.93,
             "speed_mph": 110.05,
-            "speed_kmh": 177.11
+            "speed_kmh": 177.11,
+            "logo":"https://tse3.mm.bing.net/th?id=OIP.Rm2AUARaLqXk5xQGERQVTgHaFj&pid=Api&P=0&h=180"
         },
         {
             "model_year": 1987,
@@ -1046,7 +1066,8 @@
             "motorcycle": "Triumph Trophy 1200 (110ps)",
             "time_seconds": 12.00,
             "speed_mph": 117.00,
-            "speed_kmh": 188.00
+            "speed_kmh": 188.00,
+            "logo":"https://tse3.mm.bing.net/th?id=OIP.A79CznyGjXjQ_tXm0oE0DwHaGl&pid=Api&P=0&h=180"
         }
     ]
 }

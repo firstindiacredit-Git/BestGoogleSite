@@ -88,7 +88,7 @@ const WEATHER_CARDS = {
     darkShade: "#ffae00", // Dark yellow-brown
     darkerShade: "#c18400", // Darker yellow-brown
     color: "#FFFFFF",
-    icon: "☀️",
+    icon: "https://assets.msn.com/weathermapdata/1/static/weather/Icons/taskbar_v10/Condition_Card/Haze.svg",
   },
   // Cloudy (light blue)
   CLOUDY: {
@@ -96,7 +96,26 @@ const WEATHER_CARDS = {
     darkShade: "#0070d3", // Dark blue-gray
     darkerShade: "#0058a5", // Darker blue-gray
     color: "#FFFFFF",
-    icon: "☁️",
+    icon: <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="36" cy="36" r="30" fill="url(#paint0_linear_59_26715)"/>
+            <circle cx="36" cy="36" r="30" fill="url(#paint1_linear_59_26715)"/>
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M69 15C70.6569 15 72 16.3431 72 18C72 19.6569 70.6569 21 69 21H36C34.3431 21 33 19.6569 33 18C33 16.3431 34.3431 15 36 15H69ZM3 39C1.34315 39 0 40.3431 0 42C0 43.6569 1.34315 45 3 45H36C37.6569 45 39 43.6569 39 42C39 40.3431 37.6569 39 36 39H3ZM45 42C45 40.3431 46.3431 39 48 39H57C58.6569 39 60 40.3431 60 42C60 43.6569 58.6569 45 57 45H48C46.3431 45 45 43.6569 45 42ZM24 15C25.6569 15 27 16.3431 27 18C27 19.6569 25.6569 21 24 21H15C13.3431 21 12 19.6569 12 18C12 16.3431 13.3431 15 15 15H24ZM0 54C0 52.3431 1.34315 51 3 51H57C58.6569 51 60 52.3431 60 54C60 55.6569 58.6569 57 57 57H3C1.34315 57 0 55.6569 0 54ZM15 27C13.3431 27 12 28.3431 12 30C12 31.6569 13.3431 33 15 33H69C70.6569 33 72 31.6569 72 30C72 28.3431 70.6569 27 69 27H15Z" fill="url(#paint2_linear_59_26715)"/>
+            <defs>
+            <linearGradient id="paint0_linear_59_26715" x1="14.4375" y1="14.4375" x2="65.9965" y2="60.9334" gradientUnits="userSpaceOnUse">
+            <stop offset="0.162966" stop-color="#FFE975"/>
+            <stop offset="0.53915" stop-color="#FFB729"/>
+            <stop offset="0.742056" stop-color="#FF9900"/>
+            </linearGradient>
+            <linearGradient id="paint1_linear_59_26715" x1="51.0026" y1="62.0423" x2="20.9976" y2="10.072" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#E25A01"/>
+            <stop offset="1" stop-color="#FFD400"/>
+            </linearGradient>
+            <linearGradient id="paint2_linear_59_26715" x1="43.0435" y1="57" x2="50.6004" y2="17.4094" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#DAC48C"/>
+            <stop offset="1" stop-color="#F8F3E2"/>
+            </linearGradient>
+            </defs>
+            </svg>,
   },
   // Rainy (darker blue)
   RAINY: {
@@ -104,7 +123,55 @@ const WEATHER_CARDS = {
     darkShade: "#1C2542", // Dark navy blue
     darkerShade: "#11192C", // Darker navy blue
     color: "#FFFFFF",
-    icon: "🌧️",
+    icon: 
+    <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M13.5 54H34.5H36H55.5C64.6127 54 72 46.6127 72 37.5C72 28.3873 64.6127 21 55.5 21C55.1382 21 54.7791 21.0116 54.4231 21.0346C50.6566 13.879 43.1481 9 34.5 9C23.6003 9 14.5107 16.7504 12.4418 27.0409C5.48057 27.5806 0 33.4003 0 40.5C0 47.9558 6.04416 54 13.5 54Z" fill="#E7F1FF"/>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M13.5 54H34.5H36H55.5C64.6127 54 72 46.6127 72 37.5C72 28.3873 64.6127 21 55.5 21C55.1382 21 54.7791 21.0116 54.4231 21.0346C50.6566 13.879 43.1481 9 34.5 9C23.6003 9 14.5107 16.7504 12.4418 27.0409C5.48057 27.5806 0 33.4003 0 40.5C0 47.9558 6.04416 54 13.5 54Z" fill="url(#paint0_linear_537_36557)"/>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M13.5 54H34.5H36H55.5C64.6127 54 72 46.6127 72 37.5C72 28.3873 64.6127 21 55.5 21C55.1382 21 54.7791 21.0116 54.4231 21.0346C50.6566 13.879 43.1481 9 34.5 9C23.6003 9 14.5107 16.7504 12.4418 27.0409C5.48057 27.5806 0 33.4003 0 40.5C0 47.9558 6.04416 54 13.5 54Z" fill="url(#paint1_linear_537_36557)"/>
+    <path d="M0 40.5C0 33.0442 6.04416 27 13.5 27H18C27.9411 27 36 35.0589 36 45V54H13.5C6.04416 54 0 47.9558 0 40.5Z" fill="url(#paint2_radial_537_36557)"/>
+    <path d="M12 31.5C12 19.0736 22.0736 9 34.5 9C46.9264 9 57 19.0736 57 31.5C57 43.9264 46.9264 54 34.5 54C22.0736 54 12 43.9264 12 31.5Z" fill="url(#paint3_radial_537_36557)"/>
+    <circle cx="55.5" cy="37.5" r="16.5" fill="url(#paint4_radial_537_36557)"/>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M45 61.5002V41.1006C45 39.2254 47.2709 38.2904 48.5912 39.6219L62.8413 53.9931C64.7903 55.8994 66 58.5585 66 61.5002C66 67.2992 61.299 72.0002 55.5 72.0002C49.701 72.0002 45 67.2992 45 61.5002Z" fill="#C4C4C4"/>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M45 61.5002V41.1006C45 39.2254 47.2709 38.2904 48.5912 39.6219L62.8413 53.9931C64.7903 55.8994 66 58.5585 66 61.5002C66 67.2992 61.299 72.0002 55.5 72.0002C49.701 72.0002 45 67.2992 45 61.5002Z" fill="url(#paint5_linear_537_36557)"/>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M18 59.4411V43.3308C18 41.4556 20.2709 40.5206 21.5912 41.8522L32.5983 52.9529C34.6711 54.6017 36 57.1458 36 60.0002C36 64.9708 31.9706 69.0002 27 69.0002C22.0294 69.0002 18 64.9708 18 60.0002C18 59.81 18.0059 59.6212 18.0175 59.4339L18 59.4411Z" fill="#C4C4C4"/>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M18 59.4411V43.3308C18 41.4556 20.2709 40.5206 21.5912 41.8522L32.5983 52.9529C34.6711 54.6017 36 57.1458 36 60.0002C36 64.9708 31.9706 69.0002 27 69.0002C22.0294 69.0002 18 64.9708 18 60.0002C18 59.81 18.0059 59.6212 18.0175 59.4339L18 59.4411Z" fill="url(#paint6_linear_537_36557)"/>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M27 37.4998V24.4358C27 22.5606 29.2709 21.6256 30.5912 22.9571L39.282 31.7218C40.9423 33.0975 42 35.1751 42 37.4998C42 41.642 38.6421 44.9998 34.5 44.9998C30.4968 44.9998 27.2262 41.8635 27.0112 37.9139L27 37.9186V37.4998Z" fill="#C4C4C4"/>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M27 37.4998V24.4358C27 22.5606 29.2709 21.6256 30.5912 22.9571L39.282 31.7218C40.9423 33.0975 42 35.1751 42 37.4998C42 41.642 38.6421 44.9998 34.5 44.9998C30.4968 44.9998 27.2262 41.8635 27.0112 37.9139L27 37.9186V37.4998Z" fill="url(#paint7_linear_537_36557)"/>
+    <defs>
+    <linearGradient id="paint0_linear_537_36557" x1="22.5" y1="19.5" x2="36" y2="54" gradientUnits="userSpaceOnUse">
+    <stop stop-color="#C6D8F5"/>
+    <stop offset="1" stop-color="#89AFD1" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="paint1_linear_537_36557" x1="32.0998" y1="55.5925" x2="31.1538" y2="9" gradientUnits="userSpaceOnUse">
+    <stop stop-color="#547DDA"/>
+    <stop offset="0.257422" stop-color="#93C2FF" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="paint2_radial_537_36557" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(19.5 54) rotate(-127.875) scale(28.5044 32.9871)">
+    <stop offset="0.683784" stop-color="#8FABDD" stop-opacity="0"/>
+    <stop offset="1" stop-color="#5582D3"/>
+    </radialGradient>
+    <radialGradient id="paint3_radial_537_36557" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(34.5 49.5) rotate(-90) scale(40.5)">
+    <stop offset="0.598765" stop-color="#C7DFFF" stop-opacity="0"/>
+    <stop offset="1" stop-color="#6B97E6"/>
+    </radialGradient>
+    <radialGradient id="paint4_radial_537_36557" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(46.7 49.6) rotate(-56.3099) scale(31.7288)">
+    <stop offset="0.47771" stop-color="#8FABDD" stop-opacity="0"/>
+    <stop offset="1" stop-color="#5582D3"/>
+    </radialGradient>
+    <linearGradient id="paint5_linear_537_36557" x1="60.7509" y1="69.8232" x2="41.7826" y2="48.9185" gradientUnits="userSpaceOnUse">
+    <stop stop-color="#0066FF"/>
+    <stop offset="1" stop-color="#65ACFF"/>
+    </linearGradient>
+    <linearGradient id="paint6_linear_537_36557" x1="31.5008" y1="67.1682" x2="15.5695" y2="49.2848" gradientUnits="userSpaceOnUse">
+    <stop stop-color="#0066FF"/>
+    <stop offset="1" stop-color="#65ACFF"/>
+    </linearGradient>
+    <linearGradient id="paint7_linear_537_36557" x1="38.2506" y1="43.5046" x2="25.2817" y2="28.6405" gradientUnits="userSpaceOnUse">
+    <stop stop-color="#0066FF"/>
+    <stop offset="1" stop-color="#65ACFF"/>
+    </linearGradient>
+    </defs>
+    </svg>,
   },
   // Snowy (light purple)
   SNOWY: {
