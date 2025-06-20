@@ -281,8 +281,8 @@ export const defaultBookmarks = {
     },
     {
       id: "ai3",
-      name: "Hugging Face",
-      link: "https://huggingface.co",
+      name: "Claude",
+      link: "https://claude.ai/",
       addedByAdmin: true,
     },
     {

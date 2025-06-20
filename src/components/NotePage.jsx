@@ -58,9 +58,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
   const [isEditing, setIsEditing] = useState(false);
   const { isDarkMode } = useTheme();
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const [showWarning, setShowWarning] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const MAX_TABS_FOR_GUEST = 5;
 
   const textareaRef = useRef(null);
   const lineNumberRef = useRef(null);
@@ -118,6 +116,20 @@ const NotePage = ({ inNotebookSheet = false }) => {
       const parsedTabs = JSON.parse(savedTabs);
       setTabs(parsedTabs);
       setActiveTabId(parsedTabs[0]?.id || 1);
+    }
+    // Load backgroundColor from localStorage if present and not inNotebookSheet
+    if (!inNotebookSheet) {
+      const savedBg = localStorage.getItem("backgroundColor");
+      if (savedBg) {
+        setBackgroundColor(savedBg);
+        // Also set textColor based on loaded background
+        const r = parseInt(savedBg.slice(1, 3), 16);
+        const g = parseInt(savedBg.slice(3, 5), 16);
+        const b = parseInt(savedBg.slice(5, 7), 16);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        setTextColor(brightness > 128 ? "#000000" : "#ffffff");
+        setIsAutoColor(false);
+      }
     }
   }, []);
 
@@ -203,6 +215,38 @@ const NotePage = ({ inNotebookSheet = false }) => {
     };
     checkLoginStatus();
   }, []);
+
+  useEffect(() => {
+    if (!showTabDropdown) return;
+    function handleClickOutside(event) {
+      if (
+        tabDropdownRef.current &&
+        !tabDropdownRef.current.contains(event.target)
+      ) {
+        setShowTabDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showTabDropdown]);
+
+  useEffect(() => {
+    if (!showColorPicker) return;
+    function handleClickOutside(event) {
+      if (
+        colorPickerRef.current &&
+        !colorPickerRef.current.contains(event.target)
+      ) {
+        setShowColorPicker(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showColorPicker]);
 
   const collapse = () => {
     if (!inNotebookSheet) {
@@ -448,16 +492,10 @@ const NotePage = ({ inNotebookSheet = false }) => {
   };
 
   const createNewTab = () => {
-    if (!isLoggedIn && tabs.length >= MAX_TABS_FOR_GUEST) {
-      setShowWarning(true);
-      setTimeout(() => setShowWarning(false), 3000);
-      return;
-    }
-
     const newTabId = Math.max(...tabs.map(tab => tab.id), 0) + 1;
     const newTab = {
       id: newTabId,
-      title: `Tab ${newTabId}`,
+      title: "Tab",
       content: ""
     };
     setTabs(prevTabs => [...prevTabs, newTab]);
@@ -547,7 +585,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
                         <ChevronDown className="w-4 h-4" />
                       </button>
                       {showTabDropdown && (
-                        <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-[#28283A] border border-gray-200 dark:border-gray-700 rounded-sm shadow-lg z-50">
+                        <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-[#28283A] border border-gray-200 dark:border-gray-700 rounded-sm shadow-lg z-50" style={{ maxHeight: '250px', overflowY: 'auto' }}>
                           {tabs.map(tab => (
                             <div
                               key={tab.id}
@@ -600,20 +638,6 @@ const NotePage = ({ inNotebookSheet = false }) => {
                     </button>
                   </div>
                 </div>
-
-                {/* {!isLoggedIn && (
-                  <div className="flex items-center gap-2 px-3 py-1.5 mb-2 text-sm text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 rounded-sm">
-                    <AlertCircle className="w-4 h-4" />
-                    <span>You are not logged in. Data will be saved locally only.</span>
-                  </div>
-                )} */}
-
-                {showWarning && (
-                  <div className="fixed top-4 right-4 flex items-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-sm shadow-lg z-50 animate-fade-in">
-                    <AlertCircle className="w-4 h-4" />
-                    <span>Guest users can only create up to {MAX_TABS_FOR_GUEST} tabs. Please log in to create more.</span>
-                  </div>
-                )}
 
                 <div className="flex ">
                   {lineNumbers && (

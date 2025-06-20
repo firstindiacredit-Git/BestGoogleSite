@@ -4,87 +4,7 @@ import { Popconfirm, Menu, Dropdown } from "antd";
 import { auth, db } from "../firebase";
 import { doc, updateDoc, onSnapshot } from "firebase/firestore";
 import { createPortal } from "react-dom";
-
-const AVAILABLE_TIMEZONES = [
-  // North America
-  "America/New_York",
-  "America/Los_Angeles",
-  "America/Chicago",
-  "America/Toronto",
-  "America/Vancouver",
-  "America/Mexico_City",
-  "America/Phoenix",
-  "America/Denver",
-  "America/Montreal",
-
-  // South America
-  "America/Sao_Paulo",
-  "America/Buenos_Aires",
-  "America/Santiago",
-  "America/Lima",
-  "America/Bogota",
-  "America/Caracas",
-
-  // Europe
-  "Europe/London",
-  "Europe/Paris",
-  "Europe/Berlin",
-  "Europe/Moscow",
-  "Europe/Rome",
-  "Europe/Madrid",
-  "Europe/Amsterdam",
-  "Europe/Vienna",
-  "Europe/Stockholm",
-  "Europe/Prague",
-  "Europe/Warsaw",
-  "Europe/Istanbul",
-  "Europe/Copenhagen",
-  "Europe/Oslo",
-  "Europe/Dublin",
-  "Europe/Brussels",
-  "Europe/Zurich",
-
-  // Asia
-  "Asia/Tokyo",
-  "Asia/Shanghai",
-  "Asia/Singapore",
-  "Asia/Dubai",
-  "Asia/Hong_Kong",
-  "Asia/Seoul",
-  "Asia/Kolkata",
-  "Asia/Bangkok",
-  "Asia/Jakarta",
-  "Asia/Manila",
-  "Asia/Kuala_Lumpur",
-  "Asia/Taipei",
-  "Asia/Jerusalem",
-  "Asia/Baghdad",
-  "Asia/Riyadh",
-  "Asia/Tehran",
-  "Asia/Karachi",
-  "Asia/Ho_Chi_Minh",
-
-  // Oceania
-  "Pacific/Auckland",
-  "Australia/Sydney",
-  "Australia/Melbourne",
-  "Australia/Perth",
-  "Australia/Brisbane",
-  "Pacific/Honolulu",
-  "Pacific/Fiji",
-  "Pacific/Guam",
-
-  // Africa
-  "Africa/Johannesburg",
-  "Africa/Cairo",
-  "Africa/Lagos",
-  "Africa/Nairobi",
-  "Africa/Casablanca",
-  "Africa/Accra",
-  "Africa/Addis_Ababa",
-  "Africa/Dar_es_Salaam",
-  "Africa/Khartoum",
-];
+import AVAILABLE_TIMEZONES from "../components/availableTimezones.json";
 
 const formatTimeZoneName = (timeZone) => {
   const specialCases = {
@@ -461,7 +381,8 @@ const ResponsiveWorldClock = () => {
     }
   };
 
-  const availableZones = AVAILABLE_TIMEZONES.filter(
+  const allTimezones = Object.values(AVAILABLE_TIMEZONES).flat();
+  const availableZones = allTimezones.filter(
     (tz) => !selectedTimezones.includes(tz)
   );
 

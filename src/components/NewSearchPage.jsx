@@ -447,13 +447,13 @@ const NewSearchPage = ({ isToolPage = false }) => {
     if (isNewPage && !hasWidgets) {
       notification.open({
         message: (
-          <div className="flex items-center  gap-2">
-            <PlusCircleOutlined className="text-blue-500 dark:text-blue-400" />
-            <span className="font-medium">Add Widgets to Your Page</span>
+          <div className="flex items-center gap-2">
+            <PlusCircleOutlined className="text-blue-500 dark:text-blue-500" />
+            <span className="font-medium"style={{color:"black"}}>Add Widgets to Your Page</span>
           </div>
         ),
         description: (
-          <div className="mt-2 text-gray-600 dark:text-gray-300">
+          <div className="mt-2 text-gray-600 dark:text-gray-600">
             Click the button in the bottom right to add widgets to your new page.
           </div>
         ),

@@ -5,6 +5,7 @@ import { Modal, Tabs, Radio, Space, Button, Alert } from "antd";
 import { PictureOutlined, BgColorsOutlined, DeleteOutlined, SyncOutlined } from "@ant-design/icons";
 import { auth } from "../firebase";
 import { onAuthStateChanged } from "firebase/auth";
+import { FaEllipsisV } from "react-icons/fa";
 
 const API_KEY =
   import.meta.env.VITE_OPENWEATHER_API_KEY ||
@@ -269,7 +270,13 @@ const Weather = () => {
 
   // Function to remove background
   const removeBackground = () => {
-    setCurrentBackground(null);
+    // Set Forest gradient as default after removing
+    const forestGradient = {
+      id: 'gradient-3',
+      name: 'Forest',
+      style: 'linear-gradient(45deg, #11998e, #38ef7d)'
+    };
+    setCurrentBackground(forestGradient);
     localStorage.removeItem('weatherBg');
     setShowBackgroundSelector(false);
   };
@@ -380,14 +387,28 @@ const Weather = () => {
   };
 
   useEffect(() => {
-    getUserLocation();
-    // Set random background on component mount
     const savedBg = localStorage.getItem('weatherBg');
     if (savedBg) {
-      setCurrentBackground(JSON.parse(savedBg));
+      try {
+        const parsed = JSON.parse(savedBg);
+        setCurrentBackground(parsed);
+      } catch (e) {
+        localStorage.removeItem('weatherBg');
+        setCurrentBackground(null);
+      }
     } else {
-      setCurrentBackground(null);
+      // Set Forest gradient as default
+      const forestGradient = {
+        id: 'gradient-3',
+        name: 'Forest',
+        style: 'linear-gradient(45deg, #11998e, #38ef7d)'
+      };
+      setCurrentBackground(forestGradient);
     }
+  }, []);
+
+  useEffect(() => {
+    getUserLocation();
   }, [unit]);
 
   useEffect(() => {
@@ -600,13 +621,22 @@ const Weather = () => {
     <div 
       className="p-3 h-[100px] relative"
       style={{
-        backgroundImage: currentBackground?.url ? `url(${currentBackground.url})` : 'none',
-        background: currentBackground?.style || 'none',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        minHeight: '170px',
-        backgroundColor: !currentBackground ? 'rgba(0, 0, 0, 0.1)' : 'transparent'
+        ...(currentBackground?.url
+          ? {
+              backgroundImage: `url(${currentBackground.url})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              backgroundColor: 'transparent'
+            }
+          : currentBackground?.style
+          ? {
+              background: currentBackground.style
+            }
+          : {
+              backgroundColor: 'rgba(0, 0, 0, 0.1)'
+            }),
+        minHeight: '170px'
       }}
     >
       {/* Background overlay for better text readability */}
@@ -618,9 +648,10 @@ const Weather = () => {
       <div className="absolute top-1 right-1 z-20">
         <Button
           type="text"
-          icon={<BgColorsOutlined />}
+          icon={<FaEllipsisV />}
           onClick={() => setShowBackgroundSelector(true)}
           className="text-white hover:bg-white/30"
+          title="Change Background"
         />
       </div>
 

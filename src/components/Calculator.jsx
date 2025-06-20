@@ -212,7 +212,7 @@ function Calculator() {
       {!collapsed && (
         <div className={` rounded-lg h-full w-full `}>
           {showHistory ? (
-            <div className="dark:bg-[#28283A]/[var(--widget-opacity)] text-white w-full h-full p-6">
+            <div className="dark:bg-[#28283A]/[var(--widget-opacity)] text-white w-full h-full p-6 flex flex-col justify-between" style={{height: '350px', maxHeight: '100%'}}>
               <div className="flex justify-between items-center mb-4">
                 <h3 className="font-bold text-xl dark:text-white text-black">
                   History
@@ -224,7 +224,8 @@ function Calculator() {
                   <IoClose className="w-6 h-6" />
                 </button>
               </div>
-              <div className="h-[calc(100%-6rem)] overflow-auto">
+              {/* History List with fixed height and scroll */}
+              <div className="flex-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-[#8163D3]/70 scrollbar-track-gray-200 dark:scrollbar-track-[#513a7a]/30" style={{height: '320px', maxHeight: '320px', overflowY: 'auto', scrollbarWidth: 'thin'}}>
                 {history.length > 0 ? (
                   history.map((entry, index) => (
                     <div
