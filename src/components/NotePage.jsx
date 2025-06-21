@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from "react";
 import {
   Bold,
   Underline,
-  Download,
   Mic,
   MicOff,
   Palette,
@@ -41,8 +40,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
   const [lineNumbers, setLineNumbers] = useState(true);
   const [backgroundColor, setBackgroundColor] = useState("#ffffff");
   const [showColorPicker, setShowColorPicker] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
+  const [isCollapsed] = useState(false);
   const [history, setHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
   const [isAutoColor, setIsAutoColor] = useState(true);
@@ -51,14 +49,10 @@ const NotePage = ({ inNotebookSheet = false }) => {
     top: null,
     right: null,
   });
-  const [historyPopupPosition, setHistoryPopupPosition] = useState({
-    top: null,
-    right: null,
-  });
-  const [isEditing, setIsEditing] = useState(false);
   const { isDarkMode } = useTheme();
-  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [showWarning, setShowWarning] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const MAX_TABS_FOR_GUEST = 5;
 
   const textareaRef = useRef(null);
   const lineNumberRef = useRef(null);
@@ -117,20 +111,6 @@ const NotePage = ({ inNotebookSheet = false }) => {
       setTabs(parsedTabs);
       setActiveTabId(parsedTabs[0]?.id || 1);
     }
-    // Load backgroundColor from localStorage if present and not inNotebookSheet
-    if (!inNotebookSheet) {
-      const savedBg = localStorage.getItem("backgroundColor");
-      if (savedBg) {
-        setBackgroundColor(savedBg);
-        // Also set textColor based on loaded background
-        const r = parseInt(savedBg.slice(1, 3), 16);
-        const g = parseInt(savedBg.slice(3, 5), 16);
-        const b = parseInt(savedBg.slice(5, 7), 16);
-        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-        setTextColor(brightness > 128 ? "#000000" : "#ffffff");
-        setIsAutoColor(false);
-      }
-    }
   }, []);
 
   useEffect(() => {
@@ -152,31 +132,102 @@ const NotePage = ({ inNotebookSheet = false }) => {
   }, []);
 
   useEffect(() => {
+    const savedBackgroundColor = localStorage.getItem("backgroundColor");
+    const savedTextColor = localStorage.getItem("textColor");
+    const savedIsAutoColor = localStorage.getItem("isAutoColor");
+    
+    if (savedBackgroundColor && !inNotebookSheet) {
+      setBackgroundColor(savedBackgroundColor);
+    }
+    
+    if (savedTextColor && !inNotebookSheet) {
+      setTextColor(savedTextColor);
+    }
+    
+    if (savedIsAutoColor !== null && !inNotebookSheet) {
+      setIsAutoColor(JSON.parse(savedIsAutoColor));
+    }
+  }, [inNotebookSheet]);
+
+  useEffect(() => {
     localStorage.setItem("notes", notes);
     localStorage.setItem("backgroundColor", backgroundColor);
-  }, [notes, backgroundColor]);
+    localStorage.setItem("textColor", textColor);
+    localStorage.setItem("isAutoColor", JSON.stringify(isAutoColor));
+    console.log("Background color updated:", backgroundColor, "isAutoColor:", isAutoColor);
+  }, [notes, backgroundColor, textColor, isAutoColor]);
 
   useEffect(() => {
     localStorage.setItem("notesHistory", JSON.stringify(history));
   }, [history]);
 
+  // Handle click outside for tab dropdown
   useEffect(() => {
+    if (!showTabDropdown) return;
+    
     function handleClickOutside(event) {
       if (
-        !event.target.closest(".menu-Container") &&
-        !event.target.closest(".history-popup") &&
-        event.target.closest(".history-backdrop")
+        tabDropdownRef.current &&
+        !tabDropdownRef.current.contains(event.target)
       ) {
-        setShowColorPicker(false);
-        setShowHistory(false);
+        // If editing a tab title, save it first
+        if (editingTabId && editingTitle.trim()) {
+          setTabs(prevTabs =>
+            prevTabs.map(tab =>
+              tab.id === editingTabId ? { ...tab, title: editingTitle.trim() } : tab
+            )
+          );
+        }
+        setEditingTabId(null);
+        setEditingTitle("");
+        setShowTabDropdown(false);
       }
     }
-
+    
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [showTabDropdown, editingTabId, editingTitle]);
+
+  // Handle click outside for color picker
+  useEffect(() => {
+    if (!showColorPicker) return;
+    
+    function handleClickOutside(event) {
+      // Check if click is outside both the button and the dropdown content
+      const isOutsideButton = colorPickerRef.current && !colorPickerRef.current.contains(event.target);
+      const isOutsideDropdown = !event.target.closest(".menu-Container");
+      
+      if (isOutsideButton && isOutsideDropdown) {
+        setShowColorPicker(false);
+      }
+    }
+    
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showColorPicker]);
+
+  // Handle click outside for history popup
+  useEffect(() => {
+    if (!showHistory) return;
+    
+    function handleClickOutside(event) {
+      if (
+        !event.target.closest(".history-popup") &&
+        event.target.closest(".history-backdrop")
+      ) {
+        setShowHistory(false);
+      }
+    }
+    
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showHistory]);
 
   useEffect(() => {
     if (showColorPicker && colorPickerRef.current) {
@@ -195,7 +246,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
   useEffect(() => {
     if (inNotebookSheet) {
       setIsAutoColor(false);
-      setBackgroundColor("#f5ffe5"); // Default dark background for NotebookAndSheet
+      setBackgroundColor("#fff"); // Default dark background for NotebookAndSheet
       setTextColor("#000"); // White text for contrast
     }
   }, [inNotebookSheet]);
@@ -216,43 +267,6 @@ const NotePage = ({ inNotebookSheet = false }) => {
     checkLoginStatus();
   }, []);
 
-  useEffect(() => {
-    if (!showTabDropdown) return;
-    function handleClickOutside(event) {
-      if (
-        tabDropdownRef.current &&
-        !tabDropdownRef.current.contains(event.target)
-      ) {
-        setShowTabDropdown(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [showTabDropdown]);
-
-  useEffect(() => {
-    if (!showColorPicker) return;
-    function handleClickOutside(event) {
-      if (
-        colorPickerRef.current &&
-        !colorPickerRef.current.contains(event.target)
-      ) {
-        setShowColorPicker(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [showColorPicker]);
-
-  const collapse = () => {
-    if (!inNotebookSheet) {
-      setIsCollapsed(!isCollapsed);
-    }
-  };
   const isColorDark = (hexColor) => {
     const r = parseInt(hexColor.slice(1, 3), 16);
     const g = parseInt(hexColor.slice(3, 5), 16);
@@ -266,13 +280,6 @@ const NotePage = ({ inNotebookSheet = false }) => {
     if (lineNumbersDiv) {
       lineNumbersDiv.scrollTop = e.target.scrollTop;
     }
-  };
-
-  const getTextColor = () => {
-    if (isAutoColor) {
-      return isDarkMode ? "#ffffff" : "#000000";
-    }
-    return isColorDark(backgroundColor) ? "#ffffff" : "#000000";
   };
 
   const getLineColor = () => {
@@ -292,23 +299,6 @@ const NotePage = ({ inNotebookSheet = false }) => {
 
     // For auto mode
     return isDarkMode ? "rgba(255, 255, 255, 0.2)" : "rgba(0, 0, 0, 0.2)";
-  };
-
-  const getLineNumberColor = () => {
-    if (!isAutoColor) {
-      // Convert textColor to rgba with opacity
-      if (textColor.startsWith("#")) {
-        const opacity = 0.5;
-        const r = parseInt(textColor.slice(1, 3), 16);
-        const g = parseInt(textColor.slice(3, 5), 16);
-        const b = parseInt(textColor.slice(5, 7), 16);
-        return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-      }
-      return textColor;
-    }
-
-    // For auto mode
-    return isDarkMode ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.5)";
   };
 
   const handleNotesChange = (e) => {
@@ -352,12 +342,6 @@ const NotePage = ({ inNotebookSheet = false }) => {
   const toggleUnderline = () => setIsUnderline(!isUnderline);
   const toggleLineNumbers = () => setLineNumbers(!lineNumbers);
 
-  const handleFontSizeChange = (newSize) => {
-    if (newSize >= 8 && newSize <= 32) {
-      setFontSize(newSize);
-    }
-  };
-
   const toggleSpeechToText = () => {
     if ("webkitSpeechRecognition" in window) {
       const recognition = new window.webkitSpeechRecognition();
@@ -394,21 +378,12 @@ const NotePage = ({ inNotebookSheet = false }) => {
     }
   };
 
-  // const downloadNotes = () => {
-  //   const element = document.createElement("a");
-  //   const file = new Blob([notes], { type: "text/plain" });
-  //   element.href = URL.createObjectURL(file);
-  //   element.download = "notes.txt";
-  //   document.body.appendChild(element);
-  //   element.click();
-  //   document.body.removeChild(element);
-  // };
-
   const getLineCount = () => {
     return notes.split("\n").length;
   };
 
   const handleColorChange = (color) => {
+    console.log("Color changed to:", color);
     setBackgroundColor(color);
     setIsAutoColor(false);
 
@@ -492,10 +467,16 @@ const NotePage = ({ inNotebookSheet = false }) => {
   };
 
   const createNewTab = () => {
+    if (!isLoggedIn && tabs.length >= MAX_TABS_FOR_GUEST) {
+      setShowWarning(true);
+      setTimeout(() => setShowWarning(false), 3000);
+      return;
+    }
+
     const newTabId = Math.max(...tabs.map(tab => tab.id), 0) + 1;
     const newTab = {
       id: newTabId,
-      title: "Tab",
+      title: `Tab ${newTabId}`,
       content: ""
     };
     setTabs(prevTabs => [...prevTabs, newTab]);
@@ -544,28 +525,26 @@ const NotePage = ({ inNotebookSheet = false }) => {
     } else if (e.key === 'Escape') {
       setEditingTabId(null);
       setEditingTitle("");
+      setShowTabDropdown(false);
     }
   };
 
   return (
     <div
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       className={`w-full h-full backdrop-blur-sm`}
     >
       <div className="rounded-sm h-full">
         <div
-          className={`overflow-hidden h-full rounded-b-sm `}
+          className={`overflow-hidden h-full rounded-b-sm`}
           style={{
-            backgroundColor: isAutoColor ? undefined : "",
+            backgroundColor: isAutoColor ? undefined : backgroundColor,
           }}
         >
           <div
-            className={`p-2 h-full bg flex flex-col justify-between ${
-              isAutoColor ? " text-gray-900 dark:text-white" : ""
+            className={`p-2 h-full flex flex-col justify-between ${
+              isAutoColor ? "text-gray-900 dark:text-white" : ""
             }`}
             style={{
-              backgroundColor: isAutoColor ? undefined : backgroundColor,
               color: isAutoColor ? undefined : textColor,
             }}
           >
@@ -585,7 +564,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
                         <ChevronDown className="w-4 h-4" />
                       </button>
                       {showTabDropdown && (
-                        <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-[#28283A] border border-gray-200 dark:border-gray-700 rounded-sm shadow-lg z-50" style={{ maxHeight: '250px', overflowY: 'auto' }}>
+                        <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-[#28283A] border border-gray-200 dark:border-gray-700 rounded-sm shadow-lg z-50">
                           {tabs.map(tab => (
                             <div
                               key={tab.id}
@@ -638,6 +617,20 @@ const NotePage = ({ inNotebookSheet = false }) => {
                     </button>
                   </div>
                 </div>
+
+                {/* {!isLoggedIn && (
+                  <div className="flex items-center gap-2 px-3 py-1.5 mb-2 text-sm text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 rounded-sm">
+                    <AlertCircle className="w-4 h-4" />
+                    <span>You are not logged in. Data will be saved locally only.</span>
+                  </div>
+                )} */}
+
+                {showWarning && (
+                  <div className="fixed top-4 right-4 flex items-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-sm shadow-lg z-50 animate-fade-in">
+                    <AlertCircle className="w-4 h-4" />
+                    <span>Guest users can only create up to {MAX_TABS_FOR_GUEST} tabs. Please log in to create more.</span>
+                  </div>
+                )}
 
                 <div className="flex ">
                   {lineNumbers && (
@@ -954,4 +947,3 @@ const NotePage = ({ inNotebookSheet = false }) => {
 };
 
 export default NotePage;
-

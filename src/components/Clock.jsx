@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Plus, X, Settings, ChevronDown, ChevronUp } from "lucide-react";
-import { Popconfirm, Menu, Dropdown } from "antd";
+import { useState, useEffect, useRef } from "react";
+import { Plus, X, Settings } from "lucide-react";
+import { Popconfirm } from "antd";
 import { auth, db } from "../firebase";
 import { doc, updateDoc, onSnapshot } from "firebase/firestore";
 import { createPortal } from "react-dom";
@@ -250,7 +250,11 @@ const preventScroll = (prevent) => {
 };
 
 const ResponsiveWorldClock = () => {
-  const [isAnalog, setIsAnalog] = useState(true);
+  // Load initial analog preference from localStorage, default to true
+  const [isAnalog, setIsAnalog] = useState(() => {
+    const saved = localStorage.getItem('clockDesign');
+    return saved ? JSON.parse(saved) : true;
+  });
   const [selectedTimezones, setSelectedTimezones] = useState([
     "Asia/Kolkata", // India
     "America/New_York", // USA (New York)
@@ -538,6 +542,11 @@ const ResponsiveWorldClock = () => {
       document.head.removeChild(styleSheet);
     };
   }, []);
+
+  // Save analog preference to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('clockDesign', JSON.stringify(isAnalog));
+  }, [isAnalog]);
 
   return (
     <div

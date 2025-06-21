@@ -219,7 +219,7 @@ function Calculator() {
                 </h3>
                 <button
                   onClick={toggleHistory}
-                  className="text-gray-400 hover:text-white"
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-100 "
                 >
                   <IoClose className="w-6 h-6" />
                 </button>

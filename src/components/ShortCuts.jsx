@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { db, auth } from "../firebase";
 import {
   collection,
@@ -24,7 +24,6 @@ const ShortCuts = () => {
   const [showModal, setShowModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const [formRef] = Form.useForm();
 
   const [menuVisible, setMenuVisible] = useState(null);
@@ -36,17 +35,18 @@ const ShortCuts = () => {
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
+      console.log("Enter key pressed, editMode:", editMode);
+      
       formRef.validateFields()
         .then((values) => {
+          console.log("Form validation passed, values:", values);
           if (editMode) {
+            console.log("Calling handleUpdateBookmark");
             handleUpdateBookmark(values);
           } else {
+            console.log("Calling addBookmark");
             addBookmark(values);
           }
-          // Clear form after submission
-          formRef.resetFields();
-          setName("");
-          setLink("");
         })
         .catch((info) => {
           console.log("Validate Failed:", info);
@@ -249,7 +249,7 @@ const ShortCuts = () => {
     try {
       new URL(url);
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   };
@@ -257,23 +257,34 @@ const ShortCuts = () => {
   const getFavicon = (url) => {
     try {
       return `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=64`;
-    } catch (error) {
+    } catch {
       return "https://www.freeiconspng.com/uploads/web-icon-black-png-planet-web-world-icon-17.png";
     }
   };
 
   const handleEditBookmark = (bookmark) => {
+    console.log("Editing bookmark:", bookmark);
     setEditingBookmark(bookmark);
+    setName(bookmark.name);
+    setLink(bookmark.link);
     formRef.setFieldsValue({
       name: bookmark.name,
       link: bookmark.link,
     });
     setEditMode(true);
     setShowModal(true);
+    setErrorMessage("");
   };
 
   const handleUpdateBookmark = async (values) => {
-    if (!editingBookmark) return;
+    if (!editingBookmark) {
+      console.error("No bookmark selected for editing");
+      setErrorMessage("No bookmark selected for editing");
+      return;
+    }
+
+    console.log("Updating bookmark with values:", values);
+    console.log("Editing bookmark:", editingBookmark);
 
     let bookmarkLink = values.link;
 
@@ -295,6 +306,8 @@ const ShortCuts = () => {
         name: values.name,
         link: bookmarkLink,
       };
+
+      console.log("Updated data:", updatedData);
 
       if (user) {
         // Update in Firebase for logged-in users
@@ -335,7 +348,6 @@ const ShortCuts = () => {
       }
 
       setErrorMessage("");
-      setSuccessMessage("Bookmark updated successfully!");
       setEditingBookmark(null);
       setName("");
       setLink("");
@@ -372,7 +384,6 @@ const ShortCuts = () => {
         setUserBookmarks(updatedBookmarks);
         message.success("Bookmark deleted successfully!");
       }
-      setSuccessMessage("Bookmark deleted successfully!");
     } catch (error) {
       console.error("Error deleting bookmark:", error);
       setErrorMessage("Failed to delete bookmark. Please try again.");
@@ -422,10 +433,21 @@ const ShortCuts = () => {
     setName("");
     setLink("");
     setErrorMessage("");
-    setSuccessMessage("");
     setEditMode(false);
+    setEditingBookmark(null);
     setShowModal(true);
     console.log("Add modal opened, form reset");
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setEditMode(false);
+    setEditingBookmark(null);
+    setName("");
+    setLink("");
+    setErrorMessage("");
+    formRef.resetFields();
+    console.log("Modal closed and form reset");
   };
 
   return (
@@ -513,16 +535,7 @@ const ShortCuts = () => {
       <Modal
         title={editMode ? "Edit Bookmark" : "Add Bookmark"}
         open={showModal}
-        onCancel={() => {
-          setShowModal(false);
-          setEditMode(false);
-          setName("");
-          setLink("");
-          setErrorMessage("");
-          setSuccessMessage("");
-          formRef.resetFields();
-          console.log("Modal closed and form reset");
-        }}
+        onCancel={closeModal}
         footer={null} // Remove default footer for custom submit handling
       >
         <Form
@@ -542,6 +555,7 @@ const ShortCuts = () => {
             <Input
               placeholder="Enter bookmark name"
               className="dark:bg-[#513a7a] border dark:border-gray-600 dark:text-white"
+              onKeyDown={handleKeyDown}
               onChange={(e) => {
                 setName(e.target.value);
                 console.log("Name input changed:", e.target.value);
@@ -554,7 +568,7 @@ const ShortCuts = () => {
             rules={[{ required: true, message: "Please enter URL" }]}
             help={
               <span className="text-xs text-gray-500">
-                Tip: You can enter with or without https://
+                Tip: You can enter with or without https:// | Press Enter to submit
               </span>
             }
           >
@@ -573,15 +587,7 @@ const ShortCuts = () => {
           <div className="flex justify-end gap-2 mt-4">
             <button
               type="button"
-              onClick={() => {
-                setShowModal(false);
-                setEditMode(false);
-                setName("");
-                setLink("");
-                setErrorMessage("");
-                setSuccessMessage("");
-                formRef.resetFields();
-              }}
+              onClick={closeModal}
               className="px-4 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 dark:bg-[#513a7a] dark:hover:bg-gray-600 dark:text-white rounded transition-colors"
             >
               Cancel
@@ -598,10 +604,6 @@ const ShortCuts = () => {
                     } else {
                       addBookmark(values);
                     }
-                    // Clear form after submission
-                    formRef.resetFields();
-                    setName("");
-                    setLink("");
                   })
                   .catch((info) => {
                     console.log("Validate Failed:", info);

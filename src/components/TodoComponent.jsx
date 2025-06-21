@@ -11,7 +11,6 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
-import { WidgetTransparencyContext } from "../App";
 import { useTheme } from "../context/ThemeContext";
 import { createPortal } from "react-dom";
 
@@ -40,23 +39,18 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
   const [user, setUser] = useState(null);
   const [todos, setTodos] = useState([]);
   const [inputValue, setInputValue] = useState("");
-  const [isHovering, setIsHovering] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [containerColor, setContainerColor] = useState("#ffffff");
   const [textColor, setTextColor] = useState("#000000");
   const [isAutoColor, setIsAutoColor] = useState(true);
   const [draggedItemIndex, setDraggedItemIndex] = useState(null);
-  const [backgroundColor, setBackgroundColor] = useState("#ffffff");
   const [dragOverIndex, setDragOverIndex] = useState(null);
   const [dropdownPosition, setDropdownPosition] = useState({
     top: null,
     right: null,
   });
-  const [isEditing, setIsEditing] = useState(false);
   const { isDarkMode } = useTheme();
-  const [isFullScreen, setIsFullScreen] = useState(false);
 
   const colorPickerRef = useRef(null);
 
@@ -98,11 +92,7 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
     "#9370DB",
     "#FF69B4",
   ];
-  const collapse = () => {
-    if (!inNotebookSheet) {
-      setIsCollapsed(!isCollapsed);
-    }
-  };
+
   const calculateProgress = () => {
     if (todos.length === 0) return 0;
     const completedTodos = todos.filter((todo) => todo.completed).length;
@@ -121,6 +111,19 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
       }
     });
     return () => unsubscribeAuth();
+  }, []);
+
+  // Load saved colors from localStorage on component mount
+  useEffect(() => {
+    const savedContainerColor = localStorage.getItem('todoContainerColor');
+    const savedTextColor = localStorage.getItem('todoTextColor');
+    const savedIsAutoColor = localStorage.getItem('todoIsAutoColor');
+
+    if (savedContainerColor && savedTextColor) {
+      setContainerColor(savedContainerColor);
+      setTextColor(savedTextColor);
+      setIsAutoColor(savedIsAutoColor === 'true');
+    }
   }, []);
 
   useEffect(() => {
@@ -179,7 +182,7 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
   useEffect(() => {
     if (inNotebookSheet) {
       setIsAutoColor(false);
-      setContainerColor("#E2D3aa"); // Default purple color for NotebookAndSheet
+      setContainerColor("#fff"); // Default purple color for NotebookAndSheet
       setTextColor("#000"); // black text for contrast
     }
   }, [inNotebookSheet]);
@@ -192,23 +195,14 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
     const g = parseInt(color.slice(3, 5), 16);
     const b = parseInt(color.slice(5, 7), 16);
     const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-    setTextColor(brightness > 128 ? "#000000" : "#ffffff");
-  };
+    const newTextColor = brightness > 128 ? "#000000" : "#ffffff";
+    setTextColor(newTextColor);
 
-  const isColorDark = (hexColor) => {
-    const r = parseInt(hexColor.slice(1, 3), 16);
-    const g = parseInt(hexColor.slice(3, 5), 16);
-    const b = parseInt(hexColor.slice(5, 7), 16);
-    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-    return brightness < 128;
+    // Save colors to localStorage
+    localStorage.setItem('todoContainerColor', color);
+    localStorage.setItem('todoTextColor', newTextColor);
+    localStorage.setItem('todoIsAutoColor', 'false');
   };
-
-  // const getTextColor = () => {
-  //   if (isAutoColor) {
-  //     return isDarkMode ? "#ffffff" : "#000000";
-  //   }
-  //   return isColorDark(backgroundColor) ? "#ffffff" : "#000000";
-  // };
 
   const addTodo = async (e) => {
     e.preventDefault();
@@ -365,6 +359,8 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
             onClick={() => {
               setIsAutoColor(true);
               setShowColorPicker(false);
+              // Save auto color preference to localStorage
+              localStorage.setItem('todoIsAutoColor', 'true');
             }}
             className="w-full py-1 px-2 text-sm bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors text-gray-900 dark:text-white"
           >
@@ -417,8 +413,6 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
 
   return (
     <div
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
       className={`p-2  transition-colors duration-200 w-full"
        rounded-b-sm backdrop-blur-sm relative ${
          isAutoColor ? "dark:bg-[#28283A]/[(var(--widget-opacity))]" : ""
@@ -431,84 +425,102 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
       {inNotebookSheet && (
         <h1 className="text-2xl font-bold px-3 py-2">Todo List</h1>
       )}
-      {!isCollapsed && (
-        <div className="p-3">
-          <div className="flex justify-between gap-4 items-center mb-1">
-            <div className="mb-4 w-full">
+      <div className="p-3">
+        <div className="flex justify-between gap-4 items-center mb-1">
+          <div className="mb-4 w-full">
+            <div
+              className={`text-sm flex justify-between ${
+                isAutoColor
+                  ? "text-gray-900 dark:text-gray-200"
+                  : isLight(containerColor)
+                  ? "text-gray-700"
+                  : "text-gray-200"
+              } mb-1`}
+            >
+              <div>Progress</div>
+              <div>{calculateProgress()}%</div>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
               <div
-                className={`text-sm flex justify-between ${
-                  isAutoColor
-                    ? "text-gray-900 dark:text-gray-200"
-                    : isLight(containerColor)
-                    ? "text-gray-700"
-                    : "text-gray-200"
-                } mb-1`}
-              >
-                <div>Progress</div>
-                <div>{calculateProgress()}%</div>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div
-                  className="bg-indigo-500 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${calculateProgress()}%` }}
-                ></div>
-              </div>
+                className="bg-indigo-500 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${calculateProgress()}%` }}
+              ></div>
             </div>
           </div>
+        </div>
 
-          <div
-            className="h-[400px] overflow-y-auto"
-            style={{ border: "", borderRadius: "4px" }}
-          >
-            <ul className="space-y-2 mb-4">
-              {todos.map((todo, index) => (
-                <li
-                  key={todo.id}
-                  draggable
-                  onDragStart={() => handleDragStart(index)}
-                  onDragOver={(e) => handleDragOver(e, index)}
-                  onDrop={handleDrop}
-                  className={`flex items-center gap-3 p-2 rounded ${
-                    dragOverIndex === index ? "border-2 border-blue-300" : ""
+        <div
+          className="h-[400px] overflow-y-auto"
+          style={{ border: "", borderRadius: "4px" }}
+        >
+          <ul className="space-y-2 mb-4">
+            {todos.map((todo, index) => (
+              <li
+                key={todo.id}
+                draggable
+                onDragStart={() => handleDragStart(index)}
+                onDragOver={(e) => handleDragOver(e, index)}
+                onDrop={handleDrop}
+                className={`flex items-center gap-3 p-2 rounded ${
+                  dragOverIndex === index ? "border-2 border-blue-300" : ""
+                }`}
+              >
+                <span
+                  className={`min-w-[20px] text-sm ${
+                    isAutoColor
+                      ? "text-gray-700 dark:text-gray-300"
+                      : isLight(containerColor)
+                      ? "text-gray-600"
+                      : "text-gray-300"
                   }`}
                 >
-                  <span
-                    className={`min-w-[20px] text-sm ${
+                  {index + 1}.
+                </span>
+                <input
+                  type="checkbox"
+                  checked={todo.completed}
+                  onChange={() => toggleComplete(todo.id)}
+                  className="w-5 h-5 border-2 rounded-sm focus:ring-0 text-indigo-500"
+                />
+                <span
+                  className={`flex-1 ${
+                    isAutoColor
+                      ? todo.completed
+                        ? "text-gray-400"
+                        : "text-gray-900 dark:text-gray-100"
+                      : isLight(containerColor)
+                      ? todo.completed
+                        ? "text-gray-400"
+                        : "text-gray-800"
+                      : todo.completed
+                      ? "text-gray-400"
+                      : "text-gray-100"
+                  } ${todo.completed ? "line-through" : ""}`}
+                >
+                  {todo.text}
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => startEditing(todo.id, todo.text)}
+                    className={`${
                       isAutoColor
-                        ? "text-gray-700 dark:text-gray-300"
+                        ? "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
                         : isLight(containerColor)
-                        ? "text-gray-600"
-                        : "text-gray-300"
+                        ? "text-gray-500 hover:text-gray-700"
+                        : "text-gray-300 hover:text-white"
                     }`}
                   >
-                    {index + 1}.
-                  </span>
-                  <input
-                    type="checkbox"
-                    checked={todo.completed}
-                    onChange={() => toggleComplete(todo.id)}
-                    className="w-5 h-5 border-2 rounded-sm focus:ring-0 text-indigo-500"
-                  />
-                  <span
-                    className={`flex-1 ${
-                      isAutoColor
-                        ? todo.completed
-                          ? "text-gray-400"
-                          : "text-gray-900 dark:text-gray-100"
-                        : isLight(containerColor)
-                        ? todo.completed
-                          ? "text-gray-400"
-                          : "text-gray-800"
-                        : todo.completed
-                        ? "text-gray-400"
-                        : "text-gray-100"
-                    } ${todo.completed ? "line-through" : ""}`}
+                    <Edit className="w-4 h-4" />
+                  </button>
+                  <Popconfirm
+                    title="Delete task"
+                    description="Are you sure you want to delete this task?"
+                    onConfirm={() => deleteTodo(todo.id)}
+                    okText="Yes"
+                    cancelText="No"
+                    placement="leftTop"
                   >
-                    {todo.text}
-                  </span>
-                  <div className="flex gap-2">
                     <button
-                      onClick={() => startEditing(todo.id, todo.text)}
                       className={`${
                         isAutoColor
                           ? "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
@@ -517,75 +529,55 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
                           : "text-gray-300 hover:text-white"
                       }`}
                     >
-                      <Edit className="w-4 h-4" />
+                      <Trash2 className="w-4 h-4" />
                     </button>
-                    <Popconfirm
-                      title="Delete task"
-                      description="Are you sure you want to delete this task?"
-                      onConfirm={() => deleteTodo(todo.id)}
-                      okText="Yes"
-                      cancelText="No"
-                      placement="leftTop"
-                    >
-                      <button
-                        className={`${
-                          isAutoColor
-                            ? "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
-                            : isLight(containerColor)
-                            ? "text-gray-500 hover:text-gray-700"
-                            : "text-gray-300 hover:text-white"
-                        }`}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </Popconfirm>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <form
-            onSubmit={editingId ? submitEdit : addTodo}
-            className="relative flex items-center"
-          >
-            <input
-              type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Add new task"
-              className={`w-full p-1.5 pr-10 border rounded-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                isAutoColor
-                  ? "bg-white text-gray-900 border-gray-200 dark:bg-[#28283A] dark:text-white dark:placeholder-gray-400 dark:border-gray-700"
-                  : isLight(containerColor)
-                  ? "bg-white text-gray-800"
-                  : "bg-gray-800 text-white placeholder-gray-400 border-gray-700"
-              }`}
-              style={{
-                backgroundColor: isAutoColor ? undefined : containerColor,
-                color: isAutoColor ? undefined : textColor,
-              }}
-            />
-            <button
-              type="submit"
-              className={`absolute right-12 top-1/2 -translate-y-1/2 ${
-                isAutoColor
-                  ? "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
-                  : isLight(containerColor)
-                  ? "text-gray-500 hover:text-gray-700"
-                  : "text-gray-300 hover:text-white"
-              }`}
-              style={{
-                backgroundColor: isAutoColor ? undefined : containerColor,
-                color: isAutoColor ? undefined : textColor,
-              }}
-            >
-              <span className="text-2xl">+</span>
-            </button>
-            {renderColorPicker()}
-          </form>
+                  </Popconfirm>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
-      )}
+
+        <form
+          onSubmit={editingId ? submitEdit : addTodo}
+          className="relative flex items-center"
+        >
+          <input
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            placeholder="Add new task"
+            className={`w-full p-1.5 pr-10 border rounded-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+              isAutoColor
+                ? "bg-white text-gray-900 border-gray-200 dark:bg-[#28283A] dark:text-white dark:placeholder-gray-400 dark:border-gray-700"
+                : isLight(containerColor)
+                ? "bg-white text-gray-800"
+                : "bg-gray-800 text-white placeholder-gray-400 border-gray-700"
+            }`}
+            style={{
+              backgroundColor: isAutoColor ? undefined : containerColor,
+              color: isAutoColor ? undefined : textColor,
+            }}
+          />
+          <button
+            type="submit"
+            className={`absolute right-12 top-1/2 -translate-y-1/2 ${
+              isAutoColor
+                ? "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                : isLight(containerColor)
+                ? "text-gray-500 hover:text-gray-700"
+                : "text-gray-300 hover:text-white"
+            }`}
+            style={{
+              backgroundColor: isAutoColor ? undefined : containerColor,
+              color: isAutoColor ? undefined : textColor,
+            }}
+          >
+            <span className="text-2xl">+</span>
+          </button>
+          {renderColorPicker()}
+        </form>
+      </div>
     </div>
   );
 };
