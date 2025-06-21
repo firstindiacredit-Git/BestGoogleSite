@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Edit, Trash2, Palette, ChevronDown } from "lucide-react";
+import { Edit, Trash2, Palette } from "lucide-react";
 import { Popconfirm, message } from "antd";
 import { db, auth } from "../firebase";
 import {
@@ -11,8 +11,8 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
-import PropTypes from "prop-types";
 import { createPortal } from "react-dom";
+import PropTypes from "prop-types";
 
 // Helper function to determine if a color is light or dark
 const isLight = (color) => {
@@ -35,28 +35,21 @@ const preventScroll = (prevent) => {
   document.body.style.overflow = prevent ? "hidden" : "";
 };
 
-const TodoComponent = ({ inNotebookSheet = false }) => {
-  const getStorageKey = (baseKey) =>
-    inNotebookSheet
-      ? `todocomponent_notebook_${baseKey}`
-      : `todocomponent_${baseKey}`;
-
+const TodoforTodo = ({ inNotebookSheet = false }) => {
   const [user, setUser] = useState(null);
   const [todos, setTodos] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
-  const [mainTodoContainerColor, setMainTodoContainerColor] = useState("#ffffff");
-  const [mainTodoTextColor, setMainTodoTextColor] = useState("#000000");
-  const [mainTodoIsAutoColor, setMainTodoIsAutoColor] = useState(true);
+  const [todoContainerColor, setTodoContainerColor] = useState("#9370DB");
+  const [todoTextColor, setTodoTextColor] = useState("#000000");
+  const [todoIsAutoColor, setTodoIsAutoColor] = useState(false);
   const [draggedItemIndex, setDraggedItemIndex] = useState(null);
   const [dragOverIndex, setDragOverIndex] = useState(null);
   const [dropdownPosition, setDropdownPosition] = useState({
     top: null,
     right: null,
   });
-  const listContainerRef = useRef(null);
-  const [showScrollIndicator, setShowScrollIndicator] = useState(false);
 
   const colorPickerRef = useRef(null);
 
@@ -109,28 +102,11 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       if (!currentUser) {
-        // Load todos from localStorage when user is not logged in
-        const localTodos = localStorage.getItem(getStorageKey('todos'));
-        if (localTodos) {
-          setTodos(JSON.parse(localTodos));
-        }
+        setTodos([]);
       }
     });
     return () => unsubscribeAuth();
   }, []);
-
-  // Load saved colors from localStorage on component mount
-  useEffect(() => {
-    const savedContainerColor = localStorage.getItem(getStorageKey('containerColor'));
-    const savedTextColor = localStorage.getItem(getStorageKey('textColor'));
-    const savedIsAutoColor = localStorage.getItem(getStorageKey('isAutoColor'));
-
-    if (savedContainerColor && savedTextColor) {
-      setMainTodoContainerColor(savedContainerColor);
-      setMainTodoTextColor(savedTextColor);
-      setMainTodoIsAutoColor(savedIsAutoColor === 'true');
-    }
-  }, [inNotebookSheet]);
 
   useEffect(() => {
     const fetchTodos = async () => {
@@ -153,12 +129,18 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
     fetchTodos();
   }, [user]);
 
-  // Save todos to localStorage when user is not logged in
+  // Load saved colors from localStorage on component mount
   useEffect(() => {
-    if (!user) {
-      localStorage.setItem(getStorageKey('todos'), JSON.stringify(todos));
+    const savedContainerColor = localStorage.getItem('todofortodo_containerColor');
+    const savedTextColor = localStorage.getItem('todofortodo_textColor');
+    const savedIsAutoColor = localStorage.getItem('todofortodo_isAutoColor');
+
+    if (savedContainerColor && savedTextColor) {
+      setTodoContainerColor(savedContainerColor);
+      setTodoTextColor(savedTextColor);
+      setTodoIsAutoColor(savedIsAutoColor === 'true');
     }
-  }, [todos, user]);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -187,55 +169,30 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
 
   useEffect(() => {
     if (inNotebookSheet) {
-      const savedContainerColor = localStorage.getItem(getStorageKey('containerColor'));
+      const savedContainerColor = localStorage.getItem('todofortodo_containerColor');
       if (!savedContainerColor) {
-        setMainTodoIsAutoColor(false);
-        setMainTodoContainerColor("#fff");
-        setMainTodoTextColor("#000");
+        setTodoIsAutoColor(false);
+        setTodoContainerColor("#fff");
+        setTodoTextColor("#000");
       }
     }
   }, [inNotebookSheet]);
 
-  useEffect(() => {
-    const listElement = listContainerRef.current;
-    if (!listElement) return;
-
-    const checkScroll = () => {
-      const isScrollable = listElement.scrollHeight > listElement.clientHeight;
-      // Check if scrolled to the bottom (with a 1px tolerance)
-      const isAtBottom =
-        listElement.scrollHeight - Math.ceil(listElement.scrollTop) <=
-        listElement.clientHeight + 1;
-      setShowScrollIndicator(isScrollable && !isAtBottom);
-    };
-
-    checkScroll();
-
-    listElement.addEventListener("scroll", checkScroll);
-    const resizeObserver = new ResizeObserver(checkScroll);
-    resizeObserver.observe(listElement);
-
-    return () => {
-      listElement.removeEventListener("scroll", checkScroll);
-      resizeObserver.disconnect();
-    };
-  }, [todos]);
-
   const handleColorChange = (color) => {
-    setMainTodoContainerColor(color);
-    setMainTodoIsAutoColor(false);
+    setTodoContainerColor(color);
+    setTodoIsAutoColor(false);
 
     const r = parseInt(color.slice(1, 3), 16);
     const g = parseInt(color.slice(3, 5), 16);
     const b = parseInt(color.slice(5, 7), 16);
     const brightness = (r * 299 + g * 587 + b * 114) / 1000;
     const newTextColor = brightness > 128 ? "#000000" : "#ffffff";
-    setMainTodoTextColor(newTextColor);
+    setTodoTextColor(newTextColor);
 
     // Save colors to localStorage
-    localStorage.setItem(getStorageKey('containerColor'), color);
-    localStorage.setItem(getStorageKey('textColor'), newTextColor);
-    localStorage.setItem(getStorageKey('isAutoColor'), 'false');
+    localStorage.setItem('todofortodo_containerColor', color);
+    localStorage.setItem('todofortodo_textColor', newTextColor);
+    localStorage.setItem('todofortodo_isAutoColor', 'false');
   };
 
   const addTodo = async (e) => {
@@ -243,15 +200,17 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
     if (!inputValue.trim()) return;
 
     if (!user) {
-      message.warning('You are not logged in. Your todos will be saved locally only.');
+      message.warning("Your todos will not be saved.");
       const newTodo = {
         id: Date.now().toString(),
         text: inputValue,
         completed: false,
         createdAt: new Date(),
       };
-      setTodos([newTodo, ...todos]);
+      setTodos([...todos, newTodo]);
       setInputValue("");
+      setDraggedItemIndex(null);
+      setDragOverIndex(null);
       return;
     }
 
@@ -271,8 +230,10 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
         completed: false,
       };
 
-      setTodos([newTodo, ...todos]);
+      setTodos([...todos, newTodo]);
       setInputValue("");
+      setDraggedItemIndex(null);
+      setDragOverIndex(null);
     } catch (error) {
       console.error("Error adding todo:", error);
     }
@@ -402,9 +363,9 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
         <div className="mb-2">
           <button
             onClick={() => {
-              setMainTodoIsAutoColor(true);
+              setTodoIsAutoColor(true);
               setShowColorPicker(false);
-              localStorage.setItem(getStorageKey('isAutoColor'), 'true');
+              localStorage.setItem('todofortodo_isAutoColor', 'true');
             }}
             className={autoButtonClasses}
           >
@@ -430,26 +391,24 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
           <input
             type="color"
             className={customColorInputClasses}
-            value={mainTodoContainerColor}
+            value={todoContainerColor}
             onChange={(e) => handleColorChange(e.target.value)}
           />
         </div>
       </div>
     );
-
     const paletteButtonContainerClasses = "color-picker-menu relative w-9";
     const paletteButtonClasses = `p-2 rounded-sm transition duration-200 ${
-      mainTodoIsAutoColor
+      todoIsAutoColor
         ? "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700"
         : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
     }`;
-
     return (
       <div className={paletteButtonContainerClasses} ref={colorPickerRef}>
         <button
           onClick={() => setShowColorPicker(!showColorPicker)}
           className={paletteButtonClasses}
-          style={{ color: mainTodoIsAutoColor ? undefined : mainTodoTextColor }}
+          style={{ color: todoIsAutoColor ? undefined : todoTextColor }}
         >
           <Palette className="w-5 h-5" />
         </button>
@@ -460,27 +419,26 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
 
   return (
     <div
-      className={`p-2 transition-colors duration-200 w-full rounded-b-sm backdrop-blur-sm relative flex flex-col ${
-         mainTodoIsAutoColor ? "dark:bg-[#28283A]/[(var(--widget-opacity))]" : ""
+      className={`p-2  transition-colors duration-200 w-full"
+       rounded-b-sm backdrop-blur-sm relative ${
+         todoIsAutoColor ? "dark:bg-[#28283A]/[(var(--widget-opacity))]" : ""
        }`}
       style={{
-        backgroundColor: mainTodoIsAutoColor ? undefined : mainTodoContainerColor,
-        color: mainTodoIsAutoColor ? undefined : mainTodoTextColor,
-        height: '300px', maxHeight: '100%'
+        backgroundColor: todoIsAutoColor ? undefined : todoContainerColor,
+        color: todoIsAutoColor ? undefined : todoTextColor,
       }}
-      
     >
       {inNotebookSheet && (
         <h1 className="text-2xl font-bold px-3 py-2">Todo List</h1>
       )}
-      <div className="p-3 flex flex-col flex-1 min-h-0">
+      <div className="p-3">
         <div className="flex justify-between gap-4 items-center mb-1">
           <div className="mb-4 w-full">
             <div
               className={`text-sm flex justify-between ${
-                mainTodoIsAutoColor
+                todoIsAutoColor
                   ? "text-gray-900 dark:text-gray-200"
-                  : isLight(mainTodoContainerColor)
+                  : isLight(todoContainerColor)
                   ? "text-gray-700"
                   : "text-gray-200"
               } mb-1`}
@@ -498,8 +456,7 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
         </div>
 
         <div
-          ref={listContainerRef}
-          className="flex-1 overflow-y-auto relative"
+          className="h-[400px] overflow-y-auto"
           style={{ border: "", borderRadius: "4px" }}
         >
           <ul className="space-y-2 mb-4">
@@ -516,9 +473,9 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
               >
                 <span
                   className={`min-w-[20px] text-sm ${
-                    mainTodoIsAutoColor
+                    todoIsAutoColor
                       ? "text-gray-700 dark:text-gray-300"
-                      : isLight(mainTodoContainerColor)
+                      : isLight(todoContainerColor)
                       ? "text-gray-600"
                       : "text-gray-300"
                   }`}
@@ -533,11 +490,11 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
                 />
                 <span
                   className={`flex-1 ${
-                    mainTodoIsAutoColor
+                    todoIsAutoColor
                       ? todo.completed
                         ? "text-gray-400"
                         : "text-gray-900 dark:text-gray-100"
-                      : isLight(mainTodoContainerColor)
+                      : isLight(todoContainerColor)
                       ? todo.completed
                         ? "text-gray-400"
                         : "text-gray-800"
@@ -552,9 +509,9 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
                   <button
                     onClick={() => startEditing(todo.id, todo.text)}
                     className={`${
-                      mainTodoIsAutoColor
+                      todoIsAutoColor
                         ? "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
-                        : isLight(mainTodoContainerColor)
+                        : isLight(todoContainerColor)
                         ? "text-gray-500 hover:text-gray-700"
                         : "text-gray-300 hover:text-white"
                     }`}
@@ -571,9 +528,9 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
                   >
                     <button
                       className={`${
-                        mainTodoIsAutoColor
+                        todoIsAutoColor
                           ? "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
-                          : isLight(mainTodoContainerColor)
+                          : isLight(todoContainerColor)
                           ? "text-gray-500 hover:text-gray-700"
                           : "text-gray-300 hover:text-white"
                       }`}
@@ -585,13 +542,6 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
               </li>
             ))}
           </ul>
-          {showScrollIndicator && (
-            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 pointer-events-none z-10">
-              <div className="rounded-full bg-black/40 dark:bg-white/40 p-1 animate-bounce backdrop-blur-sm">
-                <ChevronDown className="w-5 h-5 text-white dark:text-black" />
-              </div>
-            </div>
-          )}
         </div>
 
         <form
@@ -604,29 +554,31 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
             onChange={(e) => setInputValue(e.target.value)}
             placeholder="Add new task"
             className={`w-full p-1.5 pr-10 border rounded-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-              mainTodoIsAutoColor
+              todoIsAutoColor
                 ? "bg-white text-gray-900 border-gray-200 dark:bg-[#28283A] dark:text-white dark:placeholder-gray-400 dark:border-gray-700"
-                : isLight(mainTodoContainerColor)
+                : isLight(todoContainerColor)
                 ? "bg-white text-gray-800"
                 : "bg-gray-800 text-white placeholder-gray-400 border-gray-700"
             }`}
             style={{
-              backgroundColor: mainTodoIsAutoColor ? undefined : mainTodoContainerColor,
-              color: mainTodoIsAutoColor ? undefined : mainTodoTextColor,
+              backgroundColor: todoIsAutoColor ? undefined : todoContainerColor,
+              color: todoIsAutoColor ? undefined : todoTextColor,
             }}
           />
           <button
             type="submit"
             className={`absolute right-12 top-1/2 -translate-y-1/2 ${
-              mainTodoIsAutoColor
+              todoIsAutoColor
                 ? "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
-                : isLight(mainTodoContainerColor)
+                : isLight(todoContainerColor)
                 ? "text-gray-500 hover:text-gray-700"
                 : "text-gray-300 hover:text-white"
             }`}
             style={{
-              backgroundColor: mainTodoIsAutoColor ? undefined : mainTodoContainerColor,
-              color: mainTodoIsAutoColor ? undefined : mainTodoTextColor,
+              backgroundColor: todoIsAutoColor
+                ? undefined
+                : todoContainerColor,
+              color: todoIsAutoColor ? undefined : todoTextColor,
             }}
           >
             <span className="text-2xl">+</span>
@@ -638,8 +590,8 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
   );
 };
 
-TodoComponent.propTypes = {
+TodoforTodo.propTypes = {
   inNotebookSheet: PropTypes.bool,
 };
 
-export default TodoComponent;
+export default TodoforTodo;

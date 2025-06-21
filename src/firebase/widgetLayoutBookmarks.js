@@ -24,6 +24,10 @@ const defaultWidgets = {
     { id: "Bookmarks1", name: "AI", isOpen: false, column: 2, position: 0 },
     { id: "Bookmarks2", name: "Travel", isOpen: false, column: 1, position: 1 },
     { id: "Bookmarks3", name: "Sports", isOpen: false, column: 2, position: 1 },
+    { id: "Bookmarks5", name: "News", isOpen: true, column: 2, position: 2 },
+    { id: "Bookmarks8", name: "Finance", isOpen: true, column: 2, position: 3 },
+    { id: "Bookmarks9", name: "Education", isOpen: true, column: 2, position: 4 },
+    
     {
       id: "Bookmarks4",
       name: "Shopping",
@@ -31,6 +35,8 @@ const defaultWidgets = {
       column: 1,
       position: 3,
     },
+    { id: "Bookmarks6", name: "Jobs category", isOpen: true, column: 1, position: 3 },
+    { id: "Bookmarks7", name: "Movie", isOpen: true, column: 1, position: 4 },
     {
       id: "NewsFeed",
       name: "News Feed",
@@ -64,6 +70,10 @@ export const allWidgets = {
   Bookmarks3: { id: "Bookmarks3", name: "Sports" },
   Bookmarks4: { id: "Bookmarks4", name: "Shopping" },
   Bookmarks5: { id: "Bookmarks5", name: "News" },
+  Bookmarks6: { id: "Bookmarks6", name: "Jobs category" },
+  Bookmarks7: { id: "Bookmarks7", name: "Movie" },
+  Bookmarks8: { id: "Bookmarks8", name: "Finance" },
+  Bookmarks9: { id: "Bookmarks9", name: "Education" },
   Todo: { id: "Todo", name: "Todo List" },
   NewsFeed: { id: "NewsFeed", name: "News Feed" },
 };

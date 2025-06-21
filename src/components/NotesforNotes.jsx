@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Bold,
   Underline,
@@ -38,11 +38,11 @@ const preventScroll = (prevent) => {
   document.body.style.overflow = prevent ? "hidden" : "";
 };
 
-const NotePage = ({ inNotebookSheet = false }) => {
+const NotesforNotes = ({ inNotebookSheet = false }) => {
   const getStorageKey = (baseKey) =>
     inNotebookSheet
-      ? `notepage_notebook_${baseKey}`
-      : `notepage_${baseKey}`;
+      ? `notesfornotes_notebook_${baseKey}`
+      : `notesfornotes_${baseKey}`;
 
   const [currentUser, setCurrentUser] = useState(null);
   const [tabs, setTabs] = useState([
@@ -56,7 +56,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
   const [isUnderline, setIsUnderline] = useState(false);
   const [fontSize] = useState(14);
   const [isListening, setIsListening] = useState(false);
-  const [lineNumbers, setLineNumbers] = useState(false);
+  const [lineNumbers, setLineNumbers] = useState(true);
   const [backgroundColor, setBackgroundColor] = useState(() => {
     const savedColor = localStorage.getItem(getStorageKey("backgroundColor"));
     return savedColor || (inNotebookSheet ? "#f5ffe5" : "#ffffff");
@@ -156,12 +156,14 @@ const NotePage = ({ inNotebookSheet = false }) => {
         } else {
           const fetchedTabs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           setTabs(fetchedTabs);
+          // Preserve active tab if it still exists, otherwise default to first
           setActiveTabId(prevId => fetchedTabs.some(t => t.id === prevId) ? prevId : fetchedTabs[0]?.id);
         }
       });
 
-      return () => unsubscribe();
+      return () => unsubscribe(); // Cleanup listener on unmount
     } else {
+      // Guest user logic
       const savedTabs = localStorage.getItem(getStorageKey("tabs"));
       if (savedTabs) {
         const parsedTabs = JSON.parse(savedTabs);
@@ -177,23 +179,41 @@ const NotePage = ({ inNotebookSheet = false }) => {
   useEffect(() => {
     const activeTab = tabs.find((tab) => tab.id === activeTabId);
     if (!activeTab && tabs.length > 0) {
+      // If active tab is deleted or not found, fall back to first tab
       setActiveTabId(tabs[0].id);
     }
   }, [activeTabId, tabs]);
 
+  useEffect(() => {
+    const savedHistory = localStorage.getItem(getStorageKey("history"));
+    if (savedHistory) {
+      setHistory(JSON.parse(savedHistory));
+    }
+  }, [inNotebookSheet]);
+
+  // Debounced content update
   const debouncedUpdate = useRef(
     _.debounce(async (user, tabId, content, title, setActiveTabId_func) => {
       if (!user || !tabId) return;
 
+      // If the tab is a temporary local one, create it in Firestore first.
       if (tabId.toString().startsWith("local-")) {
-        const notesCollectionRef = collection(db, "users", user.uid, "notes");
+        const notesCollectionRef = collection(
+          db,
+          "users",
+          user.uid,
+          "notes"
+        );
         const newDocRef = await addDoc(notesCollectionRef, {
-          title: title || "Untitled",
+          title: title || "Untitled", // Use title or a default
           content,
           createdAt: Timestamp.now(),
         });
+        // The onSnapshot listener will replace the local tab with the synced one.
+        // We just need to update the active tab ID to the new one.
         setActiveTabId_func(newDocRef.id);
       } else {
+        // Otherwise, just update the content of the existing note.
         const noteDocRef = doc(db, "users", user.uid, "notes", tabId);
         await setDoc(noteDocRef, { content }, { merge: true });
       }
@@ -219,13 +239,6 @@ const NotePage = ({ inNotebookSheet = false }) => {
   };
 
   useEffect(() => {
-    const savedHistory = localStorage.getItem(getStorageKey("history"));
-    if (savedHistory) {
-      setHistory(JSON.parse(savedHistory));
-    }
-  }, [inNotebookSheet]);
-
-  useEffect(() => {
     localStorage.setItem(getStorageKey("backgroundColor"), backgroundColor);
     localStorage.setItem(getStorageKey("textColor"), textColor);
     localStorage.setItem(getStorageKey("isAutoColor"), JSON.stringify(isAutoColor));
@@ -244,18 +257,13 @@ const NotePage = ({ inNotebookSheet = false }) => {
         tabDropdownRef.current &&
         !tabDropdownRef.current.contains(event.target)
       ) {
+        // If editing a tab title, save it first
         if (editingTabId && editingTitle.trim()) {
-          const newTitle = editingTitle.trim();
-          if (currentUser && !editingTabId.toString().startsWith('local-')) {
-            const noteDocRef = doc(db, "users", currentUser.uid, "notes", editingTabId);
-            setDoc(noteDocRef, { title: newTitle }, { merge: true });
-          } else {
-             setTabs(prevTabs =>
-              prevTabs.map(tab =>
-                tab.id === editingTabId ? { ...tab, title: newTitle } : tab
-              )
-            );
-          }
+          setTabs(prevTabs =>
+            prevTabs.map(tab =>
+              tab.id === editingTabId ? { ...tab, title: editingTitle.trim() } : tab
+            )
+          );
         }
         setEditingTabId(null);
         setEditingTitle("");
@@ -267,13 +275,14 @@ const NotePage = ({ inNotebookSheet = false }) => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [showTabDropdown, editingTabId, editingTitle, currentUser]);
+  }, [showTabDropdown, editingTabId, editingTitle]);
 
   // Handle click outside for color picker
   useEffect(() => {
     if (!showColorPicker) return;
     
     function handleClickOutside(event) {
+      // Check if click is outside both the button and the dropdown content
       const isOutsideButton = colorPickerRef.current && !colorPickerRef.current.contains(event.target);
       const isOutsideDropdown = !event.target.closest(".menu-Container");
       
@@ -344,6 +353,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
 
   const getLineColor = () => {
     if (!isAutoColor) {
+      // Convert textColor to rgba with opacity
       const opacity = 0.2;
       if (textColor.startsWith("#")) {
         const r = parseInt(textColor.slice(1, 3), 16);
@@ -356,6 +366,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
         : "rgba(0, 0, 0, 0.2)";
     }
 
+    // For auto mode
     return isDarkMode ? "rgba(255, 255, 255, 0.2)" : "rgba(0, 0, 0, 0.2)";
   };
 
@@ -458,6 +469,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
           right: `${dropdownPosition.right}px`,
         }}
       >
+        {/* Auto Theme Button */}
         <div className="mb-2">
           <button
             onClick={() => {
@@ -470,6 +482,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
           </button>
         </div>
 
+        {/* Predefined Colors */}
         <div className="grid grid-cols-7 gap-1">
           {predefinedColors.map((color) => (
             <button
@@ -485,6 +498,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
           ))}
         </div>
 
+        {/* Custom Color Picker */}
         <div className="mt-2 flex items-center justify-center">
           <input
             type="color"
@@ -534,6 +548,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
         content: "",
         createdAt: Timestamp.now(),
       });
+      // The onSnapshot listener will automatically update the UI
       setActiveTabId(newDocRef.id);
     } else {
       const newTabId = Math.max(0, ...tabs.map(tab => typeof tab.id === 'number' ? tab.id : 0)) + 1;
@@ -558,6 +573,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
     if (currentUser && !tabId.toString().startsWith('local-')) {
       const noteDocRef = doc(db, "users", currentUser.uid, "notes", tabId);
       await deleteDoc(noteDocRef);
+      // UI will update via snapshot listener
     } else {
       const updatedTabs = tabs.filter(tab => tab.id !== tabId);
       setTabs(updatedTabs);
@@ -581,6 +597,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
       if (currentUser && !tabId.toString().startsWith('local-')) {
         const noteDocRef = doc(db, "users", currentUser.uid, "notes", tabId);
         await setDoc(noteDocRef, { title: newTitle }, { merge: true });
+        // UI will update via snapshot listener
       } else {
          setTabs(prevTabs =>
           prevTabs.map(tab =>
@@ -695,6 +712,13 @@ const NotePage = ({ inNotebookSheet = false }) => {
                   </div>
                 </div>
 
+                {/* {!isLoggedIn && (
+                  <div className="flex items-center gap-2 px-3 py-1.5 mb-2 text-sm text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 rounded-sm">
+                    <AlertCircle className="w-4 h-4" />
+                    <span>You are not logged in. Data will be saved locally only.</span>
+                  </div>
+                )} */}
+
                 {showWarning && (
                   <div className="fixed top-4 right-4 flex items-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-sm shadow-lg z-50 animate-fade-in">
                     <AlertCircle className="w-4 h-4" />
@@ -739,13 +763,13 @@ const NotePage = ({ inNotebookSheet = false }) => {
                     }`}
                     style={{
                       height: "350px",
-                      marginBottom: "6px",
+                      marginBottom: "20px",
                       resize: "none",
                       color: isAutoColor ? undefined : textColor,
                       backgroundColor: "transparent",
                       border: `1px solid ${textColor}`,
                       padding: "10px 10px 10px 10px",
-                      borderRadius: "2px",
+                      borderRadius: "5px",
                       fontSize: `${fontSize}px`,
                       lineHeight: "32px",
                       fontFamily: "Arial, sans-serif",
@@ -800,7 +824,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
             )}
 
             {!isCollapsed && (
-              <div className="flex flex-wrap justify-between items-center gap-4">
+              <div className="flex flex-wrap justify-between items-center gap-4 mt-6">
                 <div className="flex items-center space-x-3">
                   <button
                     className={`p-3 rounded-sm transition duration-200 ${
@@ -1016,8 +1040,8 @@ const NotePage = ({ inNotebookSheet = false }) => {
   );
 };
 
-NotePage.propTypes = {
+NotesforNotes.propTypes = {
   inNotebookSheet: PropTypes.bool,
 };
 
-export default NotePage;
+export default NotesforNotes;
