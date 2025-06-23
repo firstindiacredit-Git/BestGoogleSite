@@ -25,6 +25,7 @@ export const defaultWidgets = {
       position: 3,
     },
 
+    // Column 1
     {
       id: "Bookmarks",
       name: "Popular Bookmarks",
@@ -40,13 +41,16 @@ export const defaultWidgets = {
       column: 1,
       position: 2,
     },
-    { id: "Bookmarks5", name: "News", isOpen: true, column: 2, position: 2 },
+    { id: "Bookmarks6", name: "Jobs", isOpen: true, column: 1, position: 3 },
+    { id: "Bookmarks7", name: "Movie", isOpen: true, column: 1, position: 4 },
 
     // Column 2
     { id: "Bookmarks1", name: "AI", isOpen: true, column: 2, position: 0 },
     { id: "Bookmarks3", name: "Sports", isOpen: true, column: 2, position: 1 },
-    { id: "Todo", name: "Todo List", isOpen: true, column: 3, position: 2 },
-
+    { id: "Bookmarks5", name: "News", isOpen: true, column: 2, position: 2 },
+    { id: "Bookmarks8", name: "Finance", isOpen: true, column: 2, position: 3 },
+    { id: "Bookmarks9", name: "Education", isOpen: true, column: 2, position: 4 },
+    
     // Column 3
     {
       id: "imageUploader",
@@ -57,6 +61,7 @@ export const defaultWidgets = {
     },
     { id: "NewsFeed", name: "News Feed", isOpen: true, column: 3, position: 1 },
     { id: "notepad", name: "Notepad", isOpen: true, column: 3, position: 2 },
+    { id: "Todo", name: "Todo List", isOpen: true, column: 3, position: 3 },
   ],
 };
 
@@ -74,6 +79,10 @@ export const allWidgets = {
   Bookmarks3: { id: "Bookmarks3", name: "Sports" },
   Bookmarks4: { id: "Bookmarks4", name: "Shopping" },
   Bookmarks5: { id: "Bookmarks5", name: "News" },
+  Bookmarks6: { id: "Bookmarks6", name: "Jobs" },
+  Bookmarks7: { id: "Bookmarks7", name: "Movie" },
+  Bookmarks8: { id: "Bookmarks8", name: "Finance" },
+  Bookmarks9: { id: "Bookmarks9", name: "Education" },
   Todo: { id: "Todo", name: "Todo List" },
   NewsFeed: { id: "NewsFeed", name: "Latest News" },
 };
@@ -423,6 +432,134 @@ export const defaultBookmarks = {
       id: "news5",
       name: "New York Times",
       link: "https://www.nytimes.com",
+      addedByAdmin: true,
+    },
+  ],
+  Jobs: [
+    {
+      id: "job1",
+      name: "LinkedIn Jobs",
+      link: "https://www.linkedin.com/jobs",
+      addedByAdmin: true,
+    },
+    {
+      id: "job2",
+      name: "Indeed",
+      link: "https://www.indeed.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "job3",
+      name: "Glassdoor",
+      link: "https://www.glassdoor.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "job4",
+      name: "Monster",
+      link: "https://www.monster.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "job5",
+      name: "Naukri",
+      link: "https://www.naukri.com",
+      addedByAdmin: true,
+    },
+  ],
+  Movie:[
+    {
+      id: "movie1",
+      name: "Netflix",
+      link: "https://www.netflix.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "movie2",
+      name: "Amazon Prime Video",
+      link: "https://www.primevideo.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "movie3",
+      name: "Disney+ Hotstar",
+      link: "https://www.hotstar.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "movie4",
+      name: "Hulu",
+      link: "https://www.hulu.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "movie5",
+      name: "Apple TV+",
+      link: "https://tv.apple.com",
+      addedByAdmin: true,
+    },
+  ],
+  Finance:[
+    {
+      id: "finance1",
+      name: "PayPal",
+      link: "https://www.paypal.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "finance2",
+      name: "Stripe",
+      link: "https://www.stripe.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "finance3",
+      name: "Wise (TransferWise)",
+      link: "https://wise.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "finance4",
+      name: "Revolut",
+      link: "https://www.revolut.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "finance5",
+      name: "Payoneer",
+      link: "https://www.payoneer.com",
+      addedByAdmin: true,
+    },
+  ],
+  Education:[
+    {
+      id: "edu1",
+      name: "Khan Academy",
+      link: "https://www.khanacademy.org",
+      addedByAdmin: true,
+    },
+    {
+      id: "edu2",
+      name: "Coursera",
+      link: "https://www.coursera.org",
+      addedByAdmin: true,
+    },
+    {
+      id: "edu3",
+      name: "Udemy",
+      link: "https://www.udemy.com",
+      addedByAdmin: true,
+    },
+    {
+      id: "edu4",
+      name: "edX",
+      link: "https://www.edx.org",
+      addedByAdmin: true,
+    },
+    {
+      id: "edu5",
+      name: "Skillshare",
+      link: "https://www.skillshare.com",
       addedByAdmin: true,
     },
   ],

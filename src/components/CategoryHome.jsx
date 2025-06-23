@@ -889,6 +889,20 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
           addedByAdmin: true,
         },
       ],
+      Jobs: [
+        {
+          id: "job1",
+          name: "LinkedIn Jobs",
+          link: "https://www.linkedin.com/jobs",
+          addedByAdmin: true,
+        },
+        {
+          id: "job2",
+          name: "Indeed",
+          link: "https://www.indeed.com",
+          addedByAdmin: true,
+        },
+      ],
     };
 
     // Try to get from imported defaults first

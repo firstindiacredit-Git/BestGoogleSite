@@ -95,6 +95,34 @@ const Anotherpage = ({ visibleHandle, pageId = "home" }) => {
         collapsed={collapsedItems["Bookmarks5"]}
       />
     ),
+    Bookmarks6: (
+      <CategoryHome
+        categoryType="Jobs"
+        itemName="Jobs"
+        collapsed={collapsedItems["Bookmarks6"]}
+      />
+    ),
+    Bookmarks7: (
+      <CategoryHome
+        categoryType="Movie"
+        itemName="Movie"
+        collapsed={collapsedItems["Bookmarks7"]}
+      />
+    ),
+    Bookmarks8: (
+      <CategoryHome
+        categoryType="Finance"
+        itemName="Finance"
+        collapsed={collapsedItems["Bookmarks8"]}
+      />
+    ),
+       Bookmarks9: (
+      <CategoryHome
+        categoryType="Education"
+        itemName="Education"
+        collapsed={collapsedItems["Bookmarks9"]}
+      />
+    ),
     Todo: <TodoComponent collapsed={collapsedItems["Todo"]} />,
     NewsFeed: <NewsFeed collapsed={collapsedItems["NewsFeed"]} />,
   };
