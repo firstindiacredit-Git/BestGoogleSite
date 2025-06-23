@@ -44,6 +44,7 @@ function ImageUploader() {
   const [tempImage, setTempImage] = useState(null);
   const [tempFileName, setTempFileName] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const intervalRef = useRef(null);
   const fileInputRef = useRef(null);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -62,11 +63,15 @@ function ImageUploader() {
     if (activeIndex >= images.length) setActiveIndex(0);
   }, [images]);
 
-  // Carousel effect
+  // Carousel effect with smooth transitions
   useEffect(() => {
     if (images.length > 1 && !previewOpen) {
       intervalRef.current = setInterval(() => {
-        setActiveIndex((prev) => (prev + 1) % images.length);
+        setIsTransitioning(true);
+        setTimeout(() => {
+          setActiveIndex((prev) => (prev + 1) % images.length);
+          setIsTransitioning(false);
+        }, 500); // Increased transition duration for smoother effect
       }, 3000);
       return () => clearInterval(intervalRef.current);
     } else {
@@ -150,7 +155,7 @@ function ImageUploader() {
       {!collapsed && (
         <div>
           {images.length > 0 && (
-            <div className="relative rounded-b-sm group h-[20.25rem] flex items-center justify-center">
+            <div className="relative rounded-b-sm group h-[20.25rem] flex items-center justify-center overflow-hidden">
               <Image
                 src={images[activeIndex].url}
                 alt={images[activeIndex].name}
@@ -159,7 +164,9 @@ function ImageUploader() {
                   src: images[activeIndex].url,
                   onVisibleChange: (vis) => setPreviewOpen(vis),
                 }}
-                className="rounded-b-sm"
+                className={`rounded-b-sm transition-all duration-500 ease-out transform ${
+                  isTransitioning ? 'opacity-0 scale-105 translate-x-4' : 'opacity-100 scale-100 translate-x-0'
+                }`}
                 style={{ objectFit: "cover", height: "100%", width: "100%" }}
                 wrapperClassName="!h-full !w-full rounded-b-sm"
                 onClick={() => setPreviewOpen(true)}
@@ -202,7 +209,9 @@ function ImageUploader() {
                 {images.map((img, idx) => (
                   <span
                     key={idx}
-                    className={`inline-block w-3 h-3 rounded-full ${idx === activeIndex ? "bg-indigo-600" : "bg-gray-400"}`}
+                    className={`inline-block w-3 h-3 rounded-full transition-all duration-500 ease-out ${
+                      idx === activeIndex ? "bg-indigo-600 scale-125" : "bg-gray-400 scale-100"
+                    }`}
                   ></span>
                 ))}
               </div>
