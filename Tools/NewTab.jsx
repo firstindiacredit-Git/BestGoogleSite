@@ -308,17 +308,17 @@ const miscTools = [
   {
     path: "/paypal",
     name: "Paypal Link Gen.",
-    icon: <FaFilePdf className="text-green-500" />,
+    icon: <img src="https://cdn-icons-png.flaticon.com/512/888/888870.png" alt="PayPal" style={{ width: 24, height: 24 }} />,
   },
   {
     path: "/beautifier",
     name: "HTML Beautifier",
-    icon: <FaFilePdf className="text-green-500" />,
+    icon: <img src="https://icones.pro/wp-content/uploads/2021/05/icone-html-orange.png" alt="HTML Beautifier" style={{ width: 24, height: 24 }} />,
   },
   {
     path: "/resumebuild",
     name: "Resume Builder",
-    icon: <FaFilePdf className="text-green-500" />,
+    icon: <img src="https://play-lh.googleusercontent.com/PtlEBHwhkBI_9wKu-PEtp0YRdalrzv0hz7TiZh7EC1V6r2TfyTt5NorliKbs133lIRA" alt="Resume Builder" style={{ width: 24, height: 24 }} />,
   },
   // {
   //   path: "/linkchecker",
@@ -328,12 +328,12 @@ const miscTools = [
   {
     path: "/wordcounter",
     name: "Word Counter",
-    icon: <FaFilePdf className="text-green-500" />,
+    icon: <img src="https://play-lh.googleusercontent.com/DD8dMz1T78pg3qIVaaqY7E49unW3ko3hjEud1ialTRqp96TyC7D41oK0C-JACEdp3YoG" alt="Word Counter" style={{ width: 24, height: 24 }} />,
   },
   {
     path: "/trafficchecker",
     name: "Traffic Checker",
-    icon: <FaFilePdf className="text-green-500" />,
+    icon: <img src="https://png.pngtree.com/png-vector/20220910/ourmid/pngtree-traffic-icon-flat-design-best-social-report-vector-png-image_22781930.png" alt="Traffic Checker" style={{ width: 26, height: 26 }} />,
   },
 ];
 

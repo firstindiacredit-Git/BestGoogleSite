@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { MdAdd, MdDelete } from "react-icons/md";
+import { MdAdd, MdDelete, MdChevronLeft, MdChevronRight } from "react-icons/md";
 import { Image, Button, Popconfirm, Modal } from "antd";
 import Cropper from "react-easy-crop";
 
@@ -72,7 +72,7 @@ function ImageUploader() {
           setActiveIndex((prev) => (prev + 1) % images.length);
           setIsTransitioning(false);
         }, 500); // Increased transition duration for smoother effect
-      }, 3000);
+      }, 15000); // 15 seconds
       return () => clearInterval(intervalRef.current);
     } else {
       clearInterval(intervalRef.current);
@@ -83,6 +83,23 @@ function ImageUploader() {
   useEffect(() => {
     if (activeIndex >= images.length) setActiveIndex(0);
   }, [images.length, activeIndex]);
+
+  // Arrow navigation handlers
+  const handlePrev = () => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setActiveIndex((prev) => (prev - 1 + images.length) % images.length);
+      setIsTransitioning(false);
+    }, 0);
+  };
+
+  const handleNext = () => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setActiveIndex((prev) => (prev + 1) % images.length);
+      setIsTransitioning(false);
+    }, 0);
+  };
 
   const handleImageUpload = (event) => {
     const files = Array.from(event.target.files).slice(0, MAX_IMAGES - images.length);
@@ -156,6 +173,28 @@ function ImageUploader() {
         <div>
           {images.length > 0 && (
             <div className="relative rounded-b-sm group h-[20.25rem] flex items-center justify-center overflow-hidden">
+              {/* Left Arrow */}
+              {images.length > 1 && (
+                <button
+                  className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/40 hover:bg-black/70 text-white rounded-full p-2 transition"
+                  onClick={handlePrev}
+                  aria-label="Previous image"
+                  style={{ outline: 'none', border: 'none' }}
+                >
+                  <MdChevronLeft className="w-7 h-7" />
+                </button>
+              )}
+              {/* Right Arrow */}
+              {images.length > 1 && (
+                <button
+                  className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/40 hover:bg-black/70 text-white rounded-full p-2 transition"
+                  onClick={handleNext}
+                  aria-label="Next image"
+                  style={{ outline: 'none', border: 'none' }}
+                >
+                  <MdChevronRight className="w-7 h-7" />
+                </button>
+              )}
               <Image
                 src={images[activeIndex].url}
                 alt={images[activeIndex].name}
