@@ -1580,7 +1580,7 @@ const Excel = () => {
           <div className="flex justify-between relative mt-4">
             <div className="w-1/3 flex gap-3">
               <div className="relative" ref={colorPickerRef}>
-                <Button
+                {/* <Button
                   icon={<Palette className="p-1 w-8 h-8" />}
                   onClick={() => {
                     setActiveTableIndex(tableIndex);
@@ -1591,7 +1591,7 @@ const Excel = () => {
                       ? "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700"
                       : ""
                   }`}
-                ></Button>
+                ></Button> */}
                 {showColorPicker && activeTableIndex === tableIndex && (
                   <div className="absolute w-48 left-0 -top-56 z-50 -mt-2 bg-white dark:bg-[#513a7a] border border-gray-200 dark:border-gray-700 rounded shadow-lg p-3">
                     {/* Auto Theme Button */}

@@ -1021,10 +1021,6 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
                         <button
                           onClick={() => {
                             setEditingBookmark(bookmark);
-                            setNewBookmark({
-                              name: bookmark.name,
-                              link: bookmark.link,
-                            });
                           }}
                           className="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
                         >
@@ -1048,7 +1044,6 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
                   onOk={handleEdit}
                   onCancel={() => {
                     setEditingBookmark(null);
-                    setNewBookmark({ name: "", link: "" });
                   }}
                 >
                   <div className="space-y-4">
@@ -1092,6 +1087,7 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
               <button
                 onClick={() => {
                   setShowSettings(false);
+                  setNewBookmark({ name: "", link: "" });
                   setShowAddModal(true);
                 }}
                 className="flex dark:text-white/50 items-center rounded-sm gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm"

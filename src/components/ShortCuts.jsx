@@ -16,8 +16,6 @@ import { Modal, Input, Form, message } from "antd";
 const ShortCuts = () => {
   const [userBookmarks, setUserBookmarks] = useState([]);
   const [globalBookmarks, setGlobalBookmarks] = useState([]);
-  const [name, setName] = useState("");
-  const [link, setLink] = useState("");
   const [editingBookmark, setEditingBookmark] = useState(null);
   const [user, setUser] = useState(null);
   const [hiddenBookmarkIds, setHiddenBookmarkIds] = useState([]);
@@ -150,8 +148,6 @@ const ShortCuts = () => {
           message.success("Bookmark added successfully!");
           setShowModal(false);
           formRef.resetFields();
-          setName("");
-          setLink("");
           setErrorMessage("");
         } catch (firebaseError) {
           console.error("Firebase error:", firebaseError);
@@ -174,8 +170,6 @@ const ShortCuts = () => {
         message.success("Bookmark added to local storage!");
         setShowModal(false);
         formRef.resetFields();
-        setName("");
-        setLink("");
         setErrorMessage("");
       }
     } catch (error) {
@@ -265,8 +259,6 @@ const ShortCuts = () => {
   const handleEditBookmark = (bookmark) => {
     console.log("Editing bookmark:", bookmark);
     setEditingBookmark(bookmark);
-    setName(bookmark.name);
-    setLink(bookmark.link);
     formRef.setFieldsValue({
       name: bookmark.name,
       link: bookmark.link,
@@ -278,69 +270,39 @@ const ShortCuts = () => {
 
   const handleUpdateBookmark = async (values) => {
     if (!editingBookmark) {
-      console.error("No bookmark selected for editing");
       setErrorMessage("No bookmark selected for editing");
       return;
     }
 
-    console.log("Updating bookmark with values:", values);
-    console.log("Editing bookmark:", editingBookmark);
-
     let bookmarkLink = values.link;
-
-    // Add protocol if missing
-    if (
-      !bookmarkLink.startsWith("http://") &&
-      !bookmarkLink.startsWith("https://")
-    ) {
+    if (!bookmarkLink.startsWith("http://") && !bookmarkLink.startsWith("https://")) {
       bookmarkLink = "https://" + bookmarkLink;
     }
-
     if (!validateURL(bookmarkLink)) {
       setErrorMessage("Please enter a valid URL.");
       return;
     }
 
+    const updatedData = {
+      name: values.name,
+      link: bookmarkLink,
+    };
+
     try {
-      const updatedData = {
-        name: values.name,
-        link: bookmarkLink,
-      };
-
-      console.log("Updated data:", updatedData);
-
-      if (user) {
-        // Update in Firebase for logged-in users
-        const docRef = doc(
-          db,
-          "users",
-          user.uid,
-          "shortcut",
-          editingBookmark.id
-        );
+      if (user && editingBookmark.id.length === 20) { // Only update in Firestore if it's a Firestore doc
+        const docRef = doc(db, "users", user.uid, "shortcut", editingBookmark.id);
         await updateDoc(docRef, updatedData);
-
         setUserBookmarks((prev) =>
           prev.map((bm) =>
-            bm.id === editingBookmark.id
-              ? {
-                  ...bm,
-                  ...updatedData,
-                }
-              : bm
+            bm.id === editingBookmark.id ? { ...bm, ...updatedData } : bm
           )
         );
         message.success("Bookmark updated successfully!");
       } else {
-        // Update in local storage for non-logged-in users
+        // Update in local storage for non-logged-in users or local bookmarks
         const currentBookmarks = getFromLocalStorage();
         const updatedBookmarks = currentBookmarks.map((bm) =>
-          bm.id === editingBookmark.id
-            ? {
-                ...bm,
-                ...updatedData,
-              }
-            : bm
+          bm.id === editingBookmark.id ? { ...bm, ...updatedData } : bm
         );
         saveToLocalStorage(updatedBookmarks);
         setUserBookmarks(updatedBookmarks);
@@ -349,13 +311,10 @@ const ShortCuts = () => {
 
       setErrorMessage("");
       setEditingBookmark(null);
-      setName("");
-      setLink("");
       setEditMode(false);
       setShowModal(false);
       formRef.resetFields();
     } catch (error) {
-      console.error("Error updating bookmark:", error);
       setErrorMessage("Failed to update bookmark. Please try again.");
       message.error("Failed to update bookmark. Please try again.");
     }
@@ -428,10 +387,17 @@ const ShortCuts = () => {
     ...globalBookmarks.filter((bm) => !bm.isHidden),
   ];
 
+  // Sort by createdAt (newest first)
+  const sortedBookmarks = combinedBookmarks.sort((a, b) => {
+    // If createdAt is a string, convert to Date for comparison
+    const aTime = new Date(a.createdAt).getTime();
+    const bTime = new Date(b.createdAt).getTime();
+    return bTime - aTime;
+  });
+
   const openAddModal = () => {
     formRef.resetFields();
-    setName("");
-    setLink("");
+    formRef.setFieldsValue({ name: "", link: "" });
     setErrorMessage("");
     setEditMode(false);
     setEditingBookmark(null);
@@ -443,8 +409,6 @@ const ShortCuts = () => {
     setShowModal(false);
     setEditMode(false);
     setEditingBookmark(null);
-    setName("");
-    setLink("");
     setErrorMessage("");
     formRef.resetFields();
     console.log("Modal closed and form reset");
@@ -453,7 +417,7 @@ const ShortCuts = () => {
   return (
     <div className="flex items-start gap-2 max-w-7xl dark:text-white justify-center mb-10 w-full">
       <div className="flex gap-2 flex-wrap items-start">
-        {combinedBookmarks.map((bookmark) => (
+        {sortedBookmarks.map((bookmark) => (
           <div
             key={bookmark.id}
             className="text-center hover:shadow-sm hover:dark:bg-[#28283a]/[var(--widget-opacity)] hover:backdrop-blur-lg hover:bg-white/[var(--widget-opacity)] cursor-pointer p-2 rounded-sm group relative"
@@ -494,7 +458,10 @@ const ShortCuts = () => {
                 ⋮
               </button>
               {menuVisible === bookmark.id && (
-                <div className="absolute bg-white right-0 top-6 backdrop-blur border rounded shadow-md text-left z-10">
+                <div
+                  className="absolute bg-white right-0 top-6 backdrop-blur border rounded shadow-md text-left z-10"
+                  onMouseLeave={() => setMenuVisible(null)}
+                >
                   {bookmark.createdByUser && (
                     <button
                       onClick={(e) => {
@@ -542,10 +509,6 @@ const ShortCuts = () => {
           form={formRef}
           onFinish={editMode ? handleUpdateBookmark : addBookmark}
           layout="vertical"
-          initialValues={{
-            name: name,
-            link: link,
-          }}
         >
           <Form.Item
             label={<span className="dark:text-white">Name</span>}
@@ -556,10 +519,6 @@ const ShortCuts = () => {
               placeholder="Enter bookmark name"
               className="dark:bg-[#513a7a] border dark:border-gray-600 dark:text-white"
               onKeyDown={handleKeyDown}
-              onChange={(e) => {
-                setName(e.target.value);
-                console.log("Name input changed:", e.target.value);
-              }}
             />
           </Form.Item>
           <Form.Item
@@ -576,9 +535,6 @@ const ShortCuts = () => {
               onKeyDown={handleKeyDown}
               placeholder="Enter URL (e.g. google.com)"
               className="dark:bg-[#513a7a] border dark:border-gray-600 dark:text-white"
-              onChange={(e) => {
-                setLink(e.target.value);
-              }}
             />
           </Form.Item>
           {errorMessage && (

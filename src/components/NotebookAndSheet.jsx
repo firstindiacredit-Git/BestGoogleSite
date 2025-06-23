@@ -1,8 +1,7 @@
-import React from "react";
 import NotesforNotes from "./NotesforNotes";
-import TodoComponent from "./TodoComponent";
 import "react-quill/dist/quill.snow.css";
 import Excel from "./Excel";
+import TodoforTodo from "./TodoforTodo";
 
 const NotebookAndDocumentSheet = () => {
   return (
@@ -15,7 +14,7 @@ const NotebookAndDocumentSheet = () => {
 
         {/* Todo section - 4 columns on large screens */}
         <div className="lg:col-span-4 overflow-hidden">
-          <TodoComponent inNotebookSheet={true} />
+          <TodoforTodo inNotebookSheet={true} />
         </div>
       </div>
       <div className="overflow-hidden mt-4">

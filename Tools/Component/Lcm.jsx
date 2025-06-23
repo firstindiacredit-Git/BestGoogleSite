@@ -93,8 +93,8 @@ const LcmCalculator = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br mt-16 from-gray-100 to-gray-200 py-4">
-      <div className="max-w-2xl mt-16 mx-auto px-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 py-4">
+      <div className="max-w-2xl mx-auto px-4">
         <div className="bg-white rounded-[30px] shadow-md border-2 border-gray-100">
           <div className="p-1">
             <Back />

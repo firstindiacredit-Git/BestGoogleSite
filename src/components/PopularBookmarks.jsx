@@ -1615,12 +1615,26 @@ function PopularBookmarks() {
               }}
               className="flex-shrink-0"
             />
-            <a
-              href={link.url || link.link}
-              className="ml-3 text-black dark:text-white hover:text-blue-500"
-            >
-              {link.title || link.name}
-            </a>
+            <div className="ml-3 flex flex-col">
+              <a
+                href={link.url || link.link}
+                className="text-black dark:text-white hover:text-blue-500"
+                style={{ fontWeight: 500 }}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {link.title || link.name}
+              </a>
+              <a
+                href={link.url || link.link}
+                className="text-xs text-gray-500 dark:text-gray-400 hover:text-blue-400 break-all"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ marginTop: 2 }}
+              >
+                {link.url || link.link}
+              </a>
+            </div>
           </li>
         ))}
       </ul>

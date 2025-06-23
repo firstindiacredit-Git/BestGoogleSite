@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Edit, Trash2, Palette, ChevronDown } from "lucide-react";
+import { Edit, Trash2, Palette } from "lucide-react";
 import { Popconfirm, message } from "antd";
 import { db, auth } from "../firebase";
 import {
@@ -13,6 +13,7 @@ import {
 import { onAuthStateChanged } from "firebase/auth";
 import PropTypes from "prop-types";
 import { createPortal } from "react-dom";
+import { DownOutlined } from '@ant-design/icons';
 
 // Helper function to determine if a color is light or dark
 const isLight = (color) => {
@@ -56,7 +57,7 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
     right: null,
   });
   const listContainerRef = useRef(null);
-  const [showScrollIndicator, setShowScrollIndicator] = useState(false);
+  const [showScrollDown, setShowScrollDown] = useState(false);
 
   const colorPickerRef = useRef(null);
 
@@ -196,30 +197,33 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
     }
   }, [inNotebookSheet]);
 
+  // Scroll indicator logic
   useEffect(() => {
     const listElement = listContainerRef.current;
     if (!listElement) return;
 
-    const checkScroll = () => {
-      const isScrollable = listElement.scrollHeight > listElement.clientHeight;
-      // Check if scrolled to the bottom (with a 1px tolerance)
-      const isAtBottom =
-        listElement.scrollHeight - Math.ceil(listElement.scrollTop) <=
-        listElement.clientHeight + 1;
-      setShowScrollIndicator(isScrollable && !isAtBottom);
+    const handleScroll = () => {
+      // Show arrow if more than 5 todos, not at bottom, and list is scrollable
+      const atBottom = listElement.scrollHeight - listElement.scrollTop - listElement.clientHeight < 2;
+      setShowScrollDown(todos.length > 5 && !atBottom && listElement.scrollHeight > listElement.clientHeight);
     };
-
-    checkScroll();
-
-    listElement.addEventListener("scroll", checkScroll);
-    const resizeObserver = new ResizeObserver(checkScroll);
-    resizeObserver.observe(listElement);
-
+    // Initial check
+    handleScroll();
+    listElement.addEventListener('scroll', handleScroll);
+    window.addEventListener('resize', handleScroll);
     return () => {
-      listElement.removeEventListener("scroll", checkScroll);
-      resizeObserver.disconnect();
+      listElement.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
     };
   }, [todos]);
+
+  // Function to scroll to bottom
+  const scrollToBottom = () => {
+    const listElement = listContainerRef.current;
+    if (listElement) {
+      listElement.scrollTo({ top: listElement.scrollHeight, behavior: 'smooth' });
+    }
+  };
 
   const handleColorChange = (color) => {
     setMainTodoContainerColor(color);
@@ -585,13 +589,6 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
               </li>
             ))}
           </ul>
-          {showScrollIndicator && (
-            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 pointer-events-none z-10">
-              <div className="rounded-full bg-black/40 dark:bg-white/40 p-1 animate-bounce backdrop-blur-sm">
-                <ChevronDown className="w-5 h-5 text-white dark:text-black" />
-              </div>
-            </div>
-          )}
         </div>
 
         <form
@@ -631,6 +628,34 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
           >
             <span className="text-2xl">+</span>
           </button>
+          {/* Scroll Down Arrow Button */}
+          {showScrollDown && (
+            <button
+              type="button"
+              onClick={scrollToBottom}
+              style={{
+                position: 'absolute',
+                left: '50%',
+                top: '-36px', // above the input field
+                transform: 'translateX(-50%)',
+                zIndex: 10,
+                width: '20px',
+                height: '20px',
+               
+                border: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'background 0.2s',
+              }}
+              title="Scroll to bottom"
+            >
+              <span style={{ display: 'inline-block', animation: 'arrowBounce 1s infinite alternate' }}>
+                <DownOutlined style={{ fontSize: 16 }} />
+              </span>
+            </button>
+          )}
           {renderColorPickerMenu()}
         </form>
       </div>
@@ -641,5 +666,18 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
 TodoComponent.propTypes = {
   inNotebookSheet: PropTypes.bool,
 };
+
+// Add keyframes for arrow bounce animation
+const style = document.createElement('style');
+style.innerHTML = `
+@keyframes arrowBounce {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(10px); }
+}
+`;
+if (!document.head.querySelector('style[data-arrow-bounce]')) {
+  style.setAttribute('data-arrow-bounce', 'true');
+  document.head.appendChild(style);
+}
 
 export default TodoComponent;

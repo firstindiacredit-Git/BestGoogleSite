@@ -658,7 +658,7 @@ const NotesforNotes = ({ inNotebookSheet = false }) => {
                         <ChevronDown className="w-4 h-4" />
                       </button>
                       {showTabDropdown && (
-                        <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-[#28283A] border border-gray-200 dark:border-gray-700 rounded-sm shadow-lg z-50">
+                        <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-[#28283A] border border-gray-200 dark:border-gray-700 rounded-sm shadow-lg z-50 max-h-64 overflow-y-auto">
                           {tabs.map(tab => (
                             <div
                               key={tab.id}

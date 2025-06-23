@@ -178,24 +178,24 @@ const menuItems = [
   {
     type: "divider",
   },
-  {
-    key: "group4",
-    type: "group",
-    label: <div className="dark:text-white/40">Page Management</div>,
-    children: [
-      {
-        key: "addPage",
-        label: <div className="dark:text-white">New Page</div>,
-        icon: <PlusOutlined />,
-      },
-      {
-        key: "deletePage",
-        label: <div className="dark:text-white ">Delete Page</div>,
-        icon: <DeleteOutlined />,
-        danger: true,
-      },
-    ],
-  },
+  // {
+  //   key: "group4",
+  //   type: "group",
+  //   label: <div className="dark:text-white/40">Page Management</div>,
+  //   children: [
+  //     {
+  //       key: "addPage",
+  //       label: <div className="dark:text-white">New Page</div>,
+  //       icon: <PlusOutlined />,
+  //     },
+  //     {
+  //       key: "deletePage",
+  //       label: <div className="dark:text-white ">Delete Page</div>,
+  //       icon: <DeleteOutlined />,
+  //       danger: true,
+  //     },
+  //   ],
+  // },
 ];
 
 // Add these background collections at the top of the file
