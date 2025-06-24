@@ -131,7 +131,7 @@ const NewsFeed = () => {
 
       //"Making API request for fresh news data");
       const response = await fetch(
-        "https://bgs-backend.vercel.app/api/top100/news"
+        "https://newsdata.io/api/1/news?apikey=pub_63909ffdc676cafdb2b6287a51da5f0e581ff&country=in&language=en"
       );
 
       if (!response.ok) {

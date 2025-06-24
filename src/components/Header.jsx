@@ -20,12 +20,12 @@ import { FaCrown } from "react-icons/fa";
 import Signin from "./Signup/signin.jsx";
 import Signup from "./Signup.jsx";
 import { useTheme } from "../context/ThemeContext";
-import { 
-  getCustomPages, 
-  createCustomPage, 
-  updateCustomPage, 
+import {
+  getCustomPages,
+  createCustomPage,
+  updateCustomPage,
   deleteCustomPage,
-  syncLocalPagesToFirebase 
+  syncLocalPagesToFirebase
 } from "../firebase/customPages";
 
 const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
@@ -43,6 +43,24 @@ const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
   const MAX_PAGES = 3; // Maximum allowed pages for free users
   const [showAdminBanner, setShowAdminBanner] = useState(true);
   const [showGoogleApps, setShowGoogleApps] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState({
+    key: "us",
+    flag: "https://flagcdn.com/us.svg",
+    name: "USA"
+  });
+
+  const countries = [
+    {
+      key: "us",
+      flag: "https://flagcdn.com/us.svg",
+      name: "USA"
+    },
+    {
+      key: "in",
+      flag: "https://flagcdn.com/in.svg",
+      name: "India"
+    }
+  ];
 
   // Load pages from Firebase or localStorage
   const loadPages = async (currentUser) => {
@@ -50,7 +68,7 @@ const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
       try {
         // First try to sync any local pages to Firebase
         await syncLocalPagesToFirebase(currentUser.uid);
-        
+
         // Then load pages from Firebase
         const firebasePages = await getCustomPages(currentUser.uid);
         setPages(firebasePages);
@@ -108,7 +126,7 @@ const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
         setSubscriptionStatus("free");
         setIsAdmin(false);
         setShowAdminBanner(true);
-        
+
         // Load pages for non-logged in user
         await loadPages(null);
       }
@@ -605,11 +623,10 @@ const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
                 )}
                 <div
                   className={` p-2 rounded-lg text-sm flex items-center justify-center gap-2 
-                      ${
-                        subscriptionStatus === "pro"
-                          ? "text-indigo-500"
-                          : "text-gray-500 dark:text-gray-400"
-                      }`}
+                      ${subscriptionStatus === "pro"
+                      ? "text-indigo-500"
+                      : "text-gray-500 dark:text-gray-400"
+                    }`}
                 ></div>
               </div>
             ) : (
@@ -627,6 +644,48 @@ const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
           </div>
 
           <div className="flex items-center justify-between w-fit gap-4 space-x-4">
+            <Dropdown
+              menu={{
+                items: countries
+                  .filter(country => country.key !== selectedCountry.key)
+                  .map(country => ({
+                    key: country.key,
+                    label: (
+                      <div
+                        className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                        onClick={() => setSelectedCountry(country)}
+                      >
+                        <img
+                          src={country.flag}
+                          alt={country.name}
+                          className="w-6 h-4 object-cover rounded-sm"
+                        />
+                        <span className="text-sm font-medium">{country.name}</span>
+                      </div>
+                    ),
+                  })),
+              }}
+              trigger={["click"]}
+              placement="bottomLeft"
+              overlayClassName="mt-1 shadow-lg rounded-md border border-gray-200 dark:border-gray-700"
+            >
+              <button className="flex items-center gap-1 px-2 py-1.5 rounded-md  hover:bg-gray-200/80 dark:hover:bg-gray-800/20 transition-colors duration-200">
+                <img
+                  src={selectedCountry.flag}
+                  alt={selectedCountry.name}
+                  className="w-6 h-4 object-cover rounded-sm"
+                />
+                <svg
+                  className="w-3 h-3 text-gray-500 dark:text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+            </Dropdown>
             <div
               onClick={toggleTheme}
               className="flex items-center text-sm dark:hover:bg-gray-800/20 transition-all hover:bg-gray-200/80 p-2 cursor-pointer rounded-md"
@@ -637,8 +696,10 @@ const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
                 <FaMoon className="w-5 h-5 " />
               )}
             </div>
+
             {user && (
               <div className="relative">
+
                 <button
                   onClick={handleGoogleAppsClick}
                   className="flex items-center text-sm dark:hover:bg-gray-800/20 transition-all hover:bg-gray-200/80 p-2 cursor-pointer rounded-md google-apps-button"
@@ -905,16 +966,14 @@ const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
                       </p>
                       <div
                         className={`mt-2 text-sm flex items-center justify-center gap-2 
-                      ${
-                        subscriptionStatus === "pro"
-                          ? "text-indigo-500 dark:text-yellow-500"
-                          : "text-gray-500 dark:text-gray-400"
-                      }`}
+                      ${subscriptionStatus === "pro"
+                            ? "text-indigo-500 dark:text-yellow-500"
+                            : "text-gray-500 dark:text-gray-400"
+                          }`}
                       >
                         <FaCrown
-                          className={`${
-                            subscriptionStatus === "pro" ? "animate-pulse" : ""
-                          }`}
+                          className={`${subscriptionStatus === "pro" ? "animate-pulse" : ""
+                            }`}
                         />
                         <span>
                           {subscriptionStatus === "pro"
