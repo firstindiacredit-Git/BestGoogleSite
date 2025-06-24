@@ -38,6 +38,7 @@ import {
   EditOutlined,
   DeleteOutlined,
   MoreOutlined,
+  MenuOutlined,
 } from "@ant-design/icons";
 import debounce from "lodash/debounce";
 import SkeletonLoader from "./SkeletonLoader";
@@ -162,6 +163,7 @@ function PopularBookmarks() {
   const [isApplyingChanges, setIsApplyingChanges] = useState(false);
   const [availableCategories, setAvailableCategories] = useState([]);
   const [activeCategories, setActiveCategories] = useState([]);
+  const [categorySearch, setCategorySearch] = useState("");
 
   // Enhanced drag state with more comprehensive tracking
   const [dragState, setDragState] = useState({
@@ -908,31 +910,23 @@ function PopularBookmarks() {
 
       // Also add the new category to a column
       setCategoryColumns((prevColumns) => {
-        // Find the column with the least categories
-        let targetColumn = "column1";
-        let minCount = prevColumns.column1 ? prevColumns.column1.length : 0;
-
-        Object.keys(prevColumns).forEach((colKey) => {
-          const count = prevColumns[colKey] ? prevColumns[colKey].length : 0;
-          if (count < minCount) {
-            minCount = count;
-            targetColumn = colKey;
-          }
+        // Get all user categories (exclude admin)
+        const userCategoryIds = [...categories, newCategory]
+          .filter((cat) => !cat.isAdminCategory)
+          .map((cat) => cat.id);
+        const columnKeys = Object.keys(prevColumns);
+        // Distribute user categories equally across columns (round-robin)
+        const newColumns = {};
+        columnKeys.forEach((colKey) => (newColumns[colKey] = []));
+        userCategoryIds.forEach((catId, idx) => {
+          const colKey = columnKeys[idx % columnKeys.length];
+          newColumns[colKey].push(catId);
         });
-
-        // Add new category to the target column
-        const newColumns = { ...prevColumns };
-        newColumns[targetColumn] = [
-          ...(newColumns[targetColumn] || []),
-          newCategory.id,
-        ];
-
         // Also update in Firestore
         const userDocRef = doc(db, "users", user.uid);
         updateDoc(userDocRef, {
           "categoryPositions.columns": newColumns,
         }).catch((error) => console.error("Error updating columns:", error));
-
         return newColumns;
       });
 
@@ -1130,33 +1124,42 @@ function PopularBookmarks() {
     }
   };
 
+  const [selectedCategoryId, setSelectedCategoryId] = useState(""); // For global add bookmark
+
+  const handleGlobalAddBookmark = () => {
+    if (categories.length > 0) {
+      setSelectedCategoryId(categories[0].id);
+      setSelectedCategory(categories[0]);
+    } else {
+      setSelectedCategoryId("");
+      setSelectedCategory(null);
+    }
+    setIsAddBookmarkModalVisible(true);
+  };
+
+  const handleCategoryDropdownChange = (value) => {
+    setSelectedCategoryId(value);
+    const cat = categories.find((c) => c.id === value);
+    setSelectedCategory(cat || null);
+  };
+
   const handleAddBookmark = async () => {
-    if (!selectedCategory) {
+    const categoryToUse = selectedCategoryId
+      ? categories.find((cat) => cat.id === selectedCategoryId)
+      : selectedCategory;
+    if (!categoryToUse) {
       //error("Please select a category first");
       return;
     }
-
     if (!newBookmark.title.trim() || !newBookmark.url.trim()) {
       //error("Title and URL are required");
       return;
     }
-
     try {
-      const category = categories.find((cat) => cat.id === selectedCategory.id);
-      if (!category) {
-        //error("Selected category not found");
-        return;
-      }
-
-      // Check for duplicates in the same category
       const normalizedUrl = validateUrl(newBookmark.url.trim());
-
-      // Create a predictable key for deduplication
-      const urlKey = `${selectedCategory.id}-${normalizedUrl}`;
-
-      // Check for duplicates more thoroughly
+      const urlKey = `${categoryToUse.id}-${normalizedUrl}`;
       const isDuplicate = links.some((link) => {
-        if (link.categoryId !== selectedCategory.id) return false;
+        if (link.categoryId !== categoryToUse.id) return false;
         try {
           const linkUrl = validateUrl(link.url);
           return linkUrl === normalizedUrl;
@@ -1164,90 +1167,54 @@ function PopularBookmarks() {
           return false;
         }
       });
-
       if (isDuplicate) {
         //warning("This URL already exists in this category");
         return;
       }
-
-      // Generate a predictable temporary ID that includes the URL key
-      // This helps the Firestore listener match this temp bookmark with the real one
-      const tempId = `temp_${btoa(urlKey).replace(
-        /[^a-zA-Z0-9]/g,
-        ""
-      )}_${Date.now()}`;
-
-      // Prepare bookmark data
+      const tempId = `temp_${btoa(urlKey).replace(/[^a-zA-Z0-9]/g, "")}_${Date.now()}`;
       const bookmarkData = {
         title: newBookmark.title.trim(),
         url: normalizedUrl,
         favicon: newBookmark.favicon || (await fetchFavicon(normalizedUrl)),
-        categoryId: selectedCategory.id,
+        categoryId: categoryToUse.id,
         userId: user.uid,
         createdAt: new Date().toISOString(),
-        order: links.filter((link) => link.categoryId === selectedCategory.id)
-          .length,
+        order: links.filter((link) => link.categoryId === categoryToUse.id).length,
         isAdminBookmark: false,
-        _tempUrlKey: urlKey, // Add this to help with deduplication during listener updates
+        _tempUrlKey: urlKey,
       };
-
-      // Add optimistically to UI with tempId
       setLinks((prevLinks) => {
-        // Make sure we don't already have this bookmark (additional safety check)
         const existingBookmark = prevLinks.find(
           (link) =>
-            link.categoryId === selectedCategory.id &&
+            link.categoryId === categoryToUse.id &&
             link.url === normalizedUrl
         );
-
         if (existingBookmark) {
-          // Already exists, don't add it again
-          console.log("Prevented duplicate bookmark:", urlKey);
           return prevLinks;
         }
-
         return [...prevLinks, { ...bookmarkData, id: tempId }];
       });
-
-      // Add to Firestore - this will trigger the listener
       const docRef = await addDoc(
         collection(db, "users", user.uid, "CatBookmarks"),
         bookmarkData
       );
-
-      console.log(
-        `Added bookmark with temp ID ${tempId}, real ID ${docRef.id}`
-      );
-
-      // Clear form and close modal
       setNewBookmark({ title: "", url: "", favicon: "" });
       setIsAddBookmarkModalVisible(false);
+      setSelectedCategoryId("");
       //success("Bookmark added successfully");
     } catch (error) {
-      console.error("Error adding bookmark:", error);
-
-      // Clean up the temp bookmark if operation failed
       const normalizedUrl = validateUrl(newBookmark.url.trim());
       setLinks((prevLinks) =>
         prevLinks.filter(
           (link) =>
             !(
               link.id.startsWith("temp_") &&
-              link.categoryId === selectedCategory.id &&
+              link.categoryId === (selectedCategoryId || (selectedCategory && selectedCategory.id)) &&
               link.url === normalizedUrl
             )
         )
       );
-
-      if (error.message === "Invalid URL format") {
-        //error("Please enter a valid URL");
-      } else if (error.code === "permission-denied") {
-        //error("You don't have permission to add bookmarks");
-      } else if (error.code === "unavailable") {
-        //error("Network is unavailable. Please check your connection.");
-      } else {
-        //error("Failed to add bookmark. Please try again.");
-      }
+      // ... existing code ...
     }
   };
 
@@ -1720,13 +1687,22 @@ function PopularBookmarks() {
     return (
       <div className="mb-2">
         <div className="flex justify-between mb-2">
-          <button
-            className="rounded-lg flex gap-4 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]  px-3 py-2 dark:text-white mb-2"
-            onClick={() => setIsAddCategoryModalVisible(true)}
-          >
-            <PlusOutlined />
-            Add Category
-          </button>
+          <div className="flex gap-2">
+            <button
+              className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]  px-3 py-2 dark:text-white mb-2"
+              onClick={() => setIsAddCategoryModalVisible(true)}
+            >
+              <PlusOutlined />
+              Add Category
+            </button>
+            <button
+              className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)]  px-3 py-2 dark:text-white mb-2"
+              onClick={handleGlobalAddBookmark}
+            >
+              <PlusOutlined />
+              Add Bookmark
+            </button>
+          </div>
           <div className="flex items-center gap-4">
             <div
               className={`flex items-center bg-white/[(var(--widget-opacity))] backdrop-blur-lg dark:bg-[#28283A]/[(var(--widget-opacity))] p-1 rounded-sm`}
@@ -1862,6 +1838,9 @@ function PopularBookmarks() {
                                                     e.stopPropagation();
                                                     setSelectedCategory(
                                                       category
+                                                    );
+                                                    setSelectedCategoryId(
+                                                      category.id
                                                     );
                                                     setIsAddBookmarkModalVisible(
                                                       true
@@ -2810,11 +2789,11 @@ function PopularBookmarks() {
               className={`flex items-center bg-white/[(var(--widget-opacity))] backdrop-blur-lg dark:bg-[#28283A]/[(var(--widget-opacity))] p-1 rounded-sm`}
             >
               {/* <button
-                onClick={() => handleGridViewChange(true)}
+                onClick={() => handleGridViewChange(false)}
                 className={`p-2 rounded ${
-                  grid
+                  !grid
                     ? "bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] shadow-sm"
-                    : "hover:bg-white/[var(--widget-opacity)] dark:hover:bg-gray-700/[var(--widget-opacity)]"
+                    : "hover:bg-white dark:hover:bg-gray-700/50"
                 }`}
               >
                 <svg
@@ -2921,74 +2900,60 @@ function PopularBookmarks() {
       </motion.button>
 
       <Modal
-        title="Category Controller"
+        title={
+          <div>
+            <div className="text-lg font-semibold">Category Controller</div>
+            <div className="text-gray-500 dark:text-gray-300 text-sm mt-1">
+              Organize your categories into columns. Drag and drop to reorder. Changes are saved when you click "Apply Changes".
+            </div>
+          </div>
+        }
         open={isControllerOpen}
         onCancel={() => setIsControllerOpen(false)}
         width={800}
         footer={[
-          <div key="footer" className="flex justify-between items-center">
-            <div>
-              <AntButton
-                key="cancel"
-                value="dark:hover:bg-gray-800"
-                onClick={() => setIsControllerOpen(false)}
-                className="dark:text-white border-none  dark:hover:bg-gray-800 dark:bg-gray-700"
-              >
-                Cancel
-              </AntButton>
-              <AntButton
-                key="apply"
-                type="primary"
-                loading={isApplyingChanges}
-                onClick={handleApplyChanges}
-                style={{ marginLeft: "8px" }}
-              >
-                Apply Changes
-              </AntButton>
-            </div>
+          <div key="divider" className="border-t border-gray-200 dark:border-gray-700 my-2"></div>,
+          <div key="footer" className="flex justify-end items-center mt-2 gap-2">
+            <AntButton
+              key="cancel"
+              value="dark:hover:bg-gray-800"
+              onClick={() => setIsControllerOpen(false)}
+              className="dark:text-white border-none  dark:hover:bg-gray-800 dark:bg-gray-700"
+            >
+              Cancel
+            </AntButton>
+            <AntButton
+              key="apply"
+              type="primary"
+              loading={isApplyingChanges}
+              onClick={handleApplyChanges}
+              style={{ marginLeft: "8px" }}
+            >
+              Apply Changes
+            </AntButton>
           </div>,
         ]}
       >
-        <div className="flex w-full mb-4  justify-between items-center gap-2">
-          <div className="dark:text-white">Columns:</div>
+        <div className="flex w-full mb-4 justify-between items-center gap-2">
+          <div className="dark:text-white font-medium">Columns:</div>
           <div className="flex gap-2">
-            <button
-              className={`px-4 py-2 rounded-md dark:text-white dark:bg-gray-700 border-none outline-none ${
-                previewColumns === 1 ? "bg-blue-500 text-white" : ""
-              }`}
-              onClick={() => handlePreviewColumnChange(1)}
-            >
-              1
-            </button>
-            <button
-              className={`px-4 py-2 rounded-md dark:text-white dark:bg-gray-700 border-none outline-none ${
-                previewColumns === 2 ? "bg-blue-500 text-white" : ""
-              }`}
-              onClick={() => handlePreviewColumnChange(2)}
-            >
-              2
-            </button>
-            <button
-              className={`px-4 py-2 rounded-md dark:text-white dark:bg-gray-700 border-none outline-none ${
-                previewColumns === 3 ? "bg-blue-500 text-white" : ""
-              }`}
-              onClick={() => handlePreviewColumnChange(3)}
-            >
-              3
-            </button>
-            <button
-              className={`px-4 py-2 rounded-md dark:text-white dark:bg-gray-700 border-none outline-none ${
-                previewColumns === 4 ? "bg-blue-500 text-white" : ""
-              }`}
-              onClick={() => handlePreviewColumnChange(4)}
-            >
-              4
-            </button>
+            {[1,2,3,4].map(num => (
+              <button
+                key={num}
+                className={`px-4 py-2 rounded-md font-semibold border transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:text-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 ${
+                  previewColumns === num ? "bg-blue-500 text-white shadow" : "bg-white dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-gray-600"
+                }`}
+                onClick={() => handlePreviewColumnChange(num)}
+                title={`Show ${num} column${num > 1 ? 's' : ''}`}
+              >
+                {num}
+              </button>
+            ))}
           </div>
         </div>
         <DragDropContext onDragEnd={handlePreviewDragEnd}>
           <div
-            className="sort-columns-container "
+            className="sort-columns-container"
             style={{
               display: "grid",
               gridTemplateColumns: `repeat(${previewColumns}, 1fr)`,
@@ -3004,98 +2969,62 @@ function PopularBookmarks() {
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className={`
-                        p-4 rounded-lg min-h-[200px] transition-all duration-300
-                        ${
-                          snapshot.isDraggingOver
-                            ? "bg-indigo-50 dark:bg-gray-900/50 border-2 border-dashed border-indigo-400 shadow-lg"
-                            : " border dark:text-white border-none dark:bg-gray-700/50 "
-                        }
-                      `}
+                    className={`p-4 rounded-lg min-h-[200px] transition-all duration-300 border-2 ${
+                      snapshot.isDraggingOver
+                        ? "bg-indigo-50 dark:bg-gray-900/50 border-indigo-400 shadow-lg"
+                        : "bg-gray-50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-700"
+                    }`}
                   >
-                    <div
-                      className={`
-                        text-center mb-4 font-semibold transition-colors duration-300
-                        ${
-                          snapshot.isDraggingOver
-                            ? "text-indigo-600"
-                            : "text-gray-700"
-                        }
-                      `}
-                    >
-                      <div className="dark:text-white">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="text-center font-semibold dark:text-white">
                         Column {columnIndex + 1}
+                      </div>
+                      <div className="text-xs text-gray-500 dark:text-gray-300">
+                        {getColumnCategories(columnIndex).length} category{getColumnCategories(columnIndex).length !== 1 ? 'ies' : 'y'}
                       </div>
                     </div>
                     <div className="space-y-2 border-none dark:text-white min-h-[100px]">
-                      {getColumnCategories(columnIndex).map(
-                        (category, index) => (
-                          <Draggable
-                            key={category.id}
-                            draggableId={category.id}
-                            index={index}
-                          >
-                            {(provided, snapshot) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                className={`
-                                  flex items-center border-none dark:text-white justify-between p-3 rounded-lg
-                                  transition-all duration-200 dark:bg-gray-600/50
-                                  ${
-                                    snapshot.isDragging
-                                      ? "shadow-lg border-2 border-indigo-400 scale-105"
-                                      : "shadow-sm border border-none border-gray-200 hover:border-indigo-300"
-                                  }
-                                `}
-                                style={provided.draggableProps.style}
-                              >
-                                <div className="flex items-center border-none  gap-3">
-                                  <div
-                                    className={`
-                                    text-base transition-colors duration-200
-                                    ${
-                                      snapshot.isDragging
-                                        ? "text-indigo-500"
-                                        : "text-gray-400"
-                                    }
-                                  `}
-                                  >
-                                    ⋮⋮
-                                  </div>
-                                  <span
-                                    className={`
-                                    font-medium transition-colors border-none duration-200
-                                    ${
-                                      snapshot.isDragging
-                                        ? "text-indigo-600"
-                                        : "text-gray-700 border-none dark:text-white"
-                                    }
-                                  `}
-                                  >
-                                    {category.name || category.newCategory}
-                                  </span>
-                                </div>
+                      {getColumnCategories(columnIndex).map((category, index) => (
+                        <Draggable
+                          key={category.id}
+                          draggableId={category.id}
+                          index={index}
+                        >
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              className={`flex items-center border-none dark:text-white justify-between p-3 rounded-lg transition-all duration-200 dark:bg-gray-600/50 bg-white shadow-sm ${
+                                snapshot.isDragging
+                                  ? "shadow-lg border-2 border-indigo-400 scale-105 bg-indigo-50 dark:bg-indigo-900/60"
+                                  : "hover:border-indigo-300"
+                              }`}
+                              style={provided.draggableProps.style}
+                            >
+                              <div className="flex items-center border-none gap-3">
+                                <span {...provided.dragHandleProps} className="cursor-grab text-lg text-gray-400 hover:text-indigo-500 transition-colors" title="Drag to reorder">
+                                  <MenuOutlined />
+                                </span>
+                                <span className="font-medium transition-colors border-none duration-200 text-gray-700 dark:text-white">
+                                  {category.name || category.newCategory}
+                                </span>
+                              </div>
+                              <Tooltip title="Remove from column">
                                 <AntButton
                                   type="text"
                                   icon={<DeleteOutlined />}
-                                  onClick={() =>
-                                    handleRemoveFromColumn(category)
-                                  }
-                                  className={`
-                                    transition-colors duration-200
-                                    ${
-                                      snapshot.isDragging
-                                        ? "text-indigo-500"
-                                        : "text-gray-400 hover:text-red-500"
-                                    }
-                                  `}
+                                  onClick={() => handleRemoveFromColumn(category)}
+                                  className="transition-colors duration-200 text-gray-400 hover:text-red-500"
                                 />
-                              </div>
-                            )}
-                          </Draggable>
-                        )
+                              </Tooltip>
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                      {getColumnCategories(columnIndex).length === 0 && (
+                        <div className="text-center text-gray-400 dark:text-gray-500 py-8 select-none">
+                          No categories in this column
+                        </div>
                       )}
                       {provided.placeholder}
                     </div>
@@ -3105,23 +3034,35 @@ function PopularBookmarks() {
             ))}
           </div>
         </DragDropContext>
-
         <div className="mt-6">
-          <div className="text-sm font-medium dark:text-white text-gray-700 mb-2">
+          <div className="text-sm font-medium dark:text-white text-gray-700 mb-2 flex items-center gap-2">
             Available Categories
+            <Tooltip title="Search categories">
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" strokeWidth="2"/><line x1="21" y1="21" x2="16.65" y2="16.65" strokeWidth="2"/></svg>
+            </Tooltip>
           </div>
+          <input
+            type="text"
+            placeholder="Search categories..."
+            className="mb-3 w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+            value={categorySearch || ""}
+            onChange={e => setCategorySearch(e.target.value)}
+          />
           <div className="p-4 border-2 border-dashed dark:text-white dark:bg-gray-700/50 border-gray-300 rounded-lg bg-gray-50">
             <div className="flex flex-wrap gap-2">
-              {availableCategories.map((category) => (
-                <button
-                  key={category.id}
-                  onClick={() => handleAddToColumn(category, 0)}
-                  className="flex gap-2 items-center text-black dark:bg-[#28283a]/[var(--widget-opacity)] px-4 py-2 rounded-lg dark:text-white bg-white hover:scale-105 transition-transform "
-                >
-                  <PlusOutlined /> {category.name || category.newCategory}
-                </button>
-              ))}
-              {availableCategories.length === 0 && (
+              {availableCategories
+                .filter(cat => !categorySearch || (cat.name || cat.newCategory).toLowerCase().includes(categorySearch.toLowerCase()))
+                .map((category) => (
+                  <button
+                    key={category.id}
+                    onClick={() => handleAddToColumn(category, 0)}
+                    className="flex gap-2 items-center text-black dark:bg-[#28283a]/[var(--widget-opacity)] px-4 py-2 rounded-lg dark:text-white bg-white hover:scale-105 transition-transform border border-gray-200 dark:border-gray-700 shadow-sm"
+                    title="Add to first column"
+                  >
+                    <PlusOutlined /> {category.name || category.newCategory}
+                  </button>
+                ))}
+              {availableCategories.filter(cat => !categorySearch || (cat.name || cat.newCategory).toLowerCase().includes(categorySearch.toLowerCase())).length === 0 && (
                 <div className="w-full text-center py-4 text-gray-500">
                   No available categories
                 </div>
@@ -3160,8 +3101,39 @@ function PopularBookmarks() {
         onCancel={() => {
           setIsAddBookmarkModalVisible(false);
           setNewBookmark({ title: "", url: "", favicon: "" });
+          setSelectedCategoryId("");
         }}
       >
+        <div className="flex gap-2 mb-4 items-end">
+          <div style={{ flex: 1 }}>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Category
+            </label>
+            <select
+              className="w-full border rounded px-2 py-1 dark:bg-gray-800 dark:text-white"
+              value={selectedCategoryId}
+              onChange={(e) => handleCategoryDropdownChange(e.target.value)}
+            >
+              <option value="" disabled>
+                Select category
+              </option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name || cat.newCategory}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button
+            className="rounded flex gap-1 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] px-2 py-1 dark:text-white border border-gray-300 dark:border-gray-700"
+            style={{ height: 32 }}
+            onClick={() => setIsAddCategoryModalVisible(true)}
+            type="button"
+          >
+            <PlusOutlined style={{ fontSize: 14 }} />
+            Add Category
+          </button>
+        </div>
         <MemoizedBookmarkForm
           newBookmark={newBookmark}
           handleTitleChange={(e) => {

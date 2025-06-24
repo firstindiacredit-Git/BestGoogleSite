@@ -309,16 +309,15 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
     return () => preventScroll(false);
   }, [showSettings]);
 
+  // The settings menu closes on outside click of the entire CategoryHome component, but user-selected options persist
   useEffect(() => {
+    // Close the settings menu if a click occurs outside both the CategoryHome component and the settings menu
     const handleClickOutside = (event) => {
-      // Check if click is outside both the settings menu and the settings button
       if (
-        settingsMenuRef.current &&
-        !settingsMenuRef.current.contains(event.target) &&
-        buttonRef.current &&
-        !buttonRef.current.contains(event.target) &&
         componentRef.current &&
-        !componentRef.current.contains(event.target)
+        !componentRef.current.contains(event.target) &&
+        settingsMenuRef.current &&
+        !settingsMenuRef.current.contains(event.target)
       ) {
         setShowSettings(false);
       }
