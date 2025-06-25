@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate, Outlet } from "react-router-dom";
 import { LuLayoutDashboard, LuUsers } from "react-icons/lu";
 import { MdOutlineAddLink, MdBook } from "react-icons/md";
 import { IoSettingsOutline, IoSunny, IoMoon, IoLogOut } from "react-icons/io5";
-import { RiBloggerLine } from "react-icons/ri";
+import { RiBloggerLine, RiImageLine } from "react-icons/ri";
 import { signOut } from "firebase/auth";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../../firebase";
@@ -119,6 +119,11 @@ export default function Sidebar() {
       label: "Add Blogs",
       icon: RiBloggerLine,
     },
+    // {
+    //   path: "/admin/adminImages",
+    //   label: "Admin Images",
+    //   icon: RiImageLine,
+    // },
   ];
 
   return (

@@ -84,7 +84,7 @@ const Top100Page = () => {
   const fetchTop100 = async (category) => {
     try {
       setLoading(true);
-      if (["sportsmen", "brands", "motorcycles", "gdp", "banks", "cars"].includes(category)) {
+      if (["sportsmen", "brands", "motorcycles", "gdp", "banks", "cars", "billionaires"].includes(category)) {
         if (category === "sportsmen") {
           const processedData = sportsmen.map((person) => ({
             name: `${person.name} ${" "} $${(
@@ -163,6 +163,24 @@ const Top100Page = () => {
             description: `Country: ${car.country}, CEO: ${car.ceo}, Foounded: ${car.founded}`,
             image: car.icon_url || null,
             value: `#${car.rank}`,
+          }));
+          setItems(processedData);
+          setError(null);
+          setLoading(false);
+          return;
+        }
+
+        if (category === "billionaires") {
+          // Fetch from public folder
+          const response = await fetch("/billionaires.json");
+          const data = await response.json();
+          const list = Array.isArray(data.personsLists) ? data.personsLists : [];
+          const processedData = list.map((person) => ({
+            name: person.personName,
+            description: `Net Worth: $${(parseInt(person.finalWorth) / 1000).toFixed(1)}B, Source: ${person.source}, Country: ${person.countryOfCitizenship}`,
+            image: person.person?.squareImage || null,
+            value: person.finalWorth,
+            rank: person.rank,
           }));
           setItems(processedData);
           setError(null);
