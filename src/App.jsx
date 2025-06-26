@@ -60,6 +60,7 @@ const AddLinks = lazy(() => import("./components/Admin/AddLinks.jsx"));
 const Dashboard = lazy(() => import("./components/Admin/Dashboard.jsx"));
 const AddBookmark = lazy(() => import("./components/Admin/AddBookmark.jsx"));
 const Users = lazy(() => import("./components/Admin/Users.jsx"));
+// const AdminImages = lazy(() => import("./components/Admin/ImageAdminUpload.jsx"));  
 const PremiumPage = lazy(() => import("./components/PremiumPage.jsx"));
 const PremiumForm = lazy(() => import("./components/PremiumForm.jsx"));
 const LandingPage = lazy(() => import("./components/LandingPage.jsx"));
@@ -824,6 +825,7 @@ const App = () => {
                   <Route path="/contact" element={<ContactUs />} />
                   <Route path="/blog" element={<Blog />} />
                   <Route path="/blog/:id" element={<BlogDetail />} />
+                  {/* <Route path="/admin/adminImages" element={<AdminImages />} /> */}
                   <Route
                     path="/profile"
                     element={

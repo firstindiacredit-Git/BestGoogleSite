@@ -39,6 +39,8 @@ import {
   DeleteOutlined,
   MoreOutlined,
   MenuOutlined,
+  ExpandOutlined,
+  CompressOutlined,
 } from "@ant-design/icons";
 import debounce from "lodash/debounce";
 import SkeletonLoader from "./SkeletonLoader";
@@ -166,6 +168,20 @@ function PopularBookmarks() {
   const [availableCategories, setAvailableCategories] = useState([]);
   const [activeCategories, setActiveCategories] = useState([]);
   const [categorySearch, setCategorySearch] = useState("");
+  // Add state for show more/less categories
+  const [showAllCategories, setShowAllCategories] = useState(false);
+
+  const toggleAllCategories = () => {
+    const areAllOpen =
+      categories.length > 0 &&
+      categories.every((cat) => openCategories[cat.id]);
+    const newState = {};
+    categories.forEach((category) => {
+      newState[category.id] = !areAllOpen;
+    });
+    setOpenCategories(newState);
+    localStorage.setItem("categoryOpenStates", JSON.stringify(newState));
+  };
 
   // Enhanced drag state with more comprehensive tracking
   const [dragState, setDragState] = useState({
@@ -912,18 +928,20 @@ function PopularBookmarks() {
 
       // Also add the new category to a column
       setCategoryColumns((prevColumns) => {
-        // Get all user categories (exclude admin)
-        const userCategoryIds = [...categories, newCategory]
-          .filter((cat) => !cat.isAdminCategory)
-          .map((cat) => cat.id);
+        // Find the column with the least number of categories
         const columnKeys = Object.keys(prevColumns);
-        // Distribute user categories equally across columns (round-robin)
-        const newColumns = {};
-        columnKeys.forEach((colKey) => (newColumns[colKey] = []));
-        userCategoryIds.forEach((catId, idx) => {
-          const colKey = columnKeys[idx % columnKeys.length];
-          newColumns[colKey].push(catId);
+        let minColumn = columnKeys[0];
+        let minCount = prevColumns[minColumn]?.length || 0;
+        columnKeys.forEach((colKey) => {
+          const colCount = prevColumns[colKey]?.length || 0;
+          if (colCount < minCount) {
+            minCount = colCount;
+            minColumn = colKey;
+          }
         });
+        // Add new category to the column with the least items
+        const newColumns = { ...prevColumns };
+        newColumns[minColumn] = [...(newColumns[minColumn] || []), newCategory.id];
         // Also update in Firestore
         const userDocRef = doc(db, "users", user.uid);
         updateDoc(userDocRef, {
@@ -1685,10 +1703,79 @@ function PopularBookmarks() {
     );
   };
 
+  // Helper to get categories to display based on showAllCategories
+  const getVisibleCategoryIds = () => {
+    const allCategoryIds = Object.values(categoryColumns).flat();
+    if (showAllCategories || allCategoryIds.length <= 16) return allCategoryIds;
+    return allCategoryIds.slice(0, 16);
+  };
+
+  // Helper to distribute category IDs equally among columns
+  const getDistributedCategoryColumns = () => {
+    const visibleCategoryIds = getVisibleCategoryIds();
+    const distributed = {};
+    const perCol = Math.floor(visibleCategoryIds.length / columnCount);
+    let extra = visibleCategoryIds.length % columnCount;
+    let idx = 0;
+    for (let col = 1; col <= columnCount; col++) {
+      const count = perCol + (extra > 0 ? 1 : 0);
+      distributed[`column${col}`] = visibleCategoryIds.slice(idx, idx + count);
+      idx += count;
+      if (extra > 0) extra--;
+    }
+    return distributed;
+  };
+
   const renderBookmarksByCategory = () => {
+    const areAllOpen =
+      categories.length > 0 &&
+      categories.every((cat) => openCategories[cat.id]);
+
+    // Filter categories by search
+    const searchTerm = (categorySearch || '').toLowerCase();
+    const filteredCategoryIds = Object.values(categoryColumns)
+      .flat()
+      .filter((catId) => {
+        const cat = categories.find((c) => c.id === catId);
+        if (!cat) return false;
+        const name = (cat.name || cat.newCategory || '').toLowerCase();
+        return name.includes(searchTerm);
+      });
+
+    // Use filtered categories for show more/less logic
+    const getVisibleCategoryIds = () => {
+      if (showAllCategories || filteredCategoryIds.length <= 16) return filteredCategoryIds;
+      return filteredCategoryIds.slice(0, 16);
+    };
+
+    const getDistributedCategoryColumns = () => {
+      const visibleCategoryIds = getVisibleCategoryIds();
+      const distributed = {};
+      const perCol = Math.floor(visibleCategoryIds.length / columnCount);
+      let extra = visibleCategoryIds.length % columnCount;
+      let idx = 0;
+      for (let col = 1; col <= columnCount; col++) {
+        const count = perCol + (extra > 0 ? 1 : 0);
+        distributed[`column${col}`] = visibleCategoryIds.slice(idx, idx + count);
+        idx += count;
+        if (extra > 0) extra--;
+      }
+      return distributed;
+    };
+
+    const columnsToRender = showAllCategories ? (() => {
+      // Only show filtered categories in each column
+      const filteredColumns = {};
+      for (let col = 1; col <= columnCount; col++) {
+        filteredColumns[`column${col}`] = (categoryColumns[`column${col}`] || []).filter(catId => filteredCategoryIds.includes(catId));
+      }
+      return filteredColumns;
+    })() : getDistributedCategoryColumns();
+
     return (
       <div className="mb-2">
-        <div className="flex justify-between mb-2">
+        {/* Search bar for categories */}
+        <div className="flex justify-between mb-2 items-center gap-2">
           <div className="flex gap-2">
             <button
               className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]  px-3 py-2 dark:text-white mb-2"
@@ -1751,6 +1838,22 @@ function PopularBookmarks() {
                 </svg>
               </button> */}
             </div>
+            <button
+              className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] px-3 py-2 dark:text-white mb-2"
+              onClick={toggleAllCategories}
+            >
+              {areAllOpen ? <CompressOutlined /> : <ExpandOutlined />}
+              {areAllOpen ? "Collapse All" : "Expand All"}
+            </button>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              placeholder="Search categories..."
+              className="w-full max-w-xs px-3 py-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+              value={categorySearch || ''}
+              onChange={e => setCategorySearch(e.target.value)}
+            />
           </div>
         </div>
 
@@ -1775,7 +1878,7 @@ function PopularBookmarks() {
                             : "bg-transparent border-2 border-dashed border-transparent"
                         }`}
                       >
-                        {categoryColumns[`column${colNum}`]?.map(
+                        {columnsToRender[`column${colNum}`]?.map(
                           (categoryId, index) => {
                             const category = categories.find(
                               (c) => c.id === categoryId
@@ -1972,6 +2075,14 @@ function PopularBookmarks() {
             )}
           </Row>
         </DragDropContext>
+        {/* Show More/Less Button */}
+        {filteredCategoryIds.length > 16 && (
+          <div className="flex justify-center mt-4">
+            <AntButton onClick={() => setShowAllCategories((prev) => !prev)}>
+              {showAllCategories ? "Show Less" : "Show More"}
+            </AntButton>
+          </div>
+        )}
       </div>
     );
   };
@@ -2947,29 +3058,7 @@ function PopularBookmarks() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
-                  />
-                </svg>
-              </button> */}
-              {/* <button
-                onClick={() => handleGridViewChange(false)}
-                className={`p-2 rounded ${
-                  !grid
-                    ? "bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] shadow-sm"
-                    : "hover:bg-white dark:hover:bg-gray-700/50"
-                }`}
-              >
-                <svg
-                  className="w-5 h-5 dark:text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
+                    d="M4 6h16M4 12h16M4 18h18"
                   />
                 </svg>
               </button> */}
