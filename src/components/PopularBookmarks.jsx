@@ -100,6 +100,8 @@ const MemoizedBookmarkForm = React.memo(
   }
 );
 
+import { Parser } from "htmlparser2"; // Add at the top for HTML parsing
+
 function PopularBookmarks() {
   const [categories, setCategories] = useState([]);
   const [links, setLinks] = useState([]);
@@ -1702,6 +1704,25 @@ function PopularBookmarks() {
               <PlusOutlined />
               Add Bookmark
             </button>
+            <button
+              className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)]  px-3 py-2 dark:text-white mb-2"
+              onClick={handleExportBookmarks}
+            >
+              Export Bookmarks
+            </button>
+            <button
+              className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)]  px-3 py-2 dark:text-white mb-2"
+              onClick={() => importInputRef.current && importInputRef.current.click()}
+            >
+              Import Bookmarks
+            </button>
+            <input
+              type="file"
+              accept=".html"
+              ref={importInputRef}
+              style={{ display: "none" }}
+              onChange={handleImportBookmarks}
+            />
           </div>
           <div className="flex items-center gap-4">
             <div
@@ -2775,6 +2796,126 @@ function PopularBookmarks() {
   useEffect(() => {
     localStorage.setItem("bookmarkLineOptions", lineOptions.toString());
   }, [lineOptions]);
+
+  // Import/Export refs
+  const importInputRef = useRef(null);
+
+  // Export bookmarks as HTML (Netscape format)
+  const handleExportBookmarks = () => {
+    // Group bookmarks by category
+    const bookmarksByCategory = {};
+    links.forEach((link) => {
+      if (!bookmarksByCategory[link.categoryId]) bookmarksByCategory[link.categoryId] = [];
+      bookmarksByCategory[link.categoryId].push(link);
+    });
+    // Build HTML
+    let html = `<!DOCTYPE NETSCAPE-Bookmark-file-1>\n`;
+    html += `<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">\n`;
+    html += `<TITLE>Bookmarks</TITLE>\n`;
+    html += `<H1>Bookmarks</H1>\n`;
+    html += `<DL><p>\n`;
+    categories.forEach((cat) => {
+      if (bookmarksByCategory[cat.id] && bookmarksByCategory[cat.id].length > 0) {
+        html += `  <DT><H3>${cat.name || cat.newCategory}</H3>\n`;
+        html += `  <DL><p>\n`;
+        bookmarksByCategory[cat.id].forEach((link) => {
+          html += `    <DT><A HREF=\"${link.url || link.link}\">${link.title || link.name}</A>\n`;
+        });
+        html += `  </DL><p>\n`;
+      }
+    });
+    html += `</DL><p>\n`;
+    // Download
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "bookmarks.html";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  // Import bookmarks from HTML
+  const handleImportBookmarks = async (event) => {
+    const file = event.target.files[0];
+    console.log('Selected file:', file);
+    if (!file) return;
+    const text = await file.text();
+    console.log('File text:', text.slice(0, 500)); // Log first 500 chars
+    // Parse HTML using htmlparser2
+    const imported = [];
+    let currentCategory = null;
+    const parser = new Parser({
+      onopentag(name, attribs) {
+        if (name === "h3") {
+          currentCategory = "";
+        }
+        if (name === "a" && attribs.href) {
+          imported.push({
+            category: currentCategory,
+            url: attribs.href,
+            title: "",
+          });
+        }
+      },
+      ontext(text) {
+        if (currentCategory !== null) {
+          currentCategory += text;
+        } else if (imported.length > 0 && !imported[imported.length - 1].title) {
+          imported[imported.length - 1].title = text;
+        }
+      },
+      onclosetag(name) {
+        if (name === "h3") {
+          currentCategory = currentCategory.trim();
+        }
+      },
+    }, { decodeEntities: true });
+    parser.write(text);
+    parser.end();
+    console.log('Imported bookmarks:', imported);
+    // Map categories to existing or create new
+    const categoryMap = {};
+    for (const cat of categories) {
+      categoryMap[(cat.name || cat.newCategory).toLowerCase()] = cat.id;
+    }
+    console.log('Category map:', categoryMap);
+    for (const bm of imported) {
+      let catId = categoryMap[bm.category?.toLowerCase() || ""];
+      if (!catId && bm.category) {
+        // Create new category
+        const docRef = await addDoc(collection(db, "users", user.uid, "UserCategory"), {
+          newCategory: bm.category,
+          userId: user.uid,
+          order: categories.length,
+          createdAt: new Date().toISOString(),
+        });
+        catId = docRef.id;
+        categoryMap[bm.category.toLowerCase()] = catId;
+        setCategories((prev) => [...prev, { id: catId, name: bm.category, userId: user.uid, newCategory: bm.category, order: categories.length }]);
+        console.log('Created new category:', bm.category, 'with id:', catId);
+      }
+      if (catId && bm.url) {
+        // Add bookmark
+        await addDoc(collection(db, "users", user.uid, "CatBookmarks"), {
+          title: bm.title || bm.url,
+          url: bm.url,
+          favicon: await fetchFavicon(bm.url),
+          categoryId: catId,
+          userId: user.uid,
+          createdAt: new Date().toISOString(),
+          order: 0,
+          isAdminBookmark: false,
+        });
+        console.log('Added bookmark:', bm.title || bm.url, 'to category:', catId);
+      }
+    }
+    // Optionally, reload bookmarks
+    // success("Bookmarks imported successfully");
+    event.target.value = ""; // Reset input
+  };
 
   if (loading) {
     return (
