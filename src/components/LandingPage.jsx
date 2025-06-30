@@ -27,7 +27,7 @@ const BrowserPreview = () => {
         {/* Images Container */}
         <div className="relative max-h-[490px]  border border-gray-300/80 border-t-0  rounded-b-xl shadow-md">
           <video
-            src="/MainHeroVid.webm"
+            src="https://res.cloudinary.com/dnjcel8gn/video/upload/v1751005894/MainHeroVid_gwomvb.webm"
             autoPlay
             muted
             loop
