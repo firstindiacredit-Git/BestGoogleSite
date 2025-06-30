@@ -104,7 +104,11 @@ const MemoizedBookmarkForm = React.memo(
 
 import { Parser } from "htmlparser2"; // Add at the top for HTML parsing
 
+// Import the CountryContext and useCountry hook
+import { useCountry } from "../context/CountryContext";
+
 function PopularBookmarks() {
+  const { country } = useCountry();
   const [categories, setCategories] = useState([]);
   const [links, setLinks] = useState([]);
   const [user, setUser] = useState(null);
@@ -339,15 +343,15 @@ function PopularBookmarks() {
     if (!user) return [];
 
     try {
-      // Fetch admin categories
-      const adminCategorySnapshot = await getDocs(collection(db, "category"));
+      // Fetch admin categories (country-specific)
+      const adminCategorySnapshot = await getDocs(collection(db, `category_${country.key === "us" ? "USA" : "INDIA"}`));
       const adminCategories = adminCategorySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
         isAdminCategory: true,
       }));
 
-      // Fetch user categories
+      // Fetch user categories (user-specific, not country-specific)
       const userCategorySnapshot = await getDocs(
         collection(db, "users", user.uid, "UserCategory")
       );
@@ -364,7 +368,6 @@ function PopularBookmarks() {
       );
     } catch (error) {
       console.error("Error fetching categories:", error);
-      //error("Failed to fetch categories");
       return [];
     }
   };
@@ -434,12 +437,10 @@ function PopularBookmarks() {
             }
           } catch (error) {
             console.error("Error processing category changes:", error);
-            //error("Failed to process category updates");
           }
         },
         error: (error) => {
           console.error("Error in category snapshot:", error);
-          //error("Failed to listen for category updates");
         },
       }
     );
@@ -473,12 +474,10 @@ function PopularBookmarks() {
           }
         } catch (error) {
           console.error("Error processing position changes:", error);
-          //error("Failed to process layout updates");
         }
       },
       error: (error) => {
         console.error("Error in positions snapshot:", error);
-        //error("Failed to listen for layout updates");
       },
     });
 
@@ -520,7 +519,6 @@ function PopularBookmarks() {
         setOpenCategories(initialOpenStates);
       } catch (error) {
         console.error("Error initializing data:", error);
-        //error("Failed to load initial data");
       } finally {
         setLoading(false);
       }
@@ -559,7 +557,7 @@ function PopularBookmarks() {
 
         // Fetch all user bookmarks
         const userBookmarksSnapshot = await getDocs(
-          collection(db, "users", user.uid, "CatBookmarks")
+          collection(db, `links_${country.key === "us" ? "USA" : "INDIA"}`)
         );
         const userBookmarks = userBookmarksSnapshot.docs
           .map((doc) => {
@@ -588,7 +586,7 @@ function PopularBookmarks() {
         // Fetch admin bookmarks for each admin category
         const adminBookmarksPromises = categories.map(async (category) => {
           const bookmarksSnapshot = await getDocs(
-            query(collection(db, "links"), where("category", "==", category.id))
+            query(collection(db, `links_${country.key === "us" ? "USA" : "INDIA"}`), where("category", "==", category.id))
           );
           return bookmarksSnapshot.docs
             .map((doc) => {
@@ -630,7 +628,6 @@ function PopularBookmarks() {
         setLoading(false);
       } catch (error) {
         console.error("Error fetching bookmark data:", error);
-        //error("Failed to load bookmarks");
         setLoading(false);
       }
     };
@@ -758,10 +755,8 @@ function PopularBookmarks() {
       });
 
       await batch.commit();
-      // //success("Category position updated");
     } catch (error) {
       console.error("Error updating category positions:", error);
-      //error("Failed to update category position");
       // Revert local state on error
       setCategoryColumns(categoryColumns);
     }
@@ -887,7 +882,6 @@ function PopularBookmarks() {
 
   const handleAddCategory = async () => {
     if (!newCategoryName.trim()) {
-      //error("Category name cannot be empty");
       return;
     }
 
@@ -967,12 +961,10 @@ function PopularBookmarks() {
         return filtered;
       });
 
-      //success("Category added successfully");
       setNewCategoryName("");
       setIsAddCategoryModalVisible(false);
     } catch (error) {
       console.error("Error adding category:", error);
-      //error("Failed to add category");
     }
   };
 
@@ -1083,11 +1075,8 @@ function PopularBookmarks() {
 
         return newColumns;
       });
-
-      //success("Category and its bookmarks deleted successfully");
     } catch (error) {
       console.error("Error deleting category:", error);
-      //error("Failed to delete category");
     } finally {
       setLoading(false);
     }
@@ -1168,11 +1157,9 @@ function PopularBookmarks() {
       ? categories.find((cat) => cat.id === selectedCategoryId)
       : selectedCategory;
     if (!categoryToUse) {
-      //error("Please select a category first");
       return;
     }
     if (!newBookmark.title.trim() || !newBookmark.url.trim()) {
-      //error("Title and URL are required");
       return;
     }
     try {
@@ -1188,7 +1175,6 @@ function PopularBookmarks() {
         }
       });
       if (isDuplicate) {
-        //warning("This URL already exists in this category");
         return;
       }
       const tempId = `temp_${btoa(urlKey).replace(/[^a-zA-Z0-9]/g, "")}_${Date.now()}`;
@@ -1221,7 +1207,6 @@ function PopularBookmarks() {
       setNewBookmark({ title: "", url: "", favicon: "" });
       setIsAddBookmarkModalVisible(false);
       setSelectedCategoryId("");
-      //success("Bookmark added successfully");
     } catch (error) {
       const normalizedUrl = validateUrl(newBookmark.url.trim());
       setLinks((prevLinks) =>
@@ -1234,7 +1219,6 @@ function PopularBookmarks() {
             )
         )
       );
-      // ... existing code ...
     }
   };
 
@@ -1285,11 +1269,6 @@ function PopularBookmarks() {
       children: [
         {
           key: "list",
-          // icon: (
-          //   <div className="dark:text-black bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
-          //     <UnorderedListOutlined />
-          //   </div>
-          // ),
           label: "List View",
           onClick: () => {
             const newViewMode = "list";
@@ -1302,16 +1281,10 @@ function PopularBookmarks() {
               "categoryViewModes",
               JSON.stringify(updatedModes)
             );
-            //success("View mode to List");
           },
         },
         {
           key: "grid",
-          // icon: (
-          //   <div className="dark:text-black bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
-          //     <AppstoreOutlined />
-          //   </div>
-          // ),
           label: "Grid View",
           onClick: () => {
             const newViewMode = "grid";
@@ -1324,16 +1297,10 @@ function PopularBookmarks() {
               "categoryViewModes",
               JSON.stringify(updatedModes)
             );
-            //success("View mode to Grid");
           },
         },
         {
           key: "icon",
-          // icon: (
-          //   <div className="dark:text-black bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
-          //     <PictureOutlined />
-          //   </div>
-          // ),
           label: "Icon View",
           onClick: () => {
             const newViewMode = "icon";
@@ -1346,7 +1313,6 @@ function PopularBookmarks() {
               "categoryViewModes",
               JSON.stringify(updatedModes)
             );
-            //success("View mode to Icon");
           },
         },
       ],
@@ -1362,11 +1328,6 @@ function PopularBookmarks() {
       children: [
         {
           key: "Short name",
-          // icon: (
-          //   <div className="dark:text-black bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
-          //     <UnorderedListOutlined />
-          //   </div>
-          // ),
           label: "Short name",
           onClick: () => {
             setLineOptions(1);
@@ -1374,28 +1335,11 @@ function PopularBookmarks() {
         },
         {
           key: "Full name",
-          // icon: (
-          //   <div className="dark:text-black bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
-          //     <AppstoreOutlined />
-          //   </div>
-          // ),
           label: "Full name",
           onClick: () => {
             setLineOptions(2);
           },
         },
-        // {
-        //   key: "3 lines",
-        //   // icon: (
-        //   //   <div className="dark:text-black bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
-        //   //     <PictureOutlined />
-        //   //   </div>
-        //   // ),
-        //   label: "Full lines",
-        //   onClick: () => {
-        //     setLineOptions("none");
-        //   },
-        // },
       ],
     },
     {
@@ -1573,13 +1517,11 @@ function PopularBookmarks() {
         );
       }
 
-      //success("Bookmark updated successfully");
       setEditingBookmark(null);
       setIsEditBookmarkModalVisible(false);
       editBookmarkForm.resetFields();
     } catch (error) {
       console.error("Error updating bookmark:", error);
-      //error(`Failed to update bookmark: ${error.message}`);
     }
   };
 
@@ -1815,28 +1757,6 @@ function PopularBookmarks() {
             <div
               className={`flex items-center bg-white/[(var(--widget-opacity))] backdrop-blur-lg dark:bg-[#28283A]/[(var(--widget-opacity))] p-1 rounded-sm`}
             >
-              {/* <button
-                onClick={() => handleGridViewChange(false)}
-                className={`p-2 rounded ${
-                  !grid
-                    ? "bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] shadow-sm"
-                    : "hover:bg-white dark:hover:bg-gray-700/50"
-                }`}
-              >
-                <svg
-                  className="w-5 h-5 dark:text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-              </button> */}
             </div>
             <button
               className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] px-3 py-2 dark:text-white mb-2"
@@ -1884,7 +1804,6 @@ function PopularBookmarks() {
                               (c) => c.id === categoryId
                             );
                             if (!category) {
-                              // console.log(`Category not found: ${categoryId}`);
                               return null;
                             }
 
@@ -2235,9 +2154,7 @@ function PopularBookmarks() {
           }
         );
       } catch (error) {
-        console.error("Error setting up listeners:", error);
         if (isComponentMounted) {
-          //error("Failed to load data. Please refresh the page.");
         }
       }
     };
@@ -2479,11 +2396,8 @@ function PopularBookmarks() {
         JSON.stringify(newColumnStructure)
       );
 
-      //success("Changes applied successfully");
       setIsControllerOpen(false);
     } catch (error) {
-      console.error("Error applying changes:", error);
-      //error("Failed to apply changes");
     } finally {
       setIsApplyingChanges(false);
     }
@@ -2518,8 +2432,6 @@ function PopularBookmarks() {
         });
       }
     } catch (error) {
-      console.error("Error fetching categories:", error);
-      //error("Failed to fetch latest category positions");
     }
   };
 
@@ -2593,8 +2505,6 @@ function PopularBookmarks() {
         }
       },
       (error) => {
-        console.error("Error in real-time sync:", error);
-        //error("Failed to sync with latest changes");
       }
     );
 
@@ -2605,9 +2515,6 @@ function PopularBookmarks() {
         const changes = snapshot.docChanges();
 
         if (changes.length > 0) {
-          // console.log("Bookmark changes detected:", changes.length);
-
-          // Process the changes in batches to avoid performance issues
           setLinks((prevLinks) => {
             // Create map of existing category-URL combinations to prevent duplicates
             const existingUrlsByCategory = new Map();
@@ -2707,7 +2614,6 @@ function PopularBookmarks() {
         }
       },
       (error) => {
-        console.error("Error in bookmarks sync:", error);
       }
     );
 
@@ -2774,7 +2680,6 @@ function PopularBookmarks() {
   // Function to handle deletion of selected bookmarks
   const handleDeleteSelected = () => {
     if (selectedBookmarks.length === 0) {
-      //warning("No bookmarks selected for deletion");
       return;
     }
 
@@ -2845,8 +2750,6 @@ function PopularBookmarks() {
           setSelectedBookmarks([]);
           setHasUnsavedChanges(true);
         } catch (error) {
-          console.error("Error processing bookmarks:", error);
-          //error(`Failed to process bookmarks: ${error.message}`);
         } finally {
           setLoading(false);
         }
@@ -2876,10 +2779,6 @@ function PopularBookmarks() {
             userData.hiddenCategories &&
             Array.isArray(userData.hiddenCategories)
           ) {
-            // console.log(
-            //   "Loading hidden categories:",
-            //   userData.hiddenCategories
-            // );
             setHiddenCategories(userData.hiddenCategories);
           }
 
@@ -2888,10 +2787,6 @@ function PopularBookmarks() {
             userData.hiddenBookmarkIds &&
             Array.isArray(userData.hiddenBookmarkIds)
           ) {
-            // console.log(
-            //   "Loading hidden bookmark IDs:",
-            //   userData.hiddenBookmarkIds
-            // );
             setHiddenBookmarkIds(userData.hiddenBookmarkIds);
           }
         }
@@ -2951,10 +2846,8 @@ function PopularBookmarks() {
   // Import bookmarks from HTML
   const handleImportBookmarks = async (event) => {
     const file = event.target.files[0];
-    console.log('Selected file:', file);
     if (!file) return;
     const text = await file.text();
-    console.log('File text:', text.slice(0, 500)); // Log first 500 chars
     // Parse HTML using htmlparser2
     const imported = [];
     let currentCategory = null;
@@ -2986,13 +2879,11 @@ function PopularBookmarks() {
     }, { decodeEntities: true });
     parser.write(text);
     parser.end();
-    console.log('Imported bookmarks:', imported);
     // Map categories to existing or create new
     const categoryMap = {};
     for (const cat of categories) {
       categoryMap[(cat.name || cat.newCategory).toLowerCase()] = cat.id;
     }
-    console.log('Category map:', categoryMap);
     for (const bm of imported) {
       let catId = categoryMap[bm.category?.toLowerCase() || ""];
       if (!catId && bm.category) {
@@ -3024,7 +2915,6 @@ function PopularBookmarks() {
       }
     }
     // Optionally, reload bookmarks
-    // success("Bookmarks imported successfully");
     event.target.value = ""; // Reset input
   };
 
@@ -3040,28 +2930,6 @@ function PopularBookmarks() {
             <div
               className={`flex items-center bg-white/[(var(--widget-opacity))] backdrop-blur-lg dark:bg-[#28283A]/[(var(--widget-opacity))] p-1 rounded-sm`}
             >
-              {/* <button
-                onClick={() => handleGridViewChange(false)}
-                className={`p-2 rounded ${
-                  !grid
-                    ? "bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] shadow-sm"
-                    : "hover:bg-white dark:hover:bg-gray-700/50"
-                }`}
-              >
-                <svg
-                  className="w-5 h-5 dark:text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h18"
-                  />
-                </svg>
-              </button> */}
             </div>
           </div>
         </div>

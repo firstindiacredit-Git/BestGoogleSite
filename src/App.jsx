@@ -28,6 +28,7 @@ import { AuthProvider } from "./hooks/AuthContext.jsx";
 import { DesignContextProvider } from "./context/DesignContext.jsx";
 import AdminRoute from "./components/Admin/AdminRoute.jsx";
 import { ThemeProvider } from "./context/ThemeContext.jsx";
+import { CountryProvider } from "./context/CountryContext.jsx";
 const galleryupload = "/galleryupload.png";
 import { auth, db } from "./firebase";
 import { doc, getDoc } from "firebase/firestore";
@@ -787,250 +788,238 @@ const SearchPageWrapper = () => {
 
 // App Component
 const App = () => {
-  const [widgetTransparent, setWidgetTransparent] = useState(() =>
-    parseInt(localStorage.getItem("widgetTransparency") || "100")
-  );
-
-  // Memoize the widget transparency context value
-  const widgetTransparencyContextValue = useMemo(
-    () => ({
-      widgetTransparent,
-      setWidgetTransparent,
-    }),
-    [widgetTransparent]
-  );
+  const [widgetTransparent, setWidgetTransparent] = useState(100);
 
   return (
-    // Use ThemeProvider from ThemeContext.jsx
-    <ThemeProvider>
-      <WidgetTransparencyContext.Provider
-        value={widgetTransparencyContextValue}
-      >
-        <AuthProvider>
+    <WidgetTransparencyContext.Provider value={{ widgetTransparent, setWidgetTransparent }}>
+      <CountryProvider>
+        <ThemeProvider>
           <DesignContextProvider>
-            <Router>
-              <Suspense>
-                {/* Chatbot Modal */}
+            <AuthProvider>
+              <Router>
+                <Suspense>
+                  {/* Chatbot Modal */}
 
-                <Routes>
-                  {/* Public Routes */}
-                  <Route path="/" element={<LandingPage />} />
-                  <Route path="/about" element={<AboutPage />} />
-                  <Route path="/pricing" element={<PricingPage />} />
-                  <Route path="/faq" element={<FAQPage />} />
-                  <Route path="*" element={<NotFound />} />
-                  <Route path="/search" element={<SearchPageWrapper />} />
-                  <Route path="/privacy" element={<Privacy />} />
-                  <Route path="/terms" element={<Terms />} />
-                  <Route path="/contact" element={<ContactUs />} />
-                  <Route path="/blog" element={<Blog />} />
-                  <Route path="/blog/:id" element={<BlogDetail />} />
-                  {/* <Route path="/admin/adminImages" element={<AdminImages />} /> */}
-                  <Route
-                    path="/profile"
-                    element={
-                      <ContextMenuWrapper>
-                        <ProfilePage />
-                      </ContextMenuWrapper>
-                    }
-                  />
+                  <Routes>
+                    {/* Public Routes */}
+                    <Route path="/" element={<LandingPage />} />
+                    <Route path="/about" element={<AboutPage />} />
+                    <Route path="/pricing" element={<PricingPage />} />
+                    <Route path="/faq" element={<FAQPage />} />
+                    <Route path="*" element={<NotFound />} />
+                    <Route path="/search" element={<SearchPageWrapper />} />
+                    <Route path="/privacy" element={<Privacy />} />
+                    <Route path="/terms" element={<Terms />} />
+                    <Route path="/contact" element={<ContactUs />} />
+                    <Route path="/blog" element={<Blog />} />
+                    <Route path="/blog/:id" element={<BlogDetail />} />
+                    {/* <Route path="/admin/adminImages" element={<AdminImages />} /> */}
+                    <Route
+                      path="/profile"
+                      element={
+                        <ContextMenuWrapper>
+                          <ProfilePage />
+                        </ContextMenuWrapper>
+                      }
+                    />
 
-                  <Route path="/forgot-password" element={<Forgotpassword />} />
-                  <Route path="/premium" element={<PremiumPage />} />
-                  <Route path="/premium-form" element={<PremiumForm />} />
+                    <Route path="/forgot-password" element={<Forgotpassword />} />
+                    <Route path="/premium" element={<PremiumPage />} />
+                    <Route path="/premium-form" element={<PremiumForm />} />
 
-                  <Route
-                    path="/NewSearchPage"
-                    element={
-                      <ContextMenuWrapper>
-                        <NewSearchPage />
-                      </ContextMenuWrapper>
-                    }
-                  />
-                  <Route element={<ToolOutlet />}>
-                    <Route path="/calculator" element={<Calculator />} />
                     <Route
-                      path="/faren-to-celcius"
-                      element={<FarenToCelciusAndCelciusToFaren />}
+                      path="/NewSearchPage"
+                      element={
+                        <ContextMenuWrapper>
+                          <NewSearchPage />
+                        </ContextMenuWrapper>
+                      }
                     />
-                    <Route path="/second" element={<Second />} />
-                    <Route path="/hours" element={<Hours />} />
-                    <Route path="/paypal" element={<Paypal />} />
-                    <Route path="/beautifier" element={<Beautifier />} />
-                    <Route path="/resumebuild" element={<ResumeBuild />} />
-                    <Route path="/grocery" element={<Grocery />} />
-                    <Route path="/bmi" element={<Bmi />} />
-                    <Route path="/linkchecker" element={<LinkChecker />} />
-                    <Route path="/percentage" element={<Percentage />} />
-                    <Route path="/imagetopdf" element={<ImageToPdf />} />
-                    <Route path="/splitpdf" element={<SplitPdf />} />
-                    <Route path="/compress" element={<Compress />} />
-                    <Route path="/mergepdf" element={<MergePDF />} />
-                    <Route path="/pdfconverter" element={<PdfConverter />} />
-                    <Route path="/searchpdf" element={<SearchPDF />} />
-                    {/* <Route path="/searchexcelpdf" element={<SearchExcelPdf />} /> */}
-                    <Route path="/upload" element={<Upload />} />
-                    <Route path="/editpdf" element={<EditPdf />} />
-                    <Route path="/extractpages" element={<ExtractPages />} />
-                    <Route path="/pdfcropper" element={<PdfCropper />} />
-                    <Route path="/addpagenum" element={<AddPageNum />} />
-                    <Route path="/protect" element={<Protect />} />
-                    <Route path="/unlockpdf" element={<UnlockPdf />} />
-                    <Route path="/pdftoword" element={<PdfToWord />} />
-                    <Route path="/scientific" element={<Scientific />} />
-                    <Route
-                      path="/bulkemailchecker"
-                      element={<BulkEmailChecker />}
-                    />
-                    <Route
-                      path="/bulkemailsender"
-                      element={<BulkEmailSender />}
-                    />
-                    <Route path="/googlemap" element={<GoogleMap />} />
-                    <Route
-                      path="/cardvalidation"
-                      element={<CardValidation />}
-                    />
-                    <Route path="/cardgenerator" element={<CardGenerator />} />
-                    <Route
-                      path="/templategenerator"
-                      element={<TemplateGenerator />}
-                    />
-                    <Route path="/compareloan" element={<CompareLoan />} />
-                    <Route
-                      path="/currencyconverter"
-                      element={<CurrencyConverter />}
-                    />
-                    <Route path="/texttospeech" element={<TextToSpeech />} />
-                    <Route path="/speechtotext" element={<SpeechToText />} />
-                    <Route
-                      path="/onlinevoiceRecorder"
-                      element={<OnlineVoiceRecorder />}
-                    />
-                    <Route
-                      path="/onlinescreenRecorder"
-                      element={<OnlineScreenrecoder />}
-                    />
-                    <Route
-                      path="/onlinescreenshot"
-                      element={<OnlineScreenshot />}
-                    />
-                    <Route
-                      path="/onlinewebcamtest"
-                      element={<OnlineWebcamTest />}
-                    />
-                    <Route
-                      path="/phonenumberformat"
-                      element={<PhoneNumberFormat />}
-                    />
-                    <Route
-                      path="/randompassword"
-                      element={<RandomPassword />}
-                    />
-                    <Route
-                      path="/fractioncalculator"
-                      element={<FractionCalculator />}
-                    />
-                    <Route
-                      path="/averagecalculator"
-                      element={<AverageCalculator />}
-                    />
-                    <Route path="/lcm" element={<Lcm />} />
-                    <Route path="/agecalculator" element={<AgeCalculator />} />
-                    <Route
-                      path="/datediffcalculator"
-                      element={<DateDiffCalculator />}
-                    />
-                    <Route
-                      path="/linkedinscraper"
-                      element={<LinkedinScraper />}
-                    />
-                    <Route path="/calendar" element={<Calendar />} />
-                    <Route path="/clock" element={<Clock />} />
-                    <Route path="/stopwatch" element={<Stopwatch />} />
-                    <Route path="/timer" element={<Timer />} />
-                    <Route path="/alarm" element={<Alarm />} />
-                    <Route
-                      path="/binarytodecimal"
-                      element={<BinaryToDecimal />}
-                    />
-                    <Route path="/wordcounter" element={<WordCounter />} />
-                    <Route
-                      path="/compoundintrest"
-                      element={<CompoundIntrest />}
-                    />
-                    <Route
-                      path="/simpleinterest"
-                      element={<SimpleInterest />}
-                    />
-                    <Route
-                      path="/discountcalculator"
-                      element={<DiscountCalculator />}
-                    />
-                    <Route path="/gstcalculator" element={<GSTCalculator />} />
-                    <Route path="/vatcalculator" element={<VATCalculator />} />
-                    <Route
-                      path="/electricitybill"
-                      element={<ElectricityBill />}
-                    />
-                    <Route path="/tools" element={<Tool />} />
-                    <Route path="/second" element={<Second />} />
-                    <Route
-                      path="/testscorecalculator"
-                      element={<TestScoreCalculator />}
-                    />
-                    <Route
-                      path="/trafficchecker"
-                      element={<TrafficChecker />}
-                    />
-                  </Route>
+                    <Route element={<ToolOutlet />}>
+                      <Route path="/calculator" element={<Calculator />} />
+                      <Route
+                        path="/faren-to-celcius"
+                        element={<FarenToCelciusAndCelciusToFaren />}
+                      />
+                      <Route path="/second" element={<Second />} />
+                      <Route path="/hours" element={<Hours />} />
+                      <Route path="/paypal" element={<Paypal />} />
+                      <Route path="/beautifier" element={<Beautifier />} />
+                      <Route path="/resumebuild" element={<ResumeBuild />} />
+                      <Route path="/grocery" element={<Grocery />} />
+                      <Route path="/bmi" element={<Bmi />} />
+                      <Route path="/linkchecker" element={<LinkChecker />} />
+                      <Route path="/percentage" element={<Percentage />} />
+                      <Route path="/imagetopdf" element={<ImageToPdf />} />
+                      <Route path="/splitpdf" element={<SplitPdf />} />
+                      <Route path="/compress" element={<Compress />} />
+                      <Route path="/mergepdf" element={<MergePDF />} />
+                      <Route path="/pdfconverter" element={<PdfConverter />} />
+                      <Route path="/searchpdf" element={<SearchPDF />} />
+                      {/* <Route path="/searchexcelpdf" element={<SearchExcelPdf />} /> */}
+                      <Route path="/upload" element={<Upload />} />
+                      <Route path="/editpdf" element={<EditPdf />} />
+                      <Route path="/extractpages" element={<ExtractPages />} />
+                      <Route path="/pdfcropper" element={<PdfCropper />} />
+                      <Route path="/addpagenum" element={<AddPageNum />} />
+                      <Route path="/protect" element={<Protect />} />
+                      <Route path="/unlockpdf" element={<UnlockPdf />} />
+                      <Route path="/pdftoword" element={<PdfToWord />} />
+                      <Route path="/scientific" element={<Scientific />} />
+                      <Route
+                        path="/bulkemailchecker"
+                        element={<BulkEmailChecker />}
+                      />
+                      <Route
+                        path="/bulkemailsender"
+                        element={<BulkEmailSender />}
+                      />
+                      <Route path="/googlemap" element={<GoogleMap />} />
+                      <Route
+                        path="/cardvalidation"
+                        element={<CardValidation />}
+                      />
+                      <Route path="/cardgenerator" element={<CardGenerator />} />
+                      <Route
+                        path="/templategenerator"
+                        element={<TemplateGenerator />}
+                      />
+                      <Route path="/compareloan" element={<CompareLoan />} />
+                      <Route
+                        path="/currencyconverter"
+                        element={<CurrencyConverter />}
+                      />
+                      <Route path="/texttospeech" element={<TextToSpeech />} />
+                      <Route path="/speechtotext" element={<SpeechToText />} />
+                      <Route
+                        path="/onlinevoiceRecorder"
+                        element={<OnlineVoiceRecorder />}
+                      />
+                      <Route
+                        path="/onlinescreenRecorder"
+                        element={<OnlineScreenrecoder />}
+                      />
+                      <Route
+                        path="/onlinescreenshot"
+                        element={<OnlineScreenshot />}
+                      />
+                      <Route
+                        path="/onlinewebcamtest"
+                        element={<OnlineWebcamTest />}
+                      />
+                      <Route
+                        path="/phonenumberformat"
+                        element={<PhoneNumberFormat />}
+                      />
+                      <Route
+                        path="/randompassword"
+                        element={<RandomPassword />}
+                      />
+                      <Route
+                        path="/fractioncalculator"
+                        element={<FractionCalculator />}
+                      />
+                      <Route
+                        path="/averagecalculator"
+                        element={<AverageCalculator />}
+                      />
+                      <Route path="/lcm" element={<Lcm />} />
+                      <Route path="/agecalculator" element={<AgeCalculator />} />
+                      <Route
+                        path="/datediffcalculator"
+                        element={<DateDiffCalculator />}
+                      />
+                      <Route
+                        path="/linkedinscraper"
+                        element={<LinkedinScraper />}
+                      />
+                      <Route path="/calendar" element={<Calendar />} />
+                      <Route path="/clock" element={<Clock />} />
+                      <Route path="/stopwatch" element={<Stopwatch />} />
+                      <Route path="/timer" element={<Timer />} />
+                      <Route path="/alarm" element={<Alarm />} />
+                      <Route
+                        path="/binarytodecimal"
+                        element={<BinaryToDecimal />}
+                      />
+                      <Route path="/wordcounter" element={<WordCounter />} />
+                      <Route
+                        path="/compoundintrest"
+                        element={<CompoundIntrest />}
+                      />
+                      <Route
+                        path="/simpleinterest"
+                        element={<SimpleInterest />}
+                      />
+                      <Route
+                        path="/discountcalculator"
+                        element={<DiscountCalculator />}
+                      />
+                      <Route path="/gstcalculator" element={<GSTCalculator />} />
+                      <Route path="/vatcalculator" element={<VATCalculator />} />
+                      <Route
+                        path="/electricitybill"
+                        element={<ElectricityBill />}
+                      />
+                      <Route path="/tools" element={<Tool />} />
+                      <Route path="/second" element={<Second />} />
+                      <Route
+                        path="/testscorecalculator"
+                        element={<TestScoreCalculator />}
+                      />
+                      <Route
+                        path="/trafficchecker"
+                        element={<TrafficChecker />}
+                      />
+                    </Route>
 
-                  {/* Admin Routes with Sidebar Layout */}
-                  <Route
-                    path="/admin/login"
-                    element={<AdminRoute children={<Login />} />}
-                  />
+                    {/* Admin Routes with Sidebar Layout */}
+                    <Route
+                      path="/admin/login"
+                      element={<AdminRoute children={<Login />} />}
+                    />
 
-                  <Route element={<Sidebar />}>
-                    <Route
-                      path="/admin/dashboard"
-                      element={<AdminRoute children={<Dashboard />} />}
-                    />
-                    <Route
-                      path="/admin/transactions"
-                      element={<AdminRoute children={<Transactions />} />}
-                    />
-                    <Route
-                      path="/admin/addblog"
-                      element={<AdminRoute children={<AddBlog />} />}
-                    />
-                    <Route
-                      path="/admin/bloglist"
-                      element={<AdminRoute children={<BlogList />} />}
-                    />
-                    <Route
-                      path="/admin/users"
-                      element={<AdminRoute children={<Users />} />}
-                    />
-                    <Route
-                      path="/admin/AddBookmark"
-                      element={<AdminRoute children={<AddBookmark />} />}
-                    />
-                    <Route
-                      path="/admin/addlinks"
-                      element={<AdminRoute children={<AddLinks />} />}
-                    />
-                  </Route>
+                    <Route element={<Sidebar />}>
+                      <Route
+                        path="/admin/dashboard"
+                        element={<AdminRoute children={<Dashboard />} />}
+                      />
+                      <Route
+                        path="/admin/transactions"
+                        element={<AdminRoute children={<Transactions />} />}
+                      />
+                      <Route
+                        path="/admin/addblog"
+                        element={<AdminRoute children={<AddBlog />} />}
+                      />
+                      <Route
+                        path="/admin/bloglist"
+                        element={<AdminRoute children={<BlogList />} />}
+                      />
+                      <Route
+                        path="/admin/users"
+                        element={<AdminRoute children={<Users />} />}
+                      />
+                      <Route
+                        path="/admin/AddBookmark"
+                        element={<AdminRoute children={<AddBookmark />} />}
+                      />
+                      <Route
+                        path="/admin/addlinks"
+                        element={<AdminRoute children={<AddLinks />} />}
+                      />
+                    </Route>
 
-                  <Route path="/shortcut-test" element={<ShortcutTest />} />
-                </Routes>
-              </Suspense>
-            </Router>
-            <NetworkStatus />
+                    <Route path="/shortcut-test" element={<ShortcutTest />} />
+                  </Routes>
+                </Suspense>
+              </Router>
+              <NetworkStatus />
+            </AuthProvider>
           </DesignContextProvider>
-        </AuthProvider>
-      </WidgetTransparencyContext.Provider>
-    </ThemeProvider>
+        </ThemeProvider>
+      </CountryProvider>
+    </WidgetTransparencyContext.Provider>
   );
 };
 
