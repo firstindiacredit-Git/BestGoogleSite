@@ -1976,38 +1976,18 @@ function PopularBookmarks() {
               onClick={toggleAllCategories}
             >
               {areAllOpen ? <CompressOutlined /> : <ExpandOutlined />}
-                    </div>,
-                    label: <div className="dark:text-white">{areAllOpen ? "Collapse All" : "Expand All"}</div>,
-                    onClick: toggleAllCategories,
-                  },
-                  {
-                    key: "categoryManager",
-                    icon: <div className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
-              <SettingOutlined />
-                    </div>,
-                    label: <div className="dark:text-white">Category Manager</div>,
-                    onClick: () => setIsCategoryManagerOpen(true),
-                  },
-                  {
-                    key: "importBookmarks",
-                    icon: <div className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
-                      <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <path d="M12 16v-8m0 8l-5-5m5 5l5-5"/>
-                        <rect x="4" y="19" width="16" height="2" rx="1"/>
-                      </svg>
-                    </div>,
-                    label: <div className="dark:text-white">Import Bookmarks</div>,
-                    onClick: () => fileInputRef.current && fileInputRef.current.click(),
-                  },
-                ],
-              }}
-              trigger={["click"]}
-              overlayClassName="[&_.ant-dropdown-menu]:p-0 [&_.ant-dropdown-menu-item]:p-0 [&_ul]:dark:bg-[#28283a]"
-            >
-              <button className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] px-3 py-2 dark:text-white mb-2">
-                <MoreOutlined />
+              {areAllOpen ? "Collapse All" : "Expand All"}
             </button>
-            </Dropdown>
+            <div
+              className={`flex items-center bg-white/[(var(--widget-opacity))] backdrop-blur-lg dark:bg-[#28283A]/[(var(--widget-opacity))] p-1 rounded-sm`}
+            >
+            </div>
+            <button
+              className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] px-3 py-2 dark:text-white mb-2"
+              onClick={() => importInputRef.current && importInputRef.current.click()}
+            >
+              Import Bookmarks
+            </button>
             <input
               type="file"
               accept=".html,text/html"
@@ -3145,79 +3125,77 @@ function PopularBookmarks() {
   };
 
   // Import bookmarks from HTML
-  const handleImportBookmarks = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-    const text = await file.text();
-    // Parse HTML using htmlparser2
-    const imported = [];
-    let currentCategory = null;
-    const parser = new Parser({
-      onopentag(name, attribs) {
-        if (name === "h3") {
-          currentCategory = "";
-        }
-        if (name === "a" && attribs.href) {
-          imported.push({
-            category: currentCategory,
-            url: attribs.href,
-            title: "",
-          });
-        }
-      },
-      ontext(text) {
-        if (currentCategory !== null) {
-          currentCategory += text;
-        } else if (imported.length > 0 && !imported[imported.length - 1].title) {
-          imported[imported.length - 1].title = text;
-        }
-      },
-      onclosetag(name) {
-        if (name === "h3") {
-          currentCategory = currentCategory.trim();
-        }
-      },
-    }, { decodeEntities: true });
-    parser.write(text);
-    parser.end();
-    // Map categories to existing or create new
-    const categoryMap = {};
-    for (const cat of categories) {
-      categoryMap[(cat.name || cat.newCategory).toLowerCase()] = cat.id;
-    }
-    for (const bm of imported) {
-      let catId = categoryMap[bm.category?.toLowerCase() || ""];
-      if (!catId && bm.category) {
-        // Create new category
-        const docRef = await addDoc(collection(db, "users", user.uid, "UserCategory"), {
-          newCategory: bm.category,
-          userId: user.uid,
-          order: categories.length,
-          createdAt: new Date().toISOString(),
-        });
-        catId = docRef.id;
-        categoryMap[bm.category.toLowerCase()] = catId;
-        setCategories((prev) => [...prev, { id: catId, name: bm.category, userId: user.uid, newCategory: bm.category, order: categories.length }]);
-        console.log('Created new category:', bm.category, 'with id:', catId);
-      }
-      if (catId && bm.url) {
-        // Add bookmark
-        await addDoc(collection(db, "users", user.uid, "CatBookmarks"), {
-          title: bm.title || bm.url,
-          url: bm.url,
-          favicon: await fetchFavicon(bm.url),
-          categoryId: catId,
-          userId: user.uid,
-          createdAt: new Date().toISOString(),
-          order: 0,
-          isAdminBookmark: false,
-        });
-        console.log('Added bookmark:', bm.title || bm.url, 'to category:', catId);
-      }
-    }
-    // Optionally, reload bookmarks
-    event.target.value = ""; // Reset input
-  };
+  // const handleImportBookmarks = async (event) => {
+  //   const file = event.target.files[0];
+  //   if (!file) return;
+  //   const text = await file.text();
+  //   const imported = [];
+  //   let currentCategory = null;
+  //   const parser = new Parser({
+  //     onopentag(name, attribs) {
+  //       if (name === "h3") {
+  //         currentCategory = "";
+  //       }
+  //       if (name === "a" && attribs.href) {
+  //         imported.push({
+  //           category: currentCategory,
+  //           url: attribs.href,
+  //           title: "",
+  //         });
+  //       }
+  //     },
+  //     ontext(text) {
+  //       if (currentCategory !== null) {
+  //         currentCategory += text;
+  //       } else if (imported.length > 0 && !imported[imported.length - 1].title) {
+  //         imported[imported.length - 1].title = text;
+  //       }
+  //     },
+  //     onclosetag(name) {
+  //       if (name === "h3") {
+  //         currentCategory = currentCategory.trim();
+  //       }
+  //     },
+  //   }, { decodeEntities: true });
+  //   parser.write(text);
+  //   parser.end();
+  //   const categoryMap = {};
+  //   for (const cat of categories) {
+  //     categoryMap[(cat.name || cat.newCategory).toLowerCase()] = cat.id;
+  //   }
+  //   for (const bm of imported) {
+  //     let catId = categoryMap[bm.category?.toLowerCase() || ""];
+  //     if (!catId && bm.category) {
+       
+  //       const docRef = await addDoc(collection(db, "users", user.uid, "UserCategory"), {
+  //         newCategory: bm.category,
+  //         userId: user.uid,
+  //         order: categories.length,
+  //         createdAt: new Date().toISOString(),
+  //       });
+  //       catId = docRef.id;
+  //       categoryMap[bm.category.toLowerCase()] = catId;
+  //       setCategories((prev) => [...prev, { id: catId, name: bm.category, userId: user.uid, newCategory: bm.category, order: categories.length }]);
+  //       console.log('Created new category:', bm.category, 'with id:', catId);
+  //     }
+  //     if (catId && bm.url) {
+        
+  //       await addDoc(collection(db, "users", user.uid, "CatBookmarks"), {
+  //         title: bm.title || bm.url,
+  //         url: bm.url,
+  //         favicon: await fetchFavicon(bm.url),
+  //         categoryId: catId,
+  //         userId: user.uid,
+  //         createdAt: new Date().toISOString(),
+  //         order: 0,
+  //         isAdminBookmark: false,
+  //       });
+  //       console.log('Added bookmark:', bm.title || bm.url, 'to category:', catId);
+  //     }
+  //   }
+    
+  //   event.target.value = ""; 
+  // };
 
   if (loading) {
     return (
