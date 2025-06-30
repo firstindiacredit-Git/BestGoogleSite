@@ -51,7 +51,7 @@ const defaultWidgets = {
       column: 3,
       position: 1,
     },
-    { id: "Todo", name: "Todo List", isOpen: false, column: 3, position: 2 },
+    { id: "Todo", name: "To do List", isOpen: false, column: 3, position: 2 },
     { id: "notepad", name: "Notepad", isOpen: false, column: 3, position: 3 },
   ],
 };
@@ -74,7 +74,7 @@ export const allWidgets = {
   Bookmarks7: { id: "Bookmarks7", name: "Movie" },
   Bookmarks8: { id: "Bookmarks8", name: "Finance" },
   Bookmarks9: { id: "Bookmarks9", name: "Education" },
-  Todo: { id: "Todo", name: "Todo List" },
+  Todo: { id: "Todo", name: "To do List" },
   NewsFeed: { id: "NewsFeed", name: "News Feed" },
 };
 

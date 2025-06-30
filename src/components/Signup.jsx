@@ -168,10 +168,7 @@ const Signup = () => {
           const user = userCredential.user;
           await registerUserInFirestore(user);
 
-          // Add a small delay before navigation
-          setTimeout(() => {
-            navigate("/search", { replace: true });
-          }, 500);
+          // Navigation will be handled by ProfessionCheckWrapper
         } catch (error) {
           console.error("Signup error:", error);
 
@@ -213,7 +210,7 @@ const Signup = () => {
       async () => {
         try {
           await signInWithPopup(auth, provider);
-          navigate("/search", { replace: true });
+          // Navigation will be handled by ProfessionCheckWrapper
         } catch (error) {
           console.error("Google sign-in error:", error);
           setError("Failed to sign in with Google. Please try again.");
@@ -226,7 +223,7 @@ const Signup = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
-        navigate("/search");
+        // Navigation will be handled by ProfessionCheckWrapper
       }
     });
 

@@ -39,6 +39,8 @@ import Login from "./components/Admin/Login.jsx";
 import Sidebar from "./components/Admin/Sidebar.jsx";
 import ShortcutTest from "./components/ShortcutTest";
 import ChatbotAI from "./components/ChatbotAi";
+import ProfessionCheckWrapper from "./components/ProfessionCheckWrapper.jsx";
+import ProfessionalSelection from "./components/ProfessionalSelection.jsx";
 import { 
   getCustomPages, 
   createCustomPage, 
@@ -819,7 +821,14 @@ const App = () => {
                   <Route path="/pricing" element={<PricingPage />} />
                   <Route path="/faq" element={<FAQPage />} />
                   <Route path="*" element={<NotFound />} />
-                  <Route path="/search" element={<SearchPageWrapper />} />
+                  <Route 
+                    path="/search" 
+                    element={
+                      <ProfessionCheckWrapper>
+                        <SearchPageWrapper />
+                      </ProfessionCheckWrapper>
+                    } 
+                  />
                   <Route path="/privacy" element={<Privacy />} />
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/contact" element={<ContactUs />} />
@@ -838,6 +847,7 @@ const App = () => {
                   <Route path="/forgot-password" element={<Forgotpassword />} />
                   <Route path="/premium" element={<PremiumPage />} />
                   <Route path="/premium-form" element={<PremiumForm />} />
+                  <Route path="/professional-selection" element={<ProfessionalSelection />} />
 
                   <Route
                     path="/NewSearchPage"

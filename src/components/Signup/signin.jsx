@@ -45,7 +45,7 @@ const SignIn = () => {
         try {
           await signInWithEmailAndPassword(auth, email, password);
           localStorage.setItem("imageTrue", true);
-          navigate("/search");
+          // Navigation will be handled by ProfessionCheckWrapper
         } catch (err) {
           if (err.code === "auth/user-not-found") {
             setError("No user found with this email.");
@@ -68,9 +68,8 @@ const SignIn = () => {
       async () => {
         try {
           await signInWithPopup(auth, provider);
-          window.location.reload();
           localStorage.setItem("imageTrue", true);
-          navigate("/search");
+          // Navigation will be handled by ProfessionCheckWrapper
         } catch (err) {
           if (err.code === "auth/network-request-failed") {
             setError(

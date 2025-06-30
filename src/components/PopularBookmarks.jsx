@@ -41,6 +41,7 @@ import {
   MenuOutlined,
   ExpandOutlined,
   CompressOutlined,
+  SettingOutlined,
 } from "@ant-design/icons";
 import debounce from "lodash/debounce";
 import SkeletonLoader from "./SkeletonLoader";
@@ -168,6 +169,173 @@ function PopularBookmarks() {
   const [categorySearch, setCategorySearch] = useState("");
   // Add state for show more/less categories
   const [showAllCategories, setShowAllCategories] = useState(false);
+  // Add state for search bar visibility
+  const [isSearchBarOpen, setIsSearchBarOpen] = useState(false);
+
+  // State for previewing imported bookmarks
+  const [importedPreview, setImportedPreview] = useState([]);
+
+  // Ref for import bookmarks file input
+  const fileInputRef = React.useRef(null);
+  // Ref for search bar
+  const searchBarRef = React.useRef(null);
+
+  // Add state for Category Manager modal and selection
+  const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false);
+  const [selectedImported, setSelectedImported] = useState([]); // [{catIdx, linkIdx}]
+
+  // Add state for multi-select user categories in Category Manager
+  const [selectedUserCategories, setSelectedUserCategories] = useState([]);
+
+  // Import bookmarks from HTML file (now supports Chrome bookmarks format)
+  const handleImportBookmarks = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const html = e.target.result;
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      let importedCategories = [];
+      let rootLevelLinks = [];
+
+      // Chrome bookmarks: parse <DL> structure recursively, always create a category for each <H3>
+      function parseDL(dl, parentName = null, isRoot = false) {
+        let categories = [];
+        let children = Array.from(dl.children);
+        for (let i = 0; i < children.length; i++) {
+          const el = children[i];
+          if (el.tagName === 'DT') {
+            const h3 = el.querySelector('h3');
+            if (h3) {
+              // New folder/category
+              const folderName = h3.textContent.trim();
+              const nextDL = el.nextElementSibling;
+              if (nextDL && nextDL.tagName === 'DL') {
+                // Collect all direct links and subfolders
+                let links = [];
+                let subcategories = [];
+                for (let j = 0; j < nextDL.children.length; j++) {
+                  const subEl = nextDL.children[j];
+                  if (subEl.tagName === 'DT') {
+                    const subH3 = subEl.querySelector('h3');
+                    if (subH3) {
+                      // Subfolder
+                      const subDL = subEl.nextElementSibling;
+                      if (subDL && subDL.tagName === 'DL') {
+                        const subResult = parseDL(subDL, subH3.textContent.trim());
+                        subcategories = subcategories.concat(subResult);
+                      }
+                    } else {
+                      const a = subEl.querySelector('a');
+                      if (a) {
+                        links.push({
+                          title: a.textContent,
+                          url: a.getAttribute('href'),
+                        });
+                      }
+                    }
+                  }
+                }
+                // Always create a category for this folder, even if it has both links and subfolders
+                categories.push({ name: folderName, links });
+                categories = categories.concat(subcategories);
+              } else {
+                // Empty folder
+                categories.push({ name: folderName, links: [] });
+              }
+            } else {
+              const a = el.querySelector('a');
+              if (a && parentName) {
+                // Top-level link under a parent folder
+                categories.push({ name: parentName, links: [{ title: a.textContent, url: a.getAttribute('href') }] });
+              } else if (a && isRoot) {
+                // Root-level link (not in any folder)
+                rootLevelLinks.push({ title: a.textContent, url: a.getAttribute('href') });
+              }
+            }
+          }
+        }
+        return categories;
+      }
+
+      // Try Chrome bookmarks format first
+      const mainDL = doc.querySelector('dl');
+      if (mainDL) {
+        importedCategories = parseDL(mainDL, null, true);
+        // After parsing, if there are root-level bookmarks, add them as their own category
+        if (rootLevelLinks.length > 0) {
+          importedCategories.unshift({ name: 'Imported - Uncategorized', links: rootLevelLinks });
+        }
+      } else {
+        // Fallback: old format (h2/ul)
+        const categoryHeadings = doc.querySelectorAll('h2');
+        categoryHeadings.forEach((heading) => {
+          const categoryName = heading.textContent.trim();
+          const ul = heading.nextElementSibling;
+          if (ul && ul.tagName === 'UL') {
+            const links = Array.from(ul.querySelectorAll('a')).map((a) => ({
+              title: a.textContent,
+              url: a.getAttribute('href'),
+            }));
+            importedCategories.push({ name: categoryName, links });
+          }
+        });
+      }
+
+      // Merge categories with the same name (optional, for Chrome's nested folders)
+      const merged = {};
+      importedCategories.forEach(cat => {
+        if (!cat.name) return;
+        if (!merged[cat.name]) merged[cat.name] = { name: cat.name, links: [] };
+        merged[cat.name].links = merged[cat.name].links.concat(cat.links);
+      });
+      importedCategories = Object.values(merged);
+
+      // Show preview
+      setImportedPreview(importedCategories);
+
+      // Add to Firestore (or local state)
+      if (!user) return;
+      importedCategories.forEach(async (cat) => {
+        // Add category
+        const catDoc = await addDoc(collection(db, 'users', user.uid, 'UserCategory'), {
+          newCategory: cat.name,
+          userId: user.uid,
+          order: categories.length,
+          createdAt: new Date().toISOString(),
+        });
+        // Add bookmarks
+        for (const link of cat.links) {
+          await addDoc(collection(db, 'users', user.uid, 'CatBookmarks'), {
+            title: link.title,
+            url: link.url,
+            favicon: '',
+            categoryId: catDoc.id,
+            userId: user.uid,
+            createdAt: new Date().toISOString(),
+            order: 0,
+            isAdminBookmark: false,
+          });
+        }
+      });
+      // Optionally, show a success message
+      // success('Bookmarks imported!');
+
+      // ...inside handleImportBookmarks, after setImportedPreview(importedCategories);
+      Modal.info({
+        title: "Import Successful",
+        content: (
+          <div>
+            <p>Your imported categories have been added to your account.</p>
+            <p>You can view and manage them in the <b>Category Manager</b> (click the "Category Manager" button above your bookmarks).</p>
+          </div>
+        ),
+        okText: "OK",
+      });
+    };
+    reader.readAsText(file);
+  };
 
   const toggleAllCategories = () => {
     const areAllOpen =
@@ -206,6 +374,10 @@ function PopularBookmarks() {
   const handleClickOutside = (event) => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
       setIsEditModePanelVisible(false); // Close the dropdown if clicked outside
+    }
+    // Close search bar if clicked outside
+    if (searchBarRef.current && !searchBarRef.current.contains(event.target)) {
+      setIsSearchBarOpen(false);
     }
   };
 
@@ -968,6 +1140,18 @@ function PopularBookmarks() {
       //success("Category added successfully");
       setNewCategoryName("");
       setIsAddCategoryModalVisible(false);
+      // Show tip if controller is open
+      if (isControllerOpen) {
+        Modal.info({
+          title: "Tip",
+          content: (
+            <div>
+              <p>Click the column number to auto arrange your categories.</p>
+            </div>
+          ),
+          okText: "OK",
+        });
+      }
     } catch (error) {
       console.error("Error adding category:", error);
       //error("Failed to add category");
@@ -1740,35 +1924,64 @@ function PopularBookmarks() {
         return name.includes(searchTerm);
       });
 
-    // Use filtered categories for show more/less logic
-    const getVisibleCategoryIds = () => {
-      if (showAllCategories || filteredCategoryIds.length <= 16) return filteredCategoryIds;
-      return filteredCategoryIds.slice(0, 16);
+    // Helper: get visible category IDs in the user's column structure, up to a total limit, distributed equally among columns
+    const getLimitedColumns = (limit) => {
+      // Step 1: Gather filtered categories per column, preserving order
+      const perColumn = {};
+      let totalCategories = 0;
+      for (let col = 1; col <= columnCount; col++) {
+        const colKey = `column${col}`;
+        perColumn[colKey] = (categoryColumns[colKey] || []).filter(catId => filteredCategoryIds.includes(catId));
+        totalCategories += perColumn[colKey].length;
+      }
+      // Step 2: Calculate how many per column
+      const basePerCol = Math.floor(limit / columnCount);
+      let remainder = limit % columnCount;
+      // Step 3: Build result with up to basePerCol + 1 (if remainder > 0) per column
+      const result = {};
+      let used = 0;
+      for (let col = 1; col <= columnCount; col++) {
+        const colKey = `column${col}`;
+        let take = basePerCol + (remainder > 0 ? 1 : 0);
+        remainder = Math.max(0, remainder - 1);
+        result[colKey] = perColumn[colKey].slice(0, take);
+        used += result[colKey].length;
+      }
+      // If for some reason we have more than limit (e.g. not enough in some columns), trim extra from the end
+      if (used > limit) {
+        // Flatten, trim, then rebuild columns
+        const all = [];
+        for (let col = 1; col <= columnCount; col++) {
+          for (const catId of result[`column${col}`]) {
+            all.push({ col, catId });
+          }
+        }
+        const trimmed = all.slice(0, limit);
+        // Rebuild columns
+        const newResult = {};
+        for (let col = 1; col <= columnCount; col++) newResult[`column${col}`] = [];
+        trimmed.forEach(({ col, catId }) => {
+          newResult[`column${col}`].push(catId);
+        });
+        return newResult;
+      }
+      return result;
     };
 
-    const getDistributedCategoryColumns = () => {
-      const visibleCategoryIds = getVisibleCategoryIds();
-      const distributed = {};
-      const perCol = Math.floor(visibleCategoryIds.length / columnCount);
-      let extra = visibleCategoryIds.length % columnCount;
-      let idx = 0;
+    // Helper: get all filtered categories in the user's column structure
+    const getAllColumns = () => {
+      const result = {};
       for (let col = 1; col <= columnCount; col++) {
-        const count = perCol + (extra > 0 ? 1 : 0);
-        distributed[`column${col}`] = visibleCategoryIds.slice(idx, idx + count);
-        idx += count;
-        if (extra > 0) extra--;
+        const colKey = `column${col}`;
+        result[colKey] = (categoryColumns[colKey] || []).filter(catId => filteredCategoryIds.includes(catId));
       }
-      return distributed;
+      return result;
     };
 
-    const columnsToRender = showAllCategories ? (() => {
-      // Only show filtered categories in each column
-      const filteredColumns = {};
-      for (let col = 1; col <= columnCount; col++) {
-        filteredColumns[`column${col}`] = (categoryColumns[`column${col}`] || []).filter(catId => filteredCategoryIds.includes(catId));
-      }
-      return filteredColumns;
-    })() : getDistributedCategoryColumns();
+    // Decide which columns to render
+    const columnsToRender = showAllCategories
+      ? getAllColumns()
+      : getLimitedColumns(16);
 
     return (
       <div className="mb-2">
@@ -1789,22 +2002,112 @@ function PopularBookmarks() {
               <PlusOutlined />
               Add Bookmark
             </button>
-            <button
-              className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] px-3 py-2 dark:text-white mb-2"
-              onClick={toggleAllCategories}
-            >
+            <Dropdown
+              menu={{
+                items: [
+                  {
+                    key: "expandCollapse",
+                    icon: <div className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
               {areAllOpen ? <CompressOutlined /> : <ExpandOutlined />}
-              {areAllOpen ? "Collapse All" : "Expand All"}
+                    </div>,
+                    label: <div className="dark:text-white">{areAllOpen ? "Collapse All" : "Expand All"}</div>,
+                    onClick: toggleAllCategories,
+                  },
+                  {
+                    key: "categoryManager",
+                    icon: <div className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
+              <SettingOutlined />
+                    </div>,
+                    label: <div className="dark:text-white">Category Manager</div>,
+                    onClick: () => setIsCategoryManagerOpen(true),
+                  },
+                  {
+                    key: "importBookmarks",
+                    icon: <div className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
+                      <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path d="M12 16v-8m0 8l-5-5m5 5l5-5"/>
+                        <rect x="4" y="19" width="16" height="2" rx="1"/>
+                      </svg>
+                    </div>,
+                    label: <div className="dark:text-white">Import Bookmarks</div>,
+                    onClick: () => fileInputRef.current && fileInputRef.current.click(),
+                  },
+                ],
+              }}
+              trigger={["click"]}
+              overlayClassName="[&_.ant-dropdown-menu]:p-0 [&_.ant-dropdown-menu-item]:p-0 [&_ul]:dark:bg-[#28283a]"
+            >
+              <button className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] px-3 py-2 dark:text-white mb-2">
+                <MoreOutlined />
             </button>
+            </Dropdown>
+            <input
+              type="file"
+              accept=".html,text/html"
+              ref={fileInputRef}
+              style={{ display: 'none' }}
+              onChange={handleImportBookmarks}
+            />
           </div>
           <div className="flex items-center gap-2">
-            <input
-              type="text"
-              placeholder="Search categories..."
-              className="w-full max-w-xs px-3 py-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
-              value={categorySearch || ''}
-              onChange={e => setCategorySearch(e.target.value)}
-            />
+            <div className="relative flex items-center" ref={searchBarRef}>
+              {/* Search Button */}
+              <button
+                onClick={() => setIsSearchBarOpen(!isSearchBarOpen)}
+                className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] px-3 py-2 dark:text-white transition-all duration-300 hover:scale-105"
+                title="Search categories"
+              >
+                {isSearchBarOpen ? (
+                  <svg 
+                    width="16" 
+                    height="16" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2" 
+                    viewBox="0 0 24 24"
+                  >
+                    <line x1="18" y1="6" x2="6" y2="18" strokeWidth="2"/>
+                    <line x1="6" y1="6" x2="18" y2="18" strokeWidth="2"/>
+                  </svg>
+                ) : (
+                  <svg 
+                    width="16" 
+                    height="16" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2" 
+                    viewBox="0 0 24 24"
+                  >
+                    <circle cx="11" cy="11" r="8" strokeWidth="2"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" strokeWidth="2"/>
+                  </svg>
+                )}
+                {isSearchBarOpen ? "Close" : "Search"}
+              </button>
+              
+              {/* Sliding Search Input */}
+              <div 
+                className={`absolute right-0 top-0 transition-all duration-300 ease-in-out ${
+                  isSearchBarOpen 
+                    ? 'w-64 opacity-100 translate-x-0' 
+                    : 'w-0 opacity-0 translate-x-4'
+                } overflow-hidden`}
+              >
+                <input
+                  type="text"
+                  placeholder="Search categories..."
+                  className="w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-lg"
+                  value={categorySearch || ''}
+                  onChange={e => setCategorySearch(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') {
+                      setIsSearchBarOpen(false);
+                      setCategorySearch('');
+                    }
+                  }}
+                />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -2859,6 +3162,116 @@ function PopularBookmarks() {
     localStorage.setItem("bookmarkLineOptions", lineOptions.toString());
   }, [lineOptions]);
 
+  // Add effect to focus search input when search bar opens
+  useEffect(() => {
+    if (isSearchBarOpen) {
+      const searchInput = searchBarRef.current?.querySelector('input');
+      if (searchInput) {
+        setTimeout(() => searchInput.focus(), 100);
+      }
+    }
+  }, [isSearchBarOpen]);
+
+  // Add this function inside PopularBookmarks component
+  const handleExportBookmarksHtml = () => {
+    let html = `<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Exported Bookmarks</title></head><body style='font-family:sans-serif;'>`;
+    html += `<h1>Exported Bookmarks</h1>`;
+    categories.forEach((category) => {
+      const categoryLinks = links.filter(
+        (link) =>
+          link.categoryId === category.id &&
+          !hiddenBookmarkIds.includes(link.id)
+      );
+      if (categoryLinks.length === 0) return;
+      html += `<h2>${category.name || category.newCategory}</h2><ul>`;
+      categoryLinks.forEach((link) => {
+        const title = link.title || link.name;
+        const url = link.url || link.link;
+        html += `<li><a href="${url}" target="_blank" rel="noopener noreferrer">${title}</a> <span style='color:gray;font-size:0.9em;'>(${url})</span></li>`;
+      });
+      html += `</ul>`;
+    });
+    html += `</body></html>`;
+
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `bookmarks_export_${new Date().toISOString().slice(0, 10)}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  // Helper to flatten importedPreview for selection
+  const getAllImportedKeys = () => {
+    const keys = [];
+    importedPreview.forEach((cat, catIdx) => {
+      cat.links.forEach((_, linkIdx) => {
+        keys.push(`${catIdx}-${linkIdx}`);
+      });
+    });
+    return keys;
+  };
+
+  const handleSelectAllImported = () => {
+    if (selectedImported.length === getAllImportedKeys().length) {
+      setSelectedImported([]);
+    } else {
+      setSelectedImported(getAllImportedKeys());
+    }
+  };
+
+  const handleDeleteSelectedImported = () => {
+    if (selectedImported.length === 0) return;
+    // Remove selected bookmarks from importedPreview
+    setImportedPreview(prev =>
+      prev.map((cat, catIdx) => ({
+        ...cat,
+        links: cat.links.filter((_, linkIdx) => !selectedImported.includes(`${catIdx}-${linkIdx}`))
+      })).filter(cat => cat.links.length > 0)
+    );
+    setSelectedImported([]);
+  };
+
+  // Helper to get all user category IDs
+  const getAllUserCategoryIds = () =>
+    categories.filter(cat => !cat.isAdminCategory).map(cat => cat.id);
+
+  const handleSelectAllUserCategories = () => {
+    const allIds = getAllUserCategoryIds();
+    if (selectedUserCategories.length === allIds.length) {
+      setSelectedUserCategories([]);
+    } else {
+      setSelectedUserCategories(allIds);
+    }
+  };
+
+  const handleDeleteSelectedUserCategories = () => {
+    if (selectedUserCategories.length === 0) return;
+    Modal.confirm({
+      title: `Delete Selected Categories`,
+      content: `Are you sure you want to delete ${selectedUserCategories.length} selected categor${selectedUserCategories.length === 1 ? 'y' : 'ies'} and all their bookmarks? This action cannot be undone.`,
+      okText: "Delete",
+      okType: "danger",
+      cancelText: "Cancel",
+      onOk: async () => {
+        try {
+          setLoading(true);
+          for (const catId of selectedUserCategories) {
+            await handleDeleteCategory(catId);
+          }
+          setSelectedUserCategories([]);
+        } catch (error) {
+          console.error("Error deleting selected categories:", error);
+        } finally {
+          setLoading(false);
+        }
+      },
+    });
+  };
+
   if (loading) {
     return (
       <div className="w-[85vw] mx-auto" style={{ padding: "24px" }}>
@@ -2971,7 +3384,7 @@ function PopularBookmarks() {
         }
         open={isControllerOpen}
         onCancel={() => setIsControllerOpen(false)}
-        width={800}
+        width={900}
         footer={[
           <div key="divider" className="border-t border-gray-200 dark:border-gray-700 my-2"></div>,
           <div key="footer" className="flex justify-end items-center mt-2 gap-2">
@@ -3348,6 +3761,119 @@ function PopularBookmarks() {
               {renderDraggableBookmark(null, null, bookmark)}
             </div>
           ))}
+        </div>
+      </Modal>
+
+      {/* Category Manager Modal */}
+      <Modal
+        title="Category Manager"
+        open={isCategoryManagerOpen}
+        onCancel={() => setIsCategoryManagerOpen(false)}
+        footer={null}
+        width={600}
+      >
+        {/* Imported Bookmarks Preview */}
+        {importedPreview.length === 0 ? (
+          <div className="text-center text-gray-500">No imported bookmarks to manage.</div>
+        ) : (
+          <>
+            <div className="flex justify-between items-center mb-4">
+              <span className="font-semibold">Imported Bookmarks</span>
+              <div className="flex gap-2">
+                <AntButton onClick={handleSelectAllImported}>
+                  {selectedImported.length === getAllImportedKeys().length ? 'Deselect All' : 'Select All'}
+                </AntButton>
+                <AntButton
+                  danger
+                  disabled={selectedImported.length === 0}
+                  onClick={handleDeleteSelectedImported}
+                >
+                  Delete Selected ({selectedImported.length})
+                </AntButton>
+              </div>
+            </div>
+            <div style={{ maxHeight: 350, overflowY: 'auto' }}>
+              {importedPreview.map((cat, catIdx) => (
+                <div key={catIdx} className="mb-4">
+                  <div className="font-semibold mb-1">{cat.name}</div>
+                  <ul className="ml-4">
+                    {cat.links.map((link, linkIdx) => {
+                      const key = `${catIdx}-${linkIdx}`;
+                      return (
+                        <li key={key} className="flex items-center gap-2 mb-1">
+                          <Checkbox
+                            checked={selectedImported.includes(key)}
+                            onChange={e => {
+                              setSelectedImported(sel =>
+                                e.target.checked
+                                  ? [...sel, key]
+                                  : sel.filter(k => k !== key)
+                              );
+                            }}
+                          />
+                          <span className="truncate max-w-xs">{link.title}</span>
+                          <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline text-xs ml-2">{link.url}</a>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Divider */}
+        <hr className="my-6" />
+
+        {/* User Categories (from Firestore) */}
+        <div>
+          <div className="font-semibold mb-2 flex items-center gap-2">
+            Your Categories
+            <AntButton size="small" onClick={handleSelectAllUserCategories}>
+              {selectedUserCategories.length === getAllUserCategoryIds().length ? 'Deselect All' : 'Select All'}
+            </AntButton>
+            <AntButton
+              danger
+              size="small"
+              disabled={selectedUserCategories.length === 0}
+              onClick={handleDeleteSelectedUserCategories}
+            >
+              Delete Selected ({selectedUserCategories.length})
+            </AntButton>
+          </div>
+          <div style={{ maxHeight: 250, overflowY: 'auto' }}>
+            {categories.filter(cat => !cat.isAdminCategory).length === 0 ? (
+              <div className="text-gray-500">No user categories found.</div>
+            ) : (
+              categories
+                .filter(cat => !cat.isAdminCategory)
+                .map(cat => (
+                  <div key={cat.id} className="flex items-center justify-between mb-2 p-2 bg-gray-50 dark:bg-gray-700 rounded">
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        checked={selectedUserCategories.includes(cat.id)}
+                        onChange={e => {
+                          setSelectedUserCategories(sel =>
+                            e.target.checked
+                              ? [...sel, cat.id]
+                              : sel.filter(id => id !== cat.id)
+                          );
+                        }}
+                      />
+                      <span>{cat.name || cat.newCategory}</span>
+                    </div>
+                    <AntButton
+                      danger
+                      size="small"
+                      onClick={() => handleDeleteCategory(cat.id)}
+                    >
+                      Delete
+                    </AntButton>
+                  </div>
+                ))
+            )}
+          </div>
         </div>
       </Modal>
     </div>

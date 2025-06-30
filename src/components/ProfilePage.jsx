@@ -53,6 +53,71 @@ const ProfilePage = () => {
   const navigate = useNavigate();
   const { isDarkMode } = useTheme();
   const [activeSection, setActiveSection] = useState("profile");
+  const [userProfession, setUserProfession] = useState("");
+  const [isEditingProfession, setIsEditingProfession] = useState(false);
+
+  const professions = [
+    {
+      id: "student",
+      name: "Student",
+      icon: "🎓",
+      description: "Currently studying or pursuing education"
+    },
+    {
+      id: "professional",
+      name: "Professional",
+      icon: "💼",
+      description: "Working in a professional field"
+    },
+    {
+      id: "entrepreneur",
+      name: "Entrepreneur",
+      icon: "🚀",
+      description: "Running your own business or startup"
+    },
+    {
+      id: "freelancer",
+      name: "Freelancer",
+      icon: "🆓",
+      description: "Working independently on projects"
+    },
+    {
+      id: "retired",
+      name: "Retired",
+      icon: "🌅",
+      description: "Retired from active work"
+    },
+    {
+      id: "other",
+      name: "Other",
+      icon: "✨",
+      description: "Other profession or occupation"
+    }
+  ];
+
+  const getProfessionDisplayName = (professionId) => {
+    const profession = professions.find(p => p.id === professionId);
+    return profession ? profession.name : "Not selected";
+  };
+
+  const handleProfessionUpdate = async (professionId) => {
+    try {
+      const user = auth.currentUser;
+      if (user) {
+        const userDocRef = doc(db, "users", user.uid);
+        await updateDoc(userDocRef, {
+          profession: professionId,
+          professionSelectedAt: new Date()
+        });
+        setUserProfession(professionId);
+        setIsEditingProfession(false);
+        message.success("Profession updated successfully!");
+      }
+    } catch (error) {
+      console.error("Error updating profession:", error);
+      message.error("Failed to update profession. Please try again.");
+    }
+  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -71,6 +136,9 @@ const ProfilePage = () => {
         // Fetch user data from Firestore
         const userDoc = await getDoc(doc(db, "users", user.uid));
         const userData = userDoc.data();
+
+        // Set user profession
+        setUserProfession(userData?.profession || "");
 
         // Set background from Firestore or localStorage or default
         const savedBackground = localStorage.getItem("backgroundImage");
@@ -639,6 +707,43 @@ const ProfilePage = () => {
                       <p className="text-gray-700 dark:text-gray-300">••••</p>
                     )}
                   </div>
+
+                  {/* Profession Setting */}
+                  <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div className="flex justify-between items-center">
+                      <h4 className="font-medium dark:text-white">
+                        Profession
+                      </h4>
+                      <button
+                        onClick={() => setIsEditingProfession(!isEditingProfession)}
+                        className="text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300"
+                      >
+                        {isEditingProfession ? "Cancel" : "Change Profession"}
+                      </button>
+                    </div>
+
+                    {isEditingProfession ? (
+                      <div className="space-y-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="flex gap-2">
+                            {professions.map((profession) => (
+                              <button
+                                key={profession.id}
+                                onClick={() => handleProfessionUpdate(profession.id)}
+                                className="px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-700 hover:bg-gray-100 transition-colors"
+                              >
+                                {profession.icon} {profession.name}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-gray-700 dark:text-gray-300">
+                        {getProfessionDisplayName(userProfession)}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -675,6 +780,14 @@ const ProfilePage = () => {
                       ) : (
                         "Free Account"
                       )}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Profession
+                    </p>
+                    <p className="text-gray-700 dark:text-gray-300">
+                      {getProfessionDisplayName(userProfession)}
                     </p>
                   </div>
                 </div>

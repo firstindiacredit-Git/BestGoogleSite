@@ -61,7 +61,7 @@ export const defaultWidgets = {
     },
     { id: "NewsFeed", name: "News Feed", isOpen: true, column: 3, position: 1 },
     { id: "notepad", name: "Notepad", isOpen: true, column: 3, position: 2 },
-    { id: "Todo", name: "Todo List", isOpen: true, column: 3, position: 3 },
+    { id: "Todo", name: "To Do List", isOpen: true, column: 3, position: 3 },
   ],
 };
 
@@ -83,7 +83,7 @@ export const allWidgets = {
   Bookmarks7: { id: "Bookmarks7", name: "Movie" },
   Bookmarks8: { id: "Bookmarks8", name: "Finance" },
   Bookmarks9: { id: "Bookmarks9", name: "Education" },
-  Todo: { id: "Todo", name: "Todo List" },
+  Todo: { id: "Todo", name: "To Do List" },
   NewsFeed: { id: "NewsFeed", name: "Latest News" },
 };
 

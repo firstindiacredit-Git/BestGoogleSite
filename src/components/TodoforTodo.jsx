@@ -429,7 +429,7 @@ const TodoforTodo = ({ inNotebookSheet = false }) => {
       }}
     >
       {inNotebookSheet && (
-        <h1 className="text-2xl font-bold px-3 py-2">Todo List</h1>
+        <h1 className="text-2xl font-bold px-3 py-2">To do List</h1>
       )}
       <div className="p-3">
         <div className="flex justify-between gap-4 items-center mb-1">

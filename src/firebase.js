@@ -51,6 +51,8 @@ onAuthStateChanged(auth, async (user) => {
           role: "user",
           isTrialExpired: false,
           subscriptionEndDate: null,
+          profession: null,
+          professionSelectedAt: null,
         });
       } catch (error) {
         console.error("Error creating user document: ", error);
