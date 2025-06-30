@@ -493,8 +493,8 @@ function PopularBookmarks() {
         ? "#1f1f1f"
         : "#e6f7ff"
       : isDarkMode
-      ? "#141414"
-      : "#fff",
+        ? "#141414"
+        : "#fff",
     border: `${isDarkMode ? "#303030" : "#f0f0f0"}`,
     borderRadius: "4px",
     display: "flex",
@@ -684,9 +684,9 @@ function PopularBookmarks() {
         const initialOpenStates = savedOpenStates
           ? JSON.parse(savedOpenStates)
           : initialCategories.reduce((acc, category) => {
-              acc[category.id] = true;
-              return acc;
-            }, {});
+            acc[category.id] = true;
+            return acc;
+          }, {});
 
         setOpenCategories(initialOpenStates);
       } catch (error) {
@@ -1692,10 +1692,10 @@ function PopularBookmarks() {
           prevLinks.map((link) =>
             link.id === editingBookmark.id
               ? {
-                  ...link,
-                  title: values.title,
-                  url: values.url,
-                }
+                ...link,
+                title: values.title,
+                url: values.url,
+              }
               : link
           )
         );
@@ -1782,13 +1782,12 @@ function PopularBookmarks() {
                 className="w-full text-center text-black dark:text-white hover:text-blue-500"
               >
                 <span
-                  className={`text-sm break-words block ${
-                    lineOptions === 2
-                      ? "whitespace-normal"
-                      : lineOptions === "none"
+                  className={`text-sm break-words block ${lineOptions === 2
+                    ? "whitespace-normal"
+                    : lineOptions === "none"
                       ? "whitespace-normal"
                       : "line-clamp-1 truncate"
-                  }`}
+                    }`}
                   title={lineOptions !== 2 ? link.title || link.name : undefined}
                 >
                   {link.title || link.name}
@@ -1946,56 +1945,56 @@ function PopularBookmarks() {
               <PlusOutlined />
               Add Bookmark
             </button>
-            <button
-              className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)]  px-3 py-2 dark:text-white mb-2"
-              onClick={handleExportBookmarks}
+
+            <Dropdown
+              menu={{
+                items: [
+                  {
+                    key: "expandCollapse",
+                    icon: <div className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
+                      {areAllOpen ? <CompressOutlined /> : <ExpandOutlined />}
+                    </div>,
+                    label: <div className="dark:text-white">{areAllOpen ? "Collapse All" : "Expand All"}</div>,
+                    onClick: toggleAllCategories,
+                  },
+                  {
+                    key: "categoryManager",
+                    icon: <div className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
+                      <SettingOutlined />
+                    </div>,
+                    label: <div className="dark:text-white">Category Manager</div>,
+                    onClick: () => setIsCategoryManagerOpen(true),
+                  },
+                  {
+                    key: "importBookmarks",
+                    icon: <div className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
+                      <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path d="M12 16v-8m0 8l-5-5m5 5l5-5" />
+                        <rect x="4" y="19" width="16" height="2" rx="1" />
+                      </svg>
+                    </div>,
+                    label: <div className="dark:text-white">Import Bookmarks</div>,
+                    onClick: () => fileInputRef.current && fileInputRef.current.click(),
+                  },
+                ],
+              }}
+              trigger={["click"]}
+              overlayClassName="[&_.ant-dropdown-menu]:p-0 [&_.ant-dropdown-menu-item]:p-0 [&_ul]:dark:bg-[#28283a]"
             >
-              Export Bookmarks
-            </button>
-            <button
-              className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)]  px-3 py-2 dark:text-white mb-2"
-              onClick={() => importInputRef.current && importInputRef.current.click()}
-            >
-              Import Bookmarks
-            </button>
+              <button className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] px-3 py-2 dark:text-white mb-2">
+                <MoreOutlined />
+              </button>
+            </Dropdown>
+
             <input
               type="file"
-              accept=".html"
+              accept=".html,text/html"
               ref={importInputRef}
               style={{ display: "none" }}
               onChange={handleImportBookmarks}
             />
           </div>
-          <div className="flex items-center gap-4">
-            <div
-              className={`flex items-center bg-white/[(var(--widget-opacity))] backdrop-blur-lg dark:bg-[#28283A]/[(var(--widget-opacity))] p-1 rounded-sm`}
-            >
-            </div>
-            <button
-              className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] px-3 py-2 dark:text-white mb-2"
-              onClick={toggleAllCategories}
-            >
-              {areAllOpen ? <CompressOutlined /> : <ExpandOutlined />}
-              {areAllOpen ? "Collapse All" : "Expand All"}
-            </button>
-            <div
-              className={`flex items-center bg-white/[(var(--widget-opacity))] backdrop-blur-lg dark:bg-[#28283A]/[(var(--widget-opacity))] p-1 rounded-sm`}
-            >
-            </div>
-            <button
-              className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] px-3 py-2 dark:text-white mb-2"
-              onClick={() => importInputRef.current && importInputRef.current.click()}
-            >
-              Import Bookmarks
-            </button>
-            <input
-              type="file"
-              accept=".html,text/html"
-              ref={fileInputRef}
-              style={{ display: 'none' }}
-              onChange={handleImportBookmarks}
-            />
-          </div>
+          
           <div className="flex items-center gap-2">
             <div className="relative flex items-center" ref={searchBarRef}>
               {/* Search Button */}
@@ -2005,40 +2004,39 @@ function PopularBookmarks() {
                 title="Search categories"
               >
                 {isSearchBarOpen ? (
-                  <svg 
-                    width="16" 
-                    height="16" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="2" 
+                  <svg
+                    width="16"
+                    height="16"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
                     viewBox="0 0 24 24"
                   >
-                    <line x1="18" y1="6" x2="6" y2="18" strokeWidth="2"/>
-                    <line x1="6" y1="6" x2="18" y2="18" strokeWidth="2"/>
+                    <line x1="18" y1="6" x2="6" y2="18" strokeWidth="2" />
+                    <line x1="6" y1="6" x2="18" y2="18" strokeWidth="2" />
                   </svg>
                 ) : (
-                  <svg 
-                    width="16" 
-                    height="16" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="2" 
+                  <svg
+                    width="16"
+                    height="16"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
                     viewBox="0 0 24 24"
                   >
-                    <circle cx="11" cy="11" r="8" strokeWidth="2"/>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65" strokeWidth="2"/>
+                    <circle cx="11" cy="11" r="8" strokeWidth="2" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" strokeWidth="2" />
                   </svg>
                 )}
                 {isSearchBarOpen ? "Close" : "Search"}
               </button>
-              
+
               {/* Sliding Search Input */}
-              <div 
-                className={`absolute right-0 top-0 transition-all duration-300 ease-in-out ${
-                  isSearchBarOpen 
-                    ? 'w-64 opacity-100 translate-x-0' 
-                    : 'w-0 opacity-0 translate-x-4'
-                } overflow-hidden`}
+              <div
+                className={`absolute right-0 top-0 transition-all duration-300 ease-in-out ${isSearchBarOpen
+                  ? 'w-64 opacity-100 translate-x-0'
+                  : 'w-0 opacity-0 translate-x-4'
+                  } overflow-hidden`}
               >
                 <input
                   type="text"
@@ -2073,11 +2071,10 @@ function PopularBookmarks() {
                       <div
                         ref={provided.innerRef}
                         {...provided.droppableProps}
-                        className={` transition-colors duration-200 ${
-                          snapshot.isDraggingOver
-                            ? "bg-transparent border-2 border-dashed border-blue-500"
-                            : "bg-transparent border-2 border-dashed border-transparent"
-                        }`}
+                        className={` transition-colors duration-200 ${snapshot.isDraggingOver
+                          ? "bg-transparent border-2 border-dashed border-blue-500"
+                          : "bg-transparent border-2 border-dashed border-transparent"
+                          }`}
                       >
                         {columnsToRender[`column${colNum}`]?.map(
                           (categoryId, index) => {
@@ -2107,11 +2104,10 @@ function PopularBookmarks() {
                                   <div
                                     ref={provided.innerRef}
                                     {...provided.draggableProps}
-                                    className={`mb-4 transition-all duration-200 ${
-                                      snapshot.isDragging
-                                        ? ""
-                                        : "shadow-none rotate-0 scale-100"
-                                    }`}
+                                    className={`mb-4 transition-all duration-200 ${snapshot.isDragging
+                                      ? ""
+                                      : "shadow-none rotate-0 scale-100"
+                                      }`}
                                   >
                                     <Card
                                       className="max-w-xl backdrop-blur-sm  bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)]  dark:text-white mx-auto rounded-sm"
@@ -2129,11 +2125,10 @@ function PopularBookmarks() {
                                             <div className="flex items-center flex-1">
                                               <div
                                                 {...provided.dragHandleProps}
-                                                className={`cursor-move p-3 transition-all duration-200 group ${
-                                                  snapshot.isDragging
-                                                    ? "bg-gray-300/[(var(--widget-opacity))] rounded"
-                                                    : ""
-                                                }`}
+                                                className={`cursor-move p-3 transition-all duration-200 group ${snapshot.isDragging
+                                                  ? "bg-gray-300/[(var(--widget-opacity))] rounded"
+                                                  : ""
+                                                  }`}
                                                 onClick={(e) =>
                                                   e.stopPropagation()
                                                 }
@@ -3166,7 +3161,7 @@ function PopularBookmarks() {
   //   for (const bm of imported) {
   //     let catId = categoryMap[bm.category?.toLowerCase() || ""];
   //     if (!catId && bm.category) {
-       
+
   //       const docRef = await addDoc(collection(db, "users", user.uid, "UserCategory"), {
   //         newCategory: bm.category,
   //         userId: user.uid,
@@ -3179,7 +3174,7 @@ function PopularBookmarks() {
   //       console.log('Created new category:', bm.category, 'with id:', catId);
   //     }
   //     if (catId && bm.url) {
-        
+
   //       await addDoc(collection(db, "users", user.uid, "CatBookmarks"), {
   //         title: bm.title || bm.url,
   //         url: bm.url,
@@ -3193,7 +3188,7 @@ function PopularBookmarks() {
   //       console.log('Added bookmark:', bm.title || bm.url, 'to category:', catId);
   //     }
   //   }
-    
+
   //   event.target.value = ""; 
   // };
 
@@ -3281,9 +3276,8 @@ function PopularBookmarks() {
 
   return (
     <div
-      className={` w-[85vw] mx-auto popular-bookmarks-container ${
-        isDarkMode ? "dark" : ""
-      }`}
+      className={` w-[85vw] mx-auto popular-bookmarks-container ${isDarkMode ? "dark" : ""
+        }`}
     >
       {renderBookmarksByCategory()}
 
@@ -3360,12 +3354,11 @@ function PopularBookmarks() {
         <div className="flex w-full mb-4 justify-between items-center gap-2">
           <div className="dark:text-white font-medium">Columns:</div>
           <div className="flex gap-2">
-            {[1,2,3,4].map(num => (
+            {[1, 2, 3, 4].map(num => (
               <button
                 key={num}
-                className={`px-4 py-2 rounded-md font-semibold border transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:text-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 ${
-                  previewColumns === num ? "bg-blue-500 text-white shadow" : "bg-white dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-gray-600"
-                }`}
+                className={`px-4 py-2 rounded-md font-semibold border transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:text-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 ${previewColumns === num ? "bg-blue-500 text-white shadow" : "bg-white dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-gray-600"
+                  }`}
                 onClick={() => handlePreviewColumnChange(num)}
                 title={`Show ${num} column${num > 1 ? 's' : ''}`}
               >
@@ -3392,11 +3385,10 @@ function PopularBookmarks() {
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className={`p-4 rounded-lg min-h-[200px] transition-all duration-300 border-2 ${
-                      snapshot.isDraggingOver
-                        ? "bg-indigo-50 dark:bg-gray-900/50 border-indigo-400 shadow-lg"
-                        : "bg-gray-50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-700"
-                    }`}
+                    className={`p-4 rounded-lg min-h-[200px] transition-all duration-300 border-2 ${snapshot.isDraggingOver
+                      ? "bg-indigo-50 dark:bg-gray-900/50 border-indigo-400 shadow-lg"
+                      : "bg-gray-50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-700"
+                      }`}
                   >
                     <div className="flex items-center justify-between mb-4">
                       <div className="text-center font-semibold dark:text-white">
@@ -3417,11 +3409,10 @@ function PopularBookmarks() {
                             <div
                               ref={provided.innerRef}
                               {...provided.draggableProps}
-                              className={`flex items-center border-none dark:text-white justify-between p-3 rounded-lg transition-all duration-200 dark:bg-gray-600/50 bg-white shadow-sm ${
-                                snapshot.isDragging
-                                  ? "shadow-lg border-2 border-indigo-400 scale-105 bg-indigo-50 dark:bg-indigo-900/60"
-                                  : "hover:border-indigo-300"
-                              }`}
+                              className={`flex items-center border-none dark:text-white justify-between p-3 rounded-lg transition-all duration-200 dark:bg-gray-600/50 bg-white shadow-sm ${snapshot.isDragging
+                                ? "shadow-lg border-2 border-indigo-400 scale-105 bg-indigo-50 dark:bg-indigo-900/60"
+                                : "hover:border-indigo-300"
+                                }`}
                               style={provided.draggableProps.style}
                             >
                               <div className="flex items-center border-none gap-3">
@@ -3461,7 +3452,7 @@ function PopularBookmarks() {
           <div className="text-sm font-medium dark:text-white text-gray-700 mb-2 flex items-center gap-2">
             Available Categories
             <Tooltip title="Search categories">
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" strokeWidth="2"/><line x1="21" y1="21" x2="16.65" y2="16.65" strokeWidth="2"/></svg>
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" strokeWidth="2" /><line x1="21" y1="21" x2="16.65" y2="16.65" strokeWidth="2" /></svg>
             </Tooltip>
           </div>
           <input
