@@ -27,9 +27,11 @@ import {
   deleteCustomPage,
   syncLocalPagesToFirebase
 } from "../firebase/customPages";
+import { useCountry } from "../context/CountryContext";
 
 const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
   const { isDarkMode, toggleTheme } = useTheme();
+  const { country: selectedCountry, setCountry: setSelectedCountry } = useCountry();
   const [showLogin, setShowLogin] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
   const [user, setUser] = useState(null);
@@ -43,11 +45,6 @@ const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
   const MAX_PAGES = 3; // Maximum allowed pages for free users
   const [showAdminBanner, setShowAdminBanner] = useState(true);
   const [showGoogleApps, setShowGoogleApps] = useState(false);
-  const [selectedCountry, setSelectedCountry] = useState({
-    key: "us",
-    flag: "https://flagcdn.com/us.svg",
-    name: "USA"
-  });
 
   const countries = [
     {

@@ -103,7 +103,13 @@ const MemoizedBookmarkForm = React.memo(
   }
 );
 
+import { Parser } from "htmlparser2"; // Add at the top for HTML parsing
+
+// Import the CountryContext and useCountry hook
+import { useCountry } from "../context/CountryContext";
+
 function PopularBookmarks() {
+  const { country } = useCountry();
   const [categories, setCategories] = useState([]);
   const [links, setLinks] = useState([]);
   const [user, setUser] = useState(null);
@@ -509,15 +515,15 @@ function PopularBookmarks() {
     if (!user) return [];
 
     try {
-      // Fetch admin categories
-      const adminCategorySnapshot = await getDocs(collection(db, "category"));
+      // Fetch admin categories (country-specific)
+      const adminCategorySnapshot = await getDocs(collection(db, `category_${country.key === "us" ? "USA" : "INDIA"}`));
       const adminCategories = adminCategorySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
         isAdminCategory: true,
       }));
 
-      // Fetch user categories
+      // Fetch user categories (user-specific, not country-specific)
       const userCategorySnapshot = await getDocs(
         collection(db, "users", user.uid, "UserCategory")
       );
@@ -534,7 +540,6 @@ function PopularBookmarks() {
       );
     } catch (error) {
       console.error("Error fetching categories:", error);
-      //error("Failed to fetch categories");
       return [];
     }
   };
@@ -604,12 +609,10 @@ function PopularBookmarks() {
             }
           } catch (error) {
             console.error("Error processing category changes:", error);
-            //error("Failed to process category updates");
           }
         },
         error: (error) => {
           console.error("Error in category snapshot:", error);
-          //error("Failed to listen for category updates");
         },
       }
     );
@@ -643,12 +646,10 @@ function PopularBookmarks() {
           }
         } catch (error) {
           console.error("Error processing position changes:", error);
-          //error("Failed to process layout updates");
         }
       },
       error: (error) => {
         console.error("Error in positions snapshot:", error);
-        //error("Failed to listen for layout updates");
       },
     });
 
@@ -690,7 +691,6 @@ function PopularBookmarks() {
         setOpenCategories(initialOpenStates);
       } catch (error) {
         console.error("Error initializing data:", error);
-        //error("Failed to load initial data");
       } finally {
         setLoading(false);
       }
@@ -729,7 +729,7 @@ function PopularBookmarks() {
 
         // Fetch all user bookmarks
         const userBookmarksSnapshot = await getDocs(
-          collection(db, "users", user.uid, "CatBookmarks")
+          collection(db, `links_${country.key === "us" ? "USA" : "INDIA"}`)
         );
         const userBookmarks = userBookmarksSnapshot.docs
           .map((doc) => {
@@ -758,7 +758,7 @@ function PopularBookmarks() {
         // Fetch admin bookmarks for each admin category
         const adminBookmarksPromises = categories.map(async (category) => {
           const bookmarksSnapshot = await getDocs(
-            query(collection(db, "links"), where("category", "==", category.id))
+            query(collection(db, `links_${country.key === "us" ? "USA" : "INDIA"}`), where("category", "==", category.id))
           );
           return bookmarksSnapshot.docs
             .map((doc) => {
@@ -800,7 +800,6 @@ function PopularBookmarks() {
         setLoading(false);
       } catch (error) {
         console.error("Error fetching bookmark data:", error);
-        //error("Failed to load bookmarks");
         setLoading(false);
       }
     };
@@ -928,10 +927,8 @@ function PopularBookmarks() {
       });
 
       await batch.commit();
-      // //success("Category position updated");
     } catch (error) {
       console.error("Error updating category positions:", error);
-      //error("Failed to update category position");
       // Revert local state on error
       setCategoryColumns(categoryColumns);
     }
@@ -1057,7 +1054,6 @@ function PopularBookmarks() {
 
   const handleAddCategory = async () => {
     if (!newCategoryName.trim()) {
-      //error("Category name cannot be empty");
       return;
     }
 
@@ -1137,7 +1133,6 @@ function PopularBookmarks() {
         return filtered;
       });
 
-      //success("Category added successfully");
       setNewCategoryName("");
       setIsAddCategoryModalVisible(false);
       // Show tip if controller is open
@@ -1154,7 +1149,6 @@ function PopularBookmarks() {
       }
     } catch (error) {
       console.error("Error adding category:", error);
-      //error("Failed to add category");
     }
   };
 
@@ -1265,11 +1259,8 @@ function PopularBookmarks() {
 
         return newColumns;
       });
-
-      //success("Category and its bookmarks deleted successfully");
     } catch (error) {
       console.error("Error deleting category:", error);
-      //error("Failed to delete category");
     } finally {
       setLoading(false);
     }
@@ -1350,11 +1341,9 @@ function PopularBookmarks() {
       ? categories.find((cat) => cat.id === selectedCategoryId)
       : selectedCategory;
     if (!categoryToUse) {
-      //error("Please select a category first");
       return;
     }
     if (!newBookmark.title.trim() || !newBookmark.url.trim()) {
-      //error("Title and URL are required");
       return;
     }
     try {
@@ -1370,7 +1359,6 @@ function PopularBookmarks() {
         }
       });
       if (isDuplicate) {
-        //warning("This URL already exists in this category");
         return;
       }
       const tempId = `temp_${btoa(urlKey).replace(/[^a-zA-Z0-9]/g, "")}_${Date.now()}`;
@@ -1403,7 +1391,6 @@ function PopularBookmarks() {
       setNewBookmark({ title: "", url: "", favicon: "" });
       setIsAddBookmarkModalVisible(false);
       setSelectedCategoryId("");
-      //success("Bookmark added successfully");
     } catch (error) {
       const normalizedUrl = validateUrl(newBookmark.url.trim());
       setLinks((prevLinks) =>
@@ -1416,7 +1403,6 @@ function PopularBookmarks() {
             )
         )
       );
-      // ... existing code ...
     }
   };
 
@@ -1467,11 +1453,6 @@ function PopularBookmarks() {
       children: [
         {
           key: "list",
-          // icon: (
-          //   <div className="dark:text-black bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
-          //     <UnorderedListOutlined />
-          //   </div>
-          // ),
           label: "List View",
           onClick: () => {
             const newViewMode = "list";
@@ -1484,16 +1465,10 @@ function PopularBookmarks() {
               "categoryViewModes",
               JSON.stringify(updatedModes)
             );
-            //success("View mode to List");
           },
         },
         {
           key: "grid",
-          // icon: (
-          //   <div className="dark:text-black bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
-          //     <AppstoreOutlined />
-          //   </div>
-          // ),
           label: "Grid View",
           onClick: () => {
             const newViewMode = "grid";
@@ -1506,16 +1481,10 @@ function PopularBookmarks() {
               "categoryViewModes",
               JSON.stringify(updatedModes)
             );
-            //success("View mode to Grid");
           },
         },
         {
           key: "icon",
-          // icon: (
-          //   <div className="dark:text-black bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
-          //     <PictureOutlined />
-          //   </div>
-          // ),
           label: "Icon View",
           onClick: () => {
             const newViewMode = "icon";
@@ -1528,7 +1497,6 @@ function PopularBookmarks() {
               "categoryViewModes",
               JSON.stringify(updatedModes)
             );
-            //success("View mode to Icon");
           },
         },
       ],
@@ -1544,11 +1512,6 @@ function PopularBookmarks() {
       children: [
         {
           key: "Short name",
-          // icon: (
-          //   <div className="dark:text-black bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
-          //     <UnorderedListOutlined />
-          //   </div>
-          // ),
           label: "Short name",
           onClick: () => {
             setLineOptions(1);
@@ -1556,28 +1519,11 @@ function PopularBookmarks() {
         },
         {
           key: "Full name",
-          // icon: (
-          //   <div className="dark:text-black bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
-          //     <AppstoreOutlined />
-          //   </div>
-          // ),
           label: "Full name",
           onClick: () => {
             setLineOptions(2);
           },
         },
-        // {
-        //   key: "3 lines",
-        //   // icon: (
-        //   //   <div className="dark:text-black bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
-        //   //     <PictureOutlined />
-        //   //   </div>
-        //   // ),
-        //   label: "Full lines",
-        //   onClick: () => {
-        //     setLineOptions("none");
-        //   },
-        // },
       ],
     },
     {
@@ -1755,13 +1701,11 @@ function PopularBookmarks() {
         );
       }
 
-      //success("Bookmark updated successfully");
       setEditingBookmark(null);
       setIsEditBookmarkModalVisible(false);
       editBookmarkForm.resetFields();
     } catch (error) {
       console.error("Error updating bookmark:", error);
-      //error(`Failed to update bookmark: ${error.message}`);
     }
   };
 
@@ -2002,12 +1946,35 @@ function PopularBookmarks() {
               <PlusOutlined />
               Add Bookmark
             </button>
-            <Dropdown
-              menu={{
-                items: [
-                  {
-                    key: "expandCollapse",
-                    icon: <div className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
+            <button
+              className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)]  px-3 py-2 dark:text-white mb-2"
+              onClick={handleExportBookmarks}
+            >
+              Export Bookmarks
+            </button>
+            <button
+              className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)]  px-3 py-2 dark:text-white mb-2"
+              onClick={() => importInputRef.current && importInputRef.current.click()}
+            >
+              Import Bookmarks
+            </button>
+            <input
+              type="file"
+              accept=".html"
+              ref={importInputRef}
+              style={{ display: "none" }}
+              onChange={handleImportBookmarks}
+            />
+          </div>
+          <div className="flex items-center gap-4">
+            <div
+              className={`flex items-center bg-white/[(var(--widget-opacity))] backdrop-blur-lg dark:bg-[#28283A]/[(var(--widget-opacity))] p-1 rounded-sm`}
+            >
+            </div>
+            <button
+              className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] px-3 py-2 dark:text-white mb-2"
+              onClick={toggleAllCategories}
+            >
               {areAllOpen ? <CompressOutlined /> : <ExpandOutlined />}
                     </div>,
                     label: <div className="dark:text-white">{areAllOpen ? "Collapse All" : "Expand All"}</div>,
@@ -2138,7 +2105,6 @@ function PopularBookmarks() {
                               (c) => c.id === categoryId
                             );
                             if (!category) {
-                              // console.log(`Category not found: ${categoryId}`);
                               return null;
                             }
 
@@ -2489,9 +2455,7 @@ function PopularBookmarks() {
           }
         );
       } catch (error) {
-        console.error("Error setting up listeners:", error);
         if (isComponentMounted) {
-          //error("Failed to load data. Please refresh the page.");
         }
       }
     };
@@ -2733,11 +2697,8 @@ function PopularBookmarks() {
         JSON.stringify(newColumnStructure)
       );
 
-      //success("Changes applied successfully");
       setIsControllerOpen(false);
     } catch (error) {
-      console.error("Error applying changes:", error);
-      //error("Failed to apply changes");
     } finally {
       setIsApplyingChanges(false);
     }
@@ -2772,8 +2733,6 @@ function PopularBookmarks() {
         });
       }
     } catch (error) {
-      console.error("Error fetching categories:", error);
-      //error("Failed to fetch latest category positions");
     }
   };
 
@@ -2847,8 +2806,6 @@ function PopularBookmarks() {
         }
       },
       (error) => {
-        console.error("Error in real-time sync:", error);
-        //error("Failed to sync with latest changes");
       }
     );
 
@@ -2859,9 +2816,6 @@ function PopularBookmarks() {
         const changes = snapshot.docChanges();
 
         if (changes.length > 0) {
-          // console.log("Bookmark changes detected:", changes.length);
-
-          // Process the changes in batches to avoid performance issues
           setLinks((prevLinks) => {
             // Create map of existing category-URL combinations to prevent duplicates
             const existingUrlsByCategory = new Map();
@@ -2961,7 +2915,6 @@ function PopularBookmarks() {
         }
       },
       (error) => {
-        console.error("Error in bookmarks sync:", error);
       }
     );
 
@@ -3028,7 +2981,6 @@ function PopularBookmarks() {
   // Function to handle deletion of selected bookmarks
   const handleDeleteSelected = () => {
     if (selectedBookmarks.length === 0) {
-      //warning("No bookmarks selected for deletion");
       return;
     }
 
@@ -3099,8 +3051,6 @@ function PopularBookmarks() {
           setSelectedBookmarks([]);
           setHasUnsavedChanges(true);
         } catch (error) {
-          console.error("Error processing bookmarks:", error);
-          //error(`Failed to process bookmarks: ${error.message}`);
         } finally {
           setLoading(false);
         }
@@ -3130,10 +3080,6 @@ function PopularBookmarks() {
             userData.hiddenCategories &&
             Array.isArray(userData.hiddenCategories)
           ) {
-            // console.log(
-            //   "Loading hidden categories:",
-            //   userData.hiddenCategories
-            // );
             setHiddenCategories(userData.hiddenCategories);
           }
 
@@ -3142,10 +3088,6 @@ function PopularBookmarks() {
             userData.hiddenBookmarkIds &&
             Array.isArray(userData.hiddenBookmarkIds)
           ) {
-            // console.log(
-            //   "Loading hidden bookmark IDs:",
-            //   userData.hiddenBookmarkIds
-            // );
             setHiddenBookmarkIds(userData.hiddenBookmarkIds);
           }
         }
@@ -3162,114 +3104,119 @@ function PopularBookmarks() {
     localStorage.setItem("bookmarkLineOptions", lineOptions.toString());
   }, [lineOptions]);
 
-  // Add effect to focus search input when search bar opens
-  useEffect(() => {
-    if (isSearchBarOpen) {
-      const searchInput = searchBarRef.current?.querySelector('input');
-      if (searchInput) {
-        setTimeout(() => searchInput.focus(), 100);
-      }
-    }
-  }, [isSearchBarOpen]);
+  // Import/Export refs
+  const importInputRef = useRef(null);
 
-  // Add this function inside PopularBookmarks component
-  const handleExportBookmarksHtml = () => {
-    let html = `<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Exported Bookmarks</title></head><body style='font-family:sans-serif;'>`;
-    html += `<h1>Exported Bookmarks</h1>`;
-    categories.forEach((category) => {
-      const categoryLinks = links.filter(
-        (link) =>
-          link.categoryId === category.id &&
-          !hiddenBookmarkIds.includes(link.id)
-      );
-      if (categoryLinks.length === 0) return;
-      html += `<h2>${category.name || category.newCategory}</h2><ul>`;
-      categoryLinks.forEach((link) => {
-        const title = link.title || link.name;
-        const url = link.url || link.link;
-        html += `<li><a href="${url}" target="_blank" rel="noopener noreferrer">${title}</a> <span style='color:gray;font-size:0.9em;'>(${url})</span></li>`;
-      });
-      html += `</ul>`;
+  // Export bookmarks as HTML (Netscape format)
+  const handleExportBookmarks = () => {
+    // Group bookmarks by category
+    const bookmarksByCategory = {};
+    links.forEach((link) => {
+      if (!bookmarksByCategory[link.categoryId]) bookmarksByCategory[link.categoryId] = [];
+      bookmarksByCategory[link.categoryId].push(link);
     });
-    html += `</body></html>`;
-
+    // Build HTML
+    let html = `<!DOCTYPE NETSCAPE-Bookmark-file-1>\n`;
+    html += `<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">\n`;
+    html += `<TITLE>Bookmarks</TITLE>\n`;
+    html += `<H1>Bookmarks</H1>\n`;
+    html += `<DL><p>\n`;
+    categories.forEach((cat) => {
+      if (bookmarksByCategory[cat.id] && bookmarksByCategory[cat.id].length > 0) {
+        html += `  <DT><H3>${cat.name || cat.newCategory}</H3>\n`;
+        html += `  <DL><p>\n`;
+        bookmarksByCategory[cat.id].forEach((link) => {
+          html += `    <DT><A HREF=\"${link.url || link.link}\">${link.title || link.name}</A>\n`;
+        });
+        html += `  </DL><p>\n`;
+      }
+    });
+    html += `</DL><p>\n`;
+    // Download
     const blob = new Blob([html], { type: "text/html" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `bookmarks_export_${new Date().toISOString().slice(0, 10)}.html`;
+    a.download = "bookmarks.html";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
 
-  // Helper to flatten importedPreview for selection
-  const getAllImportedKeys = () => {
-    const keys = [];
-    importedPreview.forEach((cat, catIdx) => {
-      cat.links.forEach((_, linkIdx) => {
-        keys.push(`${catIdx}-${linkIdx}`);
-      });
-    });
-    return keys;
-  };
-
-  const handleSelectAllImported = () => {
-    if (selectedImported.length === getAllImportedKeys().length) {
-      setSelectedImported([]);
-    } else {
-      setSelectedImported(getAllImportedKeys());
-    }
-  };
-
-  const handleDeleteSelectedImported = () => {
-    if (selectedImported.length === 0) return;
-    // Remove selected bookmarks from importedPreview
-    setImportedPreview(prev =>
-      prev.map((cat, catIdx) => ({
-        ...cat,
-        links: cat.links.filter((_, linkIdx) => !selectedImported.includes(`${catIdx}-${linkIdx}`))
-      })).filter(cat => cat.links.length > 0)
-    );
-    setSelectedImported([]);
-  };
-
-  // Helper to get all user category IDs
-  const getAllUserCategoryIds = () =>
-    categories.filter(cat => !cat.isAdminCategory).map(cat => cat.id);
-
-  const handleSelectAllUserCategories = () => {
-    const allIds = getAllUserCategoryIds();
-    if (selectedUserCategories.length === allIds.length) {
-      setSelectedUserCategories([]);
-    } else {
-      setSelectedUserCategories(allIds);
-    }
-  };
-
-  const handleDeleteSelectedUserCategories = () => {
-    if (selectedUserCategories.length === 0) return;
-    Modal.confirm({
-      title: `Delete Selected Categories`,
-      content: `Are you sure you want to delete ${selectedUserCategories.length} selected categor${selectedUserCategories.length === 1 ? 'y' : 'ies'} and all their bookmarks? This action cannot be undone.`,
-      okText: "Delete",
-      okType: "danger",
-      cancelText: "Cancel",
-      onOk: async () => {
-        try {
-          setLoading(true);
-          for (const catId of selectedUserCategories) {
-            await handleDeleteCategory(catId);
-          }
-          setSelectedUserCategories([]);
-        } catch (error) {
-          console.error("Error deleting selected categories:", error);
-        } finally {
-          setLoading(false);
+  // Import bookmarks from HTML
+  const handleImportBookmarks = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    const text = await file.text();
+    // Parse HTML using htmlparser2
+    const imported = [];
+    let currentCategory = null;
+    const parser = new Parser({
+      onopentag(name, attribs) {
+        if (name === "h3") {
+          currentCategory = "";
+        }
+        if (name === "a" && attribs.href) {
+          imported.push({
+            category: currentCategory,
+            url: attribs.href,
+            title: "",
+          });
         }
       },
-    });
+      ontext(text) {
+        if (currentCategory !== null) {
+          currentCategory += text;
+        } else if (imported.length > 0 && !imported[imported.length - 1].title) {
+          imported[imported.length - 1].title = text;
+        }
+      },
+      onclosetag(name) {
+        if (name === "h3") {
+          currentCategory = currentCategory.trim();
+        }
+      },
+    }, { decodeEntities: true });
+    parser.write(text);
+    parser.end();
+    // Map categories to existing or create new
+    const categoryMap = {};
+    for (const cat of categories) {
+      categoryMap[(cat.name || cat.newCategory).toLowerCase()] = cat.id;
+    }
+    for (const bm of imported) {
+      let catId = categoryMap[bm.category?.toLowerCase() || ""];
+      if (!catId && bm.category) {
+        // Create new category
+        const docRef = await addDoc(collection(db, "users", user.uid, "UserCategory"), {
+          newCategory: bm.category,
+          userId: user.uid,
+          order: categories.length,
+          createdAt: new Date().toISOString(),
+        });
+        catId = docRef.id;
+        categoryMap[bm.category.toLowerCase()] = catId;
+        setCategories((prev) => [...prev, { id: catId, name: bm.category, userId: user.uid, newCategory: bm.category, order: categories.length }]);
+        console.log('Created new category:', bm.category, 'with id:', catId);
+      }
+      if (catId && bm.url) {
+        // Add bookmark
+        await addDoc(collection(db, "users", user.uid, "CatBookmarks"), {
+          title: bm.title || bm.url,
+          url: bm.url,
+          favicon: await fetchFavicon(bm.url),
+          categoryId: catId,
+          userId: user.uid,
+          createdAt: new Date().toISOString(),
+          order: 0,
+          isAdminBookmark: false,
+        });
+        console.log('Added bookmark:', bm.title || bm.url, 'to category:', catId);
+      }
+    }
+    // Optionally, reload bookmarks
+    event.target.value = ""; // Reset input
   };
 
   if (loading) {
@@ -3284,28 +3231,6 @@ function PopularBookmarks() {
             <div
               className={`flex items-center bg-white/[(var(--widget-opacity))] backdrop-blur-lg dark:bg-[#28283A]/[(var(--widget-opacity))] p-1 rounded-sm`}
             >
-              {/* <button
-                onClick={() => handleGridViewChange(false)}
-                className={`p-2 rounded ${
-                  !grid
-                    ? "bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] shadow-sm"
-                    : "hover:bg-white dark:hover:bg-gray-700/50"
-                }`}
-              >
-                <svg
-                  className="w-5 h-5 dark:text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h18"
-                  />
-                </svg>
-              </button> */}
             </div>
           </div>
         </div>

@@ -37,9 +37,7 @@ const SearchPage = ({ isToolPage = false }) => {
   const [textColor, setTextColor] = useState(() =>
     parseInt(localStorage.getItem("textColorValue") || "0")
   );
-  const { widgetTransparent, setWidgetTransparent } = useContext(
-    WidgetTransparencyContext
-  );
+  const { widgetTransparent, setWidgetTransparent } = useContext(WidgetTransparencyContext);
   const [activeComponent, setActiveComponent] = useState("Anotherpage");
   const navigate = useNavigate();
   const [visibleHandle, setVisibleHandle] = useState(() => {

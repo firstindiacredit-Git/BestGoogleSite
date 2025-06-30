@@ -72,7 +72,7 @@ function ImageUploader() {
           setActiveIndex((prev) => (prev + 1) % images.length);
           setIsTransitioning(false);
         }, 500); // Increased transition duration for smoother effect
-      }, 15000); // 15 seconds
+      }, 3000); // 15 seconds
       return () => clearInterval(intervalRef.current);
     } else {
       clearInterval(intervalRef.current);
@@ -176,7 +176,7 @@ function ImageUploader() {
               {/* Left Arrow */}
               {images.length > 1 && (
                 <button
-                  className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/40 hover:bg-black/70 text-white rounded-full p-2 transition"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 z-10 hover:bg-black/70 rounded-full p-2 transition opacity-0 group-hover:opacity-100"
                   onClick={handlePrev}
                   aria-label="Previous image"
                   style={{ outline: 'none', border: 'none' }}
@@ -187,7 +187,7 @@ function ImageUploader() {
               {/* Right Arrow */}
               {images.length > 1 && (
                 <button
-                  className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/40 hover:bg-black/70 text-white rounded-full p-2 transition"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 z-10 hover:bg-black/70 rounded-full p-2 transition opacity-0 group-hover:opacity-100"
                   onClick={handleNext}
                   aria-label="Next image"
                   style={{ outline: 'none', border: 'none' }}
