@@ -181,12 +181,11 @@ function PopularBookmarks() {
   // State for previewing imported bookmarks
   const [importedPreview, setImportedPreview] = useState([]);
 
-  // Ref for import bookmarks file input
   const fileInputRef = React.useRef(null);
-  // Ref for search bar
+ 
   const searchBarRef = React.useRef(null);
 
-  // Add state for Category Manager modal and selection
+
   const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false);
   const [selectedImported, setSelectedImported] = useState([]); // [{catIdx, linkIdx}]
 
