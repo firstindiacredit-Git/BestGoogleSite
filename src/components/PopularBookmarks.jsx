@@ -3197,6 +3197,52 @@ function PopularBookmarks() {
   //   event.target.value = ""; 
   // };
 
+  const getAllUserCategoryIds = () => categories.filter(cat => !cat.isAdminCategory).map(cat => cat.id);
+
+  const handleSelectAllUserCategories = () => {
+    if (selectedUserCategories.length === getAllUserCategoryIds().length) {
+      setSelectedUserCategories([]);
+    } else {
+      setSelectedUserCategories(getAllUserCategoryIds());
+    }
+  };
+
+  const handleDeleteSelectedUserCategories = async () => {
+    if (selectedUserCategories.length === 0) return;
+
+    Modal.confirm({
+      title: "Delete Selected Categories",
+      content: `Are you sure you want to delete ${selectedUserCategories.length} selected category(ies)? All bookmarks in these categories will also be deleted.`,
+      okText: "Delete",
+      okType: "danger",
+      cancelText: "Cancel",
+      onOk: async () => {
+        try {
+          setLoading(true);
+          for (const categoryId of selectedUserCategories) {
+            // Delete the category document
+            await deleteDoc(doc(db, "users", user.uid, "UserCategory", categoryId));
+            // Delete all bookmarks in this category
+            const bookmarksSnapshot = await getDocs(
+              collection(db, "users", user.uid, "CatBookmarks")
+            );
+            const bookmarksToDelete = bookmarksSnapshot.docs.filter(
+              (docSnap) => docSnap.data().categoryId === categoryId
+            );
+            for (const bm of bookmarksToDelete) {
+              await deleteDoc(doc(db, "users", user.uid, "CatBookmarks", bm.id));
+            }
+          }
+          setSelectedUserCategories([]);
+        } catch (error) {
+          console.error("Error deleting selected categories:", error);
+        } finally {
+          setLoading(false);
+        }
+      },
+    });
+  };
+
   if (loading) {
     return (
       <div className="w-[85vw] mx-auto" style={{ padding: "24px" }}>
