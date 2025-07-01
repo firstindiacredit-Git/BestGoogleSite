@@ -223,6 +223,29 @@ const Top100Page = () => {
       }
 
       // Handle other categories with existing backend API
+      // Yahoo Finance Most Actives for stocks
+      if (category === "stocks") {
+        const response = await fetch(
+          "https://query1.finance.yahoo.com/v1/finance/screener/predefined/saved?count=100&scrIds=most_actives"
+        );
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        const quotes = data.finance?.result?.[0]?.quotes || [];
+        const processedData = quotes.map((stock) => ({
+          name: `${stock.shortName || stock.symbol}`,
+          description: `Symbol: ${stock.symbol || "N/A"},\nExchange: ${stock.exchange || "N/A"},\nPrice: $${stock.regularMarketPrice ?? "N/A"},\nChange: ${stock.regularMarketChange ?? "N/A"} (${stock.regularMarketChangePercent ? stock.regularMarketChangePercent.toFixed(2) : "N/A"}%),\nVolume: ${stock.regularMarketVolume?.toLocaleString() ?? "N/A"},\nMarket Cap: $${stock.marketCap ? (stock.marketCap / 1e9).toFixed(2) + "B" : "N/A"},\nPE Ratio: ${stock.trailingPE ?? "N/A"},\n52W High: $${stock.fiftyTwoWeekHigh ?? "N/A"},\n52W Low: $${stock.fiftyTwoWeekLow ?? "N/A"}`,
+          value: `$${stock.regularMarketPrice ?? "N/A"}`,
+          image: stock.logo_url || null,
+        }));
+        setItems(processedData);
+        setError(null);
+        setLoading(false);
+        return;
+      }
+
+      // Handle other categories with existing backend API
       const response = await fetch(
         `https://bgs-backend.vercel.app/api/top100/${category}?year=${year}`
       );
