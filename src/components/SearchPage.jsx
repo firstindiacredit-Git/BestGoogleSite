@@ -535,8 +535,8 @@ const SearchPage = ({ isToolPage = false }) => {
                 <Shortcut />
                 {!simple && (
                   <div>
-                    <div className="flex justify-center max-w-[90vw] mb-3 w-full mx-auto">
-                      <div className="flex space-x-1 p-1 justify-between bg-gray-200/10 backdrop-blur-lg  dark:bg-[#513a7a]/10 rounded-lg w-full">
+                    <div className="flex justify-center max-w-[90vw] bg-white dark:bg-[#28283a] rounded-lg mb-3 w-full mx-auto">
+                      <div className="flex space-x-1 p-1 justify-between bg-gray-white dark:bg-[#28283a] backdrop-blur-lg  dark:bg-[#513a7a]/10 rounded-lg w-full">
                         <button
                           className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
                             activeComponent === "Anotherpage"

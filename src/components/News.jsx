@@ -1,8 +1,9 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
-import { Row, Col, List, Image, Dropdown } from "antd";
+import { Row, Col, List, Image } from "antd";
+import PropTypes from "prop-types";
 
 import SkeletonLoader from "./SkeletonLoader";
-import { FaList, FaTh, FaEllipsisH } from "react-icons/fa";
+import { FaList, FaTh } from "react-icons/fa";
 
 // Create NewsContext
 const NewsContext = createContext(null);
@@ -39,6 +40,10 @@ const NewsProvider = ({ children }) => {
   );
 };
 
+NewsProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+
 // Main NewsApp component
 const NewsApp = () => {
   const { newsapi, loading, fetchData } = useContext(NewsContext);
@@ -64,22 +69,6 @@ const NewsApp = () => {
     { key: "automobile", label: "Automobile" },
     { key: "weather", label: "Weather" }
   ];
-
-  // Split menu items into main and dropdown items
-  const mainMenuItems = menuItems.slice(0, 8);
-  const dropdownItems = menuItems.slice(8).map(item => ({
-    key: item.key,
-    label: (
-      <div
-        onClick={() => {
-          fetchData(item.key);
-          setSHow(item.label);
-        }}
-      >
-        {item.label}
-      </div>
-    ),
-  }));
 
   const renderGridView = () => (
     <Row gutter={[20, 20]}>
@@ -173,9 +162,9 @@ const NewsApp = () => {
 
   return (
     <div className="p-6">
-      <div className="flex mb-5 flex-wrap gap-2">
-        <div className="m-auto w-fit p-1 dark:text-white flex flex-wrap justify-center gap-2 rounded-md backdrop-blur-sm bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]">
-          {mainMenuItems.map((item, key) => (
+      <div className="flex mb-5 flex-wrap gap-2 justify-between items-center">
+        <div className="p-1 dark:text-white flex flex-wrap justify-start gap-2 rounded-md backdrop-blur-sm bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]">
+          {menuItems.map((item, key) => (
             <div
               key={key}
               className={`cursor-pointer px-3 py-2 rounded-md ${
@@ -191,18 +180,8 @@ const NewsApp = () => {
               {item.label}
             </div>
           ))}
-          <Dropdown
-            menu={{ items: dropdownItems }}
-            placement="bottomRight"
-            trigger={['click']}
-          >
-            <div className="cursor-pointer px-3 py-2 rounded-md hover:bg-gray-200/20 hover:dark:bg-[#513a7a]/20">
-              <FaEllipsisH />
-            </div>
-          </Dropdown>
         </div>
-
-        <div className="bg-white dark:bg-[#513a7a] rounded-lg shadow-sm p-1 inline-flex">
+        <div className="bg-white dark:bg-[#513a7a] rounded-lg shadow-sm p-1 inline-flex ml-auto">
           <button
             onClick={() => setViewMode("grid")}
             className={`p-2 rounded-md transition-all duration-200 ${

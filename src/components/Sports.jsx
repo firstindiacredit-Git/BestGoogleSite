@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { Row, Col, Button, Layout, Input, Card, Image } from "antd";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { Row, Col, Button, Layout, Card, Image } from "antd";
 
 import SkeletonLoader from "./SkeletonLoader";
 import { FaList, FaTh } from "react-icons/fa";
 const { Content } = Layout;
-const { Search } = Input;
 
 const SportsLeagues = () => {
   const [loading, setLoading] = useState(true);
@@ -14,6 +13,8 @@ const SportsLeagues = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("football");
+  const [isSearchBarOpen, setIsSearchBarOpen] = useState(false);
+  const searchBarRef = useRef(null);
 
   // Add function to get current date in YYYY-MM-DD format
   const getCurrentDate = () => {
@@ -128,14 +129,6 @@ const SportsLeagues = () => {
               statusColor = "text-blue-500";
             }
 
-            // Format scores for display
-            const homeScore = game.scores.home;
-            const awayScore = game.scores.away;
-            const scoreDisplay =
-              homeScore && awayScore
-                ? `${homeScore.total} - ${awayScore.total}`
-                : "Not Started";
-
             return {
               id: game.id,
               title: `${game.teams.home.name} vs ${game.teams.away.name}`,
@@ -147,11 +140,11 @@ const SportsLeagues = () => {
               matchState: game.status.short,
               team1: game.teams.home.name,
               team2: game.teams.away.name,
-              team1Score: homeScore
-                ? `${homeScore.total} (Q1: ${homeScore.quarter_1}, Q2: ${homeScore.quarter_2}, Q3: ${homeScore.quarter_3}, Q4: ${homeScore.quarter_4})`
+              team1Score: game.scores.home
+                ? `${game.scores.home.total} (Q1: ${game.scores.home.quarter_1}, Q2: ${game.scores.home.quarter_2}, Q3: ${game.scores.home.quarter_3}, Q4: ${game.scores.home.quarter_4})`
                 : null,
-              team2Score: awayScore
-                ? `${awayScore.total} (Q1: ${awayScore.quarter_1}, Q2: ${awayScore.quarter_2}, Q3: ${awayScore.quarter_3}, Q4: ${awayScore.quarter_4})`
+              team2Score: game.scores.away
+                ? `${game.scores.away.total} (Q1: ${game.scores.away.quarter_1}, Q2: ${game.scores.away.quarter_2}, Q3: ${game.scores.away.quarter_3}, Q4: ${game.scores.away.quarter_4})`
                 : null,
               t1img: game.teams.home.logo,
               t2img: game.teams.away.logo,
@@ -224,7 +217,6 @@ const SportsLeagues = () => {
               statusColor: statusColor,
               matchEnded: game.status.short === "FT",
               venue: game.league.name,
-              scoreDisplay: `${homeScore.total} - ${awayScore.total}`,
               hits: {
                 home: homeScore.hits,
                 away: awayScore.hits,
@@ -298,7 +290,6 @@ const SportsLeagues = () => {
               statusColor: statusColor,
               matchEnded: game.status.short === "FT",
               venue: game.league.name,
-              scoreDisplay: `${game.scores.home} - ${game.scores.away}`,
               periods: game.periods,
             };
           });
@@ -373,7 +364,6 @@ const SportsLeagues = () => {
               statusColor: statusColor,
               matchEnded: game.status.short === "FT",
               venue: game.league.name,
-              scoreDisplay: `${game.scores.home} - ${game.scores.away}`,
               week: game.week,
               periods: game.periods,
             };
@@ -419,6 +409,23 @@ const SportsLeagues = () => {
     filterLeagues();
   }, [filterLeagues, searchQuery]);
 
+  // Click outside to close search bar
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (searchBarRef.current && !searchBarRef.current.contains(event.target)) {
+        setIsSearchBarOpen(false);
+      }
+    }
+    if (isSearchBarOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isSearchBarOpen]);
+
   const menuItems = [
     { key: "football", label: "Football" },
     { key: "cricket", label: "Cricket" },
@@ -434,13 +441,44 @@ const SportsLeagues = () => {
         <Content className="p-6">
           <div className="mb-8">
             <div className="flex justify-between items-center mb-6">
-              <Search
-                placeholder="Search competitions..."
-                allowClear
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ width: 300 }}
-                className="dark:bg-[#28283A] dark:text-gray-300"
-              />
+              <div className="relative flex items-center" ref={searchBarRef} style={{ width: 300 }}>
+                {!isSearchBarOpen ? (
+                  <button
+                    onClick={() => setIsSearchBarOpen((prev) => !prev)}
+                    className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] px-3 py-2 dark:text-white transition-all duration-300 hover:scale-105"
+                    title="Search"
+                  >
+                    <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <circle cx="11" cy="11" r="8" strokeWidth="2" />
+                      <line x1="21" y1="21" x2="16.65" y2="16.65" strokeWidth="2" />
+                    </svg>
+                    Search
+                  </button>
+                ) : (
+                  <div className="relative w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-lg">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                      <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8" strokeWidth="2" />
+                        <line x1="21" y1="21" x2="16.65" y2="16.65" strokeWidth="2" />
+                      </svg>
+                    </span>
+                    <input
+                      type="text"
+                      placeholder="Search competitions..."
+                      className="w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-lg"
+                      value={searchQuery}
+                      onChange={e => setSearchQuery(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === 'Escape') {
+                          setIsSearchBarOpen(false);
+                          setSearchQuery("");
+                        }
+                      }}
+                      autoFocus={isSearchBarOpen}
+                    />
+                  </div>
+                )}
+              </div>
               <div className="m-auto w-fit p-1 dark:text-white flex justify-center gap-4 rounded-md backdrop-blur-sm bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]">
                 {menuItems.map((item, key) => (
                   <div
@@ -497,13 +535,39 @@ const SportsLeagues = () => {
       <Content className="p-6">
         <div className="mb-8">
           <div className="flex justify-between items-center mb-6">
-            <Search
-              placeholder="Search competitions..."
-              allowClear
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ width: 300 }}
-              className="dark:bg-[#28283A] dark:text-gray-300"
-            />
+            <div className="relative flex items-center" ref={searchBarRef} style={{ width: 300 }}>
+              {!isSearchBarOpen ? (
+                <button
+                  onClick={() => setIsSearchBarOpen((prev) => !prev)}
+                  className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] px-3 py-2 dark:text-white transition-all duration-300 hover:scale-105"
+                  title="Search"
+                >
+                  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="8" strokeWidth="2" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" strokeWidth="2" />
+                  </svg>
+                  Search
+                </button>
+              ) : (
+                <div className="relative w-full px-2.5 py-2 rounded text-gray-700 dark:text-white focus:outline-none shadow-lg">
+               
+                  <input
+                    type="text"
+                   
+                    className="w-full px-2.5 py-2 rounded  bg-white dark:bg-gray-800 text-gray-700 dark:text-white focus:outline-none shadow-lg"
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Escape') {
+                        setIsSearchBarOpen(false);
+                        setSearchQuery("");
+                      }
+                    }}
+                    autoFocus={isSearchBarOpen}
+                  />
+                </div>
+              )}
+            </div>
             <div className="m-auto w-fit p-1 dark:text-white flex justify-center gap-4 rounded-md backdrop-blur-sm bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]">
               {menuItems.map((item, key) => (
                 <div

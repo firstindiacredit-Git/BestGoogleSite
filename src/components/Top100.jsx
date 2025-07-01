@@ -1,20 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Card,
   Row,
   Col,
   Typography,
-  Spin,
-  Alert,
-  Radio,
-  Input,
-  List,
   Space,
   Image,
-  Dropdown,
 } from "antd";
 import { FaTh } from "react-icons/fa";
-import { FaList, FaEllipsisV } from "react-icons/fa";
+import { FaList } from "react-icons/fa";
 import sportsmen from "./sportsmen.json";
 import brands from "./brand.json";
 import bikes from "./bikes.json";
@@ -25,7 +19,6 @@ import "./ToastifyNotification.css";
 import SkeletonLoader from "./SkeletonLoader";
 
 const { Title } = Typography;
-const { Search } = Input;
 
 const Top100Page = () => {
   const [items, setItems] = useState([]);
@@ -35,6 +28,8 @@ const Top100Page = () => {
   const [page, setPage] = useState(1);
   const [viewMode, setViewMode] = useState("grid");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchBarOpen, setIsSearchBarOpen] = useState(false);
+  const searchBarRef = useRef(null);
   const year = new Date().getFullYear();
   const filteredItems = items
     .map((item, index) => ({
@@ -63,22 +58,6 @@ const Top100Page = () => {
     { key: "gdp", label: "GDP" },
     { key: "cars", label: "Cars" },
     { key: "banks", label: "Banks" },
-  ];
-
-  const dropdownItems = [
-    // ...mainCategories.map(cat => ({
-    //   key: cat.key,
-    //   label: cat.label,
-    //   onClick: () => setCategory(cat.key),
-    // })),
-    // {
-    //   type: 'divider',
-    // },
-    ...additionalCategories.map(cat => ({
-      key: cat.key,
-      label: cat.label,
-      onClick: () => setCategory(cat.key),
-    })),
   ];
 
   const fetchTop100 = async (category) => {
@@ -293,6 +272,23 @@ const Top100Page = () => {
     setLoading(true); // Set loading to true before fetching
     fetchTop100(category);
   }, [category, page]);
+
+  // Click outside to close search bar
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (searchBarRef.current && !searchBarRef.current.contains(event.target)) {
+        setIsSearchBarOpen(false);
+      }
+    }
+    if (isSearchBarOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isSearchBarOpen]);
 
   const renderGridView = () => (
     <Row gutter={[16, 16]}>
@@ -646,12 +642,44 @@ const Top100Page = () => {
               alignItems: "center",
             }}
           >
-            <Search
-              placeholder="Search items..."
-              allowClear
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ width: 300 }}
-            />
+            <div className="relative flex items-center" ref={searchBarRef} style={{ width: 300 }}>
+              <button
+                onClick={() => setIsSearchBarOpen((prev) => !prev)}
+                className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] px-3 py-2 dark:text-white transition-all duration-300 hover:scale-105"
+                title="Search"
+              >
+                {isSearchBarOpen ? (
+                  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <line x1="18" y1="6" x2="6" y2="18" strokeWidth="2" />
+                    <line x1="6" y1="6" x2="18" y2="18" strokeWidth="2" />
+                  </svg>
+                ) : (
+                  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="8" strokeWidth="2" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" strokeWidth="2" />
+                  </svg>
+                )}
+                {isSearchBarOpen ? "Close" : "Search"}
+              </button>
+              <div
+                className={`absolute left-0 top-0 transition-all duration-300 ease-in-out ${isSearchBarOpen ? 'w-64 opacity-100 -translate-x-0' : 'w-0 opacity-0 -translate-x-4'} overflow-hidden`}
+              >
+                <input
+                  type="text"
+                  placeholder="Search items..."
+                  className="w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-lg"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Escape') {
+                      setIsSearchBarOpen(false);
+                      setSearchQuery("");
+                    }
+                  }}
+                  autoFocus={isSearchBarOpen}
+                />
+              </div>
+            </div>
             <div className="dark:bg-[#513a7a]/[var(--widget-opacity)]  bg-white/[var(--widget-opacity)] backdrop-blur-sm rounded-lg border border-gray-400/10 dark:border-gray-800/10">
               <div>
                 <button
@@ -786,12 +814,44 @@ const Top100Page = () => {
             alignItems: "center",
           }}
         >
-          <Search
-            placeholder="Search items..."
-            allowClear
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ width: 300 }}
-          />
+          <div className="relative flex items-center" ref={searchBarRef} style={{ width: 300 }}>
+            <button
+              onClick={() => setIsSearchBarOpen((prev) => !prev)}
+              className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] px-3 py-2 dark:text-white transition-all duration-300 hover:scale-105"
+              title="Search"
+            >
+              {isSearchBarOpen ? (
+                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <line x1="18" y1="6" x2="6" y2="18" strokeWidth="2" />
+                  <line x1="6" y1="6" x2="18" y2="18" strokeWidth="2" />
+                </svg>
+              ) : (
+                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <circle cx="11" cy="11" r="8" strokeWidth="2" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" strokeWidth="2" />
+                </svg>
+              )}
+              {isSearchBarOpen ? "Close" : "Search"}
+            </button>
+            <div
+              className={`absolute left-0 top-0 transition-all duration-300 ease-in-out ${isSearchBarOpen ? 'w-64 opacity-100 -translate-x-0' : 'w-0 opacity-0 -translate-x-4'} overflow-hidden`}
+            >
+              <input
+                type="text"
+                placeholder="Search items..."
+                className="w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-lg"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Escape') {
+                    setIsSearchBarOpen(false);
+                    setSearchQuery("");
+                  }
+                }}
+                autoFocus={isSearchBarOpen}
+              />
+            </div>
+          </div>
           <div style={{ textAlign: "center" }}>
             <div className="dark:bg-[#513a7a]/[var(--widget-opacity)] bg-white/[var(--widget-opacity)] backdrop-blur-sm rounded-lg border border-gray-400/10 dark:border-gray-800/10">
               {mainCategories.map((cat) => (
@@ -806,15 +866,18 @@ const Top100Page = () => {
                   {cat.label}
                 </button>
               ))}
-              <Dropdown
-                menu={{ items: dropdownItems }}
-                placement="bottomRight"
-                trigger={["click"]}
-              >
-                <button className="px-4 py-2 m-1 rounded">
-                  <FaEllipsisV />
+              {additionalCategories.map((cat) => (
+                <button
+                  key={cat.key}
+                  className={`px-4 py-2 m-1 rounded ${category === cat.key
+                    ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                    : ""
+                    }`}
+                  onClick={() => setCategory(cat.key)}
+                >
+                  {cat.label}
                 </button>
-              </Dropdown>
+              ))}
             </div>
           </div>
           <div className="w-[300px] flex justify-end">
