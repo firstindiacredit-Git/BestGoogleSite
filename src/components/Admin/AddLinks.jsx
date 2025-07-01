@@ -21,22 +21,8 @@ import {
   UpOutlined,
   DownOutlined,
 } from "@ant-design/icons";
-import { useCountry } from "../../context/CountryContext";
 
 function AddLinks() {
-  const { country, setCountry } = useCountry();
-  const countries = [
-    {
-      key: "us",
-      flag: "https://flagcdn.com/us.svg",
-      name: "USA"
-    },
-    {
-      key: "in",
-      flag: "https://flagcdn.com/in.svg",
-      name: "India"
-    }
-  ];
   const [newCategory, setNewCategory] = useState("");
   const [newLink, setNewLink] = useState({ name: "", link: "", category: "" });
   const [newCategories, setNewCategories] = useState([]);
@@ -56,10 +42,6 @@ function AddLinks() {
   const [isCategoryEditModalOpen, setIsCategoryEditModalOpen] = useState(false);
 
   const ITEMS_PER_PAGE = 10;
-
-  // Helper to get collection name based on country
-  const getLinksCollection = () => `links_${country.key === "us" ? "USA" : "INDIA"}`;
-  const getCategoryCollection = () => `category_${country.key === "us" ? "USA" : "INDIA"}`;
 
   // Filter categories and their links based on search term
   const filteredCategories = newCategories
@@ -119,7 +101,7 @@ function AddLinks() {
       fetchLinks();
       fetchCategories();
     }
-  }, [user, country]);
+  }, [user]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -134,7 +116,7 @@ function AddLinks() {
 
   const fetchLinks = async () => {
     try {
-      const querySnapshot = await getDocs(collection(db, getLinksCollection()));
+      const querySnapshot = await getDocs(collection(db, "links"));
       const fetchedLinks = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
@@ -147,7 +129,7 @@ function AddLinks() {
 
   const fetchCategories = async () => {
     try {
-      const querySnapshot = await getDocs(collection(db, getCategoryCollection()));
+      const querySnapshot = await getDocs(collection(db, "category"));
       const fetchedCategories = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
@@ -166,13 +148,16 @@ function AddLinks() {
     }
 
     try {
-      await addDoc(collection(db, getCategoryCollection()), {
+      await addDoc(collection(db, "category"), {
         newCategory: newCategory.trim(),
+        // color: selectedColor,
         createdAt: new Date(),
       });
 
       setNewCategory("");
+      // setSelectedColor("#3B82F6");
       setCategoryModalOpen(false);
+      // Fetch updated data
       fetchCategories();
     } catch (error) {
       console.error("Error adding category:", error);
@@ -187,7 +172,7 @@ function AddLinks() {
     }
 
     try {
-      await addDoc(collection(db, getLinksCollection()), {
+      await addDoc(collection(db, "links"), {
         name: newLink.name,
         link: newLink.link,
         category: newLink.category,
@@ -195,6 +180,7 @@ function AddLinks() {
         createdBy: user.uid,
       });
       setNewLink({ name: "", link: "", category: "" });
+      // Fetch updated data
       fetchLinks();
       alert("Bookmark added successfully!");
     } catch (error) {
@@ -209,7 +195,8 @@ function AddLinks() {
     if (!confirmDelete) return;
 
     try {
-      await deleteDoc(doc(db, getLinksCollection(), id));
+      await deleteDoc(doc(db, "links", id));
+      // Fetch updated data
       fetchLinks();
     } catch (error) {
       console.error("Error deleting bookmark: ", error);
@@ -230,7 +217,7 @@ function AddLinks() {
     if (!editBookmarkData) return;
 
     try {
-      await updateDoc(doc(db, getLinksCollection(), editBookmarkData.id), {
+      await updateDoc(doc(db, "links", editBookmarkData.id), {
         name: editBookmarkData.name,
         link: editBookmarkData.link,
         category: editBookmarkData.category,
@@ -238,6 +225,7 @@ function AddLinks() {
       });
       setEditModalOpen(false);
       setEditBookmarkData(null);
+      // Fetch updated data
       fetchLinks();
     } catch (error) {
       console.error("Error updating bookmark:", error);
@@ -252,7 +240,8 @@ function AddLinks() {
     if (!confirmDelete) return;
 
     try {
-      await deleteDoc(doc(db, getCategoryCollection(), id));
+      await deleteDoc(doc(db, "category", id));
+      // Fetch updated data
       fetchCategories();
     } catch (error) {
       console.error("Error deleting category: ", error);
@@ -278,7 +267,7 @@ function AddLinks() {
     if (!editCategoryData) return;
 
     try {
-      await updateDoc(doc(db, getCategoryCollection(), editCategoryData.id), {
+      await updateDoc(doc(db, "category", editCategoryData.id), {
         newCategory: editCategoryData.name,
         updatedAt: new Date(),
       });
@@ -297,20 +286,6 @@ function AddLinks() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#28283A]">
-      {/* Country Switcher */}
-      <div className="flex justify-end items-center p-4">
-        <select
-          value={country.key}
-          onChange={e => setCountry(countries.find(c => c.key === e.target.value))}
-          className="px-3 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#513a7a] text-gray-700 dark:text-white"
-        >
-          {countries.map(c => (
-            <option key={c.key} value={c.key}>
-              {c.name}
-            </option>
-          ))}
-        </select>
-      </div>
       <div className="sticky top-0 z-10 bg-white dark:bg-[#37375d] shadow-sm border-b border-gray-200 dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
           <div className="flex flex-col sm:flex-row gap-4">
