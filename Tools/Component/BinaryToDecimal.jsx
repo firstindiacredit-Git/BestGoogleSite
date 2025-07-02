@@ -50,7 +50,7 @@ const BinaryToDecimal = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#28283a] py-8">
+    <div className="min-h-screen bg-blue-100 dark:bg-[#28283a] py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white dark:bg-[#513a7a] rounded-lg shadow-lg py-2">
           <Back />
@@ -76,7 +76,7 @@ const BinaryToDecimal = () => {
                         ? "Enter 0s and 1s..."
                         : "Enter decimal number..."
                     }
-                    className="w-full px-4 py-3 bg-white dark:bg-[#28283a] border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-teal-200 focus:border-teal-400 transition-colors"
+                    className="w-full px-4 py-3 bg-white dark:bg-[#28283a] border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-teal-200 focus:border-teal-400 transition-colors text-gray-900 dark:text-white dark:placeholder-gray-400"
                   />
                   {error && (
                     <p className="absolute -bottom-6 left-0 text-red-500 text-sm">

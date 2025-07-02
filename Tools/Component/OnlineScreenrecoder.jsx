@@ -99,12 +99,12 @@ const OnlineScreenrecoder = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 py-8">
+    <div className="min-h-screen bg-blue-100 dark:bg-[#513a7a] py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-[30px] shadow-lg border-2 border-gray-100">
+        <div className="bg-white dark:bg-[#28283a] rounded-[30px] shadow-lg dark:border-none">
           <Back />
           <div className="p-6">
-            <h1 className="text-3xl font-bold text-gray-900 text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white text-center mb-8">
               Screen Recorder
             </h1>
 
@@ -115,8 +115,8 @@ const OnlineScreenrecoder = () => {
                   onClick={recording ? stopCapture : startCapture}
                   className={`relative group p-4 rounded-full shadow-lg transition-all duration-200 ${
                     recording 
-                      ? "bg-red-500 hover:bg-red-600" 
-                      : "bg-teal-500 hover:bg-teal-600"
+                      ? "bg-red-500 dark:bg-red-700 hover:bg-red-600 dark:hover:bg-red-800" 
+                      : "bg-teal-500 dark:bg-teal-700 hover:bg-teal-600 dark:hover:bg-teal-800"
                   }`}
                 >
                   <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
@@ -135,7 +135,7 @@ const OnlineScreenrecoder = () => {
               </div>
 
               {/* Video Preview */}
-              <div className="relative rounded-xl overflow-hidden bg-gray-900">
+              <div className="relative rounded-xl overflow-hidden bg-gray-900 dark:bg-gray-800">
                 {recording && (
                   <div className="absolute top-4 left-4 bg-red-500 text-white text-xs px-2 py-1 rounded-full flex items-center space-x-2">
                     <span className="animate-pulse w-2 h-2 bg-white rounded-full"></span>
@@ -144,7 +144,7 @@ const OnlineScreenrecoder = () => {
                 )}
                 <video
                   ref={videoRef}
-                  className="w-full aspect-video"
+                  className="w-full aspect-video dark:bg-black"
                   controls
                   autoPlay
                 ></video>
@@ -152,7 +152,7 @@ const OnlineScreenrecoder = () => {
 
               {/* File Name Input */}
               <div className="max-w-md mx-auto">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                   Recording Name
                 </label>
                 <div className="relative rounded-lg shadow-sm">
@@ -160,11 +160,11 @@ const OnlineScreenrecoder = () => {
                     type="text"
                     value={fileName}
                     onChange={(e) => setFileName(e.target.value)}
-                    className="block w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-200 focus:border-teal-400 transition-colors"
+                    className="block w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-teal-200 focus:border-teal-400 transition-colors"
                     placeholder="Enter file name..."
                   />
                   <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                    <span className="text-gray-400 text-sm">.webm</span>
+                    <span className="text-gray-400 dark:text-gray-300 text-sm">.webm</span>
                   </div>
                 </div>
               </div>
@@ -174,7 +174,7 @@ const OnlineScreenrecoder = () => {
                 <div className="flex justify-center gap-4">
                   <button
                     onClick={saveRecording}
-                    className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors group relative"
+                    className="inline-flex items-center px-4 py-2 bg-blue-500 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-600 dark:hover:bg-blue-800 transition-colors group relative"
                   >
                     <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                       Download Recording
@@ -186,7 +186,7 @@ const OnlineScreenrecoder = () => {
                   </button>
                   <button
                     onClick={shareRecording}
-                    className="inline-flex items-center px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors group relative"
+                    className="inline-flex items-center px-4 py-2 bg-purple-500 dark:bg-purple-700 text-white rounded-lg hover:bg-purple-600 dark:hover:bg-purple-800 transition-colors group relative"
                   >
                     <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                       Share Recording

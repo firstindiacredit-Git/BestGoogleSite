@@ -75,13 +75,13 @@ const Compress = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#513a7a] py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-blue-100 dark:bg-[#513a7a] py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <div
-          className="bg-white dark:bg-[#28283a] dark:text-white border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.12)] 
+          className="bg-white dark:bg-[#28283a] dark:text-white  shadow-[0_8px_30px_rgb(0,0,0,0.12)] 
           rounded-xl transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.16)]"
         >
-          <div className="p-4 border-b dark:text-white border-gray-100">
+          <div className="p-4 border-b dark:text-gray-900 border-gray-100 dark:border-gray-700">
             <Back />
           </div>
 
@@ -100,7 +100,7 @@ const Compress = () => {
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
-                className={`relative border-2 border-dashed rounded-lg p-12 dark:text-white text-center 
+                className={`relative border-2 border-dashed rounded-lg p-12 dark:text-white text-center
                   ${
                     isDragging
                       ? "border-blue-500 bg-blue-50"
@@ -115,7 +115,7 @@ const Compress = () => {
                   id="file-upload"
                 />
                 <label htmlFor="file-upload" className="cursor-pointer">
-                  <FaFilePdf className="mx-auto h-12 w-12 dark:text-white text-gray-400" />
+                  <FaFilePdf className="mx-auto h-12 w-12 dark:text-gray-900 text-gray-400 mt-4" />
                   <div className="mt-4">
                     <span className="mt-2 block text-sm font-medium dark:text-white text-gray-900">
                       Drop your PDF here or

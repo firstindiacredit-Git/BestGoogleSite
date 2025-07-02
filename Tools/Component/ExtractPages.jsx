@@ -14,6 +14,7 @@ const ExtractPages = () => {
   const [zoomLevel, setZoomLevel] = useState(1);
   const [fileName, setFileName] = useState('');
   const [selectedPages, setSelectedPages] = useState({}); // Store selected pages
+  const [isZoomedPopup, setIsZoomedPopup] = useState(false);
 
   const handleFileChange = (e) => {
     const uploadedFile = e.target.files[0];
@@ -101,7 +102,7 @@ const ExtractPages = () => {
 
   const mergeAndDownload = async () => {
     const mergedPdf = await PDFDocument.create();
-    
+
     // Loop through selected pages
     for (let i = 0; i < pdfInstances.length; i++) {
       if (selectedPages[i]) { // Only include selected pages
@@ -127,21 +128,25 @@ const ExtractPages = () => {
     setCurrentPage(splitPages[index]);
     setShowPopup(true);
     setZoomLevel(1);
+    setIsZoomedPopup(true);
   };
 
-  const closePopup = () => setShowPopup(false);
+  const closePopup = () => {
+    setShowPopup(false);
+    setIsZoomedPopup(false);
+  };
 
   const zoomIn = () => setZoomLevel((prev) => prev * 1.2);
   const zoomOut = () => setZoomLevel((prev) => prev / 1.2);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#513a7a] py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-blue-100 dark:bg-[#513a7a] py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <div
           className="bg-white dark:bg-[#28283a] 
           rounded-xl transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.16)]"
         >
-          <div className="p-4  border-gray-100">
+          <div className="p-4  border-b dark:border-gray-700 border-gray-100">
             <Back />
           </div>
 
@@ -210,26 +215,80 @@ const ExtractPages = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-6">
                   {splitPages.map(
                     (pageUrl, index) =>
                       pageUrl && (
                         <div
                           key={index}
-                          className="relative bg-gray-50 dark:bg-gray-600 rounded-lg p-2 hover:shadow-lg transition-all duration-300 group"
+                          className="relative bg-gray-50 dark:bg-gray-600 rounded-lg p-3 hover:shadow-lg transition-all duration-300 group overflow-hidden border border-gray-200"
                         >
-                          <div className="aspect-[2/3] relative overflow-hidden">
+                          <div className="aspect-[2/3] relative overflow-hidden" style={{ width: '150px', margin: '0 auto' }}>
+                            {/* Icon row overlays the top of the image */}
+                            <div
+                              className="absolute top-2 left-1/2 transform -translate-x-1/2 flex gap-1 items-center z-20 bg-white rounded-lg shadow p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                              style={{ minWidth: '120px' }}
+                            >
+
+                              {/* Checkbox always visible */}
+                              <button
+                                onClick={() => handlePageSelection(index)}
+                                className={`p-1 rounded-md transition-colors border ${selectedPages[index] ? "bg-blue-50 text-blue-500 border-blue-300" : "bg-white text-gray-700 border-gray-300"}`}
+                                title={selectedPages[index] ? "Selected" : "Select"}
+                                style={{ minWidth: 24, minHeight: 24 }}
+                              >
+                                {selectedPages[index] ? (
+                                  <FaCheck size={12} />
+                                ) : (
+                                  <div className="w-3 h-3 border-2 border-gray-400 rounded-sm" />
+                                )}
+                              </button>
+                              {/* Other icons: always visible, white background */}
+                              <button
+                                onClick={() => openZoomPopup(index)}
+                                className="p-1 rounded-md transition-colors bg-white text-blue-500 border border-gray-300 hover:bg-blue-50"
+                                title="Zoom"
+                                style={{ minWidth: 24, minHeight: 24 }}
+                              >
+                                <FaSearchPlus size={12} />
+                              </button>
+                              <button
+                                onClick={() => rotatePage(index)}
+                                className="p-1 rounded-md transition-colors bg-white text-yellow-500 border border-gray-300 hover:bg-yellow-50"
+                                title="Rotate"
+                                style={{ minWidth: 24, minHeight: 24 }}
+                              >
+                                <FaRedo size={12} />
+                              </button>
+                              <button
+                                onClick={() => duplicatePage(index)}
+                                className="p-1 rounded-md transition-colors bg-white text-green-500 border border-gray-300 hover:bg-green-50"
+                                title="Duplicate"
+                                style={{ minWidth: 24, minHeight: 24 }}
+                              >
+                                <FaClone size={12} />
+                              </button>
+                              <button
+                                onClick={() => deletePage(index)}
+                                className="p-1 rounded-md transition-colors bg-white text-red-500 border border-gray-300 hover:bg-red-50"
+                                title="Delete"
+                                style={{ minWidth: 24, minHeight: 24 }}
+                              >
+                                <FaTrash size={12} />
+                              </button>
+                            </div>
                             <iframe
                               src={pageUrl}
                               title={`Page ${index + 1}`}
-                              className="w-full h-full rounded-md"
+                              className="w-full h-full rounded-md border border-gray-300"
                               style={{
-                                transform: `rotate(${
-                                  rotations[index] || 0
-                                }deg)`,
+                                transform: `rotate(${rotations[index] || 0}deg)`,
                                 transformOrigin: "center",
                                 transition: "transform 0.3s ease",
                                 pointerEvents: "none",
+                                width: '100%',
+                                height: '100%',
+                                background: 'white',
                               }}
                               frameBorder="0"
                               scrolling="no"
@@ -237,73 +296,6 @@ const ExtractPages = () => {
                             {rotations[index] !== 0 && (
                               <div className="absolute inset-0 -z-10 bg-gray-100 rounded-md" />
                             )}
-
-                            <div
-                              className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent 
-                            transition-all duration-300 rounded-md opacity-0 group-hover:opacity-100"
-                            >
-                              <div
-                                className="absolute top-2 left-1/2 transform -translate-x-1/2
-                              flex gap-2 bg-white/90 rounded-lg shadow-lg p-1.5 transition-all duration-300
-                              scale-90 group-hover:scale-100 opacity-0 group-hover:opacity-100"
-                              >
-                                <button
-                                  onClick={() => handlePageSelection(index)}
-                                  className={`p-1.5 rounded-md transition-colors
-                                  ${
-                                    selectedPages[index]
-                                      ? "bg-blue-50 text-blue-500"
-                                      : "hover:bg-gray-100"
-                                  }`}
-                                  title={
-                                    selectedPages[index] ? "Selected" : "Select"
-                                  }
-                                >
-                                  {selectedPages[index] ? (
-                                    <FaCheck size={14} />
-                                  ) : (
-                                    <div className="w-3.5 h-3.5 border-2 border-gray-400 rounded-sm" />
-                                  )}
-                                </button>
-                                <button
-                                  onClick={() => openZoomPopup(index)}
-                                  className="p-1.5 hover:bg-blue-50 rounded-md transition-colors"
-                                  title="Zoom"
-                                >
-                                  <FaSearchPlus
-                                    size={14}
-                                    className="text-blue-500"
-                                  />
-                                </button>
-                                <button
-                                  onClick={() => rotatePage(index)}
-                                  className="p-1.5 hover:bg-yellow-50 rounded-md transition-colors"
-                                  title="Rotate"
-                                >
-                                  <FaRedo
-                                    size={14}
-                                    className="text-yellow-500"
-                                  />
-                                </button>
-                                <button
-                                  onClick={() => duplicatePage(index)}
-                                  className="p-1.5 hover:bg-green-50 rounded-md transition-colors"
-                                  title="Duplicate"
-                                >
-                                  <FaClone
-                                    size={14}
-                                    className="text-green-500"
-                                  />
-                                </button>
-                                <button
-                                  onClick={() => deletePage(index)}
-                                  className="p-1.5 hover:bg-red-50 rounded-md transition-colors"
-                                  title="Delete"
-                                >
-                                  <FaTrash size={14} className="text-red-500" />
-                                </button>
-                              </div>
-                            </div>
                           </div>
                           <div className="flex items-center justify-between mt-2 px-1">
                             <span className="text-sm font-medium dark:text-gray-200">
@@ -354,7 +346,14 @@ const ExtractPages = () => {
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.9 }}
-              className="relative bg-white w-[90vw] h-[90vh] max-w-[180mm] max-h-[180mm] rounded-2xl shadow-2xl overflow-hidden"
+              className="relative bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col items-center justify-center"
+              style={{
+                width: 'auto',
+                maxWidth: '90vw',
+                height: 'auto',
+                maxHeight: '98vh',
+                padding: '2rem'
+              }}
             >
               <button
                 onClick={closePopup}
@@ -375,18 +374,42 @@ const ExtractPages = () => {
                 </svg>
               </button>
 
-              <div className="h-full overflow-auto">
-                <iframe
-                  src={currentPage}
-                  className="w-full h-full"
+              <div
+                className="overflow-auto flex items-center justify-center"
+                style={{
+                  width: '100%',
+                  height: '80vh',
+                  background: 'white',
+                  borderRadius: '1rem'
+                }}
+              >
+                <div
                   style={{
-                    transform: `scale(${zoomLevel})`,
-                    transformOrigin: "top left",
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '100%',
+                    height: '100%',
                   }}
-                />
+                >
+                  <iframe
+                    src={currentPage}
+                    style={{
+                      width: '800px',
+                      height: '1131px',
+                      border: 'none',
+                      transform: `scale(${zoomLevel})`,
+                      transformOrigin: "center center",
+                      background: "white",
+                      pointerEvents: "none",
+                      display: 'block',
+                      margin: 'auto'
+                    }}
+                  />
+                </div>
               </div>
 
-              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-4">
+              <div className="flex gap-4 mt-4">
                 <button
                   onClick={zoomOut}
                   className="px-6 py-2 bg-white hover:bg-gray-100 rounded-lg shadow-md transition-colors"

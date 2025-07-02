@@ -21,7 +21,7 @@ const WordCounter = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#28283a] flex justify-center pt-8">
+    <div className="min-h-screen bg-blue-100 dark:bg-[#28283a] flex justify-center pt-8">
       <div className="w-full max-w-2xl mx-auto px-4">
         <div className="bg-white dark:bg-[#513a7a] rounded-lg shadow-lg overflow-hidden">
           <div className="p-4 relative">

@@ -190,27 +190,27 @@ const OnlineWebcamTest = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 py-8">
+        <div className="min-h-screen bg-blue-100 dark:bg-[#513a7a] py-8">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="bg-white rounded-[30px] shadow-lg border-2 border-gray-100">
+                <div className="bg-white dark:bg-[#28283a] rounded-[30px] shadow-lg dark:border-none">
                     <Back />
                     <div className="p-6">
-                        <h1 className="text-3xl font-bold text-gray-900 text-center mb-8">
+                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white text-center mb-8">
                             Webcam Test
                         </h1>
 
                         {alertVisible && (
-                            <div className="mb-6 bg-red-50 border-l-4 border-red-400 p-4 rounded-lg">
+                            <div className="mb-6 bg-red-50 dark:bg-red-900 border-l-4 border-red-400 dark:border-red-600 p-4 rounded-lg">
                                 <div className="flex items-center">
-                                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <svg className="h-5 w-5 text-red-400 dark:text-red-200" viewBox="0 0 20 20" fill="currentColor">
                                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                                     </svg>
-                                    <p className="ml-3 text-sm text-red-700">
+                                    <p className="ml-3 text-sm text-red-700 dark:text-red-100">
                                         Unable to access camera or microphone. Please check your permissions.
                                     </p>
                                     <button 
                                         onClick={() => setAlertVisible(false)}
-                                        className="ml-auto text-red-400 hover:text-red-500"
+                                        className="ml-auto text-red-400 dark:text-red-200 hover:text-red-500 dark:hover:text-red-300"
                                     >
                                         <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                             <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -226,13 +226,13 @@ const OnlineWebcamTest = () => {
                                 {/* Device Selection */}
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                                             Select Camera
                                         </label>
                                         <select
                                             value={selectedCameraIndex}
                                             onChange={(e) => setSelectedCameraIndex(Number(e.target.value))}
-                                            className="block w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-200 focus:border-teal-400 transition-colors"
+                                            className="block w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-teal-200 focus:border-teal-400 transition-colors"
                                         >
                                             {cameraOptions.map((cam, index) => (
                                                 <option key={index} value={index}>{cam}</option>
@@ -241,13 +241,13 @@ const OnlineWebcamTest = () => {
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                                             Select Microphone
                                         </label>
                                         <select
                                             value={selectedMicIndex}
                                             onChange={(e) => setSelectedMicIndex(Number(e.target.value))}
-                                            className="block w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-200 focus:border-teal-400 transition-colors"
+                                            className="block w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-teal-200 focus:border-teal-400 transition-colors"
                                         >
                                             {micOptions.map((mic, index) => (
                                                 <option key={index} value={index}>{mic}</option>
@@ -257,10 +257,10 @@ const OnlineWebcamTest = () => {
                                 </div>
 
                                 {/* Video Preview */}
-                                <div className="relative rounded-xl overflow-hidden bg-gray-900">
+                                <div className="relative rounded-xl overflow-hidden bg-gray-900 dark:bg-gray-800">
                                     <video
                                         ref={videoRef}
-                                        className="w-full aspect-video"
+                                        className="w-full aspect-video dark:bg-black"
                                         autoPlay
                                         playsInline
                                         muted
@@ -276,11 +276,11 @@ const OnlineWebcamTest = () => {
                                 <div className="flex justify-center gap-4">
                                     <button
                                         onClick={isTestingActive ? stopVideo : initVideo}
-                                        className={`px-6 py-3 rounded-lg font-medium flex items-center space-x-2 ${
+                                        className={`px-6 py-3 rounded-lg font-medium flex items-center space-x-2 transition-colors ${
                                             isTestingActive
-                                                ? "bg-red-500 hover:bg-red-600 text-white"
-                                                : "bg-teal-500 hover:bg-teal-600 text-white"
-                                        } transition-colors`}
+                                                ? "bg-red-500 dark:bg-red-700 hover:bg-red-600 dark:hover:bg-red-800 text-white"
+                                                : "bg-teal-500 dark:bg-teal-700 hover:bg-teal-600 dark:hover:bg-teal-800 text-white"
+                                        }`}
                                     >
                                         {isTestingActive ? (
                                             <>
@@ -304,7 +304,7 @@ const OnlineWebcamTest = () => {
                                     {isTestingActive && (
                                         <button
                                             onClick={getImage}
-                                            className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center space-x-2"
+                                            className="px-6 py-3 bg-blue-500 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-600 dark:hover:bg-blue-800 transition-colors flex items-center space-x-2"
                                         >
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
@@ -318,17 +318,17 @@ const OnlineWebcamTest = () => {
                                 {/* Captured Image */}
                                 {hasCapture && (
                                     <div className="space-y-4">
-                                        <div className="relative rounded-xl overflow-hidden bg-gray-900">
+                                        <div className="relative rounded-xl overflow-hidden bg-gray-900 dark:bg-gray-800">
                                             <img
                                                 ref={imageRef}
-                                                className="w-full"
+                                                className="w-full dark:bg-black"
                                                 alt="Captured"
                                             />
                                         </div>
                                         <div className="flex justify-center">
                                             <button
                                                 onClick={downloadImage}
-                                                className="px-6 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors flex items-center space-x-2"
+                                                className="px-6 py-3 bg-purple-500 dark:bg-purple-700 text-white rounded-lg hover:bg-purple-600 dark:hover:bg-purple-800 transition-colors flex items-center space-x-2"
                                             >
                                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -343,30 +343,30 @@ const OnlineWebcamTest = () => {
                             {/* Right Column - Device Info */}
                             <div className="space-y-6">
                                 {/* Camera Settings */}
-                                <div className="bg-gray-50 rounded-xl p-6">
-                                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Camera Information</h3>
-                                    <div className="divide-y divide-gray-200">
+                                <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-6">
+                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Camera Information</h3>
+                                    <div className="divide-y divide-gray-200 dark:divide-gray-700">
                                         {Object.entries(cameraSettings).map(([key, value]) => (
                                             <div key={key} className="py-3 flex justify-between">
-                                                <span className="text-sm font-medium text-gray-500">
+                                                <span className="text-sm font-medium text-gray-500 dark:text-gray-300">
                                                     {key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}
                                                 </span>
-                                                <span className="text-sm text-gray-900">{value}</span>
+                                                <span className="text-sm text-gray-900 dark:text-white">{value}</span>
                                             </div>
                                         ))}
                                     </div>
                                 </div>
 
                                 {/* Microphone Settings */}
-                                <div className="bg-gray-50 rounded-xl p-6">
-                                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Microphone Information</h3>
-                                    <div className="divide-y divide-gray-200">
+                                <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-6">
+                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Microphone Information</h3>
+                                    <div className="divide-y divide-gray-200 dark:divide-gray-700">
                                         {Object.entries(micSettings).map(([key, value]) => (
                                             <div key={key} className="py-3 flex justify-between">
-                                                <span className="text-sm font-medium text-gray-500">
+                                                <span className="text-sm font-medium text-gray-500 dark:text-gray-300">
                                                     {key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}
                                                 </span>
-                                                <span className="text-sm text-gray-900">{value}</span>
+                                                <span className="text-sm text-gray-900 dark:text-white">{value}</span>
                                             </div>
                                         ))}
                                     </div>

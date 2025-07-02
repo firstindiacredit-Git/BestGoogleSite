@@ -110,21 +110,21 @@ const GSTCalculator = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 bg-gradient-to-br from-gray-100 to-gray-200 ">
-      <div className="max-w-4xl  mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-[30px] shadow-md border-2 border-gray-100">
+    <div className="min-h-screen py-12 bg-blue-100 dark:bg-[#513a7a]">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-white dark:bg-[#28283a] rounded-[30px] shadow-md dark:border-none">
           <Back />
-          <h1 className="text-3xl font-bold text-gray-900 text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white text-center mb-8">
             GST Calculator
           </h1>
 
           <div className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Input Form */}
-              <div className="bg-gray-50 rounded-2xl p-6">
+              <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-6">
                 <form onSubmit={calculateGST} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-2">
+                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-200 mb-2">
                       Calculation Type
                     </label>
                     <div className="grid grid-cols-2 gap-2">
@@ -137,7 +137,7 @@ const GSTCalculator = () => {
                           className={`w-full px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
                             calculationType === "exclusive"
                               ? "bg-indigo-600 text-white"
-                              : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
+                              : "bg-white dark:bg-gray-800 dark:text-white text-gray-700 border border-gray-200 dark:border-none hover:bg-gray-50 dark:hover:bg-gray-700"
                           }`}
                         >
                           GST Exclusive
@@ -158,7 +158,7 @@ const GSTCalculator = () => {
                           className={`w-full px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
                             calculationType === "inclusive"
                               ? "bg-indigo-600 text-white"
-                              : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
+                              : "bg-white dark:bg-gray-800 dark:text-white text-gray-700 border border-gray-200 dark:border-none hover:bg-gray-50 dark:hover:bg-gray-700"
                           }`}
                         >
                           GST Inclusive
@@ -174,21 +174,21 @@ const GSTCalculator = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-2">
+                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-200 mb-2">
                       {calculationType === "exclusive" ? "Base Amount ( )" : "Total Amount ( )"}
                     </label>
                     <input
                       type="text"
                       value={amount}
                       onChange={(e) => handleNumberInput(e.target.value, setAmount)}
-                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                      className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-none rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                       placeholder={calculationType === "exclusive" ? "Enter amount before GST" : "Enter amount including GST"}
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-2">
+                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-200 mb-2">
                       GST Rate (%)
                     </label>
                     <div className="space-y-3">
@@ -204,7 +204,7 @@ const GSTCalculator = () => {
                             className={`px-3 py-2 rounded-lg font-medium transition-colors duration-200 ${
                               gstRate === rate.toString() && !isCustomRate
                                 ? "bg-indigo-600 text-white"
-                                : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
+                                : "bg-white dark:bg-gray-800 dark:text-white text-gray-700 border border-gray-200 dark:border-none hover:bg-gray-50 dark:hover:bg-gray-700"
                             }`}
                           >
                             {rate}%
@@ -219,7 +219,7 @@ const GSTCalculator = () => {
                           className={`px-3 py-2 rounded-lg font-medium transition-colors duration-200 ${
                             isCustomRate
                               ? "bg-indigo-600 text-white"
-                              : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
+                              : "bg-white dark:bg-gray-800 dark:text-white text-gray-700 border border-gray-200 dark:border-none hover:bg-gray-50 dark:hover:bg-gray-700"
                           }`}
                         >
                           Custom
@@ -235,10 +235,10 @@ const GSTCalculator = () => {
                               setCustomRate(value);
                               setGstRate(value);
                             }}
-                            className="w-24 px-3 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                            className="w-24 px-3 py-2 bg-gray-50 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-none rounded-lg focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                             placeholder="Enter %"
                           />
-                          <span className="text-sm text-gray-600">%</span>
+                          <span className="text-sm text-gray-600 dark:text-gray-200">%</span>
                         </div>
                       )}
                     </div>
@@ -254,7 +254,7 @@ const GSTCalculator = () => {
                     <button
                       type="button"
                       onClick={handleReset}
-                      className="px-4 py-2 bg-white text-gray-700 border border-gray-200 rounded-xl font-medium hover:bg-gray-50 transition-colors duration-200"
+                      className="px-4 py-2 bg-white dark:bg-gray-800 dark:text-white text-gray-700 border border-gray-200 dark:border-none rounded-xl font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
                     >
                       Reset
                     </button>
@@ -265,37 +265,37 @@ const GSTCalculator = () => {
               {/* Results Section */}
               <div className="space-y-6">
                 {result ? (
-                  <div className="bg-white p-6 rounded-xl border border-gray-200">
+                  <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-none">
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="p-4 bg-indigo-50 rounded-lg h-32 flex flex-col justify-center">
+                      <div className="p-4 bg-indigo-50 dark:bg-[#3730a3] rounded-lg h-32 flex flex-col justify-center">
                         <p className="text-sm text-gray-600">Base Amount</p>
-                        <p className="text-2xl font-bold text-indigo-600 mt-2">
+                        <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-300 mt-2">
                           {formatCurrency(result.baseAmount)}
                         </p>
                       </div>
-                      <div className="p-4 bg-green-50 rounded-lg h-32 flex flex-col justify-center">
-                        <p className="text-sm text-gray-600">Total GST</p>
-                        <p className="text-2xl font-bold text-green-600 mt-2">
+                      <div className="p-4 bg-green-50 dark:bg-green-900 rounded-lg h-32 flex flex-col justify-center">
+                        <p className="text-sm text-gray-600 dark:text-gray-200">Total GST</p>
+                        <p className="text-2xl font-bold text-green-600 dark:text-green-300 mt-2">
                           {formatCurrency(result.gstAmount)}
                         </p>
                       </div>
-                      <div className="p-4 bg-orange-50 rounded-lg h-32 flex flex-col justify-center">
-                        <p className="text-sm text-gray-600">Final Amount</p>
-                        <p className="text-2xl font-bold text-orange-600 mt-2">
+                      <div className="p-4 bg-orange-50 dark:bg-orange-900 rounded-lg h-32 flex flex-col justify-center">
+                        <p className="text-sm text-gray-600 dark:text-gray-200">Final Amount</p>
+                        <p className="text-2xl font-bold text-orange-600 dark:text-gray-200 mt-2">
                           {formatCurrency(result.totalAmount)}
                         </p>
                       </div>
-                      <div className="p-4 bg-purple-50 rounded-lg h-32 flex flex-col justify-center">
-                        <p className="text-sm text-gray-600">GST Rate</p>
-                        <p className="text-2xl font-bold text-purple-600 mt-2">
+                      <div className="p-4 bg-purple-50 dark:bg-purple-900 rounded-lg h-32 flex flex-col justify-center">
+                        <p className="text-sm text-gray-600 dark:text-gray-200">GST Rate</p>
+                        <p className="text-2xl font-bold text-purple-600 dark:text-purple-300 mt-2">
                           {result.gstRate}%
                         </p>
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="bg-white p-6 rounded-xl border border-gray-200 flex items-center justify-center">
-                    <p className="text-gray-500 text-center">
+                  <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-none flex items-center justify-center">
+                    <p className="text-gray-500 dark:text-gray-300 text-center">
                       Enter amount and select GST rate to see the results
                     </p>
                   </div>
@@ -307,8 +307,8 @@ const GSTCalculator = () => {
             <div className="mt-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Chart */}
-                <div className="bg-white p-6 rounded-xl border border-gray-200">
-                  <h3 className="text-sm font-medium text-gray-600 mb-4">Amount Distribution</h3>
+                <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-none">
+                  <h3 className="text-sm font-medium text-gray-600 dark:text-gray-200 mb-4">Amount Distribution</h3>
                   {result ? (
                     <div className="w-full h-64">
                       <Pie data={result.chartData} options={chartOptions} />
@@ -321,7 +321,7 @@ const GSTCalculator = () => {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                           </svg>
                         </div>
-                        <p className="text-gray-500 text-sm">
+                        <p className="text-gray-500 dark:text-gray-300 text-sm">
                           Chart will appear here after calculation
                         </p>
                       </div>
@@ -330,46 +330,46 @@ const GSTCalculator = () => {
                 </div>
 
                 {/* GST Breakdown */}
-                <div className="bg-white p-6 rounded-xl border border-gray-200">
-                  <h3 className="text-sm font-medium text-gray-600 mb-4">GST Breakdown</h3>
+                <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-none">
+                  <h3 className="text-sm font-medium text-gray-600 dark:text-gray-200 mb-4">GST Breakdown</h3>
                   {result ? (
                     <div className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
-                        <div className="p-4 bg-green-50 rounded-lg">
-                          <p className="text-sm text-gray-600">CGST</p>
-                          <p className="text-lg font-semibold text-green-600 mt-1">
+                        <div className="p-4 bg-green-50 dark:bg-green-900 rounded-lg">
+                          <p className="text-sm text-gray-600 dark:text-gray-200">CGST</p>
+                          <p className="text-lg font-semibold text-green-600 dark:text-green-300 mt-1">
                             {formatCurrency(result.cgst)}
                           </p>
-                          <p className="text-xs text-gray-500 mt-1">
+                          <p className="text-xs text-gray-500 dark:text-gray-300 mt-1">
                             {(result.gstRate / 2)}% of base amount
                           </p>
                         </div>
-                        <div className="p-4 bg-orange-50 rounded-lg">
-                          <p className="text-sm text-gray-600">SGST</p>
-                          <p className="text-lg font-semibold text-orange-600 mt-1">
+                        <div className="p-4 bg-orange-50 dark:bg-orange-900 rounded-lg">
+                          <p className="text-sm text-gray-600 dark:text-gray-200">SGST</p>
+                          <p className="text-lg font-semibold text-orange-600 dark:text-orange-300 mt-1">
                             {formatCurrency(result.sgst)}
                           </p>
-                          <p className="text-xs text-gray-500 mt-1">
+                          <p className="text-xs text-gray-500 dark:text-gray-300 mt-1">
                             {(result.gstRate / 2)}% of base amount
                           </p>
                         </div>
                       </div>
-                      <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                      <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">Base Amount</span>
-                          <span className="text-sm font-medium text-gray-900">
+                          <span className="text-sm text-gray-600 dark:text-gray-200">Base Amount</span>
+                          <span className="text-sm font-medium text-gray-900 dark:text-white">
                             {formatCurrency(result.baseAmount)}
                           </span>
                         </div>
                         <div className="flex justify-between items-center mt-2">
-                          <span className="text-sm text-gray-600">Total GST</span>
-                          <span className="text-sm font-medium text-green-600">
+                          <span className="text-sm text-gray-600 dark:text-gray-200">Total GST</span>
+                          <span className="text-sm font-medium text-green-600 dark:text-green-300">
                             +{formatCurrency(result.gstAmount)}
                           </span>
                         </div>
-                        <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-200">
-                          <span className="text-sm font-medium text-gray-900">Final Amount</span>
-                          <span className="text-sm font-medium text-indigo-600">
+                        <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                          <span className="text-sm font-medium text-gray-900 dark:text-white">Final Amount</span>
+                          <span className="text-sm font-medium text-indigo-600 dark:text-indigo-300">
                             {formatCurrency(result.totalAmount)}
                           </span>
                         </div>
@@ -383,7 +383,7 @@ const GSTCalculator = () => {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                           </svg>
                         </div>
-                        <p className="text-gray-500 text-sm">
+                        <p className="text-gray-500 dark:text-gray-300 text-sm">
                           Breakdown will appear here after calculation
                         </p>
                       </div>

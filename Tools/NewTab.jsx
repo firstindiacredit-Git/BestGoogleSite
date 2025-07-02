@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
   FaFilePdf,
   FaTasks,
@@ -51,9 +51,12 @@ import {
   AiOutlineMergeCells,
   AiOutlineNumber,
 } from "react-icons/ai";
+import { Input } from "antd";
 import ButtonComponent from "./ButtonComponent";
 import GridComponent from "./GridComponent";
 import "./SearchTool.css";
+
+const { Search } = Input;
 
 // Tool data arrays
 const pdfTools = [
@@ -386,29 +389,6 @@ const NewTab = () => {
   }, [viewType]);
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [isSearchBarOpen, setIsSearchBarOpen] = useState(false);
-  const searchBarRef = useRef(null);
-  const inputRef = useRef(null);
-
-  // Click outside handler for search bar
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (searchBarRef.current && !searchBarRef.current.contains(event.target)) {
-        setIsSearchBarOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
-  // Auto-focus input when open
-  useEffect(() => {
-    if (isSearchBarOpen && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [isSearchBarOpen]);
 
   const filterTools = (tool) => {
     if (!searchTerm) return true;
@@ -461,54 +441,14 @@ const NewTab = () => {
     <div className="min-h-screen w-[90vw] mx-auto">
       <div className="px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-6">
-          {/* Toggleable Search Bar with Slide Animation */}
-          <div className="relative flex items-center" ref={searchBarRef}>
-            {/* Search Button */}
-            {!isSearchBarOpen && (
-              <button
-                onClick={() => setIsSearchBarOpen(true)}
-                className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] px-3 py-2 dark:text-white transition-all duration-300 hover:scale-105"
-                title="Search tools"
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <circle cx="11" cy="11" r="8" strokeWidth="2" />
-                  <line x1="21" y1="21" x2="16.65" y2="16.65" strokeWidth="2" />
-                </svg>
-                Search
-              </button>
-            )}
-            {/* Sliding Search Input */}
-            <div
-              className={`absolute left-0 top-0 transition-all duration-300 ease-in-out ${isSearchBarOpen
-                ? 'w-64 opacity-100 -translate-x-full'
-                : 'w-0 opacity-0 -translate-x-4 pointer-events-none'
-                } overflow-hidden`}
-              style={{ zIndex: 10 }}
-            >
-              <input
-                ref={inputRef}
-                type="text"
-                placeholder="Search tools..."
-                className="w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-lg"
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Escape') {
-                    setIsSearchBarOpen(false);
-                    setSearchTerm('');
-                  }
-                }}
-                style={{ minWidth: isSearchBarOpen ? 200 : 0 }}
-              />
-            </div>
-          </div>
+          <Search
+            placeholder="Search tools..."
+            allowClear
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{ width: 300 }}
+            className="mr-4"
+            id="Toolsearch"
+          />
 
           <div className="bg-white dark:bg-[#513a7a] rounded-lg shadow-sm p-1 inline-flex">
             <button

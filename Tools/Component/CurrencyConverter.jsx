@@ -40,9 +40,9 @@ const CustomSelect = ({ value, onChange, options, label }) => {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <label className="block text-sm font-medium text-gray-600 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-gray-600 dark:text-gray-200 mb-1">{label}</label>
       <div 
-        className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors cursor-pointer flex justify-between items-center"
+        className="w-full px-3 py-2 bg-white dark:bg-gray-800 dark:text-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors cursor-pointer flex justify-between items-center"
         onClick={() => setIsOpen(!isOpen)}
       >
         <span>{value} - {currencyNames[value] || value}</span>
@@ -52,11 +52,11 @@ const CustomSelect = ({ value, onChange, options, label }) => {
         </svg>
       </div>
       {isOpen && (
-        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+        <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 dark:text-white border border-gray-200 rounded-xl shadow-lg h-48 overflow-y-auto">
           {options.map(option => (
             <div
               key={option}
-              className="px-3 py-2 hover:bg-gray-50 cursor-pointer transition-colors"
+              className="px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
               onClick={() => {
                 onChange({ target: { value: option } });
                 setIsOpen(false);
@@ -141,17 +141,17 @@ const CurrencyConverter = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 py-4">
+    <div className="min-h-screen bg-blue-100 dark:bg-[#513a7a] py-4">
       <div className="max-w-2xl mx-auto px-4">
-        <div className="bg-white rounded-[30px] shadow-md border-2 border-gray-100">
+        <div className="bg-white dark:bg-[#28283a] rounded-[30px] shadow-md">
           {/* Back Button */}
           <div className="p-1 dark:text-red-500">
             <Back  />
           </div>
 
           {/* Header */}
-          <div className="bg-gradient-to-r from-gray-50 to-white p-2 border-b border-gray-100">
-            <h1 className="text-2xl font-bold text-gray-800 text-center">
+          <div className="bg-gradient-to-r from-gray-50 to-white dark:from-[#28283a] dark:to-[#28283a] p-2 border-b border-gray-100">
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-white text-center">
               Currency Converter
             </h1>
           </div>
@@ -163,16 +163,16 @@ const CurrencyConverter = () => {
               </div>
             )}
 
-            <div className="bg-gray-50 rounded-2xl p-4 space-y-4 overflow-visible">
+            <div className="bg-gray-50 dark:bg-[#28283a] rounded-2xl p-4 space-y-4 overflow-visible">
               {/* Amount Input */}
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Amount</label>
+                <label className="block text-sm font-medium text-gray-600 dark:text-gray-200 mb-1">Amount</label>
                 <input
                   type="number"
                   value={amount}
                   onChange={handleAmountChange}
                   placeholder="Enter amount"
-                  className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                  className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-800 dark:text-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                 />
               </div>
 
@@ -195,13 +195,13 @@ const CurrencyConverter = () => {
 
               {/* Result */}
               {exchangeRate && !isLoading && (
-                <div className="bg-white p-4 rounded-xl border border-gray-200">
+                <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200">
                   <div className="text-center">
-                    <p className="text-sm text-gray-600 mb-1">Converted Amount</p>
-                    <p className="text-2xl font-bold text-indigo-600">
+                    <p className="text-sm text-gray-600 dark:text-gray-200 mb-1">Converted Amount</p>
+                    <p className="text-2xl font-bold text-indigo-400 dark:text-indigo-300">
                       {amount} {fromCurrency} = {convertedAmount} {toCurrency}
                     </p>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-gray-500 dark:text-gray-300 mt-1">
                       1 {fromCurrency} = {exchangeRate.toFixed(8)} {toCurrency}
                     </p>
                   </div>
@@ -209,7 +209,7 @@ const CurrencyConverter = () => {
               )}
 
               {isLoading && (
-                <div className="text-center py-4 text-gray-600">
+                <div className="text-center py-4 text-gray-600 dark:text-gray-200">
                   Loading exchange rates...
                 </div>
               )}
@@ -217,9 +217,9 @@ const CurrencyConverter = () => {
 
             {/* Chart Section */}
             {!isLoading && (
-              <div className="mt-6 bg-gray-50 rounded-2xl p-4">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Top 10 Exchange Rates</h3>
-                <div className="bg-white p-4 rounded-xl border border-gray-200">
+              <div className="mt-6 bg-gray-50 dark:bg-[#28283a] rounded-2xl p-4">
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Top 10 Exchange Rates</h3>
+                <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200">
                   <Bar data={chartData} options={{
                     responsive: true,
                     plugins: {
@@ -234,24 +234,24 @@ const CurrencyConverter = () => {
 
             {/* Exchange Rates Table */}
             {!isLoading && (
-              <div className="mt-6 bg-gray-50 rounded-2xl p-4">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">All Exchange Rates</h3>
-                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <div className="mt-6 bg-gray-50 dark:bg-[#28283a] rounded-2xl p-4">
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">All Exchange Rates</h3>
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
-                        <tr className="bg-gray-50">
-                          <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Currency</th>
-                          <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Name</th>
-                          <th className="px-4 py-2 text-right text-sm font-medium text-gray-600">Rate</th>
+                        <tr className="bg-gray-50 dark:bg-[#28283a]">
+                          <th className="px-4 py-2 text-left text-sm font-medium text-gray-600 dark:text-gray-200">Currency</th>
+                          <th className="px-4 py-2 text-left text-sm font-medium text-gray-600 dark:text-gray-200">Name</th>
+                          <th className="px-4 py-2 text-right text-sm font-medium text-gray-600 dark:text-gray-200">Rate</th>
                         </tr>
                       </thead>
                       <tbody>
                         {Object.entries(allRates).map(([currency, rate]) => (
-                          <tr key={currency} className="border-t border-gray-100 hover:bg-gray-50">
-                            <td className="px-4 py-2 text-sm font-medium text-gray-700">{currency}</td>
-                            <td className="px-4 py-2 text-sm text-gray-600">{currencyNames[currency] || currency}</td>
-                            <td className="px-4 py-2 text-sm text-right font-medium text-gray-700">{rate.toFixed(8)}</td>
+                          <tr key={currency} className="border-t border-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 dark:border-none">
+                            <td className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-100">{currency}</td>
+                            <td className="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">{currencyNames[currency] || currency}</td>
+                            <td className="px-4 py-2 text-sm text-right font-medium text-gray-700 dark:text-gray-100">{rate.toFixed(8)}</td>
                           </tr>
                         ))}
                       </tbody>

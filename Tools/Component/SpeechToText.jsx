@@ -146,28 +146,28 @@ const SpeechToText = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 py-4 sm:py-6 md:py-8">
+    <div className="min-h-screen bg-blue-100 dark:bg-[#513a7a] py-4 sm:py-6 md:py-8">
       <div className="max-w-4xl mx-auto px-3 sm:px-4 lg:px-6">
-        <div className="bg-white rounded-[30px] shadow-lg border-2 border-gray-100">
+        <div className="bg-white dark:bg-[#28283a] rounded-[30px] shadow-lg dark:border-none">
           <div className="p-3 sm:p-4 md:p-6">
             <div className="mb-4">
               <Back />
             </div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 text-center mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white text-center mb-6 sm:mb-8">
               Speech to Text Converter
             </h1>
 
             <div className="space-y-4 sm:space-y-6">
               {/* Language Selection */}
               <div>
-                <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
+                <label className="block text-sm sm:text-base font-medium text-gray-700 dark:text-gray-200 mb-2">
                   Select Language
                 </label>
                 <select
                   value={selectedLanguage}
                   onChange={(e) => setSelectedLanguage(e.target.value)}
                   disabled={isListening}
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-200 focus:border-teal-400 transition-colors text-sm sm:text-base"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-teal-200 focus:border-teal-400 transition-colors text-sm sm:text-base text-gray-900 dark:text-white"
                 >
                   {Object.entries(languageCategories).map(([category, codes]) => (
                     <optgroup key={category} label={category}>
@@ -234,12 +234,12 @@ const SpeechToText = () => {
 
               {/* Text Display */}
               <div>
-                <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
+                <label className="block text-sm sm:text-base font-medium text-gray-700 dark:text-gray-200 mb-2">
                   Converted Text
                 </label>
                 <div className="relative">
                   <textarea
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-200 focus:border-teal-400 transition-colors h-32 sm:h-40 md:h-48 text-sm sm:text-base"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-teal-200 focus:border-teal-400 transition-colors h-32 sm:h-40 md:h-48 text-sm sm:text-base text-gray-900 dark:text-white"
                     value={text}
                     readOnly
                     placeholder="Your speech will appear here..."
@@ -251,7 +251,7 @@ const SpeechToText = () => {
                     <button
                       onClick={copyToClipboard}
                       disabled={!text}
-                      className="inline-flex items-center px-3 sm:px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors relative group text-sm sm:text-base"
+                      className="inline-flex items-center px-3 sm:px-4 py-2 bg-blue-500 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-600 dark:hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors relative group text-sm sm:text-base"
                     >
                       <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
@@ -268,7 +268,7 @@ const SpeechToText = () => {
                   <button
                     onClick={downloadText}
                     disabled={!text}
-                    className="inline-flex items-center px-3 sm:px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base"
+                    className="inline-flex items-center px-3 sm:px-4 py-2 bg-green-500 dark:bg-green-700 text-white rounded-lg hover:bg-green-600 dark:hover:bg-green-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base"
                   >
                     <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -279,7 +279,7 @@ const SpeechToText = () => {
                   <button
                     onClick={shareText}
                     disabled={!text}
-                    className="inline-flex items-center px-3 sm:px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base"
+                    className="inline-flex items-center px-3 sm:px-4 py-2 bg-purple-500 dark:bg-purple-700 text-white rounded-lg hover:bg-purple-600 dark:hover:bg-purple-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base"
                   >
                     <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />

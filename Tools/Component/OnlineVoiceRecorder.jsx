@@ -193,12 +193,12 @@ const OnlineVoiceRecorder = () => {
   };
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 py-8">
+    <div className="min-h-screen bg-blue-100 dark:bg-[#513a7a] py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-[30px] shadow-lg border-2 border-gray-100">
+        <div className="bg-white dark:bg-[#28283a] rounded-[30px] shadow-lg dark:border-none">
           <Back />
           <div className="p-6">
-            <h1 className="text-3xl font-bold text-gray-900 text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white text-center mb-8">
               Voice Recorder
             </h1>
 
@@ -208,7 +208,7 @@ const OnlineVoiceRecorder = () => {
                 <button
                   onClick={testMicrophone}
                   disabled={isTesting || isRecording}
-                  className="inline-flex items-center px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors relative group"
+                  className="inline-flex items-center px-4 py-2 bg-teal-500 dark:bg-teal-700 text-white rounded-lg hover:bg-teal-600 dark:hover:bg-teal-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors relative group"
                 >
                   <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
@@ -218,7 +218,7 @@ const OnlineVoiceRecorder = () => {
               </div>
 
               {testMessage && (
-                <div className={`text-center text-sm ${testMessage.includes('working') ? 'text-green-600' : 'text-red-600'}`}>
+                <div className={`text-center text-sm ${testMessage.includes('working') ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                   {testMessage}
                 </div>
               )}
@@ -229,7 +229,7 @@ const OnlineVoiceRecorder = () => {
                   ref={canvasRef}
                   width={800}
                   height={100}
-                  className="w-full h-32 rounded-xl bg-slate-50"
+                  className="w-full h-32 rounded-xl bg-slate-50 dark:bg-gray-800"
                 />
                 {isRecording && (
                   <div className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
@@ -243,7 +243,7 @@ const OnlineVoiceRecorder = () => {
                 {!isRecording ? (
                   <button
                     onClick={startRecording}
-                    className="p-4 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg group relative"
+                    className="p-4 bg-red-500 dark:bg-red-700 text-white rounded-full hover:bg-red-600 dark:hover:bg-red-800 transition-colors shadow-lg group relative"
                   >
                     <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                       Start Recording
@@ -256,7 +256,7 @@ const OnlineVoiceRecorder = () => {
                   <>
                     <button
                       onClick={pauseRecording}
-                      className="p-4 bg-yellow-500 text-white rounded-full hover:bg-yellow-600 transition-colors shadow-lg group relative"
+                      className="p-4 bg-yellow-500 dark:bg-yellow-700 text-white rounded-full hover:bg-yellow-600 dark:hover:bg-yellow-800 transition-colors shadow-lg group relative"
                     >
                       <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                         {isPaused ? 'Resume' : 'Pause'}
@@ -273,7 +273,7 @@ const OnlineVoiceRecorder = () => {
                     </button>
                     <button
                       onClick={stopRecording}
-                      className="p-4 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg group relative"
+                      className="p-4 bg-red-500 dark:bg-red-700 text-white rounded-full hover:bg-red-600 dark:hover:bg-red-800 transition-colors shadow-lg group relative"
                     >
                       <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                         Stop Recording
@@ -289,13 +289,13 @@ const OnlineVoiceRecorder = () => {
               {/* Audio Player */}
               {audioURL && (
                 <div className="space-y-4">
-                  <audio controls className="w-full" src={audioURL}>
+                  <audio controls className="w-full dark:bg-gray-800 dark:text-white" src={audioURL}>
                     Your browser does not support the audio element.
                   </audio>
                   <div className="flex justify-center">
                     <button
                       onClick={downloadRecording}
-                      className="inline-flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                      className="inline-flex items-center px-4 py-2 bg-green-500 dark:bg-green-700 text-white rounded-lg hover:bg-green-600 dark:hover:bg-green-800 transition-colors"
                     >
                       <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />

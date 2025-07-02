@@ -46,15 +46,15 @@ const Stopwatch = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 p-2 sm:p-4 md:p-8">
+    <div className="min-h-screen bg-blue-100 dark:bg-[#513a7a] p-2 sm:p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-[#28283a] rounded-2xl shadow-sm overflow-hidden">
           {/* Header */}
           <div className="relative p-4 sm:p-6">
             <div className="absolute top-4 sm:top-6 left-4 sm:left-6">
               <Back />
             </div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-black">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-black dark:text-white">
               Stopwatch
             </h1>
           </div>
@@ -62,8 +62,8 @@ const Stopwatch = () => {
           {/* Main Content */}
           <div className="p-4 sm:p-6 md:p-8">
             {/* Stopwatch Display */}
-            <div className="bg-gradient-to-br from-blue-50 to-gray-100 rounded-2xl p-4 sm:p-6 md:p-8 mb-6 sm:mb-8 shadow-sm border border-gray-100">
-              <div className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-wider text-center font-mono text-gray-800">
+            <div className="bg-gradient-to-br from-blue-50 to-gray-100 dark:from-[#3730a3] dark:to-[#28283a] rounded-2xl p-4 sm:p-6 md:p-8 mb-6 sm:mb-8 shadow-sm border border-gray-100 dark:border-gray-700">
+              <div className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-wider text-center font-mono text-gray-800 dark:text-white">
                 {formatStopwatchTime(stopwatchSeconds)}
               </div>
             </div>
@@ -75,8 +75,8 @@ const Stopwatch = () => {
                 disabled={isStopwatchRunning}
                 className={`px-4 sm:px-6 md:px-8 py-2 sm:py-2.5 md:py-3 rounded-xl text-base sm:text-lg font-medium transition-all duration-200 ${
                   isStopwatchRunning
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-blue-600 text-white hover:bg-blue-700 hover:shadow-md"
+                    ? "bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed"
+                    : "bg-blue-600 dark:bg-blue-700 text-white hover:bg-blue-700 dark:hover:bg-blue-800 hover:shadow-md"
                 }`}
               >
                 Start
@@ -86,15 +86,15 @@ const Stopwatch = () => {
                 disabled={!isStopwatchRunning}
                 className={`px-4 sm:px-6 md:px-8 py-2 sm:py-2.5 md:py-3 rounded-xl text-base sm:text-lg font-medium transition-all duration-200 ${
                   !isStopwatchRunning
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-red-600 text-white hover:bg-red-700 hover:shadow-md"
+                    ? "bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed"
+                    : "bg-red-600 dark:bg-red-700 text-white hover:bg-red-700 dark:hover:bg-red-800 hover:shadow-md"
                 }`}
               >
                 Pause
               </button>
               <button
                 onClick={resetStopwatch}
-                className="px-4 sm:px-6 md:px-8 py-2 sm:py-2.5 md:py-3 rounded-xl bg-gray-600 text-white text-base sm:text-lg font-medium transition-all duration-200 hover:bg-gray-700 hover:shadow-md"
+                className="px-4 sm:px-6 md:px-8 py-2 sm:py-2.5 md:py-3 rounded-xl bg-gray-600 dark:bg-gray-800 text-white text-base sm:text-lg font-medium transition-all duration-200 hover:bg-gray-700 dark:hover:bg-gray-900 hover:shadow-md"
               >
                 Reset
               </button>
@@ -102,21 +102,21 @@ const Stopwatch = () => {
 
             {/* Paused Times Section */}
             {pausedTimes.length > 0 && (
-              <div className="bg-gradient-to-br from-blue-50 to-gray-100 rounded-2xl p-4 sm:p-5 md:p-6 shadow-sm border border-gray-100">
-                <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-gray-800">Paused Times</h2>
+              <div className="bg-gradient-to-br from-blue-50 to-gray-100 dark:from-[#3730a3] dark:to-[#28283a] rounded-2xl p-4 sm:p-5 md:p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-gray-800 dark:text-white">Paused Times</h2>
                 <div className="overflow-x-auto max-h-48 sm:max-h-72 md:max-h-96">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-gray-200">
-                        <th className="py-2 px-3 sm:px-4 text-left text-sm sm:text-base text-gray-600">#</th>
-                        <th className="py-2 px-3 sm:px-4 text-left text-sm sm:text-base text-gray-600">Time</th>
+                      <tr className="border-b border-gray-200 dark:border-gray-700">
+                        <th className="py-2 px-3 sm:px-4 text-left text-sm sm:text-base text-gray-600 dark:text-gray-300">#</th>
+                        <th className="py-2 px-3 sm:px-4 text-left text-sm sm:text-base text-gray-600 dark:text-gray-300">Time</th>
                       </tr>
                     </thead>
                     <tbody>
                       {pausedTimes.map((time, index) => (
-                        <tr key={index} className="border-b border-gray-200">
-                          <td className="py-2 px-3 sm:px-4 text-sm sm:text-base text-gray-800">{index + 1}</td>
-                          <td className="py-2 px-3 sm:px-4 text-sm sm:text-base font-mono text-gray-800">
+                        <tr key={index} className="border-b border-gray-200 dark:border-gray-700">
+                          <td className="py-2 px-3 sm:px-4 text-sm sm:text-base text-gray-800 dark:text-white">{index + 1}</td>
+                          <td className="py-2 px-3 sm:px-4 text-sm sm:text-base font-mono text-gray-800 dark:text-white">
                             {formatStopwatchTime(time)}
                           </td>
                         </tr>

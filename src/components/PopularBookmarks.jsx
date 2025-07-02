@@ -1930,48 +1930,40 @@ function PopularBookmarks() {
         {/* Search bar for categories */}
         <div className="flex justify-between mb-2 items-center gap-2">
           <div className="flex gap-2">
-            <button
-              className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]  px-3 py-2 dark:text-white mb-2"
-              onClick={() => setIsAddCategoryModalVisible(true)}
-            >
-              <PlusOutlined />
-              Add Category
-            </button>
-            <button
-              className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)]  px-3 py-2 dark:text-white mb-2"
-              onClick={handleGlobalAddBookmark}
-            >
-              <PlusOutlined />
-              Add Bookmark
-            </button>
-
+            {/* Combined Add Button with Dropdown */}
             <Dropdown
               menu={{
                 items: [
                   {
+                    key: "addCategory",
+                    icon: <PlusOutlined />,
+                    label: <div className="dark:text-white">Add Category</div>,
+                    onClick: () => setIsAddCategoryModalVisible(true),
+                  },
+                  {
+                    key: "addBookmark",
+                    icon: <PlusOutlined />,
+                    label: <div className="dark:text-white">Add Bookmark</div>,
+                    onClick: handleGlobalAddBookmark,
+                  },
+                  {
+                    type: "divider"
+                  },
+                  {
                     key: "expandCollapse",
-                    icon: <div className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
-                      {areAllOpen ? <CompressOutlined /> : <ExpandOutlined />}
-                    </div>,
+                    icon: <div className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">{areAllOpen ? <CompressOutlined /> : <ExpandOutlined />}</div>,
                     label: <div className="dark:text-white">{areAllOpen ? "Collapse All" : "Expand All"}</div>,
                     onClick: toggleAllCategories,
                   },
                   {
                     key: "categoryManager",
-                    icon: <div className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
-                      <SettingOutlined />
-                    </div>,
+                    icon: <div className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md"><SettingOutlined /></div>,
                     label: <div className="dark:text-white">Category Manager</div>,
                     onClick: () => setIsCategoryManagerOpen(true),
                   },
                   {
                     key: "importBookmarks",
-                    icon: <div className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
-                      <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <path d="M12 16v-8m0 8l-5-5m5 5l5-5" />
-                        <rect x="4" y="19" width="16" height="2" rx="1" />
-                      </svg>
-                    </div>,
+                    icon: <div className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md"><svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 16v-8m0 8l-5-5m5 5l5-5" /><rect x="4" y="19" width="16" height="2" rx="1" /></svg></div>,
                     label: <div className="dark:text-white">Import Bookmarks</div>,
                     onClick: () => fileInputRef.current && fileInputRef.current.click(),
                   },
@@ -1981,10 +1973,9 @@ function PopularBookmarks() {
               overlayClassName="[&_.ant-dropdown-menu]:p-0 [&_.ant-dropdown-menu-item]:p-0 [&_ul]:dark:bg-[#28283a]"
             >
               <button className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] px-3 py-2 dark:text-white mb-2">
-                <MoreOutlined />
+                <PlusOutlined /> Add
               </button>
             </Dropdown>
-
             <input
               type="file"
               accept=".html,text/html"

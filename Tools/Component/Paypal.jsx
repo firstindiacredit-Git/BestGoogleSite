@@ -38,7 +38,7 @@ function App() {
   };
 
   return (
-    <div className=" min-h-screen bg-white dark:bg-[#28283a] flex items-center justify-center py-8">
+    <div className=" min-h-screen bg-blue-100 dark:bg-[#28283a] flex items-center justify-center py-8">
       <div className="w-full max-w-2xl mx-auto px-4">
         <div className="bg-white dark:bg-[#513a7a] rounded-lg shadow-lg overflow-hidden">
           <div className="p-5 relative">
@@ -120,7 +120,7 @@ function App() {
               <div className="flex justify-center gap-3 mt-2">
                 <button
                   onClick={generateLink}
-                  className="px-4 py-2 border border-black dark:border-white dark:bg-gray-800 text-white  text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                  className="px-4 py-2 border border-black text-gray-900 dark:text-white dark:border-white dark:bg-gray-800  text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200"
                 >
                   Generate Link
                 </button>

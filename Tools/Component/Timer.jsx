@@ -51,18 +51,18 @@ const Timer = () => {
     <div className="flex flex-col items-center">
       <button
         onClick={onIncrement}
-        className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center text-xl sm:text-2xl text-gray-600 hover:text-blue-600 transition-colors duration-200"
+        className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center text-xl sm:text-2xl text-gray-600 dark:text-white hover:text-blue-600 dark:hover:text-blue-300 transition-colors duration-200"
       >
         +
       </button>
-      <div className="bg-gradient-to-br from-blue-50 to-gray-100 border border-gray-100 rounded-xl p-2 sm:p-3 md:p-4 shadow-sm w-16 sm:w-20 md:w-24 text-center">
-        <span className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800 font-mono">
+      <div className="bg-gradient-to-br from-blue-50 to-gray-100 dark:from-[#3730a3] dark:to-[#28283a] border border-gray-100 dark:border-gray-700 rounded-xl p-2 sm:p-3 md:p-4 shadow-sm w-16 sm:w-20 md:w-24 text-center min-h-[56px] sm:min-h-[64px] md:min-h-[80px] flex items-center justify-center">
+        <span className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800 dark:text-white font-mono">
           {String(value).padStart(2, "0")}
         </span>
       </div>
       <button
         onClick={onDecrement}
-        className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center text-xl sm:text-2xl text-gray-600 hover:text-blue-600 transition-colors duration-200"
+        className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center text-xl sm:text-2xl text-gray-600 dark:text-white hover:text-blue-600 dark:hover:text-blue-300 transition-colors duration-200"
       >
         -
       </button>
@@ -70,15 +70,15 @@ const Timer = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 p-2 sm:p-4 md:p-8">
+    <div className="min-h-screen bg-blue-100 dark:bg-[#513a7a] p-2 sm:p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-[#28283a] rounded-2xl shadow-sm overflow-hidden">
           {/* Header */}
           <div className="relative p-4 sm:p-6">
             <div className="absolute top-4 sm:top-6 left-4 sm:left-6">
               <Back />
             </div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-black">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-black dark:text-white">
               Timer
             </h1>
           </div>
@@ -93,13 +93,13 @@ const Timer = () => {
                   onIncrement={incrementHours}
                   onDecrement={decrementHours}
                 />
-                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-400 mb-8 sm:mb-10 md:mb-12">:</div>
+                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-400 dark:text-gray-300 flex items-center justify-center">:</div>
                 <TimeUnit
                   value={minutes}
                   onIncrement={incrementMinutes}
                   onDecrement={decrementMinutes}
                 />
-                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-400 mb-8 sm:mb-10 md:mb-12">:</div>
+                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-400 dark:text-gray-300 flex items-center justify-center">:</div>
                 <TimeUnit
                   value={seconds}
                   onIncrement={incrementSeconds}
@@ -115,8 +115,8 @@ const Timer = () => {
                 disabled={isActive}
                 className={`px-4 sm:px-6 md:px-8 py-2 sm:py-2.5 md:py-3 rounded-xl text-base sm:text-lg font-medium transition-all duration-200 ${
                   isActive
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-blue-600 text-white hover:bg-blue-700 hover:shadow-md"
+                    ? "bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed"
+                    : "bg-blue-600 dark:bg-blue-700 text-white hover:bg-blue-700 dark:hover:bg-blue-800 hover:shadow-md"
                 }`}
               >
                 Start
@@ -126,15 +126,15 @@ const Timer = () => {
                 disabled={!isActive}
                 className={`px-4 sm:px-6 md:px-8 py-2 sm:py-2.5 md:py-3 rounded-xl text-base sm:text-lg font-medium transition-all duration-200 ${
                   !isActive
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-red-600 text-white hover:bg-red-700 hover:shadow-md"
+                    ? "bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed"
+                    : "bg-red-600 dark:bg-red-700 text-white hover:bg-red-700 dark:hover:bg-red-800 hover:shadow-md"
                 }`}
               >
                 Stop
               </button>
               <button
                 onClick={resetTimer}
-                className="px-4 sm:px-6 md:px-8 py-2 sm:py-2.5 md:py-3 rounded-xl bg-gray-600 text-white text-base sm:text-lg font-medium transition-all duration-200 hover:bg-gray-700 hover:shadow-md"
+                className="px-4 sm:px-6 md:px-8 py-2 sm:py-2.5 md:py-3 rounded-xl bg-gray-600 dark:bg-gray-800 text-white text-base sm:text-lg font-medium transition-all duration-200 hover:bg-gray-700 dark:hover:bg-gray-900 hover:shadow-md"
               >
                 Reset
               </button>

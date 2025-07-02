@@ -139,12 +139,12 @@ const TextToSpeech = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 py-18">
+    <div className="min-h-screen bg-blue-100 dark:bg-[#513a7a] py-18">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-[30px] shadow-lg border-2 border-gray-100">
+        <div className="bg-white dark:bg-[#28283a] rounded-[30px] shadow-lg dark:border-none">
           <Back className="mt-16"/>
           <div className="p-6">
-            <h1 className="text-3xl font-bold text-gray-900 text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white text-center mb-8">
               Text to Speech Converter
             </h1>
 
@@ -160,7 +160,7 @@ const TextToSpeech = () => {
                 />
                 <label
                   htmlFor="file-upload"
-                  className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 relative group"
+                  className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-xl text-sm font-medium text-gray-700 dark:text-white bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 relative group"
                 >
                   <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                     Upload Text File (.txt)
@@ -174,20 +174,20 @@ const TextToSpeech = () => {
 
               {/* Text Input */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                   Enter Text
                 </label>
                 <textarea
                   value={text}
                   onChange={(e) => setText(e.target.value)}
                   placeholder="Type or paste your text here..."
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors h-40"
+                  className="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors h-40"
                 />
               </div>
 
               {/* Quick Presets */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                   Quick Presets
                 </label>
                 <div className="grid grid-cols-2 gap-2">
@@ -195,7 +195,7 @@ const TextToSpeech = () => {
                     <button
                       key={name}
                       onClick={() => handlePresetClick(value)}
-                      className="px-3 py-2 rounded-lg text-sm font-medium bg-gray-50 text-gray-700 hover:bg-gray-100 transition-colors duration-200 relative group"
+                      className="px-3 py-2 rounded-lg text-sm font-medium bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200 relative group"
                     >
                       <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                         Click to use this preset text
@@ -208,12 +208,12 @@ const TextToSpeech = () => {
 
               {/* Voice Selection */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                   Select Voice
                 </label>
                 <select
                   onChange={(e) => setSelectedVoice(availableVoices[e.target.value])}
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                  className="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                 >
                   {availableVoices.map((voice, index) => (
                     <option key={index} value={index}>
@@ -225,7 +225,7 @@ const TextToSpeech = () => {
 
               {/* Speech Rate */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                   Speech Rate: {rate}x
                 </label>
                 <input
@@ -235,9 +235,9 @@ const TextToSpeech = () => {
                   step="0.1"
                   value={rate}
                   onChange={(e) => setRate(parseFloat(e.target.value))}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                  className="w-full h-2 bg-gray-200 dark:bg-gray-800 rounded-lg appearance-none cursor-pointer"
                 />
-                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-300 mt-1">
                   <span>0.5x</span>
                   <span>1x</span>
                   <span>1.5x</span>
@@ -246,13 +246,13 @@ const TextToSpeech = () => {
               </div>
 
               {/* Audio Controls */}
-              <div className="bg-white p-6 rounded-xl border border-gray-200">
+              <div className="bg-white dark:bg-[#28283a] p-6 rounded-xl border border-gray-200 dark:border-gray-700">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-2">
                     {!isPlaying ? (
                       <button
                         onClick={isPaused ? handleResume : handleSpeak}
-                        className="p-3 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors relative group"
+                        className="p-3 bg-indigo-600 dark:bg-indigo-700 text-white rounded-full hover:bg-indigo-700 dark:hover:bg-indigo-800 transition-colors relative group"
                         title={isPaused ? "Resume" : "Play"}
                       >
                         <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
@@ -266,7 +266,7 @@ const TextToSpeech = () => {
                     ) : (
                       <button
                         onClick={handlePause}
-                        className="p-3 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors relative group"
+                        className="p-3 bg-indigo-600 dark:bg-indigo-700 text-white rounded-full hover:bg-indigo-700 dark:hover:bg-indigo-800 transition-colors relative group"
                         title="Pause"
                       >
                         <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
@@ -279,7 +279,7 @@ const TextToSpeech = () => {
                     )}
                     <button
                       onClick={handleStop}
-                      className="p-3 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition-colors relative group"
+                      className="p-3 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-white rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors relative group"
                       title="Stop"
                     >
                       <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
@@ -292,7 +292,7 @@ const TextToSpeech = () => {
                     </button>
                     <button
                       onClick={handleCopyText}
-                      className="p-3 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition-colors relative group"
+                      className="p-3 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-white rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors relative group"
                       title="Copy Text"
                     >
                       <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
@@ -308,13 +308,13 @@ const TextToSpeech = () => {
                       )}
                     </button>
                   </div>
-                  <div className="text-sm font-mono text-gray-500">
+                  <div className="text-sm font-mono text-gray-500 dark:text-gray-300">
                     {formatTime(currentTime)} / {formatTime(duration)}
                   </div>
                 </div>
 
                 {/* Progress Bar */}
-                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div className="h-2 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-100"
                     style={{ width: `${(currentTime / duration) * 100 || 0}%` }}

@@ -73,7 +73,7 @@ const Bmi = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-[#513a7a]">
+    <div className="min-h-screen bg-blue-100 dark:bg-[#513a7a]">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-md mx-auto bg-white dark:bg-[#28283a] rounded-lg shadow-md p-6 dark:text-gray-200">
           <Back />

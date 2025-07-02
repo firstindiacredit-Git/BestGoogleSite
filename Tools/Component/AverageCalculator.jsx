@@ -61,45 +61,45 @@ const AverageCalculator = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 py-4">
+    <div className="min-h-screen bg-blue-100 dark:bg-[#513a7a]  py-4">
       <div className="max-w-2xl mx-auto px-4">
-        <div className="bg-white rounded-[30px] shadow-md border-2 border-gray-100">
+        <div className="bg-white dark:bg-[#28283a] rounded-[30px] shadow-md dark:border-none">
           <div className="p-1">
             <Back />
           </div>
 
-          <div className="bg-gradient-to-r from-gray-50 to-white p-2 border-b border-gray-100">
-            <h1 className="text-2xl font-bold text-gray-800 text-center">
+          <div className="bg-gradient-to-r from-gray-50 to-white dark:from-[#28283a] dark:to-[#28283a] p-2 border-b border-gray-100 dark:border-none">
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-white text-center">
               Average Calculator
             </h1>
           </div>
 
           <div className="p-6">
             {error && (
-              <div className="mb-6 p-3 bg-red-50 text-red-600 rounded-xl border border-red-200 text-sm">
+              <div className="mb-6 p-3 bg-red-50 text-red-600 rounded-xl border border-red-200 dark:border-none text-sm">
                 {error}
               </div>
             )}
 
-            <div className="bg-gray-50 rounded-2xl p-6 space-y-6">
+            <div className="bg-gray-50 dark:bg-[#28283a] rounded-2xl p-6 space-y-6">
               {/* Input Section */}
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-2">
+                <label className="block text-sm font-medium text-gray-600 dark:text-gray-200 mb-2">
                   Enter Numbers (space-separated)
                 </label>
                 <div className="relative">
                   <input
-                    type="number"
+                    type="text"
                     value={numbers}
                     onChange={(e) => {
                       setNumbers(e.target.value);
                       setError("");
                     }}
-                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                    className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-none rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                     placeholder="e.g., 10 20 30 40"
                   />
                 </div>
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-300">
                   Separate numbers with spaces
                 </p>
               </div>
@@ -114,7 +114,7 @@ const AverageCalculator = () => {
                 </button>
                 <button
                   onClick={reset}
-                  className="px-4 py-2 bg-white text-gray-700 border border-gray-200 rounded-xl font-medium hover:bg-gray-50 transition-colors duration-200"
+                  className="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-white border border-gray-200 dark:border-none rounded-xl font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
                 >
                   Reset
                 </button>
@@ -124,10 +124,10 @@ const AverageCalculator = () => {
               {stats && (
                 <div className="space-y-4">
                   {/* Main Result */}
-                  <div className="bg-white p-4 rounded-xl border border-gray-200">
+                  <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-none">
                     <div className="text-center">
-                      <p className="text-sm text-gray-600 mb-1">Average</p>
-                      <p className="text-3xl font-bold text-indigo-600">
+                      <p className="text-sm text-gray-600 dark:text-gray-200 mb-1">Average</p>
+                      <p className="text-3xl font-bold text-indigo-600 dark:text-indigo-300">
                         {stats.average}
                       </p>
                     </div>
@@ -135,21 +135,21 @@ const AverageCalculator = () => {
 
                   {/* Additional Stats */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div className="bg-white p-3 rounded-xl border border-gray-200">
-                      <p className="text-sm text-gray-600 mb-1">Min</p>
-                      <p className="text-lg font-semibold text-gray-800">{stats.min}</p>
+                    <div className="bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-200 dark:border-none">
+                      <p className="text-sm text-gray-600 dark:text-gray-200 mb-1">Min</p>
+                      <p className="text-lg font-semibold text-gray-800 dark:text-white">{stats.min}</p>
                     </div>
-                    <div className="bg-white p-3 rounded-xl border border-gray-200">
-                      <p className="text-sm text-gray-600 mb-1">Max</p>
-                      <p className="text-lg font-semibold text-gray-800">{stats.max}</p>
+                    <div className="bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-200 dark:border-none">
+                      <p className="text-sm text-gray-600 dark:text-gray-200 mb-1">Max</p>
+                      <p className="text-lg font-semibold text-gray-800 dark:text-white">{stats.max}</p>
                     </div>
-                    <div className="bg-white p-3 rounded-xl border border-gray-200">
-                      <p className="text-sm text-gray-600 mb-1">Median</p>
-                      <p className="text-lg font-semibold text-gray-800">{stats.median}</p>
+                    <div className="bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-200 dark:border-none">
+                      <p className="text-sm text-gray-600 dark:text-gray-200 mb-1">Median</p>
+                      <p className="text-lg font-semibold text-gray-800 dark:text-white">{stats.median}</p>
                     </div>
-                    <div className="bg-white p-3 rounded-xl border border-gray-200">
-                      <p className="text-sm text-gray-600 mb-1">Count</p>
-                      <p className="text-lg font-semibold text-gray-800">{stats.count}</p>
+                    <div className="bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-200 dark:border-none">
+                      <p className="text-sm text-gray-600 dark:text-gray-200 mb-1">Count</p>
+                      <p className="text-lg font-semibold text-gray-800 dark:text-white">{stats.count}</p>
                     </div>
                   </div>
                 </div>

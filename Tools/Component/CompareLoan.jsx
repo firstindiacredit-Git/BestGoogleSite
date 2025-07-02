@@ -74,7 +74,7 @@ const CompareLoan = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#28283a] flex items-start justify-center pt-4">
+    <div className="min-h-screen bg-blue-100 dark:bg-[#28283a] flex items-start justify-center pt-4">
       <div className="max-w-4xl  w-full px-2">
         <div className="bg-white dark:bg-[#513a7a] rounded-lg shadow-md overflow-hidden">
           {/* Back Button */}
@@ -93,12 +93,12 @@ const CompareLoan = () => {
             {/* Input Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               {/* Loan 1 Section */}
-              <div className="bg-gray-50 rounded-2xl p-4 space-y-4">
+              <div className="bg-gray-50 dark:bg-[#28283a] rounded-2xl p-4 space-y-4">
                 <h2 className="text-lg font-semibold text-gray-800 mb-2">
                   Loan 1 Details
                 </h2>
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-1">
+                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-200 mb-1">
                     Principal Amount
                   </label>
                   <input
@@ -107,12 +107,12 @@ const CompareLoan = () => {
                     onChange={(e) =>
                       setLoan1({ ...loan1, principal: e.target.value })
                     }
-                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                    className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-800 dark:text-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                     placeholder="Enter principal amount"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-1">
+                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-200 mb-1">
                     Interest Rate (%)
                   </label>
                   <input
@@ -121,12 +121,12 @@ const CompareLoan = () => {
                     onChange={(e) =>
                       setLoan1({ ...loan1, interest: e.target.value })
                     }
-                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                    className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-800 dark:text-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                     placeholder="Enter interest rate"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-1">
+                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-200 mb-1">
                     Tenure (Months)
                   </label>
                   <input
@@ -135,19 +135,19 @@ const CompareLoan = () => {
                     onChange={(e) =>
                       setLoan1({ ...loan1, tenure: e.target.value })
                     }
-                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                    className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-800 dark:text-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                     placeholder="Enter loan tenure"
                   />
                 </div>
               </div>
 
               {/* Loan 2 Section */}
-              <div className="bg-gray-50 rounded-2xl p-4 space-y-4">
+              <div className="bg-gray-50 dark:bg-[#28283a] rounded-2xl p-4 space-y-4">
                 <h2 className="text-lg font-semibold text-gray-800 mb-2">
                   Loan 2 Details
                 </h2>
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-1">
+                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-200 mb-1">
                     Principal Amount
                   </label>
                   <input
@@ -156,12 +156,12 @@ const CompareLoan = () => {
                     onChange={(e) =>
                       setLoan2({ ...loan2, principal: e.target.value })
                     }
-                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                    className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-800 dark:text-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                     placeholder="Enter principal amount"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-1">
+                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-200 mb-1">
                     Interest Rate (%)
                   </label>
                   <input
@@ -170,12 +170,12 @@ const CompareLoan = () => {
                     onChange={(e) =>
                       setLoan2({ ...loan2, interest: e.target.value })
                     }
-                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                    className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-800 dark:text-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                     placeholder="Enter interest rate"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-1">
+                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-200 mb-1">
                     Tenure (Months)
                   </label>
                   <input
@@ -184,7 +184,7 @@ const CompareLoan = () => {
                     onChange={(e) =>
                       setLoan2({ ...loan2, tenure: e.target.value })
                     }
-                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                    className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-800 dark:text-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                     placeholder="Enter loan tenure"
                   />
                 </div>
@@ -209,7 +209,7 @@ const CompareLoan = () => {
 
             {/* Results Section */}
             {(results.emi1 !== 0 || results.emi2 !== 0) && (
-              <div className="bg-gray-50 rounded-2xl p-4">
+              <div className="mt-3 p-3 bg-white dark:bg-[#28283a] rounded-lg border border-gray-200">
                 <h2 className="text-xl font-semibold text-gray-800 mb-4 text-center">
                   Comparison Results
                 </h2>

@@ -111,11 +111,11 @@ const VATCalculator = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 py-4 px-2 sm:px-4">
+    <div className="min-h-screen bg-blue-100 dark:bg-[#513a7a] py-4 px-2 sm:px-4">
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-[20px] sm:rounded-[30px] shadow-md border-2 border-gray-100 overflow-hidden">
+        <div className="bg-white dark:bg-[#28283a] rounded-[20px] sm:rounded-[30px] shadow-md dark:border-none overflow-hidden">
           <Back />
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-4 sm:mb-8 px-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white text-center mb-4 sm:mb-8 px-4">
             VAT Calculator
           </h1>
 
@@ -125,13 +125,13 @@ const VATCalculator = () => {
               <div className="space-y-4 sm:space-y-6">
                 <form onSubmit={calculateVAT} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-2">
+                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-200 mb-2">
                       Select Country
                     </label>
                     <select
                       value={selectedCountry}
                       onChange={handleCountryChange}
-                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                      className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-none rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                     >
                       {Object.keys(countries).map((country) => (
                         <option key={country} value={country}>
@@ -142,7 +142,7 @@ const VATCalculator = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-2">
+                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-200 mb-2">
                       Calculation Type
                     </label>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -155,7 +155,7 @@ const VATCalculator = () => {
                           className={`w-full px-4 py-3 rounded-lg font-medium transition-colors duration-200 ${
                             calculationType === "add"
                               ? "bg-indigo-600 text-white"
-                              : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
+                              : "bg-white dark:bg-gray-800 dark:text-white text-gray-700 border border-gray-200 dark:border-none hover:bg-gray-50 dark:hover:bg-gray-700"
                           }`}
                         >
                           VAT Exclusive
@@ -176,7 +176,7 @@ const VATCalculator = () => {
                           className={`w-full px-4 py-3 rounded-lg font-medium transition-colors duration-200 ${
                             calculationType === "remove"
                               ? "bg-indigo-600 text-white"
-                              : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
+                              : "bg-white dark:bg-gray-800 dark:text-white text-gray-700 border border-gray-200 dark:border-none hover:bg-gray-50 dark:hover:bg-gray-700"
                           }`}
                         >
                           VAT Inclusive
@@ -192,28 +192,28 @@ const VATCalculator = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-2">
+                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-200 mb-2">
                       {calculationType === "add" ? "Base Amount" : "Total Amount"} ({currency})
                     </label>
                     <input
                       type="text"
                       value={amount}
                       onChange={(e) => setAmount(e.target.value)}
-                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                      className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-none rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                       placeholder={`Enter ${calculationType === "add" ? "base" : "total"} amount`}
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-2">
+                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-200 mb-2">
                       VAT Rate (%)
                     </label>
                     <input
                       type="text"
                       value={vatRate}
                       onChange={(e) => setVatRate(e.target.value)}
-                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                      className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-none rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                       placeholder="Enter VAT rate"
                       required
                     />
@@ -229,7 +229,7 @@ const VATCalculator = () => {
                     <button
                       type="button"
                       onClick={handleReset}
-                      className="w-full sm:w-auto px-4 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors duration-200"
+                      className="w-full sm:w-auto px-4 py-3 border border-gray-200 dark:border-none bg-white dark:bg-gray-800 dark:text-white rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
                     >
                       Reset
                     </button>
@@ -241,30 +241,30 @@ const VATCalculator = () => {
               <div className="space-y-4 sm:space-y-6">
                 {result ? (
                   <>
-                    <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200">
+                    <div className="bg-white dark:bg-gray-900 p-4 sm:p-6 rounded-xl border border-gray-200 dark:border-none">
                       <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                        <div className="p-3 sm:p-4 bg-indigo-50 rounded-lg sm:h-32 flex flex-col justify-center">
+                        <div className="p-3 sm:p-4 bg-indigo-50 dark:bg-[#3730a3] rounded-lg sm:h-32 flex flex-col justify-center">
                           <p className="text-sm text-gray-600">Base Amount</p>
-                          <p className="text-xl sm:text-2xl font-bold text-indigo-600 mt-2">
+                          <p className="text-xl sm:text-2xl font-bold text-indigo-600 dark:text-indigo-300 mt-2">
                             {formatCurrency(result.baseAmount)}
                           </p>
                         </div>
-                        <div className="p-3 sm:p-4 bg-green-50 rounded-lg sm:h-32 flex flex-col justify-center">
-                          <p className="text-sm text-gray-600">VAT Amount</p>
-                          <p className="text-xl sm:text-2xl font-bold text-green-600 mt-2">
+                        <div className="p-3 sm:p-4 bg-green-50 dark:bg-green-900 rounded-lg sm:h-32 flex flex-col justify-center">
+                          <p className="text-sm text-gray-600 dark:text-gray-200">VAT Amount</p>
+                          <p className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-300 mt-2">
                             {formatCurrency(result.vatAmount)}
                           </p>
                         </div>
                       </div>
-                      <div className="mt-4 p-3 sm:p-4 bg-purple-50 rounded-lg text-center">
-                        <p className="text-sm text-gray-600 mb-1">Total Amount</p>
-                        <p className="text-2xl sm:text-3xl font-bold text-purple-600">
+                      <div className="mt-4 p-3 sm:p-4 bg-purple-50 dark:bg-purple-900 rounded-lg text-center">
+                        <p className="text-sm text-gray-600 dark:text-gray-200 mb-1">Total Amount</p>
+                        <p className="text-2xl sm:text-3xl font-bold text-purple-600 dark:text-purple-300">
                           {formatCurrency(result.totalAmount)}
                         </p>
                       </div>
                     </div>
-                    <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    <div className="bg-white dark:bg-gray-900 p-4 sm:p-6 rounded-xl border border-gray-200 dark:border-none">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                         Amount Distribution
                       </h3>
                       <div className="h-48 sm:h-64">
@@ -273,7 +273,7 @@ const VATCalculator = () => {
                     </div>
                   </>
                 ) : (
-                  <div className="bg-white p-6 rounded-xl border border-gray-200 h-full flex flex-col items-center justify-center text-gray-500">
+                  <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-none h-full flex flex-col items-center justify-center text-gray-500 dark:text-gray-300">
                     <svg
                       className="w-12 h-12 sm:w-16 sm:h-16 mb-4"
                       fill="none"
