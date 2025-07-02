@@ -23,7 +23,7 @@ const ResumeBuild = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 py-8 px-4">
+    <div className="min-h-screen bg-blue-100 dark:bg-[#513a7a] py-8 px-4">
       <div className="max-w-7xl mx-auto relative">
         <div className="absolute top-0 left-4">
           <Back />

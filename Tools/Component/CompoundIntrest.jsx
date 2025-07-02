@@ -115,66 +115,66 @@ const CompoundIntrest = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br  from-gray-100 to-gray-200 py-4">
+    <div className="min-h-screen bg-blue-100 dark:bg-[#513a7a] py-4">
       <div className="max-w-4xl  mx-auto px-4">
-        <div className="bg-white rounded-[30px] shadow-md border-2 border-gray-100">
+        <div className="bg-white dark:bg-[#28283a] rounded-[30px] shadow-md dark:border-none">
           <div className="p-1">
             <Back />
           </div>
 
-          <div className="bg-gradient-to-r from-gray-50 to-white p-2 border-b border-gray-100">
-            <h1 className="text-2xl font-bold text-gray-800 text-center">
+          <div className="bg-gradient-to-r from-gray-50 to-white dark:from-[#28283a] dark:to-[#28283a] p-2 border-b border-gray-100 dark:border-none">
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-white text-center">
               Compound Interest Calculator
             </h1>
           </div>
 
           <div className="p-6">
             {error && (
-              <div className="mb-6 p-3 bg-red-50 text-red-600 rounded-xl border border-red-200 text-sm">
+              <div className="mb-6 p-3 bg-red-50 text-red-600 rounded-xl border border-red-200 dark:border-none text-sm">
                 {error}
               </div>
             )}
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Input Form */}
-              <div className="bg-gray-50 rounded-2xl p-6">
+              <div className="bg-gray-50 dark:bg-[#28283a] rounded-2xl p-6">
                 <form onSubmit={calculateCompoundInterest} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-2">
+                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-200 mb-2">
                       Principal Amount ( )
                     </label>
                     <input
                       type="text"
                       value={principal}
                       onChange={(e) => handleNumberInput(e.target.value, setPrincipal)}
-                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                      className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-none rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                       placeholder="Enter initial investment"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-2">
+                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-200 mb-2">
                       Annual Interest Rate (%)
                     </label>
                     <input
                       type="text"
                       value={rate}
                       onChange={(e) => handleNumberInput(e.target.value, setRate)}
-                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                      className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-none rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                       placeholder="Enter interest rate"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-2">
+                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-200 mb-2">
                       Compounding Frequency (per year)
                     </label>
                     <select
                       value={timesCompounded}
                       onChange={(e) => setTimesCompounded(e.target.value)}
-                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                      className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-none rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                       required
                     >
                       <option value="">Select frequency</option>
@@ -187,14 +187,14 @@ const CompoundIntrest = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-2">
+                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-200 mb-2">
                       Time Period (years)
                     </label>
                     <input
                       type="text"
                       value={time}
                       onChange={(e) => handleNumberInput(e.target.value, setTime)}
-                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                      className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-none rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                       placeholder="Enter time in years"
                       required
                     />
@@ -210,7 +210,7 @@ const CompoundIntrest = () => {
                     <button
                       type="button"
                       onClick={handleReset}
-                      className="px-4 py-2 bg-white text-gray-700 border border-gray-200 rounded-xl font-medium hover:bg-gray-50 transition-colors duration-200"
+                      className="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-white border border-gray-200 dark:border-none rounded-xl font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
                     >
                       Reset
                     </button>
@@ -221,37 +221,37 @@ const CompoundIntrest = () => {
               {/* Results Section */}
               <div className="space-y-6">
                 {result ? (
-                  <div className="bg-white p-6 rounded-xl border border-gray-200">
+                  <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-none">
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="p-4 bg-indigo-50 rounded-lg h-32 flex flex-col justify-center">
+                      <div className="p-4 bg-indigo-50 dark:bg-[#3730a3] rounded-lg h-32 flex flex-col justify-center">
                         <p className="text-sm text-gray-600">Future Value</p>
-                        <p className="text-2xl font-bold text-indigo-600 mt-2">
+                        <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-300 mt-2">
                           {formatCurrency(result.futureValue)}
                         </p>
                       </div>
-                      <div className="p-4 bg-green-50 rounded-lg h-32 flex flex-col justify-center">
-                        <p className="text-sm text-gray-600">Total Interest</p>
-                        <p className="text-2xl font-bold text-green-600 mt-2">
+                      <div className="p-4 bg-green-50 dark:bg-green-900 rounded-lg h-32 flex flex-col justify-center">
+                        <p className="text-sm text-gray-600 dark:text-gray-200">Total Interest</p>
+                        <p className="text-2xl font-bold text-green-600 dark:text-green-300 mt-2">
                           {formatCurrency(result.totalInterest)}
                         </p>
                       </div>
-                      <div className="p-4 bg-blue-50 rounded-lg h-32 flex flex-col justify-center">
-                        <p className="text-sm text-gray-600">Principal Amount</p>
-                        <p className="text-2xl font-bold text-blue-600 mt-2">
+                      <div className="p-4 bg-blue-50 dark:bg-blue-900 rounded-lg h-32 flex flex-col justify-center">
+                        <p className="text-sm text-gray-600 dark:text-gray-200">Principal Amount</p>
+                        <p className="text-2xl font-bold text-blue-600 dark:text-blue-300 mt-2">
                           {formatCurrency(result.totalDeposit)}
                         </p>
                       </div>
-                      <div className="p-4 bg-purple-50 rounded-lg h-32 flex flex-col justify-center">
-                        <p className="text-sm text-gray-600">Interest Rate</p>
-                        <p className="text-2xl font-bold text-purple-600 mt-2">
+                      <div className="p-4 bg-purple-50 dark:bg-purple-900 rounded-lg h-32 flex flex-col justify-center">
+                        <p className="text-sm text-gray-600 dark:text-gray-200">Interest Rate</p>
+                        <p className="text-2xl font-bold text-purple-600 dark:text-purple-300 mt-2">
                           {result.interestPercentage.toFixed(2)}%
                         </p>
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="bg-white p-6 rounded-xl border border-gray-200 flex items-center justify-center">
-                    <p className="text-gray-500 text-center">
+                  <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-none flex items-center justify-center">
+                    <p className="text-gray-500 dark:text-gray-300 text-center">
                       Enter principal, rate and time to see the results
                     </p>
                   </div>
@@ -263,8 +263,8 @@ const CompoundIntrest = () => {
             <div className="mt-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Chart */}
-                <div className="bg-white p-6 rounded-xl border border-gray-200">
-                  <h3 className="text-sm font-medium text-gray-600 mb-4">Interest Distribution</h3>
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-none">
+                  <h3 className="text-sm font-medium text-gray-600 dark:text-gray-200 mb-4">Interest Distribution</h3>
                   {result ? (
                     <div className="w-full h-64">
                       <Pie data={chartData} options={chartOptions} />
@@ -272,12 +272,12 @@ const CompoundIntrest = () => {
                   ) : (
                     <div className="w-full h-64 flex items-center justify-center">
                       <div className="text-center">
-                        <div className="text-gray-400 mb-2">
+                        <div className="text-gray-400 dark:text-gray-500 mb-2">
                           <svg className="w-12 h-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                           </svg>
                         </div>
-                        <p className="text-gray-500 text-sm">
+                        <p className="text-gray-500 dark:text-gray-300 text-sm">
                           Chart will appear here after calculation
                         </p>
                       </div>
@@ -286,20 +286,20 @@ const CompoundIntrest = () => {
                 </div>
 
                 {/* Yearly Breakdown */}
-                <div className="bg-white p-6 rounded-xl border border-gray-200">
-                  <h3 className="text-sm font-medium text-gray-600 mb-4">Yearly Breakdown</h3>
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-none">
+                  <h3 className="text-sm font-medium text-gray-600 dark:text-gray-200 mb-4">Yearly Breakdown</h3>
                   {result ? (
                     <div className="space-y-2 max-h-64 overflow-y-auto">
                       {result.yearlyBreakdown.map((year) => (
                         <div
                           key={year.year}
-                          className="grid grid-cols-3 gap-2 text-sm p-2 hover:bg-gray-50 rounded-lg"
+                          className="grid grid-cols-3 gap-2 text-sm p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg"
                         >
-                          <div>Year {year.year}</div>
-                          <div className="text-right text-gray-600">
+                          <div className="text-gray-600 dark:text-gray-300">Year {year.year}</div>
+                          <div className="text-right text-gray-600 dark:text-gray-300">
                             {formatCurrency(year.value)}
                           </div>
-                          <div className="text-right text-green-600">
+                          <div className="text-right text-green-600 dark:text-green-300">
                             +{formatCurrency(year.interest)}
                           </div>
                         </div>
@@ -308,12 +308,12 @@ const CompoundIntrest = () => {
                   ) : (
                     <div className="h-48 flex items-center justify-center">
                       <div className="text-center">
-                        <div className="text-gray-400 mb-2">
+                        <div className="text-gray-400 dark:text-gray-500 mb-2">
                           <svg className="w-12 h-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                           </svg>
                         </div>
-                        <p className="text-gray-500 text-sm">
+                        <p className="text-gray-500 dark:text-gray-300 text-sm">
                           Breakdown will appear here after calculation
                         </p>
                       </div>

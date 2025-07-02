@@ -124,7 +124,7 @@ const CardValidation = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#513a7a] p-2 sm:p-4 md:p-8">
+    <div className="min-h-screen bg-blue-100 dark:bg-[#513a7a] p-2 sm:p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
         <div className="bg-white dark:bg-[#28283a] rounded-2xl shadow-sm overflow-hidden">
           {/* Header */}
@@ -278,13 +278,13 @@ const CardValidation = () => {
                       </button>
                       <button
                         onClick={() => downloadXLSX("Invalid")}
-                        className="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg text-sm font-medium hover:bg-purple-200 transition-all"
+                        className="px-4 py-2 bg-purple-100 text-purple-700 dark:text-purple-300 rounded-lg text-sm font-medium hover:bg-purple-200 transition-all"
                       >
                         Download Invalid (XLSX)
                       </button>
                       <button
                         onClick={() => downloadPDF("Invalid")}
-                        className="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg text-sm font-medium hover:bg-orange-200 transition-all"
+                        className="px-4 py-2 bg-orange-100 text-orange-700 dark:text-purple-300 rounded-lg text-sm font-medium hover:bg-orange-200 transition-all"
                       >
                         Download Invalid (PDF)
                       </button>

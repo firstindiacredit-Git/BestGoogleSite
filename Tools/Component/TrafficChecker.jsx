@@ -72,7 +72,7 @@ const TrafficChecker = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#28283a] flex justify-center pt-8">
+    <div className="min-h-screen bg-blue-100 dark:bg-[#28283a] flex justify-center pt-8">
       <div className="w-full max-w-2xl mx-auto px-4">
         <div className="bg-white dark:bg-[#513a7a] rounded-lg shadow-lg overflow-hidden">
           <div className="p-4 relative">
@@ -101,7 +101,7 @@ const TrafficChecker = () => {
                   <div className="flex justify-center">
                     <button
                       type="submit"
-                      className="px-4 py-2  text-white text-sm font-semibold rounded-lg dark:bg-gray-800 mt-5 transition-colors duration-200"
+                      className="px-4 py-2  dark:text-white text-sm font-semibold rounded-lg bg-blue-500 dark:bg-gray-800 mt-5 transition-colors duration-200"
                       disabled={loading}
                     >
                       {loading ? "Checking..." : "Check Traffic"}
@@ -118,7 +118,7 @@ const TrafficChecker = () => {
               {/* Results Section */}
               {trafficData && (
                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-3">
-                  <h2 className="text-base font-semibold text-gray-700 mb-2">
+                  <h2 className="text-base font-semibold text-gray-700 dark:text-white mb-2">
                     Traffic Data for {extractDomain(url)}
                   </h2>
                   <div className="space-y-2">

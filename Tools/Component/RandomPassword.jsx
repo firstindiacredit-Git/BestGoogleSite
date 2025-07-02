@@ -43,7 +43,7 @@ function RandomPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#513a7a] p-2 sm:p-4 md:p-8">
+    <div className="min-h-screen bg-blue-100 dark:bg-[#513a7a] p-2 sm:p-4 md:p-8">
       <div className="max-w-3xl mx-auto">
         <div className="bg-white dark:bg-[#28283a] rounded-2xl shadow-sm overflow-hidden">
           {/* Header */}

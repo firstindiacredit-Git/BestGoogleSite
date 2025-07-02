@@ -186,18 +186,18 @@ const SplitPdf = () => {
   const zoomOut = () => setZoomLevel((prev) => prev / 1.2);
 
   return (
-    <div className="min-h-screen dark:bg-[#513a7a] bg-white p-2 sm:p-4 md:p-8">
+    <div className="min-h-screen bg-blue-100 dark:bg-[#513a7a] p-2 sm:p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
         <div className="bg-white dark:bg-[#28283a] rounded-2xl shadow-sm overflow-hidden">
           {/* Header */}
-          <div className="relative p-4 sm:p-6">
-            <div className="mb-8 sm:mb-0 sm:absolute sm:top-6 sm:left-6">
+          <div className="relative p-6 sm:p-6">
+            <div className="mb-8 sm:mb-0 sm:absolute sm:top-6 sm:left-6 border-b dark:border-gray-700 border-gray-100">
               <Back />
             </div>
             <h1 className="text-xl sm:text-3xl md:text-4xl font-bold text-center text-gray-900 dark:text-gray-100">
               Split PDF
             </h1>
-            <p className="mt-2 text-sm text-center text-gray-600">
+            <p className="mt-2 text-sm text-center text-gray-600 dark:text-gray-400">
               Split, merge and organize your PDF pages
             </p>
           </div>
@@ -213,7 +213,7 @@ const SplitPdf = () => {
                   id="fileInput"
                 />
                 <label htmlFor="fileInput" className="cursor-pointer block">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto bg-blue-50 rounded-2xl flex items-center justify-center">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto bg-blue-50 dark:bg-blue-900 rounded-2xl flex items-center justify-center">
                     <svg
                       className="w-8 h-8 sm:w-10 sm:h-10 text-blue-500"
                       fill="none"
@@ -229,7 +229,7 @@ const SplitPdf = () => {
                     </svg>
                   </div>
                   <div className="mt-4">
-                    <span className="text-sm sm:text-base font-medium text-gray-900">
+                    <span className="text-sm sm:text-base font-medium text-gray-900 dark:text-gray-100">
                       Choose PDF file or{" "}
                       <span className="text-blue-500 hover:text-blue-600">
                         browse

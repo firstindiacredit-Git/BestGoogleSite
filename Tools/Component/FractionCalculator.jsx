@@ -38,13 +38,13 @@ const simplifyFraction = (num, den) => {
 // Input Component
 const Input = ({ label, name, value, onChange }) => (
   <div className="flex flex-col w-full">
-    <label className="text-sm font-medium text-gray-600 mb-1">{label}</label>
+    <label className="text-sm font-medium text-gray-600 dark:text-gray-200 mb-1">{label}</label>
     <input
       type="number"
       name={name}
       value={value}
       onChange={onChange}
-      className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+      className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-800 dark:text-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
       placeholder="0"
     />
   </div>
@@ -58,7 +58,7 @@ const OperationButton = ({ operation, onClick, isActive }) => (
     className={`w-full px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
       isActive
         ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
-        : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-white border border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
     }`}
   >
     {operation}
@@ -129,15 +129,15 @@ const FractionCalculator = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 py-4">
+    <div className="min-h-screen bg-blue-100 dark:bg-[#513a7a] py-4">
       <div className="max-w-2xl mx-auto px-4">
-        <div className="bg-white rounded-[30px] shadow-md border-2 border-gray-100">
+        <div className="bg-white dark:bg-[#28283a] rounded-[30px] shadow-md">
           <div className="p-1">
             <Back />
           </div>
 
-          <div className="bg-gradient-to-r from-gray-50 to-white p-2 border-b border-gray-100">
-            <h1 className="text-2xl font-bold text-gray-800 text-center">
+          <div className="bg-gradient-to-r from-gray-50 to-white dark:from-[#28283a] dark:to-[#28283a] p-2 border-b border-gray-100">
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-white text-center">
               Fraction Calculator
             </h1>
           </div>
@@ -149,7 +149,7 @@ const FractionCalculator = () => {
               </div>
             )}
 
-            <div className="bg-gray-50 rounded-2xl p-6 space-y-6">
+            <div className="bg-gray-50 dark:bg-[#28283a] rounded-2xl p-6 space-y-6">
               {/* First Fraction */}
               <div className="grid grid-cols-2 gap-4">
                 <Input
@@ -201,19 +201,15 @@ const FractionCalculator = () => {
 
               {/* Result */}
               {(result.numerator !== 0 || activeOperation) && (
-                <div className="bg-white p-4 rounded-xl border border-gray-200">
+                <div className="bg-white dark:bg-[#28283a] p-4 rounded-xl border border-gray-200">
                   <div className="text-center">
-                    <p className="text-sm text-gray-600 mb-1">Result</p>
-                    <div className="flex items-center justify-center space-x-2">
-                      <span className="text-2xl font-bold text-indigo-600">
-                        {result.numerator}
-                      </span>
-                      <div className="h-0.5 w-6 bg-indigo-600"></div>
-                      <span className="text-2xl font-bold text-indigo-600">
-                        {result.denominator}
-                      </span>
+                    <p className="text-sm text-gray-600 dark:text-gray-200 mb-1">Result</p>
+                    <div className="flex flex-col items-center">
+                      <span className="text-2xl font-bold text-indigo-400 dark:text-indigo-300">{result.numerator}</span>
+                      <span className="text-xl font-bold text-gray-600 dark:text-gray-300 my-1">―</span>
+                      <span className="text-2xl font-bold text-indigo-400 dark:text-indigo-300">{result.denominator}</span>
                     </div>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-gray-500 dark:text-gray-300 mt-1">
                       = {(result.numerator / result.denominator).toFixed(3)}
                     </p>
                   </div>

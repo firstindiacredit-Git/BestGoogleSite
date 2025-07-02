@@ -61,13 +61,13 @@ const AddPageNum = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 mt-16 dark:bg-[#513a7a] py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mt-16 mx-auto">
+    <div className="min-h-screen bg-blue-100 dark:bg-[#513a7a] py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mt-8 mx-auto">
         <div
           className="bg-white  dark:bg-[#28283a] 
           rounded-xl transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.16)]"
         >
-          <div className="p-4 ">
+          <div className="p-4 border-b dark:border-gray-700 border-gray-100">
             <Back />
           </div>
 

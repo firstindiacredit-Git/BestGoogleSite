@@ -64,7 +64,7 @@ const Clock = () => {
   const hoursDegrees = ((hours + minutes / 60) / 12) * 360;
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-[#513a7a] p-4 md:p-8">
+    <div className="min-h-screen bg-blue-100 dark:bg-[#513a7a] p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
         <div className="bg-white dark:bg-[#28283a] rounded-2xl shadow-sm overflow-hidden">
           {/* Header Section */}

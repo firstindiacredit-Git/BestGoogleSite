@@ -222,8 +222,8 @@ const ImageToPdf = () => {
   };
 
   return (
-    <div className="p-6 bg-white min-h-screen dark:bg-[#513a7a]">
-      <div className="max-w-4xl mx-auto dark:bg-[#28283a] p-4 rounded-xl">
+    <div className="p-6 bg-blue-100 min-h-screen dark:bg-[#513a7a]">
+      <div className="max-w-4xl mx-auto bg-white dark:bg-[#28283a] p-4 rounded-xl">
         <div className="border-b border-gray-100 dark:border-gray-700 pb-4 mb-6">
           <Back />
         </div>

@@ -58,8 +58,8 @@ function Percentage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#513a7a] flex items-start justify-center ">
-      <div className="max-w-7xl w-full rounded-lg">
+    <div className="min-h-screen bg-blue-100 dark:bg-[#513a7a] flex items-start justify-center">
+      <div className="max-w-7xl w-full rounded-lg mt-10">
         <div className="bg-white dark:bg-[#28283a] p-4  rounded-xl shadow-md overflow-hidden ">
           {/* Back Button */}
           <div className="p-1">
@@ -91,7 +91,7 @@ function Percentage() {
                         type="number"
                         value={percentage}
                         onChange={(e) => setPercentage(e.target.value)}
-                        className="w-full px-2 py-2 rounded-lg dark:bg-gray-700 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                        className="w-full px-2 py-2 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                         placeholder="Enter percentage"
                       />
                     </div>
@@ -103,7 +103,7 @@ function Percentage() {
                         type="number"
                         value={value}
                         onChange={(e) => setValue(e.target.value)}
-                        className="w-full px-2 py-2 dark:bg-gray-700 rounded-lg  focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                        className="w-full px-2 py-2 dark:bg-gray-700 dark:text-white rounded-lg  focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                         placeholder="Enter value"
                       />
                     </div>
@@ -147,7 +147,7 @@ function Percentage() {
                         type="number"
                         value={initialValue}
                         onChange={(e) => setInitialValue(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg dark:bg-gray-700  focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                        className="w-full px-3 py-2 rounded-lg dark:bg-gray-700 dark:text-white  focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                         placeholder="Enter initial value"
                       />
                     </div>
@@ -159,7 +159,7 @@ function Percentage() {
                         type="number"
                         value={finalValue}
                         onChange={(e) => setFinalValue(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg dark:bg-gray-700 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                        className="w-full px-3 py-2 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                         placeholder="Enter final value"
                       />
                     </div>
@@ -200,7 +200,7 @@ function Percentage() {
                         type="number"
                         value={partValue}
                         onChange={(e) => setPartValue(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg dark:bg-gray-700 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                        className="w-full px-3 py-2 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                         placeholder="Enter part value"
                       />
                     </div>
@@ -212,7 +212,7 @@ function Percentage() {
                         type="number"
                         value={wholeValue}
                         onChange={(e) => setWholeValue(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg dark:bg-gray-700 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                        className="w-full px-3 py-2 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                         placeholder="Enter whole value"
                       />
                     </div>
@@ -256,7 +256,7 @@ function Percentage() {
                         type="number"
                         value={part}
                         onChange={(e) => setPart(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg dark:bg-gray-700 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                        className="w-full px-3 py-2 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                         placeholder="Enter part value"
                       />
                     </div>
@@ -268,7 +268,7 @@ function Percentage() {
                         type="number"
                         value={percentOfWhat}
                         onChange={(e) => setPercentOfWhat(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg dark:bg-gray-700 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                        className="w-full px-3 py-2 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                         placeholder="Enter percentage"
                       />
                     </div>

@@ -84,7 +84,7 @@ const ExcelSearch = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#513a7a] flex flex-col items-center justify-start p-6">
+    <div className="min-h-screen bg-blue-100 dark:bg-[#513a7a] flex flex-col items-center justify-start p-6">
       <div className="bg-white dark:bg-[#28283a] shadow-md rounded-lg p-8 w-full max-w-7xl">
         <Back/>
          <div>

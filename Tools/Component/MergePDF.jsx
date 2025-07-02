@@ -122,13 +122,13 @@ const MergePDF = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#513a7a] py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-blue-100 dark:bg-[#513a7a] py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <div
-          className="bg-white dark:bg-[#28283a] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.12)] 
+          className="bg-white dark:bg-[#28283a] shadow-[0_8px_30px_rgb(0,0,0,0.12)] 
           rounded-xl transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.16)]"
         >
-          <div className="p-4 ">
+          <div className="p-4  border-b dark:border-gray-700 border-gray-100">
             <Back />
           </div>
 
