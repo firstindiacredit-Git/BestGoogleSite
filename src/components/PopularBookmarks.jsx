@@ -11,7 +11,6 @@ import {
   where,
   deleteDoc,
   writeBatch,
-  onSnapshot,
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import {
@@ -27,6 +26,7 @@ import {
   Empty,
   Row,
   Col,
+  notification,
 } from "antd";
 import { motion } from "framer-motion";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
@@ -505,309 +505,118 @@ function PopularBookmarks() {
     return () => unsubscribeAuth();
   }, []);
 
-  // Add new helper function for category fetching
-  const fetchCategories = async () => {
-    if (!user) return [];
-
-    try {
-      // Fetch admin categories
-      const adminCategorySnapshot = await getDocs(collection(db, "category"));
-      const adminCategories = adminCategorySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-        isAdminCategory: true,
-      }));
-
-      // Fetch user categories
-      const userCategorySnapshot = await getDocs(
-        collection(db, "users", user.uid, "UserCategory")
-      );
-      const userCategories = userCategorySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-        name: doc.data().newCategory,
-        isAdminCategory: false,
-      }));
-
-      // Combine and sort categories
-      return [...adminCategories, ...userCategories].sort(
-        (a, b) => (a.order || 0) - (b.order || 0)
-      );
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-      //error("Failed to fetch categories");
-      return [];
-    }
-  };
-
-  // Add improved snapshot listener setup
-  const setupSnapshotListeners = () => {
-    if (!user)
-      return { unsubscribeCategories: null, unsubscribePositions: null };
-
-    // Listen for user category changes
-    const unsubscribeCategories = onSnapshot(
-      collection(db, "users", user.uid, "UserCategory"),
-      {
-        next: async (snapshot) => {
-          try {
-            const changes = snapshot.docChanges();
-
-            // Handle incremental updates
-            setCategories((prevCategories) => {
-              const updatedCategories = [...prevCategories];
-
-              changes.forEach((change) => {
-                const categoryData = {
-                  id: change.doc.id,
-                  ...change.doc.data(),
-                  name: change.doc.data().newCategory,
-                  isAdminCategory: false,
-                };
-
-                if (change.type === "added") {
-                  if (
-                    !updatedCategories.some((cat) => cat.id === categoryData.id)
-                  ) {
-                    updatedCategories.push(categoryData);
-                  }
-                } else if (change.type === "modified") {
-                  const index = updatedCategories.findIndex(
-                    (cat) => cat.id === categoryData.id
-                  );
-                  if (index !== -1) {
-                    updatedCategories[index] = categoryData;
-                  }
-                } else if (change.type === "removed") {
-                  const index = updatedCategories.findIndex(
-                    (cat) => cat.id === categoryData.id
-                  );
-                  if (index !== -1) {
-                    updatedCategories.splice(index, 1);
-                  }
-                }
-              });
-
-              return updatedCategories.sort(
-                (a, b) => (a.order || 0) - (b.order || 0)
-              );
-            });
-
-            // Update columns if needed
-            if (
-              changes.some(
-                (change) => change.type === "added" || change.type === "removed"
-              )
-            ) {
-              setCategoryColumns((prevColumns) =>
-                ensureAllCategoriesInColumns(categories, prevColumns)
-              );
-            }
-          } catch (error) {
-            console.error("Error processing category changes:", error);
-            //error("Failed to process category updates");
-          }
-        },
-        error: (error) => {
-          console.error("Error in category snapshot:", error);
-          //error("Failed to listen for category updates");
-        },
-      }
-    );
-
-    // Listen for position changes
-    const unsubscribePositions = onSnapshot(doc(db, "users", user.uid), {
-      next: (docSnapshot) => {
-        try {
-          if (docSnapshot.exists()) {
-            const data = docSnapshot.data();
-            if (data.categoryPositions) {
-              const { columns, columnCount: newColumnCount } =
-                data.categoryPositions;
-
-              // Update columns with optimistic UI
-              setCategoryColumns((prevColumns) => {
-                const newColumns = { ...columns };
-                // Ensure all categories are included
-                return ensureAllCategoriesInColumns(categories, newColumns);
-              });
-
-              // Update column count if changed
-              if (newColumnCount !== columnCount) {
-                setColumnCount(newColumnCount);
-              }
-
-              // Update localStorage for persistence
-              localStorage.setItem("columnCount", newColumnCount.toString());
-              localStorage.setItem("categoryColumns", JSON.stringify(columns));
-            }
-          }
-        } catch (error) {
-          console.error("Error processing position changes:", error);
-          //error("Failed to process layout updates");
-        }
-      },
-      error: (error) => {
-        console.error("Error in positions snapshot:", error);
-        //error("Failed to listen for layout updates");
-      },
-    });
-
-    return { unsubscribeCategories, unsubscribePositions };
-  };
-
-  // Update the useEffect for initial data loading and snapshot setup
+  // Single effect to fetch all data when user changes
   useEffect(() => {
-    let unsubscribeCallbacks = {
-      unsubscribeCategories: null,
-      unsubscribePositions: null,
-    };
-
-    const initializeData = async () => {
+    let isMounted = true;
+    const fetchAllData = async () => {
       if (!user) {
         setLoading(false);
+        setCategories([]);
+        setLinks([]);
+        setCategoryColumns({ column1: [], column2: [], column3: [], column4: [] });
+        setColumnCount(4);
+        setHiddenBookmarkIds([]);
+        setOpenCategories({});
         return;
       }
-
+      setLoading(true);
       try {
-        setLoading(true);
-
-        // Initial fetch of categories
-        const initialCategories = await fetchCategories();
-        setCategories(initialCategories);
-
-        // Setup real-time listeners
-        unsubscribeCallbacks = setupSnapshotListeners();
-
-        // Load saved states from localStorage
+        // Fetch user doc
+        const userDocRef = doc(db, "users", user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        const userData = userDocSnap.exists() ? userDocSnap.data() : {};
+        // Fetch admin categories
+        const adminCategorySnapshot = await getDocs(collection(db, "category"));
+        const adminCategories = adminCategorySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+          isAdminCategory: true,
+        }));
+        // Fetch user categories
+        const userCategorySnapshot = await getDocs(collection(db, "users", user.uid, "UserCategory"));
+        const userCategories = userCategorySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+          name: doc.data().newCategory,
+          isAdminCategory: false,
+        }));
+        // Combine and sort categories
+        const allCategories = [...adminCategories, ...userCategories].sort((a, b) => (a.order || 0) - (b.order || 0));
+        // Fetch all user bookmarks
+        const userBookmarksSnapshot = await getDocs(collection(db, "users", user.uid, "CatBookmarks"));
+        const hiddenIds = userData.hiddenBookmarkIds || [];
+        const userBookmarks = userBookmarksSnapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            ...data,
+            isHidden: hiddenIds.includes(doc.id),
+            isAdminBookmark: false,
+          };
+        }).filter((bookmark) => !hiddenIds.includes(bookmark.id));
+        // Store user bookmark URLs for deduplication
+        const userBookmarkUrls = new Set(userBookmarks.map((b) => `${b.categoryId}-${b.url}`));
+        // Fetch admin bookmarks for each admin category
+        const adminBookmarksPromises = adminCategories.map(async (category) => {
+          const bookmarksSnapshot = await getDocs(query(collection(db, "links"), where("category", "==", category.id)));
+          return bookmarksSnapshot.docs.map((doc) => {
+            const data = doc.data();
+            const key = `${category.id}-${data.link}`;
+            if (userBookmarkUrls.has(key)) return null;
+            return {
+              id: doc.id,
+              ...data,
+              title: data.name,
+              url: data.link,
+              categoryId: category.id,
+              isHidden: hiddenIds.includes(doc.id),
+              isAdminBookmark: true,
+              createdBy: data.createdBy,
+              updatedAt: data.updatedAt,
+              order: data.order || 0,
+            };
+          }).filter(Boolean).filter((bookmark) => !hiddenIds.includes(bookmark.id));
+        });
+        const adminBookmarks = (await Promise.all(adminBookmarksPromises)).flat();
+        // Combine all bookmarks
+        const allBookmarks = [...userBookmarks, ...adminBookmarks];
+        // Category columns and count
+        let columns = userData.categoryPositions?.columns || { column1: [], column2: [], column3: [], column4: [] };
+        let colCount = userData.categoryPositions?.columnCount || 4;
+        // Open categories
         const savedOpenStates = localStorage.getItem("categoryOpenStates");
         const initialOpenStates = savedOpenStates
           ? JSON.parse(savedOpenStates)
-          : initialCategories.reduce((acc, category) => {
+          : allCategories.reduce((acc, category) => {
               acc[category.id] = true;
               return acc;
             }, {});
-
-        setOpenCategories(initialOpenStates);
+        // Set state if still mounted
+        if (isMounted) {
+          setCategories(allCategories);
+          setLinks(allBookmarks);
+          setCategoryColumns(columns);
+          setColumnCount(colCount);
+          setHiddenBookmarkIds(hiddenIds);
+          setOpenCategories(initialOpenStates);
+        }
       } catch (error) {
-        console.error("Error initializing data:", error);
-        //error("Failed to load initial data");
+        if (isMounted) {
+          setCategories([]);
+          setLinks([]);
+          setCategoryColumns({ column1: [], column2: [], column3: [], column4: [] });
+          setColumnCount(4);
+          setHiddenBookmarkIds([]);
+          setOpenCategories({});
+        }
+        console.error("Error fetching all data:", error);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
-
-    initializeData();
-
-    // Cleanup function
-    return () => {
-      if (unsubscribeCallbacks.unsubscribeCategories) {
-        unsubscribeCallbacks.unsubscribeCategories();
-      }
-      if (unsubscribeCallbacks.unsubscribePositions) {
-        unsubscribeCallbacks.unsubscribePositions();
-      }
-    };
+    fetchAllData();
+    return () => { isMounted = false; };
   }, [user]);
-
-  // Fetch all user bookmarks
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!user) return;
-
-      try {
-        // Fetch hidden bookmarks first
-        const userDocRef = doc(db, "users", user.uid);
-        const userDocSnap = await getDoc(userDocRef);
-        const hiddenIds = userDocSnap.exists()
-          ? userDocSnap.data().hiddenBookmarkIds || []
-          : [];
-
-        setHiddenBookmarkIds(hiddenIds);
-
-        // Create a Set to track unique URLs per category
-        const uniqueUrlsPerCategory = new Map();
-
-        // Fetch all user bookmarks
-        const userBookmarksSnapshot = await getDocs(
-          collection(db, "users", user.uid, "CatBookmarks")
-        );
-        const userBookmarks = userBookmarksSnapshot.docs
-          .map((doc) => {
-            const data = doc.data();
-            const key = `${data.categoryId}-${data.url}`;
-            if (!uniqueUrlsPerCategory.has(key)) {
-              uniqueUrlsPerCategory.set(key, doc.id);
-              return {
-                id: doc.id,
-                ...data,
-                isHidden: hiddenIds.includes(doc.id),
-                isAdminBookmark: false,
-              };
-            }
-            return null;
-          })
-          .filter(Boolean)
-          .filter((bookmark) => !hiddenIds.includes(bookmark.id));
-
-        // Store user bookmark IDs for deduplication
-        const userBookmarkIds = new Set(userBookmarks.map((b) => b.id));
-        const userBookmarkUrls = new Set(
-          userBookmarks.map((b) => `${b.categoryId}-${b.url}`)
-        );
-
-        // Fetch admin bookmarks for each admin category
-        const adminBookmarksPromises = categories.map(async (category) => {
-          const bookmarksSnapshot = await getDocs(
-            query(collection(db, "links"), where("category", "==", category.id))
-          );
-          return bookmarksSnapshot.docs
-            .map((doc) => {
-              const data = doc.data();
-              const key = `${category.id}-${data.link}`;
-              // Skip if we already have this URL in user bookmarks or if it's a duplicate
-              if (userBookmarkUrls.has(key) || uniqueUrlsPerCategory.has(key)) {
-                return null;
-              }
-              uniqueUrlsPerCategory.set(key, doc.id);
-              return {
-                id: doc.id,
-                ...data,
-                title: data.name,
-                url: data.link,
-                categoryId: category.id,
-                isHidden: hiddenIds.includes(doc.id),
-                isAdminBookmark: true,
-                createdBy: data.createdBy,
-                updatedAt: data.updatedAt,
-                order: data.order || 0,
-              };
-            })
-            .filter(Boolean)
-            .filter((bookmark) => !hiddenIds.includes(bookmark.id));
-        });
-
-        const adminBookmarks = (
-          await Promise.all(adminBookmarksPromises)
-        ).flat();
-
-        // Combine all bookmarks
-        const allBookmarks = [...userBookmarks, ...adminBookmarks];
-        // console.log(
-        //   `Loaded ${userBookmarks.length} user bookmarks and ${adminBookmarks.length} admin bookmarks`
-        // );
-
-        setLinks(allBookmarks);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching bookmark data:", error);
-        //error("Failed to load bookmarks");
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [user, categories]);
 
   // Add useEffect to load saved positions
   useEffect(() => {
@@ -1138,7 +947,14 @@ function PopularBookmarks() {
         return filtered;
       });
 
-      //success("Category added successfully");
+      // Show notification after successful add
+      notification.success({
+        message: "New category added!",
+        description: "You can organize it in the Category Controller on the home page.",
+        placement: "topRight",
+        duration: 4
+      });
+
       setNewCategoryName("");
       setIsAddCategoryModalVisible(false);
       // Show tip if controller is open
@@ -2420,152 +2236,6 @@ function PopularBookmarks() {
     }
   }, [openCategories]); // Only depend on openCategories changes
 
-  // Main effect for handling user data and categories
-  useEffect(() => {
-    if (!user) return;
-
-    let unsubscribeUserDoc = null;
-    let unsubscribeCategories = null;
-    let isComponentMounted = true;
-
-    const setupListeners = async () => {
-      try {
-        const userDocRef = doc(db, "users", user.uid);
-        const userDocSnap = await getDoc(userDocRef);
-
-        if (!isComponentMounted) return;
-
-        if (userDocSnap.exists()) {
-          const data = userDocSnap.data();
-          // Set initial data
-          if (data.hiddenCategories) {
-            setHiddenCategories(data.hiddenCategories);
-          }
-          if (data.categoryPositions) {
-            const { columns, columnCount: count } = data.categoryPositions;
-            if (columns) setCategoryColumns(columns);
-            if (count) setColumnCount(count);
-          }
-        }
-
-        // Setup real-time listener for user document
-        unsubscribeUserDoc = onSnapshot(
-          userDocRef,
-          { includeMetadataChanges: true },
-          (docSnapshot) => {
-            if (!isComponentMounted || docSnapshot.metadata.hasPendingWrites)
-              return;
-
-            if (docSnapshot.exists()) {
-              const data = docSnapshot.data();
-
-              // Update hidden categories
-              if (data.hiddenCategories) {
-                setHiddenCategories((prev) => {
-                  // Only update if there's a change
-                  if (
-                    JSON.stringify(prev) !==
-                    JSON.stringify(data.hiddenCategories)
-                  ) {
-                    console.log(
-                      "Updating hidden categories from snapshot:",
-                      data.hiddenCategories
-                    );
-                    return data.hiddenCategories;
-                  }
-                  return prev;
-                });
-              }
-
-              // Update hidden bookmark IDs
-              if (data.hiddenBookmarkIds) {
-                setHiddenBookmarkIds((prev) => {
-                  // Only update if there's a change
-                  if (
-                    JSON.stringify(prev) !==
-                    JSON.stringify(data.hiddenBookmarkIds)
-                  ) {
-                    console.log(
-                      "Updating hidden bookmark IDs from snapshot:",
-                      data.hiddenBookmarkIds
-                    );
-                    return data.hiddenBookmarkIds;
-                  }
-                  return prev;
-                });
-              }
-
-              // Update category positions
-              if (data.categoryPositions) {
-                const { columns, columnCount: newCount } =
-                  data.categoryPositions;
-                if (columns) {
-                  setCategoryColumns((prev) =>
-                    JSON.stringify(prev) !== JSON.stringify(columns)
-                      ? columns
-                      : prev
-                  );
-                }
-                if (typeof newCount === "number") {
-                  setColumnCount((prev) =>
-                    prev !== newCount ? newCount : prev
-                  );
-                }
-              }
-            }
-          }
-        );
-
-        // Setup real-time listener for user categories
-        unsubscribeCategories = onSnapshot(
-          collection(db, "users", user.uid, "UserCategory"),
-          { includeMetadataChanges: true },
-          (snapshot) => {
-            if (!isComponentMounted || snapshot.metadata.hasPendingWrites)
-              return;
-
-            const userCategories = snapshot.docs.map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-              name: doc.data().newCategory,
-              isAdminCategory: false,
-            }));
-
-            setCategories((prevCategories) => {
-              const adminCategories = prevCategories.filter(
-                (cat) => cat.isAdminCategory
-              );
-              const mergedCategories = [
-                ...adminCategories,
-                ...userCategories,
-              ].sort((a, b) => (a.order || 0) - (b.order || 0));
-
-              // Only update if there's an actual change
-              return JSON.stringify(prevCategories) !==
-                JSON.stringify(mergedCategories)
-                ? mergedCategories
-                : prevCategories;
-            });
-          }
-        );
-      } catch (error) {
-        console.error("Error setting up listeners:", error);
-        if (isComponentMounted) {
-          //error("Failed to load data. Please refresh the page.");
-        }
-      }
-    };
-
-    setupListeners();
-
-    // Cleanup function
-    return () => {
-      isComponentMounted = false;
-      if (unsubscribeUserDoc) unsubscribeUserDoc();
-      if (unsubscribeCategories) unsubscribeCategories();
-    };
-  }, [user]); // Only depend on user changes
-
   // Optimize controller state updates with debounce
   useEffect(() => {
     if (!isControllerOpen || !categories.length) return;
@@ -2844,207 +2514,12 @@ function PopularBookmarks() {
     }
   }, [user]);
 
-  // Function to setup real-time database listeners
-  const setupDatabaseListeners = () => {
-    if (!user) return null;
-
-    const userDocRef = doc(db, "users", user.uid);
-
-    // Setup real-time listener for user document
-    const unsubscribeUserDoc = onSnapshot(
-      userDocRef,
-      (docSnapshot) => {
-        if (docSnapshot.exists()) {
-          const data = docSnapshot.data();
-
-          // Check if any relevant data has changed
-          const updates = {
-            categories: data.categories,
-            columnCount: data.columnCount,
-            categoryColumns: data.categoryColumns,
-          };
-
-          let hasChanges = false;
-
-          // Compare with current state and update only if changed
-          Object.entries(updates).forEach(([key, newValue]) => {
-            if (newValue !== undefined) {
-              const currentValue = {
-                categories,
-                columnCount,
-                categoryColumns,
-              }[key];
-
-              // Deep comparison for objects, direct comparison for primitives
-              const hasChanged =
-                typeof newValue === "object" && newValue !== null
-                  ? JSON.stringify(newValue) !== JSON.stringify(currentValue)
-                  : newValue !== currentValue;
-
-              if (hasChanged) {
-                hasChanges = true;
-                const setter = {
-                  categories: setCategories,
-                  columnCount: setColumnCount,
-                  categoryColumns: setCategoryColumns,
-                }[key];
-                setter(newValue);
-
-                // Update localStorage
-                try {
-                  localStorage.setItem(
-                    key,
-                    typeof newValue === "object"
-                      ? JSON.stringify(newValue)
-                      : String(newValue)
-                  );
-                } catch (error) {
-                  console.error("Error updating localStorage:", error);
-                }
-              }
-            }
-          });
-        }
-      },
-      (error) => {
-        console.error("Error in real-time sync:", error);
-        //error("Failed to sync with latest changes");
-      }
-    );
-
-    // Add a listener for user bookmarks
-    const unsubscribeBookmarks = onSnapshot(
-      collection(db, "users", user.uid, "CatBookmarks"),
-      (snapshot) => {
-        const changes = snapshot.docChanges();
-
-        if (changes.length > 0) {
-          // console.log("Bookmark changes detected:", changes.length);
-
-          // Process the changes in batches to avoid performance issues
-          setLinks((prevLinks) => {
-            // Create map of existing category-URL combinations to prevent duplicates
-            const existingUrlsByCategory = new Map();
-
-            // First pass - track all existing bookmarks by category and URL
-            prevLinks.forEach((link) => {
-              if (link.categoryId && link.url) {
-                const key = `${link.categoryId}-${link.url}`;
-                existingUrlsByCategory.set(key, link.id);
-              }
-            });
-
-            let updatedLinks = [...prevLinks];
-            let hasChanges = false;
-
-            changes.forEach((change) => {
-              const bookmarkData = {
-                id: change.doc.id,
-                ...change.doc.data(),
-                isAdminBookmark: false,
-              };
-
-              // Create a unique key for this bookmark
-              const key = `${bookmarkData.categoryId}-${bookmarkData.url}`;
-
-              if (change.type === "added") {
-                // Check if it's a temporary ID being replaced
-                const tempIndex = updatedLinks.findIndex(
-                  (link) =>
-                    link.id.startsWith("temp_") &&
-                    link.categoryId === bookmarkData.categoryId &&
-                    link.url === bookmarkData.url
-                );
-
-                if (tempIndex !== -1) {
-                  // Replace the temporary bookmark with the real one
-                  updatedLinks[tempIndex] = bookmarkData;
-                  hasChanges = true;
-                }
-                // Check if URL already exists in this category
-                else if (existingUrlsByCategory.has(key)) {
-                  const existingId = existingUrlsByCategory.get(key);
-                  // If this is a different document with the same URL, skip it
-                  if (existingId !== bookmarkData.id) {
-                    console.warn(
-                      `Duplicate URL detected in category ${bookmarkData.categoryId}: ${bookmarkData.url}`
-                    );
-                  } else {
-                    // Update the existing bookmark if it's the same document
-                    const index = updatedLinks.findIndex(
-                      (link) => link.id === existingId
-                    );
-                    if (index !== -1) {
-                      updatedLinks[index] = bookmarkData;
-                      hasChanges = true;
-                    }
-                  }
-                }
-                // Add as new bookmark if it doesn't exist
-                else {
-                  // Check if it's already in the array by ID
-                  const exists = updatedLinks.some(
-                    (link) => link.id === bookmarkData.id
-                  );
-                  if (!exists) {
-                    updatedLinks.push(bookmarkData);
-                    existingUrlsByCategory.set(key, bookmarkData.id);
-                    hasChanges = true;
-                  }
-                }
-              } else if (change.type === "modified") {
-                const index = updatedLinks.findIndex(
-                  (link) => link.id === bookmarkData.id
-                );
-                if (index !== -1) {
-                  updatedLinks[index] = {
-                    ...updatedLinks[index],
-                    ...bookmarkData,
-                  };
-                  hasChanges = true;
-                }
-              } else if (change.type === "removed") {
-                const initialLength = updatedLinks.length;
-                updatedLinks = updatedLinks.filter(
-                  (link) => link.id !== bookmarkData.id
-                );
-                if (initialLength !== updatedLinks.length) {
-                  existingUrlsByCategory.delete(key);
-                  hasChanges = true;
-                }
-              }
-            });
-
-            // Only update state if something changed
-            return hasChanges ? updatedLinks : prevLinks;
-          });
-        }
-      },
-      (error) => {
-        console.error("Error in bookmarks sync:", error);
-      }
-    );
-
-    return () => {
-      unsubscribeUserDoc();
-      unsubscribeBookmarks();
-    };
-  };
-
-  // Effect to setup and cleanup database listeners
+  // Add effect to fetch categories when user changes
   useEffect(() => {
-    let cleanupFn = null;
-
     if (user) {
-      cleanupFn = setupDatabaseListeners();
+      fetchAndUpdateCategories();
     }
-
-    return () => {
-      if (cleanupFn) {
-        cleanupFn();
-      }
-    };
-  }, [user]); // Only re-run when user changes
+  }, [user]);
 
   const renderDraggableBookmark = (provided, snapshot, bookmark) => {
     return (

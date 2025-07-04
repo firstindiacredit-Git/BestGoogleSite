@@ -1,50 +1,39 @@
-import React, { useState, useEffect } from "react";
-import { auth, db } from "../firebase";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
-import ProfessionalSelection from "./ProfessionalSelection";
-import { Routes } from "react-router-dom";
+import { auth, db } from "../firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 const ProfessionCheckWrapper = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [userProfession, setUserProfession] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [allowed, setAllowed] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      if (currentUser) {
-        try {
-          const userDocRef = doc(db, "users", currentUser.uid);
-          const userDocSnap = await getDoc(userDocRef);
-          if (userDocSnap.exists()) {
-            const userData = userDocSnap.data();
-            setUserProfession(userData.profession);
-          } else {
-            setUserProfession(null);
-          }
-        } catch (error) {
-          setUserProfession(null);
-        }
-      } else {
-        setUserProfession(null);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        setAllowed(false);
+        setLoading(false);
+        navigate("/", { replace: true });
+        return;
       }
-      setLoading(false);
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      const userData = userDoc.data();
+      if (!userData?.profession) {
+        setAllowed(false);
+        setLoading(false);
+        navigate("/professional-selection", { replace: true });
+      } else {
+        setAllowed(true);
+        setLoading(false);
+      }
     });
     return () => unsubscribe();
-  }, []);
+  }, [navigate]);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  // Jab tak profession nahi mile, tab tak ProfessionalSelection dikhao
-  if (!userProfession) {
-    return <ProfessionalSelection />;
-  }
-
-  // Profession mil gaya toh main app dikhao
-  return children;
+  if (loading) return <div>Loading...</div>;
+  if (!allowed) return null;
+  return <>{children}</>;
 };
 
 export default ProfessionCheckWrapper; 

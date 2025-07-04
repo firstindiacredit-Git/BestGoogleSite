@@ -5,7 +5,7 @@ import {
   onAuthStateChanged,
 } from "firebase/auth";
 import { auth, provider } from "../firebase";
-import { getFirestore, setDoc, doc } from "firebase/firestore";
+import { getFirestore, setDoc, doc, getDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { IoEyeOff, IoEye } from "react-icons/io5";
 import { protectForm } from "../utils/recaptcha";
@@ -27,16 +27,47 @@ const Signup = () => {
     lastName: "",
     email: "",
     password: "",
+    profession: "",
   });
   const [formTouched, setFormTouched] = useState({
     firstName: false,
     lastName: false,
     email: false,
     password: false,
+    profession: false,
   });
 
   const navigate = useNavigate();
   const db = getFirestore();
+
+  const professionOptions = [
+    { id: "student", name: "Student", icon: "🎓", desc: "Currently studying or pursuing education" },
+    { id: "teacher", name: "Teacher", icon: "👩‍🏫", desc: "Teaching in a school, college, or university" },
+    { id: "professional", name: "Professional", icon: "💼", desc: "Working in a professional field" },
+    { id: "entrepreneur", name: "Entrepreneur", icon: "🚀", desc: "Running your own business or startup" },
+    { id: "freelancer", name: "Freelancer", icon: "🆓", desc: "Working independently on projects" },
+    { id: "retired", name: "Retired", icon: "🌅", desc: "Retired from active work" },
+    { id: "other", name: "Other", icon: "✨", desc: "Other profession or occupation" },
+  ];
+
+  const [profession, setProfession] = useState("");
+  const [showProfessionModal, setShowProfessionModal] = useState(false);
+
+  const interestOptions = [
+    { id: "technology", name: "Technology", icon: "💻" },
+    { id: "sports", name: "Sports", icon: "🏀" },
+    { id: "art", name: "Art", icon: "🎨" },
+    { id: "music", name: "Music", icon: "🎵" },
+    { id: "science", name: "Science", icon: "🔬" },
+    { id: "travel", name: "Travel", icon: "✈️" },
+    { id: "reading", name: "Reading", icon: "📚" },
+    { id: "gaming", name: "Gaming", icon: "🎮" },
+    { id: "food", name: "Food", icon: "🍔" },
+    { id: "nature", name: "Nature", icon: "🌳" },
+  ];
+
+  const [showInterestModal, setShowInterestModal] = useState(false);
+  const [interests, setInterests] = useState([]);
 
   // Validation functions
   const validateEmail = (email) => {
@@ -78,6 +109,9 @@ const Signup = () => {
       case "password":
         setPassword(value);
         break;
+      case "profession":
+        setProfession(value);
+        break;
       default:
         break;
     }
@@ -99,6 +133,8 @@ const Signup = () => {
       errorMessage = validateEmail(value);
     } else if (field === "password") {
       errorMessage = validatePassword(value);
+    } else if (field === "profession") {
+      errorMessage = profession ? "" : "Profession is required";
     }
 
     // Update the error state
@@ -115,6 +151,7 @@ const Signup = () => {
       lastName: validateName(lastName, "Last name"),
       email: validateEmail(email),
       password: validatePassword(password),
+      profession: profession ? "" : "Profession is required",
     };
 
     setFormErrors(newErrors);
@@ -123,13 +160,14 @@ const Signup = () => {
       lastName: true,
       email: true,
       password: true,
+      profession: true,
     });
 
     // Return true if there are no errors
     return !Object.values(newErrors).some((error) => error !== "");
   };
 
-  const registerUserInFirestore = async (user) => {
+  const registerUserInFirestore = async (user, prof, userInterests) => {
     try {
       const userRef = doc(db, "users", user.uid);
       await setDoc(userRef, {
@@ -137,6 +175,9 @@ const Signup = () => {
         email: user.email,
         firstName,
         lastName,
+        profession: prof || profession,
+        interests: userInterests || interests,
+        professionSelectedAt: new Date(),
         subscriptionStatus: "free",
         createdAt: new Date(),
       });
@@ -209,8 +250,16 @@ const Signup = () => {
     await protectForm(
       async () => {
         try {
-          await signInWithPopup(auth, provider);
-          // Navigation will be handled by ProfessionCheckWrapper
+          const userCredential = await signInWithPopup(auth, provider);
+          const user = userCredential.user;
+          // Check if user already has profession
+          const userRef = doc(db, "users", user.uid);
+          const userSnap = await getDoc(userRef);
+          if (!userSnap.exists() || !userSnap.data().profession) {
+            setShowProfessionModal(true);
+          } else {
+            // Navigation will be handled by ProfessionCheckWrapper
+          }
         } catch (error) {
           console.error("Google sign-in error:", error);
           setError("Failed to sign in with Google. Please try again.");
@@ -416,6 +465,31 @@ const Signup = () => {
             <p className="text-green-500 text-xs mt-1">Password is strong</p>
           )}
         </div>
+        <div className="mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {professionOptions.map((option) => (
+              <button
+                type="button"
+                key={option.id}
+                className={`relative flex flex-col items-center p-5 w-full max-w-[340px] mx-auto border rounded-2xl shadow-md transition-all text-center bg-white dark:bg-gray-800 hover:shadow-xl focus:outline-none group
+                  ${profession === option.id ? "border-blue-600 ring-2 ring-blue-200" : "border-gray-200"}`}
+                onClick={() => setProfession(option.id)}
+              >
+                <span className="text-4xl mb-2">{option.icon}</span>
+                <span className="font-bold text-lg mb-1 text-gray-900 dark:text-gray-100">{option.name}</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400 mb-2">{option.desc}</span>
+                {profession === option.id && (
+                  <span className="absolute top-2 right-2 bg-blue-600 text-white rounded-full p-1">
+                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path fill="currentColor" d="M9.5 16.5l-4-4 1.41-1.41L9.5 13.67l7.09-7.09L18 7l-8.5 8.5z"/></svg>
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+          {formTouched.profession && formErrors.profession && (
+            <p className="text-red-500 text-xs mt-1">{formErrors.profession}</p>
+          )}
+        </div>
         <div className="flex justify-center mb-4">
           <div ref={recaptchaContainer}></div>
         </div>
@@ -427,6 +501,88 @@ const Signup = () => {
           {loading ? "Creating account..." : "Create account"}
         </button>
       </form>
+
+      {showProfessionModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full">
+            <h2 className="text-xl font-bold mb-4 text-center">Select Your Profession</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+              {professionOptions.map((option) => (
+                <button
+                  type="button"
+                  key={option.id}
+                  className={`relative flex flex-col items-center p-5 w-full max-w-[340px] mx-auto border rounded-2xl shadow-md transition-all text-center bg-white dark:bg-gray-800 hover:shadow-xl focus:outline-none group
+                    ${profession === option.id ? "border-blue-600 ring-2 ring-blue-200" : "border-gray-200"}`}
+                  onClick={() => setProfession(option.id)}
+                >
+                  <span className="text-4xl mb-2">{option.icon}</span>
+                  <span className="font-bold text-lg mb-1 text-gray-900 dark:text-gray-100">{option.name}</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 mb-2">{option.desc}</span>
+                  {profession === option.id && (
+                    <span className="absolute top-2 right-2 bg-blue-600 text-white rounded-full p-1">
+                      <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path fill="currentColor" d="M9.5 16.5l-4-4 1.41-1.41L9.5 13.67l7.09-7.09L18 7l-8.5 8.5z"/></svg>
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+            <button
+              className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
+              onClick={() => {
+                if (!profession) return setError("Please select a profession.");
+                setShowProfessionModal(false);
+                setShowInterestModal(true);
+              }}
+              disabled={loading}
+            >
+              Continue
+            </button>
+            {error && <div className="text-red-500 mt-2 text-center">{error}</div>}
+          </div>
+        </div>
+      )}
+
+      {showInterestModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full">
+            <h2 className="text-xl font-bold mb-4 text-center">Select Your Interests</h2>
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              {interestOptions.map((option) => (
+                <button
+                  type="button"
+                  key={option.id}
+                  className={`relative flex flex-col items-center p-4 w-full max-w-[150px] mx-auto border rounded-xl shadow-sm transition-all text-center bg-white dark:bg-gray-800 hover:shadow-lg focus:outline-none group
+                    ${interests.includes(option.id) ? "border-blue-600 ring-2 ring-blue-200" : "border-gray-200"}`}
+                  onClick={() => setInterests((prev) => prev.includes(option.id) ? prev.filter(i => i !== option.id) : [...prev, option.id])}
+                >
+                  <span className="text-2xl mb-1">{option.icon}</span>
+                  <span className="font-semibold text-sm text-gray-900 dark:text-gray-100">{option.name}</span>
+                  {interests.includes(option.id) && (
+                    <span className="absolute top-2 right-2 bg-blue-600 text-white rounded-full p-1">
+                      <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path fill="currentColor" d="M9.5 16.5l-4-4 1.41-1.41L9.5 13.67l7.09-7.09L18 7l-8.5 8.5z"/></svg>
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+            <button
+              className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
+              onClick={async () => {
+                if (interests.length === 0) return setError("Please select at least one interest.");
+                setLoading(true);
+                const user = auth.currentUser;
+                await registerUserInFirestore(user, profession, interests);
+                setShowInterestModal(false);
+                setLoading(false);
+              }}
+              disabled={loading}
+            >
+              {loading ? "Saving..." : "Continue"}
+            </button>
+            {error && <div className="text-red-500 mt-2 text-center">{error}</div>}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
