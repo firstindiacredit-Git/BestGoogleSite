@@ -42,6 +42,7 @@ import {
   ExpandOutlined,
   CompressOutlined,
   SettingOutlined,
+  VerticalAlignBottomOutlined 
 } from "@ant-design/icons";
 import debounce from "lodash/debounce";
 import SkeletonLoader from "./SkeletonLoader";
@@ -103,13 +104,7 @@ const MemoizedBookmarkForm = React.memo(
   }
 );
 
-import { Parser } from "htmlparser2"; // Add at the top for HTML parsing
-
-// Import the CountryContext and useCountry hook
-import { useCountry } from "../context/CountryContext";
-
 function PopularBookmarks() {
-  const { country } = useCountry();
   const [categories, setCategories] = useState([]);
   const [links, setLinks] = useState([]);
   const [user, setUser] = useState(null);
@@ -181,11 +176,12 @@ function PopularBookmarks() {
   // State for previewing imported bookmarks
   const [importedPreview, setImportedPreview] = useState([]);
 
+  // Ref for import bookmarks file input
   const fileInputRef = React.useRef(null);
- 
+  // Ref for search bar
   const searchBarRef = React.useRef(null);
 
-
+  // Add state for Category Manager modal and selection
   const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false);
   const [selectedImported, setSelectedImported] = useState([]); // [{catIdx, linkIdx}]
 
@@ -492,8 +488,8 @@ function PopularBookmarks() {
         ? "#1f1f1f"
         : "#e6f7ff"
       : isDarkMode
-        ? "#141414"
-        : "#fff",
+      ? "#141414"
+      : "#fff",
     border: `${isDarkMode ? "#303030" : "#f0f0f0"}`,
     borderRadius: "4px",
     display: "flex",
@@ -514,15 +510,15 @@ function PopularBookmarks() {
     if (!user) return [];
 
     try {
-      // Fetch admin categories (country-specific)
-      const adminCategorySnapshot = await getDocs(collection(db, `category_${country.key === "us" ? "USA" : "INDIA"}`));
+      // Fetch admin categories
+      const adminCategorySnapshot = await getDocs(collection(db, "category"));
       const adminCategories = adminCategorySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
         isAdminCategory: true,
       }));
 
-      // Fetch user categories (user-specific, not country-specific)
+      // Fetch user categories
       const userCategorySnapshot = await getDocs(
         collection(db, "users", user.uid, "UserCategory")
       );
@@ -539,6 +535,7 @@ function PopularBookmarks() {
       );
     } catch (error) {
       console.error("Error fetching categories:", error);
+      //error("Failed to fetch categories");
       return [];
     }
   };
@@ -608,10 +605,12 @@ function PopularBookmarks() {
             }
           } catch (error) {
             console.error("Error processing category changes:", error);
+            //error("Failed to process category updates");
           }
         },
         error: (error) => {
           console.error("Error in category snapshot:", error);
+          //error("Failed to listen for category updates");
         },
       }
     );
@@ -645,10 +644,12 @@ function PopularBookmarks() {
           }
         } catch (error) {
           console.error("Error processing position changes:", error);
+          //error("Failed to process layout updates");
         }
       },
       error: (error) => {
         console.error("Error in positions snapshot:", error);
+        //error("Failed to listen for layout updates");
       },
     });
 
@@ -683,13 +684,14 @@ function PopularBookmarks() {
         const initialOpenStates = savedOpenStates
           ? JSON.parse(savedOpenStates)
           : initialCategories.reduce((acc, category) => {
-            acc[category.id] = true;
-            return acc;
-          }, {});
+              acc[category.id] = true;
+              return acc;
+            }, {});
 
         setOpenCategories(initialOpenStates);
       } catch (error) {
         console.error("Error initializing data:", error);
+        //error("Failed to load initial data");
       } finally {
         setLoading(false);
       }
@@ -728,7 +730,7 @@ function PopularBookmarks() {
 
         // Fetch all user bookmarks
         const userBookmarksSnapshot = await getDocs(
-          collection(db, `links_${country.key === "us" ? "USA" : "INDIA"}`)
+          collection(db, "users", user.uid, "CatBookmarks")
         );
         const userBookmarks = userBookmarksSnapshot.docs
           .map((doc) => {
@@ -757,7 +759,7 @@ function PopularBookmarks() {
         // Fetch admin bookmarks for each admin category
         const adminBookmarksPromises = categories.map(async (category) => {
           const bookmarksSnapshot = await getDocs(
-            query(collection(db, `links_${country.key === "us" ? "USA" : "INDIA"}`), where("category", "==", category.id))
+            query(collection(db, "links"), where("category", "==", category.id))
           );
           return bookmarksSnapshot.docs
             .map((doc) => {
@@ -799,6 +801,7 @@ function PopularBookmarks() {
         setLoading(false);
       } catch (error) {
         console.error("Error fetching bookmark data:", error);
+        //error("Failed to load bookmarks");
         setLoading(false);
       }
     };
@@ -926,8 +929,10 @@ function PopularBookmarks() {
       });
 
       await batch.commit();
+      // //success("Category position updated");
     } catch (error) {
       console.error("Error updating category positions:", error);
+      //error("Failed to update category position");
       // Revert local state on error
       setCategoryColumns(categoryColumns);
     }
@@ -1053,6 +1058,7 @@ function PopularBookmarks() {
 
   const handleAddCategory = async () => {
     if (!newCategoryName.trim()) {
+      //error("Category name cannot be empty");
       return;
     }
 
@@ -1132,6 +1138,7 @@ function PopularBookmarks() {
         return filtered;
       });
 
+      //success("Category added successfully");
       setNewCategoryName("");
       setIsAddCategoryModalVisible(false);
       // Show tip if controller is open
@@ -1148,6 +1155,7 @@ function PopularBookmarks() {
       }
     } catch (error) {
       console.error("Error adding category:", error);
+      //error("Failed to add category");
     }
   };
 
@@ -1258,8 +1266,11 @@ function PopularBookmarks() {
 
         return newColumns;
       });
+
+      //success("Category and its bookmarks deleted successfully");
     } catch (error) {
       console.error("Error deleting category:", error);
+      //error("Failed to delete category");
     } finally {
       setLoading(false);
     }
@@ -1340,9 +1351,11 @@ function PopularBookmarks() {
       ? categories.find((cat) => cat.id === selectedCategoryId)
       : selectedCategory;
     if (!categoryToUse) {
+      //error("Please select a category first");
       return;
     }
     if (!newBookmark.title.trim() || !newBookmark.url.trim()) {
+      //error("Title and URL are required");
       return;
     }
     try {
@@ -1358,6 +1371,7 @@ function PopularBookmarks() {
         }
       });
       if (isDuplicate) {
+        //warning("This URL already exists in this category");
         return;
       }
       const tempId = `temp_${btoa(urlKey).replace(/[^a-zA-Z0-9]/g, "")}_${Date.now()}`;
@@ -1390,6 +1404,7 @@ function PopularBookmarks() {
       setNewBookmark({ title: "", url: "", favicon: "" });
       setIsAddBookmarkModalVisible(false);
       setSelectedCategoryId("");
+      //success("Bookmark added successfully");
     } catch (error) {
       const normalizedUrl = validateUrl(newBookmark.url.trim());
       setLinks((prevLinks) =>
@@ -1402,6 +1417,7 @@ function PopularBookmarks() {
             )
         )
       );
+      // ... existing code ...
     }
   };
 
@@ -1452,6 +1468,11 @@ function PopularBookmarks() {
       children: [
         {
           key: "list",
+          // icon: (
+          //   <div className="dark:text-black bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
+          //     <UnorderedListOutlined />
+          //   </div>
+          // ),
           label: "List View",
           onClick: () => {
             const newViewMode = "list";
@@ -1464,10 +1485,16 @@ function PopularBookmarks() {
               "categoryViewModes",
               JSON.stringify(updatedModes)
             );
+            //success("View mode to List");
           },
         },
         {
           key: "grid",
+          // icon: (
+          //   <div className="dark:text-black bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
+          //     <AppstoreOutlined />
+          //   </div>
+          // ),
           label: "Grid View",
           onClick: () => {
             const newViewMode = "grid";
@@ -1480,10 +1507,16 @@ function PopularBookmarks() {
               "categoryViewModes",
               JSON.stringify(updatedModes)
             );
+            //success("View mode to Grid");
           },
         },
         {
           key: "icon",
+          // icon: (
+          //   <div className="dark:text-black bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
+          //     <PictureOutlined />
+          //   </div>
+          // ),
           label: "Icon View",
           onClick: () => {
             const newViewMode = "icon";
@@ -1496,6 +1529,7 @@ function PopularBookmarks() {
               "categoryViewModes",
               JSON.stringify(updatedModes)
             );
+            //success("View mode to Icon");
           },
         },
       ],
@@ -1511,6 +1545,11 @@ function PopularBookmarks() {
       children: [
         {
           key: "Short name",
+          // icon: (
+          //   <div className="dark:text-black bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
+          //     <UnorderedListOutlined />
+          //   </div>
+          // ),
           label: "Short name",
           onClick: () => {
             setLineOptions(1);
@@ -1518,11 +1557,28 @@ function PopularBookmarks() {
         },
         {
           key: "Full name",
+          // icon: (
+          //   <div className="dark:text-black bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
+          //     <AppstoreOutlined />
+          //   </div>
+          // ),
           label: "Full name",
           onClick: () => {
             setLineOptions(2);
           },
         },
+        // {
+        //   key: "3 lines",
+        //   // icon: (
+        //   //   <div className="dark:text-black bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
+        //   //     <PictureOutlined />
+        //   //   </div>
+        //   // ),
+        //   label: "Full lines",
+        //   onClick: () => {
+        //     setLineOptions("none");
+        //   },
+        // },
       ],
     },
     {
@@ -1691,20 +1747,22 @@ function PopularBookmarks() {
           prevLinks.map((link) =>
             link.id === editingBookmark.id
               ? {
-                ...link,
-                title: values.title,
-                url: values.url,
-              }
+                  ...link,
+                  title: values.title,
+                  url: values.url,
+                }
               : link
           )
         );
       }
 
+      //success("Bookmark updated successfully");
       setEditingBookmark(null);
       setIsEditBookmarkModalVisible(false);
       editBookmarkForm.resetFields();
     } catch (error) {
       console.error("Error updating bookmark:", error);
+      //error(`Failed to update bookmark: ${error.message}`);
     }
   };
 
@@ -1781,12 +1839,13 @@ function PopularBookmarks() {
                 className="w-full text-center text-black dark:text-white hover:text-blue-500"
               >
                 <span
-                  className={`text-sm break-words block ${lineOptions === 2
-                    ? "whitespace-normal"
-                    : lineOptions === "none"
+                  className={`text-sm break-words block ${
+                    lineOptions === 2
+                      ? "whitespace-normal"
+                      : lineOptions === "none"
                       ? "whitespace-normal"
                       : "line-clamp-1 truncate"
-                    }`}
+                  }`}
                   title={lineOptions !== 2 ? link.title || link.name : undefined}
                 >
                   {link.title || link.name}
@@ -1855,16 +1914,46 @@ function PopularBookmarks() {
       categories.length > 0 &&
       categories.every((cat) => openCategories[cat.id]);
 
-    // Filter categories by search
+    // --- Enhanced Global Search: search both categories and bookmarks ---
     const searchTerm = (categorySearch || '').toLowerCase();
+
+    // Helper: for each category, get bookmarks in that category
+    const getCategoryLinks = (catId) =>
+      links.filter(
+        (link) => link.categoryId === catId && !hiddenBookmarkIds.includes(link.id)
+      );
+
+    // Helper: does a bookmark match the search?
+    const bookmarkMatches = (bookmark) => {
+      if (!searchTerm) return true;
+      return (
+        (bookmark.title && bookmark.title.toLowerCase().includes(searchTerm)) ||
+        (bookmark.url && bookmark.url.toLowerCase().includes(searchTerm))
+      );
+    };
+
+    // Filter categories: show if category name matches OR any bookmark matches
     const filteredCategoryIds = Object.values(categoryColumns)
       .flat()
       .filter((catId) => {
         const cat = categories.find((c) => c.id === catId);
         if (!cat) return false;
         const name = (cat.name || cat.newCategory || '').toLowerCase();
-        return name.includes(searchTerm);
+        if (name.includes(searchTerm)) return true;
+        // If any bookmark in this category matches, include the category
+        const catLinks = getCategoryLinks(catId);
+        return catLinks.some(bookmarkMatches);
       });
+
+    // Helper: get all filtered categories in the user's column structure
+    const getAllColumns = () => {
+      const result = {};
+      for (let col = 1; col <= columnCount; col++) {
+        const colKey = `column${col}`;
+        result[colKey] = (categoryColumns[colKey] || []).filter(catId => filteredCategoryIds.includes(catId));
+      }
+      return result;
+    };
 
     // Helper: get visible category IDs in the user's column structure, up to a total limit, distributed equally among columns
     const getLimitedColumns = (limit) => {
@@ -1910,16 +1999,6 @@ function PopularBookmarks() {
       return result;
     };
 
-    // Helper: get all filtered categories in the user's column structure
-    const getAllColumns = () => {
-      const result = {};
-      for (let col = 1; col <= columnCount; col++) {
-        const colKey = `column${col}`;
-        result[colKey] = (categoryColumns[colKey] || []).filter(catId => filteredCategoryIds.includes(catId));
-      }
-      return result;
-    };
-
     // Decide which columns to render
     const columnsToRender = showAllCategories
       ? getAllColumns()
@@ -1928,105 +2007,49 @@ function PopularBookmarks() {
     return (
       <div className="mb-2">
         {/* Search bar for categories */}
-        <div className="flex justify-between mb-2 items-center gap-2">
-          <div className="flex gap-2">
-            {/* Combined Add Button with Dropdown */}
-            <Dropdown
-              menu={{
-                items: [
-                  {
-                    key: "addCategory",
-                    icon: <PlusOutlined />,
-                    label: <div className="dark:text-white">Add Category</div>,
-                    onClick: () => setIsAddCategoryModalVisible(true),
-                  },
-                  {
-                    key: "addBookmark",
-                    icon: <PlusOutlined />,
-                    label: <div className="dark:text-white">Add Bookmark</div>,
-                    onClick: handleGlobalAddBookmark,
-                  },
-                  {
-                    type: "divider"
-                  },
-                  {
-                    key: "expandCollapse",
-                    icon: <div className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">{areAllOpen ? <CompressOutlined /> : <ExpandOutlined />}</div>,
-                    label: <div className="dark:text-white">{areAllOpen ? "Collapse All" : "Expand All"}</div>,
-                    onClick: toggleAllCategories,
-                  },
-                  {
-                    key: "categoryManager",
-                    icon: <div className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md"><SettingOutlined /></div>,
-                    label: <div className="dark:text-white">Category Manager</div>,
-                    onClick: () => setIsCategoryManagerOpen(true),
-                  },
-                  {
-                    key: "importBookmarks",
-                    icon: <div className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md"><svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 16v-8m0 8l-5-5m5 5l5-5" /><rect x="4" y="19" width="16" height="2" rx="1" /></svg></div>,
-                    label: <div className="dark:text-white">Import Bookmarks</div>,
-                    onClick: () => fileInputRef.current && fileInputRef.current.click(),
-                  },
-                ],
-              }}
-              trigger={["click"]}
-              overlayClassName="[&_.ant-dropdown-menu]:p-0 [&_.ant-dropdown-menu-item]:p-0 [&_ul]:dark:bg-[#28283a]"
-            >
-              <button className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] px-3 py-2 dark:text-white mb-2">
-                <PlusOutlined /> Add
-              </button>
-            </Dropdown>
-            <input
-              type="file"
-              accept=".html,text/html"
-              ref={importInputRef}
-              style={{ display: "none" }}
-              onChange={handleImportBookmarks}
-            />
-          </div>
-          
+        <div className="flex justify-end mb-2 items-center gap-2">
           <div className="flex items-center gap-2">
             <div className="relative flex items-center" ref={searchBarRef}>
               {/* Search Button */}
               <button
                 onClick={() => setIsSearchBarOpen(!isSearchBarOpen)}
-                className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] px-3 py-2 dark:text-white transition-all duration-300 hover:scale-105"
+                className="rounded-lg flex gap-2 items-center mb-1.5 text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] px-3 py-2 dark:text-white transition-all duration-300 hover:scale-105"
                 title="Search categories"
               >
                 {isSearchBarOpen ? (
-                  <svg
-                    width="16"
-                    height="16"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
+                  <svg 
+                    width="16" 
+                    height="16" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2" 
                     viewBox="0 0 24 24"
                   >
-                    <line x1="18" y1="6" x2="6" y2="18" strokeWidth="2" />
-                    <line x1="6" y1="6" x2="18" y2="18" strokeWidth="2" />
+                    <line x1="18" y1="6" x2="6" y2="18" strokeWidth="2"/>
+                    <line x1="6" y1="6" x2="18" y2="18" strokeWidth="2"/>
                   </svg>
                 ) : (
-                  <svg
-                    width="16"
-                    height="16"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
+                  <svg 
+                    width="16" 
+                    height="16" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2" 
                     viewBox="0 0 24 24"
                   >
-                    <circle cx="11" cy="11" r="8" strokeWidth="2" />
-                    <line x1="21" y1="21" x2="16.65" y2="16.65" strokeWidth="2" />
+                    <circle cx="11" cy="11" r="8" strokeWidth="2"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" strokeWidth="2"/>
                   </svg>
                 )}
                 {isSearchBarOpen ? "Close" : "Search"}
               </button>
-
               {/* Sliding Search Input */}
-              <div
-                className={`absolute right-0 top-0 transition-all duration-300 ease-in-out ${isSearchBarOpen
-                  ? 'w-64 opacity-100 translate-x-0'
-                  : 'w-0 opacity-0 translate-x-4'
-                  } overflow-hidden`}
+              <div 
+                className={`absolute right-0 top-0 transition-all duration-300 ease-in-out ${
+                  isSearchBarOpen 
+                    ? 'w-64 opacity-100 translate-x-0' 
+                    : 'w-0 opacity-0 translate-x-4'
+                } overflow-hidden`}
               >
                 <input
                   type="text"
@@ -2043,6 +2066,111 @@ function PopularBookmarks() {
                 />
               </div>
             </div>
+            {/* Add button (Dropdown) now after search */}
+            <Dropdown
+              menu={{
+                items: [
+                  {
+                    key: "addCategory",
+                    icon: <PlusOutlined />, 
+                    label: <div className="dark:text-white">Add Category</div>,
+                    onClick: () => setIsAddCategoryModalVisible(true),
+                  },
+                  {
+                    key: "addBookmark",
+                    icon: <PlusOutlined />, 
+                    label: <div className="dark:text-white">Add Bookmark</div>,
+                    onClick: handleGlobalAddBookmark,
+                  },
+                  {
+                    type: "divider"
+                  },
+                  {
+                    key: "view",
+                    icon: <UnorderedListOutlined />, // You can use a suitable icon
+                    label: <div className="dark:text-white">View</div>,
+                    children: [
+                      {
+                        key: "view-list",
+                        label: "List",
+                        onClick: () => {
+                          // Set all categories to list view
+                          setCategoryViewModes((prev) => {
+                            const newModes = {};
+                            categories.forEach(cat => {
+                              newModes[cat.id] = "list";
+                            });
+                            localStorage.setItem("categoryViewModes", JSON.stringify(newModes));
+                            return newModes;
+                          });
+                        },
+                      },
+                      {
+                        key: "view-grid",
+                        label: "Grid",
+                        onClick: () => {
+                          setCategoryViewModes((prev) => {
+                            const newModes = {};
+                            categories.forEach(cat => {
+                              newModes[cat.id] = "grid";
+                            });
+                            localStorage.setItem("categoryViewModes", JSON.stringify(newModes));
+                            return newModes;
+                          });
+                        },
+                      },
+                      {
+                        key: "view-icon",
+                        label: "Icon",
+                        onClick: () => {
+                          setCategoryViewModes((prev) => {
+                            const newModes = {};
+                            categories.forEach(cat => {
+                              newModes[cat.id] = "icon";
+                            });
+                            localStorage.setItem("categoryViewModes", JSON.stringify(newModes));
+                            return newModes;
+                          });
+                        },
+                      },
+                    ],
+                  },
+                  {
+                    key: "expandCollapse",
+                    icon: <div className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">{areAllOpen ? <CompressOutlined /> : <ExpandOutlined />}</div>,
+                    label: <div className="dark:text-white">{areAllOpen ? "Collapse All" : "Expand All"}</div>,
+                    onClick: toggleAllCategories,
+                  },
+                  {
+                    key: "categoryManager",
+                    icon: <div className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md"><SettingOutlined /></div>,
+                    label: <div className="dark:text-white">Category Manager</div>,
+                    onClick: () => setIsCategoryManagerOpen(true),
+                  },
+                  {
+                    key: "importBookmarks",
+                    icon: <div className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
+                      <VerticalAlignBottomOutlined />
+                    </div>,
+                    label: <div className="dark:text-white">Import Bookmarks</div>,
+                    onClick: () => fileInputRef.current && fileInputRef.current.click(),
+                  },
+                ],
+              }}
+              trigger={["click"]}
+              overlayClassName="[&_.ant-dropdown-menu]:p-0 [&_.ant-dropdown-menu-item]:p-0 [&_ul]:dark:bg-[#28283a]"
+            >
+              <button className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] px-3 py-2 dark:text-white mb-2">
+                <PlusOutlined /> Add
+              </button>
+            </Dropdown>
+            <input
+              type="file"
+              accept=".html,text/html"
+              ref={fileInputRef}
+              style={{ display: 'none' }}
+              onChange={handleImportBookmarks}
+            />
           </div>
         </div>
 
@@ -2061,28 +2189,27 @@ function PopularBookmarks() {
                       <div
                         ref={provided.innerRef}
                         {...provided.droppableProps}
-                        className={` transition-colors duration-200 ${snapshot.isDraggingOver
-                          ? "bg-transparent border-2 border-dashed border-blue-500"
-                          : "bg-transparent border-2 border-dashed border-transparent"
-                          }`}
+                        className={` transition-colors duration-200 ${
+                          snapshot.isDraggingOver
+                            ? "bg-transparent border-2 border-dashed border-blue-500"
+                            : "bg-transparent border-2 border-dashed border-transparent"
+                        }`}
                       >
                         {columnsToRender[`column${colNum}`]?.map(
                           (categoryId, index) => {
                             const category = categories.find(
                               (c) => c.id === categoryId
                             );
-                            if (!category) {
-                              return null;
-                            }
+                            if (!category) return null;
 
-                            // Get bookmarks for this category
-                            const categoryLinks = links
-                              .filter(
-                                (link) =>
-                                  link.categoryId === category.id &&
-                                  !hiddenBookmarkIds.includes(link.id)
-                              )
-                              .sort((a, b) => (a.order || 0) - (b.order || 0));
+                            // Get bookmarks for this category, filter by search if needed
+                            let categoryLinks = getCategoryLinks(category.id);
+                            // Determine if this category is included because of a name match
+                            const name = (category.name || category.newCategory || '').toLowerCase();
+                            if (searchTerm && !name.includes(searchTerm)) {
+                              // Only filter bookmarks if the category name does NOT match
+                              categoryLinks = categoryLinks.filter(bookmarkMatches);
+                            }
 
                             return (
                               <Draggable
@@ -2094,10 +2221,11 @@ function PopularBookmarks() {
                                   <div
                                     ref={provided.innerRef}
                                     {...provided.draggableProps}
-                                    className={`mb-4 transition-all duration-200 ${snapshot.isDragging
-                                      ? ""
-                                      : "shadow-none rotate-0 scale-100"
-                                      }`}
+                                    className={`mb-4 transition-all duration-200 ${
+                                      snapshot.isDragging
+                                        ? ""
+                                        : "shadow-none rotate-0 scale-100"
+                                    }`}
                                   >
                                     <Card
                                       className="max-w-xl backdrop-blur-sm  bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)]  dark:text-white mx-auto rounded-sm"
@@ -2115,10 +2243,11 @@ function PopularBookmarks() {
                                             <div className="flex items-center flex-1">
                                               <div
                                                 {...provided.dragHandleProps}
-                                                className={`cursor-move p-3 transition-all duration-200 group ${snapshot.isDragging
-                                                  ? "bg-gray-300/[(var(--widget-opacity))] rounded"
-                                                  : ""
-                                                  }`}
+                                                className={`cursor-move p-3 transition-all duration-200 group ${
+                                                  snapshot.isDragging
+                                                    ? "bg-gray-300/[(var(--widget-opacity))] rounded"
+                                                    : ""
+                                                }`}
                                                 onClick={(e) =>
                                                   e.stopPropagation()
                                                 }
@@ -2420,7 +2549,9 @@ function PopularBookmarks() {
           }
         );
       } catch (error) {
+        console.error("Error setting up listeners:", error);
         if (isComponentMounted) {
+          //error("Failed to load data. Please refresh the page.");
         }
       }
     };
@@ -2662,8 +2793,11 @@ function PopularBookmarks() {
         JSON.stringify(newColumnStructure)
       );
 
+      //success("Changes applied successfully");
       setIsControllerOpen(false);
     } catch (error) {
+      console.error("Error applying changes:", error);
+      //error("Failed to apply changes");
     } finally {
       setIsApplyingChanges(false);
     }
@@ -2698,6 +2832,8 @@ function PopularBookmarks() {
         });
       }
     } catch (error) {
+      console.error("Error fetching categories:", error);
+      //error("Failed to fetch latest category positions");
     }
   };
 
@@ -2771,6 +2907,8 @@ function PopularBookmarks() {
         }
       },
       (error) => {
+        console.error("Error in real-time sync:", error);
+        //error("Failed to sync with latest changes");
       }
     );
 
@@ -2781,6 +2919,9 @@ function PopularBookmarks() {
         const changes = snapshot.docChanges();
 
         if (changes.length > 0) {
+          // console.log("Bookmark changes detected:", changes.length);
+
+          // Process the changes in batches to avoid performance issues
           setLinks((prevLinks) => {
             // Create map of existing category-URL combinations to prevent duplicates
             const existingUrlsByCategory = new Map();
@@ -2880,6 +3021,7 @@ function PopularBookmarks() {
         }
       },
       (error) => {
+        console.error("Error in bookmarks sync:", error);
       }
     );
 
@@ -2946,6 +3088,7 @@ function PopularBookmarks() {
   // Function to handle deletion of selected bookmarks
   const handleDeleteSelected = () => {
     if (selectedBookmarks.length === 0) {
+      //warning("No bookmarks selected for deletion");
       return;
     }
 
@@ -3016,6 +3159,8 @@ function PopularBookmarks() {
           setSelectedBookmarks([]);
           setHasUnsavedChanges(true);
         } catch (error) {
+          console.error("Error processing bookmarks:", error);
+          //error(`Failed to process bookmarks: ${error.message}`);
         } finally {
           setLoading(false);
         }
@@ -3045,6 +3190,10 @@ function PopularBookmarks() {
             userData.hiddenCategories &&
             Array.isArray(userData.hiddenCategories)
           ) {
+            // console.log(
+            //   "Loading hidden categories:",
+            //   userData.hiddenCategories
+            // );
             setHiddenCategories(userData.hiddenCategories);
           }
 
@@ -3053,6 +3202,10 @@ function PopularBookmarks() {
             userData.hiddenBookmarkIds &&
             Array.isArray(userData.hiddenBookmarkIds)
           ) {
+            // console.log(
+            //   "Loading hidden bookmark IDs:",
+            //   userData.hiddenBookmarkIds
+            // );
             setHiddenBookmarkIds(userData.hiddenBookmarkIds);
           }
         }
@@ -3069,154 +3222,105 @@ function PopularBookmarks() {
     localStorage.setItem("bookmarkLineOptions", lineOptions.toString());
   }, [lineOptions]);
 
-  // Import/Export refs
-  const importInputRef = useRef(null);
-
-  // Export bookmarks as HTML (Netscape format)
-  const handleExportBookmarks = () => {
-    // Group bookmarks by category
-    const bookmarksByCategory = {};
-    links.forEach((link) => {
-      if (!bookmarksByCategory[link.categoryId]) bookmarksByCategory[link.categoryId] = [];
-      bookmarksByCategory[link.categoryId].push(link);
-    });
-    // Build HTML
-    let html = `<!DOCTYPE NETSCAPE-Bookmark-file-1>\n`;
-    html += `<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">\n`;
-    html += `<TITLE>Bookmarks</TITLE>\n`;
-    html += `<H1>Bookmarks</H1>\n`;
-    html += `<DL><p>\n`;
-    categories.forEach((cat) => {
-      if (bookmarksByCategory[cat.id] && bookmarksByCategory[cat.id].length > 0) {
-        html += `  <DT><H3>${cat.name || cat.newCategory}</H3>\n`;
-        html += `  <DL><p>\n`;
-        bookmarksByCategory[cat.id].forEach((link) => {
-          html += `    <DT><A HREF=\"${link.url || link.link}\">${link.title || link.name}</A>\n`;
-        });
-        html += `  </DL><p>\n`;
+  // Add effect to focus search input when search bar opens
+  useEffect(() => {
+    if (isSearchBarOpen) {
+      const searchInput = searchBarRef.current?.querySelector('input');
+      if (searchInput) {
+        setTimeout(() => searchInput.focus(), 100);
       }
+    }
+  }, [isSearchBarOpen]);
+
+  // Add this function inside PopularBookmarks component
+  const handleExportBookmarksHtml = () => {
+    let html = `<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Exported Bookmarks</title></head><body style='font-family:sans-serif;'>`;
+    html += `<h1>Exported Bookmarks</h1>`;
+    categories.forEach((category) => {
+      const categoryLinks = links.filter(
+        (link) =>
+          link.categoryId === category.id &&
+          !hiddenBookmarkIds.includes(link.id)
+      );
+      if (categoryLinks.length === 0) return;
+      html += `<h2>${category.name || category.newCategory}</h2><ul>`;
+      categoryLinks.forEach((link) => {
+        const title = link.title || link.name;
+        const url = link.url || link.link;
+        html += `<li><a href="${url}" target="_blank" rel="noopener noreferrer">${title}</a> <span style='color:gray;font-size:0.9em;'>(${url})</span></li>`;
+      });
+      html += `</ul>`;
     });
-    html += `</DL><p>\n`;
-    // Download
+    html += `</body></html>`;
+
     const blob = new Blob([html], { type: "text/html" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "bookmarks.html";
+    a.download = `bookmarks_export_${new Date().toISOString().slice(0, 10)}.html`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
 
-  // Import bookmarks from HTML
-  // const handleImportBookmarks = async (event) => {
-  //   const file = event.target.files[0];
-  //   if (!file) return;
-  //   const text = await file.text();
-  //   const imported = [];
-  //   let currentCategory = null;
-  //   const parser = new Parser({
-  //     onopentag(name, attribs) {
-  //       if (name === "h3") {
-  //         currentCategory = "";
-  //       }
-  //       if (name === "a" && attribs.href) {
-  //         imported.push({
-  //           category: currentCategory,
-  //           url: attribs.href,
-  //           title: "",
-  //         });
-  //       }
-  //     },
-  //     ontext(text) {
-  //       if (currentCategory !== null) {
-  //         currentCategory += text;
-  //       } else if (imported.length > 0 && !imported[imported.length - 1].title) {
-  //         imported[imported.length - 1].title = text;
-  //       }
-  //     },
-  //     onclosetag(name) {
-  //       if (name === "h3") {
-  //         currentCategory = currentCategory.trim();
-  //       }
-  //     },
-  //   }, { decodeEntities: true });
-  //   parser.write(text);
-  //   parser.end();
-  //   const categoryMap = {};
-  //   for (const cat of categories) {
-  //     categoryMap[(cat.name || cat.newCategory).toLowerCase()] = cat.id;
-  //   }
-  //   for (const bm of imported) {
-  //     let catId = categoryMap[bm.category?.toLowerCase() || ""];
-  //     if (!catId && bm.category) {
+  // Helper to flatten importedPreview for selection
+  const getAllImportedKeys = () => {
+    const keys = [];
+    importedPreview.forEach((cat, catIdx) => {
+      cat.links.forEach((_, linkIdx) => {
+        keys.push(`${catIdx}-${linkIdx}`);
+      });
+    });
+    return keys;
+  };
 
-  //       const docRef = await addDoc(collection(db, "users", user.uid, "UserCategory"), {
-  //         newCategory: bm.category,
-  //         userId: user.uid,
-  //         order: categories.length,
-  //         createdAt: new Date().toISOString(),
-  //       });
-  //       catId = docRef.id;
-  //       categoryMap[bm.category.toLowerCase()] = catId;
-  //       setCategories((prev) => [...prev, { id: catId, name: bm.category, userId: user.uid, newCategory: bm.category, order: categories.length }]);
-  //       console.log('Created new category:', bm.category, 'with id:', catId);
-  //     }
-  //     if (catId && bm.url) {
-
-  //       await addDoc(collection(db, "users", user.uid, "CatBookmarks"), {
-  //         title: bm.title || bm.url,
-  //         url: bm.url,
-  //         favicon: await fetchFavicon(bm.url),
-  //         categoryId: catId,
-  //         userId: user.uid,
-  //         createdAt: new Date().toISOString(),
-  //         order: 0,
-  //         isAdminBookmark: false,
-  //       });
-  //       console.log('Added bookmark:', bm.title || bm.url, 'to category:', catId);
-  //     }
-  //   }
-
-  //   event.target.value = ""; 
-  // };
-
-  const getAllUserCategoryIds = () => categories.filter(cat => !cat.isAdminCategory).map(cat => cat.id);
-
-  const handleSelectAllUserCategories = () => {
-    if (selectedUserCategories.length === getAllUserCategoryIds().length) {
-      setSelectedUserCategories([]);
+  const handleSelectAllImported = () => {
+    if (selectedImported.length === getAllImportedKeys().length) {
+      setSelectedImported([]);
     } else {
-      setSelectedUserCategories(getAllUserCategoryIds());
+      setSelectedImported(getAllImportedKeys());
     }
   };
 
-  const handleDeleteSelectedUserCategories = async () => {
-    if (selectedUserCategories.length === 0) return;
+  const handleDeleteSelectedImported = () => {
+    if (selectedImported.length === 0) return;
+    // Remove selected bookmarks from importedPreview
+    setImportedPreview(prev =>
+      prev.map((cat, catIdx) => ({
+        ...cat,
+        links: cat.links.filter((_, linkIdx) => !selectedImported.includes(`${catIdx}-${linkIdx}`))
+      })).filter(cat => cat.links.length > 0)
+    );
+    setSelectedImported([]);
+  };
 
+  // Helper to get all user category IDs
+  const getAllUserCategoryIds = () =>
+    categories.filter(cat => !cat.isAdminCategory).map(cat => cat.id);
+
+  const handleSelectAllUserCategories = () => {
+    const allIds = getAllUserCategoryIds();
+    if (selectedUserCategories.length === allIds.length) {
+      setSelectedUserCategories([]);
+    } else {
+      setSelectedUserCategories(allIds);
+    }
+  };
+
+  const handleDeleteSelectedUserCategories = () => {
+    if (selectedUserCategories.length === 0) return;
     Modal.confirm({
-      title: "Delete Selected Categories",
-      content: `Are you sure you want to delete ${selectedUserCategories.length} selected category(ies)? All bookmarks in these categories will also be deleted.`,
+      title: `Delete Selected Categories`,
+      content: `Are you sure you want to delete ${selectedUserCategories.length} selected categor${selectedUserCategories.length === 1 ? 'y' : 'ies'} and all their bookmarks? This action cannot be undone.`,
       okText: "Delete",
       okType: "danger",
       cancelText: "Cancel",
       onOk: async () => {
         try {
           setLoading(true);
-          for (const categoryId of selectedUserCategories) {
-            // Delete the category document
-            await deleteDoc(doc(db, "users", user.uid, "UserCategory", categoryId));
-            // Delete all bookmarks in this category
-            const bookmarksSnapshot = await getDocs(
-              collection(db, "users", user.uid, "CatBookmarks")
-            );
-            const bookmarksToDelete = bookmarksSnapshot.docs.filter(
-              (docSnap) => docSnap.data().categoryId === categoryId
-            );
-            for (const bm of bookmarksToDelete) {
-              await deleteDoc(doc(db, "users", user.uid, "CatBookmarks", bm.id));
-            }
+          for (const catId of selectedUserCategories) {
+            await handleDeleteCategory(catId);
           }
           setSelectedUserCategories([]);
         } catch (error) {
@@ -3240,6 +3344,28 @@ function PopularBookmarks() {
             <div
               className={`flex items-center bg-white/[(var(--widget-opacity))] backdrop-blur-lg dark:bg-[#28283A]/[(var(--widget-opacity))] p-1 rounded-sm`}
             >
+              {/* <button
+                onClick={() => handleGridViewChange(false)}
+                className={`p-2 rounded ${
+                  !grid
+                    ? "bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] shadow-sm"
+                    : "hover:bg-white dark:hover:bg-gray-700/50"
+                }`}
+              >
+                <svg
+                  className="w-5 h-5 dark:text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h18"
+                  />
+                </svg>
+              </button> */}
             </div>
           </div>
         </div>
@@ -3266,8 +3392,9 @@ function PopularBookmarks() {
 
   return (
     <div
-      className={` w-[85vw] mx-auto popular-bookmarks-container ${isDarkMode ? "dark" : ""
-        }`}
+      className={` w-[85vw] mx-auto popular-bookmarks-container ${
+        isDarkMode ? "dark" : ""
+      }`}
     >
       {renderBookmarksByCategory()}
 
@@ -3344,11 +3471,12 @@ function PopularBookmarks() {
         <div className="flex w-full mb-4 justify-between items-center gap-2">
           <div className="dark:text-white font-medium">Columns:</div>
           <div className="flex gap-2">
-            {[1, 2, 3, 4].map(num => (
+            {[1,2,3,4].map(num => (
               <button
                 key={num}
-                className={`px-4 py-2 rounded-md font-semibold border transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:text-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 ${previewColumns === num ? "bg-blue-500 text-white shadow" : "bg-white dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-gray-600"
-                  }`}
+                className={`px-4 py-2 rounded-md font-semibold border transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:text-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 ${
+                  previewColumns === num ? "bg-blue-500 text-white shadow" : "bg-white dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-gray-600"
+                }`}
                 onClick={() => handlePreviewColumnChange(num)}
                 title={`Show ${num} column${num > 1 ? 's' : ''}`}
               >
@@ -3375,10 +3503,11 @@ function PopularBookmarks() {
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className={`p-4 rounded-lg min-h-[200px] transition-all duration-300 border-2 ${snapshot.isDraggingOver
-                      ? "bg-indigo-50 dark:bg-gray-900/50 border-indigo-400 shadow-lg"
-                      : "bg-gray-50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-700"
-                      }`}
+                    className={`p-4 rounded-lg min-h-[200px] transition-all duration-300 border-2 ${
+                      snapshot.isDraggingOver
+                        ? "bg-indigo-50 dark:bg-gray-900/50 border-indigo-400 shadow-lg"
+                        : "bg-gray-50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-700"
+                    }`}
                   >
                     <div className="flex items-center justify-between mb-4">
                       <div className="text-center font-semibold dark:text-white">
@@ -3399,10 +3528,11 @@ function PopularBookmarks() {
                             <div
                               ref={provided.innerRef}
                               {...provided.draggableProps}
-                              className={`flex items-center border-none dark:text-white justify-between p-3 rounded-lg transition-all duration-200 dark:bg-gray-600/50 bg-white shadow-sm ${snapshot.isDragging
-                                ? "shadow-lg border-2 border-indigo-400 scale-105 bg-indigo-50 dark:bg-indigo-900/60"
-                                : "hover:border-indigo-300"
-                                }`}
+                              className={`flex items-center border-none dark:text-white justify-between p-3 rounded-lg transition-all duration-200 dark:bg-gray-600/50 bg-white shadow-sm ${
+                                snapshot.isDragging
+                                  ? "shadow-lg border-2 border-indigo-400 scale-105 bg-indigo-50 dark:bg-indigo-900/60"
+                                  : "hover:border-indigo-300"
+                              }`}
                               style={provided.draggableProps.style}
                             >
                               <div className="flex items-center border-none gap-3">
@@ -3442,7 +3572,7 @@ function PopularBookmarks() {
           <div className="text-sm font-medium dark:text-white text-gray-700 mb-2 flex items-center gap-2">
             Available Categories
             <Tooltip title="Search categories">
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" strokeWidth="2" /><line x1="21" y1="21" x2="16.65" y2="16.65" strokeWidth="2" /></svg>
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" strokeWidth="2"/><line x1="21" y1="21" x2="16.65" y2="16.65" strokeWidth="2"/></svg>
             </Tooltip>
           </div>
           <input

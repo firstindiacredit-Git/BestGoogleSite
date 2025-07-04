@@ -828,6 +828,7 @@ const App = () => {
                     <Route path="/forgot-password" element={<Forgotpassword />} />
                     <Route path="/premium" element={<PremiumPage />} />
                     <Route path="/premium-form" element={<PremiumForm />} />
+                    <Route path="/professional-selection" element={<ProfessionalSelection />} />
 
                     <Route
                       path="/NewSearchPage"

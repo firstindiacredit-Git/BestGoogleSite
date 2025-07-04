@@ -4,7 +4,7 @@ import { signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate, Link } from "react-router-dom";
 import { protectForm } from "../../utils/recaptcha";
 
-const SignIn = () => {
+const SignIn = ({ onSuccess }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -45,6 +45,7 @@ const SignIn = () => {
         try {
           await signInWithEmailAndPassword(auth, email, password);
           localStorage.setItem("imageTrue", true);
+          if (onSuccess) onSuccess();
           // Navigation will be handled by ProfessionCheckWrapper
         } catch (err) {
           if (err.code === "auth/user-not-found") {
@@ -69,6 +70,7 @@ const SignIn = () => {
         try {
           await signInWithPopup(auth, provider);
           localStorage.setItem("imageTrue", true);
+          if (onSuccess) onSuccess();
           // Navigation will be handled by ProfessionCheckWrapper
         } catch (err) {
           if (err.code === "auth/network-request-failed") {

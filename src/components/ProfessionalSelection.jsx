@@ -6,55 +6,57 @@ import { useTheme } from "../context/ThemeContext";
 
 const ProfessionalSelection = () => {
   const [selectedProfession, setSelectedProfession] = useState("");
+  const [selectedInterests, setSelectedInterests] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { isDarkMode } = useTheme();
 
   const professions = [
-    {
-      id: "student",
-      name: "Student",
-      icon: "🎓",
-      description: "Currently studying or pursuing education"
-    },
-    {
-      id: "professional",
-      name: "Professional",
-      icon: "💼",
-      description: "Working in a professional field"
-    },
-    {
-      id: "entrepreneur",
-      name: "Entrepreneur",
-      icon: "🚀",
-      description: "Running your own business or startup"
-    },
-    {
-      id: "freelancer",
-      name: "Freelancer",
-      icon: "🆓",
-      description: "Working independently on projects"
-    },
-    {
-      id: "retired",
-      name: "Retired",
-      icon: "🌅",
-      description: "Retired from active work"
-    },
-    {
-      id: "other",
-      name: "Other",
-      icon: "✨",
-      description: "Other profession or occupation"
-    }
+    { id: "student", name: "Student", icon: "🎓", description: "" },
+    { id: "software_developer", name: "Software Developer", icon: "💻", description: "" },
+    { id: "digital_marketer", name: "Digital Marketer", icon: "📈", description: "" },
+    { id: "content_creator", name: "Content Creator / YouTuber", icon: "🎥", description: "" },
+    { id: "graphic_designer", name: "Graphic Designer", icon: "🎨", description: "" },
+    { id: "entrepreneur", name: "Entrepreneur / Founder", icon: "🚀", description: "" },
+    { id: "freelancer", name: "Freelancer", icon: "🆓", description: "" },
+    { id: "investor", name: "Investor / Trader", icon: "💰", description: "" },
+    { id: "finance_agent", name: "Finance / DSA Agents", icon: "🏦", description: "" },
+    { id: "teacher", name: "Teachers / Trainers", icon: "👩‍🏫", description: "" },
+    { id: "job_seeker", name: "Job Seekers", icon: "🧑‍💼", description: "" },
+    { id: "hr", name: "HR / Recruiter", icon: "🕵️‍♂️", description: "" },
+    { id: "travel_enthusiast", name: "Travel Enthusiast", icon: "✈️", description: "" },
   ];
+
+  const interestsList = [
+    { id: "technology", name: "Technology", icon: "💻" },
+    { id: "sports", name: "Sports", icon: "🏀" },
+    { id: "finance", name: "Finance", icon: "💰" },
+    { id: "health", name: "Health", icon: "🏥" },
+    { id: "music", name: "Music", icon: "🎵" },
+    { id: "travel", name: "Travel", icon: "✈️" },
+    { id: "education", name: "Education", icon: "📚" },
+    { id: "news", name: "News", icon: "📰" },
+    { id: "food", name: "Food", icon: "🍔" },
+    { id: "other", name: "Other", icon: "✨" },
+  ];
+
+  const handleInterestToggle = (interestId) => {
+    setSelectedInterests((prev) =>
+      prev.includes(interestId)
+        ? prev.filter((id) => id !== interestId)
+        : [...prev, interestId]
+    );
+  };
 
   const handleProfessionSelect = async () => {
     if (!selectedProfession) {
       alert("Please select your profession");
       return;
     }
-
+    if (selectedInterests.length === 0) {
+      alert("Please select at least one interest");
+      return;
+    }
     setIsLoading(true);
     try {
       const user = auth.currentUser;
@@ -62,17 +64,16 @@ const ProfessionalSelection = () => {
         const userDocRef = doc(db, "users", user.uid);
         await updateDoc(userDocRef, {
           profession: selectedProfession,
-          professionSelectedAt: new Date()
+          interests: selectedInterests,
+          professionSelectedAt: new Date(),
         });
-        
-        // Navigate to the home page
-        navigate("/search");
-        // Refresh the page after navigation
-        window.location.reload();
+        setTimeout(() => {
+          navigate("/search");
+        }, 300);
       }
     } catch (error) {
-      console.error("Error updating profession:", error);
-      alert("Failed to save profession. Please try again.");
+      console.error("Error updating profession/interests:", error);
+      alert("Failed to save profession/interests. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -83,10 +84,10 @@ const ProfessionalSelection = () => {
       <div className={`max-w-2xl w-full ${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl shadow-xl p-8`}>
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-4">
-            Welcome to AllMyTab! 👋
+            Welcome to Best Google Site! 👋
           </h1>
           <p className={`text-lg ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-            Please tell us about your profession to personalize your experience
+            Please tell us about your profession and interests to personalize your experience
           </p>
         </div>
 
@@ -114,12 +115,33 @@ const ProfessionalSelection = () => {
           ))}
         </div>
 
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold mb-2">Select your interests</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {interestsList.map((interest) => (
+              <button
+                type="button"
+                key={interest.id}
+                onClick={() => handleInterestToggle(interest.id)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all duration-200 text-left ${
+                  selectedInterests.includes(interest.id)
+                    ? `${isDarkMode ? 'border-blue-400 bg-blue-500/10' : 'border-blue-500 bg-blue-50'}`
+                    : `${isDarkMode ? 'border-gray-600 hover:border-gray-500 hover:bg-gray-700' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'}`
+                }`}
+              >
+                <span className="text-xl">{interest.icon}</span>
+                <span>{interest.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="text-center">
           <button
             onClick={handleProfessionSelect}
-            disabled={!selectedProfession || isLoading}
+            disabled={!selectedProfession || selectedInterests.length === 0 || isLoading}
             className={`px-8 py-3 rounded-lg font-semibold transition-all duration-200 ${
-              selectedProfession && !isLoading
+              selectedProfession && selectedInterests.length > 0 && !isLoading
                 ? 'bg-blue-500 hover:bg-blue-600 text-white'
                 : `${isDarkMode ? 'bg-gray-600 text-gray-400' : 'bg-gray-200 text-gray-500'} cursor-not-allowed`
             }`}
@@ -127,15 +149,6 @@ const ProfessionalSelection = () => {
             {isLoading ? "Saving..." : "Continue to Home"}
           </button>
         </div>
-
-        {/* <div className="text-center mt-6">
-          <button
-            onClick={() => navigate("/search")}
-            className={`text-sm ${isDarkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'} underline`}
-          >
-            Skip for now
-          </button>
-        </div> */}
       </div>
     </div>
   );

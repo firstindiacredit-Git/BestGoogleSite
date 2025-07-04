@@ -389,29 +389,50 @@ const NewTab = () => {
   }, [viewType]);
 
   const [searchTerm, setSearchTerm] = useState("");
+  // State to track expanded categories for list view
+  const [showAll, setShowAll] = useState(false);
 
   const filterTools = (tool) => {
     if (!searchTerm) return true;
     return tool.name.toLowerCase().includes(searchTerm.toLowerCase());
   };
 
+  const handleSeeMore = () => {
+    setShowAll((prev) => !prev);
+  };
+
   const renderListView = () => (
     <div className="grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3 xl:grid-cols-5 gap-8">
-      {toolCategories.map((category) => (
-        <div key={category.title}>
-          <h3 className="font-semibold text-lg dark:text-white text-neutral-600 text-left mb-4">
-            {category.title.toUpperCase()}
-          </h3>
-          {category.tools.filter(filterTools).map((tool) => (
-            <ButtonComponent
-              key={tool.path}
-              path={tool.path}
-              name={tool.name}
-              icon={tool.icon}
-            />
-          ))}
+      {toolCategories.map((category) => {
+        const filteredTools = category.tools.filter(filterTools);
+        const showTools = showAll ? filteredTools : filteredTools.slice(0, 5);
+        return (
+          <div key={category.title}>
+            <h3 className="font-semibold text-lg dark:text-white text-neutral-600 text-left mb-4">
+              {category.title.toUpperCase()}
+            </h3>
+            {showTools.map((tool) => (
+              <ButtonComponent
+                key={tool.path}
+                path={tool.path}
+                name={tool.name}
+                icon={tool.icon}
+              />
+            ))}
+          </div>
+        );
+      })}
+      {/* Single See More/See Less button centered below all categories */}
+      {toolCategories.some(category => category.tools.filter(filterTools).length > 5) && (
+        <div className="col-span-full flex justify-center mt-4">
+          <button
+            className="px-6 py-2 bg-white text-black rounded-lg shadow hover:text-blue-500 focus:outline-none dark:bg-[#513a7a] dark:hover:bg-[#3a2656] dark:text-white transition-colors"
+            onClick={handleSeeMore}
+          >
+            {showAll ? 'Show Less' : 'Show More'}
+          </button>
         </div>
-      ))}
+      )}
     </div>
   );
 

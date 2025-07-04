@@ -1088,7 +1088,7 @@ const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
                     alt="close"
                   />
                 </div>
-                <Signin />
+                <Signin onSuccess={closeLogin} />
                 <p className="text-center text-gray-500 dark:text-gray-400">
                   Don't have an account?{" "}
                   <button
