@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { MdOutlineDeleteOutline } from "react-icons/md";
 import { FaRegEdit } from "react-icons/fa";
 import {
@@ -14,14 +14,140 @@ import {
   updateDoc,
   doc,
   deleteDoc,
+  getDoc,
 } from "firebase/firestore";
 import {
   EditOutlined,
   DeleteOutlined,
-  UpOutlined,
-  DownOutlined,
 } from "@ant-design/icons";
 
+// Comprehensive countries list
+const countries = [
+  { key: "us", flag: "https://flagcdn.com/us.svg", name: "USA" },
+  { key: "in", flag: "https://flagcdn.com/in.svg", name: "India" },
+  { key: "gb", flag: "https://flagcdn.com/gb.svg", name: "United Kingdom" },
+  { key: "ca", flag: "https://flagcdn.com/ca.svg", name: "Canada" },
+  { key: "au", flag: "https://flagcdn.com/au.svg", name: "Australia" },
+  { key: "de", flag: "https://flagcdn.com/de.svg", name: "Germany" },
+  { key: "fr", flag: "https://flagcdn.com/fr.svg", name: "France" },
+  { key: "jp", flag: "https://flagcdn.com/jp.svg", name: "Japan" },
+  { key: "cn", flag: "https://flagcdn.com/cn.svg", name: "China" },
+  { key: "br", flag: "https://flagcdn.com/br.svg", name: "Brazil" },
+  { key: "mx", flag: "https://flagcdn.com/mx.svg", name: "Mexico" },
+  { key: "it", flag: "https://flagcdn.com/it.svg", name: "Italy" },
+  { key: "es", flag: "https://flagcdn.com/es.svg", name: "Spain" },
+  { key: "nl", flag: "https://flagcdn.com/nl.svg", name: "Netherlands" },
+  { key: "se", flag: "https://flagcdn.com/se.svg", name: "Sweden" },
+  { key: "no", flag: "https://flagcdn.com/no.svg", name: "Norway" },
+  { key: "dk", flag: "https://flagcdn.com/dk.svg", name: "Denmark" },
+  { key: "fi", flag: "https://flagcdn.com/fi.svg", name: "Finland" },
+  { key: "ch", flag: "https://flagcdn.com/ch.svg", name: "Switzerland" },
+  { key: "at", flag: "https://flagcdn.com/at.svg", name: "Austria" },
+  { key: "be", flag: "https://flagcdn.com/be.svg", name: "Belgium" },
+  { key: "ie", flag: "https://flagcdn.com/ie.svg", name: "Ireland" },
+  { key: "nz", flag: "https://flagcdn.com/nz.svg", name: "New Zealand" },
+  { key: "sg", flag: "https://flagcdn.com/sg.svg", name: "Singapore" },
+  { key: "kr", flag: "https://flagcdn.com/kr.svg", name: "South Korea" },
+  { key: "ru", flag: "https://flagcdn.com/ru.svg", name: "Russia" },
+  { key: "sa", flag: "https://flagcdn.com/sa.svg", name: "Saudi Arabia" },
+  { key: "ae", flag: "https://flagcdn.com/ae.svg", name: "UAE" },
+  { key: "za", flag: "https://flagcdn.com/za.svg", name: "South Africa" },
+  { key: "eg", flag: "https://flagcdn.com/eg.svg", name: "Egypt" },
+  { key: "ng", flag: "https://flagcdn.com/ng.svg", name: "Nigeria" },
+  { key: "ke", flag: "https://flagcdn.com/ke.svg", name: "Kenya" },
+  { key: "gh", flag: "https://flagcdn.com/gh.svg", name: "Ghana" },
+  { key: "ug", flag: "https://flagcdn.com/ug.svg", name: "Uganda" },
+  { key: "tz", flag: "https://flagcdn.com/tz.svg", name: "Tanzania" },
+  { key: "et", flag: "https://flagcdn.com/et.svg", name: "Ethiopia" },
+  { key: "ma", flag: "https://flagcdn.com/ma.svg", name: "Morocco" },
+  { key: "tn", flag: "https://flagcdn.com/tn.svg", name: "Tunisia" },
+  { key: "dz", flag: "https://flagcdn.com/dz.svg", name: "Algeria" },
+  { key: "ly", flag: "https://flagcdn.com/ly.svg", name: "Libya" },
+  { key: "sd", flag: "https://flagcdn.com/sd.svg", name: "Sudan" },
+  { key: "cm", flag: "https://flagcdn.com/cm.svg", name: "Cameroon" },
+  { key: "ci", flag: "https://flagcdn.com/ci.svg", name: "Ivory Coast" },
+  { key: "sn", flag: "https://flagcdn.com/sn.svg", name: "Senegal" },
+  { key: "ml", flag: "https://flagcdn.com/ml.svg", name: "Mali" },
+  { key: "bf", flag: "https://flagcdn.com/bf.svg", name: "Burkina Faso" },
+  { key: "ne", flag: "https://flagcdn.com/ne.svg", name: "Niger" },
+  { key: "td", flag: "https://flagcdn.com/td.svg", name: "Chad" },
+  { key: "cf", flag: "https://flagcdn.com/cf.svg", name: "Central African Republic" },
+  { key: "cg", flag: "https://flagcdn.com/cg.svg", name: "Republic of the Congo" },
+  { key: "cd", flag: "https://flagcdn.com/cd.svg", name: "Democratic Republic of the Congo" },
+  { key: "ao", flag: "https://flagcdn.com/ao.svg", name: "Angola" },
+  { key: "zm", flag: "https://flagcdn.com/zm.svg", name: "Zambia" },
+  { key: "zw", flag: "https://flagcdn.com/zw.svg", name: "Zimbabwe" },
+  { key: "bw", flag: "https://flagcdn.com/bw.svg", name: "Botswana" },
+  { key: "na", flag: "https://flagcdn.com/na.svg", name: "Namibia" },
+  { key: "sz", flag: "https://flagcdn.com/sz.svg", name: "Eswatini" },
+  { key: "ls", flag: "https://flagcdn.com/ls.svg", name: "Lesotho" },
+  { key: "mw", flag: "https://flagcdn.com/mw.svg", name: "Malawi" },
+  { key: "mz", flag: "https://flagcdn.com/mz.svg", name: "Mozambique" },
+  { key: "mg", flag: "https://flagcdn.com/mg.svg", name: "Madagascar" },
+  { key: "mu", flag: "https://flagcdn.com/mu.svg", name: "Mauritius" },
+  { key: "sc", flag: "https://flagcdn.com/sc.svg", name: "Seychelles" },
+  { key: "km", flag: "https://flagcdn.com/km.svg", name: "Comoros" },
+  { key: "dj", flag: "https://flagcdn.com/dj.svg", name: "Djibouti" },
+  { key: "so", flag: "https://flagcdn.com/so.svg", name: "Somalia" },
+  { key: "er", flag: "https://flagcdn.com/er.svg", name: "Eritrea" },
+  { key: "ss", flag: "https://flagcdn.com/ss.svg", name: "South Sudan" },
+  { key: "rw", flag: "https://flagcdn.com/rw.svg", name: "Rwanda" },
+  { key: "bi", flag: "https://flagcdn.com/bi.svg", name: "Burundi" },
+  { key: "gw", flag: "https://flagcdn.com/gw.svg", name: "Guinea-Bissau" },
+  { key: "gn", flag: "https://flagcdn.com/gn.svg", name: "Guinea" },
+  { key: "sl", flag: "https://flagcdn.com/sl.svg", name: "Sierra Leone" },
+  { key: "lr", flag: "https://flagcdn.com/lr.svg", name: "Liberia" },
+  { key: "gm", flag: "https://flagcdn.com/gm.svg", name: "Gambia" },
+  { key: "cv", flag: "https://flagcdn.com/cv.svg", name: "Cape Verde" },
+  { key: "mr", flag: "https://flagcdn.com/mr.svg", name: "Mauritania" },
+  { key: "eh", flag: "https://flagcdn.com/eh.svg", name: "Western Sahara" },
+  { key: "st", flag: "https://flagcdn.com/st.svg", name: "São Tomé and Príncipe" },
+  { key: "gq", flag: "https://flagcdn.com/gq.svg", name: "Equatorial Guinea" },
+  { key: "ga", flag: "https://flagcdn.com/ga.svg", name: "Gabon" },
+  { key: "global", flag: "https://flagcdn.com/un.svg", name: "Global" },
+];
+
+// Interest options
+const interestOptions = [
+  { id: "technology", name: "Technology", icon: "💻" },
+  { id: "sports", name: "Sports", icon: "🏀" },
+  { id: "art", name: "Art", icon: "🎨" },
+  { id: "music", name: "Music", icon: "🎵" },
+  { id: "science", name: "Science", icon: "🔬" },
+  { id: "travel", name: "Travel", icon: "✈️" },
+  { id: "reading", name: "Reading", icon: "📚" },
+  { id: "gaming", name: "Gaming", icon: "🎮" },
+  { id: "food", name: "Food", icon: "🍔" },
+  { id: "nature", name: "Nature", icon: "🌳" },
+  { id: "business", name: "Business", icon: "💼" },
+  { id: "education", name: "Education", icon: "🎓" },
+  { id: "health", name: "Health", icon: "🏥" },
+  { id: "fashion", name: "Fashion", icon: "👗" },
+  { id: "finance", name: "Finance", icon: "💰" },
+  { id: "entertainment", name: "Entertainment", icon: "🎬" },
+  { id: "news", name: "News", icon: "📰" },
+  { id: "shopping", name: "Shopping", icon: "🛒" },
+  { id: "social", name: "Social Media", icon: "📱" },
+  { id: "tools", name: "Tools", icon: "🔧" },
+];
+
+// Profession options
+const professionOptions = [
+  { id: "all", name: "All Professions" },
+  { id: "student", name: "Student" },
+  { id: "teacher", name: "Teacher" },
+  { id: "professional", name: "Professional" },
+  { id: "entrepreneur", name: "Entrepreneur" },
+  { id: "freelancer", name: "Freelancer" },
+  { id: "retired", name: "Retired" },
+  { id: "other", name: "Other" },
+];
+
+// Optimized for minimal Firestore read requests:
+// - Uses one-time reads instead of real-time listeners
+// - Updates local state instead of re-fetching after operations
+// - Manual refresh button for when fresh data is needed
+// - No automatic polling or background updates
 function AddLinks() {
   const [newCategory, setNewCategory] = useState("");
   const [newLink, setNewLink] = useState({ name: "", link: "", category: "" });
@@ -40,11 +166,17 @@ function AddLinks() {
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [editCategoryData, setEditCategoryData] = useState(null);
   const [isCategoryEditModalOpen, setIsCategoryEditModalOpen] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  // New state for category form
+  const [selectedInterests, setSelectedInterests] = useState([]);
+  const [selectedCountries, setSelectedCountries] = useState(["global"]);
+  const [selectedProfessions, setSelectedProfessions] = useState(["all"]);
 
   const ITEMS_PER_PAGE = 10;
 
-  // Filter categories and their links based on search term
-  const filteredCategories = newCategories
+  // Filter categories based on user preferences and search term
+  const filteredCategories = useMemo(() => newCategories
     .map((category) => ({
       ...category,
       links:
@@ -56,25 +188,68 @@ function AddLinks() {
               category.newCategory
                 ?.toLowerCase()
                 .includes(searchTerm.toLowerCase()))
-        ) || [], // Ensure links is always an array
+        ) || [],
     }))
-    .filter((category) => category.newCategory); // Only show categories with names
+    .filter((category) => {
+      // Filter by search term
+      const matchesSearch = category.newCategory?.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      // Filter by country - be more inclusive for new categories
+      const matchesCountry = !category.countries || 
+        category.countries.length === 0 || 
+        category.countries.includes("global") ||
+        selectedCountries.includes("global") ||
+        category.countries.some(country => selectedCountries.includes(country));
+      
+      // Filter by profession - be more inclusive for new categories
+      const matchesProfession = !category.professions || 
+        category.professions.length === 0 || 
+        category.professions.includes("all") ||
+        selectedProfessions.includes("all") ||
+        category.professions.some(profession => selectedProfessions.includes(profession));
+      
+      // Filter by interests - be more inclusive for new categories
+      const matchesInterests = !category.interests || 
+        category.interests.length === 0 || 
+        selectedInterests.length === 0 ||
+        category.interests.some(interest => selectedInterests.includes(interest));
+      
+      const shouldShow = category.newCategory && matchesSearch && matchesCountry && matchesProfession && matchesInterests;
+      
+      // Debug logging for categories that don't show
+      if (!shouldShow && category.newCategory) {
+        console.log("Category filtered out:", category.newCategory, {
+          matchesSearch,
+          matchesCountry,
+          matchesProfession,
+          matchesInterests,
+          categoryCountries: category.countries,
+          selectedCountries,
+          categoryProfessions: category.professions,
+          selectedProfessions,
+          categoryInterests: category.interests,
+          selectedInterests
+        });
+      }
+      
+      return shouldShow;
+    }), [newCategories, links, searchTerm, selectedCountries, selectedProfessions, selectedInterests]);
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredCategories.length / ITEMS_PER_PAGE);
-  const paginatedCategories = filteredCategories.slice(
+  const paginatedCategories = useMemo(() => filteredCategories.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
-  );
+  ), [filteredCategories, currentPage]);
 
   const getFaviconUrl = (link) => {
     try {
-      if (!link) return ""; // Return empty string if link is undefined
+      if (!link) return "";
       const url = new URL(link);
       return `https://www.google.com/s2/favicons?domain=${url.hostname}`;
-    } catch (error) {
+    } catch {
       console.error("Invalid URL:", link);
-      return ""; // Return empty string for invalid URLs
+      return "";
     }
   };
 
@@ -82,9 +257,25 @@ function AddLinks() {
     const setAuthPersistence = async () => {
       try {
         await setPersistence(auth, browserLocalPersistence);
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
           setUser(currentUser);
           if (currentUser) {
+            // Fetch user data to get profession and interests
+            try {
+              const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+              const userData = userDoc.data();
+              
+              // Set default filters based on user data
+              if (userData?.profession) {
+                setSelectedProfessions([userData.profession]);
+              }
+              if (userData?.interests && userData.interests.length > 0) {
+                setSelectedInterests(userData.interests);
+              }
+            } catch (error) {
+              console.error("Error fetching user data:", error);
+            }
+            
             fetchData();
           }
         });
@@ -114,6 +305,17 @@ function AddLinks() {
     }
   };
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await Promise.all([fetchLinks(), fetchCategories()]);
+    } catch (error) {
+      console.error("Error refreshing data:", error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   const fetchLinks = async () => {
     try {
       const querySnapshot = await getDocs(collection(db, "links"));
@@ -135,7 +337,7 @@ function AddLinks() {
         ...doc.data(),
       }));
       setNewCategories(fetchedCategories);
-      console.log("Fetched Categories:", fetchedCategories); // Debug log
+      console.log("Fetched Categories:", fetchedCategories);
     } catch (error) {
       console.error("Error fetching categories: ", error);
     }
@@ -148,17 +350,43 @@ function AddLinks() {
     }
 
     try {
-      await addDoc(collection(db, "category"), {
+      const docRef = await addDoc(collection(db, "category"), {
         newCategory: newCategory.trim(),
-        // color: selectedColor,
+        color: selectedColor,
+        interests: selectedInterests,
+        countries: selectedCountries,
+        professions: selectedProfessions,
         createdAt: new Date(),
       });
 
+      // Add the new category to local state instead of fetching all data
+      const newCategoryData = {
+        id: docRef.id,
+        newCategory: newCategory.trim(),
+        color: selectedColor,
+        interests: selectedInterests,
+        countries: selectedCountries,
+        professions: selectedProfessions,
+        createdAt: new Date(),
+      };
+      
+      setNewCategories(prev => [...prev, newCategoryData]);
+
       setNewCategory("");
-      // setSelectedColor("#3B82F6");
+      setSelectedColor("#3B82F6");
+      setSelectedInterests([]);
+      setSelectedCountries(["global"]);
+      setSelectedProfessions(["all"]);
       setCategoryModalOpen(false);
-      // Fetch updated data
-      fetchCategories();
+      
+      // Reset search term to show all categories
+      setSearchTerm("");
+      
+      // Reset to first page to show the new category
+      setCurrentPage(1);
+      
+      // Show success message
+      alert("Category added successfully!");
     } catch (error) {
       console.error("Error adding category:", error);
       alert("Failed to add category. Please try again.");
@@ -172,19 +400,31 @@ function AddLinks() {
     }
 
     try {
-      await addDoc(collection(db, "links"), {
+      const docRef = await addDoc(collection(db, "links"), {
         name: newLink.name,
         link: newLink.link,
         category: newLink.category,
         createdAt: new Date(),
         createdBy: user.uid,
       });
+
+      // Add the new link to local state instead of fetching all data
+      const newLinkData = {
+        id: docRef.id,
+        name: newLink.name,
+        link: newLink.link,
+        category: newLink.category,
+        createdAt: new Date(),
+        createdBy: user.uid,
+      };
+      
+      setLinks(prev => [...prev, newLinkData]);
       setNewLink({ name: "", link: "", category: "" });
-      // Fetch updated data
-      fetchLinks();
+      setBookmarkModalOpen(false);
       alert("Bookmark added successfully!");
     } catch (error) {
       console.error("Error adding bookmark: ", error);
+      alert("Failed to add bookmark. Please try again.");
     }
   };
 
@@ -196,10 +436,11 @@ function AddLinks() {
 
     try {
       await deleteDoc(doc(db, "links", id));
-      // Fetch updated data
-      fetchLinks();
+      // Remove from local state instead of fetching all data
+      setLinks(prev => prev.filter(link => link.id !== id));
     } catch (error) {
       console.error("Error deleting bookmark: ", error);
+      alert("Failed to delete bookmark. Please try again.");
     }
   };
 
@@ -223,10 +464,16 @@ function AddLinks() {
         category: editBookmarkData.category,
         updatedAt: new Date(),
       });
+      
+      // Update local state instead of fetching all data
+      setLinks(prev => prev.map(link => 
+        link.id === editBookmarkData.id 
+          ? { ...link, ...editBookmarkData, updatedAt: new Date() }
+          : link
+      ));
+      
       setEditModalOpen(false);
       setEditBookmarkData(null);
-      // Fetch updated data
-      fetchLinks();
     } catch (error) {
       console.error("Error updating bookmark:", error);
       alert("Failed to update bookmark. Please try again.");
@@ -241,10 +488,13 @@ function AddLinks() {
 
     try {
       await deleteDoc(doc(db, "category", id));
-      // Fetch updated data
-      fetchCategories();
+      // Remove from local state instead of fetching all data
+      setNewCategories(prev => prev.filter(category => category.id !== id));
+      // Also remove all links in this category
+      setLinks(prev => prev.filter(link => link.category !== id));
     } catch (error) {
       console.error("Error deleting category: ", error);
+      alert("Failed to delete category. Please try again.");
     }
   };
 
@@ -255,10 +505,13 @@ function AddLinks() {
     }));
   };
 
-  const handleEditCategory = async (categoryId, currentName) => {
+  const handleEditCategory = async (categoryId, currentName, currentInterests, currentCountries, currentProfessions) => {
     setEditCategoryData({
       id: categoryId,
       name: currentName,
+      interests: currentInterests || [],
+      countries: currentCountries || ["global"],
+      professions: currentProfessions || ["all"],
     });
     setIsCategoryEditModalOpen(true);
   };
@@ -269,15 +522,37 @@ function AddLinks() {
     try {
       await updateDoc(doc(db, "category", editCategoryData.id), {
         newCategory: editCategoryData.name,
+        interests: editCategoryData.interests,
+        countries: editCategoryData.countries,
+        professions: editCategoryData.professions,
         updatedAt: new Date(),
       });
+      
+      // Update local state instead of fetching all data
+      setNewCategories(prev => prev.map(category => 
+        category.id === editCategoryData.id 
+          ? { 
+              ...category, 
+              newCategory: editCategoryData.name,
+              interests: editCategoryData.interests,
+              countries: editCategoryData.countries,
+              professions: editCategoryData.professions,
+              updatedAt: new Date()
+            }
+          : category
+      ));
+      
       setIsCategoryEditModalOpen(false);
       setEditCategoryData(null);
-      fetchCategories();
     } catch (error) {
       console.error("Error updating category:", error);
       alert("Failed to update category. Please try again.");
     }
+  };
+
+  // Helper to get only USA and India for the add form
+  const getCountryOptions = () => {
+    return countries.filter(c => c.key === "us" || c.key === "in");
   };
 
   if (loading) {
@@ -303,6 +578,19 @@ function AddLinks() {
                   className="w-full px-4 py-2 rounded-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#513a7a] text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
+
+              {/* Refresh Button */}
+              <button
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-[#513a7a] hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Refresh data from server"
+              >
+                <svg className={`w-4 h-4 mr-1 ${isRefreshing ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                {isRefreshing ? 'Refreshing...' : 'Refresh'}
+              </button>
 
               {/* View Toggle */}
               <div className="flex items-center gap-2 bg-gray-100 dark:bg-[#38394c] p-1 rounded-sm">
@@ -351,6 +639,103 @@ function AddLinks() {
                   </svg>
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-5 py-4">
+        {/* Filter Controls */}
+        <div className="mb-6 bg-white dark:bg-[#513a7a] rounded-sm shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Filter Categories</h3>
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  setSelectedCountries(["global"]);
+                  setSelectedProfessions(["all"]);
+                  setSelectedInterests([]);
+                  setSearchTerm("");
+                }}
+                className="px-4 py-2 bg-blue-600 text-white rounded-sm hover:bg-blue-700 transition-colors text-sm"
+              >
+                Show All Categories
+              </button>
+              <button
+                onClick={() => {
+                  setSelectedCountries(["global"]);
+                  setSelectedProfessions(["all"]);
+                  setSelectedInterests([]);
+                }}
+                className="px-4 py-2 bg-gray-500 text-white rounded-sm hover:bg-gray-600 transition-colors text-sm"
+              >
+                Clear Filters
+              </button>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Countries
+              </label>
+              <select
+                value={selectedCountries}
+                onChange={(e) =>
+                  setSelectedCountries(
+                    Array.from(e.target.selectedOptions, option => option.value)
+                  )
+                }
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#513a7a] text-gray-900 dark:text-white rounded-sm focus:ring-2 focus:ring-blue-500"
+                multiple
+              >
+                {getCountryOptions().map((country) => (
+                  <option key={country.key} value={country.key}>
+                    {country.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Professions
+              </label>
+              <select
+                value={selectedProfessions}
+                onChange={(e) =>
+                  setSelectedProfessions(
+                    Array.from(e.target.selectedOptions, option => option.value)
+                  )
+                }
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#513a7a] text-gray-900 dark:text-white rounded-sm focus:ring-2 focus:ring-blue-500"
+                multiple
+              >
+                {professionOptions.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Interests
+              </label>
+              <select
+                value={selectedInterests}
+                onChange={(e) =>
+                  setSelectedInterests(
+                    Array.from(e.target.selectedOptions, option => option.value)
+                  )
+                }
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#513a7a] text-gray-900 dark:text-white rounded-sm focus:ring-2 focus:ring-blue-500"
+                multiple
+              >
+                {interestOptions.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.icon} {option.name}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
         </div>
@@ -488,47 +873,31 @@ function AddLinks() {
 
               {isCategoryModalOpen && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                  <div className="bg-white dark:bg-[#513a7a] rounded-sm max-w-md w-full p-6 shadow-xl">
+                  <div className="bg-white dark:bg-[#513a7a] rounded-lg max-w-lg w-full p-8 shadow-xl">
                     <div className="flex justify-between items-center mb-4">
-                      <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                        Add New Category
-                      </h2>
+                      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Add New Category</h2>
                       <button
                         onClick={() => setCategoryModalOpen(false)}
                         className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
                       >
-                        <svg
-                          className="h-6 w-6"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M6 18L18 6M6 6l12 12"
-                          />
+                        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
                     </div>
-                    <div className="space-y-4">
+                    <div className="space-y-6">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          Category Name
-                        </label>
+                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Category Name</label>
                         <input
                           type="text"
                           value={newCategory}
                           onChange={(e) => setNewCategory(e.target.value)}
-                          className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded-xs focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded focus:ring-2 focus:ring-blue-500"
                           placeholder="Enter category name"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          Category Color
-                        </label>
+                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Category Color</label>
                         <div className="flex items-center space-x-3">
                           <input
                             type="color"
@@ -536,15 +905,94 @@ function AddLinks() {
                             onChange={(e) => setSelectedColor(e.target.value)}
                             className="h-10 w-20 rounded cursor-pointer"
                           />
-                          <span className="text-sm text-gray-500 dark:text-gray-400">
-                            {selectedColor.toUpperCase()}
-                          </span>
+                          <span className="text-sm text-gray-500 dark:text-gray-400">{selectedColor.toUpperCase()}</span>
                         </div>
                       </div>
-                      <div className="flex justify-end space-x-3 mt-6">
+                      {/* Countries Tag Selector */}
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Countries</label>
+                        <div className="flex flex-wrap gap-2 mb-2">
+                          {selectedCountries.map((key) => {
+                            const c = countries.find(c => c.key === key);
+                            return (
+                              <span key={key} className="inline-flex items-center bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-1 rounded text-xs font-medium">
+                                {c?.flag && <img src={c.flag} alt="" className="w-4 h-4 mr-1 inline" />} {c?.name || key}
+                                <button onClick={() => setSelectedCountries(selectedCountries.filter(k => k !== key))} className="ml-1 text-blue-500 hover:text-red-500">×</button>
+                          </span>
+                            );
+                          })}
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {getCountryOptions().filter(c => !selectedCountries.includes(c.key)).map((country) => (
+                            <button
+                              key={country.key}
+                              type="button"
+                              onClick={() => setSelectedCountries([...selectedCountries, country.key])}
+                              className="inline-flex items-center bg-gray-100 dark:bg-gray-700 hover:bg-blue-200 dark:hover:bg-blue-800 text-gray-700 dark:text-gray-200 px-2 py-1 rounded text-xs font-medium"
+                            >
+                              {country.flag && <img src={country.flag} alt="" className="w-4 h-4 mr-1 inline" />} {country.name}
+                            </button>
+                          ))}
+                      </div>
+                      </div>
+                      {/* Professions Tag Selector */}
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Professions</label>
+                        <div className="flex flex-wrap gap-2 mb-2">
+                          {selectedProfessions.map((id) => {
+                            const p = professionOptions.find(p => p.id === id);
+                            return (
+                              <span key={id} className="inline-flex items-center bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-2 py-1 rounded text-xs font-medium">
+                                {p?.name || id}
+                                <button onClick={() => setSelectedProfessions(selectedProfessions.filter(k => k !== id))} className="ml-1 text-green-500 hover:text-red-500">×</button>
+                              </span>
+                            );
+                          })}
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {professionOptions.filter(p => !selectedProfessions.includes(p.id)).map((p) => (
+                            <button
+                              key={p.id}
+                              type="button"
+                              onClick={() => setSelectedProfessions([...selectedProfessions, p.id])}
+                              className="inline-flex items-center bg-gray-100 dark:bg-gray-700 hover:bg-green-200 dark:hover:bg-green-800 text-gray-700 dark:text-gray-200 px-2 py-1 rounded text-xs font-medium"
+                            >
+                              {p.name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      {/* Interests Tag Selector */}
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Interests</label>
+                        <div className="flex flex-wrap gap-2 mb-2">
+                          {selectedInterests.map((id) => {
+                            const i = interestOptions.find(i => i.id === id);
+                            return (
+                              <span key={id} className="inline-flex items-center bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 px-2 py-1 rounded text-xs font-medium">
+                                {i?.icon} {i?.name || id}
+                                <button onClick={() => setSelectedInterests(selectedInterests.filter(k => k !== id))} className="ml-1 text-purple-500 hover:text-red-500">×</button>
+                              </span>
+                            );
+                          })}
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {interestOptions.filter(i => !selectedInterests.includes(i.id)).map((i) => (
+                            <button
+                              key={i.id}
+                              type="button"
+                              onClick={() => setSelectedInterests([...selectedInterests, i.id])}
+                              className="inline-flex items-center bg-gray-100 dark:bg-gray-700 hover:bg-purple-200 dark:hover:bg-purple-800 text-gray-700 dark:text-gray-200 px-2 py-1 rounded text-xs font-medium"
+                            >
+                              {i.icon} {i.name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex justify-end space-x-3 pt-4">
                         <button
                           onClick={() => setCategoryModalOpen(false)}
-                          className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xs transition-colors"
+                          className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
                         >
                           Cancel
                         </button>
@@ -553,7 +1001,7 @@ function AddLinks() {
                             handleAddCategory();
                             setCategoryModalOpen(false);
                           }}
-                          className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-xs transition-colors"
+                          className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded transition-colors"
                         >
                           Add Category
                         </button>
@@ -568,9 +1016,16 @@ function AddLinks() {
 
         {/* Bookmarks Display */}
         <div className="mt-8">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
-            Categories ({filteredCategories.length})
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+              Categories ({filteredCategories.length} of {newCategories.length})
           </h2>
+            {filteredCategories.length !== newCategories.length && (
+              <span className="text-sm text-gray-500 dark:text-gray-400">
+                {newCategories.length - filteredCategories.length} categories hidden by filters
+              </span>
+            )}
+          </div>
 
           {isGridView ? (
             // Grid View
@@ -585,14 +1040,50 @@ function AddLinks() {
                       <div className="flex items-center gap-2">
                         <div>{category.newCategory}</div>
                         <div>({category.links?.length || 0})</div>
+                        <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                          {category.countries && category.countries.length > 0 && !category.countries.includes("global") && (
+                            <span className="px-1 py-0.5 bg-blue-100 dark:bg-blue-900 rounded text-xs">
+                              {category.countries.length === 1 
+                                ? countries.find(c => c.key === category.countries[0])?.name || category.countries[0]
+                                : `${category.countries.length} countries`
+                              }
+                            </span>
+                          )}
+                          {category.professions && category.professions.length > 0 && !category.professions.includes("all") && (
+                            <span className="px-1 py-0.5 bg-green-100 dark:bg-green-900 rounded text-xs">
+                              {category.professions.length === 1 
+                                ? professionOptions.find(p => p.id === category.professions[0])?.name || category.professions[0]
+                                : `${category.professions.length} professions`
+                              }
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <div className="flex items-center gap-2 ml-2">
+                        {category.interests && category.interests.length > 0 && (
+                          <div className="flex items-center gap-1">
+                            {category.interests.slice(0, 3).map((interest) => {
+                              const interestOption = interestOptions.find(i => i.id === interest);
+                              return interestOption ? (
+                                <span key={interest} className="text-xs" title={interestOption.name}>
+                                  {interestOption.icon}
+                                </span>
+                              ) : null;
+                            })}
+                            {category.interests.length > 3 && (
+                              <span className="text-xs text-gray-500">+{category.interests.length - 3}</span>
+                            )}
+                          </div>
+                        )}
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleEditCategory(
                               category.id,
-                              category.newCategory
+                              category.newCategory,
+                              category.interests,
+                              category.countries,
+                              category.professions
                             );
                           }}
                           className="p-1 text-gray-400 hover:text-blue-500 transition-colors"
@@ -690,15 +1181,51 @@ function AddLinks() {
                         <span className="text-sm text-gray-500 dark:text-gray-400">
                           ({category.links?.length || 0})
                         </span>
+                        <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                          {category.countries && category.countries.length > 0 && !category.countries.includes("global") && (
+                            <span className="px-1 py-0.5 bg-blue-100 dark:bg-blue-900 rounded text-xs">
+                              {category.countries.length === 1 
+                                ? countries.find(c => c.key === category.countries[0])?.name || category.countries[0]
+                                : `${category.countries.length} countries`
+                              }
+                            </span>
+                          )}
+                          {category.professions && category.professions.length > 0 && !category.professions.includes("all") && (
+                            <span className="px-1 py-0.5 bg-green-100 dark:bg-green-900 rounded text-xs">
+                              {category.professions.length === 1 
+                                ? professionOptions.find(p => p.id === category.professions[0])?.name || category.professions[0]
+                                : `${category.professions.length} professions`
+                              }
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <div className="flex items-center  ml-3">
+                        {category.interests && category.interests.length > 0 && (
+                          <div className="flex items-center gap-1 mr-2">
+                            {category.interests.slice(0, 3).map((interest) => {
+                              const interestOption = interestOptions.find(i => i.id === interest);
+                              return interestOption ? (
+                                <span key={interest} className="text-xs" title={interestOption.name}>
+                                  {interestOption.icon}
+                                </span>
+                              ) : null;
+                            })}
+                            {category.interests.length > 3 && (
+                              <span className="text-xs text-gray-500">+{category.interests.length - 3}</span>
+                            )}
+                          </div>
+                        )}
                         <div className="flex items-center gap-2 ml-2">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               handleEditCategory(
                                 category.id,
-                                category.newCategory
+                                category.newCategory,
+                                category.interests,
+                                category.countries,
+                                category.professions
                               );
                             }}
                             className="p-1 text-gray-400 hover:text-blue-500 transition-colors"
@@ -932,12 +1459,25 @@ function AddLinks() {
         </div>
       )}
       {isCategoryEditModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-[#37375d] rounded-lg shadow-xl max-w-md w-full mx-4">
-            <div className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Edit Category
-              </h3>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-[#513a7a] rounded-lg max-w-lg w-full p-8 shadow-xl">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Edit Category</h2>
+              <button
+                onClick={() => {
+                  setIsCategoryEditModalOpen(false);
+                  setEditCategoryData(null);
+                }}
+                className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+              >
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Category Name</label>
               <input
                 type="text"
                 value={editCategoryData?.name || ""}
@@ -947,22 +1487,131 @@ function AddLinks() {
                     name: e.target.value,
                   }))
                 }
-                className="w-full px-4 py-2 rounded-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#513a7a] text-gray-900 dark:text-white"
+                  className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded focus:ring-2 focus:ring-blue-500"
                 placeholder="Category name"
               />
-              <div className="flex justify-end space-x-3 mt-6">
+              </div>
+              {/* Countries Tag Selector */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Countries</label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {(editCategoryData?.countries || ["global"]).map((key) => {
+                    const c = countries.find(c => c.key === key);
+                    return (
+                      <span key={key} className="inline-flex items-center bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-1 rounded text-xs font-medium">
+                        {c?.flag && <img src={c.flag} alt="" className="w-4 h-4 mr-1 inline" />} {c?.name || key}
+                        <button 
+                          onClick={() => setEditCategoryData(prev => ({
+                            ...prev,
+                            countries: prev.countries.filter(k => k !== key)
+                          }))} 
+                          className="ml-1 text-blue-500 hover:text-red-500"
+                        >×</button>
+                      </span>
+                    );
+                  })}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {getCountryOptions().filter(c => !editCategoryData?.countries?.includes(c.key)).map((country) => (
+                    <button
+                      key={country.key}
+                      type="button"
+                      onClick={() => setEditCategoryData(prev => ({
+                        ...prev,
+                        countries: [...(prev.countries || ["global"]), country.key]
+                      }))}
+                      className="inline-flex items-center bg-gray-100 dark:bg-gray-700 hover:bg-blue-200 dark:hover:bg-blue-800 text-gray-700 dark:text-gray-200 px-2 py-1 rounded text-xs font-medium"
+                    >
+                      {country.flag && <img src={country.flag} alt="" className="w-4 h-4 mr-1 inline" />} {country.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {/* Professions Tag Selector */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Professions</label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {(editCategoryData?.professions || ["all"]).map((id) => {
+                    const p = professionOptions.find(p => p.id === id);
+                    return (
+                      <span key={id} className="inline-flex items-center bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-2 py-1 rounded text-xs font-medium">
+                        {p?.name || id}
+                        <button 
+                          onClick={() => setEditCategoryData(prev => ({
+                            ...prev,
+                            professions: prev.professions.filter(k => k !== id)
+                          }))} 
+                          className="ml-1 text-green-500 hover:text-red-500"
+                        >×</button>
+                      </span>
+                    );
+                  })}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {professionOptions.filter(p => !editCategoryData?.professions?.includes(p.id)).map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => setEditCategoryData(prev => ({
+                        ...prev,
+                        professions: [...(prev.professions || ["all"]), p.id]
+                      }))}
+                      className="inline-flex items-center bg-gray-100 dark:bg-gray-700 hover:bg-green-200 dark:hover:bg-green-800 text-gray-700 dark:text-gray-200 px-2 py-1 rounded text-xs font-medium"
+                    >
+                      {p.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {/* Interests Tag Selector */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Interests</label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {(editCategoryData?.interests || []).map((id) => {
+                    const i = interestOptions.find(i => i.id === id);
+                    return (
+                      <span key={id} className="inline-flex items-center bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 px-2 py-1 rounded text-xs font-medium">
+                        {i?.icon} {i?.name || id}
+                        <button 
+                          onClick={() => setEditCategoryData(prev => ({
+                            ...prev,
+                            interests: prev.interests.filter(k => k !== id)
+                          }))} 
+                          className="ml-1 text-purple-500 hover:text-red-500"
+                        >×</button>
+                      </span>
+                    );
+                  })}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {interestOptions.filter(i => !editCategoryData?.interests?.includes(i.id)).map((i) => (
+                    <button
+                      key={i.id}
+                      type="button"
+                      onClick={() => setEditCategoryData(prev => ({
+                        ...prev,
+                        interests: [...(prev.interests || []), i.id]
+                      }))}
+                      className="inline-flex items-center bg-gray-100 dark:bg-gray-700 hover:bg-purple-200 dark:hover:bg-purple-800 text-gray-700 dark:text-gray-200 px-2 py-1 rounded text-xs font-medium"
+                    >
+                      {i.icon} {i.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex justify-end space-x-3 pt-4">
                 <button
                   onClick={() => {
                     setIsCategoryEditModalOpen(false);
                     setEditCategoryData(null);
                   }}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xs transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleUpdateCategory}
-                  className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-xs transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded transition-colors"
                 >
                   Update Category
                 </button>

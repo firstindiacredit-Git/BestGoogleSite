@@ -699,7 +699,19 @@ const NewSearchPage = ({ isToolPage = false }) => {
                           }`}
                           onClick={() => handleToggleComponent("Tool")}
                         >
-                          <span className="drop-shadow-md">TOOL</span>
+                          <span className="drop-shadow-md">TOOLs</span>
+                        </button>
+                        <button
+                          className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                            activeComponent === "Data MiningTool"
+                              ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                              : "dark:text-white  hover:bg-gray-100 dark:hover:bg-[#28283A]"
+                          }`}
+                          onClick={() => {
+                            window.open("http://45.61.57.93:5000/login", "_blank");
+                          }}
+                        >
+                          <span className="drop-shadow-md">DATA MINING TOOL</span>
                         </button>
                         <Dropdown
                           menu={settingsMenu}

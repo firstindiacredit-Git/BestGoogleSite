@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { updatePassword, updateProfile } from "firebase/auth";
 import { auth, db } from "../firebase";
@@ -7,20 +7,15 @@ import { onAuthStateChanged } from "firebase/auth";
 import {
   FaEye,
   FaEyeSlash,
-  FaPen,
   FaCamera,
   FaUser,
-  FaLock,
-  FaShieldAlt,
   FaCrown,
   FaCog,
-  FaRegListAlt,
   FaSave,
-  FaTimes,
 } from "react-icons/fa";
 import imageCompression from "browser-image-compression";
 import { useSubscription } from "../hooks/useSubscription";
-import { Modal, message, Tabs, Spin, Button, Tooltip, Image } from "antd";
+import { message, Spin, Button, Tooltip, Image } from "antd";
 import Header from "./Header";
 import { useTheme } from "../context/ThemeContext";
 // https://cdn.dribbble.com/userupload/14883451/file/original-761915986636e2ae85fee541c6b9c051.jpg?resize=1200x900&vertical=center
@@ -46,13 +41,14 @@ const ProfilePage = () => {
   const { isPro } = useSubscription();
   const [previewUrl, setPreviewUrl] = useState(null);
   const [backgroundUrl, setBackgroundUrl] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const [isUploadingBackground, setIsUploadingBackground] = useState(false);
   const backgroundInputRef = useRef(null);
+  // eslint-disable-next-line no-unused-vars
   const [previewBackgroundUrl, setPreviewBackgroundUrl] = useState(null);
 
   const navigate = useNavigate();
   const { isDarkMode } = useTheme();
-  const [activeSection, setActiveSection] = useState("profile");
   const [userProfession, setUserProfession] = useState("");
   const [isEditingProfession, setIsEditingProfession] = useState(false);
 
@@ -173,9 +169,7 @@ const ProfilePage = () => {
     fileInputRef.current?.click();
   };
 
-  const handleBackgroundClick = () => {
-    backgroundInputRef.current?.click();
-  };
+
 
   const compressImage = async (file) => {
     const options = {
@@ -704,7 +698,9 @@ const ProfilePage = () => {
                         </Button>
                       </div>
                     ) : (
-                      <p className="text-gray-700 dark:text-gray-300">••••</p>
+                      <p className="text-gray-700 dark:text-gray-300">
+                        {userPin ? "••••" : "Not set"}
+                      </p>
                     )}
                   </div>
 

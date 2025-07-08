@@ -1,11 +1,10 @@
-import React, {
+import {
   useState,
   createContext,
-  useMemo,
   useEffect,
-  useContext,
   lazy,
   Suspense,
+  useRef,
 } from "react";
 import {
   BrowserRouter as Router,
@@ -14,15 +13,15 @@ import {
   useNavigate,
   useLocation,
 } from "react-router-dom";
-import { Dropdown, Button, Modal, message } from "antd";
+import { Dropdown, Button, Modal, message, Input, notification } from "antd";
 import {
   ReloadOutlined,
   DeleteOutlined,
-  PlusOutlined,
   BgColorsOutlined,
   ClearOutlined,
   MessageOutlined,
   CloseOutlined,
+  SmileOutlined,
 } from "@ant-design/icons";
 import { AuthProvider } from "./hooks/AuthContext.jsx";
 import { DesignContextProvider } from "./context/DesignContext.jsx";
@@ -31,7 +30,7 @@ import { ThemeProvider } from "./context/ThemeContext.jsx";
 import { CountryProvider } from "./context/CountryContext.jsx";
 const galleryupload = "/galleryupload.png";
 import { auth, db } from "./firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, addDoc, collection } from "firebase/firestore";
 import SearchPage from "./components/SearchPage.jsx";
 import NewSearchPage from "./components/NewSearchPage.jsx";
 import NetworkStatus from "./components/NetworkStatus";
@@ -40,12 +39,11 @@ import Login from "./components/Admin/Login.jsx";
 import Sidebar from "./components/Admin/Sidebar.jsx";
 import ShortcutTest from "./components/ShortcutTest";
 import ChatbotAI from "./components/ChatbotAi";
-import ProfessionCheckWrapper from "./components/ProfessionCheckWrapper.jsx";
+import Userreview from "./components/Admin/Userreview.jsx";
 import ProfessionalSelection from "./components/ProfessionalSelection.jsx";
 import { 
   getCustomPages, 
   createCustomPage, 
-  deleteCustomPage 
 } from "./firebase/customPages";
 
 // Lazy load non-critical components
@@ -144,7 +142,7 @@ import TrafficChecker from "../Tools/Component/TrafficChecker.jsx";
 
 // ... add lazy loading for the rest of the tool components ...
 
-// Context Menu Items configuratio
+// Context Menu Items configuration (static part)
 const menuItems = [
   {
     key: "group1",
@@ -187,11 +185,6 @@ const menuItems = [
     type: "group",
     label: <div className="dark:text-white/40">Page Management</div>,
     children: [
-      // {
-      //   key: "addPage",
-      //   label: <div className="dark:text-white">Copy to Clipboard</div>,
-      //   icon: <PlusOutlined />,
-      // },
       {
         key: "deletePage",
         label: <div className="dark:text-white ">Delete Page</div>,
@@ -330,6 +323,7 @@ const ContextMenuWrapper = ({ children }) => {
   const [selectedCategory, setSelectedCategory] = useState("nature");
   const navigate = useNavigate();
   const location = useLocation();
+  const [selectedText, setSelectedText] = useState("");
 
   const openModal = () => setIsModalVisible(true);
   const closeModal = () => setIsModalVisible(false);
@@ -439,6 +433,11 @@ const ContextMenuWrapper = ({ children }) => {
   };
 
   const handleMenuClick = ({ key }) => {
+    if (key.startsWith("searchGoogle:")) {
+      const query = key.replace("searchGoogle:", "");
+      window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, "_blank");
+      return;
+    }
     switch (key) {
       case "refresh":
         window.location.reload();
@@ -462,14 +461,37 @@ const ContextMenuWrapper = ({ children }) => {
     }
   };
 
+  // Build menu items dynamically
+  const dynamicMenuItems = [];
+  if (selectedText) {
+    dynamicMenuItems.push({
+      key: `searchGoogle:${selectedText}`,
+      label: (
+        <div className="dark:text-white">
+          Search Google for "{selectedText.length > 30 ? selectedText.slice(0, 30) + '...' : selectedText}"
+        </div>
+      ),
+    });
+    dynamicMenuItems.push({ type: "divider" });
+  }
+  // Merge dynamic and static menu items
   const menu = {
-    items: menuItems,
+    items: [...dynamicMenuItems, ...menuItems],
     onClick: handleMenuClick,
     style: {
       width: "200px",
       padding: "1rem 4px",
     },
   };
+
+  useEffect(() => {
+    const handleContextMenu = () => {
+      const text = window.getSelection ? window.getSelection().toString().trim() : "";
+      setSelectedText(text);
+    };
+    document.addEventListener("contextmenu", handleContextMenu);
+    return () => document.removeEventListener("contextmenu", handleContextMenu);
+  }, []);
 
   return (
     <>
@@ -781,248 +803,360 @@ const SearchPageWrapper = () => {
   );
 };
 
-// Add a loading component
-// const LoadingFallback = () => (
-//   <div className="flex items-center justify-center h-screen w-full bg-white dark:bg-gray-900">
-//     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-//   </div>
-// );
-
 // App Component
 const App = () => {
   const [widgetTransparent, setWidgetTransparent] = useState(100);
 
+  // Floating Review Button State (global)
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [reviewForm, setReviewForm] = useState({ name: "", gmail: "", description: "" });
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+
+  // Handler for review form input changes
+  const handleReviewInputChange = (e) => {
+    const { name, value } = e.target;
+    setReviewForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Handler for review form submission
+  const handleReviewSubmit = async () => {
+    setReviewSubmitting(true);
+    try {
+      // Save review to Firestore
+      await addDoc(collection(db, "userReviews"), {
+        ...reviewForm,
+        submittedAt: new Date().toISOString(),
+      });
+    } catch (e) {
+      // Optionally, show error notification
+      notification.error({
+        message: "Failed to submit review",
+        description: "Please try again later.",
+        placement: "topRight",
+        duration: 3,
+      });
+      setReviewSubmitting(false);
+      return;
+    }
+    setTimeout(() => {
+      setReviewSubmitting(false);
+      setIsReviewModalOpen(false);
+      setReviewForm({ name: "", gmail: "", description: "" });
+      notification.success({
+        message: "Thank you for your review!",
+        description: "Your feedback has been submitted.",
+        placement: "topRight",
+        duration: 3,
+        icon: <SmileOutlined style={{ color: '#52c41a' }} />,
+      });
+    }, 800);
+  };
+
   return (
-    <WidgetTransparencyContext.Provider value={{ widgetTransparent, setWidgetTransparent }}>
-      <CountryProvider>
-        <ThemeProvider>
-          <DesignContextProvider>
-            <AuthProvider>
-              <Router>
-                <Suspense>
-                  {/* Chatbot Modal */}
+    <>
+      <WidgetTransparencyContext.Provider value={{ widgetTransparent, setWidgetTransparent }}>
+        <CountryProvider>
+          <ThemeProvider>
+            <DesignContextProvider>
+              <AuthProvider>
+                <Router>
+                  <Suspense>
+                    {/* Chatbot Modal */}
+                    <Routes>
+                      {/* Public Routes */}
+                      <Route path="/" element={<LandingPage />} />
+                      <Route path="/about" element={<AboutPage />} />
+                      <Route path="/pricing" element={<PricingPage />} />
+                      <Route path="/faq" element={<FAQPage />} />
+                      <Route path="*" element={<NotFound />} />
+                      <Route path="/search" element={<SearchPageWrapper />} />
+                      <Route path="/privacy" element={<Privacy />} />
+                      <Route path="/terms" element={<Terms />} />
+                      <Route path="/contact" element={<ContactUs />} />
+                      <Route path="/blog" element={<Blog />} />
+                      <Route path="/blog/:id" element={<BlogDetail />} />
+                      {/* <Route path="/admin/adminImages" element={<AdminImages />} /> */}
+                      <Route
+                        path="/profile"
+                        element={
+                          <ContextMenuWrapper>
+                            <ProfilePage />
+                          </ContextMenuWrapper>
+                        }
+                      />
 
-                  <Routes>
-                    {/* Public Routes */}
-                    <Route path="/" element={<LandingPage />} />
-                    <Route path="/about" element={<AboutPage />} />
-                    <Route path="/pricing" element={<PricingPage />} />
-                    <Route path="/faq" element={<FAQPage />} />
-                    <Route path="*" element={<NotFound />} />
-                    <Route path="/search" element={<SearchPageWrapper />} />
-                    <Route path="/privacy" element={<Privacy />} />
-                    <Route path="/terms" element={<Terms />} />
-                    <Route path="/contact" element={<ContactUs />} />
-                    <Route path="/blog" element={<Blog />} />
-                    <Route path="/blog/:id" element={<BlogDetail />} />
-                    {/* <Route path="/admin/adminImages" element={<AdminImages />} /> */}
-                    <Route
-                      path="/profile"
-                      element={
-                        <ContextMenuWrapper>
-                          <ProfilePage />
-                        </ContextMenuWrapper>
-                      }
-                    />
+                      <Route path="/forgot-password" element={<Forgotpassword />} />
+                      <Route path="/premium" element={<PremiumPage />} />
+                      <Route path="/premium-form" element={<PremiumForm />} />
+                      <Route path="/professional-selection" element={<ProfessionalSelection />} />
 
-                    <Route path="/forgot-password" element={<Forgotpassword />} />
-                    <Route path="/premium" element={<PremiumPage />} />
-                    <Route path="/premium-form" element={<PremiumForm />} />
-                    <Route path="/professional-selection" element={<ProfessionalSelection />} />
+                      <Route
+                        path="/NewSearchPage"
+                        element={
+                          <ContextMenuWrapper>
+                            <NewSearchPage />
+                          </ContextMenuWrapper>
+                        }
+                      />
+                      <Route element={<ToolOutlet />}>
+                        <Route path="/calculator" element={<Calculator />} />
+                        <Route
+                          path="/faren-to-celcius"
+                          element={<FarenToCelciusAndCelciusToFaren />}
+                        />
+                        <Route path="/second" element={<Second />} />
+                        <Route path="/hours" element={<Hours />} />
+                        <Route path="/paypal" element={<Paypal />} />
+                        <Route path="/beautifier" element={<Beautifier />} />
+                        <Route path="/resumebuild" element={<ResumeBuild />} />
+                        <Route path="/grocery" element={<Grocery />} />
+                        <Route path="/bmi" element={<Bmi />} />
+                        <Route path="/linkchecker" element={<LinkChecker />} />
+                        <Route path="/percentage" element={<Percentage />} />
+                        <Route path="/imagetopdf" element={<ImageToPdf />} />
+                        <Route path="/splitpdf" element={<SplitPdf />} />
+                        <Route path="/compress" element={<Compress />} />
+                        <Route path="/mergepdf" element={<MergePDF />} />
+                        <Route path="/pdfconverter" element={<PdfConverter />} />
+                        <Route path="/searchpdf" element={<SearchPDF />} />
+                        {/* <Route path="/searchexcelpdf" element={<SearchExcelPdf />} /> */}
+                        <Route path="/upload" element={<Upload />} />
+                        <Route path="/editpdf" element={<EditPdf />} />
+                        <Route path="/extractpages" element={<ExtractPages />} />
+                        <Route path="/pdfcropper" element={<PdfCropper />} />
+                        <Route path="/addpagenum" element={<AddPageNum />} />
+                        <Route path="/protect" element={<Protect />} />
+                        <Route path="/unlockpdf" element={<UnlockPdf />} />
+                        <Route path="/pdftoword" element={<PdfToWord />} />
+                        <Route path="/scientific" element={<Scientific />} />
+                        <Route
+                          path="/bulkemailchecker"
+                          element={<BulkEmailChecker />}
+                        />
+                        <Route
+                          path="/bulkemailsender"
+                          element={<BulkEmailSender />}
+                        />
+                        <Route path="/googlemap" element={<GoogleMap />} />
+                        <Route
+                          path="/cardvalidation"
+                          element={<CardValidation />}
+                        />
+                        <Route path="/cardgenerator" element={<CardGenerator />} />
+                        <Route
+                          path="/templategenerator"
+                          element={<TemplateGenerator />}
+                        />
+                        <Route path="/compareloan" element={<CompareLoan />} />
+                        <Route
+                          path="/currencyconverter"
+                          element={<CurrencyConverter />}
+                        />
+                        <Route path="/texttospeech" element={<TextToSpeech />} />
+                        <Route path="/speechtotext" element={<SpeechToText />} />
+                        <Route
+                          path="/onlinevoiceRecorder"
+                          element={<OnlineVoiceRecorder />}
+                        />
+                        <Route
+                          path="/onlinescreenRecorder"
+                          element={<OnlineScreenrecoder />}
+                        />
+                        <Route
+                          path="/onlinescreenshot"
+                          element={<OnlineScreenshot />}
+                        />
+                        <Route
+                          path="/onlinewebcamtest"
+                          element={<OnlineWebcamTest />}
+                        />
+                        <Route
+                          path="/phonenumberformat"
+                          element={<PhoneNumberFormat />}
+                        />
+                        <Route
+                          path="/randompassword"
+                          element={<RandomPassword />}
+                        />
+                        <Route
+                          path="/fractioncalculator"
+                          element={<FractionCalculator />}
+                        />
+                        <Route
+                          path="/averagecalculator"
+                          element={<AverageCalculator />}
+                        />
+                        <Route path="/lcm" element={<Lcm />} />
+                        <Route path="/agecalculator" element={<AgeCalculator />} />
+                        <Route
+                          path="/datediffcalculator"
+                          element={<DateDiffCalculator />}
+                        />
+                        <Route
+                          path="/linkedinscraper"
+                          element={<LinkedinScraper />}
+                        />
+                        <Route path="/calendar" element={<Calendar />} />
+                        <Route path="/clock" element={<Clock />} />
+                        <Route path="/stopwatch" element={<Stopwatch />} />
+                        <Route path="/timer" element={<Timer />} />
+                        <Route path="/alarm" element={<Alarm />} />
+                        <Route
+                          path="/binarytodecimal"
+                          element={<BinaryToDecimal />}
+                        />
+                        <Route path="/wordcounter" element={<WordCounter />} />
+                        <Route
+                          path="/compoundintrest"
+                          element={<CompoundIntrest />}
+                        />
+                        <Route
+                          path="/simpleinterest"
+                          element={<SimpleInterest />}
+                        />
+                        <Route
+                          path="/discountcalculator"
+                          element={<DiscountCalculator />}
+                        />
+                        <Route path="/gstcalculator" element={<GSTCalculator />} />
+                        <Route path="/vatcalculator" element={<VATCalculator />} />
+                        <Route
+                          path="/electricitybill"
+                          element={<ElectricityBill />}
+                        />
+                        <Route path="/tools" element={<Tool />} />
+                        <Route path="/second" element={<Second />} />
+                        <Route
+                          path="/testscorecalculator"
+                          element={<TestScoreCalculator />}
+                        />
+                        <Route
+                          path="/trafficchecker"
+                          element={<TrafficChecker />}
+                        />
+                      </Route>
 
-                    <Route
-                      path="/NewSearchPage"
-                      element={
-                        <ContextMenuWrapper>
-                          <NewSearchPage />
-                        </ContextMenuWrapper>
-                      }
-                    />
-                    <Route element={<ToolOutlet />}>
-                      <Route path="/calculator" element={<Calculator />} />
+                      {/* Admin Routes with Sidebar Layout */}
                       <Route
-                        path="/faren-to-celcius"
-                        element={<FarenToCelciusAndCelciusToFaren />}
+                        path="/admin/login"
+                        element={<AdminRoute children={<Login />} />}
                       />
-                      <Route path="/second" element={<Second />} />
-                      <Route path="/hours" element={<Hours />} />
-                      <Route path="/paypal" element={<Paypal />} />
-                      <Route path="/beautifier" element={<Beautifier />} />
-                      <Route path="/resumebuild" element={<ResumeBuild />} />
-                      <Route path="/grocery" element={<Grocery />} />
-                      <Route path="/bmi" element={<Bmi />} />
-                      <Route path="/linkchecker" element={<LinkChecker />} />
-                      <Route path="/percentage" element={<Percentage />} />
-                      <Route path="/imagetopdf" element={<ImageToPdf />} />
-                      <Route path="/splitpdf" element={<SplitPdf />} />
-                      <Route path="/compress" element={<Compress />} />
-                      <Route path="/mergepdf" element={<MergePDF />} />
-                      <Route path="/pdfconverter" element={<PdfConverter />} />
-                      <Route path="/searchpdf" element={<SearchPDF />} />
-                      {/* <Route path="/searchexcelpdf" element={<SearchExcelPdf />} /> */}
-                      <Route path="/upload" element={<Upload />} />
-                      <Route path="/editpdf" element={<EditPdf />} />
-                      <Route path="/extractpages" element={<ExtractPages />} />
-                      <Route path="/pdfcropper" element={<PdfCropper />} />
-                      <Route path="/addpagenum" element={<AddPageNum />} />
-                      <Route path="/protect" element={<Protect />} />
-                      <Route path="/unlockpdf" element={<UnlockPdf />} />
-                      <Route path="/pdftoword" element={<PdfToWord />} />
-                      <Route path="/scientific" element={<Scientific />} />
-                      <Route
-                        path="/bulkemailchecker"
-                        element={<BulkEmailChecker />}
-                      />
-                      <Route
-                        path="/bulkemailsender"
-                        element={<BulkEmailSender />}
-                      />
-                      <Route path="/googlemap" element={<GoogleMap />} />
-                      <Route
-                        path="/cardvalidation"
-                        element={<CardValidation />}
-                      />
-                      <Route path="/cardgenerator" element={<CardGenerator />} />
-                      <Route
-                        path="/templategenerator"
-                        element={<TemplateGenerator />}
-                      />
-                      <Route path="/compareloan" element={<CompareLoan />} />
-                      <Route
-                        path="/currencyconverter"
-                        element={<CurrencyConverter />}
-                      />
-                      <Route path="/texttospeech" element={<TextToSpeech />} />
-                      <Route path="/speechtotext" element={<SpeechToText />} />
-                      <Route
-                        path="/onlinevoiceRecorder"
-                        element={<OnlineVoiceRecorder />}
-                      />
-                      <Route
-                        path="/onlinescreenRecorder"
-                        element={<OnlineScreenrecoder />}
-                      />
-                      <Route
-                        path="/onlinescreenshot"
-                        element={<OnlineScreenshot />}
-                      />
-                      <Route
-                        path="/onlinewebcamtest"
-                        element={<OnlineWebcamTest />}
-                      />
-                      <Route
-                        path="/phonenumberformat"
-                        element={<PhoneNumberFormat />}
-                      />
-                      <Route
-                        path="/randompassword"
-                        element={<RandomPassword />}
-                      />
-                      <Route
-                        path="/fractioncalculator"
-                        element={<FractionCalculator />}
-                      />
-                      <Route
-                        path="/averagecalculator"
-                        element={<AverageCalculator />}
-                      />
-                      <Route path="/lcm" element={<Lcm />} />
-                      <Route path="/agecalculator" element={<AgeCalculator />} />
-                      <Route
-                        path="/datediffcalculator"
-                        element={<DateDiffCalculator />}
-                      />
-                      <Route
-                        path="/linkedinscraper"
-                        element={<LinkedinScraper />}
-                      />
-                      <Route path="/calendar" element={<Calendar />} />
-                      <Route path="/clock" element={<Clock />} />
-                      <Route path="/stopwatch" element={<Stopwatch />} />
-                      <Route path="/timer" element={<Timer />} />
-                      <Route path="/alarm" element={<Alarm />} />
-                      <Route
-                        path="/binarytodecimal"
-                        element={<BinaryToDecimal />}
-                      />
-                      <Route path="/wordcounter" element={<WordCounter />} />
-                      <Route
-                        path="/compoundintrest"
-                        element={<CompoundIntrest />}
-                      />
-                      <Route
-                        path="/simpleinterest"
-                        element={<SimpleInterest />}
-                      />
-                      <Route
-                        path="/discountcalculator"
-                        element={<DiscountCalculator />}
-                      />
-                      <Route path="/gstcalculator" element={<GSTCalculator />} />
-                      <Route path="/vatcalculator" element={<VATCalculator />} />
-                      <Route
-                        path="/electricitybill"
-                        element={<ElectricityBill />}
-                      />
-                      <Route path="/tools" element={<Tool />} />
-                      <Route path="/second" element={<Second />} />
-                      <Route
-                        path="/testscorecalculator"
-                        element={<TestScoreCalculator />}
-                      />
-                      <Route
-                        path="/trafficchecker"
-                        element={<TrafficChecker />}
-                      />
-                    </Route>
 
-                    {/* Admin Routes with Sidebar Layout */}
-                    <Route
-                      path="/admin/login"
-                      element={<AdminRoute children={<Login />} />}
-                    />
+                      <Route element={<Sidebar />}>
+                        <Route
+                          path="/admin/dashboard"
+                          element={<AdminRoute children={<Dashboard />} />}
+                        />
+                        <Route
+                          path="/admin/transactions"
+                          element={<AdminRoute children={<Transactions />} />}
+                        />
+                        <Route
+                          path="/admin/addblog"
+                          element={<AdminRoute children={<AddBlog />} />}
+                        />
+                        <Route
+                          path="/admin/bloglist"
+                          element={<AdminRoute children={<BlogList />} />}
+                        />
+                        <Route
+                          path="/admin/users"
+                          element={<AdminRoute children={<Users />} />}
+                        />
+                        <Route
+                          path="/admin/AddBookmark"
+                          element={<AdminRoute children={<AddBookmark />} />}
+                        />
+                        <Route
+                          path="/admin/addlinks"
+                          element={<AdminRoute children={<AddLinks />} />}
+                        />
+                        <Route
+                          path="/admin/Review"
+                          element={<AdminRoute children={<Userreview />} />}
+                        />
+                      </Route>
 
-                    <Route element={<Sidebar />}>
-                      <Route
-                        path="/admin/dashboard"
-                        element={<AdminRoute children={<Dashboard />} />}
-                      />
-                      <Route
-                        path="/admin/transactions"
-                        element={<AdminRoute children={<Transactions />} />}
-                      />
-                      <Route
-                        path="/admin/addblog"
-                        element={<AdminRoute children={<AddBlog />} />}
-                      />
-                      <Route
-                        path="/admin/bloglist"
-                        element={<AdminRoute children={<BlogList />} />}
-                      />
-                      <Route
-                        path="/admin/users"
-                        element={<AdminRoute children={<Users />} />}
-                      />
-                      <Route
-                        path="/admin/AddBookmark"
-                        element={<AdminRoute children={<AddBookmark />} />}
-                      />
-                      <Route
-                        path="/admin/addlinks"
-                        element={<AdminRoute children={<AddLinks />} />}
-                      />
-                    </Route>
-
-                    <Route path="/shortcut-test" element={<ShortcutTest />} />
-                  </Routes>
-                </Suspense>
-              </Router>
-              <NetworkStatus />
-            </AuthProvider>
-          </DesignContextProvider>
-        </ThemeProvider>
-      </CountryProvider>
-    </WidgetTransparencyContext.Provider>
+                      <Route path="/shortcut-test" element={<ShortcutTest />} />
+                    </Routes>
+                  </Suspense>
+                  {/* Floating Review Button (global) */}
+                  <button
+                    onClick={() => setIsReviewModalOpen(true)}
+                    style={{
+                      position: "fixed",
+                      bottom: 90,
+                      right: 20,
+                      width: 52,
+                      height: 52,
+                      borderRadius: "50%",
+                      background: "#f59e42",
+                      color: "#fff",
+                      border: "none",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.18)",
+                      zIndex: 1100,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 28,
+                      cursor: "pointer",
+                    }}
+                    title="Leave a Review"
+                  >
+                    <SmileOutlined />
+                  </button>
+                  <Modal
+                    title={<div className="text-lg font-semibold">Leave a Review</div>}
+                    open={isReviewModalOpen}
+                    onCancel={() => setIsReviewModalOpen(false)}
+                    onOk={handleReviewSubmit}
+                    okText={reviewSubmitting ? "Submitting..." : "Submit"}
+                    okButtonProps={{ loading: reviewSubmitting, disabled: reviewSubmitting }}
+                    cancelButtonProps={{ disabled: reviewSubmitting }}
+                  >
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+                        <Input
+                          name="name"
+                          value={reviewForm.name}
+                          onChange={handleReviewInputChange}
+                          placeholder="Enter your name"
+                          disabled={reviewSubmitting}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Gmail</label>
+                        <Input
+                          name="gmail"
+                          value={reviewForm.gmail}
+                          onChange={handleReviewInputChange}
+                          placeholder="Enter your Gmail address"
+                          type="email"
+                          disabled={reviewSubmitting}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                        <Input.TextArea
+                          name="description"
+                          value={reviewForm.description}
+                          onChange={handleReviewInputChange}
+                          placeholder="Write your review..."
+                          rows={4}
+                          disabled={reviewSubmitting}
+                        />
+                      </div>
+                    </div>
+                  </Modal>
+                </Router>
+                <NetworkStatus />
+              </AuthProvider>
+            </DesignContextProvider>
+          </ThemeProvider>
+        </CountryProvider>
+      </WidgetTransparencyContext.Provider>
+    </>
   );
 };
 

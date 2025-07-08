@@ -7,6 +7,7 @@ import {
   getDoc,
   addDoc,
   updateDoc,
+  setDoc,
   query,
   where,
   deleteDoc,
@@ -38,17 +39,18 @@ import {
   EditOutlined,
   DeleteOutlined,
   MoreOutlined,
-  MenuOutlined,
   ExpandOutlined,
   CompressOutlined,
   SettingOutlined,
-  VerticalAlignBottomOutlined 
+  VerticalAlignBottomOutlined,
+  SmileOutlined,
 } from "@ant-design/icons";
 import debounce from "lodash/debounce";
 import SkeletonLoader from "./SkeletonLoader";
 
 // Import the ThemeContext and useThemeAware hook
 import { useThemeAware } from "../context/ThemeContext";
+import { useCountry } from "../context/CountryContext";
 
 // Import the BookmarkErrorBoundary component
 import BookmarkErrorBoundary from "./BookmarkErrorBoundary";
@@ -66,6 +68,70 @@ const debouncedFetchFavicon = debounce(async (url, callback) => {
     callback("");
   }
 }, 500); // Wait 500ms after typing stops
+
+// Interest options (matching the ones from AddLinks.jsx)
+const interestOptions = [
+  { id: "technology", name: "Technology", icon: "💻" },
+  { id: "sports", name: "Sports", icon: "🏀" },
+  { id: "art", name: "Art", icon: "🎨" },
+  { id: "music", name: "Music", icon: "🎵" },
+  { id: "science", name: "Science", icon: "🔬" },
+  { id: "travel", name: "Travel", icon: "✈️" },
+  { id: "reading", name: "Reading", icon: "📚" },
+  { id: "gaming", name: "Gaming", icon: "🎮" },
+  { id: "food", name: "Food", icon: "🍔" },
+  { id: "nature", name: "Nature", icon: "🌳" },
+  { id: "business", name: "Business", icon: "💼" },
+  { id: "education", name: "Education", icon: "🎓" },
+  { id: "health", name: "Health", icon: "🏥" },
+  { id: "fashion", name: "Fashion", icon: "👗" },
+  { id: "finance", name: "Finance", icon: "💰" },
+  { id: "entertainment", name: "Entertainment", icon: "🎬" },
+  { id: "news", name: "News", icon: "📰" },
+  { id: "shopping", name: "Shopping", icon: "🛒" },
+  { id: "social", name: "Social Media", icon: "📱" },
+  { id: "tools", name: "Tools", icon: "🔧" },
+];
+
+// Helper function to validate URL
+const validateUrl = (url) => {
+  try {
+    let cleanUrl = url.trim();
+    if (!cleanUrl.match(/^https?:\/\//i)) {
+      cleanUrl = `http://${cleanUrl}`;
+    }
+    new URL(cleanUrl);
+    return cleanUrl;
+  } catch {
+    throw new Error("Invalid URL format");
+  }
+};
+
+// Helper function to fetch favicon
+const fetchFavicon = async (url) => {
+  try {
+    let cleanUrl = url.trim();
+    if (!cleanUrl.match(/^https?:\/\//i)) {
+      cleanUrl = `http://${cleanUrl}`;
+    }
+    const urlObj = new URL(cleanUrl);
+    const domain = urlObj.hostname;
+
+    // Try to fetch favicon
+    const faviconUrl = `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${encodeURIComponent(
+      domain
+    )}&size=32`;
+
+    // Test if favicon exists
+    const response = await fetch(faviconUrl);
+    if (response.ok) {
+      return faviconUrl;
+    }
+    return "https://www.google.com/favicon.ico";
+  } catch {
+    return "https://www.google.com/favicon.ico";
+  }
+};
 
 // Add this memoized form component near the top of the file, before the PopularBookmarks function
 const MemoizedBookmarkForm = React.memo(
@@ -104,6 +170,8 @@ const MemoizedBookmarkForm = React.memo(
   }
 );
 
+MemoizedBookmarkForm.displayName = 'MemoizedBookmarkForm';
+
 function PopularBookmarks() {
   const [categories, setCategories] = useState([]);
   const [links, setLinks] = useState([]);
@@ -115,14 +183,21 @@ function PopularBookmarks() {
   });
   // Use the global theme context instead of local state
   const { isDarkMode } = useThemeAware();
+  const { country: selectedCountry } = useCountry();
+
+  // User profile data for filtering
+  const [userProfession, setUserProfession] = useState("");
+  const [userInterests, setUserInterests] = useState([]);
+  const [controllerInterests, setControllerInterests] = useState([]);
+  const [mainInterests, setMainInterests] = useState([]);
+
+
 
   const [categoryViewModes, setCategoryViewModes] = useState(() => {
     const savedViewModes = localStorage.getItem("categoryViewModes");
     return savedViewModes ? JSON.parse(savedViewModes) : {};
   });
   const [isAddCategoryModalVisible, setIsAddCategoryModalVisible] =
-    useState(false);
-  const [isRenameCategoryModalVisible, setIsRenameCategoryModalVisible] =
     useState(false);
   const [isAddBookmarkModalVisible, setIsAddBookmarkModalVisible] =
     useState(false);
@@ -148,9 +223,7 @@ function PopularBookmarks() {
     column3: [],
     column4: [],
   });
-  const [categoryPositions, setCategoryPositions] = useState({});
   const [categoryBookmarkSizes, setCategoryBookmarkSizes] = useState({});
-  const [hiddenCategories, setHiddenCategories] = useState([]);
   const [openCategories, setOpenCategories] = useState(() => {
     // Load initial state from localStorage
     const savedState = localStorage.getItem("categoryOpenStates");
@@ -166,7 +239,6 @@ function PopularBookmarks() {
   const [previewColumns, setPreviewColumns] = useState(columnCount);
   const [isApplyingChanges, setIsApplyingChanges] = useState(false);
   const [availableCategories, setAvailableCategories] = useState([]);
-  const [activeCategories, setActiveCategories] = useState([]);
   const [categorySearch, setCategorySearch] = useState("");
   // Add state for show more/less categories
   const [showAllCategories, setShowAllCategories] = useState(false);
@@ -187,6 +259,23 @@ function PopularBookmarks() {
 
   // Add state for multi-select user categories in Category Manager
   const [selectedUserCategories, setSelectedUserCategories] = useState([]);
+
+  // Add state for interest selection modal
+  const [isInterestModalOpen, setIsInterestModalOpen] = useState(false);
+  const [tempInterests, setTempInterests] = useState([]);
+
+  // Add state for liked bookmarks
+  const [likedBookmarks, setLikedBookmarks] = useState([]);
+  const [showOnlyLiked, setShowOnlyLiked] = useState(false);
+  const [bookmarkLikes, setBookmarkLikes] = useState({}); // Store like counts for each bookmark
+  const [userLikedBookmarks, setUserLikedBookmarks] = useState({}); // Store which bookmarks the user has liked
+  const [showSuggestionWidget, setShowSuggestionWidget] = useState(true);
+
+  const topFacebookLikedAdminBookmarks = React.useMemo(() => {
+    const adminLinks = links.filter(link => link.isAdminBookmark);
+    const sorted = [...adminLinks].sort((a, b) => (bookmarkLikes[b.id] || 0) - (bookmarkLikes[a.id] || 0));
+    return sorted.slice(0, 3).filter(link => (bookmarkLikes[link.id] || 0) > 0);
+  }, [links, bookmarkLikes]);
 
   // Import bookmarks from HTML file (now supports Chrome bookmarks format)
   const handleImportBookmarks = (event) => {
@@ -329,7 +418,7 @@ function PopularBookmarks() {
         content: (
           <div>
             <p>Your imported categories have been added to your account.</p>
-            <p>You can view and manage them in the <b>Category Manager</b> (click the "Category Manager" button above your bookmarks).</p>
+            <p>You can view and manage them in the <b>Category Manager</b> (click the &quot;Category Manager&quot; button above your bookmarks).</p>
           </div>
         ),
         okText: "OK",
@@ -350,15 +439,7 @@ function PopularBookmarks() {
     localStorage.setItem("categoryOpenStates", JSON.stringify(newState));
   };
 
-  // Enhanced drag state with more comprehensive tracking
-  const [dragState, setDragState] = useState({
-    isDragging: false,
-    draggedItem: null,
-    sourceColumn: null,
-    destinationColumn: null,
-    dragPosition: { x: 0, y: 0 },
-    dragProgress: 0, // 0-1 range for drag progress
-  });
+
 
   // Enhanced drag preview state
   // const [dragsPreview, setDragsPreview] = useState({
@@ -499,11 +580,80 @@ function PopularBookmarks() {
 
   // Track auth state
   useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+      if (currentUser) {
+        // Fetch user profile data for filtering
+        try {
+          const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+          const userData = userDoc.data();
+          setUserProfession(userData?.profession || "");
+          setUserInterests(userData?.interests || []);
+        } catch (error) {
+          console.error("Error fetching user profile:", error);
+        }
+      }
     });
     return () => unsubscribeAuth();
   }, []);
+
+  // Filter categories based on user preferences and selected country
+  const getFilteredCategories = (allCategories, isControllerMode = false) => {
+    if (isControllerMode) {
+      // In controller mode, show categories that DON'T match user preferences
+      return allCategories.filter((category) => {
+        // Check if category matches user preferences
+        const matchesUserCountry = category.countries && 
+          (category.countries.includes(selectedCountry.key) || category.countries.includes("global"));
+        
+        const matchesUserProfession = category.professions && 
+          (category.professions.includes(userProfession) || category.professions.includes("all"));
+        
+        const matchesUserInterest = category.interests && 
+          category.interests.length > 0 && 
+          userInterests.length > 0 && 
+          category.interests.some(i => userInterests.includes(i));
+        
+        // Show categories that DON'T match user preferences
+        const hasUserPreferences = userProfession || userInterests.length > 0;
+        
+        if (!hasUserPreferences) {
+          // If user has no preferences, show all categories in controller
+          return true;
+        }
+        
+        // Show categories that don't match user preferences
+        const countryMatch = matchesUserCountry;
+        const professionMatch = userProfession ? matchesUserProfession : true;
+        const interestMatch = userInterests.length > 0 ? matchesUserInterest : true;
+        
+        // Return categories that don't match ALL user preferences
+        return !(countryMatch && professionMatch && interestMatch);
+      });
+    } else {
+      // Main view: Always show user-created categories
+      return allCategories.filter((category) => {
+        if (!category.isAdminCategory) return true; // Always show user categories
+
+        // Check if category matches user preferences
+        const matchesCountry = category.countries && 
+          (category.countries.includes(selectedCountry.key) || category.countries.includes("global"));
+        const matchesProfession = category.professions && 
+          (category.professions.includes(userProfession) || category.professions.includes("all"));
+        // Use mainInterests for filtering
+        const matchesInterest = category.interests && 
+          category.interests.length > 0 && 
+          mainInterests.length > 0 && 
+          category.interests.some(i => mainInterests.includes(i));
+        const hasUserPreferences = userProfession || mainInterests.length > 0;
+        if (!hasUserPreferences) return true;
+        const countryMatch = matchesCountry;
+        const professionMatch = userProfession ? matchesProfession : true;
+        const interestMatch = mainInterests.length > 0 ? matchesInterest : true;
+        return countryMatch && professionMatch && interestMatch;
+      });
+    }
+  };
 
   // Single effect to fetch all data when user changes
   useEffect(() => {
@@ -525,6 +675,7 @@ function PopularBookmarks() {
         const userDocRef = doc(db, "users", user.uid);
         const userDocSnap = await getDoc(userDocRef);
         const userData = userDocSnap.exists() ? userDocSnap.data() : {};
+        
         // Fetch admin categories
         const adminCategorySnapshot = await getDocs(collection(db, "category"));
         const adminCategories = adminCategorySnapshot.docs.map((doc) => ({
@@ -532,6 +683,7 @@ function PopularBookmarks() {
           ...doc.data(),
           isAdminCategory: true,
         }));
+        
         // Fetch user categories
         const userCategorySnapshot = await getDocs(collection(db, "users", user.uid, "UserCategory"));
         const userCategories = userCategorySnapshot.docs.map((doc) => ({
@@ -540,8 +692,70 @@ function PopularBookmarks() {
           name: doc.data().newCategory,
           isAdminCategory: false,
         }));
+        
         // Combine and sort categories
         const allCategories = [...adminCategories, ...userCategories].sort((a, b) => (a.order || 0) - (b.order || 0));
+        
+        // Get categories that match user preferences
+        const matchingCategories = getFilteredCategories(allCategories, false);
+        
+        // Get current column structure
+        let currentColumns = userData.categoryPositions?.columns || { column1: [], column2: [], column3: [], column4: [] };
+        let colCount = userData.categoryPositions?.columnCount || 4;
+        
+        // Auto-add matching categories to columns if they're not already there
+        const updatedColumns = { ...currentColumns };
+        const existingCategoryIds = new Set(Object.values(currentColumns).flat());
+        
+        matchingCategories.forEach((category) => {
+          if (!existingCategoryIds.has(category.id)) {
+            // Find the column with the least number of categories
+            let minColumn = "column1";
+            let minCount = updatedColumns.column1?.length || 0;
+            
+            Object.keys(updatedColumns).forEach((colKey) => {
+              const colCount = updatedColumns[colKey]?.length || 0;
+              if (colCount < minCount) {
+                minCount = colCount;
+                minColumn = colKey;
+              }
+            });
+            
+            // Add category to the column with least items
+            updatedColumns[minColumn] = [...(updatedColumns[minColumn] || []), category.id];
+            existingCategoryIds.add(category.id);
+          }
+        });
+        
+        // Save updated column structure to Firestore if there were changes
+        const hasChanges = JSON.stringify(currentColumns) !== JSON.stringify(updatedColumns);
+        if (hasChanges) {
+          await updateDoc(userDocRef, {
+            categoryPositions: {
+              columns: updatedColumns,
+              columnCount: colCount,
+              lastUpdated: new Date().toISOString(),
+            },
+          });
+          
+          // Show notification about auto-added categories
+          const addedCategories = matchingCategories.filter(cat => 
+            !Object.values(currentColumns).flat().includes(cat.id)
+          );
+          
+          if (addedCategories.length > 0 && isMounted) {
+            notification.success({
+              message: "Categories Auto-Added!",
+              description: `${addedCategories.length} category${addedCategories.length > 1 ? 'ies' : 'y'} matching your preferences have been automatically added to your main view.`,
+              placement: "topRight",
+              duration: 4
+            });
+          }
+        }
+        
+        // Use the updated columns for display
+        const finalColumns = hasChanges ? updatedColumns : currentColumns;
+        
         // Fetch all user bookmarks
         const userBookmarksSnapshot = await getDocs(collection(db, "users", user.uid, "CatBookmarks"));
         const hiddenIds = userData.hiddenBookmarkIds || [];
@@ -554,8 +768,10 @@ function PopularBookmarks() {
             isAdminBookmark: false,
           };
         }).filter((bookmark) => !hiddenIds.includes(bookmark.id));
+        
         // Store user bookmark URLs for deduplication
         const userBookmarkUrls = new Set(userBookmarks.map((b) => `${b.categoryId}-${b.url}`));
+        
         // Fetch admin bookmarks for each admin category
         const adminBookmarksPromises = adminCategories.map(async (category) => {
           const bookmarksSnapshot = await getDocs(query(collection(db, "links"), where("category", "==", category.id)));
@@ -578,11 +794,38 @@ function PopularBookmarks() {
           }).filter(Boolean).filter((bookmark) => !hiddenIds.includes(bookmark.id));
         });
         const adminBookmarks = (await Promise.all(adminBookmarksPromises)).flat();
+        
+        // Also fetch admin bookmarks for categories that might not be in adminCategories but are in matchingCategories
+        const additionalAdminBookmarksPromises = matchingCategories
+          .filter(cat => cat.isAdminCategory && !adminCategories.find(ac => ac.id === cat.id))
+          .map(async (category) => {
+            const bookmarksSnapshot = await getDocs(query(collection(db, "links"), where("category", "==", category.id)));
+            return bookmarksSnapshot.docs.map((doc) => {
+              const data = doc.data();
+              const key = `${category.id}-${data.link}`;
+              if (userBookmarkUrls.has(key)) return null;
+              return {
+                id: doc.id,
+                ...data,
+                title: data.name,
+                url: data.link,
+                categoryId: category.id,
+                isHidden: hiddenIds.includes(doc.id),
+                isAdminBookmark: true,
+                createdBy: data.createdBy,
+                updatedAt: data.updatedAt,
+                order: data.order || 0,
+              };
+            }).filter(Boolean).filter((bookmark) => !hiddenIds.includes(bookmark.id));
+          });
+        const additionalAdminBookmarks = (await Promise.all(additionalAdminBookmarksPromises)).flat();
+        
+        // Combine all admin bookmarks
+        const allAdminBookmarks = [...adminBookmarks, ...additionalAdminBookmarks];
+        
         // Combine all bookmarks
-        const allBookmarks = [...userBookmarks, ...adminBookmarks];
-        // Category columns and count
-        let columns = userData.categoryPositions?.columns || { column1: [], column2: [], column3: [], column4: [] };
-        let colCount = userData.categoryPositions?.columnCount || 4;
+        const allBookmarks = [...userBookmarks, ...allAdminBookmarks];
+        
         // Open categories
         const savedOpenStates = localStorage.getItem("categoryOpenStates");
         const initialOpenStates = savedOpenStates
@@ -591,14 +834,29 @@ function PopularBookmarks() {
               acc[category.id] = true;
               return acc;
             }, {});
+        
         // Set state if still mounted
         if (isMounted) {
-          setCategories(allCategories);
+          setCategories(matchingCategories);
           setLinks(allBookmarks);
-          setCategoryColumns(columns);
+          setCategoryColumns(finalColumns);
           setColumnCount(colCount);
           setHiddenBookmarkIds(hiddenIds);
           setOpenCategories(initialOpenStates);
+          
+          // Load liked bookmarks
+          if (userData.likedBookmarks && Array.isArray(userData.likedBookmarks)) {
+            setLikedBookmarks(userData.likedBookmarks);
+          }
+          
+          // Load bookmark like counts
+          await loadBookmarkLikeCounts(allBookmarks);
+          
+          // Debug logging
+          console.log('Categories loaded:', matchingCategories.length);
+          console.log('User bookmarks loaded:', userBookmarks.length);
+          console.log('Admin bookmarks loaded:', allAdminBookmarks.length);
+          console.log('Total bookmarks:', allBookmarks.length);
         }
       } catch (error) {
         if (isMounted) {
@@ -616,7 +874,37 @@ function PopularBookmarks() {
     };
     fetchAllData();
     return () => { isMounted = false; };
-  }, [user]);
+  }, [user, selectedCountry, userProfession, userInterests, mainInterests]);
+
+  // Effect to refilter categories when user preferences change
+  useEffect(() => {
+    if (user && categories.length > 0) {
+      // Re-fetch all categories and apply filtering
+      const refilterCategories = async () => {
+        try {
+          const adminCategorySnapshot = await getDocs(collection(db, "category"));
+          const adminCategories = adminCategorySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+            isAdminCategory: true,
+          }));
+          const userCategorySnapshot = await getDocs(collection(db, "users", user.uid, "UserCategory"));
+          const userCategories = userCategorySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+            name: doc.data().newCategory,
+            isAdminCategory: false,
+          }));
+          const allCategories = [...adminCategories, ...userCategories].sort((a, b) => (a.order || 0) - (b.order || 0));
+          const filteredCategories = getFilteredCategories(allCategories, false);
+          setCategories(filteredCategories);
+        } catch (error) {
+          console.error("Error refiltering categories:", error);
+        }
+      };
+      refilterCategories();
+    }
+  }, [selectedCountry, userProfession, userInterests, mainInterests]);
 
   // Add useEffect to load saved positions
   useEffect(() => {
@@ -626,7 +914,6 @@ function PopularBookmarks() {
         const userDocRef = doc(db, "users", user.uid);
         const userDocSnap = await getDoc(userDocRef);
         if (userDocSnap.exists() && userDocSnap.data().categoryPositions) {
-          setCategoryPositions(userDocSnap.data().categoryPositions);
           // Initialize columns based on saved positions
           const savedColumns = userDocSnap.data().categoryPositions;
           setCategoryColumns(savedColumns.columns || defaultColumnState());
@@ -647,33 +934,7 @@ function PopularBookmarks() {
     column4: [],
   });
 
-  // Add function to ensure all categories are in columns
-  const ensureAllCategoriesInColumns = (allCategories, currentColumns) => {
-    const newColumns = { ...currentColumns };
-    const existingCategoryIds = new Set(Object.values(newColumns).flat());
 
-    // Add missing categories to columns
-    allCategories.forEach((category) => {
-      if (!existingCategoryIds.has(category.id)) {
-        // Find the column with the least number of categories
-        let minColumn = "column1";
-        let minCount = newColumns.column1?.length || 0;
-
-        Object.keys(newColumns).forEach((colKey) => {
-          const colCount = newColumns[colKey]?.length || 0;
-          if (colCount < minCount) {
-            minCount = colCount;
-            minColumn = colKey;
-          }
-        });
-
-        // Add category to the column with least items
-        newColumns[minColumn] = [...(newColumns[minColumn] || []), category.id];
-      }
-    });
-
-    return newColumns;
-  };
 
   // Update the onDragEnd function
   const onDragEnd = async (result) => {
@@ -690,58 +951,21 @@ function PopularBookmarks() {
     // Add to destination column
     newColumns[destColId].splice(destination.index, 0, movedCategoryId);
 
-    // Update state
+    // Update state immediately to prevent UI flicker
     setCategoryColumns(newColumns);
 
     try {
-      const batch = writeBatch(db);
-      const updates = {};
-
-      // Update positions for all categories in affected columns
-      Object.entries(newColumns).forEach(([columnId, categoryIds]) => {
-        categoryIds.forEach((categoryId, index) => {
-          const category = categories.find((c) => c.id === categoryId);
-          if (category) {
-            const columnIndex = parseInt(columnId.replace("column", ""));
-            updates[categoryId] = {
-              columnIndex,
-              order: index,
-              lastUpdated: new Date().toISOString(),
-            };
-
-            if (!category.isAdminCategory) {
-              const categoryRef = doc(
-                db,
-                "users",
-                user.uid,
-                "UserCategory",
-                categoryId
-              );
-              batch.update(categoryRef, {
-                columnIndex,
-                order: index,
-              });
-            }
-          }
-        });
-      });
-
       // Save all positions in user document
       const userDocRef = doc(db, "users", user.uid);
-      batch.update(userDocRef, {
+      await updateDoc(userDocRef, {
         categoryPositions: {
           columns: newColumns,
           columnCount,
-          positions: updates,
           lastUpdated: new Date().toISOString(),
         },
       });
-
-      await batch.commit();
-      // //success("Category position updated");
     } catch (error) {
       console.error("Error updating category positions:", error);
-      //error("Failed to update category position");
       // Revert local state on error
       setCategoryColumns(categoryColumns);
     }
@@ -792,19 +1016,67 @@ function PopularBookmarks() {
   // Effect to manage available and active categories
   useEffect(() => {
     if (isControllerOpen) {
-      // Get all categories that are not currently in any column
-      const usedCategoryIds = new Set(
-        previewCategories.map((category) => category.id)
-      );
-
-      const available = categories.filter(
-        (category) => !usedCategoryIds.has(category.id)
-      );
-
-      setAvailableCategories(available);
-      setActiveCategories(previewCategories);
+      // Fetch all categories (not just filtered ones) for the controller
+      const fetchAllCategoriesForController = async () => {
+        try {
+          const adminCategorySnapshot = await getDocs(collection(db, "category"));
+          const adminCategories = adminCategorySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+            isAdminCategory: true,
+          }));
+          const userCategorySnapshot = await getDocs(collection(db, "users", user.uid, "UserCategory"));
+          const userCategories = userCategorySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+            name: doc.data().newCategory,
+            isAdminCategory: false,
+          }));
+          const allCategories = [...adminCategories, ...userCategories].sort((a, b) => (a.order || 0) - (b.order || 0));
+          
+          // Filter categories based on selected country
+          const countryFilteredCategories = allCategories.filter((category) => {
+            // If user has selected a specific country, only show categories for that country
+            if (selectedCountry && selectedCountry.key !== 'global') {
+              // Check if category has countries field and includes the selected country
+              if (category.countries && Array.isArray(category.countries)) {
+                return category.countries.includes(selectedCountry.key) || category.countries.includes('global');
+              }
+              // If category doesn't have countries field, don't show it for specific country selection
+              return false;
+            }
+            // If user hasn't selected a country or selected global, show all categories
+            return true;
+          });
+          
+          // --- INTEREST FILTERING LOGIC ---
+          // Use controllerInterests if set, else userInterests
+          const interestsToUse = controllerInterests && controllerInterests.length > 0 ? controllerInterests : userInterests;
+          const interestFilteredCategories = countryFilteredCategories.filter((category) => {
+            if (!interestsToUse || interestsToUse.length === 0) return true;
+            if (!category.interests || category.interests.length === 0) return false;
+            return category.interests.some(i => interestsToUse.includes(i));
+          });
+          // Get categories that don't match user preferences
+          const nonMatchingCategories = getFilteredCategories(interestFilteredCategories, true);
+          const usedCategoryIds = new Set(previewCategories.map((category) => category.id));
+          const available = nonMatchingCategories.filter((category) => !usedCategoryIds.has(category.id));
+          setAvailableCategories((prevAvailable) => {
+            if (prevAvailable.length === 0) {
+              return available;
+            }
+            const existingIds = new Set(prevAvailable.map(cat => cat.id));
+            const newAvailable = available.filter(cat => !existingIds.has(cat.id));
+            return [...prevAvailable, ...newAvailable];
+          });
+        } catch (error) {
+          console.error("Error fetching categories for controller:", error);
+        }
+      };
+      
+      fetchAllCategoriesForController();
     }
-  }, [isControllerOpen, previewCategories, categories]);
+  }, [isControllerOpen, selectedCountry, userProfession, userInterests, controllerInterests, mainInterests]); // Removed previewCategories from dependencies
 
   // Effect to initialize preview categories when modal opens
   useEffect(() => {
@@ -866,10 +1138,7 @@ function PopularBookmarks() {
   };
 
   const handleAddCategory = async () => {
-    if (!newCategoryName.trim()) {
-      //error("Category name cannot be empty");
-      return;
-    }
+    if (!newCategoryName.trim()) return;
 
     try {
       const docRef = await addDoc(
@@ -882,7 +1151,6 @@ function PopularBookmarks() {
         }
       );
 
-      // Add the new category to the local state immediately
       const newCategory = {
         id: docRef.id,
         name: newCategoryName.trim(),
@@ -892,8 +1160,6 @@ function PopularBookmarks() {
       };
 
       setCategories((prevCategories) => [...prevCategories, newCategory]);
-
-      // Set the new category to be open by default
       setOpenCategories((prev) => ({
         ...prev,
         [docRef.id]: true,
@@ -906,7 +1172,7 @@ function PopularBookmarks() {
         })
       );
 
-      // Also add the new category to a column
+      // --- YEH PART ADD KARO: Category ko columns me bhi add karo ---
       setCategoryColumns((prevColumns) => {
         // Find the column with the least number of categories
         const columnKeys = Object.keys(prevColumns);
@@ -922,32 +1188,15 @@ function PopularBookmarks() {
         // Add new category to the column with the least items
         const newColumns = { ...prevColumns };
         newColumns[minColumn] = [...(newColumns[minColumn] || []), newCategory.id];
-        // Also update in Firestore
+        // Firestore me bhi update karo
         const userDocRef = doc(db, "users", user.uid);
         updateDoc(userDocRef, {
           "categoryPositions.columns": newColumns,
         }).catch((error) => console.error("Error updating columns:", error));
         return newColumns;
       });
+      // --- YAHAN TAK ---
 
-      // Make sure this category is not in hiddenCategories
-      setHiddenCategories((prev) => {
-        const filtered = prev.filter((id) => id !== newCategory.id);
-
-        // Update in Firestore if there was a change
-        if (prev.length !== filtered.length) {
-          const userDocRef = doc(db, "users", user.uid);
-          updateDoc(userDocRef, {
-            hiddenCategories: filtered,
-          }).catch((error) =>
-            console.error("Error updating hidden categories:", error)
-          );
-        }
-
-        return filtered;
-      });
-
-      // Show notification after successful add
       notification.success({
         message: "New category added!",
         description: "You can organize it in the Category Controller on the home page.",
@@ -957,21 +1206,8 @@ function PopularBookmarks() {
 
       setNewCategoryName("");
       setIsAddCategoryModalVisible(false);
-      // Show tip if controller is open
-      if (isControllerOpen) {
-        Modal.info({
-          title: "Tip",
-          content: (
-            <div>
-              <p>Click the column number to auto arrange your categories.</p>
-            </div>
-          ),
-          okText: "OK",
-        });
-      }
     } catch (error) {
       console.error("Error adding category:", error);
-      //error("Failed to add category");
     }
   };
 
@@ -1083,6 +1319,20 @@ function PopularBookmarks() {
         return newColumns;
       });
 
+      // --- NEW: If controller is open, update availableCategories and previewCategories ---
+      if (isControllerOpen) {
+        setAvailableCategories((prevAvailable) => {
+          // Find the deleted category in all categories (admin/user)
+          const deletedCat = categories.find((cat) => cat.id === categoryId);
+          if (!deletedCat) return prevAvailable;
+          // Only add if not already present
+          if (prevAvailable.some((cat) => cat.id === categoryId)) return prevAvailable;
+          return [...prevAvailable, deletedCat];
+        });
+        setPreviewCategories((prevPreview) => prevPreview.filter((cat) => cat.id !== categoryId));
+      }
+      // --- END NEW ---
+
       //success("Category and its bookmarks deleted successfully");
     } catch (error) {
       console.error("Error deleting category:", error);
@@ -1112,7 +1362,7 @@ function PopularBookmarks() {
         return faviconUrl;
       }
       return "https://www.google.com/favicon.ico";
-    } catch (error) {
+    } catch {
       return "https://www.google.com/favicon.ico";
     }
   };
@@ -1125,7 +1375,7 @@ function PopularBookmarks() {
       }
       new URL(cleanUrl);
       return cleanUrl;
-    } catch (error) {
+    } catch {
       throw new Error("Invalid URL format");
     }
   };
@@ -1182,7 +1432,7 @@ function PopularBookmarks() {
         try {
           const linkUrl = validateUrl(link.url);
           return linkUrl === normalizedUrl;
-        } catch (e) {
+        } catch {
           return false;
         }
       });
@@ -1213,7 +1463,7 @@ function PopularBookmarks() {
         }
         return [...prevLinks, { ...bookmarkData, id: tempId }];
       });
-      const docRef = await addDoc(
+      await addDoc(
         collection(db, "users", user.uid, "CatBookmarks"),
         bookmarkData
       );
@@ -1221,7 +1471,7 @@ function PopularBookmarks() {
       setIsAddBookmarkModalVisible(false);
       setSelectedCategoryId("");
       //success("Bookmark added successfully");
-    } catch (error) {
+    } catch {
       const normalizedUrl = validateUrl(newBookmark.url.trim());
       setLinks((prevLinks) =>
         prevLinks.filter(
@@ -1411,12 +1661,11 @@ function PopularBookmarks() {
           label: "Small",
           onClick: () => {
             const newSize = { list: 24, grid: 24, icon: 24 };
-            const currentViewMode = categoryViewModes[category.id] || "grid";
             setCategoryBookmarkSizes((prev) => ({
               ...prev,
               [category.id]: newSize,
             }));
-            saveUserPreferences(category.id, currentViewMode, newSize);
+            // saveUserPreferences(category.id, currentViewMode, newSize);
           },
         },
         {
@@ -1424,12 +1673,11 @@ function PopularBookmarks() {
           label: "Medium",
           onClick: () => {
             const newSize = { list: 28, grid: 32, icon: 32 };
-            const currentViewMode = categoryViewModes[category.id] || "grid";
             setCategoryBookmarkSizes((prev) => ({
               ...prev,
               [category.id]: newSize,
             }));
-            saveUserPreferences(category.id, currentViewMode, newSize);
+            // saveUserPreferences(category.id, currentViewMode, newSize);
           },
         },
         {
@@ -1437,12 +1685,11 @@ function PopularBookmarks() {
           label: "Large",
           onClick: () => {
             const newSize = { list: 40, grid: 64, icon: 70 };
-            const currentViewMode = categoryViewModes[category.id] || "grid";
             setCategoryBookmarkSizes((prev) => ({
               ...prev,
               [category.id]: newSize,
             }));
-            saveUserPreferences(category.id, currentViewMode, newSize);
+            // saveUserPreferences(category.id, currentViewMode, newSize);
           },
         },
       ],
@@ -1479,7 +1726,7 @@ function PopularBookmarks() {
     try {
       const domain = new URL(url).hostname;
       return `https://www.google.com/s2/favicons?sz=64&domain=${domain}`;
-    } catch (error) {
+    } catch {
       return `https://www.google.com/s2/favicons?sz=64&domain=google.com`; // Default favicon
     }
   };
@@ -1584,12 +1831,18 @@ function PopularBookmarks() {
 
   const renderBookmarkList = (categoryLinks, categoryId) => {
     const sizes = categoryBookmarkSizes[categoryId] || { list: 32 };
+    
+    // Filter bookmarks if showOnlyLiked is enabled
+    const filteredLinks = showOnlyLiked 
+      ? categoryLinks.filter(link => likedBookmarks.includes(link.id))
+      : categoryLinks;
+    
     return (
       <ul className="bg-white/[(var(--widget-opacity))] dark:bg-[#28283a]/[(var(--widget-opacity))]">
-        {categoryLinks.map((link) => (
+        {filteredLinks.map((link) => (
           <li
             key={link.id}
-            className="flex items-center py-2 px-4 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg"
+            className="flex items-center py-2 px-4 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg group"
           >
             <img
               src={getFaviconUrl(link.url || link.link)}
@@ -1601,7 +1854,7 @@ function PopularBookmarks() {
               }}
               className="flex-shrink-0"
             />
-            <div className="ml-3 flex flex-col">
+            <div className="ml-3 flex flex-col flex-1">
               <a
                 href={link.url || link.link}
                 className="text-black dark:text-white hover:text-blue-500"
@@ -1613,7 +1866,7 @@ function PopularBookmarks() {
               </a>
               <a
                 href={link.url || link.link}
-                className="text-xs text-gray-500 dark:text-gray-400 hover:text-blue-400 break-all"
+                className={`text-xs text-gray-500 dark:text-gray-400 hover:text-blue-400 break-all ${link.isAdminBookmark ? 'truncate whitespace-nowrap overflow-hidden max-w-[180px] block' : ''}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{ marginTop: 2 }}
@@ -1621,6 +1874,69 @@ function PopularBookmarks() {
                 {link.url || link.link}
               </a>
             </div>
+            
+            {/* Like buttons for admin bookmarks */}
+            {link.isAdminBookmark && (
+              <div className="flex items-center gap-1 ml-2">
+                {/* Heart button (favorites) */}
+                <div className="flex flex-col items-center">
+                  <button
+                    onClick={() => handleToggleLike(link)}
+                    className={`p-1 rounded-full transition-all duration-200 hover:scale-110 ${
+                      likedBookmarks.includes(link.id)
+                        ? "text-red-500 hover:text-red-600"
+                        : "text-gray-400 hover:text-red-500"
+                    }`}
+                    title={likedBookmarks.includes(link.id) ? "Remove from favorites" : "Add to favorites"}
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      fill={likedBookmarks.includes(link.id) ? "currentColor" : "none"}
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                      className="transition-all duration-200"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                      />
+                    </svg>
+                  </button>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {likedBookmarks.includes(link.id) ? "1" : "0"}
+                  </span>
+                </div>
+
+                {/* Facebook-style like button */}
+                <div className="flex flex-col items-center">
+                  <button
+                    onClick={() => handleFacebookLike(link)}
+                    className={`p-1 rounded-full transition-all duration-200 hover:scale-110 ${
+                      userLikedBookmarks[link.id]
+                        ? "text-blue-500 hover:text-blue-600"
+                        : "text-gray-400 hover:text-blue-500"
+                    }`}
+                    title={userLikedBookmarks[link.id] ? "Unlike this bookmark" : "Like this bookmark"}
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                      className="transition-all duration-200"
+                    >
+                      <path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/>
+                    </svg>
+                  </button>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {bookmarkLikes[link.id] || 0}
+                  </span>
+                </div>
+              </div>
+            )}
           </li>
         ))}
       </ul>
@@ -1734,10 +2050,22 @@ function PopularBookmarks() {
     const searchTerm = (categorySearch || '').toLowerCase();
 
     // Helper: for each category, get bookmarks in that category
-    const getCategoryLinks = (catId) =>
-      links.filter(
+    const getCategoryLinks = (catId) => {
+      const categoryLinks = links.filter(
         (link) => link.categoryId === catId && !hiddenBookmarkIds.includes(link.id)
       );
+      
+      // If no bookmarks found and this is an admin category, try to load them
+      if (categoryLinks.length === 0) {
+        const category = categories.find(c => c.id === catId);
+        if (category && category.isAdminCategory) {
+          // Load admin bookmarks for this category asynchronously
+          ensureAdminBookmarksForCategory(catId);
+        }
+      }
+      
+      return categoryLinks;
+    };
 
     // Helper: does a bookmark match the search?
     const bookmarkMatches = (bookmark) => {
@@ -1775,11 +2103,9 @@ function PopularBookmarks() {
     const getLimitedColumns = (limit) => {
       // Step 1: Gather filtered categories per column, preserving order
       const perColumn = {};
-      let totalCategories = 0;
       for (let col = 1; col <= columnCount; col++) {
         const colKey = `column${col}`;
         perColumn[colKey] = (categoryColumns[colKey] || []).filter(catId => filteredCategoryIds.includes(catId));
-        totalCategories += perColumn[colKey].length;
       }
       // Step 2: Calculate how many per column
       const basePerCol = Math.floor(limit / columnCount);
@@ -1823,7 +2149,47 @@ function PopularBookmarks() {
     return (
       <div className="mb-2">
         {/* Search bar for categories */}
-        <div className="flex justify-end mb-2 items-center gap-2">
+        <div className="flex justify-between mb-2 items-center gap-2">
+          {/* User Preferences Indicator */}
+          <div className="flex items-center gap-2">
+            {/* Show Only Liked Filter Indicator */}
+            {showOnlyLiked && (
+              <div className="flex items-center gap-2 px-3 py-1 bg-red-100 dark:bg-red-900/20 rounded-lg text-sm">
+                <span className="text-red-700 dark:text-red-300">Showing only liked bookmarks</span>
+                <button
+                  onClick={() => setShowOnlyLiked(false)}
+                  className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200 text-xs underline"
+                >
+                  Show All
+                </button>
+              </div>
+            )}
+            {/* {(userProfession || userInterests.length > 0) && (
+              <div className="flex items-center gap-2 px-3 py-1 bg-green-100 dark:bg-green-900 rounded-lg text-sm">
+                <span className="text-green-700 dark:text-green-300">Auto-added categories for:</span>
+                <span className="inline-flex items-center bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs">
+                  <img src={selectedCountry.flag} alt="" className="w-3 h-3 mr-1" />
+                  {selectedCountry.name}
+                </span>
+                {userProfession && (
+                  <span className="inline-flex items-center bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-xs">
+                    {professionOptions.find(p => p.id === userProfession)?.name || userProfession}
+                  </span>
+                )}
+                {userInterests.length > 0 && (
+                  <span className="inline-flex items-center bg-purple-200 dark:bg-purple-800 text-purple-800 dark:text-purple-200 px-2 py-1 rounded text-xs">
+                    {userInterests.length} interest{userInterests.length > 1 ? 's' : ''}
+                  </span>
+                )}
+                <button
+                  onClick={() => setIsControllerOpen(true)}
+                  className="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-200 text-xs underline"
+                >
+                  Browse other categories
+                </button>
+              </div>
+            )} */}
+          </div>
           <div className="flex items-center gap-2">
             <div className="relative flex items-center" ref={searchBarRef}>
               {/* Search Button */}
@@ -1911,7 +2277,7 @@ function PopularBookmarks() {
                         label: "List",
                         onClick: () => {
                           // Set all categories to list view
-                          setCategoryViewModes((prev) => {
+                          setCategoryViewModes(() => {
                             const newModes = {};
                             categories.forEach(cat => {
                               newModes[cat.id] = "list";
@@ -1925,7 +2291,7 @@ function PopularBookmarks() {
                         key: "view-grid",
                         label: "Grid",
                         onClick: () => {
-                          setCategoryViewModes((prev) => {
+                          setCategoryViewModes(() => {
                             const newModes = {};
                             categories.forEach(cat => {
                               newModes[cat.id] = "grid";
@@ -1939,7 +2305,7 @@ function PopularBookmarks() {
                         key: "view-icon",
                         label: "Icon",
                         onClick: () => {
-                          setCategoryViewModes((prev) => {
+                          setCategoryViewModes(() => {
                             const newModes = {};
                             categories.forEach(cat => {
                               newModes[cat.id] = "icon";
@@ -1958,10 +2324,39 @@ function PopularBookmarks() {
                     onClick: toggleAllCategories,
                   },
                   {
+                    key: "showLiked",
+                    icon: <div className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">❤️</div>,
+                    label: <div className="dark:text-white">{showOnlyLiked ? "Show All Bookmarks" : "Show Only Liked"}</div>,
+                    onClick: () => setShowOnlyLiked(!showOnlyLiked),
+                  },
+                  {
                     key: "categoryManager",
                     icon: <div className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md"><SettingOutlined /></div>,
                     label: <div className="dark:text-white">Category Manager</div>,
                     onClick: () => setIsCategoryManagerOpen(true),
+                  },
+                  {
+                    key: "refresh",
+                    icon: <div className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">🔄</div>,
+                    label: <div className="dark:text-white">Refresh Categories</div>,
+                    onClick: async () => {
+                      try {
+                        await refreshMainViewCategories();
+                        notification.success({
+                          message: "Categories Refreshed!",
+                          description: "Your categories have been updated.",
+                          placement: "topRight",
+                          duration: 2
+                        });
+                      } catch (error) {
+                        notification.error({
+                          message: "Refresh Failed",
+                          description: "Please try again.",
+                          placement: "topRight",
+                          duration: 2
+                        });
+                      }
+                    },
                   },
                   {
                     key: "importBookmarks",
@@ -1989,6 +2384,8 @@ function PopularBookmarks() {
             />
           </div>
         </div>
+
+
 
         <DragDropContext onDragEnd={onDragEnd}>
           <Row gutter={[16, 16]}>
@@ -2039,9 +2436,15 @@ function PopularBookmarks() {
                                     {...provided.draggableProps}
                                     className={`mb-4 transition-all duration-200 ${
                                       snapshot.isDragging
-                                        ? ""
+                                        ? "shadow-xl rotate-2 scale-105 z-50"
                                         : "shadow-none rotate-0 scale-100"
                                     }`}
+                                    style={{
+                                      ...provided.draggableProps.style,
+                                      transform: snapshot.isDragging 
+                                        ? `${provided.draggableProps.style?.transform} rotate(2deg) scale(1.05)` 
+                                        : provided.draggableProps.style?.transform
+                                    }}
                                   >
                                     <Card
                                       className="max-w-xl backdrop-blur-sm  bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)]  dark:text-white mx-auto rounded-sm"
@@ -2059,22 +2462,39 @@ function PopularBookmarks() {
                                             <div className="flex items-center flex-1">
                                               <div
                                                 {...provided.dragHandleProps}
-                                                className={`cursor-move p-3 transition-all duration-200 group ${
+                                                className={`cursor-grab active:cursor-grabbing p-2 transition-all duration-200 group hover:bg-gray-200/50 dark:hover:bg-gray-600/50 rounded ${
                                                   snapshot.isDragging
-                                                    ? "bg-gray-300/[(var(--widget-opacity))] rounded"
+                                                    ? "bg-gray-300/[(var(--widget-opacity))] rounded shadow-lg cursor-grabbing"
                                                     : ""
                                                 }`}
                                                 onClick={(e) =>
                                                   e.stopPropagation()
                                                 }
+                                                title="Drag to reorder"
                                               >
-                                                <div className="flex flex-col gap-1">
-                                                  ⋮⋮
+                                                <div className="flex flex-col gap-[2px]">
+                                                  <div className="flex gap-[2px]">
+                                                    <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                                    <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                                  </div>
+                                                  <div className="flex gap-[2px]">
+                                                    <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                                    <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                                  </div>
+                                                  <div className="flex gap-[2px]">
+                                                    <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                                    <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                                  </div>
                                                 </div>
                                               </div>
                                               <span className="font-semibold">
                                                 {category.name ||
                                                   category.newCategory}
+                                                {showOnlyLiked && (
+                                                  <span className="ml-2 text-xs text-red-500">
+                                                    ({categoryLinks.filter(link => likedBookmarks.includes(link.id)).length} liked)
+                                                  </span>
+                                                )}
                                               </span>
                                             </div>
                                             <Space
@@ -2213,6 +2633,40 @@ function PopularBookmarks() {
             </AntButton>
           </div>
         )}
+        
+        {/* No Categories Message */}
+        {filteredCategoryIds.length === 0 && (userProfession || userInterests.length > 0) && (
+          <div className="text-center py-8">
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6 max-w-md mx-auto">
+              <div className="text-yellow-800 dark:text-yellow-200 mb-2">
+                <svg className="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
+                No matching categories found
+              </h3>
+              <p className="text-yellow-700 dark:text-yellow-300 mb-4">
+                No categories match your current preferences. Categories that match your preferences will be automatically added here when they become available.
+              </p>
+              <div className="flex gap-2 justify-center">
+                <AntButton 
+                  type="primary" 
+                  onClick={() => setIsControllerOpen(true)}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  Browse All Categories
+                </AntButton>
+                {/* <AntButton 
+                  onClick={() => navigate('/profile')}
+                  className="border-yellow-300 text-yellow-700 dark:text-yellow-300"
+                >
+                  Update Preferences
+                </AntButton> */}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -2324,15 +2778,30 @@ function PopularBookmarks() {
     const categoriesInColumn = getColumnCategories(columnIndex);
     const newOrder = categoriesInColumn.length;
 
+    // Add to preview categories
     setPreviewCategories((prev) => [
       ...prev,
       { ...category, column: columnIndex, order: newOrder },
     ]);
 
+    // Remove from available categories to prevent duplicates
     setAvailableCategories((prev) =>
       prev.filter((cat) => cat.id !== category.id)
     );
+
+    // Also update the actual column structure
+    setCategoryColumns((prevColumns) => {
+      const newColumns = { ...prevColumns };
+      const colKey = `column${columnIndex + 1}`;
+      if (!newColumns[colKey]) {
+        newColumns[colKey] = [];
+      }
+      newColumns[colKey] = [...newColumns[colKey], category.id];
+      return newColumns;
+    });
   };
+
+
 
   // Function to remove category from a column
   const handleRemoveFromColumn = (category) => {
@@ -2340,17 +2809,6 @@ function PopularBookmarks() {
     setPreviewCategories((prev) =>
       prev.filter((cat) => cat.id !== category.id)
     );
-
-    setPreviewColumnStructure((prev) => {
-      const newStructure = { ...prev };
-      // Remove category from its current column
-      Object.keys(newStructure).forEach((columnIndex) => {
-        newStructure[columnIndex] = newStructure[columnIndex].filter(
-          (cat) => cat.id !== category.id
-        );
-      });
-      return newStructure;
-    });
 
     // Add to available categories if not already present
     setAvailableCategories((prev) => {
@@ -2379,30 +2837,33 @@ function PopularBookmarks() {
       );
 
       if (movedCategory) {
-        // Update the moved category's column and order
-        movedCategory.column = destColumnIndex;
-        movedCategory.order = destination.index;
-
-        // Update order of other categories in the destination column
-        updatedCategories.forEach((cat) => {
-          if (cat.column === destColumnIndex && cat.id !== movedCategory.id) {
-            if (cat.order >= destination.index) {
-              cat.order += 1;
-            }
-          }
-        });
+        // Remove the category from its current position
+        const filteredCategories = updatedCategories.filter(
+          (cat) => !(cat.column === sourceColumnIndex && cat.order === source.index)
+        );
 
         // Update order of categories in the source column
-        if (sourceColumnIndex !== destColumnIndex) {
-          updatedCategories.forEach((cat) => {
+        filteredCategories.forEach((cat) => {
             if (cat.column === sourceColumnIndex && cat.order > source.index) {
               cat.order -= 1;
             }
           });
-        }
+
+        // Update order of categories in the destination column
+        filteredCategories.forEach((cat) => {
+          if (cat.column === destColumnIndex && cat.order >= destination.index) {
+            cat.order += 1;
+          }
+        });
+
+        // Add the moved category to its new position
+        movedCategory.column = destColumnIndex;
+        movedCategory.order = destination.index;
+
+        const finalCategories = [...filteredCategories, movedCategory];
 
         // Sort categories by column and order
-        return updatedCategories.sort((a, b) => {
+        return finalCategories.sort((a, b) => {
           if (a.column === b.column) {
             return a.order - b.order;
           }
@@ -2421,11 +2882,6 @@ function PopularBookmarks() {
 
       // Get all category IDs that are in preview categories
       const activeCategories = previewCategories.map((cat) => cat.id);
-
-      // Any category not in activeCategories should be hidden
-      const newHiddenCategories = categories
-        .filter((cat) => !activeCategories.includes(cat.id))
-        .map((cat) => cat.id);
 
       // Prepare column structure
       const newColumnStructure = Array.from({ length: previewColumns }).reduce(
@@ -2448,11 +2904,9 @@ function PopularBookmarks() {
           columnCount: previewColumns,
           lastUpdated: new Date().toISOString(),
         },
-        hiddenCategories: newHiddenCategories,
       });
 
-      // Update local state
-      setHiddenCategories(newHiddenCategories);
+      // Update local state immediately
       setColumnCount(previewColumns);
       setCategoryColumns(newColumnStructure);
 
@@ -2463,11 +2917,51 @@ function PopularBookmarks() {
         JSON.stringify(newColumnStructure)
       );
 
-      //success("Changes applied successfully");
+      // Fetch all categories and update the main view
+      const adminCategorySnapshot = await getDocs(collection(db, "category"));
+      const adminCategories = adminCategorySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        isAdminCategory: true,
+      }));
+      
+      const userCategorySnapshot = await getDocs(collection(db, "users", user.uid, "UserCategory"));
+      const userCategories = userCategorySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        name: doc.data().newCategory,
+        isAdminCategory: false,
+      }));
+      
+      const allCategories = [...adminCategories, ...userCategories].sort((a, b) => (a.order || 0) - (b.order || 0));
+      
+      // Get categories that match user preferences for main view
+      const matchingCategories = getFilteredCategories(allCategories, false);
+      
+      // Update the categories state to show in main view
+      setCategories(matchingCategories);
+
+      // Force a re-render by updating the categories state again after a short delay
+      setTimeout(() => {
+        setCategories([...matchingCategories]);
+      }, 100);
+
+      notification.success({
+        message: "Changes Applied Successfully!",
+        description: "Your category layout has been updated.",
+        placement: "topRight",
+        duration: 3
+      });
+
       setIsControllerOpen(false);
     } catch (error) {
       console.error("Error applying changes:", error);
-      //error("Failed to apply changes");
+      notification.error({
+        message: "Failed to Apply Changes",
+        description: "Please try again.",
+        placement: "topRight",
+        duration: 3
+      });
     } finally {
       setIsApplyingChanges(false);
     }
@@ -2503,7 +2997,35 @@ function PopularBookmarks() {
       }
     } catch (error) {
       console.error("Error fetching categories:", error);
-      //error("Failed to fetch latest category positions");
+    }
+  };
+
+  // Function to refresh the main view categories
+  const refreshMainViewCategories = async () => {
+    if (!user) return;
+
+    try {
+      const adminCategorySnapshot = await getDocs(collection(db, "category"));
+      const adminCategories = adminCategorySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        isAdminCategory: true,
+      }));
+      
+      const userCategorySnapshot = await getDocs(collection(db, "users", user.uid, "UserCategory"));
+      const userCategories = userCategorySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        name: doc.data().newCategory,
+        isAdminCategory: false,
+      }));
+      
+      const allCategories = [...adminCategories, ...userCategories].sort((a, b) => (a.order || 0) - (b.order || 0));
+      const filteredCategories = getFilteredCategories(allCategories, false);
+      
+      setCategories(filteredCategories);
+    } catch (error) {
+      console.error("Error refreshing categories:", error);
     }
   };
 
@@ -2648,9 +3170,9 @@ function PopularBookmarks() {
     setIsControllerOpen((prev) => !prev);
   };
 
-  // Add a new useEffect to load hidden categories
+  // Add a new useEffect to load hidden bookmark IDs
   useEffect(() => {
-    const loadHiddenCategories = async () => {
+    const loadHiddenBookmarkIds = async () => {
       if (!user) return;
 
       try {
@@ -2660,19 +3182,7 @@ function PopularBookmarks() {
         if (userDocSnap.exists()) {
           const userData = userDocSnap.data();
 
-          // Load hidden categories
-          if (
-            userData.hiddenCategories &&
-            Array.isArray(userData.hiddenCategories)
-          ) {
-            // console.log(
-            //   "Loading hidden categories:",
-            //   userData.hiddenCategories
-            // );
-            setHiddenCategories(userData.hiddenCategories);
-          }
-
-          // Also load hidden bookmark IDs
+          // Load hidden bookmark IDs
           if (
             userData.hiddenBookmarkIds &&
             Array.isArray(userData.hiddenBookmarkIds)
@@ -2685,11 +3195,11 @@ function PopularBookmarks() {
           }
         }
       } catch (error) {
-        console.error("Error loading hidden categories:", error);
+        console.error("Error loading hidden bookmark IDs:", error);
       }
     };
 
-    loadHiddenCategories();
+    loadHiddenBookmarkIds();
   }, [user]);
 
   // Add this useEffect to save line options to localStorage
@@ -2807,6 +3317,183 @@ function PopularBookmarks() {
     });
   };
 
+  // When controller modal opens, initialize controllerInterests from userInterests
+  useEffect(() => {
+    if (isControllerOpen) {
+      setControllerInterests(userInterests || []);
+    }
+  }, [isControllerOpen, userInterests]);
+
+  // When component mounts or userInterests change, initialize mainInterests
+  useEffect(() => {
+    setMainInterests(userInterests || []);
+  }, [userInterests]);
+
+  // Function to open interest selection modal
+  const handleOpenInterestModal = () => {
+    setTempInterests([...mainInterests]);
+    setIsInterestModalOpen(true);
+  };
+
+  // Function to save interests
+  const handleSaveInterests = async () => {
+    try {
+      if (!user) return;
+      
+      // Update user document in Firestore
+      const userDocRef = doc(db, "users", user.uid);
+      await updateDoc(userDocRef, {
+        interests: tempInterests,
+        updatedAt: new Date().toISOString(),
+      });
+
+      // Update local state
+      setUserInterests(tempInterests);
+      setMainInterests(tempInterests);
+      setControllerInterests(tempInterests);
+
+      notification.success({
+        message: "Interests Updated!",
+        description: "Your interests have been saved successfully.",
+        placement: "topRight",
+        duration: 3
+      });
+
+      setIsInterestModalOpen(false);
+    } catch (error) {
+      console.error("Error updating interests:", error);
+      notification.error({
+        message: "Update Failed",
+        description: "Failed to update interests. Please try again.",
+        placement: "topRight",
+        duration: 3
+      });
+    }
+  };
+
+  // Function to ensure admin bookmarks are loaded for a category
+  const ensureAdminBookmarksForCategory = async (categoryId) => {
+    try {
+      // Check if we already have admin bookmarks for this category
+      const existingBookmarks = links.filter(link => link.categoryId === categoryId && link.isAdminBookmark);
+      if (existingBookmarks.length > 0) {
+        return; // Already have bookmarks for this category
+      }
+
+      // Fetch admin bookmarks for this category
+      const bookmarksSnapshot = await getDocs(query(collection(db, "links"), where("category", "==", categoryId)));
+      const newAdminBookmarks = bookmarksSnapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          title: data.name,
+          url: data.link,
+          categoryId: categoryId,
+          isHidden: hiddenBookmarkIds.includes(doc.id),
+          isAdminBookmark: true,
+          createdBy: data.createdBy,
+          updatedAt: data.updatedAt,
+          order: data.order || 0,
+        };
+      }).filter((bookmark) => !hiddenBookmarkIds.includes(bookmark.id));
+
+      if (newAdminBookmarks.length > 0) {
+        setLinks(prevLinks => [...prevLinks, ...newAdminBookmarks]);
+        console.log(`Loaded ${newAdminBookmarks.length} admin bookmarks for category ${categoryId}`);
+      }
+    } catch (error) {
+      console.error(`Error loading admin bookmarks for category ${categoryId}:`, error);
+    }
+  };
+
+  // --- 1. Add a helper to batch fetch like counts ---
+  const batchFetchBookmarkLikes = async (bookmarkIds, db) => {
+    if (!bookmarkIds.length) return {};
+    const likeCounts = {};
+    const userLiked = {};
+    // Firestore 'in' queries are limited to 10
+    const batchSize = 10;
+    for (let i = 0; i < bookmarkIds.length; i += batchSize) {
+      const batchIds = bookmarkIds.slice(i, i + batchSize);
+      const q = query(collection(db, "bookmarkLikes"), where("bookmarkId", "in", batchIds));
+      const snap = await getDocs(q);
+      snap.docs.forEach(docSnap => {
+        const data = docSnap.data();
+        likeCounts[data.bookmarkId] = data.likes || 0;
+        userLiked[data.bookmarkId] = data.likedBy || [];
+      });
+    }
+    return { likeCounts, userLiked };
+  };
+  // --- 2. Refactor loadBookmarkLikeCounts to use batch fetch ---
+  const loadBookmarkLikeCounts = async (bookmarks) => {
+    try {
+      const adminBookmarks = bookmarks.filter(bookmark => bookmark.isAdminBookmark);
+      const bookmarkIds = adminBookmarks.map(b => b.id);
+      const { likeCounts, userLiked } = await batchFetchBookmarkLikes(bookmarkIds, db);
+      const userId = user?.uid;
+      setBookmarkLikes(likeCounts);
+      setUserLikedBookmarks(
+        Object.fromEntries(
+          bookmarkIds.map(id => [id, userLiked[id]?.includes(userId)])
+        )
+      );
+    } catch (error) {
+      console.error("Error loading bookmark like counts:", error);
+    }
+  };
+  // --- 3. Suggestion widget: always show on page load if there are liked bookmarks ---
+  // Remove the auto-hide effect and instead always show the widget if there are top liked bookmarks
+  // Replace this effect:
+  // useEffect(() => {
+  //   if (topFacebookLikedAdminBookmarks.length > 0) {
+  //     setShowSuggestionWidget(true);
+  //     const timer = setTimeout(() => setShowSuggestionWidget(false), 3000);
+  //     return () => clearTimeout(timer);
+  //   }
+  // }, [topFacebookLikedAdminBookmarks.map(b => b.id).join(','), topFacebookLikedAdminBookmarks.map(b => bookmarkLikes[b.id]).join(',')]);
+  // With this:
+  useEffect(() => {
+    if (topFacebookLikedAdminBookmarks.length > 0) {
+      setShowSuggestionWidget(true);
+    } else {
+      setShowSuggestionWidget(false);
+    }
+  }, [topFacebookLikedAdminBookmarks.length]);
+  // ... existing code ...
+  // --- 4. Render categories and bookmarks immediately, update like counts as soon as fetched ---
+  // (No change needed if you already render categories and bookmarks as soon as they are available, and only like counts update later)
+  // ... existing code ...
+
+  // Floating Review Button State
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [reviewForm, setReviewForm] = useState({ name: "", gmail: "", description: "" });
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+
+  // Handler for review form input changes
+  const handleReviewInputChange = (e) => {
+    const { name, value } = e.target;
+    setReviewForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Handler for review form submission
+  const handleReviewSubmit = async () => {
+    setReviewSubmitting(true);
+    setTimeout(() => {
+      setReviewSubmitting(false);
+      setIsReviewModalOpen(false);
+      setReviewForm({ name: "", gmail: "", description: "" });
+      notification.success({
+        message: "Thank you for your review!",
+        description: "Your feedback has been submitted.",
+        placement: "topRight",
+        duration: 3,
+        icon: <SmileOutlined style={{ color: '#52c41a' }} />,
+      });
+    }, 1200);
+  };
+
   if (loading) {
     return (
       <div className="w-[85vw] mx-auto" style={{ padding: "24px" }}>
@@ -2871,6 +3558,74 @@ function PopularBookmarks() {
         isDarkMode ? "dark" : ""
       }`}
     >
+      {/* Floating Most Facebook-Liked Bookmarks Suggestion Widget */}
+      {showSuggestionWidget && topFacebookLikedAdminBookmarks.length > 0 && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: 24,
+            left: 75,
+            zIndex: 1200,
+            background: isDarkMode ? '#28283a' : '#fff',
+            color: isDarkMode ? '#fff' : '#222',
+            borderRadius: 12,
+            boxShadow: '0 4px 24px rgba(0,0,0,0.18)',
+            padding: '18px 20px 12px 20px',
+            minWidth: 260,
+            maxWidth: 320,
+            border: isDarkMode ? '1px solid #444' : '1px solid #e0e0e0',
+            transition: 'all 0.3s',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <span style={{ fontWeight: 600, fontSize: 16, letterSpacing: 0.2 }}>👍 Most Liked Bookmarks</span>
+            <button
+              onClick={() => setShowSuggestionWidget(false)}
+              style={{ background: 'none', border: 'none', color: isDarkMode ? '#fff' : '#222', fontSize: 18, cursor: 'pointer', marginLeft: 8 }}
+              title="Close"
+            >
+              ×
+            </button>
+          </div>
+          <div>
+            {topFacebookLikedAdminBookmarks.map((bookmark, idx) => (
+              <a
+                key={bookmark.id}
+                href={bookmark.url || bookmark.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '8px 0',
+                  borderBottom: '1px solid ' + (isDarkMode ? '#333' : '#eee'),
+                  textDecoration: 'none',
+                  color: isDarkMode ? '#fff' : '#222',
+                  fontWeight: 500,
+                }}
+              >
+                {/* Crown badge for #1 most liked */}
+                {idx === 0 && (
+                  <span style={{ marginRight: 4, display: 'flex', alignItems: 'center' }} title="Most Liked">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="#FFD700" style={{marginRight:2}}><path d="M12 2l2.09 6.26L20 9.27l-5 4.87L16.18 22 12 18.56 7.82 22 9 14.14l-5-4.87 5.91-.91z"/></svg>
+                  </span>
+                )}
+                <img
+                  src={bookmark.favicon || `https://www.google.com/s2/favicons?sz=32&domain=${(bookmark.url || bookmark.link || '').replace(/https?:\/\//, '').split('/')[0]}`}
+                  alt=""
+                  style={{ width: 22, height: 22, borderRadius: 4, marginRight: 4, background: '#fff' }}
+                />
+                <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{bookmark.title || bookmark.name}</span>
+                <span style={{ fontSize: 15, color: isDarkMode ? '#4fc3f7' : '#1976d2', fontWeight: 600, marginLeft: 6, display: 'flex', alignItems: 'center', gap: 3 }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style={{marginRight:2}}><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
+                  {bookmarkLikes[bookmark.id] || 0}
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
       {renderBookmarksByCategory()}
 
       {/* Floating Button for Controller */}
@@ -2919,7 +3674,7 @@ function PopularBookmarks() {
         }
         open={isControllerOpen}
         onCancel={() => setIsControllerOpen(false)}
-        width={900}
+        width={1000}
         footer={[
           <div key="divider" className="border-t border-gray-200 dark:border-gray-700 my-2"></div>,
           <div key="footer" className="flex justify-end items-center mt-2 gap-2">
@@ -2943,7 +3698,71 @@ function PopularBookmarks() {
           </div>,
         ]}
       >
+        {/* Category Controller Header */}
+        <div className="mb-6 bg-white dark:bg-[#513a7a] rounded-sm shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+          
+          <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+            
+            
+            {/* Current Interests Display */}
+            {userInterests.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-700">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-sm font-medium text-blue-700 dark:text-blue-300">Your Current Interests:</span>
+                  <button
+                    onClick={handleOpenInterestModal}
+                    className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 transition-colors"
+                  >
+                    Change
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {userInterests.map((interestId) => {
+                    const interest = interestOptions.find(i => i.id === interestId);
+                    return interest ? (
+                      <span
+                        key={interestId}
+                        className="inline-flex items-center bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-xs font-medium"
+                      >
+                        {interest.icon} {interest.name}
+                      </span>
+                    ) : null;
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+          {/* <div className="mb-4 flex flex-col md:flex-row md:items-center gap-2">
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-gray-700 dark:text-white">Filter by Interests:</span>
+              <Select
+                mode="multiple"
+                allowClear
+                style={{ minWidth: 180 }}
+                placeholder="Select interests"
+                value={mainInterests}
+                onChange={setMainInterests}
+                options={
+                  // Use the complete interest options list
+                  interestOptions.map(option => ({ 
+                    label: `${option.icon} ${option.name}`, 
+                    value: option.id 
+                  }))
+                }
+              />
+              <AntButton
+                type="primary"
+                size="small"
+                onClick={handleOpenInterestModal}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                Change My Interests
+              </AntButton>
+            </div>
+          </div> */}
+        </div>
         <div className="flex w-full mb-4 justify-between items-center gap-2">
+          <div className="flex items-center gap-4">
           <div className="dark:text-white font-medium">Columns:</div>
           <div className="flex gap-2">
             {[1,2,3,4].map(num => (
@@ -2958,6 +3777,12 @@ function PopularBookmarks() {
                 {num}
               </button>
             ))}
+            </div>
+          </div>
+          <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+            <span>Active: {previewCategories.length}</span>
+            <span>Available: {availableCategories.length}</span>
+            <span>Total: {previewCategories.length + availableCategories.length}</span>
           </div>
         </div>
         <DragDropContext onDragEnd={handlePreviewDragEnd}>
@@ -2980,7 +3805,7 @@ function PopularBookmarks() {
                     {...provided.droppableProps}
                     className={`p-4 rounded-lg min-h-[200px] transition-all duration-300 border-2 ${
                       snapshot.isDraggingOver
-                        ? "bg-indigo-50 dark:bg-gray-900/50 border-indigo-400 shadow-lg"
+                            ? "bg-indigo-50 dark:bg-gray-900/50 border-indigo-400 shadow-lg scale-105"
                         : "bg-gray-50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-700"
                     }`}
                   >
@@ -3005,14 +3830,32 @@ function PopularBookmarks() {
                               {...provided.draggableProps}
                               className={`flex items-center border-none dark:text-white justify-between p-3 rounded-lg transition-all duration-200 dark:bg-gray-600/50 bg-white shadow-sm ${
                                 snapshot.isDragging
-                                  ? "shadow-lg border-2 border-indigo-400 scale-105 bg-indigo-50 dark:bg-indigo-900/60"
-                                  : "hover:border-indigo-300"
+                                  ? "shadow-xl border-2 border-indigo-400 scale-105 bg-indigo-50 dark:bg-indigo-900/60 rotate-2 z-50"
+                                  : "hover:border-indigo-300 hover:shadow-md"
                               }`}
-                              style={provided.draggableProps.style}
+                              style={{
+                                ...provided.draggableProps.style,
+                                transform: snapshot.isDragging 
+                                  ? `${provided.draggableProps.style?.transform} rotate(2deg) scale(1.05)` 
+                                  : provided.draggableProps.style?.transform
+                              }}
                             >
                               <div className="flex items-center border-none gap-3">
-                                <span {...provided.dragHandleProps} className="cursor-grab text-lg text-gray-400 hover:text-indigo-500 transition-colors" title="Drag to reorder">
-                                  <MenuOutlined />
+                                <span {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing p-2 transition-all duration-200 group hover:bg-gray-200/50 dark:hover:bg-gray-600/50 rounded" title="Drag to reorder">
+                                  <div className="flex flex-col gap-[2px]">
+                                    <div className="flex gap-[2px]">
+                                      <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                      <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                    </div>
+                                    <div className="flex gap-[2px]">
+                                      <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                      <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                    </div>
+                                    <div className="flex gap-[2px]">
+                                      <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                      <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                    </div>
+                                  </div>
                                 </span>
                                 <span className="font-medium transition-colors border-none duration-200 text-gray-700 dark:text-white">
                                   {category.name || category.newCategory}
@@ -3044,11 +3887,52 @@ function PopularBookmarks() {
           </div>
         </DragDropContext>
         <div className="mt-6">
-          <div className="text-sm font-medium dark:text-white text-gray-700 mb-2 flex items-center gap-2">
-            Available Categories
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-sm font-medium dark:text-white text-gray-700 flex items-center gap-2">
+              Available Categories ({availableCategories.length})
             <Tooltip title="Search categories">
               <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" strokeWidth="2"/><line x1="21" y1="21" x2="16.65" y2="16.65" strokeWidth="2"/></svg>
             </Tooltip>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setCategorySearch("")}
+                className="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+              >
+                Clear Search
+              </button>
+              <button
+                onClick={() => {
+                  // Add all available categories to columns
+                  const allAvailable = availableCategories.filter(cat => 
+                    !categorySearch || (cat.name || cat.newCategory).toLowerCase().includes(categorySearch.toLowerCase())
+                  );
+                  
+                  setPreviewCategories(prev => {
+                    const updated = [...prev];
+                    allAvailable.forEach((category, index) => {
+                      const colIndex = index % previewColumns;
+                      const order = Math.floor(index / previewColumns);
+                      updated.push({
+                        ...category,
+                        column: colIndex,
+                        order: order
+                      });
+                    });
+                    return updated;
+                  });
+                  
+                  setAvailableCategories(prev => 
+                    prev.filter(cat => 
+                      !allAvailable.some(availableCat => availableCat.id === cat.id)
+                    )
+                  );
+                }}
+                className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Add All Filtered
+              </button>
+            </div>
           </div>
           <input
             type="text"
@@ -3057,23 +3941,24 @@ function PopularBookmarks() {
             value={categorySearch || ""}
             onChange={e => setCategorySearch(e.target.value)}
           />
-          <div className="p-4 border-2 border-dashed dark:text-white dark:bg-gray-700/50 border-gray-300 rounded-lg bg-gray-50">
+          <div className="p-4 border-2 border-dashed dark:text-white dark:bg-gray-700/50 border-gray-300 rounded-lg bg-gray-50 max-h-60 overflow-y-auto">
             <div className="flex flex-wrap gap-2">
               {availableCategories
                 .filter(cat => !categorySearch || (cat.name || cat.newCategory).toLowerCase().includes(categorySearch.toLowerCase()))
                 .map((category) => (
+                  <div key={category.id} className="flex items-center gap-2">
                   <button
-                    key={category.id}
                     onClick={() => handleAddToColumn(category, 0)}
-                    className="flex gap-2 items-center text-black dark:bg-[#28283a]/[var(--widget-opacity)] px-4 py-2 rounded-lg dark:text-white bg-white hover:scale-105 transition-transform border border-gray-200 dark:border-gray-700 shadow-sm"
+                      className="flex gap-2 items-center text-black dark:bg-[#28283a]/[var(--widget-opacity)] px-3 py-2 rounded-lg dark:text-white bg-white hover:scale-105 transition-transform border border-gray-200 dark:border-gray-700 shadow-sm text-sm"
                     title="Add to first column"
                   >
                     <PlusOutlined /> {category.name || category.newCategory}
                   </button>
+                  </div>
                 ))}
               {availableCategories.filter(cat => !categorySearch || (cat.name || cat.newCategory).toLowerCase().includes(categorySearch.toLowerCase())).length === 0 && (
                 <div className="w-full text-center py-4 text-gray-500">
-                  No available categories
+                  {categorySearch ? "No categories match your search" : "No available categories"}
                 </div>
               )}
             </div>
@@ -3408,6 +4293,165 @@ function PopularBookmarks() {
                   </div>
                 ))
             )}
+          </div>
+        </div>
+      </Modal>
+
+      {/* Interest Selection Modal */}
+      <Modal
+        title={
+          <div className="text-center">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Select Your Interests</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              Choose your interests to get personalized category recommendations
+            </p>
+          </div>
+        }
+        open={isInterestModalOpen}
+        onCancel={() => setIsInterestModalOpen(false)}
+        footer={[
+          <AntButton key="cancel" onClick={() => setIsInterestModalOpen(false)}>
+            Cancel
+          </AntButton>,
+          <AntButton
+            key="save"
+            type="primary"
+            onClick={handleSaveInterests}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            Save Interests
+          </AntButton>,
+        ]}
+        width={600}
+      >
+        <div className="py-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {interestOptions.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => {
+                  setTempInterests(prev =>
+                    prev.includes(option.id)
+                      ? prev.filter(id => id !== option.id)
+                      : [...prev, option.id]
+                  );
+                }}
+                className={`relative flex flex-col items-center p-4 border-2 rounded-lg transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
+                  tempInterests.includes(option.id)
+                    ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-200"
+                    : "border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-blue-300"
+                }`}
+              >
+                <span className="text-3xl mb-2">{option.icon}</span>
+                <span className="font-medium text-sm text-gray-900 dark:text-white text-center">
+                  {option.name}
+                </span>
+                {tempInterests.includes(option.id) && (
+                  <div className="absolute top-2 right-2 bg-blue-500 text-white rounded-full p-1">
+                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24">
+                      <path fill="currentColor" d="M9.5 16.5l-4-4 1.41-1.41L9.5 13.67l7.09-7.09L18 7l-8.5 8.5z"/>
+                    </svg>
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
+          
+          {tempInterests.length > 0 && (
+            <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
+                Selected Interests ({tempInterests.length}):
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {tempInterests.map((interestId) => {
+                  const interest = interestOptions.find(i => i.id === interestId);
+                  return (
+                    <span
+                      key={interestId}
+                      className="inline-flex items-center bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full text-sm font-medium"
+                    >
+                      {interest?.icon} {interest?.name}
+                      <button
+                        onClick={() => setTempInterests(prev => prev.filter(id => id !== interestId))}
+                        className="ml-2 text-blue-600 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-100"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      </Modal>
+      {/* Floating Review Button */}
+      <button
+        onClick={() => setIsReviewModalOpen(true)}
+        style={{
+          position: "fixed",
+          bottom: 90,
+          right: 20,
+          width: 52,
+          height: 52,
+          borderRadius: "50%",
+          background: "#f59e42",
+          color: "#fff",
+          border: "none",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.18)",
+          zIndex: 1100,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 28,
+          cursor: "pointer",
+        }}
+        title="Leave a Review"
+      >
+        <SmileOutlined />
+      </button>
+      <Modal
+        title={<div className="text-lg font-semibold">Leave a Review</div>}
+        open={isReviewModalOpen}
+        onCancel={() => setIsReviewModalOpen(false)}
+        onOk={handleReviewSubmit}
+        okText={reviewSubmitting ? "Submitting..." : "Submit"}
+        okButtonProps={{ loading: reviewSubmitting, disabled: reviewSubmitting }}
+        cancelButtonProps={{ disabled: reviewSubmitting }}
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+            <Input
+              name="name"
+              value={reviewForm.name}
+              onChange={handleReviewInputChange}
+              placeholder="Enter your name"
+              disabled={reviewSubmitting}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Gmail</label>
+            <Input
+              name="gmail"
+              value={reviewForm.gmail}
+              onChange={handleReviewInputChange}
+              placeholder="Enter your Gmail address"
+              type="email"
+              disabled={reviewSubmitting}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+            <Input.TextArea
+              name="description"
+              value={reviewForm.description}
+              onChange={handleReviewInputChange}
+              placeholder="Write your review..."
+              rows={4}
+              disabled={reviewSubmitting}
+            />
           </div>
         </div>
       </Modal>
