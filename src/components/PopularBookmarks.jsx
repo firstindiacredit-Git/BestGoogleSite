@@ -3494,6 +3494,68 @@ function PopularBookmarks() {
     }, 1200);
   };
 
+  // --- Like/Favorite (Heart) Button Handler ---
+  const handleToggleLike = async (bookmark) => {
+    if (!user) return;
+    try {
+      const userDocRef = doc(db, "users", user.uid);
+      let newLikedBookmarks;
+      if (likedBookmarks.includes(bookmark.id)) {
+        // Remove from favorites
+        newLikedBookmarks = likedBookmarks.filter((id) => id !== bookmark.id);
+      } else {
+        // Add to favorites
+        newLikedBookmarks = [...likedBookmarks, bookmark.id];
+      }
+      setLikedBookmarks(newLikedBookmarks);
+      await updateDoc(userDocRef, { likedBookmarks: newLikedBookmarks });
+    } catch (error) {
+      notification.error({
+        message: "Failed to update favorites",
+        description: error.message,
+        placement: "topRight",
+        duration: 2,
+      });
+    }
+  };
+
+  // --- Facebook-like Button Handler ---
+  const handleFacebookLike = async (bookmark) => {
+    if (!user) return;
+    try {
+      const likeDocRef = doc(db, "bookmarkLikes", bookmark.id);
+      const likeDocSnap = await getDoc(likeDocRef);
+      let likes = 0;
+      let likedBy = [];
+      if (likeDocSnap.exists()) {
+        const data = likeDocSnap.data();
+        likes = data.likes || 0;
+        likedBy = data.likedBy || [];
+      }
+      let newLikes, newLikedBy;
+      if (userLikedBookmarks[bookmark.id]) {
+        // Unlike
+        newLikes = Math.max(0, likes - 1);
+        newLikedBy = likedBy.filter((uid) => uid !== user.uid);
+      } else {
+        // Like
+        newLikes = likes + 1;
+        newLikedBy = [...likedBy, user.uid];
+      }
+      // Optimistically update UI
+      setBookmarkLikes((prev) => ({ ...prev, [bookmark.id]: newLikes }));
+      setUserLikedBookmarks((prev) => ({ ...prev, [bookmark.id]: !userLikedBookmarks[bookmark.id] }));
+      await setDoc(likeDocRef, { likes: newLikes, likedBy: newLikedBy }, { merge: true });
+    } catch (error) {
+      notification.error({
+        message: "Failed to update like",
+        description: error.message,
+        placement: "topRight",
+        duration: 2,
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="w-[85vw] mx-auto" style={{ padding: "24px" }}>

@@ -41,11 +41,18 @@ const Signup = () => {
   const db = getFirestore();
 
   const professionOptions = [
+    { id: "developer", name: "Developer / Programmer", icon: "💻", desc: "Software development and programming" },
+    { id: "designer", name: "Designer (UI/UX, Graphic, Web)", icon: "🎨", desc: "Creative design and user experience" },
+    { id: "digital_marketer", name: "Digital Marketer", icon: "📱", desc: "Digital marketing and online promotion" },
     { id: "student", name: "Student", icon: "🎓", desc: "Currently studying or pursuing education" },
-    { id: "teacher", name: "Teacher", icon: "👩‍🏫", desc: "Teaching in a school, college, or university" },
-    { id: "professional", name: "Professional", icon: "💼", desc: "Working in a professional field" },
-    { id: "entrepreneur", name: "Entrepreneur", icon: "🚀", desc: "Running your own business or startup" },
-    { id: "freelancer", name: "Freelancer", icon: "🆓", desc: "Working independently on projects" },
+    { id: "teacher", name: "Teacher / Educator", icon: "👩‍🏫", desc: "Teaching in a school, college, or university" },
+    { id: "entrepreneur", name: "Entrepreneur / Founder", icon: "🚀", desc: "Running your own business or startup" },
+    { id: "freelancer", name: "Freelancer (Creative or Technical)", icon: "🆓", desc: "Working independently on projects" },
+    { id: "consultant", name: "Consultant / Advisor", icon: "💡", desc: "Providing expert advice and consultation" },
+    { id: "working_professional", name: "Working Professional", icon: "💼", desc: "Working in a professional field" },
+    { id: "researcher", name: "Researcher / Academic", icon: "🔬", desc: "Research and academic work" },
+    { id: "it_support", name: "IT / Tech Support", icon: "🛠️", desc: "IT support and technical assistance" },
+    { id: "medical", name: "Medical Professional", icon: "⚕️", desc: "Healthcare and medical services" },
     { id: "retired", name: "Retired", icon: "🌅", desc: "Retired from active work" },
     { id: "other", name: "Other", icon: "✨", desc: "Other profession or occupation" },
   ];
@@ -54,16 +61,20 @@ const Signup = () => {
   const [showProfessionModal, setShowProfessionModal] = useState(false);
 
   const interestOptions = [
-    { id: "technology", name: "Technology", icon: "💻" },
-    { id: "sports", name: "Sports", icon: "🏀" },
-    { id: "art", name: "Art", icon: "🎨" },
-    { id: "music", name: "Music", icon: "🎵" },
-    { id: "science", name: "Science", icon: "🔬" },
-    { id: "travel", name: "Travel", icon: "✈️" },
-    { id: "reading", name: "Reading", icon: "📚" },
-    { id: "gaming", name: "Gaming", icon: "🎮" },
-    { id: "food", name: "Food", icon: "🍔" },
-    { id: "nature", name: "Nature", icon: "🌳" },
+    { id: "productivity_seeker", name: "Productivity Seeker", icon: "⚡" },
+    { id: "lifelong_learner", name: "Lifelong Learner", icon: "🧠" },
+    { id: "self_improvement", name: "Self-Improvement / Mindfulness", icon: "🧘" },
+    { id: "traveller", name: "Traveller / Explorer", icon: "✈️" },
+    { id: "content_creator", name: "Content Creator / YouTuber", icon: "📹" },
+    { id: "gamer", name: "Gamer", icon: "🎮" },
+    { id: "music_lover", name: "Music Lover / Podcaster", icon: "🎵" },
+    { id: "cooking", name: "Cooking & Foodie", icon: "🍳" },
+    { id: "photographer", name: "Photographer", icon: "📸" },
+    { id: "artist", name: "Artist / Creative", icon: "🎨" },
+    { id: "reader", name: "Reader / Bookworm", icon: "📚" },
+    { id: "investor", name: "Investor / Trader", icon: "📈" },
+    { id: "smart_shopper", name: "Smart Shopper / Deal Hunter", icon: "🛒" },
+    
   ];
 
   const [showInterestModal, setShowInterestModal] = useState(false);
@@ -504,9 +515,9 @@ const Signup = () => {
 
       {showProfessionModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full">
+          <div className="bg-white p-6 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-bold mb-4 text-center">Select Your Profession</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 max-h-[50vh] overflow-y-auto">
               {professionOptions.map((option) => (
                 <button
                   type="button"
@@ -544,9 +555,9 @@ const Signup = () => {
 
       {showInterestModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full">
+          <div className="bg-white p-6 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-bold mb-4 text-center">Select Your Interests</h2>
-            <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="grid grid-cols-2 gap-3 mb-4 max-h-[50vh] overflow-y-auto">
               {interestOptions.map((option) => (
                 <button
                   type="button"

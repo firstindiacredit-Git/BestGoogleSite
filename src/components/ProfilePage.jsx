@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { updatePassword, updateProfile } from "firebase/auth";
 import { auth, db } from "../firebase";
@@ -7,15 +7,20 @@ import { onAuthStateChanged } from "firebase/auth";
 import {
   FaEye,
   FaEyeSlash,
+  FaPen,
   FaCamera,
   FaUser,
+  FaLock,
+  FaShieldAlt,
   FaCrown,
   FaCog,
+  FaRegListAlt,
   FaSave,
+  FaTimes,
 } from "react-icons/fa";
 import imageCompression from "browser-image-compression";
 import { useSubscription } from "../hooks/useSubscription";
-import { message, Spin, Button, Tooltip, Image } from "antd";
+import { Modal, message, Tabs, Spin, Button, Tooltip, Image } from "antd";
 import Header from "./Header";
 import { useTheme } from "../context/ThemeContext";
 // https://cdn.dribbble.com/userupload/14883451/file/original-761915986636e2ae85fee541c6b9c051.jpg?resize=1200x900&vertical=center
@@ -41,18 +46,35 @@ const ProfilePage = () => {
   const { isPro } = useSubscription();
   const [previewUrl, setPreviewUrl] = useState(null);
   const [backgroundUrl, setBackgroundUrl] = useState(null);
-  // eslint-disable-next-line no-unused-vars
   const [isUploadingBackground, setIsUploadingBackground] = useState(false);
   const backgroundInputRef = useRef(null);
-  // eslint-disable-next-line no-unused-vars
   const [previewBackgroundUrl, setPreviewBackgroundUrl] = useState(null);
 
   const navigate = useNavigate();
   const { isDarkMode } = useTheme();
+  const [activeSection, setActiveSection] = useState("profile");
   const [userProfession, setUserProfession] = useState("");
   const [isEditingProfession, setIsEditingProfession] = useState(false);
 
   const professions = [
+    {
+      id: "developer",
+      name: "Developer / Programmer",
+      icon: "💻",
+      description: "Software development and programming"
+    },
+    {
+      id: "designer",
+      name: "Designer (UI/UX, Graphic, Web)",
+      icon: "🎨",
+      description: "Creative design and user experience"
+    },
+    {
+      id: "digital_marketer",
+      name: "Digital Marketer",
+      icon: "📱",
+      description: "Digital marketing and online promotion"
+    },
     {
       id: "student",
       name: "Student",
@@ -60,22 +82,52 @@ const ProfilePage = () => {
       description: "Currently studying or pursuing education"
     },
     {
-      id: "professional",
-      name: "Professional",
-      icon: "💼",
-      description: "Working in a professional field"
+      id: "teacher",
+      name: "Teacher / Educator",
+      icon: "👩‍🏫",
+      description: "Teaching in a school, college, or university"
     },
     {
       id: "entrepreneur",
-      name: "Entrepreneur",
+      name: "Entrepreneur / Founder",
       icon: "🚀",
       description: "Running your own business or startup"
     },
     {
       id: "freelancer",
-      name: "Freelancer",
+      name: "Freelancer (Creative or Technical)",
       icon: "🆓",
       description: "Working independently on projects"
+    },
+    {
+      id: "consultant",
+      name: "Consultant / Advisor",
+      icon: "💡",
+      description: "Providing expert advice and consultation"
+    },
+    {
+      id: "working_professional",
+      name: "Working Professional",
+      icon: "💼",
+      description: "Working in a professional field"
+    },
+    {
+      id: "researcher",
+      name: "Researcher / Academic",
+      icon: "🔬",
+      description: "Research and academic work"
+    },
+    {
+      id: "it_support",
+      name: "IT / Tech Support",
+      icon: "🛠️",
+      description: "IT support and technical assistance"
+    },
+    {
+      id: "medical",
+      name: "Medical Professional",
+      icon: "⚕️",
+      description: "Healthcare and medical services"
     },
     {
       id: "retired",
@@ -169,7 +221,9 @@ const ProfilePage = () => {
     fileInputRef.current?.click();
   };
 
-
+  const handleBackgroundClick = () => {
+    backgroundInputRef.current?.click();
+  };
 
   const compressImage = async (file) => {
     const options = {
@@ -467,11 +521,11 @@ const ProfilePage = () => {
 
   return (
     <div
-      className={`fixed inset-0 ${
+      className={`${
         isDarkMode
           ? "bg-gradient-to-r from-[#1a1a2e] via-[#2a243f] to-[#1a1a2e]"
           : "bg-gradient-to-r from-indigo-200 via-blue-100 to-indigo-200"
-      } transition-colors duration-300`}
+      } min-h-screen transition-colors duration-300`}
     >
       <Header goBack={true} />
 
@@ -698,9 +752,7 @@ const ProfilePage = () => {
                         </Button>
                       </div>
                     ) : (
-                      <p className="text-gray-700 dark:text-gray-300">
-                        {userPin ? "••••" : "Not set"}
-                      </p>
+                      <p className="text-gray-700 dark:text-gray-300">••••</p>
                     )}
                   </div>
 
@@ -720,18 +772,17 @@ const ProfilePage = () => {
 
                     {isEditingProfession ? (
                       <div className="space-y-4">
-                        <div className="flex items-center space-x-3">
-                          <div className="flex gap-2">
-                            {professions.map((profession) => (
-                              <button
-                                key={profession.id}
-                                onClick={() => handleProfessionUpdate(profession.id)}
-                                className="px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-700 hover:bg-gray-100 transition-colors"
-                              >
-                                {profession.icon} {profession.name}
-                              </button>
-                            ))}
-                          </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-64 overflow-y-auto">
+                          {professions.map((profession) => (
+                            <button
+                              key={profession.id}
+                              onClick={() => handleProfessionUpdate(profession.id)}
+                              className="px-3 py-2 rounded-lg text-sm font-medium bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors border border-gray-200 dark:border-gray-600 flex items-center justify-center text-center"
+                            >
+                              <span className="mr-1">{profession.icon}</span>
+                              <span className="text-xs">{profession.name}</span>
+                            </button>
+                          ))}
                         </div>
                       </div>
                     ) : (

@@ -621,7 +621,7 @@ const SearchPage = ({ isToolPage = false }) => {
                           }`}
                           onClick={() => handleToggleComponent("Tool")}
                         >
-                          <span className="drop-shadow-md">TOOLs</span>
+                          <span className="drop-shadow-md">TOOL</span>
                         </button>
                         <button
                           className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
