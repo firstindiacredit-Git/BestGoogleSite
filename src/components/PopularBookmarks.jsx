@@ -47,6 +47,7 @@ import {
 } from "@ant-design/icons";
 import debounce from "lodash/debounce";
 import SkeletonLoader from "./SkeletonLoader";
+import PropTypes from 'prop-types';
 
 // Import the ThemeContext and useThemeAware hook
 import { useThemeAware } from "../context/ThemeContext";
@@ -71,26 +72,19 @@ const debouncedFetchFavicon = debounce(async (url, callback) => {
 
 // Interest options (matching the ones from AddLinks.jsx)
 const interestOptions = [
-  { id: "technology", name: "Technology", icon: "💻" },
-  { id: "sports", name: "Sports", icon: "🏀" },
-  { id: "art", name: "Art", icon: "🎨" },
-  { id: "music", name: "Music", icon: "🎵" },
-  { id: "science", name: "Science", icon: "🔬" },
-  { id: "travel", name: "Travel", icon: "✈️" },
-  { id: "reading", name: "Reading", icon: "📚" },
-  { id: "gaming", name: "Gaming", icon: "🎮" },
-  { id: "food", name: "Food", icon: "🍔" },
-  { id: "nature", name: "Nature", icon: "🌳" },
-  { id: "business", name: "Business", icon: "💼" },
-  { id: "education", name: "Education", icon: "🎓" },
-  { id: "health", name: "Health", icon: "🏥" },
-  { id: "fashion", name: "Fashion", icon: "👗" },
-  { id: "finance", name: "Finance", icon: "💰" },
-  { id: "entertainment", name: "Entertainment", icon: "🎬" },
-  { id: "news", name: "News", icon: "📰" },
-  { id: "shopping", name: "Shopping", icon: "🛒" },
-  { id: "social", name: "Social Media", icon: "📱" },
-  { id: "tools", name: "Tools", icon: "🔧" },
+  { id: "productivity_seeker", name: "Productivity Seeker", icon: "💻" },
+  { id: "lifelong_learner", name: "Lifelong Learner", icon: "🏀" },
+  { id: "self_improvement_indfulness", name: "Self-Improvement / Mindfulness", icon: "🎨" },
+  { id: "traveller_explorer", name: "Traveller / Explorer", icon: "🎵" },
+  { id: "content_creator_youTuber", name: "Content Creator / YouTuber", icon: "🔬" },
+  { id: "gamer", name: "Gamer", icon: "✈️" },
+  { id: "music_lover_podcaster", name: "Music Lover / Podcaster", icon: "📚" },
+  { id: "cooking_& _foodie", name: "Cooking & Foodie", icon: "🎮" },
+  { id: "photographer", name: "Photographer", icon: "🍔" },
+  { id: "artist_creative", name: "Artist / Creative", icon: "🌳" },
+  { id: "reader_bookworm", name: "Reader / Bookworm", icon: "💼" },
+  { id: "investor_trader", name: "Investor / Trader", icon: "🎓" },
+  { id: "smart_shopper", name: "Smart Shopper / Deal Hunter", icon: "🏥" }
 ];
 
 // Helper function to validate URL
@@ -161,7 +155,6 @@ const MemoizedBookmarkForm = React.memo(
       </div>
     </div>
   ),
-  // Only re-render if title or URL actually changed
   (prevProps, nextProps) => {
     return (
       prevProps.newBookmark.title === nextProps.newBookmark.title &&
@@ -169,8 +162,17 @@ const MemoizedBookmarkForm = React.memo(
     );
   }
 );
-
 MemoizedBookmarkForm.displayName = 'MemoizedBookmarkForm';
+MemoizedBookmarkForm.propTypes = {
+  newBookmark: PropTypes.shape({
+    title: PropTypes.string,
+    url: PropTypes.string,
+    favicon: PropTypes.string,
+  }).isRequired,
+  handleTitleChange: PropTypes.func.isRequired,
+  handleUrlChange: PropTypes.func.isRequired,
+  onKeyDown: PropTypes.func.isRequired,
+};
 
 function PopularBookmarks() {
   const [categories, setCategories] = useState([]);
@@ -632,9 +634,8 @@ function PopularBookmarks() {
       });
     } else {
       // Main view: Always show user-created categories
-      return allCategories.filter((category) => {
+      let filtered = allCategories.filter((category) => {
         if (!category.isAdminCategory) return true; // Always show user categories
-
         // Check if category matches user preferences
         const matchesCountry = category.countries && 
           (category.countries.includes(selectedCountry.key) || category.countries.includes("global"));
@@ -652,6 +653,31 @@ function PopularBookmarks() {
         const interestMatch = mainInterests.length > 0 ? matchesInterest : true;
         return countryMatch && professionMatch && interestMatch;
       });
+
+      // --- Custom sorting for India ---
+      if (selectedCountry && (selectedCountry.key === 'IN' || selectedCountry.name === 'India')) {
+        // Separate India categories and others
+        const indiaCategories = filtered.filter(cat => Array.isArray(cat.countries) && cat.countries.includes('india'));
+        const otherCategories = filtered.filter(cat => !(Array.isArray(cat.countries) && cat.countries.includes('india')));
+        // Sort India categories by profession and interest match
+        indiaCategories.sort((a, b) => {
+          // Profession match first
+          const aProf = a.professions && userProfession && a.professions.includes(userProfession);
+          const bProf = b.professions && userProfession && b.professions.includes(userProfession);
+          if (aProf && !bProf) return -1;
+          if (!aProf && bProf) return 1;
+          // Interest match next
+          const aInt = a.interests && mainInterests.some(i => a.interests.includes(i));
+          const bInt = b.interests && mainInterests.some(i => b.interests.includes(i));
+          if (aInt && !bInt) return -1;
+          if (!aInt && bInt) return 1;
+          // Otherwise, keep original order
+          return 0;
+        });
+        // Return India categories first, then others
+        return [...indiaCategories, ...otherCategories];
+      }
+      return filtered;
     }
   };
 
@@ -4238,7 +4264,7 @@ function PopularBookmarks() {
         ]}
       >
         <div style={{ minHeight: "100px" }}>
-          {editModeBookmarks.map((bookmark, index) => (
+          {editModeBookmarks.map((bookmark) => (
             <div key={bookmark.id}>
               {renderDraggableBookmark(null, null, bookmark)}
             </div>

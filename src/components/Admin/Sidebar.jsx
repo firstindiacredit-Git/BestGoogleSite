@@ -123,12 +123,17 @@ export default function Sidebar() {
       path: "/admin/Review",
       label: "User Review",
       icon: MdOutlineRateReview,
-    }
-    // {
-    //   path: "/admin/adminImages",
-    //   label: "Admin Images",
-    //   icon: RiImageLine,
-    // },
+    },
+    {
+      path: "/admin/adminImages",
+      label: "Admin Images",
+      icon: RiImageLine,
+    },
+    {
+      path: "/admin/addsubcatbookmark",
+      label: "Subcategory Bookmarks",
+      icon: RiImageLine,
+    },
   ];
 
   return (

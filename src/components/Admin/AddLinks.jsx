@@ -25,110 +25,24 @@ import {
 const countries = [
   { key: "us", flag: "https://flagcdn.com/us.svg", name: "USA" },
   { key: "in", flag: "https://flagcdn.com/in.svg", name: "India" },
-  { key: "gb", flag: "https://flagcdn.com/gb.svg", name: "United Kingdom" },
-  { key: "ca", flag: "https://flagcdn.com/ca.svg", name: "Canada" },
-  { key: "au", flag: "https://flagcdn.com/au.svg", name: "Australia" },
-  { key: "de", flag: "https://flagcdn.com/de.svg", name: "Germany" },
-  { key: "fr", flag: "https://flagcdn.com/fr.svg", name: "France" },
-  { key: "jp", flag: "https://flagcdn.com/jp.svg", name: "Japan" },
-  { key: "cn", flag: "https://flagcdn.com/cn.svg", name: "China" },
-  { key: "br", flag: "https://flagcdn.com/br.svg", name: "Brazil" },
-  { key: "mx", flag: "https://flagcdn.com/mx.svg", name: "Mexico" },
-  { key: "it", flag: "https://flagcdn.com/it.svg", name: "Italy" },
-  { key: "es", flag: "https://flagcdn.com/es.svg", name: "Spain" },
-  { key: "nl", flag: "https://flagcdn.com/nl.svg", name: "Netherlands" },
-  { key: "se", flag: "https://flagcdn.com/se.svg", name: "Sweden" },
-  { key: "no", flag: "https://flagcdn.com/no.svg", name: "Norway" },
-  { key: "dk", flag: "https://flagcdn.com/dk.svg", name: "Denmark" },
-  { key: "fi", flag: "https://flagcdn.com/fi.svg", name: "Finland" },
-  { key: "ch", flag: "https://flagcdn.com/ch.svg", name: "Switzerland" },
-  { key: "at", flag: "https://flagcdn.com/at.svg", name: "Austria" },
-  { key: "be", flag: "https://flagcdn.com/be.svg", name: "Belgium" },
-  { key: "ie", flag: "https://flagcdn.com/ie.svg", name: "Ireland" },
-  { key: "nz", flag: "https://flagcdn.com/nz.svg", name: "New Zealand" },
-  { key: "sg", flag: "https://flagcdn.com/sg.svg", name: "Singapore" },
-  { key: "kr", flag: "https://flagcdn.com/kr.svg", name: "South Korea" },
-  { key: "ru", flag: "https://flagcdn.com/ru.svg", name: "Russia" },
-  { key: "sa", flag: "https://flagcdn.com/sa.svg", name: "Saudi Arabia" },
-  { key: "ae", flag: "https://flagcdn.com/ae.svg", name: "UAE" },
-  { key: "za", flag: "https://flagcdn.com/za.svg", name: "South Africa" },
-  { key: "eg", flag: "https://flagcdn.com/eg.svg", name: "Egypt" },
-  { key: "ng", flag: "https://flagcdn.com/ng.svg", name: "Nigeria" },
-  { key: "ke", flag: "https://flagcdn.com/ke.svg", name: "Kenya" },
-  { key: "gh", flag: "https://flagcdn.com/gh.svg", name: "Ghana" },
-  { key: "ug", flag: "https://flagcdn.com/ug.svg", name: "Uganda" },
-  { key: "tz", flag: "https://flagcdn.com/tz.svg", name: "Tanzania" },
-  { key: "et", flag: "https://flagcdn.com/et.svg", name: "Ethiopia" },
-  { key: "ma", flag: "https://flagcdn.com/ma.svg", name: "Morocco" },
-  { key: "tn", flag: "https://flagcdn.com/tn.svg", name: "Tunisia" },
-  { key: "dz", flag: "https://flagcdn.com/dz.svg", name: "Algeria" },
-  { key: "ly", flag: "https://flagcdn.com/ly.svg", name: "Libya" },
-  { key: "sd", flag: "https://flagcdn.com/sd.svg", name: "Sudan" },
-  { key: "cm", flag: "https://flagcdn.com/cm.svg", name: "Cameroon" },
-  { key: "ci", flag: "https://flagcdn.com/ci.svg", name: "Ivory Coast" },
-  { key: "sn", flag: "https://flagcdn.com/sn.svg", name: "Senegal" },
-  { key: "ml", flag: "https://flagcdn.com/ml.svg", name: "Mali" },
-  { key: "bf", flag: "https://flagcdn.com/bf.svg", name: "Burkina Faso" },
-  { key: "ne", flag: "https://flagcdn.com/ne.svg", name: "Niger" },
-  { key: "td", flag: "https://flagcdn.com/td.svg", name: "Chad" },
-  { key: "cf", flag: "https://flagcdn.com/cf.svg", name: "Central African Republic" },
-  { key: "cg", flag: "https://flagcdn.com/cg.svg", name: "Republic of the Congo" },
-  { key: "cd", flag: "https://flagcdn.com/cd.svg", name: "Democratic Republic of the Congo" },
-  { key: "ao", flag: "https://flagcdn.com/ao.svg", name: "Angola" },
-  { key: "zm", flag: "https://flagcdn.com/zm.svg", name: "Zambia" },
-  { key: "zw", flag: "https://flagcdn.com/zw.svg", name: "Zimbabwe" },
-  { key: "bw", flag: "https://flagcdn.com/bw.svg", name: "Botswana" },
-  { key: "na", flag: "https://flagcdn.com/na.svg", name: "Namibia" },
-  { key: "sz", flag: "https://flagcdn.com/sz.svg", name: "Eswatini" },
-  { key: "ls", flag: "https://flagcdn.com/ls.svg", name: "Lesotho" },
-  { key: "mw", flag: "https://flagcdn.com/mw.svg", name: "Malawi" },
-  { key: "mz", flag: "https://flagcdn.com/mz.svg", name: "Mozambique" },
-  { key: "mg", flag: "https://flagcdn.com/mg.svg", name: "Madagascar" },
-  { key: "mu", flag: "https://flagcdn.com/mu.svg", name: "Mauritius" },
-  { key: "sc", flag: "https://flagcdn.com/sc.svg", name: "Seychelles" },
-  { key: "km", flag: "https://flagcdn.com/km.svg", name: "Comoros" },
-  { key: "dj", flag: "https://flagcdn.com/dj.svg", name: "Djibouti" },
-  { key: "so", flag: "https://flagcdn.com/so.svg", name: "Somalia" },
-  { key: "er", flag: "https://flagcdn.com/er.svg", name: "Eritrea" },
-  { key: "ss", flag: "https://flagcdn.com/ss.svg", name: "South Sudan" },
-  { key: "rw", flag: "https://flagcdn.com/rw.svg", name: "Rwanda" },
-  { key: "bi", flag: "https://flagcdn.com/bi.svg", name: "Burundi" },
-  { key: "gw", flag: "https://flagcdn.com/gw.svg", name: "Guinea-Bissau" },
-  { key: "gn", flag: "https://flagcdn.com/gn.svg", name: "Guinea" },
-  { key: "sl", flag: "https://flagcdn.com/sl.svg", name: "Sierra Leone" },
-  { key: "lr", flag: "https://flagcdn.com/lr.svg", name: "Liberia" },
-  { key: "gm", flag: "https://flagcdn.com/gm.svg", name: "Gambia" },
-  { key: "cv", flag: "https://flagcdn.com/cv.svg", name: "Cape Verde" },
-  { key: "mr", flag: "https://flagcdn.com/mr.svg", name: "Mauritania" },
-  { key: "eh", flag: "https://flagcdn.com/eh.svg", name: "Western Sahara" },
-  { key: "st", flag: "https://flagcdn.com/st.svg", name: "São Tomé and Príncipe" },
-  { key: "gq", flag: "https://flagcdn.com/gq.svg", name: "Equatorial Guinea" },
-  { key: "ga", flag: "https://flagcdn.com/ga.svg", name: "Gabon" },
   { key: "global", flag: "https://flagcdn.com/un.svg", name: "Global" },
 ];
 
 // Interest options
 const interestOptions = [
-  { id: "technology", name: "Technology", icon: "💻" },
-  { id: "sports", name: "Sports", icon: "🏀" },
-  { id: "art", name: "Art", icon: "🎨" },
-  { id: "music", name: "Music", icon: "🎵" },
-  { id: "science", name: "Science", icon: "🔬" },
-  { id: "travel", name: "Travel", icon: "✈️" },
-  { id: "reading", name: "Reading", icon: "📚" },
-  { id: "gaming", name: "Gaming", icon: "🎮" },
-  { id: "food", name: "Food", icon: "🍔" },
-  { id: "nature", name: "Nature", icon: "🌳" },
-  { id: "business", name: "Business", icon: "💼" },
-  { id: "education", name: "Education", icon: "🎓" },
-  { id: "health", name: "Health", icon: "🏥" },
-  { id: "fashion", name: "Fashion", icon: "👗" },
-  { id: "finance", name: "Finance", icon: "💰" },
-  { id: "entertainment", name: "Entertainment", icon: "🎬" },
-  { id: "news", name: "News", icon: "📰" },
-  { id: "shopping", name: "Shopping", icon: "🛒" },
-  { id: "social", name: "Social Media", icon: "📱" },
-  { id: "tools", name: "Tools", icon: "🔧" },
+  { id: "productivity_seeker", name: "Productivity Seeker", icon: "💻" },
+  { id: "lifelong_learner", name: "Lifelong Learner", icon: "🏀" },
+  { id: "self_improvement_indfulness", name: "Self-Improvement / Mindfulness", icon: "🎨" },
+  { id: "traveller_explorer", name: "Traveller / Explorer", icon: "🎵" },
+  { id: "content_creator_youTuber", name: "Content Creator / YouTuber", icon: "🔬" },
+  { id: "gamer", name: "Gamer", icon: "✈️" },
+  { id: "music_lover_podcaster", name: "Music Lover / Podcaster", icon: "📚" },
+  { id: "cooking_& _foodie", name: "Cooking & Foodie", icon: "🎮" },
+  { id: "photographer", name: "Photographer", icon: "🍔" },
+  { id: "artist_creative", name: "Artist / Creative", icon: "🌳" },
+  { id: "reader_bookworm", name: "Reader / Bookworm", icon: "💼" },
+  { id: "investor_trader", name: "Investor / Trader", icon: "🎓" },
+  { id: "smart_shopper", name: "Smart Shopper / Deal Hunter", icon: "🏥" }
 ];
 
 // Profession options
@@ -202,11 +116,16 @@ function AddLinks() {
         category.countries.some(country => selectedCountries.includes(country));
       
       // Filter by profession - be more inclusive for new categories
-      const matchesProfession = !category.professions || 
-        category.professions.length === 0 || 
-        category.professions.includes("all") ||
+      const profs = Array.isArray(category.professions)
+        ? category.professions
+        : category.professions
+          ? [category.professions]
+          : [];
+
+      const matchesProfession = profs.length === 0 ||
+        profs.includes("all") ||
         selectedProfessions.includes("all") ||
-        category.professions.some(profession => selectedProfessions.includes(profession));
+        profs.some(profession => selectedProfessions.includes(profession));
       
       // Filter by interests - be more inclusive for new categories
       const matchesInterests = !category.interests || 
@@ -1478,24 +1397,29 @@ function AddLinks() {
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Category Name</label>
-              <input
-                type="text"
-                value={editCategoryData?.name || ""}
-                onChange={(e) =>
-                  setEditCategoryData((prev) => ({
-                    ...prev,
-                    name: e.target.value,
-                  }))
-                }
+                <input
+                  type="text"
+                  value={editCategoryData?.name || ""}
+                  onChange={(e) =>
+                    setEditCategoryData((prev) => ({
+                      ...prev,
+                      name: e.target.value,
+                    }))
+                  }
                   className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded focus:ring-2 focus:ring-blue-500"
-                placeholder="Category name"
-              />
+                  placeholder="Category name"
+                />
               </div>
               {/* Countries Tag Selector */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Countries</label>
                 <div className="flex flex-wrap gap-2 mb-2">
-                  {(editCategoryData?.countries || ["global"]).map((key) => {
+                  {(Array.isArray(editCategoryData?.countries)
+                    ? editCategoryData.countries
+                    : editCategoryData?.countries
+                      ? [editCategoryData.countries]
+                      : ["global"]
+                  ).map((key) => {
                     const c = countries.find(c => c.key === key);
                     return (
                       <span key={key} className="inline-flex items-center bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-1 rounded text-xs font-medium">
@@ -1531,7 +1455,12 @@ function AddLinks() {
               <div>
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Professions</label>
                 <div className="flex flex-wrap gap-2 mb-2">
-                  {(editCategoryData?.professions || ["all"]).map((id) => {
+                  {(Array.isArray(editCategoryData?.professions)
+                    ? editCategoryData.professions
+                    : editCategoryData?.professions
+                      ? [editCategoryData.professions]
+                      : ["all"]
+                  ).map((id) => {
                     const p = professionOptions.find(p => p.id === id);
                     return (
                       <span key={id} className="inline-flex items-center bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-2 py-1 rounded text-xs font-medium">
@@ -1567,7 +1496,12 @@ function AddLinks() {
               <div>
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Interests</label>
                 <div className="flex flex-wrap gap-2 mb-2">
-                  {(editCategoryData?.interests || []).map((id) => {
+                  {(Array.isArray(editCategoryData?.interests)
+                    ? editCategoryData.interests
+                    : editCategoryData?.interests
+                      ? [editCategoryData.interests]
+                      : []
+                  ).map((id) => {
                     const i = interestOptions.find(i => i.id === id);
                     return (
                       <span key={id} className="inline-flex items-center bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 px-2 py-1 rounded text-xs font-medium">

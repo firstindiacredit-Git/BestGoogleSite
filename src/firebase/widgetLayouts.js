@@ -243,324 +243,304 @@ export const resetPageLayout = async (userId, pageName) => {
 
 // Add default bookmarks for non-logged in users
 export const defaultBookmarks = {
-  Popular: [
-    {
-      id: "popular1",
-      name: "Google",
-      link: "https://www.google.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "popular2",
-      name: "YouTube",
-      link: "https://www.youtube.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "popular3",
-      name: "Facebook",
-      link: "https://www.facebook.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "popular4",
-      name: "Amazon",
-      link: "https://www.amazon.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "popular5",
-      name: "Twitter",
-      link: "https://www.twitter.com",
-      addedByAdmin: true,
-    },
-  ],
-  AI: [
-    {
-      id: "ai1",
-      name: "ChatGPT",
-      link: "https://chat.openai.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "ai2",
-      name: "Google Bard",
-      link: "https://bard.google.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "ai3",
-      name: "Claude",
-      link: "https://claude.ai/",
-      addedByAdmin: true,
-    },
-    {
-      id: "ai4",
-      name: "Midjourney",
-      link: "https://www.midjourney.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "ai5",
-      name: "Anthropic Claude",
-      link: "https://www.anthropic.com",
-      addedByAdmin: true,
-    },
-  ],
-  Travel: [
-    {
-      id: "travel1",
-      name: "Booking.com",
-      link: "https://www.booking.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "travel2",
-      name: "Airbnb",
-      link: "https://www.airbnb.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "travel3",
-      name: "Expedia",
-      link: "https://www.expedia.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "travel4",
-      name: "TripAdvisor",
-      link: "https://www.tripadvisor.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "travel5",
-      name: "Kayak",
-      link: "https://www.kayak.com",
-      addedByAdmin: true,
-    },
-  ],
-  Sports: [
-    {
-      id: "sports1",
-      name: "ESPN",
-      link: "https://www.espn.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "sports2",
-      name: "NBA",
-      link: "https://www.nba.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "sports3",
-      name: "FIFA",
-      link: "https://www.fifa.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "sports4",
-      name: "NFL",
-      link: "https://www.nfl.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "sports5",
-      name: "MLB",
-      link: "https://www.mlb.com",
-      addedByAdmin: true,
-    },
-  ],
-  Shopping: [
-    {
-      id: "shopping1",
-      name: "Amazon",
-      link: "https://www.amazon.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "shopping2",
-      name: "eBay",
-      link: "https://www.ebay.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "shopping3",
-      name: "Walmart",
-      link: "https://www.walmart.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "shopping4",
-      name: "Target",
-      link: "https://www.target.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "shopping5",
-      name: "Best Buy",
-      link: "https://www.bestbuy.com",
-      addedByAdmin: true,
-    },
-  ],
-  News: [
-    {
-      id: "news1",
-      name: "CNN",
-      link: "https://www.cnn.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "news2",
-      name: "BBC",
-      link: "https://www.bbc.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "news3",
-      name: "Reuters",
-      link: "https://www.reuters.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "news4",
-      name: "The Guardian",
-      link: "https://www.theguardian.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "news5",
-      name: "New York Times",
-      link: "https://www.nytimes.com",
-      addedByAdmin: true,
-    },
-  ],
-  Jobs: [
-    {
-      id: "job1",
-      name: "LinkedIn Jobs",
-      link: "https://www.linkedin.com/jobs",
-      addedByAdmin: true,
-    },
-    {
-      id: "job2",
-      name: "Indeed",
-      link: "https://www.indeed.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "job3",
-      name: "Glassdoor",
-      link: "https://www.glassdoor.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "job4",
-      name: "Monster",
-      link: "https://www.monster.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "job5",
-      name: "Naukri",
-      link: "https://www.naukri.com",
-      addedByAdmin: true,
-    },
-  ],
-  Movie:[
-    {
-      id: "movie1",
-      name: "Netflix",
-      link: "https://www.netflix.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "movie2",
-      name: "Amazon Prime Video",
-      link: "https://www.primevideo.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "movie3",
-      name: "Disney+ Hotstar",
-      link: "https://www.hotstar.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "movie4",
-      name: "Hulu",
-      link: "https://www.hulu.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "movie5",
-      name: "Apple TV+",
-      link: "https://tv.apple.com",
-      addedByAdmin: true,
-    },
-  ],
-  Finance:[
-    {
-      id: "finance1",
-      name: "PayPal",
-      link: "https://www.paypal.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "finance2",
-      name: "Stripe",
-      link: "https://www.stripe.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "finance3",
-      name: "Wise (TransferWise)",
-      link: "https://wise.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "finance4",
-      name: "Revolut",
-      link: "https://www.revolut.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "finance5",
-      name: "Payoneer",
-      link: "https://www.payoneer.com",
-      addedByAdmin: true,
-    },
-  ],
-  Education:[
-    {
-      id: "edu1",
-      name: "Khan Academy",
-      link: "https://www.khanacademy.org",
-      addedByAdmin: true,
-    },
-    {
-      id: "edu2",
-      name: "Coursera",
-      link: "https://www.coursera.org",
-      addedByAdmin: true,
-    },
-    {
-      id: "edu3",
-      name: "Udemy",
-      link: "https://www.udemy.com",
-      addedByAdmin: true,
-    },
-    {
-      id: "edu4",
-      name: "edX",
-      link: "https://www.edx.org",
-      addedByAdmin: true,
-    },
-    {
-      id: "edu5",
-      name: "Skillshare",
-      link: "https://www.skillshare.com",
-      addedByAdmin: true,
-    },
-  ],
+  Popular: {
+    "Search Engines": [
+      {
+        id: "popular1",
+        name: "Google",
+        link: "https://www.google.com",
+        addedByAdmin: true,
+      },
+      {
+        id: "popular2",
+        name: "Bing",
+        link: "https://www.bing.com",
+        addedByAdmin: true,
+      },
+    ],
+    "Social Media": [
+      {
+        id: "popular3",
+        name: "Facebook",
+        link: "https://www.facebook.com",
+        addedByAdmin: true,
+      },
+      {
+        id: "popular4",
+        name: "Twitter",
+        link: "https://www.twitter.com",
+        addedByAdmin: true,
+      },
+    ],
+  },
+  AI: {
+    "Chatbots": [
+      {
+        id: "ai1",
+        name: "ChatGPT",
+        link: "https://chat.openai.com",
+        addedByAdmin: true,
+      },
+      {
+        id: "ai2",
+        name: "Google Bard",
+        link: "https://bard.google.com",
+        addedByAdmin: true,
+      },
+    ],
+    "Image Generators": [
+      {
+        id: "ai3",
+        name: "Midjourney",
+        link: "https://www.midjourney.com",
+        addedByAdmin: true,
+      },
+      {
+        id: "ai4",
+        name: "DALL-E",
+        link: "https://labs.openai.com/",
+        addedByAdmin: true,
+      },
+    ],
+  },
+  Travel: {
+    "Hotels": [
+      {
+        id: "travel1",
+        name: "Booking.com",
+        link: "https://www.booking.com",
+        addedByAdmin: true,
+      },
+      {
+        id: "travel2",
+        name: "Airbnb",
+        link: "https://www.airbnb.com",
+        addedByAdmin: true,
+      },
+    ],
+    "Flights": [
+      {
+        id: "travel3",
+        name: "Expedia",
+        link: "https://www.expedia.com",
+        addedByAdmin: true,
+      },
+      {
+        id: "travel4",
+        name: "Kayak",
+        link: "https://www.kayak.com",
+        addedByAdmin: true,
+      },
+    ],
+  },
+  Sports: {
+    "News": [
+      {
+        id: "sports1",
+        name: "ESPN",
+        link: "https://www.espn.com",
+        addedByAdmin: true,
+      },
+      {
+        id: "sports2",
+        name: "BBC Sport",
+        link: "https://www.bbc.com/sport",
+        addedByAdmin: true,
+      },
+    ],
+    "Leagues": [
+      {
+        id: "sports3",
+        name: "NBA",
+        link: "https://www.nba.com",
+        addedByAdmin: true,
+      },
+      {
+        id: "sports4",
+        name: "FIFA",
+        link: "https://www.fifa.com",
+        addedByAdmin: true,
+      },
+    ],
+  },
+  Shopping: {
+    "E-Commerce": [
+      {
+        id: "shopping1",
+        name: "Amazon",
+        link: "https://www.amazon.com",
+        addedByAdmin: true,
+      },
+      {
+        id: "shopping2",
+        name: "eBay",
+        link: "https://www.ebay.com",
+        addedByAdmin: true,
+      },
+    ],
+    "Retail": [
+      {
+        id: "shopping3",
+        name: "Walmart",
+        link: "https://www.walmart.com",
+        addedByAdmin: true,
+      },
+      {
+        id: "shopping4",
+        name: "Target",
+        link: "https://www.target.com",
+        addedByAdmin: true,
+      },
+    ],
+  },
+  News: {
+    "International": [
+      {
+        id: "news1",
+        name: "CNN",
+        link: "https://www.cnn.com",
+        addedByAdmin: true,
+      },
+      {
+        id: "news2",
+        name: "BBC",
+        link: "https://www.bbc.com",
+        addedByAdmin: true,
+      },
+    ],
+    "Finance": [
+      {
+        id: "news3",
+        name: "Reuters",
+        link: "https://www.reuters.com",
+        addedByAdmin: true,
+      },
+      {
+        id: "news4",
+        name: "Bloomberg",
+        link: "https://www.bloomberg.com",
+        addedByAdmin: true,
+      },
+    ],
+  },
+  Jobs: {
+    "Job Boards": [
+      {
+        id: "job1",
+        name: "LinkedIn Jobs",
+        link: "https://www.linkedin.com/jobs",
+        addedByAdmin: true,
+      },
+      {
+        id: "job2",
+        name: "Indeed",
+        link: "https://www.indeed.com",
+        addedByAdmin: true,
+      },
+    ],
+    "Company Careers": [
+      {
+        id: "job3",
+        name: "Google Careers",
+        link: "https://careers.google.com",
+        addedByAdmin: true,
+      },
+      {
+        id: "job4",
+        name: "Amazon Jobs",
+        link: "https://www.amazon.jobs",
+        addedByAdmin: true,
+      },
+    ],
+  },
+  Movie: {
+    "Streaming": [
+      {
+        id: "movie1",
+        name: "Netflix",
+        link: "https://www.netflix.com",
+        addedByAdmin: true,
+      },
+      {
+        id: "movie2",
+        name: "Amazon Prime Video",
+        link: "https://www.primevideo.com",
+        addedByAdmin: true,
+      },
+    ],
+    "Reviews": [
+      {
+        id: "movie3",
+        name: "Rotten Tomatoes",
+        link: "https://www.rottentomatoes.com",
+        addedByAdmin: true,
+      },
+      {
+        id: "movie4",
+        name: "IMDb",
+        link: "https://www.imdb.com",
+        addedByAdmin: true,
+      },
+    ],
+  },
+  Finance: {
+    "Payments": [
+      {
+        id: "finance1",
+        name: "PayPal",
+        link: "https://www.paypal.com",
+        addedByAdmin: true,
+      },
+      {
+        id: "finance2",
+        name: "Stripe",
+        link: "https://www.stripe.com",
+        addedByAdmin: true,
+      },
+    ],
+    "Banking": [
+      {
+        id: "finance3",
+        name: "Wise (TransferWise)",
+        link: "https://wise.com",
+        addedByAdmin: true,
+      },
+      {
+        id: "finance4",
+        name: "Revolut",
+        link: "https://www.revolut.com",
+        addedByAdmin: true,
+      },
+    ],
+  },
+  Education: {
+    "Online Courses": [
+      {
+        id: "edu1",
+        name: "Khan Academy",
+        link: "https://www.khanacademy.org",
+        addedByAdmin: true,
+      },
+      {
+        id: "edu2",
+        name: "Coursera",
+        link: "https://www.coursera.org",
+        addedByAdmin: true,
+      },
+    ],
+    "Skill Learning": [
+      {
+        id: "edu3",
+        name: "Udemy",
+        link: "https://www.udemy.com",
+        addedByAdmin: true,
+      },
+      {
+        id: "edu4",
+        name: "Skillshare",
+        link: "https://www.skillshare.com",
+        addedByAdmin: true,
+      },
+    ],
+  },
 };

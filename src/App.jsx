@@ -60,8 +60,9 @@ const Forgotpassword = lazy(() =>
 const AddLinks = lazy(() => import("./components/Admin/AddLinks.jsx"));
 const Dashboard = lazy(() => import("./components/Admin/Dashboard.jsx"));
 const AddBookmark = lazy(() => import("./components/Admin/AddBookmark.jsx"));
+const AddSubcategory =lazy(() => import("./components/Admin/AddSubcategory.jsx"))
 const Users = lazy(() => import("./components/Admin/Users.jsx"));
-// const AdminImages = lazy(() => import("./components/Admin/ImageAdminUpload.jsx"));  
+const AdminImages = lazy(() => import("./components/Admin/ImageAdminUpload.jsx"));  
 const PremiumPage = lazy(() => import("./components/PremiumPage.jsx"));
 const PremiumForm = lazy(() => import("./components/PremiumForm.jsx"));
 const LandingPage = lazy(() => import("./components/LandingPage.jsx"));
@@ -875,7 +876,7 @@ const App = () => {
                       <Route path="/contact" element={<ContactUs />} />
                       <Route path="/blog" element={<Blog />} />
                       <Route path="/blog/:id" element={<BlogDetail />} />
-                      {/* <Route path="/admin/adminImages" element={<AdminImages />} /> */}
+                      <Route path="/admin/adminImages" element={<AdminImages />} />
                       <Route
                         path="/profile"
                         element={
@@ -1075,6 +1076,11 @@ const App = () => {
                           path="/admin/Review"
                           element={<AdminRoute children={<Userreview />} />}
                         />
+                         <Route
+                        path="/admin/addsubcatbookmark"
+                        element={<AdminRoute children={<AddSubcategory />} />}
+                      />
+
                       </Route>
 
                       <Route path="/shortcut-test" element={<ShortcutTest />} />
