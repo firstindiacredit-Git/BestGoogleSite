@@ -12,6 +12,7 @@ import {
   where,
   deleteDoc,
   writeBatch,
+  onSnapshot,
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import {
@@ -176,7 +177,6 @@ MemoizedBookmarkForm.propTypes = {
 
 function PopularBookmarks() {
   const [categories, setCategories] = useState([]);
-  const [links, setLinks] = useState([]);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [lineOptions, setLineOptions] = useState(() => {
@@ -274,10 +274,10 @@ function PopularBookmarks() {
   const [showSuggestionWidget, setShowSuggestionWidget] = useState(true);
 
   const topFacebookLikedAdminBookmarks = React.useMemo(() => {
-    const adminLinks = links.filter(link => link.isAdminBookmark);
+    const adminLinks = categories.filter(link => link.isAdminBookmark);
     const sorted = [...adminLinks].sort((a, b) => (bookmarkLikes[b.id] || 0) - (bookmarkLikes[a.id] || 0));
     return sorted.slice(0, 3).filter(link => (bookmarkLikes[link.id] || 0) > 0);
-  }, [links, bookmarkLikes]);
+  }, [categories, bookmarkLikes]);
 
   // Import bookmarks from HTML file (now supports Chrome bookmarks format)
   const handleImportBookmarks = (event) => {
@@ -688,7 +688,6 @@ function PopularBookmarks() {
       if (!user) {
         setLoading(false);
         setCategories([]);
-        setLinks([]);
         setCategoryColumns({ column1: [], column2: [], column3: [], column4: [] });
         setColumnCount(4);
         setHiddenBookmarkIds([]);
@@ -799,27 +798,28 @@ function PopularBookmarks() {
         const userBookmarkUrls = new Set(userBookmarks.map((b) => `${b.categoryId}-${b.url}`));
         
         // Fetch admin bookmarks for each admin category
-        const adminBookmarksPromises = adminCategories.map(async (category) => {
-          const bookmarksSnapshot = await getDocs(query(collection(db, "links"), where("category", "==", category.id)));
-          return bookmarksSnapshot.docs.map((doc) => {
-            const data = doc.data();
-            const key = `${category.id}-${data.link}`;
-            if (userBookmarkUrls.has(key)) return null;
-            return {
-              id: doc.id,
-              ...data,
-              title: data.name,
-              url: data.link,
-              categoryId: category.id,
-              isHidden: hiddenIds.includes(doc.id),
-              isAdminBookmark: true,
-              createdBy: data.createdBy,
-              updatedAt: data.updatedAt,
-              order: data.order || 0,
-            };
-          }).filter(Boolean).filter((bookmark) => !hiddenIds.includes(bookmark.id));
-        });
-        const adminBookmarks = (await Promise.all(adminBookmarksPromises)).flat();
+        // const adminBookmarksPromises = adminCategories.map(async (category) => {
+        //   const bookmarksSnapshot = await getDocs(query(collection(db, "links"), where("category", "==", category.id)));
+        //   return bookmarksSnapshot.docs.map((doc) => {
+        //     const data = doc.data();
+        //     const key = `${category.id}-${data.link}`;
+        //     if (userBookmarkUrls.has(key)) return null;
+        //     return {
+        //       id: doc.id,
+        //       ...data,
+        //       title: data.name,
+        //       url: data.link,
+        //       categoryId: category.id,
+        //       isHidden: hiddenIds.includes(doc.id),
+        //       isAdminBookmark: true,
+        //       createdBy: data.createdBy,
+        //       updatedAt: data.updatedAt,
+        //       order: data.order || 0,
+        //     };
+        //   }).filter(Boolean).filter((bookmark) => !hiddenIds.includes(bookmark.id));
+        // });
+        // const adminBookmarks = (await Promise.all(adminBookmarksPromises)).flat();
+        // console.log('Admin bookmarks loaded:', adminBookmarks.length);
         
         // Also fetch admin bookmarks for categories that might not be in adminCategories but are in matchingCategories
         const additionalAdminBookmarksPromises = matchingCategories
@@ -847,7 +847,7 @@ function PopularBookmarks() {
         const additionalAdminBookmarks = (await Promise.all(additionalAdminBookmarksPromises)).flat();
         
         // Combine all admin bookmarks
-        const allAdminBookmarks = [...adminBookmarks, ...additionalAdminBookmarks];
+        const allAdminBookmarks = [...adminCategories, ...additionalAdminBookmarks];
         
         // Combine all bookmarks
         const allBookmarks = [...userBookmarks, ...allAdminBookmarks];
@@ -864,7 +864,6 @@ function PopularBookmarks() {
         // Set state if still mounted
         if (isMounted) {
           setCategories(matchingCategories);
-          setLinks(allBookmarks);
           setCategoryColumns(finalColumns);
           setColumnCount(colCount);
           setHiddenBookmarkIds(hiddenIds);
@@ -887,7 +886,6 @@ function PopularBookmarks() {
       } catch (error) {
         if (isMounted) {
           setCategories([]);
-          setLinks([]);
           setCategoryColumns({ column1: [], column2: [], column3: [], column4: [] });
           setColumnCount(4);
           setHiddenBookmarkIds([]);
@@ -1246,9 +1244,7 @@ function PopularBookmarks() {
       await deleteDoc(doc(db, "users", user.uid, "UserCategory", categoryId));
 
       // Get all bookmarks in this category
-      const categoryBookmarks = links.filter(
-        (link) => link.categoryId === categoryId
-      );
+      const categoryBookmarks = categoryBookmarks[categoryId]?.bookmarks || [];
 
       console.log(
         `Found ${categoryBookmarks.length} bookmarks to delete in category ${categoryId}`
@@ -1313,9 +1309,11 @@ function PopularBookmarks() {
       );
 
       // Remove all bookmarks for this category from the link state
-      setLinks((prevLinks) =>
-        prevLinks.filter((link) => link.categoryId !== categoryId)
-      );
+      setCategoryBookmarks(prev => {
+        const newState = { ...prev };
+        delete newState[categoryId];
+        return newState;
+      });
 
       // Remove the category from openCategories state
       setOpenCategories((prev) => {
@@ -1368,44 +1366,6 @@ function PopularBookmarks() {
     }
   };
 
-  const fetchFavicon = async (url) => {
-    try {
-      let cleanUrl = url.trim();
-      if (!cleanUrl.match(/^https?:\/\//i)) {
-        cleanUrl = `http://${cleanUrl}`;
-      }
-      const urlObj = new URL(cleanUrl);
-      const domain = urlObj.hostname;
-
-      // Try to fetch favicon
-      const faviconUrl = `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${encodeURIComponent(
-        domain
-      )}&size=32`;
-
-      // Test if favicon exists
-      const response = await fetch(faviconUrl);
-      if (response.ok) {
-        return faviconUrl;
-      }
-      return "https://www.google.com/favicon.ico";
-    } catch {
-      return "https://www.google.com/favicon.ico";
-    }
-  };
-
-  const validateUrl = (url) => {
-    try {
-      let cleanUrl = url.trim();
-      if (!cleanUrl.match(/^https?:\/\//i)) {
-        cleanUrl = `http://${cleanUrl}`;
-      }
-      new URL(cleanUrl);
-      return cleanUrl;
-    } catch {
-      throw new Error("Invalid URL format");
-    }
-  };
-
   const handleUrlChange = (e) => {
     const url = e.target.value;
     // Just update the URL immediately, without fetching favicon on every keystroke
@@ -1453,8 +1413,7 @@ function PopularBookmarks() {
     try {
       const normalizedUrl = validateUrl(newBookmark.url.trim());
       const urlKey = `${categoryToUse.id}-${normalizedUrl}`;
-      const isDuplicate = links.some((link) => {
-        if (link.categoryId !== categoryToUse.id) return false;
+      const isDuplicate = categoryBookmarks[categoryToUse.id]?.bookmarks?.some((link) => {
         try {
           const linkUrl = validateUrl(link.url);
           return linkUrl === normalizedUrl;
@@ -1466,7 +1425,6 @@ function PopularBookmarks() {
         //warning("This URL already exists in this category");
         return;
       }
-      const tempId = `temp_${btoa(urlKey).replace(/[^a-zA-Z0-9]/g, "")}_${Date.now()}`;
       const bookmarkData = {
         title: newBookmark.title.trim(),
         url: normalizedUrl,
@@ -1474,21 +1432,17 @@ function PopularBookmarks() {
         categoryId: categoryToUse.id,
         userId: user.uid,
         createdAt: new Date().toISOString(),
-        order: links.filter((link) => link.categoryId === categoryToUse.id).length,
+        order: categoryBookmarks[categoryToUse.id]?.bookmarks?.length || 0,
         isAdminBookmark: false,
         _tempUrlKey: urlKey,
       };
-      setLinks((prevLinks) => {
-        const existingBookmark = prevLinks.find(
-          (link) =>
-            link.categoryId === categoryToUse.id &&
-            link.url === normalizedUrl
-        );
-        if (existingBookmark) {
-          return prevLinks;
-        }
-        return [...prevLinks, { ...bookmarkData, id: tempId }];
-      });
+      setCategoryBookmarks(prev => ({
+        ...prev,
+        [categoryToUse.id]: {
+          ...(prev[categoryToUse.id] || {}),
+          bookmarks: [...(prev[categoryToUse.id]?.bookmarks || []), bookmarkData],
+        },
+      }));
       await addDoc(
         collection(db, "users", user.uid, "CatBookmarks"),
         bookmarkData
@@ -1499,16 +1453,20 @@ function PopularBookmarks() {
       //success("Bookmark added successfully");
     } catch {
       const normalizedUrl = validateUrl(newBookmark.url.trim());
-      setLinks((prevLinks) =>
-        prevLinks.filter(
-          (link) =>
-            !(
-              link.id.startsWith("temp_") &&
-              link.categoryId === (selectedCategoryId || (selectedCategory && selectedCategory.id)) &&
-              link.url === normalizedUrl
-            )
-        )
-      );
+      setCategoryBookmarks(prev => ({
+        ...prev,
+        [categoryToUse.id]: {
+          ...(prev[categoryToUse.id] || {}),
+          bookmarks: prev[categoryToUse.id]?.bookmarks?.filter(
+            (link) =>
+              !(
+                link.id.startsWith("temp_") &&
+                link.categoryId === (selectedCategoryId || (selectedCategory && selectedCategory.id)) &&
+                link.url === normalizedUrl
+              )
+          ) || [],
+        },
+      }));
       // ... existing code ...
     }
   };
@@ -1533,16 +1491,9 @@ function PopularBookmarks() {
       onClick: () => {
         setSelectedCategory(category);
         // Filter out hidden bookmarks when setting editModeBookmarks
-        const visibleBookmarks = links
-          .filter((link) => {
-            // Check if the bookmark is not hidden
-            const isNotHidden = !hiddenBookmarkIds.includes(link.id);
-            // Check if it belongs to the selected category
-            const belongsToCategory = link.categoryId === category.id;
-            return isNotHidden && belongsToCategory;
-          })
-          .sort((a, b) => (a.order || 0) - (b.order || 0))
-          .map((link) => ({ ...link, isEditing: false }));
+        const visibleBookmarks = categoryBookmarks[category.id]?.bookmarks?.filter(
+          (link) => !hiddenBookmarkIds.includes(link.id)
+        ) || [];
 
         setEditModeBookmarks(visibleBookmarks);
         setIsEditModePanelVisible(true);
@@ -1808,13 +1759,16 @@ function PopularBookmarks() {
         console.log("Created user copy of admin bookmark");
 
         // Update local state to show the new bookmark
-        setLinks((prevLinks) => [
-          ...prevLinks.filter((link) => link.id !== editingBookmark.id), // Remove original from view
-          {
-            ...userBookmarkData,
-            id: docRef.id,
-          },
-        ]);
+        setCategoryBookmarks(prev => {
+          const filtered = prev[editingBookmark.categoryId]?.bookmarks?.filter(link => link.id !== editingBookmark.id) || [];
+          return {
+            ...prev,
+            [editingBookmark.categoryId]: {
+              ...(prev[editingBookmark.categoryId] || {}),
+              bookmarks: [...filtered, userBookmarkData],
+            },
+          };
+        });
       } else {
         // User bookmarks can be updated directly
         const docRef = doc(
@@ -1832,17 +1786,21 @@ function PopularBookmarks() {
         console.log("Updated user bookmark");
 
         // Update local state
-        setLinks((prevLinks) =>
-          prevLinks.map((link) =>
-            link.id === editingBookmark.id
-              ? {
-                  ...link,
-                  title: values.title,
-                  url: values.url,
-                }
-              : link
-          )
-        );
+        setCategoryBookmarks(prev => {
+          const filtered = prev[editingBookmark.categoryId]?.bookmarks?.filter(link => link.id !== editingBookmark.id) || [];
+          return {
+            ...prev,
+            [editingBookmark.categoryId]: {
+              ...(prev[editingBookmark.categoryId] || {}),
+              bookmarks: [...filtered, {
+                ...editingBookmark,
+                title: values.title,
+                url: values.url,
+                updatedAt: new Date().toISOString(),
+              }],
+            },
+          };
+        });
       }
 
       //success("Bookmark updated successfully");
@@ -2077,16 +2035,14 @@ function PopularBookmarks() {
 
     // Helper: for each category, get bookmarks in that category
     const getCategoryLinks = (catId) => {
-      const categoryLinks = links.filter(
-        (link) => link.categoryId === catId && !hiddenBookmarkIds.includes(link.id)
-      );
+      const categoryLinks = categoryBookmarks[catId]?.bookmarks || [];
       
       // If no bookmarks found and this is an admin category, try to load them
       if (categoryLinks.length === 0) {
         const category = categories.find(c => c.id === catId);
         if (category && category.isAdminCategory) {
           // Load admin bookmarks for this category asynchronously
-          ensureAdminBookmarksForCategory(catId);
+          fetchBookmarksForCategory(catId);
         }
       }
       
@@ -2801,6 +2757,9 @@ function PopularBookmarks() {
 
   // Function to add category to a column
   const handleAddToColumn = (category, columnIndex) => {
+    // Prevent duplicates: check if category is already in previewCategories
+    if (previewCategories.some(cat => cat.id === category.id)) return;
+    // Also check if already in the column structure
     const categoriesInColumn = getColumnCategories(columnIndex);
     const newOrder = categoriesInColumn.length;
 
@@ -2822,7 +2781,10 @@ function PopularBookmarks() {
       if (!newColumns[colKey]) {
         newColumns[colKey] = [];
       }
-      newColumns[colKey] = [...newColumns[colKey], category.id];
+      // Prevent duplicates in columns
+      if (!newColumns[colKey].includes(category.id)) {
+        newColumns[colKey] = [...newColumns[colKey], category.id];
+      }
       return newColumns;
     });
   };
@@ -3171,9 +3133,16 @@ function PopularBookmarks() {
           }
 
           // Update local state
-          setLinks((prevLinks) =>
-            prevLinks.filter((link) => !selectedBookmarks.includes(link.id))
-          );
+          setCategoryBookmarks(prev => {
+            const newState = { ...prev };
+            bookmarksToDelete.forEach(bookmark => {
+              newState[bookmark.categoryId] = {
+                ...(prev[bookmark.categoryId] || {}),
+                bookmarks: prev[bookmark.categoryId]?.bookmarks?.filter(b => b.id !== bookmark.id) || [],
+              };
+            });
+            return newState;
+          });
           setEditModeBookmarks((prevBookmarks) =>
             prevBookmarks.filter(
               (bookmark) => !selectedBookmarks.includes(bookmark.id)
@@ -3248,11 +3217,7 @@ function PopularBookmarks() {
     let html = `<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Exported Bookmarks</title></head><body style='font-family:sans-serif;'>`;
     html += `<h1>Exported Bookmarks</h1>`;
     categories.forEach((category) => {
-      const categoryLinks = links.filter(
-        (link) =>
-          link.categoryId === category.id &&
-          !hiddenBookmarkIds.includes(link.id)
-      );
+      const categoryLinks = categoryBookmarks[category.id]?.bookmarks || [];
       if (categoryLinks.length === 0) return;
       html += `<h2>${category.name || category.newCategory}</h2><ul>`;
       categoryLinks.forEach((link) => {
@@ -3394,42 +3359,6 @@ function PopularBookmarks() {
         placement: "topRight",
         duration: 3
       });
-    }
-  };
-
-  // Function to ensure admin bookmarks are loaded for a category
-  const ensureAdminBookmarksForCategory = async (categoryId) => {
-    try {
-      // Check if we already have admin bookmarks for this category
-      const existingBookmarks = links.filter(link => link.categoryId === categoryId && link.isAdminBookmark);
-      if (existingBookmarks.length > 0) {
-        return; // Already have bookmarks for this category
-      }
-
-      // Fetch admin bookmarks for this category
-      const bookmarksSnapshot = await getDocs(query(collection(db, "links"), where("category", "==", categoryId)));
-      const newAdminBookmarks = bookmarksSnapshot.docs.map((doc) => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          ...data,
-          title: data.name,
-          url: data.link,
-          categoryId: categoryId,
-          isHidden: hiddenBookmarkIds.includes(doc.id),
-          isAdminBookmark: true,
-          createdBy: data.createdBy,
-          updatedAt: data.updatedAt,
-          order: data.order || 0,
-        };
-      }).filter((bookmark) => !hiddenBookmarkIds.includes(bookmark.id));
-
-      if (newAdminBookmarks.length > 0) {
-        setLinks(prevLinks => [...prevLinks, ...newAdminBookmarks]);
-        console.log(`Loaded ${newAdminBookmarks.length} admin bookmarks for category ${categoryId}`);
-      }
-    } catch (error) {
-      console.error(`Error loading admin bookmarks for category ${categoryId}:`, error);
     }
   };
 
@@ -3582,6 +3511,102 @@ function PopularBookmarks() {
     }
   };
 
+  // Bookmarks per category: { [categoryId]: { bookmarks: [], loading: false, unsubscribe: null } }
+  const [categoryBookmarks, setCategoryBookmarks] = useState({});
+
+  // Store unsubscribe functions for Firestore listeners
+  const unsubscribeRefs = useRef({});
+
+  // Helper: fetch admin bookmarks for a category
+  const fetchAdminBookmarksForCategory = async (categoryId) => {
+    try {
+      const bookmarksSnapshot = await getDocs(query(collection(db, "links"), where("category", "==", categoryId)));
+      return bookmarksSnapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          title: data.name,
+          url: data.link,
+          categoryId: categoryId,
+          isAdminBookmark: true,
+          createdBy: data.createdBy,
+          updatedAt: data.updatedAt,
+          order: data.order || 0,
+        };
+      });
+    } catch (error) {
+      console.error("Error fetching admin bookmarks:", error);
+      return [];
+    }
+  };
+
+  // Function to fetch bookmarks for a category (with Firestore listener)
+  const fetchBookmarksForCategory = (categoryId) => {
+    if (!user || !categoryId) return;
+    // If already listening, do nothing
+    if (unsubscribeRefs.current[categoryId]) return;
+    setCategoryBookmarks(prev => ({
+      ...prev,
+      [categoryId]: { ...(prev[categoryId] || {}), loading: true }
+    }));
+    // ---
+    // Always fetch user bookmarks from Firestore for the expanded category.
+    // This ensures user-added bookmarks always show after refresh when the category is expanded.
+    // ---
+    const colRef = collection(db, "users", user.uid, "CatBookmarks");
+    const q = query(colRef, where("categoryId", "==", categoryId));
+    const unsubscribe = onSnapshot(q, async (snapshot) => {
+      const userBookmarks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), isAdminBookmark: false }));
+      // Fetch admin bookmarks
+      const adminBookmarks = await fetchAdminBookmarksForCategory(categoryId);
+      // Hide admin bookmarks that are hidden or overridden by user
+      const userBookmarkUrls = new Set(userBookmarks.map(b => b.url));
+      const hiddenIds = (categoryBookmarks[categoryId]?.hiddenBookmarkIds || hiddenBookmarkIds) || [];
+      const filteredAdmin = adminBookmarks.filter(b => !userBookmarkUrls.has(b.url) && !hiddenIds.includes(b.id));
+      // Merge user and admin bookmarks
+      const bookmarks = [...userBookmarks, ...filteredAdmin];
+      setCategoryBookmarks(prev => ({
+        ...prev,
+        [categoryId]: { ...(prev[categoryId] || {}), bookmarks, loading: false }
+      }));
+      console.log(`Admin bookmarks loaded for category ${categoryId}: ${adminBookmarks.length}`);
+      console.log(`User bookmarks loaded for category ${categoryId}: ${userBookmarks.length}`);
+      console.log(`Total bookmarks loaded for category ${categoryId}: ${bookmarks.length}`);
+    });
+    unsubscribeRefs.current[categoryId] = unsubscribe;
+  };
+
+  // Function to unsubscribe Firestore listener for a category
+  const unsubscribeCategory = (categoryId) => {
+    if (unsubscribeRefs.current[categoryId]) {
+      unsubscribeRefs.current[categoryId]();
+      delete unsubscribeRefs.current[categoryId];
+      setCategoryBookmarks(prev => {
+        const newState = { ...prev };
+        delete newState[categoryId];
+        return newState;
+      });
+    }
+  };
+
+  // On initial mount, fetch bookmarks for all categories that are open by default
+  useEffect(() => {
+    if (!user) return;
+    Object.entries(openCategories).forEach(([categoryId, isOpen]) => {
+      if (isOpen) {
+        fetchBookmarksForCategory(categoryId);
+      }
+    });
+    // Cleanup on unmount: unsubscribe all
+    return () => {
+      Object.keys(openCategories).forEach(categoryId => unsubscribeCategory(categoryId));
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  // When a category is toggled open/closed, update listeners
+  
   if (loading) {
     return (
       <div className="w-[85vw] mx-auto" style={{ padding: "24px" }}>

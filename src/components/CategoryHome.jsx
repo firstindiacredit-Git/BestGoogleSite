@@ -12,7 +12,7 @@ import {
   addDoc,
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
-import { X, Folder, Plus, Settings as SettingsIcon, Maximize2 } from "lucide-react";
+import { X, Folder, Plus, Settings as SettingsIcon } from "lucide-react";
 // Modal and Input removed (no longer used)
 import PropTypes from "prop-types";
 import { defaultBookmarks } from "../firebase/widgetLayouts";
@@ -21,7 +21,7 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
   // Removed unused user state
   const [bookmarks, setBookmarks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState('subcategory'); // 'subcategory' or 'all'
+  const [viewMode] = useState('subcategory'); // 'subcategory' or 'all'
   const [showSettings, setShowSettings] = useState(false);
   // Removed unused showUrl, iconSize, titleLines, dropdownPosition
   // Removed unused modal and hover state
@@ -44,6 +44,9 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
   const [addLoading, setAddLoading] = useState(false);
   const [addError, setAddError] = useState("");
   const [subcategories, setSubcategories] = useState([]);
+  // Add new state for list view
+  const [mainViewMode, setMainViewMode] = useState('subcategory'); // 'subcategory', 'all', or 'list'
+  const [selectedCategory, setSelectedCategory] = useState(Object.keys(defaultBookmarks)[0]);
 
   // Add localStorage keys
   const bookmarksStorageKey = `bookmarks_${categoryType}`;
@@ -107,6 +110,16 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
       }
     }
     return [];
+  };
+
+  // Helper to get all categories
+  const getAllCategories = () => Object.keys(defaultBookmarks);
+
+  // Helper to get all bookmarks for a category (flatten all subcategories)
+  const getAllBookmarksForCategoryList = (cat) => {
+    const catObj = defaultBookmarks[cat];
+    if (!catObj) return [];
+    return Object.values(catObj).flat();
   };
 
   // Fetch subcategories from Firestore when categoryType changes
@@ -699,12 +712,56 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
     );
   };
 
-  // Extend button click handler
-  const handleExtendClick = () => {
-    setShowExtendPopup(true);
-    // Yahi function “Show All Bookmarks” ke liye bhi use hota hai
-    // No need to assign allBookmarks or setExtendBookmarks
-  };
+  // (handleExtendClick removed as it's not used)
+
+  // Render category list view (like SearchPage navigation)
+  const renderCategoryListView = () => (
+    <div className="w-full">
+      <div className="flex flex-wrap gap-2 mb-4">
+        {getAllCategories().map((cat) => (
+          <button
+            key={cat}
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+              selectedCategory === cat
+                ? 'bg-indigo-500 text-white dark:bg-[#513a7a]'
+                : 'dark:text-white hover:bg-gray-100 dark:hover:bg-[#28283A] bg-gray-100'
+            }`}
+            onClick={() => setSelectedCategory(cat)}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+      <div className="mt-2">
+        {getAllBookmarksForCategoryList(selectedCategory).length === 0 ? (
+          <div className="text-center text-gray-500">No bookmarks found.</div>
+        ) : (
+          <div className="flex flex-col gap-1">
+            {getAllBookmarksForCategoryList(selectedCategory).map((item) => (
+              <a
+                key={item.id}
+                href={item.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer group"
+              >
+                <img
+                  src={`https://www.google.com/s2/favicons?sz=64&domain=${(() => { try { return new URL(item.link).hostname; } catch { return 'google.com'; } })()}`}
+                  alt=""
+                  className="w-6 h-6 rounded"
+                  onError={(e) => { e.target.onerror = null; e.target.src = 'https://www.google.com/favicon.ico'; }}
+                />
+                <span className="flex-1 text-gray-900 dark:text-gray-100 truncate">
+                  {item.name}
+                </span>
+                <svg className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <div
@@ -715,45 +772,42 @@ const CategoryHome = ({ categoryType, collapsed = false }) => {
         transition: "height 0.2s ease-in-out",
       }}
     >
+      {/* Add main view mode selector */}
+      <div className="flex gap-1 mb-4">
+          <button
+          onClick={() => setMainViewMode('subcategory')}
+          className={`px-3 py-2 rounded dark:border-gray-700 focus:outline-none transition text-sm ${mainViewMode === 'subcategory' ? 'bg-gray-200 text-gray-700' : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200'}`}
+          >
+            By Subcategory
+          </button>
+          <button
+          onClick={() => setMainViewMode('all')}
+          className={`px-3 py-2 rounded dark:border-gray-700 focus:outline-none transition text-sm ${mainViewMode === 'all' ? 'bg-gray-200 text-gray-700' : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200'}`}
+          >
+            All Bookmarks
+          </button>
+          <button
+          onClick={() => setMainViewMode('list')}
+          className={`px-3 py-2 rounded dark:border-gray-700 focus:outline-none transition text-sm ${mainViewMode === 'list' ? 'bg-gray-200 text-gray-700' : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200'}`}
+        >
+          Categories
+          </button>
+        </div>
       {/* Bookmarks UI: selector and list */}
-      {viewMode === 'subcategory' && !collapsed && (
+      {mainViewMode === 'subcategory' && !collapsed && (
         <div className="relative">
           {renderSubcategorySelector()}
           {renderSubcategoryBookmarksInline()}
         </div>
       )}
-      {viewMode === 'all' && !collapsed && (
+      {mainViewMode === 'all' && !collapsed && (
         <div className="relative">
           {renderAllBookmarksInline()}
         </div>
       )}
+      {mainViewMode === 'list' && !collapsed && renderCategoryListView()}
       {/* Bottom action row: toggle and buttons */}
       <div className="flex items-center justify-end gap-2 mt-6">
-        {/* Toggle buttons */}
-        <div className="flex gap-1">
-          <button
-            onClick={() => setViewMode('subcategory')}
-            className={`px-3 py-2 rounded dark:border-gray-700 focus:outline-none transition text-sm
-              ${viewMode === 'subcategory' ? 'bg-gray-200 text-gray-700' : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200'}`}
-          >
-            By Subcategory
-          </button>
-          <button
-            onClick={() => setViewMode('all')}
-            className={`px-3 py-2 rounded-r  dark:border-gray-700 focus:outline-none transition text-sm
-              ${viewMode === 'all' ? 'bg-gray-200 text-gray-700' : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200'}`}
-          >
-            All Bookmarks
-          </button>
-          <button
-            className="p-2 rounded bg-gray-100 dark:bg-gray-800 dark:text-white text-gray-700 hover:bg-gray-200 transition"
-            onClick={handleExtendClick}
-            aria-label="Extend"
-            title="Extend"
-          >
-            <Maximize2 className="w-5 h-5" />
-          </button>
-        </div>
         {/* Add and Settings buttons */}
         <button
           className="p-2 rounded bg-gray-100 dark:bg-gray-800 dark:text-white text-gray-700 hover:bg-gray-200 transition"

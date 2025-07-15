@@ -24,13 +24,15 @@ const AddSubcategory = () => {
   const [bookmarkMessages, setBookmarkMessages] = useState({});
   const [bookmarkLoading, setBookmarkLoading] = useState({});
   const [showBookmarkModal, setShowBookmarkModal] = useState({}); // { category: { subcat: bool } }
-  const [bookmarksMap, setBookmarksMap] = useState({}); // { category: { subcat: [bookmarks] } }
   const [editSubcatModal, setEditSubcatModal] = useState({}); // { category, subcat, value }
   const [editBookmarkModal, setEditBookmarkModal] = useState({}); // { category, subcat, bookmark }
   const [deleteConfirm, setDeleteConfirm] = useState({}); // { type: 'subcat'|'bookmark', category, subcat, bookmark }
   // Update subcategory data model to { name, iconUrl }
   // Add 'iconUrl' input to add/edit forms, and render icon in UI
   const [subcatIconForms, setSubcatIconForms] = useState({}); // { category: iconUrl }
+  // Add a new state to store bookmarks per subcategory for admin view
+  const [adminBookmarksMap, setAdminBookmarksMap] = useState({}); // { category: { subcat: [bookmarks] } }
+  const [openSubcats, setOpenSubcats] = useState({}); // { category: { subcat: true/false } }
 
   // Fetch subcategories for all categories from Firestore
   useEffect(() => {
@@ -56,11 +58,12 @@ const AddSubcategory = () => {
     return () => unsubscribes.forEach(unsub => unsub());
   }, [categories]);
 
-  // Fetch bookmarks for each subcategory
+  // Fetch bookmarks for each subcategory for admin view
   useEffect(() => {
     const unsubscribes = [];
     categories.forEach(category => {
-      (subcategoriesMap[category] || []).forEach(subcat => {
+      (subcategoriesMap[category] || []).forEach(subcatObj => {
+        const subcat = typeof subcatObj === 'string' ? subcatObj : subcatObj.name;
         // Find category doc id
         const fetchAndListen = async () => {
           const q = query(collection(db, "category"), where("newCategory", "==", category));
@@ -69,7 +72,7 @@ const AddSubcategory = () => {
           const categoryId = snapshot.docs[0].id;
           const linksQuery = query(collection(db, "links"), where("category", "==", categoryId), where("subcategory", "==", subcat));
           const unsubscribe = onSnapshot(linksQuery, (linksSnap) => {
-            setBookmarksMap(prev => ({
+            setAdminBookmarksMap(prev => ({
               ...prev,
               [category]: {
                 ...(prev[category] || {}),
@@ -299,6 +302,16 @@ const AddSubcategory = () => {
     setDeleteConfirm({});
   };
 
+  const toggleSubcat = (category, subcat) => {
+    setOpenSubcats(prev => ({
+      ...prev,
+      [category]: {
+        ...(prev[category] || {}),
+        [subcat]: !(prev[category]?.[subcat])
+      }
+    }));
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center bg-white dark:bg-gray-900 py-8">
       <h2 className="text-2xl font-bold mb-8 text-gray-800 dark:text-gray-100">Manage Categories, Subcategories & Bookmarks</h2>
@@ -341,8 +354,15 @@ const AddSubcategory = () => {
                   const iconUrl = typeof subcatObj === 'object' ? subcatObj.iconUrl : '';
                   return (
                     <div key={subcat} className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-3">
-                      <div className="flex items-center gap-3 mb-2 justify-between">
+                      <div
+                        className="flex items-center gap-3 mb-2 justify-between cursor-pointer"
+                        onClick={() => toggleSubcat(category, subcat)}
+                      >
                         <div className="flex items-center gap-3">
+                          {/* Chevron icon for expand/collapse */}
+                          <span className={`transition-transform ${openSubcats[category]?.[subcat] ? "rotate-90" : ""}`}>
+                            ▶
+                          </span>
                           {iconUrl ? (
                             <img src={iconUrl} alt="icon" className="w-7 h-7 rounded object-cover border border-gray-200 dark:border-gray-700" />
                           ) : (
@@ -355,46 +375,75 @@ const AddSubcategory = () => {
                           <button type="button" className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900" onClick={() => setDeleteConfirm({ type: 'subcat', category, subcat })} title="Delete Subcategory"><Trash2 className="w-4 h-4 text-red-600" /></button>
                         </div>
                       </div>
-                      {/* Bookmarks list */}
-                      <div className="flex flex-wrap gap-2 mb-2">
-                        {(bookmarksMap[category]?.[subcat] || []).filter(b => b.name !== "[Empty]").length === 0 ? (
-                          <span className="text-gray-400 text-sm">No bookmarks yet.</span>
-                        ) : (
-                          (bookmarksMap[category]?.[subcat] || []).filter(b => b.name !== "[Empty]").map(b => (
-                            <a
-                              key={b.id}
-                              href={b.link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-2 px-3 py-1 rounded bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-blue-50 dark:hover:bg-blue-800 transition text-sm"
-                            >
-                              <img
-                                src={getFaviconUrl(b.link)}
-                                alt=""
-                                className="w-5 h-5 rounded"
-                                onError={e => { e.target.onerror = null; e.target.src = "https://www.google.com/favicon.ico"; }}
-                              />
-                              <span className="truncate max-w-[120px]">{b.name}</span>
-                              <button type="button" className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700" onClick={e => { e.preventDefault(); openEditBookmarkModal(category, subcat, b); }} title="Edit Bookmark"><Pencil className="w-4 h-4" /></button>
-                              <button type="button" className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900" onClick={e => { e.preventDefault(); setDeleteConfirm({ type: 'bookmark', category, subcat, bookmark: b }); }} title="Delete Bookmark"><Trash2 className="w-4 h-4 text-red-600" /></button>
-                            </a>
-                          ))
-                        )}
-                      </div>
-                      {/* Add Bookmark button (body, professional style) */}
-                      <button
-                        type="button"
-                        className="w-full mt-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-semibold shadow transition flex items-center justify-center gap-2"
-                        onClick={() => openBookmarkModal(category, subcat)}
-                      >
-                        <Plus className="w-5 h-5" /> Add Bookmark
-                      </button>
+                      {/* Bookmarks list - only show if open */}
+                      {openSubcats[category]?.[subcat] && (
+                        <div>
+                          {(adminBookmarksMap[category]?.[subcat] || []).filter(b => b.name !== "[Empty]").length > 0 ? (
+                            <div className="flex flex-col gap-3 mb-2 mt-2">
+                              {(adminBookmarksMap[category]?.[subcat] || [])
+                                .filter(b => b.name !== "[Empty]")
+                                .map(b => (
+                                  <div
+                                    key={b.id}
+                                    className="group flex items-center justify-between bg-gray-100 dark:bg-gray-700 rounded-lg px-3 py-2 shadow-sm hover:shadow transition w-full"
+                                  >
+                                    <a
+                                      href={b.link}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="flex items-center gap-3 flex-1 min-w-0"
+                                      title={b.name}
+                                    >
+                                      <img
+                                        src={getFaviconUrl(b.link)}
+                                        alt=""
+                                        className="w-6 h-6 rounded border border-gray-300 dark:border-gray-600 bg-white"
+                                        onError={e => { e.target.onerror = null; e.target.src = "https://www.google.com/favicon.ico"; }}
+                                      />
+                                      <span className="truncate font-medium text-gray-800 dark:text-gray-100">{b.name}</span>
+                                    </a>
+                                    <div className="flex gap-1 opacity-70 group-hover:opacity-100 transition">
+                                      <button
+                                        type="button"
+                                        className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-800"
+                                        onClick={() => setEditBookmarkModal({ category, subcat, bookmark: { ...b } })}
+                                        title="Edit Bookmark"
+                                      >
+                                        <Pencil className="w-4 h-4" />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900"
+                                        onClick={() => setDeleteConfirm({ type: 'bookmark', category, subcat, bookmark: b })}
+                                        title="Delete Bookmark"
+                                      >
+                                        <Trash2 className="w-4 h-4 text-red-600" />
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))}
+                            </div>
+                          ) : (
+                            <div className="text-gray-400 italic text-sm py-2 text-center">No bookmarks yet.</div>
+                          )}
+                        </div>
+                      )}
+                      {/* Add Bookmark button - only show if open */}
+                      {openSubcats[category]?.[subcat] && (
+                        <button
+                          type="button"
+                          className="w-full mt-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-semibold shadow transition flex items-center justify-center gap-2"
+                          onClick={() => openBookmarkModal(category, subcat)}
+                        >
+                          <Plus className="w-5 h-5" /> Add Bookmark
+                        </button>
+                      )}
                       {/* Bookmark add modal */}
                       {showBookmarkModal[category]?.[subcat] && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-                          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6 w-full max-w-xs relative">
+                          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6 w-full max-w-xl relative">
                             <button
-                              className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                              className="absolute top-2 w-4 right-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
                               onClick={() => closeBookmarkModal(category, subcat)}
                               aria-label="Close"
                             >

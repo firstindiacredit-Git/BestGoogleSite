@@ -17,51 +17,15 @@ export const defaultWidgets = {
     { id: "weather", name: "Weather", isOpen: true, column: 0, position: 0 },
     { id: "clock", name: "Clock", isOpen: true, column: 0, position: 1 },
     { id: "calendar", name: "Calendar", isOpen: true, column: 0, position: 2 },
-    {
-      id: "calculator",
-      name: "Calculator",
-      isOpen: true,
-      column: 0,
-      position: 3,
-    },
+    { id: "calculator", name: "Calculator", isOpen: true, column: 0, position: 3 },
 
     // Column 1
-    {
-      id: "Bookmarks",
-      name: "Popular Bookmarks",
-      isOpen: true,
-      column: 1,
-      position: 0,
-    },
-    { id: "Bookmarks2", name: "Travel", isOpen: true, column: 1, position: 1 },
-    {
-      id: "Bookmarks4",
-      name: "Shopping",
-      isOpen: true,
-      column: 1,
-      position: 2,
-    },
-    { id: "Bookmarks6", name: "Jobs", isOpen: true, column: 1, position: 3 },
-    { id: "Bookmarks7", name: "Movie", isOpen: true, column: 1, position: 4 },
+    { id: "imageUploader", name: "Image Uploader", isOpen: true, column: 1, position: 0 },
+    { id: "notepad", name: "Notepad", isOpen: true, column: 1, position: 1 },
+    { id: "Todo", name: "To Do List", isOpen: true, column: 1, position: 2 },
 
     // Column 2
-    { id: "Bookmarks1", name: "AI", isOpen: true, column: 2, position: 0 },
-    { id: "Bookmarks3", name: "Sports", isOpen: true, column: 2, position: 1 },
-    { id: "Bookmarks5", name: "News", isOpen: true, column: 2, position: 2 },
-    { id: "Bookmarks8", name: "Finance", isOpen: true, column: 2, position: 3 },
-    { id: "Bookmarks9", name: "Education", isOpen: true, column: 2, position: 4 },
-    
-    // Column 3
-    {
-      id: "imageUploader",
-      name: "Image Uploader",
-      isOpen: true,
-      column: 3,
-      position: 0,
-    },
-    { id: "NewsFeed", name: "News Feed", isOpen: true, column: 3, position: 1 },
-    { id: "notepad", name: "Notepad", isOpen: true, column: 3, position: 2 },
-    { id: "Todo", name: "To Do List", isOpen: true, column: 3, position: 3 },
+    { id: "NewsFeed", name: "News Feed", isOpen: true, column: 2, position: 0 },
   ],
 };
 
@@ -114,20 +78,11 @@ export const initializeUserLayout = async (userId) => {
   }
 };
 
-// Function to redistribute widgets across new column count
-const redistributeWidgets = (widgets, newColumnCount) => {
-  if (!widgets || !widgets.length) return [];
+// (redistributeWidgets removed as unused)
 
-  // Sort widgets by their current position
-  const sortedWidgets = [...widgets].sort((a, b) => a.position - b.position);
-
-  // Redistribute widgets across new columns
-  return sortedWidgets.map((widget, index) => ({
-    ...widget,
-    column: index % newColumnCount,
-    position: Math.floor(index / newColumnCount),
-  }));
-};
+// Placeholder for updatePageLayout to fix linter error
+// TODO: Implement updatePageLayout if needed
+const updatePageLayout = () => { throw new Error('updatePageLayout not implemented'); };
 
 // Get layout for a specific page
 export const getPageLayout = async (userId, pageName) => {
