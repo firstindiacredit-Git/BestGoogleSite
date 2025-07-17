@@ -80,9 +80,31 @@ export const initializeUserLayout = async (userId) => {
 
 // (redistributeWidgets removed as unused)
 
-// Placeholder for updatePageLayout to fix linter error
-// TODO: Implement updatePageLayout if needed
-const updatePageLayout = () => { throw new Error('updatePageLayout not implemented'); };
+// Add or export updatePageLayout for direct Firestore updates
+export const updatePageLayout = async (userId, pageName, layout) => {
+  try {
+    const userLayoutRef = doc(db, "users", userId, "layouts", "widgets");
+    const layoutDoc = await getDoc(userLayoutRef);
+
+    let currentData = {};
+    if (layoutDoc.exists()) {
+      currentData = layoutDoc.data();
+    }
+
+    await setDoc(userLayoutRef, {
+      ...currentData,
+      [pageName]: {
+        widgets: layout.widgets,
+        columns: layout.columns,
+      },
+    });
+
+    return true;
+  } catch (error) {
+    console.error("Error updating page layout:", error);
+    return false;
+  }
+};
 
 // Get layout for a specific page
 export const getPageLayout = async (userId, pageName) => {
