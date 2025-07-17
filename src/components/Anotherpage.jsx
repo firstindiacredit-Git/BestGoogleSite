@@ -671,7 +671,7 @@ const Anotherpage = ({ pageId = "home" }) => {
                         style={{ minHeight: 48 }}
                       >
                         <div className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full border border-gray-300 bg-white dark:bg-gray-800 mr-2">
-                          <img src={`https://www.google.com/s2/favicons?sz=64&domain=${(() => { try { return new URL(b.link).hostname; } catch { return 'google.com'; } })()}`} alt="" className="w-5 h-5 rounded" />
+                        <img src={`https://www.google.com/s2/favicons?sz=64&domain=${(() => { try { return new URL(b.link).hostname; } catch { return 'google.com'; } })()}`} alt="" className="w-5 h-5 rounded" />
                         </div>
                         {editingId === b.id ? (
                           <>
@@ -699,13 +699,13 @@ const Anotherpage = ({ pageId = "home" }) => {
                           </>
                         ) : (
                           <>
-                            <span className="flex-1 text-gray-900 dark:text-gray-100 truncate max-w-[150px] overflow-hidden whitespace-nowrap">{truncateName(b.name)}</span>
+                        <span className="flex-1 text-gray-900 dark:text-gray-100 truncate max-w-[150px] overflow-hidden whitespace-nowrap">{truncateName(b.name)}</span>
                             <a href={b.link} target="_blank" rel="noopener noreferrer" className="text-blue-500 text-xs underline" title="Visit bookmark" aria-label="Visit bookmark">Visit</a>
                             <div className="flex gap-1 ml-2">
-                              <button
+                        <button
                                 className={`px-2 py-1 rounded text-xs ${hiddenIds.includes(b.id) ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-700'} hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400`}
                                 onClick={e => { e.stopPropagation(); handleHideBookmark(b.id, !hiddenIds.includes(b.id)); }}
-                                title={hiddenIds.includes(b.id) ? 'Unhide' : 'Hide'}
+                          title={hiddenIds.includes(b.id) ? 'Unhide' : 'Hide'}
                                 aria-label={hiddenIds.includes(b.id) ? 'Unhide bookmark' : 'Hide bookmark'}
                               >
                                 {hiddenIds.includes(b.id)
@@ -717,7 +717,7 @@ const Anotherpage = ({ pageId = "home" }) => {
                               </button>
                               <button title="Delete" aria-label="Delete bookmark" className="text-red-600 px-2 py-1 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-red-400" onClick={e => { e.stopPropagation(); deleteBookmark(b); }}>
                                 <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
-                              </button>
+                        </button>
                             </div>
                           </>
                         )}
@@ -1657,53 +1657,364 @@ const Anotherpage = ({ pageId = "home" }) => {
   // Add state for global search
   const [globalSearch, setGlobalSearch] = useState("");
 
-  // Placeholder for global search handler
-  const handleGlobalSearch = (e) => {
-    e.preventDefault();
-    if (globalSearch.trim()) {
-      // TODO: Implement global search logic or navigation
-      alert(`Search for: ${globalSearch}`);
+  // Add state for search results modal
+  const [searchResults, setSearchResults] = useState({ bookmarks: [], widgets: [] });
+  const [showSearchModal, setShowSearchModal] = useState(false);
+  const searchModalRef = useRef(null);
+
+  // Close search modal on outside click or Escape
+  useEffect(() => {
+    if (!showSearchModal) return;
+    function handleKey(e) {
+      if (e.key === "Escape") setShowSearchModal(false);
     }
+    function handleClick(e) {
+      if (searchModalRef.current && !searchModalRef.current.contains(e.target)) {
+        setShowSearchModal(false);
+      }
+    }
+    document.addEventListener("keydown", handleKey);
+    document.addEventListener("mousedown", handleClick);
+    return () => {
+      document.removeEventListener("keydown", handleKey);
+      document.removeEventListener("mousedown", handleClick);
+    };
+  }, [showSearchModal]);
+
+  // Helper to get all bookmarks (user and default)
+  function getAllBookmarks() {
+    let all = [];
+    // User bookmarks
+    Object.entries(subcatBookmarks).forEach(([subcat, arr]) => {
+      if (Array.isArray(arr)) {
+        arr.forEach(b => all.push({ ...b, subcat, category: selectedCategory }));
+      }
+    });
+    // Default bookmarks (for all categories)
+    Object.entries(defaultBookmarks).forEach(([cat, subcats]) => {
+      Object.entries(subcats).forEach(([subcat, arr]) => {
+        arr.forEach(b => all.push({ ...b, subcat, category: cat }));
+      });
+    });
+    return all;
+  }
+  // Helper to get all widgets/components (by display name)
+  function getAllWidgets() {
+    return Object.entries(componentMap).map(([key, comp]) => ({
+      id: key,
+      name: key.charAt(0).toUpperCase() + key.slice(1),
+    }));
+  }
+
+  // Add state for filtered grid view
+  const [activeSearchIds, setActiveSearchIds] = useState(null); // null = no search, array = filtered
+
+  // Update handleGlobalSearch to filter the main grid
+  const runLiveSearch = (query) => {
+    query = query.trim().toLowerCase();
+    if (!query) {
+      setActiveSearchIds(null);
+      return;
+    }
+    // Bookmarks
+    const allBookmarks = getAllBookmarks();
+    const filteredBookmarks = allBookmarks.filter(b =>
+      (b.name && b.name.toLowerCase().includes(query)) ||
+      (b.link && b.link.toLowerCase().includes(query))
+    );
+    // Widgets
+    const allWidgets = getAllWidgets();
+    const filteredWidgets = allWidgets.filter(w =>
+      w.name.toLowerCase().includes(query)
+    );
+    // Collect matching widget IDs and subcat IDs
+    const widgetIds = filteredWidgets.map(w => w.id);
+    const subcatIds = filteredBookmarks.map(b => `subcat_${b.subcat}`);
+    // If a widget is a bookmarks widget, also include it
+    if (filteredBookmarks.length > 0) widgetIds.push('Bookmarks');
+    setActiveSearchIds([...new Set([...widgetIds, ...subcatIds])]);
   };
 
+  // On input change, run live search
+  const handleSearchInput = (e) => {
+    setGlobalSearch(e.target.value);
+    runLiveSearch(e.target.value);
+  };
+
+  // On form submit, just prevent default and clear if empty
+  const handleGlobalSearch = (e) => {
+    e.preventDefault();
+    if (!globalSearch.trim()) setActiveSearchIds(null);
+  };
+
+  // When search input is cleared, restore full grid
+  useEffect(() => {
+    if (!globalSearch.trim()) {
+      setActiveSearchIds(null);
+    }
+  }, [globalSearch]);
+
+  // In the grid rendering, filter items if activeSearchIds is set
+  const filteredColumnItems = useMemo(() => {
+    if (!activeSearchIds) return columnItems;
+    return columnItems.map(col =>
+      col.filter(item => activeSearchIds.includes(item.id))
+    );
+  }, [columnItems, activeSearchIds]);
+
+  // Add state for sliding search
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchInputRef = useRef(null);
+
+  // Focus input when open
+  useEffect(() => {
+    if (searchOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [searchOpen]);
+
+  // Close on outside click or Escape
+  useEffect(() => {
+    if (!searchOpen) return;
+    function handleKey(e) {
+      if (e.key === "Escape") setSearchOpen(false);
+    }
+    function handleClick(e) {
+      if (searchInputRef.current && !searchInputRef.current.parentNode.contains(e.target)) {
+        setSearchOpen(false);
+      }
+    }
+    document.addEventListener("keydown", handleKey);
+    document.addEventListener("mousedown", handleClick);
+    return () => {
+      document.removeEventListener("keydown", handleKey);
+      document.removeEventListener("mousedown", handleClick);
+    };
+  }, [searchOpen]);
+
+  // Add state for three-dot menu
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  // Close menu on outside click
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handleClick(e) {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [menuOpen]);
+
+  // Collapse/Expand all handlers
+  const handleCollapseAll = () => {
+    setCollapsedItems(prev => {
+      const newState = {};
+      items.forEach(item => { newState[item.id] = true; });
+      localStorage.setItem("collapsedItems", JSON.stringify(newState));
+      return newState;
+    });
+    setMenuOpen(false);
+  };
+  const handleExpandAll = () => {
+    setCollapsedItems(prev => {
+      const newState = {};
+      items.forEach(item => { newState[item.id] = false; });
+      localStorage.setItem("collapsedItems", JSON.stringify(newState));
+      return newState;
+    });
+    setMenuOpen(false);
+  };
+
+  // Add state for all bookmarks view modal
+  const [showAllBookmarks, setShowAllBookmarks] = useState(false);
+
+  // Helper to check if all widgets are collapsed
+  const allCollapsed = useMemo(() => {
+    return items.every(item => collapsedItems[item.id]);
+  }, [items, collapsedItems]);
+
+  // Add state for view mode modal
+  const [showViewModeModal, setShowViewModeModal] = useState(false);
+
+  // Add state for submenu open
+  const [viewModeSubmenuOpen, setViewModeSubmenuOpen] = useState(false);
+
+  // Add refs for menu and submenu
+  const menuContainerRef = useRef(null);
+  const submenuRef = useRef(null);
+
+  // Close menu and submenu on outside click
+  useEffect(() => {
+    if (!menuOpen && !viewModeSubmenuOpen) return;
+    function handleClick(e) {
+      if (
+        menuContainerRef.current &&
+        !menuContainerRef.current.contains(e.target) &&
+        (!submenuRef.current || !submenuRef.current.contains(e.target))
+      ) {
+        setMenuOpen(false);
+        setViewModeSubmenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [menuOpen, viewModeSubmenuOpen]);
+
   return (
-    <div className={`anotherpage-container ${isDarkMode ? "dark" : ""}`}>
-      {/* Add the global search bar above the category navigation */}
-      <div className="w-full flex justify-center mt-4 mb-3">
-        <form onSubmit={handleGlobalSearch} className="flex items-center gap-2 w-full max-w-md">
-          <input
-            type="text"
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm"
-            placeholder="Search bookmarks, widgets, anything..."
-            value={globalSearch}
-            onChange={e => setGlobalSearch(e.target.value)}
-          />
-          <button
-            type="submit"
-            className="px-3 py-2 bg-blue-600 text-white rounded-r-md hover:bg-blue-700 transition flex items-center justify-center"
-            title="Search"
-            aria-label="Search"
-          >
-            {/* Search Icon SVG */}
-            <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-          </button>
-        </form>
-      </div>
+    <div className={`anotherpage-container ${isDarkMode ? "dark" : ""}`}> 
       {/* Category navigation outside the widget grid */}
-      <div className="flex flex-wrap gap-2 mb-2 justify-center">
-        {allCategories.map((cat) => (
-          <button
-            key={cat}
-            className={`px-4 py-2 text-sm font-medium rounded-md w-auto transition-all ${
-              selectedCategory === cat
-                ? 'bg-indigo-500 text-white'
-                : 'bg-gray-100'
-            }`}
-            onClick={() => setSelectedCategory(cat)}
-          >
-            {cat}
-          </button>
-        ))}
+      <div className="relative flex items-center mb-2 w-full" style={{ maxWidth: '90vw', margin: '0 auto' }}>
+        <div className="flex-1 flex flex-wrap gap-2 justify-center">
+          {allCategories.map((cat) => (
+            <button
+              key={cat}
+              className={`px-4 py-2 text-sm font-medium rounded-md w-auto transition-all ${
+                selectedCategory === cat
+                  ? 'bg-indigo-500 text-white'
+                  : 'bg-gray-100'
+              }`}
+              onClick={() => setSelectedCategory(cat)}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2" style={{ maxWidth: 400 }}>
+          {!searchOpen && (
+            <>
+              <button
+                type="button"
+                className={`h-4 w-4 dark:bg-[#28283b] bg-white shadow flex items-center justify-center rounded hover:bg-gray-100 transition`}
+                title="Search"
+                aria-label="Search"
+                onClick={() => setSearchOpen(true)}
+                tabIndex={0}
+                style={{ minWidth: 30, minHeight: 30 }}
+              >
+                <svg width="16" height="16" fill="none" stroke="#6366F1" strokeWidth="2.2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              </button>
+              <div className="relative">
+                <button
+                  type="button"
+                  className="h-9 w-9 flex items-center justify-center rounded  dark:bg-[#28283b] dark:hover:bg-gray-900 bg-white hover:bg-gray-200 transition"
+                  title="More options"
+                  aria-label="More options"
+                  onClick={() => setMenuOpen(o => !o)}
+                >
+                  {/* Three-dot vertical SVG */}
+                  <svg width="20" height="20" fill="none" stroke="#6366F1" strokeWidth="2.2" viewBox="0 0 24 24">
+                    <circle cx="12" cy="5" r="1.5"/>
+                    <circle cx="12" cy="12" r="1.5"/>
+                    <circle cx="12" cy="19" r="1.5"/>
+                  </svg>
+                </button>
+                {menuOpen && (
+                  <div ref={menuContainerRef} className="absolute right-0 bottom-full mb-2 w-36 dark:text-white bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-lg z-[1200]">
+                    {!allCollapsed ? (
+                      <button
+                        className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                        onClick={handleCollapseAll}
+                      >
+                        Collapse All
+                      </button>
+                    ) : (
+                      <button
+                        className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                        onClick={handleExpandAll}
+                      >
+                        Expand All
+                      </button>
+                    )}
+                    <button
+                      className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                      onClick={() => { setShowAllBookmarks(true); setMenuOpen(false); }}
+                    >
+                      All Bookmark
+                    </button>
+                    <div
+                      className="relative"
+                      tabIndex={0}
+                    >
+                      <button
+                        className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition flex items-center justify-between"
+                        onClick={() => setViewModeSubmenuOpen(v => !v)}
+                        aria-haspopup="true"
+                        aria-expanded={viewModeSubmenuOpen}
+                      >
+                        View Mode
+                        <svg width="16" height="16" fill="none" stroke="#6366F1" strokeWidth="2.2" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+                      </button>
+                      {viewModeSubmenuOpen && (
+                        <div ref={submenuRef} className="absolute left-full top-0 ml-2 w-32 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-2xl z-[1200] flex flex-col py-2 px-1">
+                          {[
+                            { mode: 'list', label: 'List', icon: <svg width="20" height="20" fill="none" stroke="#6366F1" strokeWidth="2" viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="2" rx="1"/><rect x="4" y="11" width="16" height="2" rx="1"/><rect x="4" y="16" width="16" height="2" rx="1"/></svg> },
+                            { mode: 'grid', label: 'Grid', icon: <svg width="20" height="20" fill="none" stroke="#6366F1" strokeWidth="2" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg> },
+                            { mode: 'icon', label: 'Icon', icon: <svg width="20" height="20" fill="none" stroke="#6366F1" strokeWidth="2" viewBox="0 0 24 24"><circle cx="7" cy="7" r="3"/><circle cx="17" cy="7" r="3"/><circle cx="7" cy="17" r="3"/><circle cx="17" cy="17" r="3"/></svg> },
+                            { mode: 'cloud', label: 'Cloud', icon: <svg width="20" height="20" fill="none" stroke="#6366F1" strokeWidth="2" viewBox="0 0 24 24"><path d="M17.5 19a4.5 4.5 0 0 0 0-9c-.2 0-.4 0-.6.03A6 6 0 1 0 6 17.5"/></svg> },
+                          ].map(({ mode, label, icon }) => (
+                            <button
+                              key={mode}
+                              className={`w-full flex items-center gap-3 px-4 py-2 rounded text-sm font-semibold border-b last:border-b-0 border-gray-100 dark:border-gray-700 transition relative ${Object.values(subcatDisplayModes).every(v => v === mode) ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'} hover:bg-blue-100`}
+                              onClick={async () => {
+                                const subcats = firestoreUser && firestoreSubcats.length > 0 ? firestoreSubcats : subcatOrder;
+                                const updates = {};
+                                subcats.forEach(subcat => {
+                                  const key = typeof subcat === 'object' && subcat.name ? subcat.name : subcat;
+                                  updates[key] = mode;
+                                });
+                                setSubcatDisplayModes(prev => ({ ...prev, ...updates }));
+                                if (firestoreUser) {
+                                  for (const subcat of subcats) {
+                                    const key = `subcatDisplayModes`;
+                                    let allModes = { ...subcatDisplayModes, ...updates };
+                                    localStorage.setItem(key, JSON.stringify(allModes));
+                                  }
+                                } else {
+                                  localStorage.setItem('subcatDisplayModes', JSON.stringify({ ...subcatDisplayModes, ...updates }));
+                                }
+                                setViewModeSubmenuOpen(false);
+                                setMenuOpen(false);
+                              }}
+                            >
+                              <span>{icon}</span>
+                              <span>{label}</span>
+                              {Object.values(subcatDisplayModes).every(v => v === mode) && (
+                                <span className="absolute right-3">
+                                  {/* Checkmark icon */}
+                                  <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+                                </span>
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+          {searchOpen && (
+            <form
+              onSubmit={handleGlobalSearch}
+              className={`transition-all duration-300 overflow-hidden w-[220px] opacity-100 ml-2 flex items-center`}
+              style={{ maxWidth: 320 }}
+            >
+              <input
+                ref={searchInputRef}
+                type="text"
+                className="flex-1 h-9 px-5 py-2 border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-base bg-white shadow"
+                placeholder="Search bookmarks, widgets, anything..."
+                value={globalSearch}
+                onChange={handleSearchInput}
+                style={{ minWidth: 0 }}
+              />
+            </form>
+          )}
+        </div>
       </div>
 
       {/* Widget grid with drag and drop */}
@@ -1714,7 +2025,7 @@ const Anotherpage = ({ pageId = "home" }) => {
               <SkeletonLoader />
             </div>
           ) : (
-            columnItems.map((colItems, colIdx) => (
+            filteredColumnItems.map((colItems, colIdx) => (
               <Droppable droppableId={colIdx.toString()} key={colIdx}>
                 {(provided, snapshot) => (
                   <div
@@ -1868,7 +2179,134 @@ const Anotherpage = ({ pageId = "home" }) => {
         subcatKey={addBookmarkModal.subcatKey}
         onClose={() => setAddBookmarkModal({ open: false, subcatKey: null })}
       />
-
+      {showSearchModal && (
+        <div className="fixed inset-0 z-[1200] flex items-start justify-center bg-black/20" style={{ paddingTop: 90 }}>
+          <div ref={searchModalRef} className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 p-6 w-full max-w-lg mx-auto">
+            <div className="font-semibold text-lg mb-3">Search Results</div>
+            <div className="mb-4">
+              <div className="font-semibold text-gray-500 mb-1">Bookmarks</div>
+              {searchResults.bookmarks.length === 0 ? (
+                <div className="text-gray-400 text-sm">No bookmarks found.</div>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  {searchResults.bookmarks.map((b, i) => (
+                    <a
+                      key={b.id + i}
+                      href={b.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition cursor-pointer group"
+                    >
+                      <img
+                        src={`https://www.google.com/s2/favicons?sz=64&domain=${(() => { try { return new URL(b.link).hostname; } catch { return 'google.com'; } })()}`}
+                        alt=""
+                        className="w-5 h-5 rounded"
+                        onError={e => { e.target.onerror = null; e.target.src = 'https://www.google.com/favicon.ico'; }}
+                      />
+                      <span className="flex-1 text-gray-900 dark:text-gray-100 max-w-xs overflow-hidden whitespace-nowrap">
+                        {b.name}
+                      </span>
+                      <span className="text-xs text-gray-400">[{b.category} / {b.subcat}]</span>
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div>
+              <div className="font-semibold text-gray-500 mb-1">Widgets/Tools</div>
+              {searchResults.widgets.length === 0 ? (
+                <div className="text-gray-400 text-sm">No widgets found.</div>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  {searchResults.widgets.map(w => (
+                    <div key={w.id} className="flex items-center gap-2 p-2 rounded bg-gray-100 dark:bg-gray-800">
+                      <span className="flex-1 text-gray-900 dark:text-gray-100">{w.name}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="flex justify-end mt-4">
+              <button className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700" onClick={() => setShowSearchModal(false)}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showAllBookmarks && (
+        <div className="fixed inset-0 z-[1200] flex items-start justify-center bg-black/20" style={{ paddingTop: 90 }}>
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 p-6 w-full max-w-lg mx-auto">
+            <div className="font-semibold dark:text-white text-lg mb-3">All Bookmarks View</div>
+            {/* Only show bookmarks list, no view mode selector */}
+            <div className="flex flex-col gap-2 max-h-[60vh] overflow-y-auto">
+              {getAllBookmarks().map((b, i) => (
+                <a
+                  key={b.id + i}
+                  href={b.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition cursor-pointer group"
+                >
+                  <img
+                    src={`https://www.google.com/s2/favicons?sz=64&domain=${(() => { try { return new URL(b.link).hostname; } catch { return 'google.com'; } })()}`}
+                    alt=""
+                    className="w-5 h-5 rounded"
+                    onError={e => { e.target.onerror = null; e.target.src = 'https://www.google.com/favicon.ico'; }}
+                  />
+                  <span className="flex-1 text-gray-900 dark:text-gray-100 max-w-xs overflow-hidden whitespace-nowrap">
+                    {b.name}
+                  </span>
+                  <span className="text-xs text-gray-400">[{b.category} / {b.subcat}]</span>
+                </a>
+              ))}
+            </div>
+            <div className="flex justify-end mt-4">
+              <button className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700" onClick={() => setShowAllBookmarks(false)}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showViewModeModal && (
+        <div className="fixed inset-0 z-[1200] flex items-start justify-center bg-black/20" style={{ paddingTop: 90 }}>
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 p-6 w-full max-w-lg mx-auto">
+            <div className="font-semibold text-lg mb-3">Set All Subcategories View Mode</div>
+            <div className="flex items-center gap-3 mb-4">
+              {['list','grid','icon','cloud'].map(mode => (
+                <button
+                  key={mode}
+                  className={`px-3 py-1 rounded text-sm font-semibold border ${Object.values(subcatDisplayModes).every(v => v === mode) ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-100 border-gray-300 text-gray-700'} hover:bg-blue-100 transition`}
+                  onClick={async () => {
+                    // Update all subcat display modes in state
+                    const subcats = firestoreUser && firestoreSubcats.length > 0 ? firestoreSubcats : subcatOrder;
+                    const updates = {};
+                    subcats.forEach(subcat => {
+                      const key = typeof subcat === 'object' && subcat.name ? subcat.name : subcat;
+                      updates[key] = mode;
+                    });
+                    setSubcatDisplayModes(prev => ({ ...prev, ...updates }));
+                    // Persist for all subcats
+                    if (firestoreUser) {
+                      for (const subcat of subcats) {
+                        const subcatKey = typeof subcat === 'object' && subcat.name ? subcat.name : subcat;
+                        const key = `subcatDisplayModes`;
+                        let allModes = { ...subcatDisplayModes, ...updates };
+                        localStorage.setItem(key, JSON.stringify(allModes));
+                      }
+                    } else {
+                      localStorage.setItem('subcatDisplayModes', JSON.stringify({ ...subcatDisplayModes, ...updates }));
+                    }
+                    setShowViewModeModal(false);
+                  }}
+                >
+                  {mode.charAt(0).toUpperCase() + mode.slice(1)}
+                </button>
+              ))}
+            </div>
+            <div className="flex justify-end mt-4">
+              <button className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700" onClick={() => setShowViewModeModal(false)}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
