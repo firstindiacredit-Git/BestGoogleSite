@@ -259,14 +259,40 @@ const Anotherpage = ({ pageId = "home" }) => {
             setColumns(4);
           }
         } else {
-          const localLayout = getFromLocalStorage();
-          if (localLayout && localLayout.widgets && localLayout.columns) {
-            setItems(localLayout.widgets);
-            setColumns(localLayout.columns); // <-- THIS MUST BE 4 after Default!
-          } else {
-            setItems(defaultWidgets[pageId] || []);
-            setColumns(4);
-          }
+          let localLayout = getFromLocalStorage();
+          // Always force the 4 widgets to be in the correct columns/positions
+          const forceWidgets = [
+            { id: 'imageUploader', column: 3, name: 'Image Uploader', position: 0 },
+            { id: 'NewsFeed', column: 3, name: 'News Feed', position: 1 },
+            { id: 'notepad', column: 3, name: 'Notepad ', position: 2 },
+            { id: 'Todo', column: 3, name: 'To Do List', position: 3 },
+          ];
+          let widgets = (localLayout && localLayout.widgets) ? [...localLayout.widgets] : (defaultWidgets[pageId] ? [...defaultWidgets[pageId]] : []);
+          // Remove any of the 4 widgets if present
+          widgets = widgets.filter(w => !forceWidgets.some(fw => fw.id === w.id));
+          // Start with the forced widgets in their columns/positions
+          let newWidgets = forceWidgets.map(fw => ({
+            id: fw.id,
+            name: fw.name,
+            isOpen: true,
+            column: fw.column,
+            position: fw.position,
+          }));
+          // For all other widgets, distribute them after the forced widgets in their column
+          let colPositions = [0, 0, 0, 4]; // next position for each column (col 3 starts at 4)
+          widgets.forEach(w => {
+            // If column is not set or out of range, put in column 0
+            let col = (typeof w.column === 'number' && w.column >= 0 && w.column < 4) ? w.column : 0;
+            // If col is 3, start after the 4 forced widgets
+            let pos = col === 3 ? colPositions[3]++ : colPositions[col]++;
+            newWidgets.push({
+              ...w,
+              column: col,
+              position: pos,
+            });
+          });
+          setItems(newWidgets);
+          setColumns(4);
         }
         setLoading(false);
       }
@@ -554,7 +580,8 @@ const Anotherpage = ({ pageId = "home" }) => {
         setEditError('URL is required');
         return;
       }
-      if (!isValidUrl(editFields.link.trim())) {
+      // Remove URL validation for logged-in users
+      if (!firestoreUser && !isValidUrl(editFields.link.trim())) {
         setEditError('Please enter a valid URL (http/https)');
         return;
       }
@@ -716,7 +743,7 @@ const Anotherpage = ({ pageId = "home" }) => {
                                 <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
                               </button>
                               <button title="Delete" aria-label="Delete bookmark" className="text-red-600 px-2 py-1 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-red-400" onClick={e => { e.stopPropagation(); deleteBookmark(b); }}>
-                                <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+                                <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 6h18" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
                         </button>
                             </div>
                           </>
@@ -845,7 +872,8 @@ const Anotherpage = ({ pageId = "home" }) => {
         setError('URL is required');
         return;
       }
-      if (!isValidUrl(localBookmark.link.trim())) {
+      // Remove URL validation for logged-in users
+      if (!firestoreUser && !isValidUrl(localBookmark.link.trim())) {
         setError('Please enter a valid URL (http/https)');
         return;
       }
@@ -862,7 +890,7 @@ const Anotherpage = ({ pageId = "home" }) => {
       handleAddBookmark(localBookmark.subcat);
     };
 
-    const isDisabled = !localBookmark.name.trim() || !localBookmark.link.trim() || !isValidUrl(localBookmark.link.trim());
+    const isDisabled = !localBookmark.name.trim() || !localBookmark.link.trim() || (!firestoreUser && !isValidUrl(localBookmark.link.trim()));
 
     return open ? (
       <CustomModal open={open} onClose={onClose} width={400}>
@@ -2037,8 +2065,8 @@ const Anotherpage = ({ pageId = "home" }) => {
                   >
                     {colItems
                       .filter(item => {
-                        // If logged in, filter out Bookmarks1, Bookmarks2, etc.
-                        if (firestoreUser && /^Bookmarks\d+$/.test(item.id)) return false;
+                        // Hide Bookmarks1, Bookmarks2, etc. for all users
+                        if (/^Bookmarks\d+$/.test(item.id)) return false;
                         return true;
                       })
                       .map((item, idx) => (

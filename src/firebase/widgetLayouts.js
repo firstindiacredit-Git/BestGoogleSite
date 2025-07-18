@@ -14,18 +14,16 @@ const debounce = (func, wait) => {
 export const defaultWidgets = {
   home: [
     // Column 0
-    { id: "weather", name: "Weather", isOpen: true, column: 0, position: 0 },
-    { id: "clock", name: "Clock", isOpen: true, column: 0, position: 1 },
-    { id: "calendar", name: "Calendar", isOpen: true, column: 0, position: 2 },
-    { id: "calculator", name: "Calculator", isOpen: true, column: 0, position: 3 },
+    { id: "weather", name: "Weather", isOpen: true, column: 0, position: 1 },
+    { id: "clock", name: "Clock", isOpen: true, column: 0, position: 2 },
+    { id: "calendar", name: "Calendar", isOpen: true, column: 0, position: 3 },
+    { id: "calculator", name: "Calculator", isOpen: true, column: 0, position: 4 },
 
-    // Column 1
-    { id: "imageUploader", name: "Image Uploader", isOpen: true, column: 1, position: 0 },
-    { id: "notepad", name: "Notepad", isOpen: true, column: 1, position: 1 },
-    { id: "Todo", name: "To Do List", isOpen: true, column: 1, position: 2 },
-
-    // Column 2
-    { id: "NewsFeed", name: "News Feed", isOpen: true, column: 2, position: 0 },
+    // Ensure these 4 widgets are always at the top of their columns
+    { id: "imageUploader", name: "Image Uploader", isOpen: true, column: 0, position: 0 },
+    { id: "NewsFeed", name: "News Feed", isOpen: true, column: 1, position: 0 },
+    { id: "notepad", name: "Notepad", isOpen: true, column: 2, position: 0 },
+    { id: "Todo", name: "To Do List", isOpen: true, column: 3, position: 0 },
   ],
 };
 
