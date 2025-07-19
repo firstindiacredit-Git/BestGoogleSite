@@ -1,3 +1,4 @@
+import { Bookmark } from "lucide-react";
 import { db } from "../firebase";
 import { doc, getDoc, setDoc, collection, updateDoc } from "firebase/firestore";
 
@@ -27,6 +28,7 @@ const defaultWidgets = {
     { id: "Bookmarks5", name: "News", isOpen: true, column: 2, position: 2 },
     { id: "Bookmarks8", name: "Finance", isOpen: true, column: 2, position: 3 },
     { id: "Bookmarks9", name: "Education", isOpen: true, column: 2, position: 4 },
+    { id: "Bookmarks10", name: "Bpo", isOpen: true, column: 2, position: 5 },
     
     {
       id: "Bookmarks4",
@@ -74,6 +76,7 @@ export const allWidgets = {
   Bookmarks7: { id: "Bookmarks7", name: "Movie" },
   Bookmarks8: { id: "Bookmarks8", name: "Finance" },
   Bookmarks9: { id: "Bookmarks9", name: "Education" },
+  Bookmark10: { id:"Bookmarks10", name: "Bpo"},
   Todo: { id: "Todo", name: "To do List" },
   NewsFeed: { id: "NewsFeed", name: "News Feed" },
 };

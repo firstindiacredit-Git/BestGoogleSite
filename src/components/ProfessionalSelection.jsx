@@ -4,11 +4,18 @@ import { auth, db } from "../firebase";
 import { doc, updateDoc } from "firebase/firestore";
 
 const professions = [
+  { id: "developer", name: "Developer / Programmer", icon: "💻", description: "Software development and programming" },
+  { id: "designer", name: "Designer (UI/UX, Graphic, Web)", icon: "🎨", description: "Creative design and user experience" },
+  { id: "digital_marketer", name: "Digital Marketer", icon: "📱", description: "Digital marketing and online promotion" },
   { id: "student", name: "Student", icon: "🎓", description: "Currently studying or pursuing education" },
-  { id: "teacher", name: "Teacher", icon: "👩‍🏫", description: "Teaching in a school, college, or university" },
-  { id: "professional", name: "Professional", icon: "💼", description: "Working in a professional field" },
-  { id: "entrepreneur", name: "Entrepreneur", icon: "🚀", description: "Running your own business or startup" },
-  { id: "freelancer", name: "Freelancer", icon: "🆓", description: "Working independently on projects" },
+  { id: "teacher", name: "Teacher / Educator", icon: "👩‍🏫", description: "Teaching in a school, college, or university" },
+  { id: "entrepreneur", name: "Entrepreneur / Founder", icon: "🚀", description: "Running your own business or startup" },
+  { id: "freelancer", name: "Freelancer (Creative or Technical)", icon: "🆓", description: "Working independently on projects" },
+  { id: "consultant", name: "Consultant / Advisor", icon: "💡", description: "Providing expert advice and consultation" },
+  { id: "working_professional", name: "Working Professional", icon: "💼", description: "Working in a professional field" },
+  { id: "researcher", name: "Researcher / Academic", icon: "🔬", description: "Research and academic work" },
+  { id: "it_support", name: "IT / Tech Support", icon: "🛠️", description: "IT support and technical assistance" },
+  { id: "medical", name: "Medical Professional", icon: "⚕️", description: "Healthcare and medical services" },
   { id: "retired", name: "Retired", icon: "🌅", description: "Retired from active work" },
   { id: "other", name: "Other", icon: "✨", description: "Other profession or occupation" },
 ];
@@ -78,4 +85,4 @@ const ProfessionalSelection = () => {
   );
 };
 
-export default ProfessionalSelection; 
+export default ProfessionalSelection;

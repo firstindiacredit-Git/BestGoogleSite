@@ -19,14 +19,18 @@ const ProfessionCheckWrapper = ({ children }) => {
       }
       const userDoc = await getDoc(doc(db, "users", user.uid));
       const userData = userDoc.data();
+      
+      // Check if user has profession (required)
       if (!userData?.profession) {
         setAllowed(false);
         setLoading(false);
         navigate("/professional-selection", { replace: true });
-      } else {
-        setAllowed(true);
-        setLoading(false);
+        return;
       }
+      
+      // User has profession - allow access
+      setAllowed(true);
+      setLoading(false);
     });
     return () => unsubscribe();
   }, [navigate]);
@@ -36,4 +40,4 @@ const ProfessionCheckWrapper = ({ children }) => {
   return <>{children}</>;
 };
 
-export default ProfessionCheckWrapper; 
+export default ProfessionCheckWrapper;

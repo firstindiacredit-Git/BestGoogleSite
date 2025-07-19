@@ -269,8 +269,8 @@ function PopularBookmarks() {
   // Add state for liked bookmarks
   const [likedBookmarks, setLikedBookmarks] = useState([]);
   const [showOnlyLiked, setShowOnlyLiked] = useState(false);
-  const [bookmarkLikes, setBookmarkLikes] = useState({}); // Store like counts for each bookmark
-  const [userLikedBookmarks, setUserLikedBookmarks] = useState({}); // Store which bookmarks the user has liked
+  const [bookmarkLikes, setBookmarkLikes] = useState({});
+  const [userLikedBookmarks, setUserLikedBookmarks] = useState({});
   const [showSuggestionWidget, setShowSuggestionWidget] = useState(true);
 
   const topFacebookLikedAdminBookmarks = React.useMemo(() => {
@@ -601,84 +601,86 @@ function PopularBookmarks() {
 
   // Filter categories based on user preferences and selected country
   const getFilteredCategories = (allCategories, isControllerMode = false) => {
-    if (isControllerMode) {
-      // In controller mode, show categories that DON'T match user preferences
-      return allCategories.filter((category) => {
-        // Check if category matches user preferences
-        const matchesUserCountry = category.countries && 
-          (category.countries.includes(selectedCountry.key) || category.countries.includes("global"));
-        
-        const matchesUserProfession = category.professions && 
-          (category.professions.includes(userProfession) || category.professions.includes("all"));
-        
-        const matchesUserInterest = category.interests && 
-          category.interests.length > 0 && 
-          userInterests.length > 0 && 
-          category.interests.some(i => userInterests.includes(i));
-        
-        // Show categories that DON'T match user preferences
-        const hasUserPreferences = userProfession || userInterests.length > 0;
-        
-        if (!hasUserPreferences) {
-          // If user has no preferences, show all categories in controller
-          return true;
-        }
-        
-        // Show categories that don't match user preferences
-        const countryMatch = matchesUserCountry;
-        const professionMatch = userProfession ? matchesUserProfession : true;
-        const interestMatch = userInterests.length > 0 ? matchesUserInterest : true;
-        
-        // Return categories that don't match ALL user preferences
-        return !(countryMatch && professionMatch && interestMatch);
-      });
-    } else {
-      // Main view: Always show user-created categories
-      let filtered = allCategories.filter((category) => {
-        if (!category.isAdminCategory) return true; // Always show user categories
-        // Check if category matches user preferences
-        const matchesCountry = category.countries && 
-          (category.countries.includes(selectedCountry.key) || category.countries.includes("global"));
-        const matchesProfession = category.professions && 
-          (category.professions.includes(userProfession) || category.professions.includes("all"));
-        // Use mainInterests for filtering
+    // First, separate user-created and admin categories
+    const userCategories = allCategories.filter(cat => !cat.isAdminCategory);
+    const adminCategories = allCategories.filter(cat => cat.isAdminCategory);
+
+    // Always show user-created categories
+    let filteredCategories = [...userCategories];
+
+    // For admin categories, filter based on country, profession and interests
+    const adminFilteredCategories = adminCategories.filter(category => {
+      // Check country match first
+      const matchesCountry = category.countries && (
+        category.countries.includes(selectedCountry?.key) || 
+        category.countries.includes("global") ||
+        (selectedCountry?.key === 'IN' && category.countries.includes('india'))
+      );
+
+      // If country doesn't match, don't show the category
+      if (!matchesCountry) return false;
+
+      // Check profession match
+      const matchesProfession = category.professions && (
+        category.professions.includes(userProfession) || 
+        category.professions.includes("all")
+      );
+
+      // Check interests match
         const matchesInterest = category.interests && 
           category.interests.length > 0 && 
           mainInterests.length > 0 && 
           category.interests.some(i => mainInterests.includes(i));
-        const hasUserPreferences = userProfession || mainInterests.length > 0;
-        if (!hasUserPreferences) return true;
-        const countryMatch = matchesCountry;
-        const professionMatch = userProfession ? matchesProfession : true;
-        const interestMatch = mainInterests.length > 0 ? matchesInterest : true;
-        return countryMatch && professionMatch && interestMatch;
-      });
 
-      // --- Custom sorting for India ---
-      if (selectedCountry && (selectedCountry.key === 'IN' || selectedCountry.name === 'India')) {
-        // Separate India categories and others
-        const indiaCategories = filtered.filter(cat => Array.isArray(cat.countries) && cat.countries.includes('india'));
-        const otherCategories = filtered.filter(cat => !(Array.isArray(cat.countries) && cat.countries.includes('india')));
-        // Sort India categories by profession and interest match
-        indiaCategories.sort((a, b) => {
-          // Profession match first
-          const aProf = a.professions && userProfession && a.professions.includes(userProfession);
-          const bProf = b.professions && userProfession && b.professions.includes(userProfession);
-          if (aProf && !bProf) return -1;
-          if (!aProf && bProf) return 1;
-          // Interest match next
-          const aInt = a.interests && mainInterests.some(i => a.interests.includes(i));
-          const bInt = b.interests && mainInterests.some(i => b.interests.includes(i));
-          if (aInt && !bInt) return -1;
-          if (!aInt && bInt) return 1;
-          // Otherwise, keep original order
-          return 0;
-        });
-        // Return India categories first, then others
-        return [...indiaCategories, ...otherCategories];
+      // If user has no preferences, don't show admin categories
+      if (!userProfession && mainInterests.length === 0) return false;
+
+      // If user has only profession set
+      if (userProfession && mainInterests.length === 0) {
+        return matchesProfession;
       }
-      return filtered;
-    }
+
+      // If user has only interests set
+      if (!userProfession && mainInterests.length > 0) {
+        return matchesInterest;
+      }
+
+      // If user has both profession and interests set
+      return matchesProfession || matchesInterest;
+    });
+
+    // Add filtered admin categories to the result
+    filteredCategories = [...filteredCategories, ...adminFilteredCategories];
+
+    // Sort categories by country (India first), then profession match, then interest match
+    filteredCategories.sort((a, b) => {
+      if (a.isAdminCategory && b.isAdminCategory) {
+        // If selected country is India, prioritize India categories
+        if (selectedCountry?.key === 'IN') {
+          const aIsIndia = a.countries?.includes('india') || false;
+          const bIsIndia = b.countries?.includes('india') || false;
+          if (aIsIndia && !bIsIndia) return -1;
+          if (!aIsIndia && bIsIndia) return 1;
+        }
+
+        // Then sort by profession match
+        const aMatchesProfession = a.professions?.includes(userProfession) || false;
+        const bMatchesProfession = b.professions?.includes(userProfession) || false;
+        
+        if (aMatchesProfession && !bMatchesProfession) return -1;
+        if (!aMatchesProfession && bMatchesProfession) return 1;
+
+        // Then sort by interest match
+        const aMatchesInterest = a.interests?.some(i => mainInterests.includes(i)) || false;
+        const bMatchesInterest = b.interests?.some(i => mainInterests.includes(i)) || false;
+        
+        if (aMatchesInterest && !bMatchesInterest) return -1;
+        if (!aMatchesInterest && bMatchesInterest) return 1;
+      }
+      return 0;
+    });
+
+    return filteredCategories;
   };
 
   // Single effect to fetch all data when user changes
@@ -768,14 +770,7 @@ function PopularBookmarks() {
             !Object.values(currentColumns).flat().includes(cat.id)
           );
           
-          if (addedCategories.length > 0 && isMounted) {
-            notification.success({
-              message: "Categories Auto-Added!",
-              description: `${addedCategories.length} category${addedCategories.length > 1 ? 'ies' : 'y'} matching your preferences have been automatically added to your main view.`,
-              placement: "topRight",
-              duration: 4
-            });
-          }
+         
         }
         
         // Use the updated columns for display
@@ -857,9 +852,9 @@ function PopularBookmarks() {
         const initialOpenStates = savedOpenStates
           ? JSON.parse(savedOpenStates)
           : allCategories.reduce((acc, category) => {
-              acc[category.id] = true;
-              return acc;
-            }, {});
+          acc[category.id] = true;
+          return acc;
+        }, {});
         
         // Set state if still mounted
         if (isMounted) {
@@ -1814,16 +1809,32 @@ function PopularBookmarks() {
   };
 
   const renderBookmarkList = (categoryLinks, categoryId) => {
+    if (!Array.isArray(categoryLinks)) {
+      return (
+        <div className="text-center p-4 text-gray-500">
+          Loading bookmarks...
+        </div>
+      );
+    }
+
     const sizes = categoryBookmarkSizes[categoryId] || { list: 32 };
     
     // Filter bookmarks if showOnlyLiked is enabled
     const filteredLinks = showOnlyLiked 
-      ? categoryLinks.filter(link => likedBookmarks.includes(link.id))
+      ? categoryLinks.filter(link => likedBookmarks?.includes(link.id))
       : categoryLinks;
     
     return (
       <ul className="bg-white/[(var(--widget-opacity))] dark:bg-[#28283a]/[(var(--widget-opacity))]">
-        {filteredLinks.map((link) => (
+        {filteredLinks.map((link) => {
+          if (!link || !link.id) return null;
+
+          // Safely get like-related values with defaults
+          const isLiked = userLikedBookmarks?.[link.id] || false;
+          const likeCount = bookmarkLikes?.[link.id] || 0;
+          const isFavorite = likedBookmarks?.includes(link.id) || false;
+
+          return (
           <li
             key={link.id}
             className="flex items-center py-2 px-4 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg group"
@@ -1867,16 +1878,16 @@ function PopularBookmarks() {
                   <button
                     onClick={() => handleToggleLike(link)}
                     className={`p-1 rounded-full transition-all duration-200 hover:scale-110 ${
-                      likedBookmarks.includes(link.id)
+                        isFavorite
                         ? "text-red-500 hover:text-red-600"
                         : "text-gray-400 hover:text-red-500"
                     }`}
-                    title={likedBookmarks.includes(link.id) ? "Remove from favorites" : "Add to favorites"}
+                      title={isFavorite ? "Remove from favorites" : "Add to favorites"}
                   >
                     <svg
                       width="16"
                       height="16"
-                      fill={likedBookmarks.includes(link.id) ? "currentColor" : "none"}
+                        fill={isFavorite ? "currentColor" : "none"}
                       stroke="currentColor"
                       strokeWidth="2"
                       viewBox="0 0 24 24"
@@ -1890,7 +1901,7 @@ function PopularBookmarks() {
                     </svg>
                   </button>
                   <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    {likedBookmarks.includes(link.id) ? "1" : "0"}
+                      {isFavorite ? "1" : "0"}
                   </span>
                 </div>
 
@@ -1899,11 +1910,11 @@ function PopularBookmarks() {
                   <button
                     onClick={() => handleFacebookLike(link)}
                     className={`p-1 rounded-full transition-all duration-200 hover:scale-110 ${
-                      userLikedBookmarks[link.id]
+                        isLiked
                         ? "text-blue-500 hover:text-blue-600"
                         : "text-gray-400 hover:text-blue-500"
                     }`}
-                    title={userLikedBookmarks[link.id] ? "Unlike this bookmark" : "Like this bookmark"}
+                      title={isLiked ? "Unlike this bookmark" : "Like this bookmark"}
                   >
                     <svg
                       width="16"
@@ -1916,13 +1927,14 @@ function PopularBookmarks() {
                     </svg>
                   </button>
                   <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    {bookmarkLikes[link.id] || 0}
+                      {likeCount}
                   </span>
                 </div>
               </div>
             )}
           </li>
-        ))}
+          );
+        })}
       </ul>
     );
   };
@@ -2146,35 +2158,51 @@ function PopularBookmarks() {
                 </button>
               </div>
             )}
-            {/* {(userProfession || userInterests.length > 0) && (
-              <div className="flex items-center gap-2 px-3 py-1 bg-green-100 dark:bg-green-900 rounded-lg text-sm">
-                <span className="text-green-700 dark:text-green-300">Auto-added categories for:</span>
-                <span className="inline-flex items-center bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs">
-                  <img src={selectedCountry.flag} alt="" className="w-3 h-3 mr-1" />
-                  {selectedCountry.name}
+            {/* User Preferences Indicator (Profession & Interests) */}
+            <div className="flex items-center gap-2">
+              {/* Profession badge */}
+              <button
+                className="flex items-center gap-1 px-2 py-1 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 text-xs font-medium border border-blue-200 dark:border-blue-700 hover:bg-blue-200 dark:hover:bg-blue-800 transition cursor-pointer"
+                style={{ minWidth: 0 }}
+                onClick={() => setIsProfessionModalOpen(true)}
+                title="Change Profession"
+              >
+                <span>{getProfessionIcon(userProfession)}</span>
+                <span className="truncate max-w-[90px]">{getProfessionDisplayName(userProfession)}</span>
+                <span className="ml-1 text-blue-400">
+                  <svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeWidth="2" d="M12 4v16m8-8H4"/></svg>
                 </span>
-                {userProfession && (
-                  <span className="inline-flex items-center bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-xs">
-                    {professionOptions.find(p => p.id === userProfession)?.name || userProfession}
-                  </span>
-                )}
-                {userInterests.length > 0 && (
-                  <span className="inline-flex items-center bg-purple-200 dark:bg-purple-800 text-purple-800 dark:text-purple-200 px-2 py-1 rounded text-xs">
-                    {userInterests.length} interest{userInterests.length > 1 ? 's' : ''}
-                  </span>
-                )}
+              </button>
+              {/* Interests badges */}
+              {userInterests.length === 0 ? (
                 <button
-                  onClick={() => setIsControllerOpen(true)}
-                  className="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-200 text-xs underline"
+                  className="px-2 py-1 rounded bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 text-xs font-medium border border-purple-200 dark:border-purple-700 hover:bg-purple-200 dark:hover:bg-purple-800 transition cursor-pointer"
+                  onClick={() => setIsInterestModalOpen(true)}
+                  title="Add Interests"
                 >
-                  Browse other categories
+                  + Add Interests
                 </button>
+              ) : (
+                userInterests.map((interestId) => {
+                  const interest = interestOptions.find((i) => i.id === interestId);
+                  return (
+                    <button
+                      key={interestId}
+                      className="flex items-center gap-1 px-2 py-1 rounded bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 text-xs font-medium border border-purple-200 dark:border-purple-700 hover:bg-purple-200 dark:hover:bg-purple-800 transition cursor-pointer"
+                      onClick={() => setIsInterestModalOpen(true)}
+                      title="Change Interests"
+                    >
+                      <span>{interest?.icon}</span>
+                      <span className="truncate max-w-[70px]">{interest?.name || interestId}</span>
+                    </button>
+                  );
+                })
+              )}
               </div>
-            )} */}
           </div>
           <div className="flex items-center gap-2">
-            <div className="relative flex items-center" ref={searchBarRef}>
               {/* Search Button */}
+            <div className="relative flex items-center" ref={searchBarRef}>
               <button
                 onClick={() => setIsSearchBarOpen(!isSearchBarOpen)}
                 className="rounded-lg flex gap-2 items-center mb-1.5 text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] px-3 py-2 dark:text-white transition-all duration-300 hover:scale-105"
@@ -2205,7 +2233,6 @@ function PopularBookmarks() {
                     <line x1="21" y1="21" x2="16.65" y2="16.65" strokeWidth="2"/>
                   </svg>
                 )}
-                {isSearchBarOpen ? "Close" : "Search"}
               </button>
               {/* Sliding Search Input */}
               <div 
@@ -2230,35 +2257,92 @@ function PopularBookmarks() {
                 />
               </div>
             </div>
-            {/* Add button (Dropdown) now after search */}
+
+            {/* Add Button */}
             <Dropdown
               menu={{
                 items: [
                   {
                     key: "addCategory",
                     icon: <PlusOutlined />, 
-                    label: <div className="dark:text-white">Add Category</div>,
+                    label: "Add Category",
                     onClick: () => setIsAddCategoryModalVisible(true),
                   },
                   {
                     key: "addBookmark",
                     icon: <PlusOutlined />, 
-                    label: <div className="dark:text-white">Add Bookmark</div>,
+                    label: "Add Bookmark",
                     onClick: handleGlobalAddBookmark,
                   },
+                ],
+              }}
+              trigger={["click"]}
+            >
+              <button className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] px-3 py-2 dark:text-white mb-2">
+                <PlusOutlined /> 
+              </button>
+            </Dropdown>
+
+            {/* Settings Button */}
+            <Dropdown
+              menu={{
+                items: [
                   {
-                    type: "divider"
+                    key: "expandCollapse",
+                    icon: areAllOpen ? <CompressOutlined /> : <ExpandOutlined />, // dynamic icon
+                    label: areAllOpen ? "Collapse All" : "Expand All", // dynamic label
+                    onClick: toggleAllCategories,
+                  },
+                  {
+                    key: "showLiked",
+                    icon: <span style={{ color: "#e25555" }}>❤️</span>,
+                    label: showOnlyLiked ? "Show All Bookmarks" : "Show Only Liked",
+                    onClick: () => setShowOnlyLiked(!showOnlyLiked),
+                  },
+                  {
+                    key: "categoryManager",
+                    icon: <SettingOutlined />,
+                    label: "Category Manager",
+                    onClick: () => setIsCategoryManagerOpen(true),
+                  },
+                  {
+                    key: "refresh",
+                    icon: <span style={{ color: "#4fc3f7" }}>🔄</span>,
+                    label: "Refresh Categories",
+                    onClick: async () => {
+                      try {
+                        await refreshMainViewCategories();
+                        notification.success({
+                          message: "Categories Refreshed!",
+                          description: "Your categories have been updated.",
+                          placement: "topRight",
+                          duration: 2
+                        });
+                      } catch (error) {
+                        notification.error({
+                          message: "Refresh Failed",
+                          description: "Please try again.",
+                          placement: "topRight",
+                          duration: 2
+                        });
+                      }
+                    },
+                  },
+                  {
+                    key: "importBookmarks",
+                    icon: <VerticalAlignBottomOutlined />,
+                    label: "Import Bookmarks",
+                    onClick: () => fileInputRef.current && fileInputRef.current.click(),
                   },
                   {
                     key: "view",
-                    icon: <UnorderedListOutlined />, // You can use a suitable icon
-                    label: <div className="dark:text-white">View</div>,
+                    icon: <UnorderedListOutlined />,
+                    label: "View",
                     children: [
                       {
                         key: "view-list",
                         label: "List",
                         onClick: () => {
-                          // Set all categories to list view
                           setCategoryViewModes(() => {
                             const newModes = {};
                             categories.forEach(cat => {
@@ -2299,62 +2383,12 @@ function PopularBookmarks() {
                       },
                     ],
                   },
-                  {
-                    key: "expandCollapse",
-                    icon: <div className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">{areAllOpen ? <CompressOutlined /> : <ExpandOutlined />}</div>,
-                    label: <div className="dark:text-white">{areAllOpen ? "Collapse All" : "Expand All"}</div>,
-                    onClick: toggleAllCategories,
-                  },
-                  {
-                    key: "showLiked",
-                    icon: <div className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">❤️</div>,
-                    label: <div className="dark:text-white">{showOnlyLiked ? "Show All Bookmarks" : "Show Only Liked"}</div>,
-                    onClick: () => setShowOnlyLiked(!showOnlyLiked),
-                  },
-                  {
-                    key: "categoryManager",
-                    icon: <div className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md"><SettingOutlined /></div>,
-                    label: <div className="dark:text-white">Category Manager</div>,
-                    onClick: () => setIsCategoryManagerOpen(true),
-                  },
-                  {
-                    key: "refresh",
-                    icon: <div className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">🔄</div>,
-                    label: <div className="dark:text-white">Refresh Categories</div>,
-                    onClick: async () => {
-                      try {
-                        await refreshMainViewCategories();
-                        notification.success({
-                          message: "Categories Refreshed!",
-                          description: "Your categories have been updated.",
-                          placement: "topRight",
-                          duration: 2
-                        });
-                      } catch (error) {
-                        notification.error({
-                          message: "Refresh Failed",
-                          description: "Please try again.",
-                          placement: "topRight",
-                          duration: 2
-                        });
-                      }
-                    },
-                  },
-                  {
-                    key: "importBookmarks",
-                    icon: <div className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded-md">
-                      <VerticalAlignBottomOutlined />
-                    </div>,
-                    label: <div className="dark:text-white">Import Bookmarks</div>,
-                    onClick: () => fileInputRef.current && fileInputRef.current.click(),
-                  },
                 ],
               }}
               trigger={["click"]}
-              overlayClassName="[&_.ant-dropdown-menu]:p-0 [&_.ant-dropdown-menu-item]:p-0 [&_ul]:dark:bg-[#28283a]"
             >
               <button className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] px-3 py-2 dark:text-white mb-2">
-                <PlusOutlined /> Add
+                <SettingOutlined /> 
               </button>
             </Dropdown>
             <input
@@ -2469,15 +2503,33 @@ function PopularBookmarks() {
                                                   </div>
                                                 </div>
                                               </div>
+                                              <div className="flex items-center gap-2">
                                               <span className="font-semibold">
-                                                {category.name ||
-                                                  category.newCategory}
-                                                {showOnlyLiked && (
-                                                  <span className="ml-2 text-xs text-red-500">
-                                                    ({categoryLinks.filter(link => likedBookmarks.includes(link.id)).length} liked)
+                                                  {category.name || category.newCategory}
+                                                </span>
+                                                {category.isAdminCategory && (
+                                                  <div className="flex gap-1">
+                                                    {/* Country indicator */}
+                                                    {category.countries?.includes('india') && selectedCountry?.key === 'IN' && (
+                                                      <span className="px-2 py-0.5 text-xs bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 rounded">
+                                                        🇮🇳 India
                                                   </span>
                                                 )}
+                                                    {/* Profession indicator */}
+                                                    {/* {category.professions?.includes(userProfession) && (
+                                                      <span className="px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded">
+                                                        {userProfession}
                                               </span>
+                                                    )} */}
+                                                    {/* Interest indicator */}
+                                                    {/* {category.interests?.some(i => mainInterests.includes(i)) && (
+                                                      <span className="px-2 py-0.5 text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 rounded">
+                                                        Interest Match
+                                                      </span>
+                                                    )} */}
+                                                  </div>
+                                                )}
+                                              </div>
                                             </div>
                                             <Space
                                               onClick={(e) =>
@@ -2620,31 +2672,26 @@ function PopularBookmarks() {
         {filteredCategoryIds.length === 0 && (userProfession || userInterests.length > 0) && (
           <div className="text-center py-8">
             <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6 max-w-md mx-auto">
-              <div className="text-yellow-800 dark:text-yellow-200 mb-2">
-                <svg className="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
-              </div>
               <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
                 No matching categories found
               </h3>
               <p className="text-yellow-700 dark:text-yellow-300 mb-4">
-                No categories match your current preferences. Categories that match your preferences will be automatically added here when they become available.
+                {!userProfession && mainInterests.length === 0 ? (
+                  "Please set your profession and interests to see relevant categories."
+                ) : (
+                  `No categories match your ${userProfession ? `profession (${userProfession})` : ''} 
+                   ${userProfession && mainInterests.length > 0 ? ' or ' : ''}
+                   ${mainInterests.length > 0 ? 'interests' : ''}.`
+                )}
               </p>
               <div className="flex gap-2 justify-center">
                 <AntButton 
                   type="primary" 
-                  onClick={() => setIsControllerOpen(true)}
+                  onClick={() => setIsInterestModalOpen(true)}
                   className="bg-blue-600 hover:bg-blue-700"
                 >
-                  Browse All Categories
-                </AntButton>
-                {/* <AntButton 
-                  onClick={() => navigate('/profile')}
-                  className="border-yellow-300 text-yellow-700 dark:text-yellow-300"
-                >
                   Update Preferences
-                </AntButton> */}
+                </AntButton>
               </div>
             </div>
           </div>
@@ -3343,12 +3390,7 @@ function PopularBookmarks() {
       setMainInterests(tempInterests);
       setControllerInterests(tempInterests);
 
-      notification.success({
-        message: "Interests Updated!",
-        description: "Your interests have been saved successfully.",
-        placement: "topRight",
-        duration: 3
-      });
+      
 
       setIsInterestModalOpen(false);
     } catch (error) {
@@ -3384,18 +3426,29 @@ function PopularBookmarks() {
   // --- 2. Refactor loadBookmarkLikeCounts to use batch fetch ---
   const loadBookmarkLikeCounts = async (bookmarks) => {
     try {
+      // Initialize with empty objects first
+      setBookmarkLikes({});
+      setUserLikedBookmarks({});
+      
       const adminBookmarks = bookmarks.filter(bookmark => bookmark.isAdminBookmark);
+      if (!adminBookmarks.length) return;
+
       const bookmarkIds = adminBookmarks.map(b => b.id);
       const { likeCounts, userLiked } = await batchFetchBookmarkLikes(bookmarkIds, db);
       const userId = user?.uid;
-      setBookmarkLikes(likeCounts);
+
+      // Update states with fetched data
+      setBookmarkLikes(likeCounts || {});
       setUserLikedBookmarks(
         Object.fromEntries(
-          bookmarkIds.map(id => [id, userLiked[id]?.includes(userId)])
+          bookmarkIds.map(id => [id, userLiked[id]?.includes(userId) || false])
         )
       );
     } catch (error) {
       console.error("Error loading bookmark like counts:", error);
+      // Set default values on error
+      setBookmarkLikes({});
+      setUserLikedBookmarks({});
     }
   };
   // --- 3. Suggestion widget: always show on page load if there are liked bookmarks ---
@@ -3606,7 +3659,66 @@ function PopularBookmarks() {
   }, [user]);
 
   // When a category is toggled open/closed, update listeners
-  
+
+  // Profession options for badge and modal
+  const professionOptions = [
+    { id: "developer", name: "Developer / Programmer", icon: "💻" },
+    { id: "designer", name: "Designer (UI/UX, Graphic, Web)", icon: "🎨" },
+    { id: "digital_marketer", name: "Digital Marketer", icon: "📱" },
+    { id: "student", name: "Student", icon: "🎓" },
+    { id: "teacher", name: "Teacher / Educator", icon: "👩‍🏫" },
+    { id: "entrepreneur", name: "Entrepreneur / Founder", icon: "��" },
+    { id: "freelancer", name: "Freelancer (Creative or Technical)", icon: "🆓" },
+    { id: "consultant", name: "Consultant / Advisor", icon: "💡" },
+    { id: "working_professional", name: "Working Professional", icon: "💼" },
+    { id: "researcher", name: "Researcher / Academic", icon: "🔬" },
+    { id: "it_support", name: "IT / Tech Support", icon: "🛠️" },
+    { id: "medical", name: "Medical Professional", icon: "⚕️" },
+    { id: "retired", name: "Retired", icon: "🌅" },
+    { id: "other", name: "Other", icon: "✨" },
+  ];
+
+  // Helper to get profession display name
+  const getProfessionDisplayName = (professionId) => {
+    const profession = professionOptions.find((p) => p.id === professionId);
+    return profession ? profession.name : "Set Profession";
+  };
+  const getProfessionIcon = (professionId) => {
+    const profession = professionOptions.find((p) => p.id === professionId);
+    return profession ? profession.icon : "❓";
+  };
+
+  // Profession modal state
+  const [isProfessionModalOpen, setIsProfessionModalOpen] = useState(false);
+  const [tempProfession, setTempProfession] = useState(userProfession || "");
+
+  // Save profession handler
+  const handleSaveProfession = async () => {
+    if (!user || !tempProfession) return;
+    try {
+      const userDocRef = doc(db, "users", user.uid);
+      await updateDoc(userDocRef, {
+        profession: tempProfession,
+        professionSelectedAt: new Date().toISOString(),
+      });
+      setUserProfession(tempProfession);
+      setIsProfessionModalOpen(false);
+      notification.success({
+        message: "Profession Updated!",
+        description: "Your profession has been saved successfully.",
+        placement: "topRight",
+        duration: 3,
+      });
+    } catch (error) {
+      notification.error({
+        message: "Update Failed",
+        description: "Failed to update profession. Please try again.",
+        placement: "topRight",
+        duration: 3,
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="w-[85vw] mx-auto" style={{ padding: "24px" }}>
@@ -3812,68 +3924,7 @@ function PopularBookmarks() {
         ]}
       >
         {/* Category Controller Header */}
-        <div className="mb-6 bg-white dark:bg-[#513a7a] rounded-sm shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-          
-          <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-            
-            
-            {/* Current Interests Display */}
-            {userInterests.length > 0 && (
-              <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-700">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-sm font-medium text-blue-700 dark:text-blue-300">Your Current Interests:</span>
-                  <button
-                    onClick={handleOpenInterestModal}
-                    className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 transition-colors"
-                  >
-                    Change
-                  </button>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {userInterests.map((interestId) => {
-                    const interest = interestOptions.find(i => i.id === interestId);
-                    return interest ? (
-                      <span
-                        key={interestId}
-                        className="inline-flex items-center bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-xs font-medium"
-                      >
-                        {interest.icon} {interest.name}
-                      </span>
-                    ) : null;
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-          {/* <div className="mb-4 flex flex-col md:flex-row md:items-center gap-2">
-            <div className="flex items-center gap-2">
-              <span className="font-medium text-gray-700 dark:text-white">Filter by Interests:</span>
-              <Select
-                mode="multiple"
-                allowClear
-                style={{ minWidth: 180 }}
-                placeholder="Select interests"
-                value={mainInterests}
-                onChange={setMainInterests}
-                options={
-                  // Use the complete interest options list
-                  interestOptions.map(option => ({ 
-                    label: `${option.icon} ${option.name}`, 
-                    value: option.id 
-                  }))
-                }
-              />
-              <AntButton
-                type="primary"
-                size="small"
-                onClick={handleOpenInterestModal}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                Change My Interests
-              </AntButton>
-            </div>
-          </div> */}
-        </div>
+        
         <div className="flex w-full mb-4 justify-between items-center gap-2">
           <div className="flex items-center gap-4">
           <div className="dark:text-white font-medium">Columns:</div>
@@ -4565,6 +4616,59 @@ function PopularBookmarks() {
               rows={4}
               disabled={reviewSubmitting}
             />
+          </div>
+        </div>
+      </Modal>
+      {/* Profession Selection Modal */}
+      <Modal
+        title={
+          <div className="text-center">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Select Your Profession</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Choose your profession to get personalized category recommendations</p>
+          </div>
+        }
+        open={isProfessionModalOpen}
+        onCancel={() => setIsProfessionModalOpen(false)}
+        footer={[
+          <AntButton key="cancel" onClick={() => setIsProfessionModalOpen(false)}>
+            Cancel
+          </AntButton>,
+          <AntButton
+            key="save"
+            type="primary"
+            onClick={handleSaveProfession}
+            className="bg-blue-600 hover:bg-blue-700"
+            disabled={!tempProfession}
+          >
+            Save Profession
+          </AntButton>,
+        ]}
+        width={600}
+      >
+        <div className="py-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {professionOptions.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => setTempProfession(option.id)}
+                className={`relative flex flex-col items-center p-4 border-2 rounded-lg transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
+                  tempProfession === option.id
+                    ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-200"
+                    : "border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-blue-300"
+                }`}
+              >
+                <span className="text-3xl mb-2">{option.icon}</span>
+                <span className="font-medium text-sm text-gray-900 dark:text-white text-center">{option.name}</span>
+                {tempProfession === option.id && (
+                  <div className="absolute top-2 right-2 bg-blue-500 text-white rounded-full p-1">
+                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24">
+                      <path fill="currentColor" d="M9.5 16.5l-4-4 1.41-1.41L9.5 13.67l7.09-7.09L18 7l-8.5 8.5z"/>
+                    </svg>
+                  </div>
+                )}
+              </button>
+            ))}
           </div>
         </div>
       </Modal>

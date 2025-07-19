@@ -82,11 +82,17 @@ const SignIn = ({ onSuccess }) => {
         try {
           const userCredential = await signInWithEmailAndPassword(auth, email, password);
           const user = userCredential.user;
-          // Check if user has profession
+          // Check if user has profession and interests
           const userRef = doc(db, "users", user.uid);
           const userSnap = await getDoc(userRef);
-          if (!userSnap.exists() || !userSnap.data().profession) {
+          const userData = userSnap.data();
+          
+          if (!userSnap.exists() || !userData?.profession) {
             setShowProfessionModal(true);
+          } else if (!userData?.interests || userData.interests.length === 0) {
+            // User has profession but no interests - show interest modal
+            setProfession(userData.profession);
+            setShowInterestModal(true);
           } else {
             if (onSuccess) onSuccess();
             // Navigation will be handled by ProfessionCheckWrapper
@@ -114,11 +120,17 @@ const SignIn = ({ onSuccess }) => {
         try {
           const userCredential = await signInWithPopup(auth, provider);
           const user = userCredential.user;
-          // Check if user has profession
+          // Check if user has profession and interests
           const userRef = doc(db, "users", user.uid);
           const userSnap = await getDoc(userRef);
-          if (!userSnap.exists() || !userSnap.data().profession) {
+          const userData = userSnap.data();
+          
+          if (!userSnap.exists() || !userData?.profession) {
             setShowProfessionModal(true);
+          } else if (!userData?.interests || userData.interests.length === 0) {
+            // User has profession but no interests - show interest modal
+            setProfession(userData.profession);
+            setShowInterestModal(true);
           } else {
             if (onSuccess) onSuccess();
             // Navigation will be handled by ProfessionCheckWrapper
@@ -348,9 +360,13 @@ const SignIn = ({ onSuccess }) => {
       {showInterestModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-purple-100 bg-opacity-90 z-[9999]">
           <div className="bg-white p-8 rounded-3xl shadow-2xl border border-blue-100 max-w-lg w-full max-h-[90vh] overflow-y-auto animate-fade-in flex flex-col items-center">
-            <div className="mb-2 text-xs text-blue-500 font-semibold tracking-widest uppercase">Step 2 of 2</div>
+            <div className="mb-2 text-xs text-blue-500 font-semibold tracking-widest uppercase">
+              {showProfessionModal ? "Step 2 of 2" : "Select Interests"}
+            </div>
             <h2 className="text-2xl font-extrabold mb-1 text-center text-blue-900 font-sans">Select Your Interests</h2>
-            <div className="text-gray-500 text-sm mb-6 text-center">Choose at least one to help us recommend the best content for you.</div>
+            <div className="text-gray-500 text-sm mb-6 text-center">
+              Choose your interests to help us recommend the best content for you. You can skip this step if you prefer.
+            </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 mb-6 w-full max-h-[50vh] overflow-y-auto">
               {interestOptions.map((option) => (
                 <button
@@ -370,25 +386,50 @@ const SignIn = ({ onSuccess }) => {
                 </button>
               ))}
             </div>
-            <button
-              className="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white py-3 rounded-xl font-bold text-lg shadow-md hover:from-purple-600 hover:to-blue-600 transition-all"
-              onClick={async () => {
-                if (interests.length === 0) return setError("Please select at least one interest.");
-                setLoading(true);
-                const user = auth.currentUser;
-                await updateDoc(doc(db, "users", user.uid), {
-                  profession: profession,
-                  interests: interests,
-                  professionSelectedAt: new Date(),
-                });
-                setShowInterestModal(false);
-                if (onSuccess) onSuccess();
-                setLoading(false);
-              }}
-              disabled={loading}
-            >
-              {loading ? "Saving..." : "Continue"}
-            </button>
+            <div className="flex gap-3 w-full">
+              {/* Always show skip button */}
+              <button
+                type="button"
+                className="flex-1 bg-gray-500 text-white py-3 rounded-xl font-bold text-lg shadow-md hover:bg-gray-600 transition-all"
+                onClick={async () => {
+                  setLoading(true);
+                  const user = auth.currentUser;
+                  await updateDoc(doc(db, "users", user.uid), {
+                    profession: profession,
+                    interests: [], // Empty array for interests
+                    professionSelectedAt: new Date(),
+                  });
+                  setShowInterestModal(false);
+                  if (onSuccess) onSuccess();
+                  setLoading(false);
+                }}
+                disabled={loading}
+              >
+                {loading ? "Saving..." : "Skip"}
+              </button>
+              <button
+                className="flex-1 bg-gradient-to-r from-purple-500 to-blue-500 text-white py-3 rounded-xl font-bold text-lg shadow-md hover:from-purple-600 hover:to-blue-600 transition-all"
+                onClick={async () => {
+                  if (interests.length === 0) {
+                    setError("Please select at least one interest or click Skip to continue without interests.");
+                    return;
+                  }
+                  setLoading(true);
+                  const user = auth.currentUser;
+                  await updateDoc(doc(db, "users", user.uid), {
+                    profession: profession,
+                    interests: interests,
+                    professionSelectedAt: new Date(),
+                  });
+                  setShowInterestModal(false);
+                  if (onSuccess) onSuccess();
+                  setLoading(false);
+                }}
+                disabled={loading}
+              >
+                {loading ? "Saving..." : "Continue with Interests"}
+              </button>
+            </div>
             {error && <div className="text-red-500 mt-2 text-center">{error}</div>}
           </div>
         </div>

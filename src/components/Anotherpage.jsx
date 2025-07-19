@@ -33,7 +33,7 @@ import { DragDropContext as DnDContext, Droppable as DnDDroppable, Draggable as 
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 const allCategories = [
-  "Popular", "AI", "Travel", "Sports", "Shopping", "News", "Jobs", "Movie", "Finance", "Education"
+  "Popular", "AI", "Travel", "Sports", "Shopping", "News", "Jobs", "Movie", "Finance", "Education", "Bpo"
 ];
 
 // Memoize all widget components
@@ -308,7 +308,6 @@ const Anotherpage = ({ pageId = "home" }) => {
   }, [isSorterOpen, columns, items]);
 
   useEffect(() => {
-    // Update available widgets whenever sortedItems changes
     // setAvailableWidgets(getAvailableWidgets(sortedItems)); // This line was removed
   }, [sortedItems]);
 
@@ -772,58 +771,72 @@ const Anotherpage = ({ pageId = "home" }) => {
 
   // --- Add state for Add Bookmark modal ---
   const [addBookmarkModal, setAddBookmarkModal] = useState({ open: false, subcatKey: null });
-  const [newBookmark, setNewBookmark] = useState({ name: '', link: '' });
 
   // Add handler to save new bookmark
-  const handleAddBookmark = async (subcatKey) => {
-    if (!newBookmark.name || !newBookmark.link) return;
+  const handleAddBookmark = async (subcatKey, bookmark) => {
+    // --- Duplicate check before add ---
+    const normalizedNewUrl = normalizeDomain(bookmark.link);
+    // Get all bookmarks for this subcat (from state, which is up-to-date)
+    const existingBookmarks = subcatBookmarks[subcatKey] || [];
+    const isDuplicate = existingBookmarks.some(b => normalizeDomain(b.link || '') === normalizedNewUrl);
+    if (isDuplicate) {
+      message.error('A bookmark with this URL already exists in this subcategory.');
+      setAddBookmarkModal({ open: false, subcatKey: null });
+      return;
+    }
+    if (!bookmark.name || !bookmark.link) return;
     if (firestoreUser) {
       // Save to Firestore (modular API)
       const docRef = await addDoc(
         collection(db, 'users', firestoreUser.uid, 'bookmarks'),
         {
-          name: newBookmark.name,
-          link: newBookmark.link,
+          name: bookmark.name,
+          link: bookmark.link,
           category: selectedCategory,
           subcategory: subcatKey,
           addedByAdmin: false,
         }
       );
-      // Optimistically update UI
-      setSubcatBookmarks(prev => ({
-        ...prev,
-        [subcatKey]: [
-          ...(prev[subcatKey] || []),
-          {
-            id: docRef.id,
-            name: newBookmark.name,
-            link: newBookmark.link,
-            category: selectedCategory,
-            subcategory: subcatKey,
-            addedByAdmin: false,
-          }
-        ]
-      }));
+      // Optimistically update UI (ensure no duplicate)
+      setSubcatBookmarks(prev => {
+        const prevArr = prev[subcatKey] || [];
+        const filtered = prevArr.filter(b => normalizeDomain(b.link || '') !== normalizedNewUrl);
+        return {
+          ...prev,
+          [subcatKey]: [
+            ...filtered,
+            {
+              id: docRef.id,
+              name: bookmark.name,
+              link: bookmark.link,
+              category: selectedCategory,
+              subcategory: subcatKey,
+              addedByAdmin: false,
+            }
+          ]
+        };
+      });
       fetchSubcatBookmarks(subcatKey); // Still fetch to ensure sync
     } else {
       // Save to localStorage
       const key = `userBookmarks_${selectedCategory}_${subcatKey}`;
       const existing = JSON.parse(localStorage.getItem(key) || '[]');
+      // Remove any existing with same normalized URL
+      const filtered = existing.filter(b => normalizeDomain(b.link || '') !== normalizedNewUrl);
       const newEntry = {
         id: Date.now().toString(),
-        name: newBookmark.name,
-        link: newBookmark.link,
+        name: bookmark.name,
+        link: bookmark.link,
         addedByAdmin: false,
       };
-      localStorage.setItem(key, JSON.stringify([...existing, newEntry]));
+      localStorage.setItem(key, JSON.stringify([...filtered, newEntry]));
       // Update state
       setSubcatBookmarks(prev => ({
         ...prev,
-        [subcatKey]: [...(prev[subcatKey] || []), newEntry]
+        [subcatKey]: [...filtered, newEntry]
       }));
     }
     setAddBookmarkModal({ open: false, subcatKey: null });
-    setNewBookmark({ name: '', link: '' });
   };
 
   // AddBookmarkModal component (move above usage)
@@ -885,9 +898,8 @@ const Anotherpage = ({ pageId = "home" }) => {
         return;
       }
       setError('');
-      // Set newBookmark and call handleAddBookmark
-      setNewBookmark({ name: localBookmark.name.trim(), link: localBookmark.link.trim() });
-      handleAddBookmark(localBookmark.subcat);
+      // Directly call handleAddBookmark with bookmark data
+      handleAddBookmark(localBookmark.subcat, { name: localBookmark.name.trim(), link: localBookmark.link.trim() });
     };
 
     const isDisabled = !localBookmark.name.trim() || !localBookmark.link.trim() || (!firestoreUser && !isValidUrl(localBookmark.link.trim()));
@@ -1571,13 +1583,21 @@ const Anotherpage = ({ pageId = "home" }) => {
   // Helper to render bookmarks in the selected mode
   function renderBookmarksView(bookmarks, mode = 'list', iconSize = 'medium') {
     if (!Array.isArray(bookmarks)) return null;
+    // Remove duplicates by normalized URL
+    const seen = new Set();
+    const uniqueBookmarks = bookmarks.filter(item => {
+      const norm = normalizeDomain(item.link || '');
+      if (seen.has(norm)) return false;
+      seen.add(norm);
+      return true;
+    });
     // Icon size classes
     const sizeClass = iconSize === 'small' ? 'w-4 h-4' : iconSize === 'large' ? 'w-10 h-10' : 'w-7 h-7';
     const sizeClassList = iconSize === 'small' ? 'w-5 h-5' : iconSize === 'large' ? 'w-12 h-12' : 'w-7 h-7';
     if (mode === 'list') {
       return (
         <div className="flex flex-col gap-2 p-3">
-          {bookmarks.map((item) => (
+          {uniqueBookmarks.map((item) => (
             <a
               key={item.id}
               href={item.link}
@@ -1602,7 +1622,7 @@ const Anotherpage = ({ pageId = "home" }) => {
     if (mode === 'grid') {
       return (
         <div className="grid grid-cols-5 gap-2 p-3">
-          {bookmarks.map((item) => (
+          {uniqueBookmarks.map((item) => (
             <a
               key={item.id}
               href={item.link}
@@ -1627,7 +1647,7 @@ const Anotherpage = ({ pageId = "home" }) => {
     if (mode === 'cloud') {
       return (
         <div className="flex flex-wrap gap-2 p-3">
-          {bookmarks.map((item) => (
+          {uniqueBookmarks.map((item) => (
             <a
               key={item.id}
               href={item.link}
@@ -1651,7 +1671,7 @@ const Anotherpage = ({ pageId = "home" }) => {
     if (mode === 'icon') {
       return (
         <div className="grid grid-cols-6 gap-2 p-3">
-          {bookmarks.map((item) => (
+          {uniqueBookmarks.map((item) => (
             <a
               key={item.id}
               href={item.link}

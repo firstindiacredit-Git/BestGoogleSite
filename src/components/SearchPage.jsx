@@ -16,7 +16,7 @@ import NotebookAndSheet from "../components/NotebookAndSheet";
 import PasswordGenerator from "../components/PasswordGenerater";
 import News from "../components/News";
 import Tool from "../../Tools/Tool.jsx";
-
+import BalanceSheet from "../components/balancesheet/BalanceSheet.jsx";
 import Sports from "../components/Sports";
 import Top100 from "../components/Top100";
 import "./style.css";
@@ -25,6 +25,10 @@ import { Settings } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { DesignContext } from "../context/DesignContext.jsx";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { useAuth } from "../context/AuthContext.jsx";
+import axios from "axios";
+import BalancesheetDashboard from "../components/balancesheet/BalancesheetDashboard.jsx";
+import BalancesheetLogin from "../components/balancesheet/BalancesheetLogin.jsx";
 
 const SearchPage = ({ isToolPage = false }) => {
   const { isDarkMode, toggleTheme } = useTheme();
@@ -39,6 +43,7 @@ const SearchPage = ({ isToolPage = false }) => {
   );
   const { widgetTransparent, setWidgetTransparent } = useContext(WidgetTransparencyContext);
   const [activeComponent, setActiveComponent] = useState("Anotherpage");
+  const [selectedSheetId, setSelectedSheetId] = useState(null);
   const navigate = useNavigate();
   const [visibleHandle, setVisibleHandle] = useState(() => {
     const savedMode = localStorage.getItem("uiMode");
@@ -60,6 +65,8 @@ const SearchPage = ({ isToolPage = false }) => {
 
   const [isGoogleSearchLoaded, setIsGoogleSearchLoaded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [userSheets, setUserSheets] = useState([]);
+  const { user } = useAuth();
 
   useEffect(() => {
     const authInstance = getAuth();
@@ -84,6 +91,20 @@ const SearchPage = ({ isToolPage = false }) => {
       setActiveComponent(storedActiveComponent);
     }
   }, []);
+
+  useEffect(() => {
+    const fetchSheets = async () => {
+      if (user) {
+        try {
+          const response = await axios.get("/sheets");
+          setUserSheets(response.data.filter(sheet => sheet.user === user._id));
+        } catch (error) {
+          // Optionally handle error
+        }
+      }
+    };
+    fetchSheets();
+  }, [user]);
 
   const handleTempTransparencyChange = useCallback((newValue) => {
     setSliderTransparency(newValue); // Update slider position
@@ -635,6 +656,20 @@ const SearchPage = ({ isToolPage = false }) => {
                         >
                           <span className="drop-shadow-md">DATA MINING TOOL</span>
                         </button>
+                        <button
+                          className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                            activeComponent === "BalanceSheet"
+                              ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                              : "dark:text-white  hover:bg-gray-100 dark:hover:bg-[#28283A]"
+                          }`}
+                          onClick={() => {
+                            setSelectedSheetId(null);
+                            setActiveComponent("BalanceSheet");
+                          }}
+                        >
+                          <span className="drop-shadow-md">BALANCE SHEET</span>
+                        </button>
+                        
                         <Dropdown
                           menu={settingsMenu}
                           trigger={["click"]}
@@ -659,7 +694,11 @@ const SearchPage = ({ isToolPage = false }) => {
             </>
           ) : (
             <div className="w-full">
-              {activeComponent === "NotebookAndSheet" ? (
+              {activeComponent === "BalanceSheet" ? (
+                !user ? <BalancesheetLogin onLoginSuccess={() => setActiveComponent("BalanceDashboard")} /> : <BalanceSheet sheetId={selectedSheetId} />
+              ) : activeComponent === "BalanceDashboard" ? (
+                !user ? <BalancesheetLogin onLoginSuccess={() => setActiveComponent("BalanceDashboard")} /> : <BalancesheetDashboard onSheetClick={(id) => { setSelectedSheetId(id); setActiveComponent("BalanceSheet"); }} />
+              ) : activeComponent === "NotebookAndSheet" ? (
                 <NotebookAndSheet />
               ) : activeComponent === "PopularBookmarks" ? (
                 <PopularBookmarks />

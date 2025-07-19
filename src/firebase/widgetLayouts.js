@@ -45,6 +45,7 @@ export const allWidgets = {
   Bookmarks7: { id: "Bookmarks7", name: "Movie" },
   Bookmarks8: { id: "Bookmarks8", name: "Finance" },
   Bookmarks9: { id: "Bookmarks9", name: "Education" },
+  Bookmarks10: {id: "Bookmarks10", name: "Bpo" },
   Todo: { id: "Todo", name: "To Do List" },
   NewsFeed: { id: "NewsFeed", name: "Latest News" },
 };
@@ -512,6 +513,36 @@ export const defaultBookmarks = {
       },
       {
         id: "edu4",
+        name: "Skillshare",
+        link: "https://www.skillshare.com",
+        addedByAdmin: true,
+      },
+    ],
+  },
+  Bpo: {
+    "Courses": [
+      {
+        id: "bpo1",
+        name: "Khan Academy",
+        link: "https://www.khanacademy.org",
+        addedByAdmin: true,
+      },
+      {
+        id: "bpo2",
+        name: "Coursera",
+        link: "https://www.coursera.org",
+        addedByAdmin: true,
+      },
+    ],
+    "Skill Learning": [
+      {
+        id: "bpo3",
+        name: "Udemy",
+        link: "https://www.udemy.com",
+        addedByAdmin: true,
+      },
+      {
+        id: "bpo4",
         name: "Skillshare",
         link: "https://www.skillshare.com",
         addedByAdmin: true,

@@ -1,0 +1,139 @@
+.ant-layout {
+  min-height: 100vh;
+  background: #f0f2f5 !important;
+}
+
+.ant-layout-content {
+  padding: 24px;
+}
+
+.profile-card {
+  box-shadow: 0 1px 2px -2px rgba(0, 0, 0, 0.16),
+              0 3px 6px 0 rgba(0, 0, 0, 0.12),
+              0 5px 12px 4px rgba(0, 0, 0, 0.09);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.ant-card-head {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.ant-avatar {
+  border: 3px solid #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.ant-avatar:hover {
+  transform: scale(1.05);
+}
+
+.ant-statistic {
+  padding: 12px;
+  border-radius: 4px;
+  background: #fafafa;
+  transition: all 0.3s ease;
+}
+
+.ant-statistic:hover {
+  background: #f0f0f0;
+}
+
+.ant-form-item-label > label {
+  font-weight: 500;
+}
+
+.ant-input-affix-wrapper {
+  border-radius: 4px;
+}
+
+.ant-input-affix-wrapper:hover,
+.ant-input-affix-wrapper:focus {
+  border-color: #40a9ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+.ant-btn {
+  border-radius: 4px;
+  height: 40px;
+  padding: 0 20px;
+  font-weight: 500;
+}
+
+.ant-btn-primary {
+  background: linear-gradient(45deg, #1890ff 30%, #40a9ff 90%);
+  border: none;
+}
+
+.ant-btn-primary:hover {
+  background: linear-gradient(45deg, #40a9ff 30%, #69c0ff 90%);
+}
+
+.ant-upload {
+  cursor: pointer;
+}
+
+.ant-upload:hover .ant-avatar {
+  opacity: 0.8;
+}
+
+.ant-divider {
+  margin: 16px 0;
+}
+
+.ant-modal-content {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.ant-modal-header {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 16px 24px;
+}
+
+.ant-modal-body {
+  padding: 24px;
+}
+
+.ant-spin {
+  color: #1890ff;
+}
+
+.ant-message {
+  z-index: 1000;
+}
+
+.ant-message-notice-content {
+  border-radius: 4px;
+  box-shadow: 0 3px 6px -4px rgba(0, 0, 0, 0.12),
+              0 6px 16px 0 rgba(0, 0, 0, 0.08),
+              0 9px 28px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Header Card Styles */
+.header-card {
+  background: linear-gradient(45deg, #2196F3 30%, #64B5F6 90%);
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.header-card .ant-card-body {
+  padding: 24px;
+}
+
+.header-card .ant-typography {
+  color: white;
+}
+
+.header-card .ant-btn {
+  color: white;
+  border-color: white;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.header-card .ant-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: white;
+  color: white;
+} 

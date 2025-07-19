@@ -274,7 +274,9 @@ const AddSubcategory = () => {
     const categoryId = snapshot.docs[0].id;
     const categoryDocRef = doc(db, "category", categoryId);
     await updateDoc(categoryDocRef, {
-      subcategories: (snapshot.docs[0].data().subcategories || []).filter((s) => s !== subcat)
+      subcategories: (snapshot.docs[0].data().subcategories || []).filter(
+        (s) => (typeof s === "string" ? s !== subcat : s.name !== subcat)
+      )
     });
     // Delete all links in this subcat
     const linksQ = query(collection(db, "links"), where("category", "==", categoryId), where("subcategory", "==", subcat));

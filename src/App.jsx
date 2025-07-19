@@ -23,7 +23,7 @@ import {
   CloseOutlined,
   SmileOutlined,
 } from "@ant-design/icons";
-import { AuthProvider } from "./hooks/AuthContext.jsx";
+import { AuthProvider } from "./context/AuthContext.jsx";
 import { DesignContextProvider } from "./context/DesignContext.jsx";
 import AdminRoute from "./components/Admin/AdminRoute.jsx";
 import { ThemeProvider } from "./context/ThemeContext.jsx";
@@ -40,6 +40,9 @@ import Sidebar from "./components/Admin/Sidebar.jsx";
 import ShortcutTest from "./components/ShortcutTest";
 import ChatbotAI from "./components/ChatbotAi";
 import Userreview from "./components/Admin/Userreview.jsx";
+import BalancesheetLogin from "./components/balancesheet/BalancesheetLogin.jsx"
+import BalancesheetDashboard from "./components/balancesheet/BalancesheetDashboard.jsx";
+import BalanceSheet from './components/balancesheet/BalanceSheet';
 import ProfessionalSelection from "./components/ProfessionalSelection.jsx";
 import { 
   getCustomPages, 
@@ -140,6 +143,7 @@ import VATCalculator from "../Tools/Component/VATCalculator.jsx";
 import ElectricityBill from "../Tools/Component/ElectricityBill.jsx";
 import TestScoreCalculator from "../Tools/Component/TestScoreCalculator.jsx";
 import TrafficChecker from "../Tools/Component/TrafficChecker.jsx";
+
 
 // ... add lazy loading for the rest of the tool components ...
 
@@ -1035,6 +1039,22 @@ const App = () => {
                           path="/trafficchecker"
                           element={<TrafficChecker />}
                         />
+                         <Route
+                          path="/balancesheetlogin"
+                          element={<BalancesheetLogin />}
+                        />
+                         <Route
+                          path="/balancesheetdashboard"
+                          element={<BalancesheetDashboard />}
+                        />
+                        <Route
+            path="/sheet/:id"
+            element={
+              
+                <BalanceSheet />
+              
+            }
+          />
                       </Route>
 
                       {/* Admin Routes with Sidebar Layout */}
