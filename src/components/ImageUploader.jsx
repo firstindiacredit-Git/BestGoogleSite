@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { MdAdd, MdDelete, MdChevronLeft, MdChevronRight } from "react-icons/md";
-import { Image, Button, Popconfirm, Modal } from "antd";
+import { MdAdd, MdDelete, MdChevronLeft, MdChevronRight, MdPause, MdPlayArrow } from "react-icons/md";
+import { Image, Button, Popconfirm, Modal, Tooltip } from "antd";
 import Cropper from "react-easy-crop";
 import { fetchAdminImages } from "../firebase/firestore";
+
+
 
 function getCroppedImg(imageSrc, crop) {
   return new Promise((resolve, reject) => {
@@ -37,6 +39,8 @@ const ASPECT = 16 / 9;
 
 function ImageUploader() {
   const [images, setImages] = useState([]);
+ 
+  
   const [hiddenImageIds, setHiddenImageIds] = useState([]);
   const [showCropper, setShowCropper] = useState(false);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -49,6 +53,8 @@ function ImageUploader() {
   const intervalRef = useRef(null);
   const fileInputRef = useRef(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
     const loadAllImages = async () => {
@@ -69,20 +75,26 @@ function ImageUploader() {
         const localImagesFormatted = localImages.map(img => ({ ...img, isLocal: true, name: img.name || 'User Image' }));
 
         setImages([...adminImagesFormatted, ...localImagesFormatted]);
+        setIsInitialLoad(false);
       } catch (error) {
         console.error("Failed to load admin images:", error);
+        setIsInitialLoad(false);
       }
     };
     loadAllImages();
   }, []);
 
   useEffect(() => {
-    const localImages = images.filter(img => img.isLocal);
-    localStorage.setItem("uploadedImages", JSON.stringify(localImages));
+    // Only save to localStorage after initial load is complete
+    if (!isInitialLoad) {
+      const localImages = images.filter(img => img.isLocal);
+      localStorage.setItem("uploadedImages", JSON.stringify(localImages));
+    }
+    
     if (images.length > 0 && activeIndex >= images.length) {
       setActiveIndex(0);
     }
-  }, [images, activeIndex]);
+  }, [images, activeIndex, isInitialLoad]);
 
   const handleHideImage = (idToHide) => {
     const newHiddenIds = [...hiddenImageIds, idToHide];
@@ -93,7 +105,7 @@ function ImageUploader() {
 
   // Carousel effect
   useEffect(() => {
-    if (images.length > 1 && !previewOpen) {
+    if (images.length > 1 && !previewOpen && !isPaused) {
       intervalRef.current = setInterval(() => {
         setIsTransitioning(true);
         setTimeout(() => {
@@ -102,10 +114,8 @@ function ImageUploader() {
         }, 500);
       }, 15000);
       return () => clearInterval(intervalRef.current);
-    } else {
-      clearInterval(intervalRef.current);
     }
-  }, [images.length, previewOpen]);
+  }, [images.length, previewOpen, isPaused]);
 
   const handlePrev = () => {
     setIsTransitioning(true);
@@ -133,9 +143,15 @@ function ImageUploader() {
         img.onload = () => {
           if (img.width > img.height) {
             setImages((prev) => {
-              const newArr = [...prev, { name: file.name, url: reader.result, isLocal: true }];
-              return newArr.slice(0, MAX_IMAGES);
+              const newArr = [{ name: file.name, url: reader.result, isLocal: true }, ...prev];
+              const finalArr = newArr.slice(0, MAX_IMAGES);
+              // Immediately save to localStorage
+              const localImages = finalArr.filter(img => img.isLocal);
+              localStorage.setItem("uploadedImages", JSON.stringify(localImages));
+              return finalArr;
             });
+            // Set the new image as the active image (first image)
+            setActiveIndex(0);
           } else {
             setTempImage(reader.result);
             setTempFileName(file.name);
@@ -155,10 +171,17 @@ function ImageUploader() {
   const handleCropSave = async () => {
     try {
       const croppedImg = await getCroppedImg(tempImage, croppedAreaPixels);
+     
       setImages((prev) => {
-        const newArr = [...prev, { name: tempFileName || "Cropped Image", url: croppedImg, isLocal: true }];
-        return newArr.slice(0, MAX_IMAGES);
+        const newArr = [{ name: tempFileName || "Cropped Image", url: croppedImg, isLocal: true }, ...prev];
+        const finalArr = newArr.slice(0, MAX_IMAGES);
+        // Immediately save to localStorage
+        const localImages = finalArr.filter(img => img.isLocal);
+        localStorage.setItem("uploadedImages", JSON.stringify(localImages));
+        return finalArr;
       });
+      // Set the new cropped image as the active image (first image)
+      setActiveIndex(0);
       setShowCropper(false);
       setTempImage(null);
       setTempFileName("");
@@ -175,17 +198,27 @@ function ImageUploader() {
         const newArr = prev.filter((_, idx) => idx !== activeIndex);
         if (newArr.length === 0) setPreviewOpen(false);
         if (activeIndex >= newArr.length) setActiveIndex(0);
+        // Immediately save to localStorage
+        const localImages = newArr.filter(img => img.isLocal);
+        localStorage.setItem("uploadedImages", JSON.stringify(localImages));
         return newArr;
       });
     }
     setPreviewOpen(false);
+    setIsPaused(false); // <-- resume slideshow
   };
   
+  
   const handleAddClick = () => {
+    if (images.length >= MAX_IMAGES) {
+      alert("You can't add more than five images");
+      return;
+    }
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
   };
+  
   
   return (
     <div className="backdrop-blur-sm rounded-b-sm w-full">
@@ -193,11 +226,11 @@ function ImageUploader() {
       <style>{`.ant-image-preview-close { background: #000 !important; }`}</style>
       <div>
         {images.length > 0 && (
-          <div className="relative rounded-b-sm group h-[20.25rem] flex items-center justify-center overflow-hidden">
+          <div className="relative rounded-b-sm group h-[20.25rem] flex items-center justify-center overflow-hidden bg-gray-900">
             {/* Arrows and Image display */}
             {images.length > 1 && (
               <button
-                className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/40 hover:bg-black/70 text-white rounded-full p-2 transition"
+                className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/40 hover:bg-black/70 text-white rounded-full p-2 transition opacity-0 group-hover:opacity-100"
                 onClick={handlePrev}
                 aria-label="Previous image"
                 style={{ outline: 'none', border: 'none' }}
@@ -207,7 +240,7 @@ function ImageUploader() {
             )}
             {images.length > 1 && (
               <button
-                className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/40 hover:bg-black/70 text-white rounded-full p-2 transition"
+                className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/40 hover:bg-black/70 text-white rounded-full p-2 transition opacity-0 group-hover:opacity-100"
                 onClick={handleNext}
                 aria-label="Next image"
                 style={{ outline: 'none', border: 'none' }}
@@ -229,10 +262,26 @@ function ImageUploader() {
               style={{ objectFit: "cover", height: "100%", width: "100%" }}
               wrapperClassName="!h-full !w-full rounded-b-sm"
               onClick={() => setPreviewOpen(true)}
+              fallback={
+                <div className="w-full h-full bg-gray-800 flex items-center justify-center">
+                  <div className="text-white text-sm">Loading...</div>
+                </div>
+              }
             />
 
             {/* Action Buttons: Delete local OR Hide admin */}
             <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              {/* Pause/Play Button */}
+              <Tooltip title={isPaused ? "Play" : "Pause"} placement="top">
+                <Button
+                  type="primary"
+                  icon={isPaused ? <MdPlayArrow className="text-lg" /> : <MdPause className="text-lg" />}
+                  className="flex items-center gap-1"
+                  onClick={() => setIsPaused((prev) => !prev)}
+                  style={{ marginRight: '0.25rem' }}
+                ></Button>
+              </Tooltip>
+              {/* Delete/Hide Button */}
               {images[activeIndex]?.isLocal ? (
                 <Popconfirm
                   title="Delete image"
@@ -241,12 +290,18 @@ function ImageUploader() {
                   okText="Yes"
                   cancelText="No"
                   placement="leftTop"
+                  onOpenChange={(visible) => {
+                    if (visible) setIsPaused(true);
+                    else setIsPaused(false);
+                  }}
                 >
-                  <Button
-                    type="primary"
-                    icon={<MdDelete className="text-lg" />}
-                    className="flex items-center gap-1"
-                  ></Button>
+                  <Tooltip title="Delete" placement="top">
+                    <Button
+                      type="primary"
+                      icon={<MdDelete className="text-lg" />}
+                      className="flex items-center gap-1"
+                    ></Button>
+                  </Tooltip>
                 </Popconfirm>
               ) : (
                 <Popconfirm
@@ -257,22 +312,25 @@ function ImageUploader() {
                   cancelText="No"
                   placement="leftTop"
                 >
-                   <Button
-                    type="primary"
-                    icon={<MdDelete className="text-lg" />}
-                    className="flex items-center gap-1"
-                  ></Button>
+                  <Tooltip title="Hide" placement="top">
+                    <Button
+                      type="primary"
+                      icon={<MdDelete className="text-lg" />}
+                      className="flex items-center gap-1"
+                    ></Button>
+                  </Tooltip>
                 </Popconfirm>
               )}
 
-              {images.length < MAX_IMAGES && (
+              {/* Add Button */}
+              <Tooltip title={images.length >= MAX_IMAGES ? "Maximum 5 images allowed" : "Add Image"} placement="top">
                 <Button
                   type="primary"
                   icon={<MdAdd className="text-lg" />}
-                  className="flex items-center gap-1"
+                  className={`flex items-center gap-1 ${images.length >= MAX_IMAGES ? 'opacity-50 cursor-not-allowed' : ''}`}
                   onClick={handleAddClick}
                 ></Button>
-              )}
+              </Tooltip>
             </div>
             
             <input
@@ -285,21 +343,25 @@ function ImageUploader() {
               disabled={images.length >= MAX_IMAGES}
               id="file-input-inline"
             />
-            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2">
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
               {images.map((img, idx) => (
                 <span
                   key={idx}
-                  className={`inline-block w-3 h-3 rounded-full transition-all duration-500 ease-out ${
+                  className={`inline-block w-2 h-2 rounded-full transition-all duration-500 ease-out ${
                     idx === activeIndex ? "bg-indigo-600 scale-125" : "bg-gray-400 scale-100"
-                  }`}
+                  } cursor-pointer`}
+                  onClick={() => setActiveIndex(idx)}
                 ></span>
               ))}
             </div>
           </div>
         )}
-        {images.length === 0 && images.length < MAX_IMAGES && (
+        {images.length === 0 && (
           <div className="h-32 flex items-center justify-center dark:bg-[#28283A]/[var(--widget-opacity)] rounded-sm w-full mb-2">
-            <label htmlFor="file-input" className="cursor-pointer flex flex-col items-center">
+            <div 
+              className="cursor-pointer flex flex-col items-center"
+              onClick={handleAddClick}
+            >
               <input
                 type="file"
                 accept="image/*"
@@ -307,13 +369,14 @@ function ImageUploader() {
                 onChange={handleImageUpload}
                 className="hidden"
                 id="file-input"
+                ref={fileInputRef}
                 disabled={images.length >= MAX_IMAGES}
               />
               <MdAdd className="w-12 h-12 text-indigo-600 hover:text-indigo-800 transition duration-300" />
               <span className="mt-2 text-sm text-gray-600 dark:text-gray-400">
                 Click to upload image(s)
               </span>
-            </label>
+            </div>
           </div>
         )}
       </div>
@@ -350,4 +413,3 @@ function ImageUploader() {
 }
 
 export default ImageUploader;
-

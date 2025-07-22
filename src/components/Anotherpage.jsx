@@ -33,7 +33,7 @@ import { DragDropContext as DnDContext, Droppable as DnDDroppable, Draggable as 
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { collection as fsCollection, getDocs as fsGetDocs } from "firebase/firestore";
 
-const allCategories = [
+const defaultCategoryList = [
   "Designer (UI/UX, Graphic, Web)", "Developer / Programmer", "Digital Marketer", "Student", "Teacher / Educator", "Enterprener / Founder", "Freelancer(Creative or Technical)", "Consultant / Advisor", "Working Professional", "Reseacher / Academic", "IT / Tech Support", "Medical Professional"
 ];
 
@@ -111,24 +111,44 @@ const Anotherpage = ({ pageId = "home" }) => {
   };
   const [selectedCategory, setSelectedCategory] = useState(getInitialCategory());
   // Add state for selected profession
-  const localProfessionKey = 'selectedProfession';
-  const getInitialProfession = () => {
-    const saved = localStorage.getItem(localProfessionKey);
-    return saved ? saved : 'all'; // Default to 'all'
-  };
-  const [selectedProfession, setSelectedProfession] = useState(getInitialProfession);
+  const [allCategories, setAllCategories] = useState(defaultCategoryList);
 
   // On category change, save to localStorage
   useEffect(() => {
     localStorage.setItem(localCategoryKey, selectedCategory);
   }, [selectedCategory]);
-  // On profession change, save to localStorage
+  
   useEffect(() => {
-    localStorage.setItem(localProfessionKey, selectedProfession);
-  }, [selectedProfession]);
+    const fetchCategories = async () => {
+      try {
+        const categorySnapshot = await getDocs(collection(db, "category"));
+        const hardcodedCatNames = defaultCategoryList;
+
+        // Filter Firestore docs to only include admin-added categories
+        const adminAddedCategories = categorySnapshot.docs
+          .map(doc => doc.data())
+          .filter(data => data.addedByAdmin === true)
+          .map(data => data.newCategory);
+
+        // Merge the hardcoded list with the admin-added list
+        const mergedCategories = [...new Set([...hardcodedCatNames, ...adminAddedCategories])];
+        
+        setAllCategories(mergedCategories.sort());
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        // Fallback to default list on error
+        setAllCategories(defaultCategoryList);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  // On profession change, save to localStorage
   const [subcatBookmarks, setSubcatBookmarks] = useState({}); // { subcat: [bookmarks] }
   const [firestoreSubcats, setFirestoreSubcats] = useState([]); // For logged-in users
   const [firestoreUser, setFirestoreUser] = useState(null);
+  const [interestLoading, setInterestLoading] = useState(true);
 
   // Add new function to handle local storage operations
   const localStorageKey = "widget_layout";
@@ -160,87 +180,105 @@ const Anotherpage = ({ pageId = "home" }) => {
     setSubcatOrder(getInitialSubcatOrder(selectedCategory));
   }, [selectedCategory]);
 
-  // Handle drag end for subcategory cards
-  // Remove unused onSubcatDragEnd function
-
   // Track auth state for Firestore
   useEffect(() => {
     const unsubscribe = auth ? auth.onAuthStateChanged((user) => {
+      if (user) {
+        const userDocRef = doc(db, "users", user.uid);
+        getDoc(userDocRef)
+          .then(userDocSnap => {
+            if (userDocSnap.exists() && userDocSnap.data().selectedInterest) {
+              setSelectedInterest(userDocSnap.data().selectedInterest);
+            }
+          })
+          .catch(error => {
+            console.error("Error fetching user's selected interest:", error);
+          })
+          .finally(() => {
+            setInterestLoading(false);
+          });
+      } else {
+        const saved = localStorage.getItem('selectedInterest');
+        setSelectedInterest(saved || 'not_select');
+        setInterestLoading(false);
+      }
       setFirestoreUser(user);
-    }) : () => {};
+    }) : () => {
+      setInterestLoading(false);
+    };
     return () => unsubscribe();
   }, []);
 
   // Fetch subcategories from Firestore if logged in
   useEffect(() => {
-    if (!firestoreUser) {
+    if (!selectedCategory) {
       setFirestoreSubcats([]);
       return;
     }
-    // Fetch subcategories for selectedCategory
+    // Fetch subcategories for selectedCategory, regardless of login status
     const q = query(collection(db, "category"), where("newCategory", "==", selectedCategory));
     const unsub = onSnapshot(q, (snapshot) => {
       if (!snapshot.empty) {
+        // Category found in Firestore, use its subcategories
         const docData = snapshot.docs[0].data();
-        let subcategories = Array.isArray(docData.subcategories) ? docData.subcategories : [];
-        
-        if (selectedProfession !== 'all') {
-          subcategories = subcategories.filter(subcat => {
-            if (typeof subcat === 'string') return true; 
-            if (!subcat.professions || subcat.professions.length === 0) return true;
-            return subcat.professions.includes(selectedProfession);
-          });
-        }
-        setFirestoreSubcats(subcategories);
+        setFirestoreSubcats(Array.isArray(docData.subcategories) ? docData.subcategories : []);
       } else {
-        setFirestoreSubcats([]);
+        // Fallback to defaultBookmarks if not found in Firestore (for pure hardcoded categories)
+        setFirestoreSubcats(Object.keys(defaultBookmarks[selectedCategory] || {}));
       }
     });
     return () => unsub();
-  }, [firestoreUser, selectedCategory, selectedProfession]);
+  }, [selectedCategory]);
 
   // Fetch bookmarks for a subcategory from Firestore (only when expanded)
   const fetchSubcatBookmarks = async (subcat) => {
-    if (selectedInterest !== 'all') {
-      // Fetch bookmarks for interest subcategory
-      const interestId = selectedInterest;
-      const q = query(collection(db, "links"), where("interestId", "==", interestId), where("subcategory", "==", subcat));
-      const snap = await getDocs(q);
-      setSubcatBookmarks(prev => ({
-        ...prev,
-        [subcat]: snap.docs.map(doc => ({ id: doc.id, ...doc.data(), addedByAdmin: true })),
-      }));
+    // If an interest is selected, fetch bookmarks based on interestId
+    if (selectedInterest !== 'not_select' && selectedInterest !== 'all') {
+      const q = query(collection(db, "links"), where("interestId", "==", selectedInterest), where("subcategory", "==", subcat));
+      try {
+        const snap = await getDocs(q);
+        const bookmarks = snap.docs.map(doc => ({ id: doc.id, ...doc.data(), addedByAdmin: true }));
+        setSubcatBookmarks(prev => ({ ...prev, [subcat]: bookmarks }));
+      } catch (error) {
+        console.error("Error fetching interest bookmarks:", error);
+      }
       return;
     }
-    if (!firestoreUser) return;
 
-    // Fetch user bookmarks
-    const userQ = query(
-      collection(db, "users", firestoreUser.uid, "bookmarks"),
-      where("category", "==", selectedCategory),
-      where("subcategory", "==", subcat)
-    );
-    const userSnapshot = await getDocs(userQ);
-    const userBookmarks = userSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), addedByAdmin: false }));
-
-    // Fetch admin bookmarks
-    // First, get the category document ID for the selectedCategory
+    // 1. Always fetch admin bookmarks for the category/subcategory from Firestore.
     const catQ = query(collection(db, "category"), where("newCategory", "==", selectedCategory));
     const catSnap = await getDocs(catQ);
     let adminBookmarks = [];
+
     if (!catSnap.empty) {
       const catId = catSnap.docs[0].id;
       const adminQ = query(
         collection(db, "links"),
         where("category", "==", catId),
-        where("subcategory", "==", subcat),
-        where("addedByAdmin", "==", true)
+        where("subcategory", "==", subcat)
       );
       const adminSnap = await getDocs(adminQ);
       adminBookmarks = adminSnap.docs.map(doc => ({ id: doc.id, ...doc.data(), addedByAdmin: true }));
     }
 
-    // Combine and set
+    // 2. If no admin bookmarks are found, fall back to hardcoded defaults.
+    if (adminBookmarks.length === 0) {
+      adminBookmarks = defaultBookmarks[selectedCategory]?.[subcat] || [];
+    }
+    
+    // 3. If a user is logged in, fetch their specific bookmarks.
+    let userBookmarks = [];
+    if (firestoreUser) {
+      const userQ = query(
+        collection(db, "users", firestoreUser.uid, "bookmarks"),
+        where("category", "==", selectedCategory),
+        where("subcategory", "==", subcat)
+      );
+      const userSnapshot = await getDocs(userQ);
+      userBookmarks = userSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), addedByAdmin: false }));
+    }
+
+    // 4. Combine and set bookmarks.
     setSubcatBookmarks((prev) => ({
       ...prev,
       [subcat]: [...adminBookmarks, ...userBookmarks]
@@ -411,14 +449,14 @@ const Anotherpage = ({ pageId = "home" }) => {
   // Add this useEffect to load hidden bookmarks for all subcategories on mount and when user/category/subcats change
   useEffect(() => {
     // Get the list of subcategories (from Firestore or default)
-    const subcatsList = firestoreUser && firestoreSubcats.length > 0 ? firestoreSubcats : subcatOrder;
+    const subcatsList = firestoreSubcats;
     subcatsList.forEach((subcat) => {
       if (!subcat) return; // skip null/undefined
       const subcatKey = typeof subcat === 'object' && subcat.name ? subcat.name : subcat;
       if (subcatKey) loadHiddenBookmarks(subcatKey);
     });
     // eslint-disable-next-line
-  }, [firestoreUser, selectedCategory, firestoreSubcats, subcatOrder]);
+  }, [firestoreUser, selectedCategory, firestoreSubcats]);
 
   // State for subcategory display modes
   // Load persisted view modes and icon sizes from localStorage
@@ -1081,7 +1119,7 @@ const Anotherpage = ({ pageId = "home" }) => {
     const saved = localStorage.getItem(localInterestKey);
     return saved ? saved : 'not_select'; // Default to 'not_select' instead of 'all'
   };
-  const [selectedInterest, setSelectedInterest] = useState(getInitialInterest);
+  const [selectedInterest, setSelectedInterest] = useState(getInitialInterest());
   const [interestOptions, setInterestOptions] = useState([{ id: 'all', name: 'All Interests' }]);
   const [interestSubcats, setInterestSubcats] = useState([]); // [{name: string}]
 
@@ -1108,11 +1146,19 @@ const Anotherpage = ({ pageId = "home" }) => {
   }, []);
   // Persist selectedInterest
   useEffect(() => {
-    localStorage.setItem(localInterestKey, selectedInterest);
-  }, [selectedInterest]);
+    if (interestLoading) {
+      return; // Don't save while initial state is loading
+    }
+    if (firestoreUser) {
+      const userDocRef = doc(db, "users", firestoreUser.uid);
+      setDoc(userDocRef, { selectedInterest: selectedInterest }, { merge: true });
+    } else {
+      localStorage.setItem(localInterestKey, selectedInterest);
+    }
+  }, [selectedInterest, firestoreUser, interestLoading]);
   // Fetch subcategories for selected interest
   useEffect(() => {
-    if (selectedInterest === 'all') {
+    if (selectedInterest === 'all' || selectedInterest === 'not_select') {
       setInterestSubcats([]);
       return;
     }
@@ -1123,7 +1169,7 @@ const Anotherpage = ({ pageId = "home" }) => {
   // --- Update subcats logic to use interest if selected ---
   const subcats = (selectedInterest !== 'not_select' && selectedInterest !== 'all')
     ? interestSubcats
-    : (firestoreUser && firestoreSubcats.length > 0 ? firestoreSubcats : subcatOrder);
+    : firestoreSubcats;
 
   // Hide interest subcategories when selectedInterest is 'not_select'
   useEffect(() => {
@@ -1131,6 +1177,17 @@ const Anotherpage = ({ pageId = "home" }) => {
       setInterestSubcats([]);
     }
   }, [selectedInterest]);
+
+  // NEW: useEffect to fetch all bookmarks for the current subcategories
+  useEffect(() => {
+    (subcats || []).forEach(subcatObj => {
+      const subcatKey = getSubcatKey(subcatObj);
+      if (subcatKey) {
+        fetchSubcatBookmarks(subcatKey);
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subcats]);
 
   // Build the widgets to render: all normal widgets + subcategory widgets
   const allWidgetItems = [
@@ -2023,19 +2080,9 @@ const Anotherpage = ({ pageId = "home" }) => {
         );
       });
 
-  // --- Fetch bookmarks for interest subcategories when interest changes ---
-  useEffect(() => {
-    if (selectedInterest === 'all') return;
-    (interestSubcats || []).forEach(subcatObj => {
-      const subcatKey = typeof subcatObj === 'object' && subcatObj.name ? subcatObj.name : subcatObj;
-      if (subcatKey) fetchSubcatBookmarks(subcatKey);
-    });
-    // eslint-disable-next-line
-  }, [selectedInterest, interestSubcats]);
-
   return (
     <div className={`anotherpage-container ${isDarkMode ? "dark" : ""}`}> 
-      {filteredCategories.length === 0 ? (
+      {allCategories.length === 0 ? (
         <div className="w-full flex flex-col items-center justify-center min-h-[60vh]">
           <div className="text-2xl font-semibold text-gray-500 dark:text-gray-300 mt-20">No subcategories found for your profession.</div>
         </div>
@@ -2076,7 +2123,7 @@ const Anotherpage = ({ pageId = "home" }) => {
           <div style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center', gap: 1, marginRight: 12 }}>
             <Dropdown
               overlay={
-                <Menu style={{ width: 150 }}>
+                <Menu style={{ width: 250 }}>
                   <Menu.Item key="not_select" onClick={() => setSelectedInterest('not_select')}>
                     Not Selected
                   </Menu.Item>

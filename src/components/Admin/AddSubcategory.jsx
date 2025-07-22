@@ -15,7 +15,6 @@ const getFaviconUrl = (url) => {
 };
 
 const AddSubcategory = () => {
-  const [categories] = useState(Object.keys(defaultBookmarks));
   const [subcategoriesMap, setSubcategoriesMap] = useState({});
   const [subcatForms, setSubcatForms] = useState({});
   const [subcatMessages, setSubcatMessages] = useState({});
@@ -37,6 +36,67 @@ const AddSubcategory = () => {
   const [selectedProfessions, setSelectedProfessions] = useState({});
   const [selectedInterests, setSelectedInterests] = useState({});
   const [activeTab, setActiveTab] = useState("categories"); // 'categories' or 'interests'
+
+  // NEW: State for new category input
+  const [newCategoryInput, setNewCategoryInput] = useState("");
+  const [newCategoryLoading, setNewCategoryLoading] = useState(false);
+  const [newCategoryMessage, setNewCategoryMessage] = useState("");
+
+  // NEW: State for all categories (hardcoded + admin-added)
+  const [allCategories, setAllCategories] = useState([]);
+
+  // NEW: Track which category is being deleted
+  const [deleteCategoryConfirm, setDeleteCategoryConfirm] = useState(null); // { name, id }
+  // NEW: State for category edit modal
+  const [editCategoryModal, setEditCategoryModal] = useState(null); // { oldName, newName }
+
+  // Delete admin-added category and its bookmarks
+  const handleDeleteCategory = async (category) => {
+    // Find the category doc
+    const q = query(collection(db, "category"), where("newCategory", "==", category), where("addedByAdmin", "==", true));
+    const snapshot = await getDocs(q);
+    if (snapshot.empty) return;
+    const categoryId = snapshot.docs[0].id;
+    // Delete all links for this category
+    const linksQ = query(collection(db, "links"), where("category", "==", categoryId));
+    const linksSnap = await getDocs(linksQ);
+    for (const docSnap of linksSnap.docs) {
+      await deleteDoc(doc(db, "links", docSnap.id));
+    }
+    // Delete the category doc
+    await deleteDoc(doc(db, "category", categoryId));
+    setDeleteCategoryConfirm(null);
+  };
+
+  // NEW: Save edited category name
+  const handleEditCategorySave = async () => {
+    const { oldName, newName } = editCategoryModal;
+    if (!newName || oldName === newName) {
+      setEditCategoryModal(null);
+      return;
+    }
+
+    // Check if new name already exists
+    if (allCategories.some(c => c.toLowerCase() === newName.toLowerCase())) {
+      alert("A category with this name already exists.");
+      return;
+    }
+
+    // Find the category doc
+    const q = query(collection(db, "category"), where("newCategory", "==", oldName), where("addedByAdmin", "==", true));
+    const snapshot = await getDocs(q);
+    if (snapshot.empty) {
+      alert("Could not find the category to update.");
+      return;
+    }
+    const categoryId = snapshot.docs[0].id;
+    const categoryDocRef = doc(db, "category", categoryId);
+
+    // Update the category name
+    await updateDoc(categoryDocRef, { newCategory: newName });
+
+    setEditCategoryModal(null);
+  };
 
   const professionOptions = [
     { id: "developer", name: "Developer / Programmer", icon: "💻", desc: "Software development and programming" },
@@ -72,32 +132,43 @@ const AddSubcategory = () => {
   ];
   // Fetch subcategories for all categories from Firestore
   useEffect(() => {
-    const unsubscribes = [];
-    categories.forEach(category => {
-      const categoryQuery = query(collection(db, "category"), where("newCategory", "==", category));
-      const unsubscribe = onSnapshot(categoryQuery, (snapshot) => {
-        setSubcategoriesMap(prev => {
-          if (!snapshot.empty) {
-            const docData = snapshot.docs[0].data();
-            return { ...prev, [category]: Array.isArray(docData.subcategories) ? docData.subcategories : [] };
-          } else {
-            const imported = defaultBookmarks[category];
-            if (imported && typeof imported === 'object' && !Array.isArray(imported)) {
-              return { ...prev, [category]: Object.keys(imported) };
-            }
-            return { ...prev, [category]: [] };
-          }
-        });
+    const q = query(collection(db, "category"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const hardcodedCatNames = Object.keys(defaultBookmarks);
+
+      // Filter Firestore docs. A doc is relevant if it's admin-added OR corresponds to a hardcoded category.
+      const relevantDocsData = snapshot.docs
+        .map(doc => doc.data())
+        .filter(data => data.addedByAdmin === true || hardcodedCatNames.includes(data.newCategory));
+      
+      const newSubcategoriesMap = {};
+      const foundInFirestore = [];
+
+      relevantDocsData.forEach(data => {
+        newSubcategoriesMap[data.newCategory] = Array.isArray(data.subcategories) ? data.subcategories : [];
+        foundInFirestore.push(data.newCategory);
       });
-      unsubscribes.push(unsubscribe);
+
+      // Handle pure hardcoded categories that do NOT have a Firestore entry.
+      hardcodedCatNames.forEach(catName => {
+        if (!foundInFirestore.includes(catName)) {
+          const imported = defaultBookmarks[catName];
+          newSubcategoriesMap[catName] = (imported && typeof imported === 'object' && !Array.isArray(imported)) 
+                                        ? Object.keys(imported) 
+                                        : [];
+        }
+      });
+      
+      setSubcategoriesMap(newSubcategoriesMap);
+      setAllCategories(Object.keys(newSubcategoriesMap).sort()); // sort for consistent order
     });
-    return () => unsubscribes.forEach(unsub => unsub());
-  }, [categories]);
+    return () => unsubscribe();
+  }, []);
 
   // Fetch bookmarks for each subcategory for admin view
   useEffect(() => {
     const unsubscribes = [];
-    categories.forEach(category => {
+    allCategories.forEach(category => {
       (subcategoriesMap[category] || []).forEach(subcatObj => {
         const subcat = typeof subcatObj === 'string' ? subcatObj : subcatObj.name;
         // Find category doc id
@@ -122,7 +193,7 @@ const AddSubcategory = () => {
       });
     });
     return () => unsubscribes.forEach(unsub => unsub());
-  }, [categories, subcategoriesMap]);
+  }, [allCategories, subcategoriesMap]);
 
   // Subcategory add form handlers (unchanged)
   const handleSubcatInputChange = (category, value) => {
@@ -143,18 +214,46 @@ const AddSubcategory = () => {
     try {
       const q = query(collection(db, "category"), where("newCategory", "==", category));
       const snapshot = await getDocs(q);
+
+      const newSubcategoryData = {
+        name: subcategory,
+        iconUrl: iconUrl || "",
+        professions: selectedProfessions[category] || [],
+        interests: selectedInterests[category] || [],
+      };
+
       if (snapshot.empty) {
-        setSubcatMessages(prev => ({ ...prev, [category]: "Category not found." }));
-        setSubcatLoading(prev => ({ ...prev, [category]: false }));
-        return;
+        // If category doesn't exist in Firestore, create it if it's a valid hardcoded category.
+        const hardcodedCatNames = Object.keys(defaultBookmarks);
+        if (hardcodedCatNames.includes(category)) {
+          await addDoc(collection(db, "category"), {
+            newCategory: category,
+            subcategories: [newSubcategoryData],
+          });
+          // Force a state update to trigger UI refresh
+          setTimeout(() => {
+            setSubcategoriesMap(prev => ({ ...prev }));
+          }, 300);
+        } else {
+          // This should not happen with the current UI logic
+          throw new Error("Attempted to add subcategory to an unknown category.");
+        }
+      } else {
+        // If category exists, update its subcategories array.
+        const categoryId = snapshot.docs[0].id;
+        const categoryDocRef = doc(db, "category", categoryId);
+        const prevSubcats = snapshot.docs[0].data().subcategories || [];
+        const newSubcats = [...prevSubcats, newSubcategoryData];
+        await updateDoc(categoryDocRef, {
+          subcategories: newSubcats,
+        });
+        // Manually update local state for immediate UI refresh
+        setSubcategoriesMap(prev => ({
+          ...prev,
+          [category]: newSubcats
+        }));
       }
-      const categoryId = snapshot.docs[0].id;
-      const categoryDocRef = doc(db, "category", categoryId);
-      // Add subcategory as object
-      const prevSubcats = snapshot.docs[0].data().subcategories || [];
-      await updateDoc(categoryDocRef, {
-        subcategories: [...prevSubcats, { name: subcategory, iconUrl: iconUrl || "" , professions: selectedProfessions[category] || [], interests: selectedInterests[category] || [] }]
-      });
+
       setSubcatMessages(prev => ({ ...prev, [category]: "✅ Subcategory added!" }));
       setSubcatForms(prev => ({ ...prev, [category]: "" }));
       setSubcatIconForms(prev => ({ ...prev, [category]: "" }));
@@ -553,6 +652,42 @@ const AddSubcategory = () => {
     }));
   };
 
+  // Add new category handler
+  const handleAddCategory = async (e) => {
+    e.preventDefault();
+    setNewCategoryMessage("");
+    setNewCategoryLoading(true);
+    const catName = newCategoryInput.trim();
+    if (!catName) {
+      setNewCategoryMessage("Please enter a category name.");
+      setNewCategoryLoading(false);
+      return;
+    }
+    try {
+      // Check if already exists (Firestore or hardcoded)
+      if (allCategories.some(c => c.toLowerCase() === catName.toLowerCase())) {
+        setNewCategoryMessage("Category already exists.");
+        setNewCategoryLoading(false);
+        return;
+      }
+      await addDoc(collection(db, "category"), { newCategory: catName, subcategories: [], addedByAdmin: true });
+      setNewCategoryMessage("✅ Category added!");
+      setNewCategoryInput("");
+    } catch {
+      setNewCategoryMessage("❌ Error adding category.");
+    }
+    setNewCategoryLoading(false);
+  };
+
+  // Helper to check if a category is admin-added
+  const isAdminCategory = async (category) => {
+    // Find the category doc
+    const q = query(collection(db, "category"), where("newCategory", "==", category), where("addedByAdmin", "==", true));
+    const snapshot = await getDocs(q);
+    if (snapshot.empty) return false;
+    return true;
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center bg-white dark:bg-gray-900 py-8">
       {/* Tab Switcher */}
@@ -574,188 +709,234 @@ const AddSubcategory = () => {
       {activeTab === "categories" && (
         <>
           <h2 className="text-2xl font-bold mb-8 text-gray-800 dark:text-gray-100">Manage Categories, Subcategories & Bookmarks</h2>
+          {/* NEW: Add Category Form */}
+          <form className="flex gap-2 mb-8" onSubmit={handleAddCategory}>
+            <input
+              type="text"
+              placeholder="New Category"
+              className="border rounded px-3 py-2 flex-1 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500"
+              value={newCategoryInput}
+              onChange={e => setNewCategoryInput(e.target.value)}
+            />
+            <button
+              type="submit"
+              className="bg-blue-600 hover:bg-blue-700 text-white rounded px-4 py-2 font-semibold disabled:opacity-60"
+              disabled={newCategoryLoading}
+            >
+              {newCategoryLoading ? "Adding..." : "Add Category"}
+            </button>
+          </form>
+          {newCategoryMessage && (
+            <div className={`mb-4 text-center ${newCategoryMessage.startsWith("✅") ? "text-green-600" : "text-red-600"}`}>{newCategoryMessage}</div>
+          )}
           <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {categories.map(category => (
-              <div key={category} className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow p-6 flex flex-col">
-                <h3 className="text-xl font-semibold mb-4 text-blue-700 dark:text-blue-300">{category}</h3>
-                {/* Subcategory add form */}
-                <button
+            {allCategories.map(category => {
+              // Check if this is an admin-added category (not hardcoded)
+              const hardcodedCatNames = Object.keys(defaultBookmarks);
+              const isHardcoded = hardcodedCatNames.includes(category);
+              return (
+                <div key={category} className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow p-6 flex flex-col">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-semibold text-blue-700 dark:text-blue-300">{category}</h3>
+                    {/* Show delete button only for admin-added categories */}
+                    {!isHardcoded && (
+                      <div className="flex gap-2">
+                         <button
+                          className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
+                          title="Edit Category"
+                          onClick={() => setEditCategoryModal({ oldName: category, newName: category })}
+                        >
+                          <Pencil className="w-5 h-5" />
+                        </button>
+                        <button
+                          className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900"
+                          title="Delete Category"
+                          onClick={() => setDeleteCategoryConfirm({ name: category })}
+                        >
+                          <Trash2 className="w-5 h-5 text-red-600" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  {/* Subcategory add form */}
+                  <button
                     onClick={() => openSubcatModal(category)}
                     className="w-full mt-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-semibold shadow transition flex items-center justify-center gap-2"
                   >
                     <Plus className="w-5 h-5" /> Add Subcategory
                   </button>
-                {subcatMessages[category] && (
-                  <div className={`mt-2 text-center ${subcatMessages[category].startsWith("✅") ? "text-green-600" : "text-red-600"}`}>{subcatMessages[category]}</div>
-                )}
-                {/* Subcategory list */}
-                {subcategoriesMap[category] && subcategoriesMap[category].length > 0 ? (
-                  <div className="flex flex-col gap-4 mt-4">
-                    {subcategoriesMap[category].map(subcatObj => {
-                      const subcat = typeof subcatObj === 'string' ? subcatObj : subcatObj.name;
-                      const iconUrl = typeof subcatObj === 'object' ? subcatObj.iconUrl : '';
-                      const professions = typeof subcatObj === 'object' ? subcatObj.professions : [];
-                      const interests = typeof subcatObj === 'object' ? subcatObj.interests : [];
-                      return (
-                        <div key={subcat} className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-3">
-                          <div
-                            className="flex items-center gap-3 mb-2 justify-between cursor-pointer"
-                            onClick={() => toggleSubcat(category, subcat)}
-                          >
-                            <div className="flex items-center gap-3 flex-1 min-w-0">
-                              {/* Chevron icon for expand/collapse */}
-                              <span className={`transition-transform ${openSubcats[category]?.[subcat] ? "rotate-90" : ""}`}>
-                                ▶
-                              </span>
-                              {iconUrl ? (
-                                <img src={iconUrl} alt="icon" className="w-7 h-7 rounded object-cover border border-gray-200 dark:border-gray-700 flex-shrink-0" />
-                              ) : (
-                                <Folder className="w-5 h-5 text-blue-400 dark:text-blue-300 flex-shrink-0" />
-                              )}
-                              <div className="flex-1 min-w-0">
-                                <span className="truncate font-medium text-gray-800 dark:text-gray-100">{subcat}</span>
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                  {(professions || []).map(profId => {
-                                    const profession = professionOptions.find(p => p.id === profId);
-                                    return profession ? (
-                                      <span key={profId} title={profession.name} className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full dark:bg-blue-900 dark:text-blue-200">
-                                        {profession.name}
-                                      </span>
-                                    ) : null;
-                                  })}
-                                  {(interests || []).map(intId => {
-                                    const interest = interestOptions.find(i => i.id === intId);
-                                    return interest ? (
-                                      <span key={intId} title={interest.name} className="bg-purple-100 text-purple-800 text-xs font-medium px-2 py-0.5 rounded-full dark:bg-purple-900 dark:text-purple-200">
-                                        {interest.name}
-                                      </span>
-                                    ) : null;
-                                  })}
-                                </div>
-                              </div>
-                            </div>
-                            <div className="flex gap-2">
-                              <button type="button" className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700" onClick={(e) => { e.stopPropagation(); openEditSubcatModal(category, subcatObj); }} title="Edit Subcategory"><Pencil className="w-4 h-4" /></button>
-                              <button type="button" className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900" onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ type: 'subcat', category, subcat }); }} title="Delete Subcategory"><Trash2 className="w-4 h-4 text-red-600" /></button>
-                            </div>
-                          </div>
-                          {/* Bookmarks list - only show if open */}
-                          {openSubcats[category]?.[subcat] && (
-                            <div>
-                              {(adminBookmarksMap[category]?.[subcat] || []).filter(b => b.name !== "[Empty]").length > 0 ? (
-                                <div className="flex flex-col gap-3 mb-2 mt-2">
-                                  {(adminBookmarksMap[category]?.[subcat] || [])
-                                    .filter(b => b.name !== "[Empty]")
-                                    .map(b => (
-                                      <div
-                                        key={b.id}
-                                        className="group flex items-center justify-between bg-gray-100 dark:bg-gray-700 rounded-lg px-3 py-2 shadow-sm hover:shadow transition w-full"
-                                      >
-                                        <a
-                                          href={b.link}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="flex items-center gap-3 flex-1 min-w-0"
-                                          title={b.name}
-                                        >
-                                          <img
-                                            src={getFaviconUrl(b.link)}
-                                            alt=""
-                                            className="w-6 h-6 rounded border border-gray-300 dark:border-gray-600 bg-white"
-                                            onError={e => { e.target.onerror = null; e.target.src = "https://www.google.com/favicon.ico"; }}
-                                          />
-                                          <span className="truncate font-medium text-gray-800 dark:text-gray-100">{b.name}</span>
-                                        </a>
-                                        <div className="flex gap-1 opacity-70 group-hover:opacity-100 transition">
-                                          <button
-                                            type="button"
-                                            className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-800"
-                                            onClick={() => setEditBookmarkModal({ category, subcat, bookmark: { ...b } })}
-                                            title="Edit Bookmark"
-                                          >
-                                            <Pencil className="w-4 h-4" />
-                                          </button>
-                                          <button
-                                            type="button"
-                                            className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900"
-                                            onClick={() => setDeleteConfirm({ type: 'bookmark', category, subcat, bookmark: b })}
-                                            title="Delete Bookmark"
-                                          >
-                                            <Trash2 className="w-4 h-4 text-red-600" />
-                                          </button>
-                                        </div>
-                                      </div>
-                                    ))}
-                                </div>
-                              ) : (
-                                <div className="text-gray-400 italic text-sm py-2 text-center">No bookmarks yet.</div>
-                              )}
-                            </div>
-                          )}
-                          {/* Add Bookmark button - only show if open */}
-                          {openSubcats[category]?.[subcat] && (
-                            <button
-                              type="button"
-                              className="w-full mt-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-semibold shadow transition flex items-center justify-center gap-2"
-                              onClick={() => openBookmarkModal(category, subcat)}
+                  {subcatMessages[category] && (
+                    <div className={`mt-2 text-center ${subcatMessages[category].startsWith("✅") ? "text-green-600" : "text-red-600"}`}>{subcatMessages[category]}</div>
+                  )}
+                  {/* Subcategory list */}
+                  {subcategoriesMap[category] && subcategoriesMap[category].length > 0 ? (
+                    <div className="flex flex-col gap-4 mt-4">
+                      {subcategoriesMap[category].map(subcatObj => {
+                        const subcat = typeof subcatObj === 'string' ? subcatObj : subcatObj.name;
+                        const iconUrl = typeof subcatObj === 'object' ? subcatObj.iconUrl : '';
+                        const professions = typeof subcatObj === 'object' ? subcatObj.professions : [];
+                        const interests = typeof subcatObj === 'object' ? subcatObj.interests : [];
+                        return (
+                          <div key={subcat} className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-3">
+                            <div
+                              className="flex items-center gap-3 mb-2 justify-between cursor-pointer"
+                              onClick={() => toggleSubcat(category, subcat)}
                             >
-                              <Plus className="w-5 h-5" /> Add Bookmark
-                            </button>
-                          )}
-                          {/* Bookmark add modal */}
-                          {showBookmarkModal[category]?.[subcat] && (
-                            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-                              <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6 w-full max-w-xl relative">
-                                <button
-                                  className="absolute top-3 right-3 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-                                  onClick={() => closeBookmarkModal(category, subcat)}
-                                  aria-label="Close"
-                                >
-                                  <X className="w-5 h-5" />
-                                </button>
-                                <div className="mb-4 font-semibold text-gray-800 dark:text-gray-100 text-lg text-center">
-                                  Add Bookmark to <span className="text-blue-600 dark:text-blue-300">{subcat}</span>
+                              <div className="flex items-center gap-3 flex-1 min-w-0">
+                                {/* Chevron icon for expand/collapse */}
+                                <span className={`transition-transform ${openSubcats[category]?.[subcat] ? "rotate-90" : ""}`}>
+                                  ▶
+                                </span>
+                                {iconUrl ? (
+                                  <img src={iconUrl} alt="icon" className="w-7 h-7 rounded object-cover border border-gray-200 dark:border-gray-700 flex-shrink-0" />
+                                ) : (
+                                  <Folder className="w-5 h-5 text-blue-400 dark:text-blue-300 flex-shrink-0" />
+                                )}
+                                <div className="flex-1 min-w-0">
+                                  <span className="truncate font-medium text-gray-800 dark:text-gray-100">{subcat}</span>
+                                  <div className="flex flex-wrap gap-1 mt-1">
+                                    {(professions || []).map(profId => {
+                                      const profession = professionOptions.find(p => p.id === profId);
+                                      return profession ? (
+                                        <span key={profId} title={profession.name} className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full dark:bg-blue-900 dark:text-blue-200">
+                                          {profession.name}
+                                        </span>
+                                      ) : null;
+                                    })}
+                                    {(interests || []).map(intId => {
+                                      const interest = interestOptions.find(i => i.id === intId);
+                                      return interest ? (
+                                        <span key={intId} title={interest.name} className="bg-purple-100 text-purple-800 text-xs font-medium px-2 py-0.5 rounded-full dark:bg-purple-900 dark:text-purple-200">
+                                          {interest.name}
+                                        </span>
+                                      ) : null;
+                                    })}
+                                  </div>
                                 </div>
-                                <form className="flex flex-col gap-4" onSubmit={e => handleAddBookmark(e, category, subcat)}>
-                                  <input
-                                    type="text"
-                                    placeholder="Bookmark name"
-                                    className="border rounded px-3 py-2 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500"
-                                    value={bookmarkForms[category]?.[subcat]?.name || ""}
-                                    onChange={e => handleBookmarkInputChange(category, subcat, "name", e.target.value)}
-                                  />
-                                  <input
-                                    type="url"
-                                    placeholder="https://example.com"
-                                    className="border rounded px-3 py-2 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500"
-                                    value={bookmarkForms[category]?.[subcat]?.link || ""}
-                                    onChange={e => handleBookmarkInputChange(category, subcat, "link", e.target.value)}
-                                  />
-                                  <button
-                                    type="submit"
-                                    className="bg-blue-600 hover:bg-blue-700 text-white rounded px-4 py-2 font-semibold disabled:opacity-60"
-                                    disabled={bookmarkLoading[category]?.[subcat]}
-                                  >
-                                    {bookmarkLoading[category]?.[subcat] ? "Adding..." : "Add Bookmark"}
-                                  </button>
-                                  {bookmarkMessages[category]?.[subcat] && (
-                                    <div className={`text-sm mt-1 text-center ${bookmarkMessages[category][subcat].startsWith("✅") ? "text-green-600" : "text-red-600"}`}>
-                                      {bookmarkMessages[category][subcat]}
-                                    </div>
-                                  )}
-                                </form>
+                              </div>
+                              <div className="flex gap-2">
+                                <button type="button" className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700" onClick={(e) => { e.stopPropagation(); openEditSubcatModal(category, subcatObj); }} title="Edit Subcategory"><Pencil className="w-4 h-4" /></button>
+                                <button type="button" className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900" onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ type: 'subcat', category, subcat }); }} title="Delete Subcategory"><Trash2 className="w-4 h-4 text-red-600" /></button>
                               </div>
                             </div>
-                          )}
-                        </div>
-                      );
-                  })}
-                  </div>
-                ) : (
-                  <div className="text-gray-400">No subcategories found.</div>
-                )}
-              </div>
-            ))}
+                            {/* Bookmarks list - only show if open */}
+                            {openSubcats[category]?.[subcat] && (
+                              <div>
+                                {(adminBookmarksMap[category]?.[subcat] || []).filter(b => b.name !== "[Empty]").length > 0 ? (
+                                  <div className="flex flex-col gap-3 mb-2 mt-2">
+                                    {(adminBookmarksMap[category]?.[subcat] || [])
+                                      .filter(b => b.name !== "[Empty]")
+                                      .map(b => (
+                                        <div
+                                          key={b.id}
+                                          className="group flex items-center justify-between bg-gray-100 dark:bg-gray-700 rounded-lg px-3 py-2 shadow-sm hover:shadow transition w-full"
+                                        >
+                                          <a
+                                            href={b.link}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center gap-3 flex-1 min-w-0"
+                                            title={b.name}
+                                          >
+                                            <img
+                                              src={getFaviconUrl(b.link)}
+                                              alt=""
+                                              className="w-6 h-6 rounded border border-gray-300 dark:border-gray-600 bg-white"
+                                              onError={e => { e.target.onerror = null; e.target.src = "https://www.google.com/favicon.ico"; }}
+                                            />
+                                            <span className="truncate font-medium text-gray-800 dark:text-gray-100">{b.name}</span>
+                                          </a>
+                                          <div className="flex gap-1 opacity-70 group-hover:opacity-100 transition">
+                                            <button
+                                              type="button"
+                                              className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-800"
+                                              onClick={() => setEditBookmarkModal({ category, subcat, bookmark: { ...b } })}
+                                              title="Edit Bookmark"
+                                            >
+                                              <Pencil className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                              type="button"
+                                              className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900"
+                                              onClick={() => setDeleteConfirm({ type: 'bookmark', category, subcat, bookmark: b })}
+                                              title="Delete Bookmark"
+                                            >
+                                              <Trash2 className="w-4 h-4 text-red-600" />
+                                            </button>
+                                          </div>
+                                        </div>
+                                      ))}
+                                  </div>
+                                ) : (
+                                  <div className="text-gray-400 italic text-sm py-2 text-center">No bookmarks yet.</div>
+                                )}
+                              </div>
+                            )}
+                            {/* Add Bookmark button - only show if open */}
+                            {openSubcats[category]?.[subcat] && (
+                              <button
+                                type="button"
+                                className="w-full mt-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-semibold shadow transition flex items-center justify-center gap-2"
+                                onClick={() => openBookmarkModal(category, subcat)}
+                              >
+                                <Plus className="w-5 h-5" /> Add Bookmark
+                              </button>
+                            )}
+                            {/* Bookmark add modal */}
+                            {showBookmarkModal[category]?.[subcat] && (
+                              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                                <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6 w-full max-w-xl relative">
+                                  <button
+                                    className="absolute top-3 right-3 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                                    onClick={() => closeBookmarkModal(category, subcat)}
+                                    aria-label="Close"
+                                  >
+                                    <X className="w-5 h-5" />
+                                  </button>
+                                  <div className="mb-4 font-semibold text-gray-800 dark:text-gray-100 text-lg text-center">
+                                    Add Bookmark to <span className="text-blue-600 dark:text-blue-300">{subcat}</span>
+                                  </div>
+                                  <form className="flex flex-col gap-4" onSubmit={e => handleAddBookmark(e, category, subcat)}>
+                                    <input
+                                      type="text"
+                                      placeholder="Bookmark name"
+                                      className="border rounded px-3 py-2 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500"
+                                      value={bookmarkForms[category]?.[subcat]?.name || ""}
+                                      onChange={e => handleBookmarkInputChange(category, subcat, "name", e.target.value)}
+                                    />
+                                    <input
+                                      type="url"
+                                      placeholder="https://example.com"
+                                      className="border rounded px-3 py-2 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500"
+                                      value={bookmarkForms[category]?.[subcat]?.link || ""}
+                                      onChange={e => handleBookmarkInputChange(category, subcat, "link", e.target.value)}
+                                    />
+                                    <button
+                                      type="submit"
+                                      className="bg-blue-600 hover:bg-blue-700 text-white rounded px-4 py-2 font-semibold disabled:opacity-60"
+                                      disabled={bookmarkLoading[category]?.[subcat]}
+                                    >
+                                      {bookmarkLoading[category]?.[subcat] ? "Adding..." : "Add Bookmark"}
+                                    </button>
+                                    {bookmarkMessages[category]?.[subcat] && (
+                                      <div className={`text-sm mt-1 text-center ${bookmarkMessages[category][subcat].startsWith("✅") ? "text-green-600" : "text-red-600"}`}>
+                                        {bookmarkMessages[category][subcat]}
+                                      </div>
+                                    )}
+                                  </form>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                    })}
+                    </div>
+                  ) : (
+                    <div className="text-gray-400">No subcategories found.</div>
+                  )}
+                </div>
+              )
+            })}
           </div>
           {showSubcatModal[Object.keys(showSubcatModal).find(c => showSubcatModal[c])] && (() => {
             const category = Object.keys(showSubcatModal).find(c => showSubcatModal[c]);
@@ -892,6 +1073,22 @@ const AddSubcategory = () => {
                 </div>
                 <button className="w-full bg-red-600 hover:bg-red-700 text-white rounded px-3 py-1 font-semibold mb-2" onClick={() => deleteConfirm.type === 'subcat' ? handleDeleteSubcat(deleteConfirm) : handleDeleteBookmark(deleteConfirm)}>Delete</button>
                 <button className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 rounded px-3 py-1 font-semibold" onClick={() => setDeleteConfirm({})}>Cancel</button>
+              </div>
+            </div>
+          )}
+          {/* NEW: Edit Category Modal */}
+          {editCategoryModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+              <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6 w-full max-w-xs relative">
+                <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200" onClick={() => setEditCategoryModal(null)} aria-label="Close"><X /></button>
+                <div className="mb-3 font-semibold text-gray-800 dark:text-gray-100 text-lg text-center">Edit Category</div>
+                <input
+                  type="text"
+                  className="border rounded px-2 py-1 w-full dark:bg-gray-800 dark:text-white mb-3"
+                  value={editCategoryModal.newName}
+                  onChange={e => setEditCategoryModal(prev => ({ ...prev, newName: e.target.value }))}
+                />
+                <button className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded px-3 py-1 font-semibold" onClick={handleEditCategorySave}>Save</button>
               </div>
             </div>
           )}
@@ -1101,6 +1298,20 @@ const AddSubcategory = () => {
             <div className="mb-4 text-center text-gray-700 dark:text-gray-200">Delete bookmark &quot;{deleteInterestBookmarkConfirm.bookmark?.name}&quot;?</div>
             <button className="w-full bg-red-600 hover:bg-red-700 text-white rounded px-3 py-1 font-semibold mb-2" onClick={() => handleDeleteInterestBookmark(deleteInterestBookmarkConfirm)}>Delete</button>
             <button className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 rounded px-3 py-1 font-semibold" onClick={() => setDeleteInterestBookmarkConfirm({})}>Cancel</button>
+          </div>
+        </div>
+      )}
+      {/* Delete Category Confirm Modal */}
+      {deleteCategoryConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6 w-full max-w-xs relative">
+            <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200" onClick={() => setDeleteCategoryConfirm(null)} aria-label="Close"><X /></button>
+            <div className="mb-3 font-semibold text-gray-800 dark:text-gray-100 text-lg text-center">Confirm Delete</div>
+            <div className="mb-4 text-center text-gray-700 dark:text-gray-200">
+              Delete category &quot;{deleteCategoryConfirm.name}&quot; and all its subcategories &amp; bookmarks?
+            </div>
+            <button className="w-full bg-red-600 hover:bg-red-700 text-white rounded px-3 py-1 font-semibold mb-2" onClick={() => handleDeleteCategory(deleteCategoryConfirm.name)}>Delete</button>
+            <button className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 rounded px-3 py-1 font-semibold" onClick={() => setDeleteCategoryConfirm(null)}>Cancel</button>
           </div>
         </div>
       )}
