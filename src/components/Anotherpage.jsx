@@ -31,10 +31,13 @@ import { SettingOutlined } from '@ant-design/icons';
 import { Dropdown, Menu } from "antd";
 import { DragDropContext as DnDContext, Droppable as DnDDroppable, Draggable as DnDDraggable } from 'react-beautiful-dnd';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { collection as fsCollection, getDocs as fsGetDocs } from "firebase/firestore";
 
 const allCategories = [
-  "Popular", "AI", "Travel", "Sports", "Shopping", "News", "Jobs", "Movie", "Finance", "Education", "Bpo"
+  "Designer (UI/UX, Graphic, Web)", "Developer / Programmer", "Digital Marketer", "Student", "Teacher / Educator", "Enterprener / Founder", "Freelancer(Creative or Technical)", "Consultant / Advisor", "Working Professional", "Reseacher / Academic", "IT / Tech Support", "Medical Professional"
 ];
+
+
 
 // Memoize all widget components
 const MemoWeather = memo(Weather);
@@ -104,14 +107,25 @@ const Anotherpage = ({ pageId = "home" }) => {
   const localCategoryKey = 'selectedCategory';
   const getInitialCategory = () => {
     const saved = localStorage.getItem(localCategoryKey);
-    return saved ? saved : 'Popular';
+    return saved ? saved : 'Designer (UI/UX, Graphic, Web)';
   };
   const [selectedCategory, setSelectedCategory] = useState(getInitialCategory());
+  // Add state for selected profession
+  const localProfessionKey = 'selectedProfession';
+  const getInitialProfession = () => {
+    const saved = localStorage.getItem(localProfessionKey);
+    return saved ? saved : 'all'; // Default to 'all'
+  };
+  const [selectedProfession, setSelectedProfession] = useState(getInitialProfession);
 
   // On category change, save to localStorage
   useEffect(() => {
     localStorage.setItem(localCategoryKey, selectedCategory);
   }, [selectedCategory]);
+  // On profession change, save to localStorage
+  useEffect(() => {
+    localStorage.setItem(localProfessionKey, selectedProfession);
+  }, [selectedProfession]);
   const [subcatBookmarks, setSubcatBookmarks] = useState({}); // { subcat: [bookmarks] }
   const [firestoreSubcats, setFirestoreSubcats] = useState([]); // For logged-in users
   const [firestoreUser, setFirestoreUser] = useState(null);
@@ -168,16 +182,36 @@ const Anotherpage = ({ pageId = "home" }) => {
     const unsub = onSnapshot(q, (snapshot) => {
       if (!snapshot.empty) {
         const docData = snapshot.docs[0].data();
-        setFirestoreSubcats(Array.isArray(docData.subcategories) ? docData.subcategories : []);
+        let subcategories = Array.isArray(docData.subcategories) ? docData.subcategories : [];
+        
+        if (selectedProfession !== 'all') {
+          subcategories = subcategories.filter(subcat => {
+            if (typeof subcat === 'string') return true; 
+            if (!subcat.professions || subcat.professions.length === 0) return true;
+            return subcat.professions.includes(selectedProfession);
+          });
+        }
+        setFirestoreSubcats(subcategories);
       } else {
         setFirestoreSubcats([]);
       }
     });
     return () => unsub();
-  }, [firestoreUser, selectedCategory]);
+  }, [firestoreUser, selectedCategory, selectedProfession]);
 
   // Fetch bookmarks for a subcategory from Firestore (only when expanded)
   const fetchSubcatBookmarks = async (subcat) => {
+    if (selectedInterest !== 'all') {
+      // Fetch bookmarks for interest subcategory
+      const interestId = selectedInterest;
+      const q = query(collection(db, "links"), where("interestId", "==", interestId), where("subcategory", "==", subcat));
+      const snap = await getDocs(q);
+      setSubcatBookmarks(prev => ({
+        ...prev,
+        [subcat]: snap.docs.map(doc => ({ id: doc.id, ...doc.data(), addedByAdmin: true })),
+      }));
+      return;
+    }
     if (!firestoreUser) return;
 
     // Fetch user bookmarks
@@ -627,7 +661,9 @@ const Anotherpage = ({ pageId = "home" }) => {
         const docRef = doc(db, 'users', firestoreUser.uid, 'bookmarks', b.id);
         await setDoc(docRef, {}, { merge: false }); // Remove doc
         // Firestore doesn't have a direct delete in this import, so use deleteDoc if available
-        try { await (await import('firebase/firestore')).deleteDoc(docRef); } catch {}
+        try { await (await import('firebase/firestore')).deleteDoc(docRef); } catch (e) {
+          console.error("Error deleting document:", e);
+        }
       } else {
         const key = `userBookmarks_${selectedCategory}_${subcatKey}`;
         const existing = JSON.parse(localStorage.getItem(key) || '[]');
@@ -697,7 +733,7 @@ const Anotherpage = ({ pageId = "home" }) => {
                         style={{ minHeight: 48 }}
                       >
                         <div className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full border border-gray-300 bg-white dark:bg-gray-800 mr-2">
-                        <img src={`https://www.google.com/s2/favicons?sz=64&domain=${(() => { try { return new URL(b.link).hostname; } catch { return 'google.com'; } })()}`} alt="" className="w-5 h-5 rounded" />
+                          <img src={`https://www.google.com/s2/favicons?sz=64&domain=${(() => { try { return new URL(b.link).hostname; } catch { return 'google.com'; } })()}`} alt="" className="w-5 h-5 rounded" />
                         </div>
                         {editingId === b.id ? (
                           <>
@@ -725,13 +761,13 @@ const Anotherpage = ({ pageId = "home" }) => {
                           </>
                         ) : (
                           <>
-                        <span className="flex-1 text-gray-900 dark:text-gray-100 truncate max-w-[150px] overflow-hidden whitespace-nowrap">{truncateName(b.name)}</span>
+                            <span className="flex-1 text-gray-900 dark:text-gray-100 truncate max-w-[150px] overflow-hidden whitespace-nowrap">{truncateName(b.name)}</span>
                             <a href={b.link} target="_blank" rel="noopener noreferrer" className="text-blue-500 text-xs underline" title="Visit bookmark" aria-label="Visit bookmark">Visit</a>
                             <div className="flex gap-1 ml-2">
-                        <button
+                              <button
                                 className={`px-2 py-1 rounded text-xs ${hiddenIds.includes(b.id) ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-700'} hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400`}
                                 onClick={e => { e.stopPropagation(); handleHideBookmark(b.id, !hiddenIds.includes(b.id)); }}
-                          title={hiddenIds.includes(b.id) ? 'Unhide' : 'Hide'}
+                                title={hiddenIds.includes(b.id) ? 'Unhide' : 'Hide'}
                                 aria-label={hiddenIds.includes(b.id) ? 'Unhide bookmark' : 'Hide bookmark'}
                               >
                                 {hiddenIds.includes(b.id)
@@ -743,7 +779,7 @@ const Anotherpage = ({ pageId = "home" }) => {
                               </button>
                               <button title="Delete" aria-label="Delete bookmark" className="text-red-600 px-2 py-1 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-red-400" onClick={e => { e.stopPropagation(); deleteBookmark(b); }}>
                                 <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 6h18" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
-                        </button>
+                              </button>
                             </div>
                           </>
                         )}
@@ -1039,8 +1075,62 @@ const Anotherpage = ({ pageId = "home" }) => {
     onIconSizeChange: PropTypes.func,
   };
 
-  // Get subcategories for the selected category
-  const subcats = firestoreUser && firestoreSubcats.length > 0 ? firestoreSubcats : subcatOrder;
+  // --- Interest Dropdown State ---
+  const localInterestKey = 'selectedInterest';
+  const getInitialInterest = () => {
+    const saved = localStorage.getItem(localInterestKey);
+    return saved ? saved : 'not_select'; // Default to 'not_select' instead of 'all'
+  };
+  const [selectedInterest, setSelectedInterest] = useState(getInitialInterest);
+  const [interestOptions, setInterestOptions] = useState([{ id: 'all', name: 'All Interests' }]);
+  const [interestSubcats, setInterestSubcats] = useState([]); // [{name: string}]
+
+  // Reset selectedInterest when selectedCategory changes
+  useEffect(() => {
+    setSelectedInterest('not_select');
+  }, [selectedCategory]);
+
+  // Fetch interests from Firestore
+  useEffect(() => {
+    async function fetchInterests() {
+      try {
+        const snap = await fsGetDocs(fsCollection(db, 'interests'));
+        const options = [{ id: 'all', name: 'All Interests' }];
+        snap.forEach(doc => {
+          options.push({ id: doc.id, name: doc.data().name, subcategories: doc.data().subcategories || [] });
+        });
+        setInterestOptions(options);
+      } catch {
+        setInterestOptions([{ id: 'all', name: 'All Interests' }]);
+      }
+    }
+    fetchInterests();
+  }, []);
+  // Persist selectedInterest
+  useEffect(() => {
+    localStorage.setItem(localInterestKey, selectedInterest);
+  }, [selectedInterest]);
+  // Fetch subcategories for selected interest
+  useEffect(() => {
+    if (selectedInterest === 'all') {
+      setInterestSubcats([]);
+      return;
+    }
+    const found = interestOptions.find(i => i.id === selectedInterest);
+    setInterestSubcats(found?.subcategories || []);
+  }, [selectedInterest, interestOptions]);
+
+  // --- Update subcats logic to use interest if selected ---
+  const subcats = (selectedInterest !== 'not_select' && selectedInterest !== 'all')
+    ? interestSubcats
+    : (firestoreUser && firestoreSubcats.length > 0 ? firestoreSubcats : subcatOrder);
+
+  // Hide interest subcategories when selectedInterest is 'not_select'
+  useEffect(() => {
+    if (selectedInterest === 'not_select') {
+      setInterestSubcats([]);
+    }
+  }, [selectedInterest]);
 
   // Build the widgets to render: all normal widgets + subcategory widgets
   const allWidgetItems = [
@@ -1706,7 +1796,7 @@ const Anotherpage = ({ pageId = "home" }) => {
   const [globalSearch, setGlobalSearch] = useState("");
 
   // Add state for search results modal
-  const [searchResults, setSearchResults] = useState({ bookmarks: [], widgets: [] });
+  const [searchResults] = useState({ bookmarks: [], widgets: [] });
   const [showSearchModal, setShowSearchModal] = useState(false);
   const searchModalRef = useRef(null);
 
@@ -1748,7 +1838,7 @@ const Anotherpage = ({ pageId = "home" }) => {
   }
   // Helper to get all widgets/components (by display name)
   function getAllWidgets() {
-    return Object.entries(componentMap).map(([key, comp]) => ({
+    return Object.entries(componentMap).map(([key]) => ({
       id: key,
       name: key.charAt(0).toUpperCase() + key.slice(1),
     }));
@@ -1858,7 +1948,7 @@ const Anotherpage = ({ pageId = "home" }) => {
 
   // Collapse/Expand all handlers
   const handleCollapseAll = () => {
-    setCollapsedItems(prev => {
+    setCollapsedItems(() => {
       const newState = {};
       items.forEach(item => { newState[item.id] = true; });
       localStorage.setItem("collapsedItems", JSON.stringify(newState));
@@ -1867,7 +1957,7 @@ const Anotherpage = ({ pageId = "home" }) => {
     setMenuOpen(false);
   };
   const handleExpandAll = () => {
-    setCollapsedItems(prev => {
+    setCollapsedItems(() => {
       const newState = {};
       items.forEach(item => { newState[item.id] = false; });
       localStorage.setItem("collapsedItems", JSON.stringify(newState));
@@ -1911,28 +2001,133 @@ const Anotherpage = ({ pageId = "home" }) => {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [menuOpen, viewModeSubmenuOpen]);
 
+  // Add this near the top, after user is fetched
+  const userProfession = user?.profession || null;
+
+  // Filter categories to only those with at least one subcategory for the user's profession
+  const filteredCategories = !userProfession
+    ? allCategories
+    : allCategories.filter(cat => {
+        // Get subcategories for this category
+        const subcatsRaw = (firestoreUser && firestoreSubcats.length > 0 && selectedCategory === cat)
+          ? firestoreSubcats
+          : (defaultBookmarks[cat] ? Object.values(defaultBookmarks[cat]) : []);
+        // Flatten if needed
+        const subcatsArr = Array.isArray(subcatsRaw) ? subcatsRaw : Object.values(subcatsRaw);
+        // Check if any subcategory matches the user's profession
+        return subcatsArr.some(
+          subcat =>
+            typeof subcat === 'object' &&
+            Array.isArray(subcat.professions) &&
+            subcat.professions.includes(userProfession)
+        );
+      });
+
+  // --- Fetch bookmarks for interest subcategories when interest changes ---
+  useEffect(() => {
+    if (selectedInterest === 'all') return;
+    (interestSubcats || []).forEach(subcatObj => {
+      const subcatKey = typeof subcatObj === 'object' && subcatObj.name ? subcatObj.name : subcatObj;
+      if (subcatKey) fetchSubcatBookmarks(subcatKey);
+    });
+    // eslint-disable-next-line
+  }, [selectedInterest, interestSubcats]);
+
   return (
     <div className={`anotherpage-container ${isDarkMode ? "dark" : ""}`}> 
-      {/* Category navigation outside the widget grid */}
-      <div className="relative flex items-center mb-2 w-full" style={{ maxWidth: '90vw', margin: '0 auto' }}>
-        <div className="flex-1 flex flex-wrap gap-2 justify-center">
-          {allCategories.map((cat) => (
-            <button
-              key={cat}
-              className={`px-4 py-2 text-sm font-medium rounded-md w-auto transition-all ${
-                selectedCategory === cat
-                  ? 'bg-indigo-500 text-white'
-                  : 'bg-gray-100'
-              }`}
-              onClick={() => setSelectedCategory(cat)}
-            >
-              {cat}
-            </button>
-          ))}
+      {filteredCategories.length === 0 ? (
+        <div className="w-full flex flex-col items-center justify-center min-h-[60vh]">
+          <div className="text-2xl font-semibold text-gray-500 dark:text-gray-300 mt-20">No subcategories found for your profession.</div>
         </div>
-        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2" style={{ maxWidth: 400 }}>
-          {!searchOpen && (
-            <>
+      ) : (
+      <>
+      {/* Profession, Interest, Search, and Menu in separate divs at the top */}
+      <div className="w-full flex items-center mb-1 justify-between" style={{ maxWidth: '90vw', margin: '0 auto', position: 'relative' }}>
+        {/* Left: Profession and Interest Dropdowns */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 1, marginLeft: 6 }}>
+          {/* Profession Dropdown */}
+          <div style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Dropdown
+              overlay={
+                <Menu style={{ width: 250, maxHeight: 280, overflowY: 'auto' }}>
+                  {filteredCategories.map(cat => (
+                    <Menu.Item key={cat} onClick={() => setSelectedCategory(cat)}>
+                      {cat}
+                    </Menu.Item>
+                  ))}
+                </Menu>
+              }
+              trigger={["click"]}
+              placement="bottomLeft"
+            >
+              <button
+                className="flex items-center gap-1 px-2 py-1 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 text-xs font-medium border border-blue-200 dark:border-blue-700 hover:bg-blue-200 dark:hover:bg-blue-800 transition cursor-pointer"
+                style={{ minWidth: 0, marginRight: 1, width: 120, justifyContent: 'flex-start' }}
+                title="Select Category"
+              >
+                <span className="truncate max-w-[110px]">{selectedCategory}</span>
+                <span className="ml-auto text-blue-400 flex items-center">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+                </span>
+              </button>
+            </Dropdown>
+          </div>
+          {/* Interest Dropdown */}
+          <div style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center', gap: 1, marginRight: 12 }}>
+            <Dropdown
+              overlay={
+                <Menu style={{ width: 150 }}>
+                  <Menu.Item key="not_select" onClick={() => setSelectedInterest('not_select')}>
+                    Not Selected
+                  </Menu.Item>
+                  {interestOptions.map(i => (
+                    <Menu.Item key={i.id} onClick={() => setSelectedInterest(i.id)}>
+                      {i.name}
+                    </Menu.Item>
+                  ))}
+                </Menu>
+              }
+              trigger={["click"]}
+              placement="bottomLeft"
+            >
+              <button
+                className="flex items-center gap-1 px-2 py-1 rounded bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 text-xs font-medium border border-purple-200 dark:border-purple-700 hover:bg-purple-200 dark:hover:bg-purple-800 transition cursor-pointer"
+                style={{ minWidth: 0, width: 150, justifyContent: 'flex-start' }}
+                title="Select Interest"
+              >
+                <span className="truncate max-w-[130px]">
+                  {selectedInterest === 'not_select'
+                    ? 'Not Selected'
+                    : (interestOptions.find(i => i.id === selectedInterest)?.name || 'All Interests')}
+                </span>
+                <span className="ml-auto text-purple-400 flex items-center">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+                </span>
+              </button>
+            </Dropdown>
+          </div>
+        </div>
+        {/* Right: Search and Three-dot Menu */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 1, marginRight: 7 }}>
+          {/* Search Input/Button */}
+          <div style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center', gap: 1, marginRight: 2 }}>
+            {searchOpen ? (
+              <form
+                onSubmit={handleGlobalSearch}
+                className={`transition-all duration-300 overflow-hidden w-[220px] opacity-100 ml-2 flex items-center`}
+                style={{ maxWidth: 320 }}
+              >
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  className="flex-1 h-9 px-5 py-2 border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-base bg-white shadow"
+                  placeholder="Search bookmarks, widgets, anything..."
+                  value={globalSearch}
+                  onChange={handleSearchInput}
+                  style={{ minWidth: 0 }}
+                />
+              </form>
+            ) : (
               <button
                 type="button"
                 className={`h-4 w-4 dark:bg-[#28283b] bg-white shadow flex items-center justify-center rounded hover:bg-gray-100 transition`}
@@ -1944,124 +2139,109 @@ const Anotherpage = ({ pageId = "home" }) => {
               >
                 <svg width="16" height="16" fill="none" stroke="#6366F1" strokeWidth="2.2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
               </button>
-              <div className="relative">
-                <button
-                  type="button"
-                  className="h-9 w-9 flex items-center justify-center rounded  dark:bg-[#28283b] dark:hover:bg-gray-900 bg-white hover:bg-gray-200 transition"
-                  title="More options"
-                  aria-label="More options"
-                  onClick={() => setMenuOpen(o => !o)}
-                >
-                  {/* Three-dot vertical SVG */}
-                  <svg width="20" height="20" fill="none" stroke="#6366F1" strokeWidth="2.2" viewBox="0 0 24 24">
-                    <circle cx="12" cy="5" r="1.5"/>
-                    <circle cx="12" cy="12" r="1.5"/>
-                    <circle cx="12" cy="19" r="1.5"/>
-                  </svg>
-                </button>
-                {menuOpen && (
-                  <div ref={menuContainerRef} className="absolute right-0 bottom-full mb-2 w-36 dark:text-white bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-lg z-[1200]">
-                    {!allCollapsed ? (
-                      <button
-                        className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                        onClick={handleCollapseAll}
-                      >
-                        Collapse All
-                      </button>
-                    ) : (
-                      <button
-                        className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                        onClick={handleExpandAll}
-                      >
-                        Expand All
-                      </button>
-                    )}
+            )}
+          </div>
+          {/* Three-dot Menu */}
+          <div style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div className="relative">
+              <button
+                type="button"
+                className="h-9 w-9 flex items-center justify-center rounded  dark:bg-[#28283b] dark:hover:bg-gray-900 bg-white hover:bg-gray-200 transition"
+                title="More options"
+                aria-label="More options"
+                onClick={() => setMenuOpen(o => !o)}
+              >
+                <svg width="20" height="20" fill="none" stroke="#6366F1" strokeWidth="2.2" viewBox="0 0 24 24">
+                  <circle cx="12" cy="5" r="1.5"/>
+                  <circle cx="12" cy="12" r="1.5"/>
+                  <circle cx="12" cy="19" r="1.5"/>
+                </svg>
+              </button>
+              {menuOpen && (
+                <div ref={menuContainerRef} className="absolute right-0 bottom-full mb-2 w-36 dark:text-white bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-lg z-[1200]">
+                  {/* ...menu content... */}
+                  {!allCollapsed ? (
                     <button
                       className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                      onClick={() => { setShowAllBookmarks(true); setMenuOpen(false); }}
+                      onClick={handleCollapseAll}
                     >
-                      All Bookmark
+                      Collapse All
                     </button>
-                    <div
-                      className="relative"
-                      tabIndex={0}
+                  ) : (
+                    <button
+                      className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                      onClick={handleExpandAll}
                     >
-                      <button
-                        className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition flex items-center justify-between"
-                        onClick={() => setViewModeSubmenuOpen(v => !v)}
-                        aria-haspopup="true"
-                        aria-expanded={viewModeSubmenuOpen}
-                      >
-                        View Mode
-                        <svg width="16" height="16" fill="none" stroke="#6366F1" strokeWidth="2.2" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
-                      </button>
-                      {viewModeSubmenuOpen && (
-                        <div ref={submenuRef} className="absolute left-full top-0 ml-2 w-32 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-2xl z-[1200] flex flex-col py-2 px-1">
-                          {[
-                            { mode: 'list', label: 'List', icon: <svg width="20" height="20" fill="none" stroke="#6366F1" strokeWidth="2" viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="2" rx="1"/><rect x="4" y="11" width="16" height="2" rx="1"/><rect x="4" y="16" width="16" height="2" rx="1"/></svg> },
-                            { mode: 'grid', label: 'Grid', icon: <svg width="20" height="20" fill="none" stroke="#6366F1" strokeWidth="2" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg> },
-                            { mode: 'icon', label: 'Icon', icon: <svg width="20" height="20" fill="none" stroke="#6366F1" strokeWidth="2" viewBox="0 0 24 24"><circle cx="7" cy="7" r="3"/><circle cx="17" cy="7" r="3"/><circle cx="7" cy="17" r="3"/><circle cx="17" cy="17" r="3"/></svg> },
-                            { mode: 'cloud', label: 'Cloud', icon: <svg width="20" height="20" fill="none" stroke="#6366F1" strokeWidth="2" viewBox="0 0 24 24"><path d="M17.5 19a4.5 4.5 0 0 0 0-9c-.2 0-.4 0-.6.03A6 6 0 1 0 6 17.5"/></svg> },
-                          ].map(({ mode, label, icon }) => (
-                            <button
-                              key={mode}
-                              className={`w-full flex items-center gap-3 px-4 py-2 rounded text-sm font-semibold border-b last:border-b-0 border-gray-100 dark:border-gray-700 transition relative ${Object.values(subcatDisplayModes).every(v => v === mode) ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'} hover:bg-blue-100`}
-                              onClick={async () => {
-                                const subcats = firestoreUser && firestoreSubcats.length > 0 ? firestoreSubcats : subcatOrder;
-                                const updates = {};
-                                subcats.forEach(subcat => {
-                                  const key = typeof subcat === 'object' && subcat.name ? subcat.name : subcat;
-                                  updates[key] = mode;
-                                });
-                                setSubcatDisplayModes(prev => ({ ...prev, ...updates }));
-                                if (firestoreUser) {
-                                  for (const subcat of subcats) {
-                                    const key = `subcatDisplayModes`;
-                                    let allModes = { ...subcatDisplayModes, ...updates };
-                                    localStorage.setItem(key, JSON.stringify(allModes));
-                                  }
-                                } else {
-                                  localStorage.setItem('subcatDisplayModes', JSON.stringify({ ...subcatDisplayModes, ...updates }));
-                                }
-                                setViewModeSubmenuOpen(false);
-                                setMenuOpen(false);
-                              }}
-                            >
-                              <span>{icon}</span>
-                              <span>{label}</span>
-                              {Object.values(subcatDisplayModes).every(v => v === mode) && (
-                                <span className="absolute right-3">
-                                  {/* Checkmark icon */}
-                                  <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
-                                </span>
-                              )}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                      Expand All
+                    </button>
+                  )}
+                  <button
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                    onClick={() => { setShowAllBookmarks(true); setMenuOpen(false); }}
+                  >
+                    All Bookmark
+                  </button>
+                  <div
+                    className="relative"
+                    tabIndex={0}
+                  >
+                    <button
+                      className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition flex items-center justify-between"
+                      onClick={() => setViewModeSubmenuOpen(v => !v)}
+                      aria-haspopup="true"
+                      aria-expanded={viewModeSubmenuOpen}
+                    >
+                      View Mode
+                      <svg width="16" height="16" fill="none" stroke="#6366F1" strokeWidth="2.2" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+                    </button>
+                    {viewModeSubmenuOpen && (
+                      <div ref={submenuRef} className="absolute left-full top-0 ml-2 w-32 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-2xl z-[1200] flex flex-col py-2 px-1">
+                        {/* ...submenu content... */}
+                        {[
+                          { mode: 'list', label: 'List', icon: <svg width="20" height="20" fill="none" stroke="#6366F1" strokeWidth="2" viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="2" rx="1"/><rect x="4" y="11" width="16" height="2" rx="1"/><rect x="4" y="16" width="16" height="2" rx="1"/></svg> },
+                          { mode: 'grid', label: 'Grid', icon: <svg width="20" height="20" fill="none" stroke="#6366F1" strokeWidth="2" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg> },
+                          { mode: 'icon', label: 'Icon', icon: <svg width="20" height="20" fill="none" stroke="#6366F1" strokeWidth="2" viewBox="0 0 24 24"><circle cx="7" cy="7" r="3"/><circle cx="17" cy="7" r="3"/><circle cx="7" cy="17" r="3"/><circle cx="17" cy="17" r="3"/></svg> },
+                          { mode: 'cloud', label: 'Cloud', icon: <svg width="20" height="20" fill="none" stroke="#6366F1" strokeWidth="2" viewBox="0 0 24 24"><path d="M17.5 19a4.5 4.5 0 0 0 0-9c-.2 0-.4 0-.6.03A6 6 0 1 0 6 17.5"/></svg> },
+                        ].map(({ mode, label, icon }) => (
+                          <button
+                            key={mode}
+                            className={`w-full flex items-center gap-3 px-4 py-2 rounded text-sm font-semibold border-b last:border-b-0 border-gray-100 dark:border-gray-700 transition relative ${Object.values(subcatDisplayModes).every(v => v === mode) ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'} hover:bg-blue-100`}
+                            onClick={async () => {
+                              const subcats = firestoreUser && firestoreSubcats.length > 0 ? firestoreSubcats : subcatOrder;
+                              const updates = {};
+                              subcats.forEach(subcat => {
+                                const key = typeof subcat === 'object' && subcat.name ? subcat.name : subcat;
+                                updates[key] = mode;
+                              });
+                              setSubcatDisplayModes(prev => ({ ...prev, ...updates }));
+                              if (firestoreUser) {
+                                // Persist for all subcats
+                                const key = `subcatDisplayModes`;
+                                let allModes = { ...subcatDisplayModes, ...updates };
+                                localStorage.setItem(key, JSON.stringify(allModes));
+                              } else {
+                                localStorage.setItem('subcatDisplayModes', JSON.stringify({ ...subcatDisplayModes, ...updates }));
+                              }
+                              setViewModeSubmenuOpen(false);
+                              setMenuOpen(false);
+                            }}
+                          >
+                            <span>{icon}</span>
+                            <span>{label}</span>
+                            {Object.values(subcatDisplayModes).every(v => v === mode) && (
+                              <span className="absolute right-3">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+                              </span>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            </>
-          )}
-          {searchOpen && (
-            <form
-              onSubmit={handleGlobalSearch}
-              className={`transition-all duration-300 overflow-hidden w-[220px] opacity-100 ml-2 flex items-center`}
-              style={{ maxWidth: 320 }}
-            >
-              <input
-                ref={searchInputRef}
-                type="text"
-                className="flex-1 h-9 px-5 py-2 border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-base bg-white shadow"
-                placeholder="Search bookmarks, widgets, anything..."
-                value={globalSearch}
-                onChange={handleSearchInput}
-                style={{ minWidth: 0 }}
-              />
-            </form>
-          )}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -2333,12 +2513,9 @@ const Anotherpage = ({ pageId = "home" }) => {
                     setSubcatDisplayModes(prev => ({ ...prev, ...updates }));
                     // Persist for all subcats
                     if (firestoreUser) {
-                      for (const subcat of subcats) {
-                        const subcatKey = typeof subcat === 'object' && subcat.name ? subcat.name : subcat;
-                        const key = `subcatDisplayModes`;
-                        let allModes = { ...subcatDisplayModes, ...updates };
-                        localStorage.setItem(key, JSON.stringify(allModes));
-                      }
+                      const key = `subcatDisplayModes`;
+                      let allModes = { ...subcatDisplayModes, ...updates };
+                      localStorage.setItem(key, JSON.stringify(allModes));
                     } else {
                       localStorage.setItem('subcatDisplayModes', JSON.stringify({ ...subcatDisplayModes, ...updates }));
                     }
@@ -2355,8 +2532,14 @@ const Anotherpage = ({ pageId = "home" }) => {
           </div>
         </div>
       )}
+      </>
+      )}
     </div>
   );
+};
+
+Anotherpage.propTypes = {
+  pageId: PropTypes.string
 };
 
 export default Anotherpage;

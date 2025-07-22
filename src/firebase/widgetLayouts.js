@@ -1,3 +1,4 @@
+import { Support } from "@mui/icons-material";
 import { db } from "../firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 
@@ -35,17 +36,17 @@ export const allWidgets = {
   notepad: { id: "notepad", name: "Notepad" },
   imageUploader: { id: "imageUploader", name: "Image" },
   calendar: { id: "calendar", name: "Calendar" },
-  Bookmarks: { id: "Bookmarks", name: "Popular" },
-  Bookmarks1: { id: "Bookmarks1", name: "AI" },
-  Bookmarks2: { id: "Bookmarks2", name: "Travel" },
-  Bookmarks3: { id: "Bookmarks3", name: "Sports" },
-  Bookmarks4: { id: "Bookmarks4", name: "Shopping" },
-  Bookmarks5: { id: "Bookmarks5", name: "News" },
-  Bookmarks6: { id: "Bookmarks6", name: "Jobs" },
-  Bookmarks7: { id: "Bookmarks7", name: "Movie" },
-  Bookmarks8: { id: "Bookmarks8", name: "Finance" },
-  Bookmarks9: { id: "Bookmarks9", name: "Education" },
-  Bookmarks10: {id: "Bookmarks10", name: "Bpo" },
+  Bookmarks: { id: "Bookmarks", name: "Designer (UI/UX, Graphic, Web)" },
+  Bookmarks1: { id: "Bookmarks1", name: "Developer / Programmer" },
+  Bookmarks2: { id: "Bookmarks2", name: "Digital Marketer" },
+  Bookmarks3: { id: "Bookmarks3", name: "Student" },
+  Bookmarks4: { id: "Bookmarks4", name: "Teacher / Educator" },
+  Bookmarks5: { id: "Bookmarks5", name: "Enterprener / Founder" },
+  Bookmarks6: { id: "Bookmarks6", name: "Freelancer(Creative or Technical)" },
+  Bookmarks7: { id: "Bookmarks7", name: "Consultant / Advisor" },
+  Bookmarks8: { id: "Bookmarks8", name: "Working Professional" },
+  Bookmarks9: { id: "Bookmarks9", name: "Reseacher / Academic" },
+  Bookmarks10: {id: "Bookmarks10", name: "IT / Tech Support" },
   Todo: { id: "Todo", name: "To Do List" },
   NewsFeed: { id: "NewsFeed", name: "Latest News" },
 };
@@ -219,7 +220,7 @@ export const resetPageLayout = async (userId, pageName) => {
 
 // Add default bookmarks for non-logged in users
 export const defaultBookmarks = {
-  Popular: {
+  "Designer (UI/UX, Graphic, Web)": {
     "Search Engines": [
       {
         id: "popular1",
@@ -249,7 +250,7 @@ export const defaultBookmarks = {
       },
     ],
   },
-  AI: {
+  "Developer / Programmer": {
     "Chatbots": [
       {
         id: "ai1",
@@ -279,7 +280,7 @@ export const defaultBookmarks = {
       },
     ],
   },
-  Travel: {
+  "Digital Marketer": {
     "Hotels": [
       {
         id: "travel1",
@@ -309,7 +310,7 @@ export const defaultBookmarks = {
       },
     ],
   },
-  Sports: {
+  "Student": {
     "News": [
       {
         id: "sports1",
@@ -339,7 +340,7 @@ export const defaultBookmarks = {
       },
     ],
   },
-  Shopping: {
+  "Teacher / Educator": {
     "E-Commerce": [
       {
         id: "shopping1",
@@ -369,7 +370,7 @@ export const defaultBookmarks = {
       },
     ],
   },
-  News: {
+  "Enterprener / Founder": {
     "International": [
       {
         id: "news1",
@@ -399,7 +400,7 @@ export const defaultBookmarks = {
       },
     ],
   },
-  Jobs: {
+  "Freelancer(Creative or Technical)": {
     "Job Boards": [
       {
         id: "job1",
@@ -429,7 +430,7 @@ export const defaultBookmarks = {
       },
     ],
   },
-  Movie: {
+  "Consultant / Advisor": {
     "Streaming": [
       {
         id: "movie1",
@@ -459,7 +460,7 @@ export const defaultBookmarks = {
       },
     ],
   },
-  Finance: {
+  "Working Professional": {
     "Payments": [
       {
         id: "finance1",
@@ -489,7 +490,7 @@ export const defaultBookmarks = {
       },
     ],
   },
-  Education: {
+  "Reseacher / Academic": {
     "Online Courses": [
       {
         id: "edu1",
@@ -519,7 +520,7 @@ export const defaultBookmarks = {
       },
     ],
   },
-  Bpo: {
+  "IT/Tech Support": {
     "Courses": [
       {
         id: "bpo1",
