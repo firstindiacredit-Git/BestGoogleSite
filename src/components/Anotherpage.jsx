@@ -2601,7 +2601,7 @@ const Anotherpage = ({ pageId = "home" }) => {
         </div>
       )}
       {showViewModeModal && (
-        <div className="fixed inset-0 z-[1200] flex items-start justify-center bg-black/20" style={{ paddingTop: 90 }}>
+        <div className="fixed inset-0 z-[1200] flex items-start justify-center bg-black/40" style={{ paddingTop: 90 }}>
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 p-6 w-full max-w-lg mx-auto">
             <div className="font-semibold text-lg mb-3">Set All Subcategories View Mode</div>
             <div className="flex items-center gap-3 mb-4">
@@ -2644,49 +2644,108 @@ const Anotherpage = ({ pageId = "home" }) => {
         footer={null}
         closable={false}
         centered
+        
       >
         {!firstTimeStep && (
-          <div className="flex flex-col items-center gap-6 p-6">
-            <h2 className="text-xl font-bold mb-2">Welcome!</h2>
-            <p className="mb-4">Do you want to see subcategories based on categories or interests?</p>
-            <div className="flex gap-4">
-              <AntButton type="primary" onClick={() => handleFirstTimeChoice('category')}>Categories</AntButton>
-              <AntButton type="default" onClick={() => handleFirstTimeChoice('interest')}>Interests</AntButton>
+          <div className="flex flex-col items-center gap-6 p-8 bg-white">
+            <h2 className="text-2xl font-bold mb-2 text-blue-700">Welcome!</h2>
+            <p className="mb-4 text-gray-600 text-center">How would you like to personalize your experience?</p>
+            <div className="flex gap-4 w-full justify-center">
+              <AntButton type="primary" className="!bg-white hover:!text-white !text-black !border-gray-300 !rounded-full !px-8 !py-2 !text-lg hover:!bg-blue-700 transition" onClick={() => handleFirstTimeChoice('category')}>Professionals</AntButton>
+              <AntButton type="default" className="!rounded-full !px-8 !py-2 !text-lg hover:!text-white !text-black !border-gray-300 hover:!bg-blue-700 transition" onClick={() => handleFirstTimeChoice('interest')}>Interests</AntButton>
             </div>
           </div>
         )}
         {firstTimeStep === 'category' && (
-          <div className="flex flex-col items-center gap-6 p-6">
-            <h2 className="text-lg font-semibold mb-2">Select a Category</h2>
-            <select
-              className="border rounded px-3 py-2 text-base"
-              value={firstTimeSelection}
-              onChange={e => handleFirstTimeSelect(e.target.value)}
-            >
-              <option value="">Select Category</option>
+          <div className="flex flex-col items-center gap-6 p-0 bg-transparent">
+            <div className="w-full max-w-3xl mx-auto bg-white dark:bg-gray-900 flex flex-col items-center relative">
+              {/* Back Button */}
+              <button
+                className="absolute left-4 top-4 flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium text-base focus:outline-none"
+                onClick={() => setFirstTimeStep(null)}
+                style={{ zIndex: 10 }}
+                aria-label="Back"
+              >
+                <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
+                Back
+              </button>
+              <h2 className="text-2xl font-bold mb-1 text-blue-700 mt-8">Select a Profession</h2>
+              <p className="text-gray-500 text-center mb-4">Choose your main professional area to personalize your dashboard.</p>
+              <label className="block w-full text-left text-gray-600 font-medium mb-2">Profession</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 w-full mb-4">
               {allCategories.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
+                  <button
+                    key={cat}
+                    type="button"
+                    className={`py-4 rounded-xl border-2 font-semibold transition text-base focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 text-gray-800 bg-blue-50 hover:bg-blue-100 border-blue-200 shadow-sm flex items-center justify-center text-center whitespace-normal break-words min-h-[66px] relative ${firstTimeSelection === cat ? 'bg-blue-600 text-white border-blue-600 ring-2 ring-blue-400' : ''}`}
+                    onClick={() => setFirstTimeSelection(cat)}
+                  >
+                    {cat}
+                    {firstTimeSelection === cat && (
+                      <span className="absolute top-2 right-2 text-white bg-blue-500 rounded-full p-1">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+                      </span>
+                    )}
+                  </button>
               ))}
-            </select>
+              </div>
+              <button
+                className={`w-full py-3 rounded-full bg-blue-600 text-white font-semibold text-lg shadow-lg hover:bg-blue-700 transition ${!firstTimeSelection ? 'opacity-60 cursor-not-allowed' : ''}`}
+                disabled={!firstTimeSelection}
+                onClick={() => handleFirstTimeSelect(firstTimeSelection)}
+              >
+                Confirm
+              </button>
+            </div>
           </div>
         )}
         {firstTimeStep === 'interest' && (
-          <div className="flex flex-col items-center gap-6 p-6">
-            <h2 className="text-lg font-semibold mb-2">Select an Interest</h2>
-            {interestsLoading ? (
-              <div className="text-gray-500">Loading interests...</div>
-            ) : (
-              <select
-                className="border rounded px-3 py-2 text-base"
-                value={firstTimeSelection}
-                onChange={e => handleFirstTimeSelect(e.target.value)}
+          <div className="flex flex-col items-center gap-6 p-0 bg-transparent">
+              <div className="w-full max-w-3xl mx-auto bg-white dark:bg-gray-900 flex flex-col items-center relative">
+              {/* Back Button */}
+              <button
+                className="absolute left-4 top-4 flex items-center gap-1 text-purple-600 hover:text-purple-800 font-medium text-base focus:outline-none"
+                onClick={() => setFirstTimeStep(null)}
+                style={{ zIndex: 10 }}
+                aria-label="Back"
               >
-                <option value="">Select Interest</option>
+                <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
+                Back
+              </button>
+              <h2 className="text-2xl font-bold mb-1 text-purple-700 mt-8">Select an Interest</h2>
+              <p className="text-gray-500 text-center mb-4">Pick an interest to tailor your experience.</p>
+              <label className="block w-full text-left text-gray-600 font-medium mb-2">Interest</label>
+            {interestsLoading ? (
+                <div className="flex items-center justify-center w-full h-12">
+                  <svg className="animate-spin h-6 w-6 text-purple-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 w-full mb-4">
                 {interestOptions.filter(i => i.id !== 'all').map(opt => (
-                  <option key={opt.id} value={opt.id}>{opt.name}</option>
+                    <button
+                      key={opt.id}
+                      type="button"
+                      className={`py-4 px-4 rounded-xl border-2 font-semibold transition text-base focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 text-gray-800 bg-purple-50 hover:bg-purple-100 border-purple-200 shadow-sm flex items-center justify-center text-center whitespace-normal break-words min-h-[56px] relative ${firstTimeSelection === opt.id ? 'bg-purple-600 text-white border-purple-600 ring-2 ring-purple-400' : ''}`}
+                      onClick={() => setFirstTimeSelection(opt.id)}
+                    >
+                      {opt.name}
+                      {firstTimeSelection === opt.id && (
+                        <span className="absolute top-2 right-2 text-white bg-purple-500 rounded-full p-1">
+                          <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+                        </span>
+                      )}
+                    </button>
                 ))}
-              </select>
-            )}
+                </div>
+              )}
+              <button
+                className={`w-full py-3 rounded-full bg-purple-600 text-white font-semibold text-lg shadow-lg hover:bg-purple-700 transition ${!firstTimeSelection ? 'opacity-60 cursor-not-allowed' : ''}`}
+                disabled={!firstTimeSelection}
+                onClick={() => handleFirstTimeSelect(firstTimeSelection)}
+              >
+                Confirm
+              </button>
+            </div>
           </div>
         )}
       </Modal>
