@@ -71,23 +71,6 @@ const debouncedFetchFavicon = debounce(async (url, callback) => {
   }
 }, 500); // Wait 500ms after typing stops
 
-// Interest options (matching the ones from AddLinks.jsx)
-const interestOptions = [
-  { id: "productivity_seeker", name: "Productivity Seeker", icon: "💻" },
-  { id: "lifelong_learner", name: "Lifelong Learner", icon: "🏀" },
-  { id: "self_improvement_indfulness", name: "Self-Improvement / Mindfulness", icon: "🎨" },
-  { id: "traveller_explorer", name: "Traveller / Explorer", icon: "🎵" },
-  { id: "content_creator_youTuber", name: "Content Creator / YouTuber", icon: "🔬" },
-  { id: "gamer", name: "Gamer", icon: "✈️" },
-  { id: "music_lover_podcaster", name: "Music Lover / Podcaster", icon: "📚" },
-  { id: "cooking_& _foodie", name: "Cooking & Foodie", icon: "🎮" },
-  { id: "photographer", name: "Photographer", icon: "🍔" },
-  { id: "artist_creative", name: "Artist / Creative", icon: "🌳" },
-  { id: "reader_bookworm", name: "Reader / Bookworm", icon: "💼" },
-  { id: "investor_trader", name: "Investor / Trader", icon: "🎓" },
-  { id: "smart_shopper", name: "Smart Shopper / Deal Hunter", icon: "🏥" }
-];
-
 // Helper function to validate URL
 const validateUrl = (url) => {
   try {
@@ -189,11 +172,6 @@ function PopularBookmarks() {
 
   // User profile data for filtering
   const [userProfession, setUserProfession] = useState("");
-  const [userInterests, setUserInterests] = useState([]);
-  const [controllerInterests, setControllerInterests] = useState([]);
-  const [mainInterests, setMainInterests] = useState([]);
-
-
 
   const [categoryViewModes, setCategoryViewModes] = useState(() => {
     const savedViewModes = localStorage.getItem("categoryViewModes");
@@ -261,10 +239,6 @@ function PopularBookmarks() {
 
   // Add state for multi-select user categories in Category Manager
   const [selectedUserCategories, setSelectedUserCategories] = useState([]);
-
-  // Add state for interest selection modal
-  const [isInterestModalOpen, setIsInterestModalOpen] = useState(false);
-  const [tempInterests, setTempInterests] = useState([]);
 
   // Add state for liked bookmarks
   const [likedBookmarks, setLikedBookmarks] = useState([]);
@@ -571,8 +545,8 @@ function PopularBookmarks() {
         ? "#1f1f1f"
         : "#e6f7ff"
       : isDarkMode
-      ? "#141414"
-      : "#fff",
+        ? "#141414"
+        : "#fff",
     border: `${isDarkMode ? "#303030" : "#f0f0f0"}`,
     borderRadius: "4px",
     display: "flex",
@@ -590,7 +564,6 @@ function PopularBookmarks() {
           const userDoc = await getDoc(doc(db, "users", currentUser.uid));
           const userData = userDoc.data();
           setUserProfession(userData?.profession || "");
-          setUserInterests(userData?.interests || []);
         } catch (error) {
           console.error("Error fetching user profile:", error);
         }
@@ -608,11 +581,11 @@ function PopularBookmarks() {
     // Always show user-created categories
     let filteredCategories = [...userCategories];
 
-    // For admin categories, filter based on country, profession and interests
+    // For admin categories, filter based on country and profession
     const adminFilteredCategories = adminCategories.filter(category => {
       // Check country match first
       const matchesCountry = category.countries && (
-        category.countries.includes(selectedCountry?.key) || 
+        category.countries.includes(selectedCountry?.key) ||
         category.countries.includes("global") ||
         (selectedCountry?.key === 'IN' && category.countries.includes('india'))
       );
@@ -621,38 +594,24 @@ function PopularBookmarks() {
       if (!matchesCountry) return false;
 
       // Check profession match
+      if (userProfession === "all") return true;
+
       const matchesProfession = category.professions && (
-        category.professions.includes(userProfession) || 
+        category.professions.includes(userProfession) ||
         category.professions.includes("all")
       );
 
-      // Check interests match
-        const matchesInterest = category.interests && 
-          category.interests.length > 0 && 
-          mainInterests.length > 0 && 
-          category.interests.some(i => mainInterests.includes(i));
+      // If user has no profession, don't show admin categories
+      if (!userProfession) return false;
 
-      // If user has no preferences, don't show admin categories
-      if (!userProfession && mainInterests.length === 0) return false;
-
-      // If user has only profession set
-      if (userProfession && mainInterests.length === 0) {
-        return matchesProfession;
-      }
-
-      // If user has only interests set
-      if (!userProfession && mainInterests.length > 0) {
-        return matchesInterest;
-      }
-
-      // If user has both profession and interests set
-      return matchesProfession || matchesInterest;
+      // Return based on profession match
+      return matchesProfession;
     });
 
     // Add filtered admin categories to the result
     filteredCategories = [...filteredCategories, ...adminFilteredCategories];
 
-    // Sort categories by country (India first), then profession match, then interest match
+    // Sort categories by country (India first), then profession match
     filteredCategories.sort((a, b) => {
       if (a.isAdminCategory && b.isAdminCategory) {
         // If selected country is India, prioritize India categories
@@ -666,16 +625,9 @@ function PopularBookmarks() {
         // Then sort by profession match
         const aMatchesProfession = a.professions?.includes(userProfession) || false;
         const bMatchesProfession = b.professions?.includes(userProfession) || false;
-        
+
         if (aMatchesProfession && !bMatchesProfession) return -1;
         if (!aMatchesProfession && bMatchesProfession) return 1;
-
-        // Then sort by interest match
-        const aMatchesInterest = a.interests?.some(i => mainInterests.includes(i)) || false;
-        const bMatchesInterest = b.interests?.some(i => mainInterests.includes(i)) || false;
-        
-        if (aMatchesInterest && !bMatchesInterest) return -1;
-        if (!aMatchesInterest && bMatchesInterest) return 1;
       }
       return 0;
     });
@@ -702,7 +654,7 @@ function PopularBookmarks() {
         const userDocRef = doc(db, "users", user.uid);
         const userDocSnap = await getDoc(userDocRef);
         const userData = userDocSnap.exists() ? userDocSnap.data() : {};
-        
+
         // Fetch admin categories
         const adminCategorySnapshot = await getDocs(collection(db, "category"));
         const adminCategories = adminCategorySnapshot.docs.map((doc) => ({
@@ -710,7 +662,7 @@ function PopularBookmarks() {
           ...doc.data(),
           isAdminCategory: true,
         }));
-        
+
         // Fetch user categories
         const userCategorySnapshot = await getDocs(collection(db, "users", user.uid, "UserCategory"));
         const userCategories = userCategorySnapshot.docs.map((doc) => ({
@@ -719,27 +671,27 @@ function PopularBookmarks() {
           name: doc.data().newCategory,
           isAdminCategory: false,
         }));
-        
+
         // Combine and sort categories
         const allCategories = [...adminCategories, ...userCategories].sort((a, b) => (a.order || 0) - (b.order || 0));
-        
+
         // Get categories that match user preferences
         const matchingCategories = getFilteredCategories(allCategories, false);
-        
+
         // Get current column structure
         let currentColumns = userData.categoryPositions?.columns || { column1: [], column2: [], column3: [], column4: [] };
         let colCount = userData.categoryPositions?.columnCount || 4;
-        
+
         // Auto-add matching categories to columns if they're not already there
         const updatedColumns = { ...currentColumns };
         const existingCategoryIds = new Set(Object.values(currentColumns).flat());
-        
+
         matchingCategories.forEach((category) => {
           if (!existingCategoryIds.has(category.id)) {
             // Find the column with the least number of categories
             let minColumn = "column1";
             let minCount = updatedColumns.column1?.length || 0;
-            
+
             Object.keys(updatedColumns).forEach((colKey) => {
               const colCount = updatedColumns[colKey]?.length || 0;
               if (colCount < minCount) {
@@ -747,13 +699,13 @@ function PopularBookmarks() {
                 minColumn = colKey;
               }
             });
-            
+
             // Add category to the column with least items
             updatedColumns[minColumn] = [...(updatedColumns[minColumn] || []), category.id];
             existingCategoryIds.add(category.id);
           }
         });
-        
+
         // Save updated column structure to Firestore if there were changes
         const hasChanges = JSON.stringify(currentColumns) !== JSON.stringify(updatedColumns);
         if (hasChanges) {
@@ -764,18 +716,18 @@ function PopularBookmarks() {
               lastUpdated: new Date().toISOString(),
             },
           });
-          
+
           // Show notification about auto-added categories
-          const addedCategories = matchingCategories.filter(cat => 
+          const addedCategories = matchingCategories.filter(cat =>
             !Object.values(currentColumns).flat().includes(cat.id)
           );
-          
-         
+
+
         }
-        
+
         // Use the updated columns for display
         const finalColumns = hasChanges ? updatedColumns : currentColumns;
-        
+
         // Fetch all user bookmarks
         const userBookmarksSnapshot = await getDocs(collection(db, "users", user.uid, "CatBookmarks"));
         const hiddenIds = userData.hiddenBookmarkIds || [];
@@ -788,10 +740,10 @@ function PopularBookmarks() {
             isAdminBookmark: false,
           };
         }).filter((bookmark) => !hiddenIds.includes(bookmark.id));
-        
+
         // Store user bookmark URLs for deduplication
         const userBookmarkUrls = new Set(userBookmarks.map((b) => `${b.categoryId}-${b.url}`));
-        
+
         // Fetch admin bookmarks for each admin category
         // const adminBookmarksPromises = adminCategories.map(async (category) => {
         //   const bookmarksSnapshot = await getDocs(query(collection(db, "links"), where("category", "==", category.id)));
@@ -815,7 +767,7 @@ function PopularBookmarks() {
         // });
         // const adminBookmarks = (await Promise.all(adminBookmarksPromises)).flat();
         // console.log('Admin bookmarks loaded:', adminBookmarks.length);
-        
+
         // Also fetch admin bookmarks for categories that might not be in adminCategories but are in matchingCategories
         const additionalAdminBookmarksPromises = matchingCategories
           .filter(cat => cat.isAdminCategory && !adminCategories.find(ac => ac.id === cat.id))
@@ -840,22 +792,22 @@ function PopularBookmarks() {
             }).filter(Boolean).filter((bookmark) => !hiddenIds.includes(bookmark.id));
           });
         const additionalAdminBookmarks = (await Promise.all(additionalAdminBookmarksPromises)).flat();
-        
+
         // Combine all admin bookmarks
         const allAdminBookmarks = [...adminCategories, ...additionalAdminBookmarks];
-        
+
         // Combine all bookmarks
         const allBookmarks = [...userBookmarks, ...allAdminBookmarks];
-        
+
         // Open categories
         const savedOpenStates = localStorage.getItem("categoryOpenStates");
         const initialOpenStates = savedOpenStates
           ? JSON.parse(savedOpenStates)
           : allCategories.reduce((acc, category) => {
-          acc[category.id] = true;
-          return acc;
-        }, {});
-        
+            acc[category.id] = true;
+            return acc;
+          }, {});
+
         // Set state if still mounted
         if (isMounted) {
           setCategories(matchingCategories);
@@ -863,15 +815,15 @@ function PopularBookmarks() {
           setColumnCount(colCount);
           setHiddenBookmarkIds(hiddenIds);
           setOpenCategories(initialOpenStates);
-          
+
           // Load liked bookmarks
           if (userData.likedBookmarks && Array.isArray(userData.likedBookmarks)) {
             setLikedBookmarks(userData.likedBookmarks);
           }
-          
+
           // Load bookmark like counts
           await loadBookmarkLikeCounts(allBookmarks);
-          
+
           // Debug logging
           console.log('Categories loaded:', matchingCategories.length);
           console.log('User bookmarks loaded:', userBookmarks.length);
@@ -893,7 +845,7 @@ function PopularBookmarks() {
     };
     fetchAllData();
     return () => { isMounted = false; };
-  }, [user, selectedCountry, userProfession, userInterests, mainInterests]);
+  }, [user, selectedCountry, userProfession]);
 
   // Effect to refilter categories when user preferences change
   useEffect(() => {
@@ -923,7 +875,7 @@ function PopularBookmarks() {
       };
       refilterCategories();
     }
-  }, [selectedCountry, userProfession, userInterests, mainInterests]);
+  }, [selectedCountry, userProfession]);
 
   // Add useEffect to load saved positions
   useEffect(() => {
@@ -1052,7 +1004,7 @@ function PopularBookmarks() {
             isAdminCategory: false,
           }));
           const allCategories = [...adminCategories, ...userCategories].sort((a, b) => (a.order || 0) - (b.order || 0));
-          
+
           // Filter categories based on selected country
           const countryFilteredCategories = allCategories.filter((category) => {
             // If user has selected a specific country, only show categories for that country
@@ -1067,17 +1019,9 @@ function PopularBookmarks() {
             // If user hasn't selected a country or selected global, show all categories
             return true;
           });
-          
-          // --- INTEREST FILTERING LOGIC ---
-          // Use controllerInterests if set, else userInterests
-          const interestsToUse = controllerInterests && controllerInterests.length > 0 ? controllerInterests : userInterests;
-          const interestFilteredCategories = countryFilteredCategories.filter((category) => {
-            if (!interestsToUse || interestsToUse.length === 0) return true;
-            if (!category.interests || category.interests.length === 0) return false;
-            return category.interests.some(i => interestsToUse.includes(i));
-          });
+
           // Get categories that don't match user preferences
-          const nonMatchingCategories = getFilteredCategories(interestFilteredCategories, true);
+          const nonMatchingCategories = getFilteredCategories(countryFilteredCategories, true);
           const usedCategoryIds = new Set(previewCategories.map((category) => category.id));
           const available = nonMatchingCategories.filter((category) => !usedCategoryIds.has(category.id));
           setAvailableCategories((prevAvailable) => {
@@ -1092,10 +1036,10 @@ function PopularBookmarks() {
           console.error("Error fetching categories for controller:", error);
         }
       };
-      
+
       fetchAllCategoriesForController();
     }
-  }, [isControllerOpen, selectedCountry, userProfession, userInterests, controllerInterests, mainInterests]); // Removed previewCategories from dependencies
+  }, [isControllerOpen, selectedCountry, userProfession]); // Removed previewCategories from dependencies
 
   // Effect to initialize preview categories when modal opens
   useEffect(() => {
@@ -1818,12 +1762,12 @@ function PopularBookmarks() {
     }
 
     const sizes = categoryBookmarkSizes[categoryId] || { list: 32 };
-    
+
     // Filter bookmarks if showOnlyLiked is enabled
-    const filteredLinks = showOnlyLiked 
+    const filteredLinks = showOnlyLiked
       ? categoryLinks.filter(link => likedBookmarks?.includes(link.id))
       : categoryLinks;
-    
+
     return (
       <ul className="bg-white/[(var(--widget-opacity))] dark:bg-[#28283a]/[(var(--widget-opacity))]">
         {filteredLinks.map((link) => {
@@ -1835,104 +1779,102 @@ function PopularBookmarks() {
           const isFavorite = likedBookmarks?.includes(link.id) || false;
 
           return (
-          <li
-            key={link.id}
-            className="flex items-center py-2 px-4 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg group"
-          >
-            <img
-              src={getFaviconUrl(link.url || link.link)}
-              alt=""
-              style={{
-                width: `${sizes.list}px`,
-                height: `${sizes.list}px`,
-                padding: "2px",
-              }}
-              className="flex-shrink-0"
-            />
-            <div className="ml-3 flex flex-col flex-1">
-              <a
-                href={link.url || link.link}
-                className="text-black dark:text-white hover:text-blue-500"
-                style={{ fontWeight: 500 }}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {link.title || link.name}
-              </a>
-              <a
-                href={link.url || link.link}
-                className={`text-xs text-gray-500 dark:text-gray-400 hover:text-blue-400 break-all ${link.isAdminBookmark ? 'truncate whitespace-nowrap overflow-hidden max-w-[180px] block' : ''}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ marginTop: 2 }}
-              >
-                {link.url || link.link}
-              </a>
-            </div>
-            
-            {/* Like buttons for admin bookmarks */}
-            {link.isAdminBookmark && (
-              <div className="flex items-center gap-1 ml-2">
-                {/* Heart button (favorites) */}
-                <div className="flex flex-col items-center">
-                  <button
-                    onClick={() => handleToggleLike(link)}
-                    className={`p-1 rounded-full transition-all duration-200 hover:scale-110 ${
-                        isFavorite
-                        ? "text-red-500 hover:text-red-600"
-                        : "text-gray-400 hover:text-red-500"
-                    }`}
-                      title={isFavorite ? "Remove from favorites" : "Add to favorites"}
-                  >
-                    <svg
-                      width="16"
-                      height="16"
-                        fill={isFavorite ? "currentColor" : "none"}
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      viewBox="0 0 24 24"
-                      className="transition-all duration-200"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                      />
-                    </svg>
-                  </button>
-                  <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {isFavorite ? "1" : "0"}
-                  </span>
-                </div>
-
-                {/* Facebook-style like button */}
-                <div className="flex flex-col items-center">
-                  <button
-                    onClick={() => handleFacebookLike(link)}
-                    className={`p-1 rounded-full transition-all duration-200 hover:scale-110 ${
-                        isLiked
-                        ? "text-blue-500 hover:text-blue-600"
-                        : "text-gray-400 hover:text-blue-500"
-                    }`}
-                      title={isLiked ? "Unlike this bookmark" : "Like this bookmark"}
-                  >
-                    <svg
-                      width="16"
-                      height="16"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                      className="transition-all duration-200"
-                    >
-                      <path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/>
-                    </svg>
-                  </button>
-                  <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {likeCount}
-                  </span>
-                </div>
+            <li
+              key={link.id}
+              className="flex items-center py-2 px-4 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg group"
+            >
+              <img
+                src={getFaviconUrl(link.url || link.link)}
+                alt=""
+                style={{
+                  width: `${sizes.list}px`,
+                  height: `${sizes.list}px`,
+                  padding: "2px",
+                }}
+                className="flex-shrink-0"
+              />
+              <div className="ml-3 flex flex-col flex-1">
+                <a
+                  href={link.url || link.link}
+                  className="text-black dark:text-white hover:text-blue-500"
+                  style={{ fontWeight: 500 }}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {link.title || link.name}
+                </a>
+                <a
+                  href={link.url || link.link}
+                  className={`text-xs text-gray-500 dark:text-gray-400 hover:text-blue-400 break-all ${link.isAdminBookmark ? 'truncate whitespace-nowrap overflow-hidden max-w-[180px] block' : ''}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ marginTop: 2 }}
+                >
+                  {link.url || link.link}
+                </a>
               </div>
-            )}
-          </li>
+
+              {/* Like buttons for admin bookmarks */}
+              {link.isAdminBookmark && (
+                <div className="flex items-center gap-1 ml-2">
+                  {/* Heart button (favorites) */}
+                  <div className="flex flex-col items-center">
+                    <button
+                      onClick={() => handleToggleLike(link)}
+                      className={`p-1 rounded-full transition-all duration-200 hover:scale-110 ${isFavorite
+                          ? "text-red-500 hover:text-red-600"
+                          : "text-gray-400 hover:text-red-500"
+                        }`}
+                      title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        fill={isFavorite ? "currentColor" : "none"}
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        viewBox="0 0 24 24"
+                        className="transition-all duration-200"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                        />
+                      </svg>
+                    </button>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      {isFavorite ? "1" : "0"}
+                    </span>
+                  </div>
+
+                  {/* Facebook-style like button */}
+                  <div className="flex flex-col items-center">
+                    <button
+                      onClick={() => handleFacebookLike(link)}
+                      className={`p-1 rounded-full transition-all duration-200 hover:scale-110 ${isLiked
+                          ? "text-blue-500 hover:text-blue-600"
+                          : "text-gray-400 hover:text-blue-500"
+                        }`}
+                      title={isLiked ? "Unlike this bookmark" : "Like this bookmark"}
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                        className="transition-all duration-200"
+                      >
+                        <path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z" />
+                      </svg>
+                    </button>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      {likeCount}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </li>
           );
         })}
       </ul>
@@ -1967,13 +1909,12 @@ function PopularBookmarks() {
                 className="w-full text-center text-black dark:text-white hover:text-blue-500"
               >
                 <span
-                  className={`text-sm break-words block ${
-                    lineOptions === 2
+                  className={`text-sm break-words block ${lineOptions === 2
                       ? "whitespace-normal"
                       : lineOptions === "none"
-                      ? "whitespace-normal"
-                      : "line-clamp-1 truncate"
-                  }`}
+                        ? "whitespace-normal"
+                        : "line-clamp-1 truncate"
+                    }`}
                   title={lineOptions !== 2 ? link.title || link.name : undefined}
                 >
                   {link.title || link.name}
@@ -2048,7 +1989,7 @@ function PopularBookmarks() {
     // Helper: for each category, get bookmarks in that category
     const getCategoryLinks = (catId) => {
       const categoryLinks = categoryBookmarks[catId]?.bookmarks || [];
-      
+
       // If no bookmarks found and this is an admin category, try to load them
       if (categoryLinks.length === 0) {
         const category = categories.find(c => c.id === catId);
@@ -2057,7 +1998,7 @@ function PopularBookmarks() {
           fetchBookmarksForCategory(catId);
         }
       }
-      
+
       return categoryLinks;
     };
 
@@ -2158,50 +2099,10 @@ function PopularBookmarks() {
                 </button>
               </div>
             )}
-            {/* User Preferences Indicator (Profession & Interests) */}
-            <div className="flex items-center gap-2">
-              {/* Profession badge */}
-              <button
-                className="flex items-center gap-1 px-2 py-1 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 text-xs font-medium border border-blue-200 dark:border-blue-700 hover:bg-blue-200 dark:hover:bg-blue-800 transition cursor-pointer"
-                style={{ minWidth: 0 }}
-                onClick={() => setIsProfessionModalOpen(true)}
-                title="Change Profession"
-              >
-                <span>{getProfessionIcon(userProfession)}</span>
-                <span className="truncate max-w-[90px]">{getProfessionDisplayName(userProfession)}</span>
-                <span className="ml-1 text-blue-400">
-                  <svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeWidth="2" d="M12 4v16m8-8H4"/></svg>
-                </span>
-              </button>
-              {/* Interests badges */}
-              {userInterests.length === 0 ? (
-                <button
-                  className="px-2 py-1 rounded bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 text-xs font-medium border border-purple-200 dark:border-purple-700 hover:bg-purple-200 dark:hover:bg-purple-800 transition cursor-pointer"
-                  onClick={() => setIsInterestModalOpen(true)}
-                  title="Add Interests"
-                >
-                  + Add Interests
-                </button>
-              ) : (
-                userInterests.map((interestId) => {
-                  const interest = interestOptions.find((i) => i.id === interestId);
-                  return (
-                    <button
-                      key={interestId}
-                      className="flex items-center gap-1 px-2 py-1 rounded bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 text-xs font-medium border border-purple-200 dark:border-purple-700 hover:bg-purple-200 dark:hover:bg-purple-800 transition cursor-pointer"
-                      onClick={() => setIsInterestModalOpen(true)}
-                      title="Change Interests"
-                    >
-                      <span>{interest?.icon}</span>
-                      <span className="truncate max-w-[70px]">{interest?.name || interestId}</span>
-                    </button>
-                  );
-                })
-              )}
-              </div>
+
           </div>
           <div className="flex items-center gap-2">
-              {/* Search Button */}
+            {/* Search Button */}
             <div className="relative flex items-center" ref={searchBarRef}>
               <button
                 onClick={() => setIsSearchBarOpen(!isSearchBarOpen)}
@@ -2209,38 +2110,37 @@ function PopularBookmarks() {
                 title="Search categories"
               >
                 {isSearchBarOpen ? (
-                  <svg 
-                    width="16" 
-                    height="16" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="2" 
+                  <svg
+                    width="16"
+                    height="16"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
                     viewBox="0 0 24 24"
                   >
-                    <line x1="18" y1="6" x2="6" y2="18" strokeWidth="2"/>
-                    <line x1="6" y1="6" x2="18" y2="18" strokeWidth="2"/>
+                    <line x1="18" y1="6" x2="6" y2="18" strokeWidth="2" />
+                    <line x1="6" y1="6" x2="18" y2="18" strokeWidth="2" />
                   </svg>
                 ) : (
-                  <svg 
-                    width="16" 
-                    height="16" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="2" 
+                  <svg
+                    width="16"
+                    height="16"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
                     viewBox="0 0 24 24"
                   >
-                    <circle cx="11" cy="11" r="8" strokeWidth="2"/>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65" strokeWidth="2"/>
+                    <circle cx="11" cy="11" r="8" strokeWidth="2" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" strokeWidth="2" />
                   </svg>
                 )}
               </button>
               {/* Sliding Search Input */}
-              <div 
-                className={`absolute right-0 top-0 transition-all duration-300 ease-in-out ${
-                  isSearchBarOpen 
-                    ? 'w-64 opacity-100 translate-x-0' 
+              <div
+                className={`absolute right-0 top-0 transition-all duration-300 ease-in-out ${isSearchBarOpen
+                    ? 'w-64 opacity-100 translate-x-0'
                     : 'w-0 opacity-0 translate-x-4'
-                } overflow-hidden`}
+                  } overflow-hidden`}
               >
                 <input
                   type="text"
@@ -2264,13 +2164,13 @@ function PopularBookmarks() {
                 items: [
                   {
                     key: "addCategory",
-                    icon: <PlusOutlined />, 
+                    icon: <PlusOutlined />,
                     label: "Add Category",
                     onClick: () => setIsAddCategoryModalVisible(true),
                   },
                   {
                     key: "addBookmark",
-                    icon: <PlusOutlined />, 
+                    icon: <PlusOutlined />,
                     label: "Add Bookmark",
                     onClick: handleGlobalAddBookmark,
                   },
@@ -2279,7 +2179,7 @@ function PopularBookmarks() {
               trigger={["click"]}
             >
               <button className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] px-3 py-2 dark:text-white mb-2">
-                <PlusOutlined /> 
+                <PlusOutlined />
               </button>
             </Dropdown>
 
@@ -2388,7 +2288,7 @@ function PopularBookmarks() {
               trigger={["click"]}
             >
               <button className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] px-3 py-2 dark:text-white mb-2">
-                <SettingOutlined /> 
+                <SettingOutlined />
               </button>
             </Dropdown>
             <input
@@ -2418,11 +2318,10 @@ function PopularBookmarks() {
                       <div
                         ref={provided.innerRef}
                         {...provided.droppableProps}
-                        className={` transition-colors duration-200 ${
-                          snapshot.isDraggingOver
+                        className={` transition-colors duration-200 ${snapshot.isDraggingOver
                             ? "bg-transparent border-2 border-dashed border-blue-500"
                             : "bg-transparent border-2 border-dashed border-transparent"
-                        }`}
+                          }`}
                       >
                         {columnsToRender[`column${colNum}`]?.map(
                           (categoryId, index) => {
@@ -2450,15 +2349,14 @@ function PopularBookmarks() {
                                   <div
                                     ref={provided.innerRef}
                                     {...provided.draggableProps}
-                                    className={`mb-4 transition-all duration-200 ${
-                                      snapshot.isDragging
+                                    className={`mb-4 transition-all duration-200 ${snapshot.isDragging
                                         ? "shadow-xl rotate-2 scale-105 z-50"
                                         : "shadow-none rotate-0 scale-100"
-                                    }`}
+                                      }`}
                                     style={{
                                       ...provided.draggableProps.style,
-                                      transform: snapshot.isDragging 
-                                        ? `${provided.draggableProps.style?.transform} rotate(2deg) scale(1.05)` 
+                                      transform: snapshot.isDragging
+                                        ? `${provided.draggableProps.style?.transform} rotate(2deg) scale(1.05)`
                                         : provided.draggableProps.style?.transform
                                     }}
                                   >
@@ -2478,11 +2376,10 @@ function PopularBookmarks() {
                                             <div className="flex items-center flex-1">
                                               <div
                                                 {...provided.dragHandleProps}
-                                                className={`cursor-grab active:cursor-grabbing p-2 transition-all duration-200 group hover:bg-gray-200/50 dark:hover:bg-gray-600/50 rounded ${
-                                                  snapshot.isDragging
+                                                className={`cursor-grab active:cursor-grabbing p-2 transition-all duration-200 group hover:bg-gray-200/50 dark:hover:bg-gray-600/50 rounded ${snapshot.isDragging
                                                     ? "bg-gray-300/[(var(--widget-opacity))] rounded shadow-lg cursor-grabbing"
                                                     : ""
-                                                }`}
+                                                  }`}
                                                 onClick={(e) =>
                                                   e.stopPropagation()
                                                 }
@@ -2504,7 +2401,7 @@ function PopularBookmarks() {
                                                 </div>
                                               </div>
                                               <div className="flex items-center gap-2">
-                                              <span className="font-semibold">
+                                                <span className="font-semibold">
                                                   {category.name || category.newCategory}
                                                 </span>
                                                 {category.isAdminCategory && (
@@ -2513,8 +2410,8 @@ function PopularBookmarks() {
                                                     {category.countries?.includes('india') && selectedCountry?.key === 'IN' && (
                                                       <span className="px-2 py-0.5 text-xs bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 rounded">
                                                         🇮🇳 India
-                                                  </span>
-                                                )}
+                                                      </span>
+                                                    )}
                                                     {/* Profession indicator */}
                                                     {/* {category.professions?.includes(userProfession) && (
                                                       <span className="px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded">
@@ -2667,31 +2564,24 @@ function PopularBookmarks() {
             </AntButton>
           </div>
         )}
-        
+
         {/* No Categories Message */}
-        {filteredCategoryIds.length === 0 && (userProfession || userInterests.length > 0) && (
+        {filteredCategoryIds.length === 0 && userProfession && (
           <div className="text-center py-8">
             <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6 max-w-md mx-auto">
               <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
                 No matching categories found
               </h3>
               <p className="text-yellow-700 dark:text-yellow-300 mb-4">
-                {!userProfession && mainInterests.length === 0 ? (
-                  "Please set your profession and interests to see relevant categories."
+                {!userProfession ? (
+                  "Please set your profession to see relevant categories."
                 ) : (
-                  `No categories match your ${userProfession ? `profession (${userProfession})` : ''} 
-                   ${userProfession && mainInterests.length > 0 ? ' or ' : ''}
-                   ${mainInterests.length > 0 ? 'interests' : ''}.`
+                  `No categories match your profession (${userProfession}).`
                 )}
               </p>
-              <div className="flex gap-2 justify-center">
-                <AntButton 
-                  type="primary" 
-                  onClick={() => setIsInterestModalOpen(true)}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  Update Preferences
-                </AntButton>
+              <div className="flex flex-col gap-4 items-center">
+                <p className="text-sm text-gray-600 dark:text-gray-400">Select your profession from the options above</p>
+                {renderProfessionBar()}
               </div>
             </div>
           </div>
@@ -2879,10 +2769,10 @@ function PopularBookmarks() {
 
         // Update order of categories in the source column
         filteredCategories.forEach((cat) => {
-            if (cat.column === sourceColumnIndex && cat.order > source.index) {
-              cat.order -= 1;
-            }
-          });
+          if (cat.column === sourceColumnIndex && cat.order > source.index) {
+            cat.order -= 1;
+          }
+        });
 
         // Update order of categories in the destination column
         filteredCategories.forEach((cat) => {
@@ -2959,7 +2849,7 @@ function PopularBookmarks() {
         ...doc.data(),
         isAdminCategory: true,
       }));
-      
+
       const userCategorySnapshot = await getDocs(collection(db, "users", user.uid, "UserCategory"));
       const userCategories = userCategorySnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -2967,12 +2857,12 @@ function PopularBookmarks() {
         name: doc.data().newCategory,
         isAdminCategory: false,
       }));
-      
+
       const allCategories = [...adminCategories, ...userCategories].sort((a, b) => (a.order || 0) - (b.order || 0));
-      
+
       // Get categories that match user preferences for main view
       const matchingCategories = getFilteredCategories(allCategories, false);
-      
+
       // Update the categories state to show in main view
       setCategories(matchingCategories);
 
@@ -3046,7 +2936,7 @@ function PopularBookmarks() {
         ...doc.data(),
         isAdminCategory: true,
       }));
-      
+
       const userCategorySnapshot = await getDocs(collection(db, "users", user.uid, "UserCategory"));
       const userCategories = userCategorySnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -3054,10 +2944,10 @@ function PopularBookmarks() {
         name: doc.data().newCategory,
         isAdminCategory: false,
       }));
-      
+
       const allCategories = [...adminCategories, ...userCategories].sort((a, b) => (a.order || 0) - (b.order || 0));
       const filteredCategories = getFilteredCategories(allCategories, false);
-      
+
       setCategories(filteredCategories);
     } catch (error) {
       console.error("Error refreshing categories:", error);
@@ -3355,54 +3245,7 @@ function PopularBookmarks() {
     });
   };
 
-  // When controller modal opens, initialize controllerInterests from userInterests
-  useEffect(() => {
-    if (isControllerOpen) {
-      setControllerInterests(userInterests || []);
-    }
-  }, [isControllerOpen, userInterests]);
 
-  // When component mounts or userInterests change, initialize mainInterests
-  useEffect(() => {
-    setMainInterests(userInterests || []);
-  }, [userInterests]);
-
-  // Function to open interest selection modal
-  const handleOpenInterestModal = () => {
-    setTempInterests([...mainInterests]);
-    setIsInterestModalOpen(true);
-  };
-
-  // Function to save interests
-  const handleSaveInterests = async () => {
-    try {
-      if (!user) return;
-      
-      // Update user document in Firestore
-      const userDocRef = doc(db, "users", user.uid);
-      await updateDoc(userDocRef, {
-        interests: tempInterests,
-        updatedAt: new Date().toISOString(),
-      });
-
-      // Update local state
-      setUserInterests(tempInterests);
-      setMainInterests(tempInterests);
-      setControllerInterests(tempInterests);
-
-      
-
-      setIsInterestModalOpen(false);
-    } catch (error) {
-      console.error("Error updating interests:", error);
-      notification.error({
-        message: "Update Failed",
-        description: "Failed to update interests. Please try again.",
-        placement: "topRight",
-        duration: 3
-      });
-    }
-  };
 
   // --- 1. Add a helper to batch fetch like counts ---
   const batchFetchBookmarkLikes = async (bookmarkIds, db) => {
@@ -3429,7 +3272,7 @@ function PopularBookmarks() {
       // Initialize with empty objects first
       setBookmarkLikes({});
       setUserLikedBookmarks({});
-      
+
       const adminBookmarks = bookmarks.filter(bookmark => bookmark.isAdminBookmark);
       if (!adminBookmarks.length) return;
 
@@ -3660,22 +3503,51 @@ function PopularBookmarks() {
 
   // When a category is toggled open/closed, update listeners
 
-  // Profession options for badge and modal
+  // Profession options
   const professionOptions = [
-    { id: "developer", name: "Developer / Programmer", icon: "💻" },
-    { id: "designer", name: "Designer (UI/UX, Graphic, Web)", icon: "🎨" },
-    { id: "digital_marketer", name: "Digital Marketer", icon: "📱" },
+    { id: "developer", name: "Developer", icon: "💻" },
+    { id: "designer", name: "Designer", icon: "🎨" },
+    { id: "digital_marketer", name: "Marketer", icon: "📱" },
     { id: "student", name: "Student", icon: "🎓" },
-    { id: "teacher", name: "Teacher / Educator", icon: "👩‍🏫" },
-    { id: "entrepreneur", name: "Entrepreneur / Founder", icon: "��" },
-    { id: "freelancer", name: "Freelancer (Creative or Technical)", icon: "🆓" },
-    { id: "consultant", name: "Consultant / Advisor", icon: "💡" },
-    { id: "working_professional", name: "Working Professional", icon: "💼" },
-    { id: "researcher", name: "Researcher / Academic", icon: "🔬" },
-    { id: "it_support", name: "IT / Tech Support", icon: "🛠️" },
-    { id: "medical", name: "Medical Professional", icon: "⚕️" },
-    { id: "retired", name: "Retired", icon: "🌅" },
+    { id: "teacher", name: "Teacher", icon: "👩‍🏫" },
+    { id: "entrepreneur", name: "Founder", icon: "💼" },
+    { id: "freelancer", name: "Freelancer", icon: "🆓" },
+    { id: "consultant", name: "Consultant", icon: "💡" },
+    { id: "working_professional", name: "Professional", icon: "👔" },
+    { id: "researcher", name: "Researcher", icon: "🔬" },
+    { id: "it_support", name: "IT Support", icon: "🛠️" },
+    { id: "medical", name: "Medical", icon: "⚕️" },
     { id: "other", name: "Other", icon: "✨" },
+    { id: "bpo", name: "BPO" },
+    { id: "productivity_management", name: "Productivity & Task Management" },
+    { id: "ai_automation", name: "AI Tools & Automation" },
+    { id: "education_learning", name: "Education & Learning" },
+    { id: "professional_entrepreneurship", name: "Professional & Entrepreneurship" },
+    { id: "tax_investments", name: "Tax & Investments" },
+    { id: "marketing_growth", name: "Marketing & Growth" },
+    { id: "creativity_design", name: "Creativity & Design" },
+    { id: "programmer_developer", name: "Programmer & Developer" },
+    { id: "news", name: "News" },
+    { id: "shopping_deals", name: "Shopping & Deal Sites" },
+    { id: "health_wellness", name: "Health & Wellness" },
+    { id: "travel", name: "Travel" },
+    { id: "entertainment_leisure", name: "Entertainment & Leisure" },
+    { id: "career_jobs", name: "Career & Job Portals" },
+    { id: "privacy_security", name: "Privacy & Security" },
+    { id: "india_specific", name: "India-Specific Portals" },
+    { id: "brain_interests", name: "Brain-Interests" },
+    { id: "science_nature", name: "Science & Nature" },
+    { id: "automotive_transport", name: "Automotive & Transport" },
+    { id: "gaming_entertainment", name: "Gaming & Entertainment" },
+    { id: "kids_family", name: "Kids & Family" },
+    { id: "international_tools", name: "International Tools" },
+    { id: "events_conferences", name: "Events & Conferences" },
+    { id: "technology_computing", name: "Technology & Computing" },
+    { id: "social_community", name: "Social & Community" },
+    { id: "home_lifestyle", name: "Home & Lifestyle" },
+    { id: "analytics_reporting", name: "Analytics & Reporting" },
+    { id: "startup_indie_tools", name: "Startup Directories & Indie Tools" },
+    { id: "all", name: "All Professions", icon: "🌐" },
   ];
 
   // Helper to get profession display name
@@ -3688,40 +3560,36 @@ function PopularBookmarks() {
     return profession ? profession.icon : "❓";
   };
 
-  // Profession modal state
-  const [isProfessionModalOpen, setIsProfessionModalOpen] = useState(false);
-  const [tempProfession, setTempProfession] = useState(userProfession || "");
 
-  // Save profession handler
-  const handleSaveProfession = async () => {
-    if (!user || !tempProfession) return;
-    try {
-      const userDocRef = doc(db, "users", user.uid);
-      await updateDoc(userDocRef, {
-        profession: tempProfession,
-        professionSelectedAt: new Date().toISOString(),
-      });
-      setUserProfession(tempProfession);
-      setIsProfessionModalOpen(false);
-      notification.success({
-        message: "Profession Updated!",
-        description: "Your profession has been saved successfully.",
-        placement: "topRight",
-        duration: 3,
-      });
-    } catch (error) {
-      notification.error({
-        message: "Update Failed",
-        description: "Failed to update profession. Please try again.",
-        placement: "topRight",
-        duration: 3,
-      });
-    }
-  };
+
+  // Add profession selection bar at the top
+  const renderProfessionBar = () => (
+    <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
+      {professionOptions.map((option) => (
+        <button
+          key={option.id}
+          onClick={() => {
+            setUserProfession(option.id);
+          }}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${userProfession === option.id
+              ? "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700"
+              : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700"
+            }`}
+        >
+          <span>{option.icon}</span>
+          <span className="text-sm font-medium">{option.name}</span>
+          {userProfession === option.id && (
+            <span className="w-2 h-2 rounded-full bg-blue-500 dark:bg-blue-400"></span>
+          )}
+        </button>
+      ))}
+    </div>
+  );
 
   if (loading) {
     return (
       <div className="w-[85vw] mx-auto" style={{ padding: "24px" }}>
+        {renderProfessionBar()}
         <div className="flex justify-between mb-2">
           <button className="rounded-lg flex gap-4 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]  px-3 py-2 dark:text-white mb-2">
             <PlusOutlined />
@@ -3731,28 +3599,6 @@ function PopularBookmarks() {
             <div
               className={`flex items-center bg-white/[(var(--widget-opacity))] backdrop-blur-lg dark:bg-[#28283A]/[(var(--widget-opacity))] p-1 rounded-sm`}
             >
-              {/* <button
-                onClick={() => handleGridViewChange(false)}
-                className={`p-2 rounded ${
-                  !grid
-                    ? "bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] shadow-sm"
-                    : "hover:bg-white dark:hover:bg-gray-700/50"
-                }`}
-              >
-                <svg
-                  className="w-5 h-5 dark:text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h18"
-                  />
-                </svg>
-              </button> */}
             </div>
           </div>
         </div>
@@ -3779,10 +3625,10 @@ function PopularBookmarks() {
 
   return (
     <div
-      className={` w-[85vw] mx-auto popular-bookmarks-container ${
-        isDarkMode ? "dark" : ""
-      }`}
+      className={` w-[85vw] mx-auto popular-bookmarks-container ${isDarkMode ? "dark" : ""
+        }`}
     >
+      {renderProfessionBar()}
       {/* Floating Most Facebook-Liked Bookmarks Suggestion Widget */}
       {showSuggestionWidget && topFacebookLikedAdminBookmarks.length > 0 && (
         <div
@@ -3833,7 +3679,7 @@ function PopularBookmarks() {
                 {/* Crown badge for #1 most liked */}
                 {idx === 0 && (
                   <span style={{ marginRight: 4, display: 'flex', alignItems: 'center' }} title="Most Liked">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="#FFD700" style={{marginRight:2}}><path d="M12 2l2.09 6.26L20 9.27l-5 4.87L16.18 22 12 18.56 7.82 22 9 14.14l-5-4.87 5.91-.91z"/></svg>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="#FFD700" style={{ marginRight: 2 }}><path d="M12 2l2.09 6.26L20 9.27l-5 4.87L16.18 22 12 18.56 7.82 22 9 14.14l-5-4.87 5.91-.91z" /></svg>
                   </span>
                 )}
                 <img
@@ -3843,7 +3689,7 @@ function PopularBookmarks() {
                 />
                 <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{bookmark.title || bookmark.name}</span>
                 <span style={{ fontSize: 15, color: isDarkMode ? '#4fc3f7' : '#1976d2', fontWeight: 600, marginLeft: 6, display: 'flex', alignItems: 'center', gap: 3 }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style={{marginRight:2}}><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style={{ marginRight: 2 }}><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z" /></svg>
                   {bookmarkLikes[bookmark.id] || 0}
                 </span>
               </a>
@@ -3924,23 +3770,22 @@ function PopularBookmarks() {
         ]}
       >
         {/* Category Controller Header */}
-        
+
         <div className="flex w-full mb-4 justify-between items-center gap-2">
           <div className="flex items-center gap-4">
-          <div className="dark:text-white font-medium">Columns:</div>
-          <div className="flex gap-2">
-            {[1,2,3,4].map(num => (
-              <button
-                key={num}
-                className={`px-4 py-2 rounded-md font-semibold border transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:text-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 ${
-                  previewColumns === num ? "bg-blue-500 text-white shadow" : "bg-white dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-gray-600"
-                }`}
-                onClick={() => handlePreviewColumnChange(num)}
-                title={`Show ${num} column${num > 1 ? 's' : ''}`}
-              >
-                {num}
-              </button>
-            ))}
+            <div className="dark:text-white font-medium">Columns:</div>
+            <div className="flex gap-2">
+              {[1, 2, 3, 4].map(num => (
+                <button
+                  key={num}
+                  className={`px-4 py-2 rounded-md font-semibold border transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:text-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 ${previewColumns === num ? "bg-blue-500 text-white shadow" : "bg-white dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-gray-600"
+                    }`}
+                  onClick={() => handlePreviewColumnChange(num)}
+                  title={`Show ${num} column${num > 1 ? 's' : ''}`}
+                >
+                  {num}
+                </button>
+              ))}
             </div>
           </div>
           <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
@@ -3967,11 +3812,10 @@ function PopularBookmarks() {
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className={`p-4 rounded-lg min-h-[200px] transition-all duration-300 border-2 ${
-                      snapshot.isDraggingOver
-                            ? "bg-indigo-50 dark:bg-gray-900/50 border-indigo-400 shadow-lg scale-105"
+                    className={`p-4 rounded-lg min-h-[200px] transition-all duration-300 border-2 ${snapshot.isDraggingOver
+                        ? "bg-indigo-50 dark:bg-gray-900/50 border-indigo-400 shadow-lg scale-105"
                         : "bg-gray-50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-700"
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center justify-between mb-4">
                       <div className="text-center font-semibold dark:text-white">
@@ -3992,15 +3836,14 @@ function PopularBookmarks() {
                             <div
                               ref={provided.innerRef}
                               {...provided.draggableProps}
-                              className={`flex items-center border-none dark:text-white justify-between p-3 rounded-lg transition-all duration-200 dark:bg-gray-600/50 bg-white shadow-sm ${
-                                snapshot.isDragging
+                              className={`flex items-center border-none dark:text-white justify-between p-3 rounded-lg transition-all duration-200 dark:bg-gray-600/50 bg-white shadow-sm ${snapshot.isDragging
                                   ? "shadow-xl border-2 border-indigo-400 scale-105 bg-indigo-50 dark:bg-indigo-900/60 rotate-2 z-50"
                                   : "hover:border-indigo-300 hover:shadow-md"
-                              }`}
+                                }`}
                               style={{
                                 ...provided.draggableProps.style,
-                                transform: snapshot.isDragging 
-                                  ? `${provided.draggableProps.style?.transform} rotate(2deg) scale(1.05)` 
+                                transform: snapshot.isDragging
+                                  ? `${provided.draggableProps.style?.transform} rotate(2deg) scale(1.05)`
                                   : provided.draggableProps.style?.transform
                               }}
                             >
@@ -4054,9 +3897,9 @@ function PopularBookmarks() {
           <div className="flex items-center justify-between mb-4">
             <div className="text-sm font-medium dark:text-white text-gray-700 flex items-center gap-2">
               Available Categories ({availableCategories.length})
-            <Tooltip title="Search categories">
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" strokeWidth="2"/><line x1="21" y1="21" x2="16.65" y2="16.65" strokeWidth="2"/></svg>
-            </Tooltip>
+              <Tooltip title="Search categories">
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" strokeWidth="2" /><line x1="21" y1="21" x2="16.65" y2="16.65" strokeWidth="2" /></svg>
+              </Tooltip>
             </div>
             <div className="flex gap-2">
               <button
@@ -4068,10 +3911,10 @@ function PopularBookmarks() {
               <button
                 onClick={() => {
                   // Add all available categories to columns
-                  const allAvailable = availableCategories.filter(cat => 
+                  const allAvailable = availableCategories.filter(cat =>
                     !categorySearch || (cat.name || cat.newCategory).toLowerCase().includes(categorySearch.toLowerCase())
                   );
-                  
+
                   setPreviewCategories(prev => {
                     const updated = [...prev];
                     allAvailable.forEach((category, index) => {
@@ -4085,9 +3928,9 @@ function PopularBookmarks() {
                     });
                     return updated;
                   });
-                  
-                  setAvailableCategories(prev => 
-                    prev.filter(cat => 
+
+                  setAvailableCategories(prev =>
+                    prev.filter(cat =>
                       !allAvailable.some(availableCat => availableCat.id === cat.id)
                     )
                   );
@@ -4111,13 +3954,13 @@ function PopularBookmarks() {
                 .filter(cat => !categorySearch || (cat.name || cat.newCategory).toLowerCase().includes(categorySearch.toLowerCase()))
                 .map((category) => (
                   <div key={category.id} className="flex items-center gap-2">
-                  <button
-                    onClick={() => handleAddToColumn(category, 0)}
+                    <button
+                      onClick={() => handleAddToColumn(category, 0)}
                       className="flex gap-2 items-center text-black dark:bg-[#28283a]/[var(--widget-opacity)] px-3 py-2 rounded-lg dark:text-white bg-white hover:scale-105 transition-transform border border-gray-200 dark:border-gray-700 shadow-sm text-sm"
-                    title="Add to first column"
-                  >
-                    <PlusOutlined /> {category.name || category.newCategory}
-                  </button>
+                      title="Add to first column"
+                    >
+                      <PlusOutlined /> {category.name || category.newCategory}
+                    </button>
                   </div>
                 ))}
               {availableCategories.filter(cat => !categorySearch || (cat.name || cat.newCategory).toLowerCase().includes(categorySearch.toLowerCase())).length === 0 && (
@@ -4461,95 +4304,8 @@ function PopularBookmarks() {
         </div>
       </Modal>
 
-      {/* Interest Selection Modal */}
-      <Modal
-        title={
-          <div className="text-center">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Select Your Interests</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Choose your interests to get personalized category recommendations
-            </p>
-          </div>
-        }
-        open={isInterestModalOpen}
-        onCancel={() => setIsInterestModalOpen(false)}
-        footer={[
-          <AntButton key="cancel" onClick={() => setIsInterestModalOpen(false)}>
-            Cancel
-          </AntButton>,
-          <AntButton
-            key="save"
-            type="primary"
-            onClick={handleSaveInterests}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            Save Interests
-          </AntButton>,
-        ]}
-        width={600}
-      >
-        <div className="py-4">
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            {interestOptions.map((option) => (
-              <button
-                key={option.id}
-                type="button"
-                onClick={() => {
-                  setTempInterests(prev =>
-                    prev.includes(option.id)
-                      ? prev.filter(id => id !== option.id)
-                      : [...prev, option.id]
-                  );
-                }}
-                className={`relative flex flex-col items-center p-4 border-2 rounded-lg transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-                  tempInterests.includes(option.id)
-                    ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-200"
-                    : "border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-blue-300"
-                }`}
-              >
-                <span className="text-3xl mb-2">{option.icon}</span>
-                <span className="font-medium text-sm text-gray-900 dark:text-white text-center">
-                  {option.name}
-                </span>
-                {tempInterests.includes(option.id) && (
-                  <div className="absolute top-2 right-2 bg-blue-500 text-white rounded-full p-1">
-                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24">
-                      <path fill="currentColor" d="M9.5 16.5l-4-4 1.41-1.41L9.5 13.67l7.09-7.09L18 7l-8.5 8.5z"/>
-                    </svg>
-                  </div>
-                )}
-              </button>
-            ))}
-          </div>
-          
-          {tempInterests.length > 0 && (
-            <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-              <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
-                Selected Interests ({tempInterests.length}):
-              </h4>
-              <div className="flex flex-wrap gap-2">
-                {tempInterests.map((interestId) => {
-                  const interest = interestOptions.find(i => i.id === interestId);
-                  return (
-                    <span
-                      key={interestId}
-                      className="inline-flex items-center bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full text-sm font-medium"
-                    >
-                      {interest?.icon} {interest?.name}
-                      <button
-                        onClick={() => setTempInterests(prev => prev.filter(id => id !== interestId))}
-                        className="ml-2 text-blue-600 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-100"
-                      >
-                        ×
-                      </button>
-                    </span>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-      </Modal>
+
+
       {/* Floating Review Button */}
       <button
         onClick={() => setIsReviewModalOpen(true)}
@@ -4619,59 +4375,7 @@ function PopularBookmarks() {
           </div>
         </div>
       </Modal>
-      {/* Profession Selection Modal */}
-      <Modal
-        title={
-          <div className="text-center">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Select Your Profession</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Choose your profession to get personalized category recommendations</p>
-          </div>
-        }
-        open={isProfessionModalOpen}
-        onCancel={() => setIsProfessionModalOpen(false)}
-        footer={[
-          <AntButton key="cancel" onClick={() => setIsProfessionModalOpen(false)}>
-            Cancel
-          </AntButton>,
-          <AntButton
-            key="save"
-            type="primary"
-            onClick={handleSaveProfession}
-            className="bg-blue-600 hover:bg-blue-700"
-            disabled={!tempProfession}
-          >
-            Save Profession
-          </AntButton>,
-        ]}
-        width={600}
-      >
-        <div className="py-4">
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            {professionOptions.map((option) => (
-              <button
-                key={option.id}
-                type="button"
-                onClick={() => setTempProfession(option.id)}
-                className={`relative flex flex-col items-center p-4 border-2 rounded-lg transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-                  tempProfession === option.id
-                    ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-200"
-                    : "border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-blue-300"
-                }`}
-              >
-                <span className="text-3xl mb-2">{option.icon}</span>
-                <span className="font-medium text-sm text-gray-900 dark:text-white text-center">{option.name}</span>
-                {tempProfession === option.id && (
-                  <div className="absolute top-2 right-2 bg-blue-500 text-white rounded-full p-1">
-                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24">
-                      <path fill="currentColor" d="M9.5 16.5l-4-4 1.41-1.41L9.5 13.67l7.09-7.09L18 7l-8.5 8.5z"/>
-                    </svg>
-                  </div>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      </Modal>
+
     </div>
   );
 }

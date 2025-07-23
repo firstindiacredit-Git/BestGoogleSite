@@ -28,6 +28,54 @@ const countries = [
   { key: "global", flag: "https://flagcdn.com/un.svg", name: "Global" },
 ];
 
+// Profession options
+const professionOptions = [
+  { id: "all", name: "All Professions" },
+  // Previous Professions
+  { id: "developer", name: "Developer / Programmer" },
+  { id: "designer", name: "Designer (UI/UX, Graphic, Web)" },
+  { id: "digital_marketer", name: "Digital Marketer" },
+  { id: "student", name: "Student" },
+  { id: "teacher", name: "Teacher / Educator" },
+  { id: "entrepreneur", name: "Entrepreneur / Founder" },
+  { id: "freelancer", name: "Freelancer (Creative or Technical)" },
+  { id: "consultant", name: "Consultant / Advisor" },
+  { id: "professional", name: "Working Professional" },
+  { id: "researcher", name: "Researcher / Academic" },
+  { id: "it_support", name: "IT / Tech Support" },
+  { id: "medical", name: "Medical Professional" },
+  // New Professions
+  { id: "bpo", name: "BPO" },
+  { id: "productivity_management", name: "Productivity & Task Management" },
+  { id: "ai_automation", name: "AI Tools & Automation" },
+  { id: "education_learning", name: "Education & Learning" },
+  { id: "professional_entrepreneurship", name: "Professional & Entrepreneurship" },
+  { id: "tax_investments", name: "Tax & Investments" },
+  { id: "marketing_growth", name: "Marketing & Growth" },
+  { id: "creativity_design", name: "Creativity & Design" },
+  { id: "programmer_developer", name: "Programmer & Developer" },
+  { id: "news", name: "News" },
+  { id: "shopping_deals", name: "Shopping & Deal Sites" },
+  { id: "health_wellness", name: "Health & Wellness" },
+  { id: "travel", name: "Travel" },
+  { id: "entertainment_leisure", name: "Entertainment & Leisure" },
+  { id: "career_jobs", name: "Career & Job Portals" },
+  { id: "privacy_security", name: "Privacy & Security" },
+  { id: "india_specific", name: "India-Specific Portals" },
+  { id: "brain_interests", name: "Brain-Interests" },
+  { id: "science_nature", name: "Science & Nature" },
+  { id: "automotive_transport", name: "Automotive & Transport" },
+  { id: "gaming_entertainment", name: "Gaming & Entertainment" },
+  { id: "kids_family", name: "Kids & Family" },
+  { id: "international_tools", name: "International Tools" },
+  { id: "events_conferences", name: "Events & Conferences" },
+  { id: "technology_computing", name: "Technology & Computing" },
+  { id: "social_community", name: "Social & Community" },
+  { id: "home_lifestyle", name: "Home & Lifestyle" },
+  { id: "analytics_reporting", name: "Analytics & Reporting" },
+  { id: "startup_indie_tools", name: "Startup Directories & Indie Tools" }
+];
+
 // Interest options
 const interestOptions = [
   { id: "productivity_seeker", name: "Productivity Seeker", icon: "💻" },
@@ -43,18 +91,6 @@ const interestOptions = [
   { id: "reader_bookworm", name: "Reader / Bookworm", icon: "💼" },
   { id: "investor_trader", name: "Investor / Trader", icon: "🎓" },
   { id: "smart_shopper", name: "Smart Shopper / Deal Hunter", icon: "🏥" }
-];
-
-// Profession options
-const professionOptions = [
-  { id: "all", name: "All Professions" },
-  { id: "student", name: "Student" },
-  { id: "teacher", name: "Teacher" },
-  { id: "professional", name: "Professional" },
-  { id: "entrepreneur", name: "Entrepreneur" },
-  { id: "freelancer", name: "Freelancer" },
-  { id: "retired", name: "Retired" },
-  { id: "other", name: "Other" },
 ];
 
 // Optimized for minimal Firestore read requests:
@@ -109,11 +145,16 @@ function AddLinks() {
       const matchesSearch = category.newCategory?.toLowerCase().includes(searchTerm.toLowerCase());
       
       // Filter by country - be more inclusive for new categories
-      const matchesCountry = !category.countries || 
-        category.countries.length === 0 || 
-        category.countries.includes("global") ||
+      const categoryCountries = Array.isArray(category.countries) 
+        ? category.countries 
+        : category.countries 
+          ? [category.countries] 
+          : [];
+          
+      const matchesCountry = categoryCountries.length === 0 || 
+        categoryCountries.includes("global") ||
         selectedCountries.includes("global") ||
-        category.countries.some(country => selectedCountries.includes(country));
+        categoryCountries.some(country => selectedCountries.includes(country));
       
       // Filter by profession - be more inclusive for new categories
       const profs = Array.isArray(category.professions)
@@ -618,43 +659,57 @@ function AddLinks() {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Professions
               </label>
-              <select
-                value={selectedProfessions}
-                onChange={(e) =>
-                  setSelectedProfessions(
-                    Array.from(e.target.selectedOptions, option => option.value)
-                  )
-                }
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#513a7a] text-gray-900 dark:text-white rounded-sm focus:ring-2 focus:ring-blue-500"
-                multiple
-              >
-                {professionOptions.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.name}
-                  </option>
+              <div className="flex flex-wrap gap-2 mb-2 max-h-[100px] overflow-y-auto p-2 border border-gray-200 dark:border-gray-600 rounded">
+                {selectedProfessions.map((id) => {
+                  const p = professionOptions.find(p => p.id === id);
+                  return (
+                    <span key={id} className="inline-flex items-center bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-2 py-1 rounded text-xs font-medium">
+                      {p?.name || id}
+                      <button onClick={() => setSelectedProfessions(selectedProfessions.filter(k => k !== id))} className="ml-1 text-green-500 hover:text-red-500">×</button>
+                    </span>
+                  );
+                })}
+              </div>
+              <div className="flex flex-wrap gap-2 max-h-[200px] overflow-y-auto p-2 border border-gray-200 dark:border-gray-600 rounded">
+                {professionOptions.filter(p => !selectedProfessions.includes(p.id)).map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => setSelectedProfessions([...selectedProfessions, p.id])}
+                    className="inline-flex items-center bg-gray-100 dark:bg-gray-700 hover:bg-green-200 dark:hover:bg-green-800 text-gray-700 dark:text-gray-200 px-2 py-1 rounded text-xs font-medium"
+                  >
+                    {p.name}
+                  </button>
                 ))}
-              </select>
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Interests
               </label>
-              <select
-                value={selectedInterests}
-                onChange={(e) =>
-                  setSelectedInterests(
-                    Array.from(e.target.selectedOptions, option => option.value)
-                  )
-                }
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#513a7a] text-gray-900 dark:text-white rounded-sm focus:ring-2 focus:ring-blue-500"
-                multiple
-              >
-                {interestOptions.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.icon} {option.name}
-                  </option>
+              <div className="flex flex-wrap gap-2 mb-2 max-h-[100px] overflow-y-auto p-2 border border-gray-200 dark:border-gray-600 rounded">
+                {selectedInterests.map((id) => {
+                  const i = interestOptions.find(i => i.id === id);
+                  return (
+                    <span key={id} className="inline-flex items-center bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 px-2 py-1 rounded text-xs font-medium">
+                      {i?.icon} {i?.name || id}
+                      <button onClick={() => setSelectedInterests(selectedInterests.filter(k => k !== id))} className="ml-1 text-purple-500 hover:text-red-500">×</button>
+                    </span>
+                  );
+                })}
+              </div>
+              <div className="flex flex-wrap gap-2 max-h-[200px] overflow-y-auto p-2 border border-gray-200 dark:border-gray-600 rounded">
+                {interestOptions.filter(i => !selectedInterests.includes(i.id)).map((i) => (
+                  <button
+                    key={i.id}
+                    type="button"
+                    onClick={() => setSelectedInterests([...selectedInterests, i.id])}
+                    className="inline-flex items-center bg-gray-100 dark:bg-gray-700 hover:bg-purple-200 dark:hover:bg-purple-800 text-gray-700 dark:text-gray-200 px-2 py-1 rounded text-xs font-medium"
+                  >
+                    {i.icon} {i.name}
+                  </button>
                 ))}
-              </select>
+              </div>
             </div>
           </div>
         </div>
@@ -792,138 +847,144 @@ function AddLinks() {
 
               {isCategoryModalOpen && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                  <div className="bg-white dark:bg-[#513a7a] rounded-lg max-w-lg w-full p-8 shadow-xl">
-                    <div className="flex justify-between items-center mb-4">
-                      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Add New Category</h2>
-                      <button
-                        onClick={() => setCategoryModalOpen(false)}
-                        className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
-                      >
-                        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-                    <div className="space-y-6">
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Category Name</label>
-                        <input
-                          type="text"
-                          value={newCategory}
-                          onChange={(e) => setNewCategory(e.target.value)}
-                          className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded focus:ring-2 focus:ring-blue-500"
-                          placeholder="Enter category name"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Category Color</label>
-                        <div className="flex items-center space-x-3">
-                          <input
-                            type="color"
-                            value={selectedColor}
-                            onChange={(e) => setSelectedColor(e.target.value)}
-                            className="h-10 w-20 rounded cursor-pointer"
-                          />
-                          <span className="text-sm text-gray-500 dark:text-gray-400">{selectedColor.toUpperCase()}</span>
-                        </div>
-                      </div>
-                      {/* Countries Tag Selector */}
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Countries</label>
-                        <div className="flex flex-wrap gap-2 mb-2">
-                          {selectedCountries.map((key) => {
-                            const c = countries.find(c => c.key === key);
-                            return (
-                              <span key={key} className="inline-flex items-center bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-1 rounded text-xs font-medium">
-                                {c?.flag && <img src={c.flag} alt="" className="w-4 h-4 mr-1 inline" />} {c?.name || key}
-                                <button onClick={() => setSelectedCountries(selectedCountries.filter(k => k !== key))} className="ml-1 text-blue-500 hover:text-red-500">×</button>
-                          </span>
-                            );
-                          })}
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {getCountryOptions().filter(c => !selectedCountries.includes(c.key)).map((country) => (
-                            <button
-                              key={country.key}
-                              type="button"
-                              onClick={() => setSelectedCountries([...selectedCountries, country.key])}
-                              className="inline-flex items-center bg-gray-100 dark:bg-gray-700 hover:bg-blue-200 dark:hover:bg-blue-800 text-gray-700 dark:text-gray-200 px-2 py-1 rounded text-xs font-medium"
-                            >
-                              {country.flag && <img src={country.flag} alt="" className="w-4 h-4 mr-1 inline" />} {country.name}
-                            </button>
-                          ))}
-                      </div>
-                      </div>
-                      {/* Professions Tag Selector */}
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Professions</label>
-                        <div className="flex flex-wrap gap-2 mb-2">
-                          {selectedProfessions.map((id) => {
-                            const p = professionOptions.find(p => p.id === id);
-                            return (
-                              <span key={id} className="inline-flex items-center bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-2 py-1 rounded text-xs font-medium">
-                                {p?.name || id}
-                                <button onClick={() => setSelectedProfessions(selectedProfessions.filter(k => k !== id))} className="ml-1 text-green-500 hover:text-red-500">×</button>
-                              </span>
-                            );
-                          })}
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {professionOptions.filter(p => !selectedProfessions.includes(p.id)).map((p) => (
-                            <button
-                              key={p.id}
-                              type="button"
-                              onClick={() => setSelectedProfessions([...selectedProfessions, p.id])}
-                              className="inline-flex items-center bg-gray-100 dark:bg-gray-700 hover:bg-green-200 dark:hover:bg-green-800 text-gray-700 dark:text-gray-200 px-2 py-1 rounded text-xs font-medium"
-                            >
-                              {p.name}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                      {/* Interests Tag Selector */}
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Interests</label>
-                        <div className="flex flex-wrap gap-2 mb-2">
-                          {selectedInterests.map((id) => {
-                            const i = interestOptions.find(i => i.id === id);
-                            return (
-                              <span key={id} className="inline-flex items-center bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 px-2 py-1 rounded text-xs font-medium">
-                                {i?.icon} {i?.name || id}
-                                <button onClick={() => setSelectedInterests(selectedInterests.filter(k => k !== id))} className="ml-1 text-purple-500 hover:text-red-500">×</button>
-                              </span>
-                            );
-                          })}
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {interestOptions.filter(i => !selectedInterests.includes(i.id)).map((i) => (
-                            <button
-                              key={i.id}
-                              type="button"
-                              onClick={() => setSelectedInterests([...selectedInterests, i.id])}
-                              className="inline-flex items-center bg-gray-100 dark:bg-gray-700 hover:bg-purple-200 dark:hover:bg-purple-800 text-gray-700 dark:text-gray-200 px-2 py-1 rounded text-xs font-medium"
-                            >
-                              {i.icon} {i.name}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="flex justify-end space-x-3 pt-4">
+                  <div className="bg-white dark:bg-[#513a7a] rounded-lg max-w-lg w-full max-h-[90vh] flex flex-col shadow-xl">
+                    <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                      <div className="flex justify-between items-center">
+                        <h2 className="text-xl font-bold text-gray-900 dark:text-white">Add New Category</h2>
                         <button
                           onClick={() => setCategoryModalOpen(false)}
-                          className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                          className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
                         >
-                          Cancel
+                          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
                         </button>
-                        <button
-                          onClick={() => {
-                            handleAddCategory();
-                            setCategoryModalOpen(false);
-                          }}
-                          className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded transition-colors"
-                        >
-                          Add Category
-                        </button>
+                      </div>
+                    </div>
+                    <div className="p-6 overflow-y-auto flex-1">
+                      <div className="space-y-4">
+                        {/* Category Name */}
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Category Name</label>
+                          <input
+                            type="text"
+                            value={newCategory}
+                            onChange={(e) => setNewCategory(e.target.value)}
+                            className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded focus:ring-2 focus:ring-blue-500"
+                            placeholder="Enter category name"
+                          />
+                        </div>
+                        {/* Category Color */}
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Category Color</label>
+                          <div className="flex items-center space-x-3">
+                            <input
+                              type="color"
+                              value={selectedColor}
+                              onChange={(e) => setSelectedColor(e.target.value)}
+                              className="h-8 w-16 rounded cursor-pointer"
+                            />
+                            <span className="text-sm text-gray-500 dark:text-gray-400">{selectedColor.toUpperCase()}</span>
+                          </div>
+                        </div>
+                        {/* Countries Tag Selector */}
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Countries</label>
+                          <div className="flex flex-wrap gap-2 mb-2">
+                            {selectedCountries.map((key) => {
+                              const c = countries.find(c => c.key === key);
+                              return (
+                                <span key={key} className="inline-flex items-center bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-1 rounded text-xs font-medium">
+                                  {c?.flag && <img src={c.flag} alt="" className="w-4 h-4 mr-1 inline" />} {c?.name || key}
+                                  <button onClick={() => setSelectedCountries(selectedCountries.filter(k => k !== key))} className="ml-1 text-blue-500 hover:text-red-500">×</button>
+                            </span>
+                              );
+                            })}
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {getCountryOptions().filter(c => !selectedCountries.includes(c.key)).map((country) => (
+                              <button
+                                key={country.key}
+                                type="button"
+                                onClick={() => setSelectedCountries([...selectedCountries, country.key])}
+                                className="inline-flex items-center bg-gray-100 dark:bg-gray-700 hover:bg-blue-200 dark:hover:bg-blue-800 text-gray-700 dark:text-gray-200 px-2 py-1 rounded text-xs font-medium"
+                              >
+                                {country.flag && <img src={country.flag} alt="" className="w-4 h-4 mr-1 inline" />} {country.name}
+                              </button>
+                            ))}
+                        </div>
+                        </div>
+                        {/* Professions Tag Selector */}
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Professions</label>
+                          <div className="flex flex-wrap gap-2 mb-2 max-h-[100px] overflow-y-auto p-2 border border-gray-200 dark:border-gray-600 rounded">
+                            {selectedProfessions.map((id) => {
+                              const p = professionOptions.find(p => p.id === id);
+                              return (
+                                <span key={id} className="inline-flex items-center bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-2 py-1 rounded text-xs font-medium">
+                                  {p?.name || id}
+                                  <button onClick={() => setSelectedProfessions(selectedProfessions.filter(k => k !== id))} className="ml-1 text-green-500 hover:text-red-500">×</button>
+                                </span>
+                              );
+                            })}
+                          </div>
+                          <div className="flex flex-wrap gap-2 max-h-[200px] overflow-y-auto p-2 border border-gray-200 dark:border-gray-600 rounded">
+                            {professionOptions.filter(p => !selectedProfessions.includes(p.id)).map((p) => (
+                              <button
+                                key={p.id}
+                                type="button"
+                                onClick={() => setSelectedProfessions([...selectedProfessions, p.id])}
+                                className="inline-flex items-center bg-gray-100 dark:bg-gray-700 hover:bg-green-200 dark:hover:bg-green-800 text-gray-700 dark:text-gray-200 px-2 py-1 rounded text-xs font-medium"
+                              >
+                                {p.name}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        {/* Interests Tag Selector */}
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Interests</label>
+                          <div className="flex flex-wrap gap-2 mb-2 max-h-[100px] overflow-y-auto p-2 border border-gray-200 dark:border-gray-600 rounded">
+                            {selectedInterests.map((id) => {
+                              const i = interestOptions.find(i => i.id === id);
+                              return (
+                                <span key={id} className="inline-flex items-center bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 px-2 py-1 rounded text-xs font-medium">
+                                  {i?.icon} {i?.name || id}
+                                  <button onClick={() => setSelectedInterests(selectedInterests.filter(k => k !== id))} className="ml-1 text-purple-500 hover:text-red-500">×</button>
+                                </span>
+                              );
+                            })}
+                          </div>
+                          <div className="flex flex-wrap gap-2 max-h-[200px] overflow-y-auto p-2 border border-gray-200 dark:border-gray-600 rounded">
+                            {interestOptions.filter(i => !selectedInterests.includes(i.id)).map((i) => (
+                              <button
+                                key={i.id}
+                                type="button"
+                                onClick={() => setSelectedInterests([...selectedInterests, i.id])}
+                                className="inline-flex items-center bg-gray-100 dark:bg-gray-700 hover:bg-purple-200 dark:hover:bg-purple-800 text-gray-700 dark:text-gray-200 px-2 py-1 rounded text-xs font-medium"
+                              >
+                                {i.icon} {i.name}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="flex justify-end space-x-3 pt-4">
+                          <button
+                            onClick={() => setCategoryModalOpen(false)}
+                            className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={() => {
+                              handleAddCategory();
+                              setCategoryModalOpen(false);
+                            }}
+                            className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded transition-colors"
+                          >
+                            Add Category
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1379,176 +1440,181 @@ function AddLinks() {
       )}
       {isCategoryEditModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-[#513a7a] rounded-lg max-w-lg w-full p-8 shadow-xl">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Edit Category</h2>
-              <button
-                onClick={() => {
-                  setIsCategoryEditModalOpen(false);
-                  setEditCategoryData(null);
-                }}
-                className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
-              >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Category Name</label>
-                <input
-                  type="text"
-                  value={editCategoryData?.name || ""}
-                  onChange={(e) =>
-                    setEditCategoryData((prev) => ({
-                      ...prev,
-                      name: e.target.value,
-                    }))
-                  }
-                  className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded focus:ring-2 focus:ring-blue-500"
-                  placeholder="Category name"
-                />
-              </div>
-              {/* Countries Tag Selector */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Countries</label>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {(Array.isArray(editCategoryData?.countries)
-                    ? editCategoryData.countries
-                    : editCategoryData?.countries
-                      ? [editCategoryData.countries]
-                      : ["global"]
-                  ).map((key) => {
-                    const c = countries.find(c => c.key === key);
-                    return (
-                      <span key={key} className="inline-flex items-center bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-1 rounded text-xs font-medium">
-                        {c?.flag && <img src={c.flag} alt="" className="w-4 h-4 mr-1 inline" />} {c?.name || key}
-                        <button 
-                          onClick={() => setEditCategoryData(prev => ({
-                            ...prev,
-                            countries: prev.countries.filter(k => k !== key)
-                          }))} 
-                          className="ml-1 text-blue-500 hover:text-red-500"
-                        >×</button>
-                      </span>
-                    );
-                  })}
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {getCountryOptions().filter(c => !editCategoryData?.countries?.includes(c.key)).map((country) => (
-                    <button
-                      key={country.key}
-                      type="button"
-                      onClick={() => setEditCategoryData(prev => ({
-                        ...prev,
-                        countries: [...(prev.countries || ["global"]), country.key]
-                      }))}
-                      className="inline-flex items-center bg-gray-100 dark:bg-gray-700 hover:bg-blue-200 dark:hover:bg-blue-800 text-gray-700 dark:text-gray-200 px-2 py-1 rounded text-xs font-medium"
-                    >
-                      {country.flag && <img src={country.flag} alt="" className="w-4 h-4 mr-1 inline" />} {country.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              {/* Professions Tag Selector */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Professions</label>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {(Array.isArray(editCategoryData?.professions)
-                    ? editCategoryData.professions
-                    : editCategoryData?.professions
-                      ? [editCategoryData.professions]
-                      : ["all"]
-                  ).map((id) => {
-                    const p = professionOptions.find(p => p.id === id);
-                    return (
-                      <span key={id} className="inline-flex items-center bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-2 py-1 rounded text-xs font-medium">
-                        {p?.name || id}
-                        <button 
-                          onClick={() => setEditCategoryData(prev => ({
-                            ...prev,
-                            professions: prev.professions.filter(k => k !== id)
-                          }))} 
-                          className="ml-1 text-green-500 hover:text-red-500"
-                        >×</button>
-                      </span>
-                    );
-                  })}
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {professionOptions.filter(p => !editCategoryData?.professions?.includes(p.id)).map((p) => (
-                    <button
-                      key={p.id}
-                      type="button"
-                      onClick={() => setEditCategoryData(prev => ({
-                        ...prev,
-                        professions: [...(prev.professions || ["all"]), p.id]
-                      }))}
-                      className="inline-flex items-center bg-gray-100 dark:bg-gray-700 hover:bg-green-200 dark:hover:bg-green-800 text-gray-700 dark:text-gray-200 px-2 py-1 rounded text-xs font-medium"
-                    >
-                      {p.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              {/* Interests Tag Selector */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Interests</label>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {(Array.isArray(editCategoryData?.interests)
-                    ? editCategoryData.interests
-                    : editCategoryData?.interests
-                      ? [editCategoryData.interests]
-                      : []
-                  ).map((id) => {
-                    const i = interestOptions.find(i => i.id === id);
-                    return (
-                      <span key={id} className="inline-flex items-center bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 px-2 py-1 rounded text-xs font-medium">
-                        {i?.icon} {i?.name || id}
-                        <button 
-                          onClick={() => setEditCategoryData(prev => ({
-                            ...prev,
-                            interests: prev.interests.filter(k => k !== id)
-                          }))} 
-                          className="ml-1 text-purple-500 hover:text-red-500"
-                        >×</button>
-                      </span>
-                    );
-                  })}
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {interestOptions.filter(i => !editCategoryData?.interests?.includes(i.id)).map((i) => (
-                    <button
-                      key={i.id}
-                      type="button"
-                      onClick={() => setEditCategoryData(prev => ({
-                        ...prev,
-                        interests: [...(prev.interests || []), i.id]
-                      }))}
-                      className="inline-flex items-center bg-gray-100 dark:bg-gray-700 hover:bg-purple-200 dark:hover:bg-purple-800 text-gray-700 dark:text-gray-200 px-2 py-1 rounded text-xs font-medium"
-                    >
-                      {i.icon} {i.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="flex justify-end space-x-3 pt-4">
+          <div className="bg-white dark:bg-[#513a7a] rounded-lg max-w-lg w-full max-h-[80vh] flex flex-col shadow-xl">
+            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Edit Category</h2>
                 <button
                   onClick={() => {
                     setIsCategoryEditModalOpen(false);
                     setEditCategoryData(null);
                   }}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                  className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
                 >
-                  Cancel
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
                 </button>
-                <button
-                  onClick={handleUpdateCategory}
-                  className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded transition-colors"
-                >
-                  Update Category
-                </button>
+              </div>
+            </div>
+            <div className="p-6 overflow-y-auto flex-1">
+              <div className="space-y-4">
+                {/* Category Name */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Category Name</label>
+                  <input
+                    type="text"
+                    value={editCategoryData?.name || ""}
+                    onChange={(e) =>
+                      setEditCategoryData((prev) => ({
+                        ...prev,
+                        name: e.target.value,
+                      }))
+                    }
+                    className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-[#513a7a] dark:text-white rounded focus:ring-2 focus:ring-blue-500"
+                    placeholder="Category name"
+                  />
+                </div>
+                {/* Countries Tag Selector */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Countries</label>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {(Array.isArray(editCategoryData?.countries)
+                      ? editCategoryData.countries
+                      : editCategoryData?.countries
+                        ? [editCategoryData.countries]
+                        : ["global"]
+                    ).map((key) => {
+                      const c = countries.find(c => c.key === key);
+                      return (
+                        <span key={key} className="inline-flex items-center bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-1 rounded text-xs font-medium">
+                          {c?.flag && <img src={c.flag} alt="" className="w-4 h-4 mr-1 inline" />} {c?.name || key}
+                          <button 
+                            onClick={() => setEditCategoryData(prev => ({
+                              ...prev,
+                              countries: prev.countries.filter(k => k !== key)
+                            }))} 
+                            className="ml-1 text-blue-500 hover:text-red-500"
+                          >×</button>
+                        </span>
+                      );
+                    })}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {getCountryOptions().filter(c => !editCategoryData?.countries?.includes(c.key)).map((country) => (
+                      <button
+                        key={country.key}
+                        type="button"
+                        onClick={() => setEditCategoryData(prev => ({
+                          ...prev,
+                          countries: [...(prev.countries || ["global"]), country.key]
+                        }))}
+                        className="inline-flex items-center bg-gray-100 dark:bg-gray-700 hover:bg-blue-200 dark:hover:bg-blue-800 text-gray-700 dark:text-gray-200 px-2 py-1 rounded text-xs font-medium"
+                      >
+                        {country.flag && <img src={country.flag} alt="" className="w-4 h-4 mr-1 inline" />} {country.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {/* Professions Tag Selector */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Professions</label>
+                  <div className="flex flex-wrap gap-2 mb-2 max-h-[100px] overflow-y-auto p-2 border border-gray-200 dark:border-gray-600 rounded">
+                    {(Array.isArray(editCategoryData?.professions)
+                      ? editCategoryData.professions
+                      : editCategoryData?.professions
+                        ? [editCategoryData.professions]
+                        : ["all"]
+                    ).map((id) => {
+                      const p = professionOptions.find(p => p.id === id);
+                      return (
+                        <span key={id} className="inline-flex items-center bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-2 py-1 rounded text-xs font-medium">
+                          {p?.name || id}
+                          <button 
+                            onClick={() => setEditCategoryData(prev => ({
+                              ...prev,
+                              professions: prev.professions.filter(k => k !== id)
+                            }))} 
+                            className="ml-1 text-green-500 hover:text-red-500"
+                          >×</button>
+                        </span>
+                      );
+                    })}
+                  </div>
+                  <div className="flex flex-wrap gap-2 max-h-[200px] overflow-y-auto p-2 border border-gray-200 dark:border-gray-600 rounded">
+                    {professionOptions.filter(p => !editCategoryData?.professions?.includes(p.id)).map((p) => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => setEditCategoryData(prev => ({
+                          ...prev,
+                          professions: [...(prev.professions || ["all"]), p.id]
+                        }))}
+                        className="inline-flex items-center bg-gray-100 dark:bg-gray-700 hover:bg-green-200 dark:hover:bg-green-800 text-gray-700 dark:text-gray-200 px-2 py-1 rounded text-xs font-medium"
+                      >
+                        {p.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {/* Interests Tag Selector */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Interests</label>
+                  <div className="flex flex-wrap gap-2 mb-2 max-h-[100px] overflow-y-auto p-2 border border-gray-200 dark:border-gray-600 rounded">
+                    {(Array.isArray(editCategoryData?.interests)
+                      ? editCategoryData.interests
+                      : editCategoryData?.interests
+                        ? [editCategoryData.interests]
+                        : []
+                    ).map((id) => {
+                      const i = interestOptions.find(i => i.id === id);
+                      return (
+                        <span key={id} className="inline-flex items-center bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 px-2 py-1 rounded text-xs font-medium">
+                          {i?.icon} {i?.name || id}
+                          <button 
+                            onClick={() => setEditCategoryData(prev => ({
+                              ...prev,
+                              interests: prev.interests.filter(k => k !== id)
+                            }))} 
+                            className="ml-1 text-purple-500 hover:text-red-500"
+                          >×</button>
+                        </span>
+                      );
+                    })}
+                  </div>
+                  <div className="flex flex-wrap gap-2 max-h-[200px] overflow-y-auto p-2 border border-gray-200 dark:border-gray-600 rounded">
+                    {interestOptions.filter(i => !editCategoryData?.interests?.includes(i.id)).map((i) => (
+                      <button
+                        key={i.id}
+                        type="button"
+                        onClick={() => setEditCategoryData(prev => ({
+                          ...prev,
+                          interests: [...(prev.interests || []), i.id]
+                        }))}
+                        className="inline-flex items-center bg-gray-100 dark:bg-gray-700 hover:bg-purple-200 dark:hover:bg-purple-800 text-gray-700 dark:text-gray-200 px-2 py-1 rounded text-xs font-medium"
+                      >
+                        {i.icon} {i.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex justify-end space-x-3 pt-4">
+                  <button
+                    onClick={() => {
+                      setIsCategoryEditModalOpen(false);
+                      setEditCategoryData(null);
+                    }}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleUpdateCategory}
+                    className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded transition-colors"
+                  >
+                    Update Category
+                  </button>
+                </div>
               </div>
             </div>
           </div>

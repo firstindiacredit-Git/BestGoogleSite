@@ -149,6 +149,7 @@ const Anotherpage = ({ pageId = "home" }) => {
   const [firestoreSubcats, setFirestoreSubcats] = useState([]); // For logged-in users
   const [firestoreUser, setFirestoreUser] = useState(null);
   const [interestLoading, setInterestLoading] = useState(true);
+  const [interestsLoading, setInterestsLoading] = useState(false);
 
   // Add new function to handle local storage operations
   const localStorageKey = "widget_layout";
@@ -236,7 +237,7 @@ const Anotherpage = ({ pageId = "home" }) => {
     if (selectedInterest !== 'not_select' && selectedInterest !== 'all') {
       const q = query(collection(db, "links"), where("interestId", "==", selectedInterest), where("subcategory", "==", subcat));
       try {
-        const snap = await getDocs(q);
+      const snap = await getDocs(q);
         const bookmarks = snap.docs.map(doc => ({ id: doc.id, ...doc.data(), addedByAdmin: true }));
         setSubcatBookmarks(prev => ({ ...prev, [subcat]: bookmarks }));
       } catch (error) {
@@ -1128,8 +1129,10 @@ const Anotherpage = ({ pageId = "home" }) => {
     setSelectedInterest('not_select');
   }, [selectedCategory]);
 
-  // Fetch interests from Firestore
+  // Fetch interests from Firestore only if user is authenticated
   useEffect(() => {
+    if (!firestoreUser) return;
+    setInterestsLoading(true);
     async function fetchInterests() {
       try {
         const snap = await fsGetDocs(fsCollection(db, 'interests'));
@@ -1140,10 +1143,12 @@ const Anotherpage = ({ pageId = "home" }) => {
         setInterestOptions(options);
       } catch {
         setInterestOptions([{ id: 'all', name: 'All Interests' }]);
+      } finally {
+        setInterestsLoading(false);
       }
     }
     fetchInterests();
-  }, []);
+  }, [firestoreUser]);
   // Persist selectedInterest
   useEffect(() => {
     if (interestLoading) {
@@ -1153,7 +1158,7 @@ const Anotherpage = ({ pageId = "home" }) => {
       const userDocRef = doc(db, "users", firestoreUser.uid);
       setDoc(userDocRef, { selectedInterest: selectedInterest }, { merge: true });
     } else {
-      localStorage.setItem(localInterestKey, selectedInterest);
+    localStorage.setItem(localInterestKey, selectedInterest);
     }
   }, [selectedInterest, firestoreUser, interestLoading]);
   // Fetch subcategories for selected interest
@@ -2080,6 +2085,61 @@ const Anotherpage = ({ pageId = "home" }) => {
         );
       });
 
+  // Add at the top of Anotherpage component
+  const [showFirstTimeModal, setShowFirstTimeModal] = useState(false);
+  const [firstTimeStep, setFirstTimeStep] = useState(null); // 'category' or 'interest'
+  const [firstTimeSelection, setFirstTimeSelection] = useState("");
+
+  // Check on mount if user has selected category/interest
+  useEffect(() => {
+    async function checkFirstTime() {
+      let hasCategory = false;
+      let hasInterest = false;
+      if (firestoreUser) {
+        const userDocRef = doc(db, "users", firestoreUser.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists()) {
+          const data = userDocSnap.data();
+          hasCategory = !!data.selectedCategory;
+          hasInterest = !!data.selectedInterest && data.selectedInterest !== 'not_select';
+        }
+      } else {
+        hasCategory = !!localStorage.getItem('selectedCategory');
+        hasInterest = !!localStorage.getItem('selectedInterest') && localStorage.getItem('selectedInterest') !== 'not_select';
+      }
+      if (!hasCategory && !hasInterest) {
+        setShowFirstTimeModal(true);
+      }
+    }
+    checkFirstTime();
+  }, [firestoreUser]);
+
+  // Handle first time modal selection
+  const handleFirstTimeChoice = (choice) => {
+    setFirstTimeStep(choice); // 'category' or 'interest'
+  };
+  const handleFirstTimeSelect = async (value) => {
+    setFirstTimeSelection(value);
+    if (firstTimeStep === 'category') {
+      setSelectedCategory(value);
+      if (firestoreUser) {
+        const userDocRef = doc(db, "users", firestoreUser.uid);
+        await setDoc(userDocRef, { selectedCategory: value }, { merge: true });
+      } else {
+        localStorage.setItem('selectedCategory', value);
+      }
+    } else if (firstTimeStep === 'interest') {
+      setSelectedInterest(value);
+      if (firestoreUser) {
+        const userDocRef = doc(db, "users", firestoreUser.uid);
+        await setDoc(userDocRef, { selectedInterest: value }, { merge: true });
+      } else {
+        localStorage.setItem('selectedInterest', value);
+      }
+    }
+    setShowFirstTimeModal(false);
+  };
+
   return (
     <div className={`anotherpage-container ${isDarkMode ? "dark" : ""}`}> 
       {allCategories.length === 0 ? (
@@ -2579,6 +2639,57 @@ const Anotherpage = ({ pageId = "home" }) => {
           </div>
         </div>
       )}
+      <Modal
+        open={showFirstTimeModal}
+        footer={null}
+        closable={false}
+        centered
+      >
+        {!firstTimeStep && (
+          <div className="flex flex-col items-center gap-6 p-6">
+            <h2 className="text-xl font-bold mb-2">Welcome!</h2>
+            <p className="mb-4">Do you want to see subcategories based on categories or interests?</p>
+            <div className="flex gap-4">
+              <AntButton type="primary" onClick={() => handleFirstTimeChoice('category')}>Categories</AntButton>
+              <AntButton type="default" onClick={() => handleFirstTimeChoice('interest')}>Interests</AntButton>
+            </div>
+          </div>
+        )}
+        {firstTimeStep === 'category' && (
+          <div className="flex flex-col items-center gap-6 p-6">
+            <h2 className="text-lg font-semibold mb-2">Select a Category</h2>
+            <select
+              className="border rounded px-3 py-2 text-base"
+              value={firstTimeSelection}
+              onChange={e => handleFirstTimeSelect(e.target.value)}
+            >
+              <option value="">Select Category</option>
+              {allCategories.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+          </div>
+        )}
+        {firstTimeStep === 'interest' && (
+          <div className="flex flex-col items-center gap-6 p-6">
+            <h2 className="text-lg font-semibold mb-2">Select an Interest</h2>
+            {interestsLoading ? (
+              <div className="text-gray-500">Loading interests...</div>
+            ) : (
+              <select
+                className="border rounded px-3 py-2 text-base"
+                value={firstTimeSelection}
+                onChange={e => handleFirstTimeSelect(e.target.value)}
+              >
+                <option value="">Select Interest</option>
+                {interestOptions.filter(i => i.id !== 'all').map(opt => (
+                  <option key={opt.id} value={opt.id}>{opt.name}</option>
+                ))}
+              </select>
+            )}
+          </div>
+        )}
+      </Modal>
       </>
       )}
     </div>
