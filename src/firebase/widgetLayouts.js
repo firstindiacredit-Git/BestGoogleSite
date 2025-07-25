@@ -15,16 +15,28 @@ const debounce = (func, wait) => {
 export const defaultWidgets = {
   home: [
     // Column 0
-    { id: "weather", name: "Weather", isOpen: true, column: 0, position: 1 },
-    { id: "clock", name: "Clock", isOpen: true, column: 0, position: 2 },
-    { id: "calendar", name: "Calendar", isOpen: true, column: 0, position: 3 },
-    { id: "calculator", name: "Calculator", isOpen: true, column: 0, position: 4 },
+    { id: "weather", name: "Weather", isOpen: true, column: 0, position: 0 },
+    { id: "clock", name: "Clock", isOpen: true, column: 0, position: 1 },
+    { id: "calendar", name: "Calendar", isOpen: true, column: 0, position: 2 },
+    {
+      id: "calculator",
+      name: "Calculator",
+      isOpen: true,
+      column: 0,
+      position: 3,
+    },
 
-    // Ensure these 4 widgets are always at the top of their columns
-    { id: "imageUploader", name: "Image Uploader", isOpen: true, column: 0, position: 0 },
-    { id: "NewsFeed", name: "News Feed", isOpen: true, column: 1, position: 0 },
-    { id: "notepad", name: "Notepad", isOpen: true, column: 2, position: 0 },
-    { id: "Todo", name: "To Do List", isOpen: true, column: 3, position: 0 },
+    // Column 3 (4th column): Forced widgets in order
+    {
+      id: "imageUploader",
+      name: "Image Uploader",
+      isOpen: true,
+      column: 3,
+      position: 0,
+    },
+    { id: "NewsFeed", name: "News Feed", isOpen: true, column: 3, position: 1 },
+    { id: "notepad", name: "Notepad", isOpen: true, column: 3, position: 2 },
+    { id: "Todo", name: "To Do List", isOpen: true, column: 3, position: 3 },
   ],
 };
 
@@ -46,7 +58,7 @@ export const allWidgets = {
   Bookmarks7: { id: "Bookmarks7", name: "Consultant / Advisor" },
   Bookmarks8: { id: "Bookmarks8", name: "Working Professional" },
   Bookmarks9: { id: "Bookmarks9", name: "Reseacher / Academic" },
-  Bookmarks10: {id: "Bookmarks10", name: "IT / Tech Support" },
+  Bookmarks10: { id: "Bookmarks10", name: "IT / Tech Support" },
   Todo: { id: "Todo", name: "To Do List" },
   NewsFeed: { id: "NewsFeed", name: "Latest News" },
 };
@@ -251,7 +263,7 @@ export const defaultBookmarks = {
     ],
   },
   "Developer / Programmer": {
-    "Chatbots": [
+    Chatbots: [
       {
         id: "ai1",
         name: "ChatGPT",
@@ -281,7 +293,7 @@ export const defaultBookmarks = {
     ],
   },
   "Digital Marketer": {
-    "Hotels": [
+    Hotels: [
       {
         id: "travel1",
         name: "Booking.com",
@@ -295,7 +307,7 @@ export const defaultBookmarks = {
         addedByAdmin: true,
       },
     ],
-    "Flights": [
+    Flights: [
       {
         id: "travel3",
         name: "Expedia",
@@ -310,8 +322,8 @@ export const defaultBookmarks = {
       },
     ],
   },
-  "Student": {
-    "News": [
+  Student: {
+    News: [
       {
         id: "sports1",
         name: "ESPN",
@@ -325,7 +337,7 @@ export const defaultBookmarks = {
         addedByAdmin: true,
       },
     ],
-    "Leagues": [
+    Leagues: [
       {
         id: "sports3",
         name: "NBA",
@@ -355,7 +367,7 @@ export const defaultBookmarks = {
         addedByAdmin: true,
       },
     ],
-    "Retail": [
+    Retail: [
       {
         id: "shopping3",
         name: "Walmart",
@@ -371,7 +383,7 @@ export const defaultBookmarks = {
     ],
   },
   "Enterprener / Founder": {
-    "International": [
+    International: [
       {
         id: "news1",
         name: "CNN",
@@ -385,7 +397,7 @@ export const defaultBookmarks = {
         addedByAdmin: true,
       },
     ],
-    "Finance": [
+    Finance: [
       {
         id: "news3",
         name: "Reuters",
@@ -431,7 +443,7 @@ export const defaultBookmarks = {
     ],
   },
   "Consultant / Advisor": {
-    "Streaming": [
+    Streaming: [
       {
         id: "movie1",
         name: "Netflix",
@@ -445,7 +457,7 @@ export const defaultBookmarks = {
         addedByAdmin: true,
       },
     ],
-    "Reviews": [
+    Reviews: [
       {
         id: "movie3",
         name: "Rotten Tomatoes",
@@ -461,7 +473,7 @@ export const defaultBookmarks = {
     ],
   },
   "Working Professional": {
-    "Payments": [
+    Payments: [
       {
         id: "finance1",
         name: "PayPal",
@@ -475,7 +487,7 @@ export const defaultBookmarks = {
         addedByAdmin: true,
       },
     ],
-    "Banking": [
+    Banking: [
       {
         id: "finance3",
         name: "Wise (TransferWise)",
@@ -521,7 +533,7 @@ export const defaultBookmarks = {
     ],
   },
   "IT/Tech Support": {
-    "Courses": [
+    Courses: [
       {
         id: "bpo1",
         name: "Khan Academy",

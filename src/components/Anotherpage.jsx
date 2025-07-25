@@ -37,7 +37,23 @@ const defaultCategoryList = [
   "Designer (UI/UX, Graphic, Web)", "Developer / Programmer", "Digital Marketer", "Student", "Teacher / Educator", "Enterprener / Founder", "Freelancer(Creative or Technical)", "Consultant / Advisor", "Working Professional", "Reseacher / Academic", "IT / Tech Support", "Medical Professional"
 ];
 
-
+// Mapping from category name to profession ID
+const categoryToProfessionId = {
+  "Developer / Programmer": "developer",
+  "Designer (UI/UX, Graphic, Web)": "designer",
+  "Digital Marketer": "digital_marketer",
+  "Student": "student",
+  "Teacher / Educator": "teacher",
+  "Enterprener / Founder": "entrepreneur",
+  "Freelancer(Creative or Technical)": "freelancer",
+  "Consultant / Advisor": "consultant",
+  "Working Professional": "working_professional",
+  "Reseacher / Academic": "researcher",
+  "IT / Tech Support": "it_support",
+  "Medical Professional": "medical",
+  "Retired": "retired",
+  "Other": "other"
+};
 
 // Memoize all widget components
 const MemoWeather = memo(Weather);
@@ -1747,8 +1763,9 @@ const Anotherpage = ({ pageId = "home" }) => {
     const sizeClass = iconSize === 'small' ? 'w-4 h-4' : iconSize === 'large' ? 'w-10 h-10' : 'w-7 h-7';
     const sizeClassList = iconSize === 'small' ? 'w-5 h-5' : iconSize === 'large' ? 'w-12 h-12' : 'w-7 h-7';
     if (mode === 'list') {
+      // Show all bookmarks in a scrollable container (max 5 visible at a time)
       return (
-        <div className="flex flex-col gap-2 p-3">
+        <div className="flex flex-col gap-2 p-3 max-h-64 overflow-y-auto" style={{ maxHeight: '220px', minHeight: '0' }}>
           {uniqueBookmarks.map((item) => (
             <a
               key={item.id}
@@ -1772,8 +1789,19 @@ const Anotherpage = ({ pageId = "home" }) => {
       );
     }
     if (mode === 'grid') {
+      // Show 3 rows (5 columns per row) in a scrollable grid
+      const maxRows = 2.5;
+      const columns = 5;
+      // Icon size affects row height, so set a fixed height per row
+      let rowHeight = 70; // default for medium
+      if (iconSize === 'small') rowHeight = 50;
+      if (iconSize === 'large') rowHeight = 100;
+      const gridHeight = rowHeight * maxRows + 16; // +16 for padding/gap
       return (
-        <div className="grid grid-cols-5 gap-2 p-3">
+        <div
+          className="grid grid-cols-5 gap-2 p-3 overflow-y-auto"
+          style={{ maxHeight: `${gridHeight}px`, minHeight: '0' }}
+        >
           {uniqueBookmarks.map((item) => (
             <a
               key={item.id}
@@ -2124,7 +2152,8 @@ const Anotherpage = ({ pageId = "home" }) => {
       setSelectedCategory(value);
       if (firestoreUser) {
         const userDocRef = doc(db, "users", firestoreUser.uid);
-        await setDoc(userDocRef, { selectedCategory: value }, { merge: true });
+        const professionId = categoryToProfessionId[value] || "other";
+        await setDoc(userDocRef, { selectedCategory: value, profession: professionId }, { merge: true });
       } else {
         localStorage.setItem('selectedCategory', value);
       }
@@ -2158,7 +2187,16 @@ const Anotherpage = ({ pageId = "home" }) => {
               overlay={
                 <Menu style={{ width: 250, maxHeight: 280, overflowY: 'auto' }}>
                   {filteredCategories.map(cat => (
-                    <Menu.Item key={cat} onClick={() => setSelectedCategory(cat)}>
+                    <Menu.Item key={cat} onClick={async () => {
+                      setSelectedCategory(cat);
+                      if (firestoreUser) {
+                        const userDocRef = doc(db, "users", firestoreUser.uid);
+                        const professionId = categoryToProfessionId[cat] || "other";
+                        await setDoc(userDocRef, { selectedCategory: cat, profession: professionId }, { merge: true });
+                      } else {
+                        localStorage.setItem('selectedCategory', cat);
+                      }
+                    }}>
                       {cat}
                     </Menu.Item>
                   ))}
@@ -2217,7 +2255,7 @@ const Anotherpage = ({ pageId = "home" }) => {
         {/* Right: Search and Three-dot Menu */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 1, marginRight: 7 }}>
           {/* Search Input/Button */}
-          <div style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center', gap: 1, marginRight: 2 }}>
+          <div style={{  position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center', gap: 1, marginRight: 2 }}>
             {searchOpen ? (
               <form
                 onSubmit={handleGlobalSearch}

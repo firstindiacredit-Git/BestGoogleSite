@@ -55,6 +55,9 @@ const ProfilePage = () => {
   const [activeSection, setActiveSection] = useState("profile");
   const [userProfession, setUserProfession] = useState("");
   const [isEditingProfession, setIsEditingProfession] = useState(false);
+  const [userInterest, setUserInterest] = useState('');
+  const [interestOptions, setInterestOptions] = useState([{ id: 'all', name: 'All Interests' }]);
+  const [interestLoading, setInterestLoading] = useState(true);
 
   const professions = [
     {
@@ -216,6 +219,37 @@ const ProfilePage = () => {
 
     return () => unsubscribe();
   }, [navigate]);
+
+  useEffect(() => {
+    async function fetchInterests() {
+      try {
+        const snap = await getDoc(doc(db, "users", userId));
+        const userData = snap.exists() ? snap.data() : {};
+        setUserInterest(userData.selectedInterest || 'not_select');
+      } catch {
+        setUserInterest('not_select');
+      }
+      setInterestLoading(false);
+    }
+    if (userId) fetchInterests();
+  }, [userId]);
+
+  useEffect(() => {
+    async function fetchInterestOptions() {
+      try {
+        const { getDocs, collection } = await import('firebase/firestore');
+        const snap = await getDocs(collection(db, 'interests'));
+        const options = [{ id: 'all', name: 'All Interests' }];
+        snap.forEach(doc => {
+          options.push({ id: doc.id, name: doc.data().name });
+        });
+        setInterestOptions(options);
+      } catch {
+        setInterestOptions([{ id: 'all', name: 'All Interests' }]);
+      }
+    }
+    fetchInterestOptions();
+  }, []);
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
@@ -835,6 +869,14 @@ const ProfilePage = () => {
                     </p>
                     <p className="text-gray-700 dark:text-gray-300">
                       {getProfessionDisplayName(userProfession)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Interest
+                    </p>
+                    <p className="text-gray-700 dark:text-gray-300">
+                      {interestLoading ? 'Loading...' : (interestOptions.find(i => i.id === userInterest)?.name || 'Not selected')}
                     </p>
                   </div>
                 </div>

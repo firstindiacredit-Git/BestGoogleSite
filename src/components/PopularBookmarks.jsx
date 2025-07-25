@@ -171,7 +171,7 @@ function PopularBookmarks() {
   const { country: selectedCountry } = useCountry();
 
   // User profile data for filtering
-  const [userProfession, setUserProfession] = useState("");
+  const [userProfession, setUserProfession] = useState("ai_automation");
 
   const [categoryViewModes, setCategoryViewModes] = useState(() => {
     const savedViewModes = localStorage.getItem("categoryViewModes");
@@ -562,8 +562,8 @@ function PopularBookmarks() {
         // Fetch user profile data for filtering
         try {
           const userDoc = await getDoc(doc(db, "users", currentUser.uid));
-          const userData = userDoc.data();
-          setUserProfession(userData?.profession || "");
+          // const userData = userDoc.data();
+          // Do not setUserProfession here!
         } catch (error) {
           console.error("Error fetching user profile:", error);
         }
@@ -745,33 +745,7 @@ function PopularBookmarks() {
         const userBookmarkUrls = new Set(userBookmarks.map((b) => `${b.categoryId}-${b.url}`));
 
         // Fetch admin bookmarks for each admin category
-        // const adminBookmarksPromises = adminCategories.map(async (category) => {
-        //   const bookmarksSnapshot = await getDocs(query(collection(db, "links"), where("category", "==", category.id)));
-        //   return bookmarksSnapshot.docs.map((doc) => {
-        //     const data = doc.data();
-        //     const key = `${category.id}-${data.link}`;
-        //     if (userBookmarkUrls.has(key)) return null;
-        //     return {
-        //       id: doc.id,
-        //       ...data,
-        //       title: data.name,
-        //       url: data.link,
-        //       categoryId: category.id,
-        //       isHidden: hiddenIds.includes(doc.id),
-        //       isAdminBookmark: true,
-        //       createdBy: data.createdBy,
-        //       updatedAt: data.updatedAt,
-        //       order: data.order || 0,
-        //     };
-        //   }).filter(Boolean).filter((bookmark) => !hiddenIds.includes(bookmark.id));
-        // });
-        // const adminBookmarks = (await Promise.all(adminBookmarksPromises)).flat();
-        // console.log('Admin bookmarks loaded:', adminBookmarks.length);
-
-        // Also fetch admin bookmarks for categories that might not be in adminCategories but are in matchingCategories
-        const additionalAdminBookmarksPromises = matchingCategories
-          .filter(cat => cat.isAdminCategory && !adminCategories.find(ac => ac.id === cat.id))
-          .map(async (category) => {
+        const adminBookmarksPromises = adminCategories.map(async (category) => {
             const bookmarksSnapshot = await getDocs(query(collection(db, "links"), where("category", "==", category.id)));
             return bookmarksSnapshot.docs.map((doc) => {
               const data = doc.data();
@@ -791,13 +765,10 @@ function PopularBookmarks() {
               };
             }).filter(Boolean).filter((bookmark) => !hiddenIds.includes(bookmark.id));
           });
-        const additionalAdminBookmarks = (await Promise.all(additionalAdminBookmarksPromises)).flat();
-
-        // Combine all admin bookmarks
-        const allAdminBookmarks = [...adminCategories, ...additionalAdminBookmarks];
+        const adminBookmarks = (await Promise.all(adminBookmarksPromises)).flat();
 
         // Combine all bookmarks
-        const allBookmarks = [...userBookmarks, ...allAdminBookmarks];
+        const allBookmarks = [...userBookmarks, ...adminBookmarks];
 
         // Open categories
         const savedOpenStates = localStorage.getItem("categoryOpenStates");
@@ -827,7 +798,7 @@ function PopularBookmarks() {
           // Debug logging
           console.log('Categories loaded:', matchingCategories.length);
           console.log('User bookmarks loaded:', userBookmarks.length);
-          console.log('Admin bookmarks loaded:', allAdminBookmarks.length);
+          console.log('Admin bookmarks loaded:', adminBookmarks.length);
           console.log('Total bookmarks:', allBookmarks.length);
         }
       } catch (error) {
@@ -869,6 +840,35 @@ function PopularBookmarks() {
           const allCategories = [...adminCategories, ...userCategories].sort((a, b) => (a.order || 0) - (b.order || 0));
           const filteredCategories = getFilteredCategories(allCategories, false);
           setCategories(filteredCategories);
+
+          // Update categoryColumns to match new categories
+          setCategoryColumns(prevColumns => {
+            // Flatten all current category IDs in columns
+            const allColIds = Object.values(prevColumns).flat();
+            // Only keep IDs that are in filteredCategories
+            const validIds = filteredCategories.map(cat => cat.id);
+            // Remove any IDs not in validIds
+            let newColumns = {};
+            let colCount = Object.keys(prevColumns).length || 4;
+            for (let col = 1; col <= colCount; col++) {
+              newColumns[`column${col}`] = [];
+            }
+            // Distribute validIds equally among columns
+            validIds.forEach((id, i) => {
+              const col = (i % colCount) + 1;
+              newColumns[`column${col}`].push(id);
+            });
+            // Persist to Firestore
+            const userDocRef = doc(db, "users", user.uid);
+            updateDoc(userDocRef, {
+              categoryPositions: {
+                columns: newColumns,
+                columnCount: colCount,
+                lastUpdated: new Date().toISOString(),
+              },
+            }).catch((err) => console.error("Error updating columns after profession change:", err));
+            return newColumns;
+          });
         } catch (error) {
           console.error("Error refiltering categories:", error);
         }
@@ -3249,21 +3249,21 @@ function PopularBookmarks() {
 
   // --- 1. Add a helper to batch fetch like counts ---
   const batchFetchBookmarkLikes = async (bookmarkIds, db) => {
-    if (!bookmarkIds.length) return {};
+    if (!bookmarkIds.length) return { likeCounts: {}, userLiked: {} };
     const likeCounts = {};
     const userLiked = {};
-    // Firestore 'in' queries are limited to 10
-    const batchSize = 10;
-    for (let i = 0; i < bookmarkIds.length; i += batchSize) {
-      const batchIds = bookmarkIds.slice(i, i + batchSize);
-      const q = query(collection(db, "bookmarkLikes"), where("bookmarkId", "in", batchIds));
-      const snap = await getDocs(q);
-      snap.docs.forEach(docSnap => {
+    // Firestore does not support 'in' queries on document ID, so fetch each doc by ID
+    await Promise.all(bookmarkIds.map(async (id) => {
+      const docSnap = await getDoc(doc(db, "bookmarkLikes", id));
+      if (docSnap.exists()) {
         const data = docSnap.data();
-        likeCounts[data.bookmarkId] = data.likes || 0;
-        userLiked[data.bookmarkId] = data.likedBy || [];
-      });
+        likeCounts[id] = data.likes || 0;
+        userLiked[id] = data.likedBy || [];
+      } else {
+        likeCounts[id] = 0;
+        userLiked[id] = [];
     }
+    }));
     return { likeCounts, userLiked };
   };
   // --- 2. Refactor loadBookmarkLikeCounts to use batch fetch ---
@@ -3277,6 +3277,7 @@ function PopularBookmarks() {
       if (!adminBookmarks.length) return;
 
       const bookmarkIds = adminBookmarks.map(b => b.id);
+      if (!bookmarkIds.length) return;
       const { likeCounts, userLiked } = await batchFetchBookmarkLikes(bookmarkIds, db);
       const userId = user?.uid;
 
@@ -3505,19 +3506,20 @@ function PopularBookmarks() {
 
   // Profession options
   const professionOptions = [
-    { id: "developer", name: "Developer", icon: "💻" },
-    { id: "designer", name: "Designer", icon: "🎨" },
-    { id: "digital_marketer", name: "Marketer", icon: "📱" },
-    { id: "student", name: "Student", icon: "🎓" },
-    { id: "teacher", name: "Teacher", icon: "👩‍🏫" },
-    { id: "entrepreneur", name: "Founder", icon: "💼" },
-    { id: "freelancer", name: "Freelancer", icon: "🆓" },
-    { id: "consultant", name: "Consultant", icon: "💡" },
-    { id: "working_professional", name: "Professional", icon: "👔" },
-    { id: "researcher", name: "Researcher", icon: "🔬" },
-    { id: "it_support", name: "IT Support", icon: "🛠️" },
-    { id: "medical", name: "Medical", icon: "⚕️" },
-    { id: "other", name: "Other", icon: "✨" },
+    // { id: "developer", name: "Developer", icon: "💻" },
+    // { id: "designer", name: "Designer", icon: "🎨" },
+    // { id: "digital_marketer", name: "Marketer", icon: "📱" },
+    // { id: "student", name: "Student", icon: "🎓" },
+    // { id: "teacher", name: "Teacher", icon: "👩‍🏫" },
+    // { id: "entrepreneur", name: "Founder", icon: "💼" },
+    // { id: "freelancer", name: "Freelancer", icon: "🆓" },
+    // { id: "consultant", name: "Consultant", icon: "💡" },
+    // { id: "working_professional", name: "Professional", icon: "👔" },
+    // { id: "researcher", name: "Researcher", icon: "🔬" },
+    // { id: "it_support", name: "IT Support", icon: "🛠️" },
+    // { id: "medical", name: "Medical", icon: "⚕️" },
+    // { id: "other", name: "Other", icon: "✨" },
+    { id: "all", name: "All Professions" },
     { id: "bpo", name: "BPO" },
     { id: "productivity_management", name: "Productivity & Task Management" },
     { id: "ai_automation", name: "AI Tools & Automation" },
@@ -3547,7 +3549,7 @@ function PopularBookmarks() {
     { id: "home_lifestyle", name: "Home & Lifestyle" },
     { id: "analytics_reporting", name: "Analytics & Reporting" },
     { id: "startup_indie_tools", name: "Startup Directories & Indie Tools" },
-    { id: "all", name: "All Professions", icon: "🌐" },
+    
   ];
 
   // Helper to get profession display name
@@ -3564,7 +3566,7 @@ function PopularBookmarks() {
 
   // Add profession selection bar at the top
   const renderProfessionBar = () => (
-    <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
+    <div className="flex flex-wrap items-center gap-2 mb-4">
       {professionOptions.map((option) => (
         <button
           key={option.id}
@@ -3572,9 +3574,9 @@ function PopularBookmarks() {
             setUserProfession(option.id);
           }}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${userProfession === option.id
-              ? "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700"
-              : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700"
-            }`}
+            ? "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700"
+            : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700"
+          }`}
         >
           <span>{option.icon}</span>
           <span className="text-sm font-medium">{option.name}</span>
