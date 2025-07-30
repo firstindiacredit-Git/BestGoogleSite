@@ -221,7 +221,7 @@ function PopularBookmarks() {
   const [availableCategories, setAvailableCategories] = useState([]);
   const [categorySearch, setCategorySearch] = useState("");
   // Add state for show more/less categories
-  const [showAllCategories, setShowAllCategories] = useState(false);
+
   // Add state for search bar visibility
   const [isSearchBarOpen, setIsSearchBarOpen] = useState(false);
 
@@ -1967,28 +1967,7 @@ function PopularBookmarks() {
     );
   };
 
-  // Helper to get categories to display based on showAllCategories
-  const getVisibleCategoryIds = () => {
-    const allCategoryIds = Object.values(categoryColumns).flat();
-    if (showAllCategories || allCategoryIds.length <= 16) return allCategoryIds;
-    return allCategoryIds.slice(0, 16);
-  };
 
-  // Helper to distribute category IDs equally among columns
-  const getDistributedCategoryColumns = () => {
-    const visibleCategoryIds = getVisibleCategoryIds();
-    const distributed = {};
-    const perCol = Math.floor(visibleCategoryIds.length / columnCount);
-    let extra = visibleCategoryIds.length % columnCount;
-    let idx = 0;
-    for (let col = 1; col <= columnCount; col++) {
-      const count = perCol + (extra > 0 ? 1 : 0);
-      distributed[`column${col}`] = visibleCategoryIds.slice(idx, idx + count);
-      idx += count;
-      if (extra > 0) extra--;
-    }
-    return distributed;
-  };
 
   const renderBookmarksByCategory = () => {
     const areAllOpen =
@@ -2023,8 +2002,40 @@ function PopularBookmarks() {
       );
     };
 
-    // Filter categories: show if category name matches OR any bookmark matches
-    const filteredCategoryIds = Object.values(categoryColumns)
+
+
+
+
+    // Helper: group categories by profession
+    const groupCategoriesByProfession = (categoryIds) => {
+      const grouped = {};
+      
+      categoryIds.forEach(catId => {
+        const category = categories.find(c => c.id === catId);
+        if (!category) return;
+        
+        // For admin categories, use their professions array
+        if (category.isAdminCategory && category.professions) {
+          category.professions.forEach(profession => {
+            if (!grouped[profession]) {
+              grouped[profession] = [];
+            }
+            grouped[profession].push(category);
+          });
+        } else {
+          // For user categories, group under "User Categories"
+          if (!grouped['user_categories']) {
+            grouped['user_categories'] = [];
+          }
+          grouped['user_categories'].push(category);
+        }
+      });
+      
+      return grouped;
+    };
+
+    // Get all filtered categories and group them by profession
+    const allFilteredCategories = Object.values(categoryColumns)
       .flat()
       .filter((catId) => {
         const cat = categories.find((c) => c.id === catId);
@@ -2036,62 +2047,7 @@ function PopularBookmarks() {
         return catLinks.some(bookmarkMatches);
       });
 
-    // Helper: get all filtered categories in the user's column structure
-    const getAllColumns = () => {
-      const result = {};
-      for (let col = 1; col <= columnCount; col++) {
-        const colKey = `column${col}`;
-        result[colKey] = (categoryColumns[colKey] || []).filter(catId => filteredCategoryIds.includes(catId));
-      }
-      return result;
-    };
-
-    // Helper: get visible category IDs in the user's column structure, up to a total limit, distributed equally among columns
-    const getLimitedColumns = (limit) => {
-      // Step 1: Gather filtered categories per column, preserving order
-      const perColumn = {};
-      for (let col = 1; col <= columnCount; col++) {
-        const colKey = `column${col}`;
-        perColumn[colKey] = (categoryColumns[colKey] || []).filter(catId => filteredCategoryIds.includes(catId));
-      }
-      // Step 2: Calculate how many per column
-      const basePerCol = Math.floor(limit / columnCount);
-      let remainder = limit % columnCount;
-      // Step 3: Build result with up to basePerCol + 1 (if remainder > 0) per column
-      const result = {};
-      let used = 0;
-      for (let col = 1; col <= columnCount; col++) {
-        const colKey = `column${col}`;
-        let take = basePerCol + (remainder > 0 ? 1 : 0);
-        remainder = Math.max(0, remainder - 1);
-        result[colKey] = perColumn[colKey].slice(0, take);
-        used += result[colKey].length;
-      }
-      // If for some reason we have more than limit (e.g. not enough in some columns), trim extra from the end
-      if (used > limit) {
-        // Flatten, trim, then rebuild columns
-        const all = [];
-        for (let col = 1; col <= columnCount; col++) {
-          for (const catId of result[`column${col}`]) {
-            all.push({ col, catId });
-          }
-        }
-        const trimmed = all.slice(0, limit);
-        // Rebuild columns
-        const newResult = {};
-        for (let col = 1; col <= columnCount; col++) newResult[`column${col}`] = [];
-        trimmed.forEach(({ col, catId }) => {
-          newResult[`column${col}`].push(catId);
-        });
-        return newResult;
-      }
-      return result;
-    };
-
-    // Decide which columns to render
-    const columnsToRender = showAllCategories
-      ? getAllColumns()
-      : getLimitedColumns(16);
+    const groupedCategories = groupCategoriesByProfession(allFilteredCategories);
 
     return (
       <div className="mb-2">
@@ -2315,15 +2271,46 @@ function PopularBookmarks() {
 
 
 
+        {/* Profession Headers Section */}
+        <div className="mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {Object.entries(groupedCategories).map(([professionId, categories]) => {
+              const professionName = professionId === 'user_categories' 
+                ? 'User Categories' 
+                : getProfessionDisplayName(professionId);
+              const professionIcon = professionId === 'user_categories' 
+                ? '👤' 
+                : getProfessionIcon(professionId);
+              
+              return (
+                <div key={professionId} className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-700 shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{professionIcon}</span>
+                    <div>
+                      <h3 className="text-lg font-bold text-blue-800 dark:text-blue-200">
+                        {professionName}
+                      </h3>
+                      <p className="text-sm text-blue-600 dark:text-blue-300">
+                        {categories.length} category{categories.length !== 1 ? 'ies' : 'y'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Categories Section - 4 Columns */}
         <DragDropContext onDragEnd={onDragEnd}>
           <Row gutter={[16, 16]}>
-            {Array.from({ length: columnCount }, (_, i) => i + 1).map(
+            {Array.from({ length: 4 }, (_, i) => i + 1).map(
               (colNum) => (
                 <Col
                   key={`column${colNum}`}
                   xs={24}
-                  sm={columnCount <= 2 ? 12 : 24}
-                  lg={24 / columnCount}
+                  sm={12}
+                  lg={6}
                 >
                   <Droppable droppableId={`column${colNum}`}>
                     {(provided, snapshot) => (
@@ -2335,13 +2322,23 @@ function PopularBookmarks() {
                             : "bg-transparent border-2 border-dashed border-transparent"
                           }`}
                       >
-                        {columnsToRender[`column${colNum}`]?.map(
-                          (categoryId, index) => {
-                            const category = categories.find(
-                              (c) => c.id === categoryId
-                            );
-                            if (!category) return null;
-
+                        {(() => {
+                          // Distribute all categories across 4 columns
+                          const allCategories = Object.values(groupedCategories).flat();
+                          const categoriesForThisColumn = [];
+                          let draggableIndex = 0;
+                          
+                          allCategories.forEach((category, index) => {
+                            const shouldIncludeInThisColumn = index % 4 === (colNum - 1);
+                            if (shouldIncludeInThisColumn) {
+                              categoriesForThisColumn.push({
+                                category,
+                                draggableIndex: draggableIndex++
+                              });
+                            }
+                          });
+                          
+                          return categoriesForThisColumn.map(({ category, draggableIndex }) => {
                             // Get bookmarks for this category, filter by search if needed
                             let categoryLinks = getCategoryLinks(category.id);
                             // Determine if this category is included because of a name match
@@ -2355,7 +2352,7 @@ function PopularBookmarks() {
                               <Draggable
                                 key={category.id}
                                 draggableId={category.id}
-                                index={index}
+                                index={draggableIndex}
                               >
                                 {(provided, snapshot) => (
                                   <div
@@ -2424,18 +2421,6 @@ function PopularBookmarks() {
                                                         🇮🇳 India
                                                       </span>
                                                     )}
-                                                    {/* Profession indicator */}
-                                                    {/* {category.professions?.includes(userProfession) && (
-                                                      <span className="px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded">
-                                                        {userProfession}
-                                              </span>
-                                                    )} */}
-                                                    {/* Interest indicator */}
-                                                    {/* {category.interests?.some(i => mainInterests.includes(i)) && (
-                                                      <span className="px-2 py-0.5 text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 rounded">
-                                                        Interest Match
-                                                      </span>
-                                                    )} */}
                                                   </div>
                                                 )}
                                               </div>
@@ -2557,8 +2542,8 @@ function PopularBookmarks() {
                                 )}
                               </Draggable>
                             );
-                          }
-                        )}
+                          });
+                        })()}
                         {provided.placeholder}
                       </div>
                     )}
@@ -2568,17 +2553,9 @@ function PopularBookmarks() {
             )}
           </Row>
         </DragDropContext>
-        {/* Show More/Less Button */}
-        {filteredCategoryIds.length > 16 && (
-          <div className="flex justify-center mt-4">
-            <AntButton onClick={() => setShowAllCategories((prev) => !prev)}>
-              {showAllCategories ? "Show Less" : "Show More"}
-            </AntButton>
-          </div>
-        )}
 
         {/* No Categories Message */}
-        {filteredCategoryIds.length === 0 && userProfession && (
+        {Object.keys(groupedCategories).length === 0 && userProfession && (
           <div className="text-center py-8">
             <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6 max-w-md mx-auto">
               <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
