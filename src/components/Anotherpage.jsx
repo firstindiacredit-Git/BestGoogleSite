@@ -34,11 +34,12 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { collection as fsCollection, getDocs as fsGetDocs } from "firebase/firestore";
 
 const defaultCategoryList = [
-  "Designer (UI/UX, Graphic, Web)", "Developer / Programmer", "Digital Marketer", "Student", "Teacher / Educator", "Enterprener / Founder", "Freelancer(Creative or Technical)", "Consultant / Advisor", "Working Professional", "Reseacher / Academic", "IT / Tech Support", "Medical Professional"
+  "Not Selected", "Designer (UI/UX, Graphic, Web)", "Developer / Programmer", "Digital Marketer", "Student", "Teacher / Educator", "Enterprener / Founder", "Freelancer(Creative or Technical)", "Consultant / Advisor", "Working Professional", "Reseacher / Academic", "IT / Tech Support", "Medical Professional"
 ];
 
 // Mapping from category name to profession ID
 const categoryToProfessionId = {
+  "Not Selected": "not_selected",
   "Developer / Programmer": "developer",
   "Designer (UI/UX, Graphic, Web)": "designer",
   "Digital Marketer": "digital_marketer",
@@ -118,12 +119,17 @@ const Anotherpage = ({ pageId = "home" }) => {
     const savedState = localStorage.getItem("collapsedItems");
     return savedState ? JSON.parse(savedState) : {};
   });
+
+  // Demo mode state for logged out users
+  const [isDemoMode, setIsDemoMode] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
   // --- Persist last selected category in localStorage ---
   // On mount, read from localStorage
   const localCategoryKey = 'selectedCategory';
   const getInitialCategory = () => {
     const saved = localStorage.getItem(localCategoryKey);
-    return saved ? saved : 'Designer (UI/UX, Graphic, Web)';
+    return saved ? saved : 'Not Selected';
   };
   const [selectedCategory, setSelectedCategory] = useState(getInitialCategory());
   // Add state for selected profession
@@ -133,6 +139,13 @@ const Anotherpage = ({ pageId = "home" }) => {
   useEffect(() => {
     localStorage.setItem(localCategoryKey, selectedCategory);
   }, [selectedCategory]);
+
+  // Handle dropdown clicks in demo mode
+  const handleDropdownClick = () => {
+    if (isDemoMode) {
+      setShowLoginModal(true);
+    }
+  };
   
   useEffect(() => {
     const fetchCategories = async () => {
@@ -214,14 +227,17 @@ const Anotherpage = ({ pageId = "home" }) => {
           .finally(() => {
             setInterestLoading(false);
           });
+        setIsDemoMode(false);
       } else {
         const saved = localStorage.getItem('selectedInterest');
         setSelectedInterest(saved || 'not_select');
         setInterestLoading(false);
+        setIsDemoMode(true);
       }
       setFirestoreUser(user);
     }) : () => {
       setInterestLoading(false);
+      setIsDemoMode(true);
     };
     return () => unsubscribe();
   }, []);
@@ -249,6 +265,19 @@ const Anotherpage = ({ pageId = "home" }) => {
 
   // Fetch bookmarks for a subcategory from Firestore (only when expanded)
   const fetchSubcatBookmarks = async (subcat) => {
+    // If in demo mode (logged out), use hardcoded bookmarks
+    if (isDemoMode) {
+      // Find the category that contains this subcategory
+      let foundBookmarks = [];
+      Object.entries(defaultBookmarks).forEach(([, subcategories]) => {
+        if (subcategories[subcat]) {
+          foundBookmarks = subcategories[subcat];
+        }
+      });
+      setSubcatBookmarks(prev => ({ ...prev, [subcat]: foundBookmarks }));
+      return;
+    }
+
     // If an interest is selected, fetch bookmarks based on interestId
     if (selectedInterest !== 'not_select' && selectedInterest !== 'all') {
       const q = query(collection(db, "links"), where("interestId", "==", selectedInterest), where("subcategory", "==", subcat));
@@ -298,7 +327,7 @@ const Anotherpage = ({ pageId = "home" }) => {
     // 4. Combine and set bookmarks.
     setSubcatBookmarks((prev) => ({
       ...prev,
-      [subcat]: [...adminBookmarks, ...userBookmarks]
+      [subcat]: [...adminBookmarks, ...userBookmarks],
     }));
   };
 
@@ -338,50 +367,65 @@ const Anotherpage = ({ pageId = "home" }) => {
       authInstance,
       async (currentUser) => {
         setUser(currentUser);
+        
+        // Check if this is a new page (not "home")
+        const isNewPage = pageId !== "home";
+        
         if (currentUser) {
           const layout = await getPageLayout(currentUser.uid, pageId);
           if (layout && layout.widgets && layout.columns) {
             setItems(layout.widgets);
-            setColumns(layout.columns); // <-- THIS MUST BE 4 after Default!
+            setColumns(layout.columns);
+          } else if (isNewPage) {
+            // For new pages, start with empty layout
+            setItems([]);
+            setColumns(4);
           } else {
             setItems(defaultWidgets[pageId] || []);
             setColumns(4);
           }
         } else {
           let localLayout = getFromLocalStorage();
-          // Always force the 4 widgets to be in the correct columns/positions
-          const forceWidgets = [
-            { id: 'imageUploader', column: 3, name: 'Image Uploader', position: 0 },
-            { id: 'NewsFeed', column: 3, name: 'News Feed', position: 1 },
-            { id: 'notepad', column: 3, name: 'Notepad ', position: 2 },
-            { id: 'Todo', column: 3, name: 'To Do List', position: 3 },
-          ];
-          let widgets = (localLayout && localLayout.widgets) ? [...localLayout.widgets] : (defaultWidgets[pageId] ? [...defaultWidgets[pageId]] : []);
-          // Remove any of the 4 widgets if present
-          widgets = widgets.filter(w => !forceWidgets.some(fw => fw.id === w.id));
-          // Start with the forced widgets in their columns/positions
-          let newWidgets = forceWidgets.map(fw => ({
-            id: fw.id,
-            name: fw.name,
-            isOpen: true,
-            column: fw.column,
-            position: fw.position,
-          }));
-          // For all other widgets, distribute them after the forced widgets in their column
-          let colPositions = [0, 0, 0, 4]; // next position for each column (col 3 starts at 4)
-          widgets.forEach(w => {
-            // If column is not set or out of range, put in column 0
-            let col = (typeof w.column === 'number' && w.column >= 0 && w.column < 4) ? w.column : 0;
-            // If col is 3, start after the 4 forced widgets
-            let pos = col === 3 ? colPositions[3]++ : colPositions[col]++;
-            newWidgets.push({
-              ...w,
-              column: col,
-              position: pos,
+          
+          if (isNewPage) {
+            // For new pages, start with empty layout
+            setItems([]);
+            setColumns(4);
+          } else {
+            // Always force the 4 widgets to be in the correct columns/positions
+            const forceWidgets = [
+              { id: 'imageUploader', column: 3, name: 'Image Uploader', position: 0 },
+              { id: 'NewsFeed', column: 3, name: 'News Feed', position: 1 },
+              { id: 'notepad', column: 3, name: 'Notepad ', position: 2 },
+              { id: 'Todo', column: 3, name: 'To Do List', position: 3 },
+            ];
+            let widgets = (localLayout && localLayout.widgets) ? [...localLayout.widgets] : (defaultWidgets[pageId] ? [...defaultWidgets[pageId]] : []);
+            // Remove any of the 4 widgets if present
+            widgets = widgets.filter(w => !forceWidgets.some(fw => fw.id === w.id));
+            // Start with the forced widgets in their columns/positions
+            let newWidgets = forceWidgets.map(fw => ({
+              id: fw.id,
+              name: fw.name,
+              isOpen: true,
+              column: fw.column,
+              position: fw.position,
+            }));
+            // For all other widgets, distribute them after the forced widgets in their column
+            let colPositions = [0, 0, 0, 4]; // next position for each column (col 3 starts at 4)
+            widgets.forEach(w => {
+              // If column is not set or out of range, put in column 0
+              let col = (typeof w.column === 'number' && w.column >= 0 && w.column < 4) ? w.column : 0;
+              // If col is 3, start after the 4 forced widgets
+              let pos = col === 3 ? colPositions[3]++ : colPositions[col]++;
+              newWidgets.push({
+                ...w,
+                column: col,
+                position: pos,
+              });
             });
-          });
-          setItems(newWidgets);
-          setColumns(4);
+            setItems(newWidgets);
+            setColumns(4);
+          }
         }
         setLoading(false);
       }
@@ -1139,11 +1183,18 @@ const Anotherpage = ({ pageId = "home" }) => {
   const [selectedInterest, setSelectedInterest] = useState(getInitialInterest());
   const [interestOptions, setInterestOptions] = useState([{ id: 'all', name: 'All Interests' }]);
   const [interestSubcats, setInterestSubcats] = useState([]); // [{name: string}]
+  const [isAutoCategoryChange, setIsAutoCategoryChange] = useState(false);
 
-  // Reset selectedInterest when selectedCategory changes
+  // Reset selectedInterest when selectedCategory changes, but keep interest if "Not Selected" is chosen
   useEffect(() => {
-    setSelectedInterest('not_select');
-  }, [selectedCategory]);
+    if (selectedCategory !== 'Not Selected' && !isAutoCategoryChange) {
+      setSelectedInterest('not_select');
+    }
+    // Reset the auto change flag
+    if (isAutoCategoryChange) {
+      setIsAutoCategoryChange(false);
+    }
+  }, [selectedCategory, isAutoCategoryChange]);
 
   // Fetch interests from Firestore only if user is authenticated
   useEffect(() => {
@@ -1190,7 +1241,14 @@ const Anotherpage = ({ pageId = "home" }) => {
   // --- Update subcats logic to use interest if selected ---
   const subcats = (selectedInterest !== 'not_select' && selectedInterest !== 'all')
     ? interestSubcats
-    : firestoreSubcats;
+    : (selectedCategory === 'Not Selected' && selectedInterest !== 'not_select')
+      ? interestSubcats // Show interests when "Not Selected" is chosen and interest is selected
+      : (isDemoMode 
+          ? Object.keys(defaultBookmarks[selectedCategory] || {}).map(name => ({ name }))
+          : (firestoreSubcats.length > 0 
+              ? firestoreSubcats 
+              : Object.keys(defaultBookmarks[selectedCategory] || {}).map(name => ({ name }))
+            ));
 
   // Hide interest subcategories when selectedInterest is 'not_select'
   useEffect(() => {
@@ -1201,14 +1259,52 @@ const Anotherpage = ({ pageId = "home" }) => {
 
   // NEW: useEffect to fetch all bookmarks for the current subcategories
   useEffect(() => {
-    (subcats || []).forEach(subcatObj => {
-      const subcatKey = getSubcatKey(subcatObj);
-      if (subcatKey) {
-        fetchSubcatBookmarks(subcatKey);
+    if (isDemoMode) {
+      if (selectedInterest !== 'not_select' && selectedInterest !== 'all') {
+        // Load bookmarks for interest subcategories in demo mode
+        interestSubcats.forEach(subcat => {
+          const subcatName = getSubcatName(subcat);
+          if (subcatName) {
+            fetchSubcatBookmarks(subcatName);
+          }
+        });
+      } else {
+        // Load all bookmarks for first 3 categories and subcategories in demo mode
+        Object.entries(defaultBookmarks).slice(0, 3).forEach(([, subcategories]) => {
+          Object.keys(subcategories).forEach(subcatName => {
+            if (subcatName) {
+              fetchSubcatBookmarks(subcatName);
+            }
+          });
+        });
       }
-    });
+    } else {
+      // Ensure all subcategories for the selected category are loaded
+      const allSubcats = firestoreSubcats.length > 0 
+        ? firestoreSubcats.map(subcat => getSubcatName(subcat))
+        : Object.keys(defaultBookmarks[selectedCategory] || {});
+      
+      allSubcats.forEach(subcatName => {
+        if (subcatName) {
+          fetchSubcatBookmarks(subcatName);
+        }
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [subcats]);
+  }, [selectedCategory, isDemoMode, firestoreSubcats, selectedInterest, interestSubcats]);
+
+  // NEW: useEffect to fetch bookmarks for interest subcategories
+  useEffect(() => {
+    if (selectedInterest !== 'not_select' && selectedInterest !== 'all' && interestSubcats.length > 0) {
+      interestSubcats.forEach(subcat => {
+        const subcatName = getSubcatName(subcat);
+        if (subcatName) {
+          fetchSubcatBookmarks(subcatName);
+        }
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedInterest, interestSubcats]);
 
   // Build the widgets to render: all normal widgets + subcategory widgets
   const allWidgetItems = [
@@ -1221,34 +1317,87 @@ const Anotherpage = ({ pageId = "home" }) => {
       component,
         defaultColumn: 0,
     })),
-    // Subcategory cards
-    ...subcats
-      .filter(subcat => subcat !== null && subcat !== undefined && getSubcatName(subcat))
-      .map((subcat, index) => {
-        const subcatKey = getSubcatKey(subcat);
-        const subcatName = getSubcatName(subcat);
-        const bookmarks = firestoreUser
-          ? (subcatBookmarks[subcatKey] || [])
-          : (defaultBookmarks[selectedCategory]?.[subcatName] || []);
-        const displayMode = subcatDisplayModes[subcatKey] || 'list';
-        const iconSize = subcatIconSizes[subcatKey] || 'medium';
-        return {
-          id: `subcat_${subcatKey}`,
-          type: 'subcat',
-          component: (
-            <SubcategoryCard
-              key={subcatKey}
-              subcat={subcat}
-              bookmarks={bookmarks}
-              displayMode={displayMode}
-              iconSize={iconSize}
-              onDisplayModeChange={mode => handleSubcatDisplayMode(subcatKey, mode)}
-              onIconSizeChange={size => handleSubcatIconSize(subcatKey, size)}
-            />
-          ),
-          defaultColumn: (index % 2) + 1,
-        };
-      }),
+    // Subcategory cards - only show if not a new page
+    ...(pageId === "home" ? (isDemoMode 
+        ? (selectedInterest !== 'not_select' && selectedInterest !== 'all')
+          ? // Show interest subcategories in demo mode
+            interestSubcats
+              .filter(subcat => subcat !== null && subcat !== undefined && getSubcatName(subcat))
+              .map((subcat, index) => {
+                const subcatKey = getSubcatKey(subcat);
+                const subcatName = getSubcatName(subcat);
+                const bookmarks = subcatBookmarks[subcatKey] || [];
+                const displayMode = subcatDisplayModes[subcatKey] || 'grid';
+                const iconSize = subcatIconSizes[subcatKey] || 'medium';
+                return {
+                  id: `subcat_${subcatKey}`,
+                  type: 'subcat',
+                  component: (
+                    <SubcategoryCard
+                      key={subcatKey}
+                      subcat={{ name: subcatName }}
+                      bookmarks={bookmarks}
+                      displayMode={displayMode}
+                      iconSize={iconSize}
+                      onDisplayModeChange={mode => handleSubcatDisplayMode(subcatKey, mode)}
+                      onIconSizeChange={size => handleSubcatIconSize(subcatKey, size)}
+                    />
+                  ),
+                  defaultColumn: (index % 2) + 1,
+                };
+              })
+          : // Show default bookmarks in demo mode
+            Object.entries(defaultBookmarks).slice(0, 3).flatMap(([, subcategories]) => 
+              Object.keys(subcategories).map((subcatName, index) => {
+                const bookmarks = subcatBookmarks[subcatName] || subcategories[subcatName] || [];
+                const displayMode = subcatDisplayModes[subcatName] || 'list';
+                const iconSize = subcatIconSizes[subcatName] || 'medium';
+                return {
+                  id: `subcat_${subcatName}`,
+                  type: 'subcat',
+                  component: (
+                    <SubcategoryCard
+                      key={`${subcatName}`}
+                      subcat={{ name: subcatName }}
+                      bookmarks={bookmarks}
+                      displayMode={displayMode}
+                      iconSize={iconSize}
+                      onDisplayModeChange={mode => handleSubcatDisplayMode(subcatName, mode)}
+                      onIconSizeChange={size => handleSubcatIconSize(subcatName, size)}
+                    />
+                  ),
+                  defaultColumn: (index % 2) + 1,
+                };
+              })
+            )
+        : subcats
+            .filter(subcat => subcat !== null && subcat !== undefined && getSubcatName(subcat))
+            .map((subcat, index) => {
+              const subcatKey = getSubcatKey(subcat);
+              const subcatName = getSubcatName(subcat);
+              const bookmarks = firestoreUser
+                ? (subcatBookmarks[subcatKey] || [])
+                : (defaultBookmarks[selectedCategory]?.[subcatName] || []);
+              const displayMode = subcatDisplayModes[subcatKey] || 'grid';
+              const iconSize = subcatIconSizes[subcatKey] || 'medium';
+              return {
+                id: `subcat_${subcatKey}`,
+                type: 'subcat',
+                component: (
+                  <SubcategoryCard
+                    key={subcatKey}
+                    subcat={{ name: subcatName }}
+                    bookmarks={bookmarks}
+                    displayMode={displayMode}
+                    iconSize={iconSize}
+                    onDisplayModeChange={mode => handleSubcatDisplayMode(subcatKey, mode)}
+                    onIconSizeChange={size => handleSubcatIconSize(subcatKey, size)}
+                  />
+                ),
+                defaultColumn: (index % 2) + 1,
+              };
+            })
+    ) : []),
     // ImageUploader, NewsFeed, Notepad, TodoList
     ...Object.entries(componentMap)
       .filter(([key]) => ['imageUploader', 'NewsFeed', 'notepad', 'Todo'].includes(key))
@@ -1260,10 +1409,118 @@ const Anotherpage = ({ pageId = "home" }) => {
       })),
   ];
 
-  // Only set default layout if items is empty and not on every render
+  // Function to get all available widgets for the controller (including subcategories for new pages)
+  const getAllAvailableWidgetsForController = () => {
+    const baseWidgets = [
+      // Weather, Clock, Calendar, Calculator
+      ...Object.entries(componentMap)
+        .filter(([key]) => ['weather', 'clock', 'calendar', 'calculator'].includes(key))
+        .map(([key, component]) => ({
+          id: key,
+          type: 'widget',
+          component,
+          defaultColumn: 0,
+        })),
+      // ImageUploader, NewsFeed, Notepad, TodoList
+      ...Object.entries(componentMap)
+        .filter(([key]) => ['imageUploader', 'NewsFeed', 'notepad', 'Todo'].includes(key))
+        .map(([key, component]) => ({
+          id: key,
+          type: 'widget',
+          component,
+          defaultColumn: 3,
+        })),
+    ];
+
+    // Add subcategories for controller (always include them)
+    const subcategoryWidgets = (isDemoMode 
+      ? (selectedInterest !== 'not_select' && selectedInterest !== 'all')
+        ? // Show interest subcategories in demo mode
+          interestSubcats
+            .filter(subcat => subcat !== null && subcat !== undefined && getSubcatName(subcat))
+            .map((subcat, index) => {
+              const subcatKey = getSubcatKey(subcat);
+              const subcatName = getSubcatName(subcat);
+              const bookmarks = subcatBookmarks[subcatKey] || [];
+              const displayMode = subcatDisplayModes[subcatKey] || 'list';
+              const iconSize = subcatIconSizes[subcatKey] || 'medium';
+              return {
+                id: `subcat_${subcatKey}`,
+                type: 'subcat',
+                component: (
+                  <SubcategoryCard
+                    key={subcatKey}
+                    subcat={{ name: subcatName }}
+                    bookmarks={bookmarks}
+                    displayMode={displayMode}
+                    iconSize={iconSize}
+                    onDisplayModeChange={mode => handleSubcatDisplayMode(subcatKey, mode)}
+                    onIconSizeChange={size => handleSubcatIconSize(subcatKey, size)}
+                  />
+                ),
+                defaultColumn: (index % 2) + 1,
+              };
+            })
+        : // Show default bookmarks in demo mode
+          Object.entries(defaultBookmarks).slice(0, 3).flatMap(([, subcategories]) => 
+            Object.keys(subcategories).map((subcatName, index) => {
+              const bookmarks = subcatBookmarks[subcatName] || subcategories[subcatName] || [];
+              const displayMode = subcatDisplayModes[subcatName] || 'list';
+              const iconSize = subcatIconSizes[subcatName] || 'medium';
+              return {
+                id: `subcat_${subcatName}`,
+                type: 'subcat',
+                component: (
+                  <SubcategoryCard
+                    key={`${subcatName}`}
+                    subcat={{ name: subcatName }}
+                    bookmarks={bookmarks}
+                    displayMode={displayMode}
+                    iconSize={iconSize}
+                    onDisplayModeChange={mode => handleSubcatDisplayMode(subcatName, mode)}
+                    onIconSizeChange={size => handleSubcatIconSize(subcatName, size)}
+                  />
+                ),
+                defaultColumn: (index % 2) + 1,
+              };
+            })
+          )
+      : subcats
+          .filter(subcat => subcat !== null && subcat !== undefined && getSubcatName(subcat))
+          .map((subcat, index) => {
+            const subcatKey = getSubcatKey(subcat);
+            const subcatName = getSubcatName(subcat);
+            const bookmarks = firestoreUser
+              ? (subcatBookmarks[subcatKey] || [])
+              : (defaultBookmarks[selectedCategory]?.[subcatName] || []);
+            const displayMode = subcatDisplayModes[subcatKey] || 'list';
+            const iconSize = subcatIconSizes[subcatKey] || 'medium';
+            return {
+              id: `subcat_${subcatKey}`,
+              type: 'subcat',
+              component: (
+                <SubcategoryCard
+                  key={subcatKey}
+                  subcat={{ name: subcatName }}
+                  bookmarks={bookmarks}
+                  displayMode={displayMode}
+                  iconSize={iconSize}
+                  onDisplayModeChange={mode => handleSubcatDisplayMode(subcatKey, mode)}
+                  onIconSizeChange={size => handleSubcatIconSize(subcatKey, size)}
+                />
+              ),
+              defaultColumn: (index % 2) + 1,
+            };
+          })
+    );
+
+    return [...baseWidgets, ...subcategoryWidgets];
+  };
+
+  // Only set default layout if items is empty and not on every render (only for home page)
   useEffect(() => {
-    if (!loading && items.length === 0) {
-      // Initialize layout only if items is empty
+    if (!loading && items.length === 0 && pageId === "home") {
+      // Initialize layout only if items is empty and it's the home page
       const initialLayout = allWidgetItems.map((item, idx) => ({
         id: item.id,
         column: item.defaultColumn,
@@ -1273,11 +1530,11 @@ const Anotherpage = ({ pageId = "home" }) => {
       setItems(initialLayout);
     }
     // eslint-disable-next-line
-  }, [loading, allWidgetItems.length]);
+  }, [loading, allWidgetItems.length, pageId]);
 
-  // Ensure all subcategories are always present in items
+  // Ensure all subcategories are always present in items (only for home page)
   useEffect(() => {
-    if (loading) return;
+    if (loading || pageId !== "home") return;
     // Find subcat ids in allWidgetItems
     const subcatIds = allWidgetItems.filter(i => i.type === 'subcat').map(i => i.id);
     // Remove subcat items not in current subcatIds
@@ -1307,11 +1564,35 @@ const Anotherpage = ({ pageId = "home" }) => {
       setItems(filteredItems);
     }
     // eslint-disable-next-line
-  }, [subcats, allWidgetItems.length, items.length, loading]);
+  }, [subcats, allWidgetItems.length, items.length, loading, pageId]);
+
+  // Fetch bookmarks for subcategories when they are added to items
+  useEffect(() => {
+    if (loading) return;
+    
+    // Find subcategories in current items that might need bookmarks fetched
+    const subcatItems = items.filter(item => item.type === 'subcat' && item.id.startsWith('subcat_'));
+    
+    subcatItems.forEach(item => {
+      const subcatName = item.id.replace('subcat_', '');
+      // Only fetch if bookmarks haven't been loaded yet
+      if (!subcatBookmarks[subcatName] || subcatBookmarks[subcatName].length === 0) {
+        fetchSubcatBookmarks(subcatName);
+      }
+    });
+  }, [items, loading]);
 
   // Helper to get the component for a given id
   const getComponentById = (id) => {
-    const found = allWidgetItems.find((item) => item.id === id);
+    // First try to find in allWidgetItems (for home page)
+    let found = allWidgetItems.find((item) => item.id === id);
+    
+    // If not found and it's a subcategory, try to get from controller widgets
+    if (!found && id.startsWith('subcat_')) {
+      const controllerWidgets = getAllAvailableWidgetsForController();
+      found = controllerWidgets.find((item) => item.id === id);
+    }
+    
     return found ? found.component : null;
   };
 
@@ -1401,9 +1682,10 @@ const Anotherpage = ({ pageId = "home" }) => {
       setWidgetPreview(items.map((item) => ({ ...item })));
       setWidgetControllerColumns(columns);
       setHasUnsavedWidgetChanges(false);
-      // Calculate available widgets (not in preview)
+      // Calculate available widgets (not in preview) - include subcategories for controller
       const usedIds = new Set(items.map(item => item.id));
-      const available = allWidgetItems.filter(item => !usedIds.has(item.id));
+      const controllerWidgets = getAllAvailableWidgetsForController();
+      const available = controllerWidgets.filter(item => !usedIds.has(item.id));
       setAvailableWidgetsPreview(available);
     }
     prevWidgetControllerOpen.current = isWidgetControllerOpen;
@@ -1473,8 +1755,9 @@ const Anotherpage = ({ pageId = "home" }) => {
   const handleDeleteWidgetFromPreview = (widgetId) => {
     setHasUnsavedWidgetChanges(true);
     setWidgetPreview(prev => prev.filter(w => w.id !== widgetId));
-    // Find the widget info from allWidgetItems
-    const widget = allWidgetItems.find(w => w.id === widgetId);
+    // Find the widget info from controller widgets
+    const controllerWidgets = getAllAvailableWidgetsForController();
+    const widget = controllerWidgets.find(w => w.id === widgetId);
     if (widget) {
       setAvailableWidgetsPreview(prev => [...prev, widget]);
     }
@@ -1485,9 +1768,17 @@ const Anotherpage = ({ pageId = "home" }) => {
     setHasUnsavedWidgetChanges(true);
     // Remove from available
     setAvailableWidgetsPreview(prev => prev.filter(w => w.id !== widgetId));
+    
+    // If it's a subcategory, fetch its bookmarks
+    if (widgetId.startsWith('subcat_')) {
+      const subcatName = widgetId.replace('subcat_', '');
+      fetchSubcatBookmarks(subcatName);
+    }
+    
     // Add to preview, assign to column with least widgets
     setWidgetPreview(prev => {
-      const widget = allWidgetItems.find(w => w.id === widgetId);
+      const controllerWidgets = getAllAvailableWidgetsForController();
+      const widget = controllerWidgets.find(w => w.id === widgetId);
       if (!widget) return prev;
       let column = 0;
       if (widgetControllerColumns === 3 && widget.type === 'subcat') {
@@ -1525,7 +1816,8 @@ const Anotherpage = ({ pageId = "home" }) => {
     setWidgetPreview(defaultWidgetsArr);
     // Update available widgets
     const usedIds = new Set(defaultWidgetsArr.map(item => item.id));
-    const available = allWidgetItems.filter(item => !usedIds.has(item.id));
+    const controllerWidgets = getAllAvailableWidgetsForController();
+    const available = controllerWidgets.filter(item => !usedIds.has(item.id));
     setAvailableWidgetsPreview(available);
     setHasUnsavedWidgetChanges(true);
 };
@@ -1791,7 +2083,6 @@ const Anotherpage = ({ pageId = "home" }) => {
     if (mode === 'grid') {
       // Show 3 rows (5 columns per row) in a scrollable grid
       const maxRows = 2.5;
-      const columns = 5;
       // Icon size affects row height, so set a fixed height per row
       let rowHeight = 70; // default for medium
       if (iconSize === 'small') rowHeight = 50;
@@ -2095,23 +2386,25 @@ const Anotherpage = ({ pageId = "home" }) => {
   const userProfession = user?.profession || null;
 
   // Filter categories to only those with at least one subcategory for the user's profession
-  const filteredCategories = !userProfession
-    ? allCategories
-    : allCategories.filter(cat => {
-        // Get subcategories for this category
-        const subcatsRaw = (firestoreUser && firestoreSubcats.length > 0 && selectedCategory === cat)
-          ? firestoreSubcats
-          : (defaultBookmarks[cat] ? Object.values(defaultBookmarks[cat]) : []);
-        // Flatten if needed
-        const subcatsArr = Array.isArray(subcatsRaw) ? subcatsRaw : Object.values(subcatsRaw);
-        // Check if any subcategory matches the user's profession
-        return subcatsArr.some(
-          subcat =>
-            typeof subcat === 'object' &&
-            Array.isArray(subcat.professions) &&
-            subcat.professions.includes(userProfession)
-        );
-      });
+  const filteredCategories = isDemoMode
+    ? Object.keys(defaultBookmarks) // Show all demo categories in demo mode
+    : (!userProfession
+        ? allCategories
+        : allCategories.filter(cat => {
+            // Get subcategories for this category
+            const subcatsRaw = (firestoreUser && firestoreSubcats.length > 0 && selectedCategory === cat)
+              ? firestoreSubcats
+              : (defaultBookmarks[cat] ? Object.values(defaultBookmarks[cat]) : []);
+            // Flatten if needed
+            const subcatsArr = Array.isArray(subcatsRaw) ? subcatsRaw : Object.values(subcatsRaw);
+            // Check if any subcategory matches the user's profession
+            return subcatsArr.some(
+              subcat =>
+                typeof subcat === 'object' &&
+                Array.isArray(subcat.professions) &&
+                subcat.professions.includes(userProfession)
+            );
+          }));
 
   // Add at the top of Anotherpage component
   const [showFirstTimeModal, setShowFirstTimeModal] = useState(false);
@@ -2171,6 +2464,32 @@ const Anotherpage = ({ pageId = "home" }) => {
 
   return (
     <div className={`anotherpage-container ${isDarkMode ? "dark" : ""}`}> 
+      {/* Demo Mode Banner */}
+      {isDemoMode && (
+        <div className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-4 mb-4 shadow-lg">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <div>
+                <span className="font-semibold">Demo Mode</span>
+                <span className="ml-2 text-blue-100">You&apos;re viewing demo version with thier bookmarks. Sign in to access your personal data!</span>
+              </div>
+            </div>
+            <button
+              onClick={() => {}}
+              className="text-blue-100 hover:text-white transition-colors"
+              title="Hide demo banner"
+            >
+              <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+      
       {allCategories.length === 0 ? (
         <div className="w-full flex flex-col items-center justify-center min-h-[60vh]">
           <div className="text-2xl font-semibold text-gray-500 dark:text-gray-300 mt-20">No subcategories found for your profession.</div>
@@ -2188,6 +2507,10 @@ const Anotherpage = ({ pageId = "home" }) => {
                 <Menu style={{ width: 250, maxHeight: 280, overflowY: 'auto' }}>
                   {filteredCategories.map(cat => (
                     <Menu.Item key={cat} onClick={async () => {
+                      if (isDemoMode) {
+                        setShowLoginModal(true);
+                        return;
+                      }
                       setSelectedCategory(cat);
                       if (firestoreUser) {
                         const userDocRef = doc(db, "users", firestoreUser.uid);
@@ -2204,14 +2527,20 @@ const Anotherpage = ({ pageId = "home" }) => {
               }
               trigger={["click"]}
               placement="bottomLeft"
+              disabled={isDemoMode}
             >
               <button
-                className="flex items-center gap-1 px-2 py-1 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 text-xs font-medium border border-blue-200 dark:border-blue-700 hover:bg-blue-200 dark:hover:bg-blue-800 transition cursor-pointer"
+                className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium border transition cursor-pointer ${
+                  isDemoMode 
+                    ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-700 cursor-not-allowed' 
+                    : 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-700 hover:bg-blue-200 dark:hover:bg-blue-800'
+                }`}
                 style={{ minWidth: 0, marginRight: 1, width: 120, justifyContent: 'flex-start' }}
-                title="Select Category"
+                title={isDemoMode ? "Sign in to change category" : "Select Category"}
+                onClick={() => handleDropdownClick('category')}
               >
                 <span className="truncate max-w-[110px]">{selectedCategory}</span>
-                <span className="ml-auto text-blue-400 flex items-center">
+                <span className={`ml-auto flex items-center ${isDemoMode ? 'text-gray-400' : 'text-blue-400'}`}>
                   <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
                 </span>
               </button>
@@ -2222,11 +2551,37 @@ const Anotherpage = ({ pageId = "home" }) => {
             <Dropdown
               overlay={
                 <Menu style={{ width: 250 }}>
-                  <Menu.Item key="not_select" onClick={() => setSelectedInterest('not_select')}>
+                  <Menu.Item key="not_select" onClick={async () => {
+                    if (isDemoMode) {
+                      setShowLoginModal(true);
+                      return;
+                    }
+                    setSelectedInterest('not_select');
+                    // Don't change profession when "Not Selected" is chosen in interest dropdown
+                  }}>
                     Not Selected
                   </Menu.Item>
                   {interestOptions.map(i => (
-                    <Menu.Item key={i.id} onClick={() => setSelectedInterest(i.id)}>
+                    <Menu.Item key={i.id} onClick={async () => {
+                      if (isDemoMode) {
+                        setShowLoginModal(true);
+                        return;
+                      }
+                      setSelectedInterest(i.id);
+                      // Automatically set profession to "Not Selected" when any interest is selected
+                      setIsAutoCategoryChange(true);
+                      setSelectedCategory('Not Selected');
+                      if (firestoreUser) {
+                        const userDocRef = doc(db, "users", firestoreUser.uid);
+                        await setDoc(userDocRef, { 
+                          selectedCategory: 'Not Selected', 
+                          profession: 'not_selected',
+                          selectedInterest: i.id 
+                        }, { merge: true });
+                      } else {
+                        localStorage.setItem('selectedCategory', 'Not Selected');
+                      }
+                    }}>
                       {i.name}
                     </Menu.Item>
                   ))}
@@ -2234,24 +2589,43 @@ const Anotherpage = ({ pageId = "home" }) => {
               }
               trigger={["click"]}
               placement="bottomLeft"
+              disabled={isDemoMode}
             >
               <button
-                className="flex items-center gap-1 px-2 py-1 rounded bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 text-xs font-medium border border-purple-200 dark:border-purple-700 hover:bg-purple-200 dark:hover:bg-purple-800 transition cursor-pointer"
-                style={{ minWidth: 0, width: 150, justifyContent: 'flex-start' }}
-                title="Select Interest"
+                className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium border transition cursor-pointer ${
+                  isDemoMode 
+                    ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-700 cursor-not-allowed' 
+                    : selectedCategory === 'Not Selected'
+                      ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200 border-orange-200 dark:border-orange-700 hover:bg-orange-200 dark:hover:bg-orange-800'
+                      : 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 border-purple-200 dark:border-purple-700 hover:bg-purple-200 dark:hover:bg-purple-800'
+                }`}
+                style={{ minWidth: 0, width: selectedCategory === 'Not Selected' ? 180 : 150, justifyContent: 'flex-start' }}
+                title={isDemoMode ? "Sign in to change interest" : selectedCategory === 'Not Selected' ? "Select Interest (Required when no profession selected)" : "Select Interest"}
+                onClick={() => handleDropdownClick('interest')}
               >
                 <span className="truncate max-w-[130px]">
-                  {selectedInterest === 'not_select'
+                  {selectedCategory === 'Not Selected' && selectedInterest === 'not_select'
+                    ? 'Select Interest *'
+                    : selectedInterest === 'not_select'
                     ? 'Not Selected'
                     : (interestOptions.find(i => i.id === selectedInterest)?.name || 'All Interests')}
                 </span>
-                <span className="ml-auto text-purple-400 flex items-center">
+                <span className={`ml-auto flex items-center ${isDemoMode ? 'text-gray-400' : selectedCategory === 'Not Selected' ? 'text-orange-400' : 'text-purple-400'}`}>
                   <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
                 </span>
               </button>
             </Dropdown>
           </div>
         </div>
+        {/* Helpful message when "Not Selected" is chosen */}
+        {selectedCategory === 'Not Selected' && selectedInterest === 'not_select' && !isDemoMode && (
+          <div className="w-full text-center py-2 px-4 mb-2 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 rounded-lg">
+            <span className="text-orange-700 dark:text-orange-300 text-sm">
+              💡 Since you haven&apos;t selected a specific profession, please choose an interest to see relevant bookmarks and tools.
+            </span>
+          </div>
+        )}
+
         {/* Right: Search and Three-dot Menu */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 1, marginRight: 7 }}>
           {/* Search Input/Button */}
@@ -2397,6 +2771,102 @@ const Anotherpage = ({ pageId = "home" }) => {
             <div className="col-span-4">
               <SkeletonLoader />
             </div>
+          ) : items.length === 0 ? (
+            // Empty State with Animation
+            <div className="col-span-4 flex flex-col items-center justify-center min-h-[60vh] p-8">
+              <div className="text-center max-w-md mx-auto">
+                {/* Animated Plus Icon */}
+                <div className="relative mb-8">
+                  <div className="w-24 h-24 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg animate-pulse">
+                    <svg 
+                      width="48" 
+                      height="48" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2" 
+                      viewBox="0 0 24 24"
+                      className="text-white animate-bounce"
+                    >
+                      <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                  </div>
+                  
+                  {/* Floating Arrow Animation */}
+                  <div className="absolute -bottom-22 -right-4 animate-bounce">
+                    <svg width="32" height="32" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="text-blue-500 transform rotate-90">
+                      <path d="M7 17L17 7M17 7H7M17 7V17"/>
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Main Message */}
+                <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-4">
+                  Welcome to Your Dashboard!
+                </h2>
+                
+                <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
+                  This is your personal workspace. Start by adding widgets and tools to customize your experience.
+                </p>
+
+                {/* Animated Steps */}
+                <div className="space-y-4 mb-8">
+                  <div className="flex items-center gap-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700 animate-fade-in-up">
+                    <div className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-sm">1</div>
+                    <div>
+                      <h3 className="font-semibold text-gray-800 dark:text-white">Click the Blue Button</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">Find the floating blue button in the bottom right corner</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-4 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-700 animate-fade-in-up" style={{animationDelay: '0.2s'}}>
+                    <div className="w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center font-bold text-sm">2</div>
+                    <div>
+                      <h3 className="font-semibold text-gray-800 dark:text-white">Choose Your Widgets</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">Select from weather, clock, calculator, and more</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700 animate-fade-in-up" style={{animationDelay: '0.4s'}}>
+                    <div className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center font-bold text-sm">3</div>
+                    <div>
+                      <h3 className="font-semibold text-gray-800 dark:text-white">Organize & Save</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">Drag to arrange and click Apply to save your layout</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Call to Action */}
+                <button
+                  onClick={() => setIsWidgetControllerOpen(true)}
+                  className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 animate-pulse"
+                >
+                  <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path d="M12 5v14M5 12h14"/>
+                  </svg>
+                  Start Adding Widgets
+                </button>
+
+                {/* Floating Widgets Preview */}
+                {/* <div className="mt-12 grid grid-cols-3 gap-4 max-w-sm mx-auto">
+                  {['weather', 'clock', 'calculator'].map((widget, index) => (
+                    <div 
+                      key={widget}
+                      className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-md border border-gray-200 dark:border-gray-700 animate-float"
+                      style={{animationDelay: `${index * 0.3}s`}}
+                    >
+                      <div className="text-center">
+                        <div className="w-12 h-12 mx-auto mb-2 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg flex items-center justify-center">
+                          <span className="text-white text-lg">
+                            {widget === 'weather' ? '🌤️' : widget === 'clock' ? '🕐' : '🧮'}
+                          </span>
+                        </div>
+                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300 capitalize">{widget}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div> */}
+              </div>
+            </div>
           ) : (
             filteredColumnItems.map((colItems, colIdx) => (
               <Droppable droppableId={colIdx.toString()} key={colIdx}>
@@ -2501,16 +2971,18 @@ const Anotherpage = ({ pageId = "home" }) => {
           background: '#6366F1',
           color: '#fff',
           border: 'none',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+          boxShadow: items.length === 0 ? '0 4px 20px rgba(99, 102, 241, 0.4)' : '0 2px 8px rgba(0,0,0,0.15)',
           zIndex: 1100,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           fontSize: 28,
           cursor: 'pointer',
+          animation: items.length === 0 ? 'pulse 2s infinite' : 'none',
         }}
         onClick={() => setIsWidgetControllerOpen(true)}
         title="Widget Controller"
+        className={items.length === 0 ? 'animate-pulse' : ''}
       >
         <PlusOutlined />
       </button>
@@ -2786,6 +3258,45 @@ const Anotherpage = ({ pageId = "home" }) => {
             </div>
           </div>
         )}
+      </Modal>
+      
+      {/* Login Modal for Demo Mode */}
+      <Modal
+        open={showLoginModal}
+        onCancel={() => setShowLoginModal(false)}
+        footer={null}
+        width={400}
+        centered
+      >
+        <div className="text-center py-6">
+          <div className="mb-4">
+            <svg width="48" height="48" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" className="mx-auto text-blue-500 mb-4">
+              <path d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
+            </svg>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Sign In Required</h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">
+              To change categories and interests, please sign in to your account.
+            </p>
+          </div>
+          <div className="flex gap-3 justify-center">
+            <button
+              onClick={() => setShowLoginModal(false)}
+              className="px-4 py-2 text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                setShowLoginModal(false);
+                // You can add navigation to login page here
+                window.location.href = '/signin';
+              }}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Sign In
+            </button>
+          </div>
+        </div>
       </Modal>
       </>
       )}

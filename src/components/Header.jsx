@@ -329,26 +329,111 @@ const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
 
     try {
       const userDocRef = doc(db, "users", currentUser.uid);
-      setDefaultPageId(pageId.toString());
+      const pageIdString = pageId.toString();
+      
+      // Update state immediately for better UX
+      setDefaultPageId(pageIdString);
 
       await setDoc(
         userDocRef,
         {
-          defaultPageId: pageId,
+          defaultPageId: pageIdString,
         },
         { merge: true }
       );
 
       message.success("Default page updated successfully");
+      
+      // Navigate to the new default page
+      navigate(`/NewSearchPage?pageId=${pageIdString}`);
     } catch (error) {
       console.error("Error setting default page:", error);
       message.error("Failed to set default page");
+      // Revert state on error
       setDefaultPageId(null);
     }
   };
 
+  const removeDefaultPage = async () => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      message.error("Please sign in to remove default page");
+      return;
+    }
+
+    try {
+      const userDocRef = doc(db, "users", currentUser.uid);
+      
+      await setDoc(
+        userDocRef,
+        {
+          defaultPageId: null,
+        },
+        { merge: true }
+      );
+
+      setDefaultPageId(null);
+      message.success("Default page removed successfully");
+      
+      // Navigate back to home page
+      navigate("/search");
+    } catch (error) {
+      console.error("Error removing default page:", error);
+      message.error("Failed to remove default page");
+    }
+  };
+
+  const resetAllPages = async () => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      message.error("Please sign in to reset pages");
+      return;
+    }
+
+    Modal.confirm({
+      title: <div className="dark:text-white">Reset All Pages</div>,
+      content: (
+        <div className="dark:text-white">
+          Are you sure you want to delete all your custom pages? This action cannot be undone.
+        </div>
+      ),
+      okText: <div className="dark:text-white">Yes, Reset</div>,
+      cancelText: <div>Cancel</div>,
+      onOk: async () => {
+        try {
+          // Delete all pages from Firebase
+          for (const page of pages) {
+            await deleteCustomPage(currentUser.uid, page.id);
+          }
+
+          // Clear default page
+          const userDocRef = doc(db, "users", currentUser.uid);
+          await setDoc(
+            userDocRef,
+            {
+              defaultPageId: null,
+            },
+            { merge: true }
+          );
+
+          setPages([]);
+          setDefaultPageId(null);
+          message.success("All pages have been reset successfully");
+          
+          // Navigate back to home page
+          navigate("/search");
+        } catch (error) {
+          console.error("Error resetting pages:", error);
+          message.error("Failed to reset pages. Please try again.");
+        }
+      },
+    });
+  };
+
   const [defaultPageId, setDefaultPageId] = useState(null);
   const [showWarning, setShowWarning] = useState(true);
+
+
 
   useEffect(() => {
     const fetchDefaultPage = async () => {
@@ -359,7 +444,14 @@ const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
         const userDocRef = doc(db, "users", currentUser.uid);
         const userDoc = await getDoc(userDocRef);
         if (userDoc.exists()) {
-          setDefaultPageId(userDoc.data().defaultPageId);
+          const defaultPageId = userDoc.data().defaultPageId;
+          // Ensure consistent string type for comparison
+          setDefaultPageId(defaultPageId ? defaultPageId.toString() : null);
+          
+          // Auto-navigate to default page if user is on home page and has a default page set
+          if (defaultPageId && location.pathname === "/search") {
+            navigate(`/NewSearchPage?pageId=${defaultPageId.toString()}`);
+          }
         }
       } catch (error) {
         console.error("Error fetching default page:", error);
@@ -375,7 +467,7 @@ const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [location.pathname, navigate]);
 
   const items = useMemo(
     () => [
@@ -455,6 +547,33 @@ const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
             </button>
           ),
       },
+      { type: "divider" },
+      {
+        key: "remove-default",
+        label: (
+          <button
+            onClick={removeDefaultPage}
+            disabled={!defaultPageId}
+            className="flex items-center gap-4 w-full dark:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <DeleteOutlined />
+            Remove Default Page
+          </button>
+        ),
+      },
+      {
+        key: "reset-all",
+        label: (
+          <button
+            onClick={resetAllPages}
+            disabled={pages.length === 0}
+            className="flex items-center gap-4 w-full dark:text-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <DeleteOutlined />
+            Reset All Pages
+          </button>
+        ),
+      },
     ],
     [
       pages,
@@ -463,6 +582,8 @@ const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
       deletePage,
       defaultPageId,
       setDefaultPage,
+      removeDefaultPage,
+      resetAllPages,
     ]
   );
 

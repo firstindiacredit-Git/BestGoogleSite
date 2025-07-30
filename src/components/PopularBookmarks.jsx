@@ -1752,6 +1752,12 @@ function PopularBookmarks() {
     }
   };
 
+  // Helper function to truncate text if longer than 15 characters
+  const truncateText = (text, maxLength = 20) => {
+    if (!text) return '';
+    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+  };
+
   const renderBookmarkList = (categoryLinks, categoryId) => {
     if (!Array.isArray(categoryLinks)) {
       return (
@@ -1778,6 +1784,10 @@ function PopularBookmarks() {
           const likeCount = bookmarkLikes?.[link.id] || 0;
           const isFavorite = likedBookmarks?.includes(link.id) || false;
 
+          // Truncate bookmark name and URL for list view
+          const truncatedName = truncateText(link.title || link.name);
+          const truncatedUrl = truncateText(link.url || link.link);
+
           return (
             <li
               key={link.id}
@@ -1800,8 +1810,9 @@ function PopularBookmarks() {
                   style={{ fontWeight: 500 }}
                   target="_blank"
                   rel="noopener noreferrer"
+                  title={link.title || link.name} // Show full name on hover
                 >
-                  {link.title || link.name}
+                  {truncatedName}
                 </a>
                 <a
                   href={link.url || link.link}
@@ -1809,8 +1820,9 @@ function PopularBookmarks() {
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{ marginTop: 2 }}
+                  title={link.url || link.link} // Show full URL on hover
                 >
-                  {link.url || link.link}
+                  {truncatedUrl}
                 </a>
               </div>
 
@@ -2401,8 +2413,8 @@ function PopularBookmarks() {
                                                 </div>
                                               </div>
                                               <div className="flex items-center gap-2">
-                                                <span className="font-semibold">
-                                                  {category.name || category.newCategory}
+                                                <span className="font-semibold" title={category.name || category.newCategory}>
+                                                  {truncateText(category.name || category.newCategory)}
                                                 </span>
                                                 {category.isAdminCategory && (
                                                   <div className="flex gap-1">
@@ -3866,8 +3878,8 @@ function PopularBookmarks() {
                                     </div>
                                   </div>
                                 </span>
-                                <span className="font-medium transition-colors border-none duration-200 text-gray-700 dark:text-white">
-                                  {category.name || category.newCategory}
+                                <span className="font-medium transition-colors border-none duration-200 text-gray-700 dark:text-white" title={category.name || category.newCategory}>
+                                  {truncateText(category.name || category.newCategory)}
                                 </span>
                               </div>
                               <Tooltip title="Remove from column">
@@ -3959,9 +3971,9 @@ function PopularBookmarks() {
                     <button
                       onClick={() => handleAddToColumn(category, 0)}
                       className="flex gap-2 items-center text-black dark:bg-[#28283a]/[var(--widget-opacity)] px-3 py-2 rounded-lg dark:text-white bg-white hover:scale-105 transition-transform border border-gray-200 dark:border-gray-700 shadow-sm text-sm"
-                      title="Add to first column"
+                      title={`Add ${category.name || category.newCategory} to first column`}
                     >
-                      <PlusOutlined /> {category.name || category.newCategory}
+                      <PlusOutlined /> {truncateText(category.name || category.newCategory)}
                     </button>
                   </div>
                 ))}
@@ -4022,7 +4034,7 @@ function PopularBookmarks() {
               </option>
               {categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
-                  {cat.name || cat.newCategory}
+                  {truncateText(cat.name || cat.newCategory)}
                 </option>
               ))}
             </select>
@@ -4106,7 +4118,7 @@ function PopularBookmarks() {
       </Modal>
 
       <Modal
-        title={`Edit Bookmarks - ${selectedCategory?.name}`}
+        title={`Edit Bookmarks - ${truncateText(selectedCategory?.name)}`}
         open={isEditModePanelVisible}
         width={800}
         onCancel={() => {

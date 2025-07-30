@@ -11,8 +11,6 @@ import {
   Trash2,
   X,
   Plus,
-  ChevronDown,
-  Pencil,
   AlertCircle,
 } from "lucide-react";
 import { HiOutlineNumberedList } from "react-icons/hi2";
@@ -630,69 +628,74 @@ const NotePage = ({ inNotebookSheet = false }) => {
             )}
             {!isCollapsed && (
               <>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="relative" ref={tabDropdownRef}>
-                      <button
-                        onClick={() => setShowTabDropdown(!showTabDropdown)}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700 rounded-sm text-sm min-w-[120px]"
+                {/* Horizontal Tab Bar */}
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-1 flex-1 overflow-x-auto scrollbar-hide">
+                    {tabs.slice(0, 3).map(tab => (
+                      <div
+                        key={tab.id}
+                        className={`flex items-center px-4 py-1.5 rounded-t-md border-b-2 cursor-pointer select-none transition-colors duration-150 mr-1
+                          ${activeTabId === tab.id
+                            ? 'bg-white dark:bg-[#28283A] border-indigo-500 text-indigo-700 dark:text-indigo-200 font-semibold shadow'
+                            : 'bg-gray-100 dark:bg-[#513a7a] border-transparent text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700'}
+                        `}
+                        onClick={() => switchTab(tab.id)}
+                        onDoubleClick={() => startEditingTab(tab.id, tab.title, { stopPropagation: () => {} })}
+                        style={{ minWidth: 76, maxWidth: 180 }}
                       >
-                        {tabs.find(tab => tab.id === activeTabId)?.title}
-                        <ChevronDown className="w-4 h-4" />
+                        {editingTabId === tab.id ? (
+                          <input
+                            ref={editInputRef}
+                            type="text"
+                            value={editingTitle}
+                            onChange={e => setEditingTitle(e.target.value)}
+                            onBlur={e => saveTabTitle(tab.id, e)}
+                            onKeyDown={e => handleTitleKeyDown(tab.id, e)}
+                            className="flex-1 bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 text-sm px-1"
+                            onClick={e => e.stopPropagation()}
+                            style={{ minWidth: 60, maxWidth: 120 }}
+                          />
+                        ) : (
+                          <span className="truncate max-w-[100px] text-sm" title={tab.title}>{tab.title}</span>
+                        )}
+                        {tabs.length > 1 && (
+                          <button
+                            onClick={e => deleteTab(tab.id, e)}
+                            className="ml-2 text-gray-400 hover:text-red-500 focus:outline-none"
+                            title="Close tab"
+                            tabIndex={-1}
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    {/* Add Tab Button - Only show when less than 3 tabs */}
+                    {tabs.length < 3 && (
+                      <button
+                        onClick={createNewTab}
+                        className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 hover:text-indigo-600 transition flex-shrink-0"
+                        title="New Tab"
+                        style={{ minWidth: 32 }}
+                      >
+                        <Plus className="w-5 h-5" />
                       </button>
-                      {showTabDropdown && (
-                        <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-[#28283A] border border-gray-200 dark:border-gray-700 rounded-sm shadow-lg z-50">
-                          {tabs.map(tab => (
-                            <div
-                              key={tab.id}
-                              className="flex items-center justify-between px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
-                              onClick={() => switchTab(tab.id)}
-                            >
-                              {editingTabId === tab.id ? (
-                                <input
-                                  ref={editInputRef}
-                                  type="text"
-                                  value={editingTitle}
-                                  onChange={(e) => setEditingTitle(e.target.value)}
-                                  onBlur={(e) => saveTabTitle(tab.id, e)}
-                                  onKeyDown={(e) => handleTitleKeyDown(tab.id, e)}
-                                  className="flex-1 bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400"
-                                  onClick={(e) => e.stopPropagation()}
-                                />
-                              ) : (
-                                <div className="flex items-center gap-2 flex-1">
-                                  <span className="text-sm">{tab.title}</span>
-                                  <button
-                                    onClick={(e) => startEditingTab(tab.id, tab.title, e)}
-                                    className="text-gray-500 hover:text-blue-500"
-                                    title="Rename tab"
-                                  >
-                                    <Pencil className="w-3 h-3" />
-                                  </button>
-                                </div>
-                              )}
-                              {tabs.length > 1 && (
-                                <button
-                                  onClick={(e) => deleteTab(tab.id, e)}
-                                  className="text-gray-500 hover:text-red-500 ml-2"
-                                  title="Delete tab"
-                                >
-                                  <X className="w-4 h-4" />
-                                </button>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    <button
-                      onClick={createNewTab}
-                      className="flex items-center gap-1 px-2 py-1.5 bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700 rounded-sm text-sm"
-                      title="New Tab"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </button>
+                    )}
                   </div>
+                  {/* Notes Redirect Button - Show when 3 or more tabs exist */}
+                  {tabs.length >= 3 && (
+                    <button
+                      onClick={() => {
+                        // Set localStorage to automatically select NOTES component
+                        localStorage.setItem("activeComponent", "NotebookAndSheet");
+                        window.location.href = '/search';
+                      }}
+                      className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-500 hover:bg-indigo-600 text-white transition-colors flex-shrink-0"
+                      title="Go to Notes"
+                    >
+                      <Plus className="w-5 h-5" />
+                    </button>
+                  )}
                 </div>
 
                 {showWarning && (

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Bold,
   Underline,
@@ -84,6 +84,7 @@ const NotesforNotes = ({ inNotebookSheet = false }) => {
   const [showWarning, setShowWarning] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const MAX_TABS_FOR_GUEST = 5;
+  const MAX_VISIBLE_TABS = 10; // Show 10 tabs horizontally
 
   const textareaRef = useRef(null);
   const lineNumberRef = useRef(null);
@@ -253,10 +254,10 @@ const NotesforNotes = ({ inNotebookSheet = false }) => {
     if (!showTabDropdown) return;
     
     function handleClickOutside(event) {
-      if (
-        tabDropdownRef.current &&
-        !tabDropdownRef.current.contains(event.target)
-      ) {
+      // Check if click is outside the dropdown
+      const isOutsideDropdown = tabDropdownRef.current && !tabDropdownRef.current.contains(event.target);
+      
+      if (isOutsideDropdown) {
         // If editing a tab title, save it first
         if (editingTabId && editingTitle.trim()) {
           setTabs(prevTabs =>
@@ -647,68 +648,176 @@ const NotesforNotes = ({ inNotebookSheet = false }) => {
             )}
             {!isCollapsed && (
               <>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="relative" ref={tabDropdownRef}>
+                                <div className="flex items-center gap-2 mb-2">
+                  <div className="tab-container flex items-center gap-1 flex-wrap max-w-full overflow-x-auto relative">
+                    {/* Left Arrow Button - Show when there are more than MAX_VISIBLE_TABS */}
+                    {tabs.length > MAX_VISIBLE_TABS && (
                       <button
-                        onClick={() => setShowTabDropdown(!showTabDropdown)}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700 rounded-sm text-sm min-w-[120px]"
+                        onClick={() => {
+                          const scrollContainer = document.querySelector('.tab-scroll-container');
+                          console.log('Left arrow clicked, scrollContainer:', scrollContainer);
+                          if (scrollContainer) {
+                            scrollContainer.scrollLeft -= 200;
+                            console.log('Scrolled left, new scrollLeft:', scrollContainer.scrollLeft);
+                          }
+                        }}
+                        className="absolute left-0 top-0 bottom-0 z-10 bg-white dark:bg-[#28283A] border-r border-gray-200 dark:border-gray-700 px-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center min-w-[32px]"
+                        title="Scroll Left"
                       >
-                        {tabs.find(tab => tab.id === activeTabId)?.title}
-                        <ChevronDown className="w-4 h-4" />
+                        <ChevronDown className="w-4 h-4 transform rotate-90" />
                       </button>
-                      {showTabDropdown && (
-                        <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-[#28283A] border border-gray-200 dark:border-gray-700 rounded-sm shadow-lg z-50 max-h-64 overflow-y-auto">
-                          {tabs.map(tab => (
-                            <div
-                              key={tab.id}
-                              className="flex items-center justify-between px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
-                              onClick={() => switchTab(tab.id)}
-                            >
-                              {editingTabId === tab.id ? (
-                                <input
-                                  ref={editInputRef}
-                                  type="text"
-                                  value={editingTitle}
-                                  onChange={(e) => setEditingTitle(e.target.value)}
-                                  onBlur={(e) => saveTabTitle(tab.id, e)}
-                                  onKeyDown={(e) => handleTitleKeyDown(tab.id, e)}
-                                  className="flex-1 bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400"
-                                  onClick={(e) => e.stopPropagation()}
-                                />
-                              ) : (
-                                <div className="flex items-center gap-2 flex-1">
-                                  <span className="text-sm">{tab.title}</span>
-                                  <button
-                                    onClick={(e) => startEditingTab(tab.id, tab.title, e)}
-                                    className="text-gray-500 hover:text-blue-500"
-                                    title="Rename tab"
-                                  >
-                                    <Pencil className="w-3 h-3" />
-                                  </button>
-                                </div>
-                              )}
-                              {tabs.length > 1 && (
-                                <button
-                                  onClick={(e) => deleteTab(tab.id, e)}
-                                  className="text-gray-500 hover:text-red-500 ml-2"
-                                  title="Delete tab"
-                                >
-                                  <X className="w-4 h-4" />
-                                </button>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                    )}
+                    
+                    {/* Right Arrow Button - Show when there are more than MAX_VISIBLE_TABS */}
+                    {tabs.length > MAX_VISIBLE_TABS && (
+                      <button
+                        onClick={() => {
+                          const scrollContainer = document.querySelector('.tab-scroll-container');
+                          console.log('Right arrow clicked, scrollContainer:', scrollContainer);
+                          if (scrollContainer) {
+                            scrollContainer.scrollLeft += 200;
+                            console.log('Scrolled right, new scrollLeft:', scrollContainer.scrollLeft);
+                          }
+                        }}
+                        className="absolute right-0 top-0 bottom-0 z-10 bg-white dark:bg-[#28283A] border-l border-gray-200 dark:border-gray-700 px-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center min-w-[32px]"
+                        title="Scroll Right"
+                      >
+                        <ChevronDown className="w-4 h-4 transform -rotate-90" />
+                      </button>
+                    )}
+                    
+                    {/* Horizontal tabs - show all tabs with scroll */}
+                    <div className="tab-scroll-container flex items-center gap-1 flex-1 overflow-x-auto scrollbar-hide" style={{ paddingLeft: tabs.length > MAX_VISIBLE_TABS ? '32px' : '0', paddingRight: tabs.length > MAX_VISIBLE_TABS ? '32px' : '0' }}>
+                      {tabs.map(tab => (
+                       <div
+                         key={tab.id}
+                         className={`group relative flex items-center gap-1 px-3 py-1.5 rounded-sm text-sm cursor-pointer transition-colors ${
+                           activeTabId === tab.id
+                             ? "bg-blue-500 text-white"
+                             : "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700"
+                         }`}
+                         onClick={() => switchTab(tab.id)}
+                       >
+                        {editingTabId === tab.id ? (
+                          <input
+                            ref={editInputRef}
+                            type="text"
+                            value={editingTitle}
+                            onChange={(e) => setEditingTitle(e.target.value)}
+                            onBlur={(e) => saveTabTitle(tab.id, e)}
+                            onKeyDown={(e) => handleTitleKeyDown(tab.id, e)}
+                            className="flex-1 bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 min-w-[60px]"
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        ) : (
+                          <span className="text-sm truncate max-w-[100px]">{tab.title}</span>
+                        )}
+                        <button
+                          onClick={(e) => startEditingTab(tab.id, tab.title, e)}
+                          className="text-gray-500 hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                          title="Rename tab"
+                        >
+                          <Pencil className="w-3 h-3" />
+                        </button>
+                        {tabs.length > 1 && (
+                          <button
+                            onClick={(e) => deleteTab(tab.id, e)}
+                            className="text-gray-500 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                            title="Delete tab"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                   </div>
+                    
+                    
+                    {/* Add Tab Button - Always show, but with different styling when at limit */}
                     <button
                       onClick={createNewTab}
-                      className="flex items-center gap-1 px-2 py-1.5 bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700 rounded-sm text-sm"
-                      title="New Tab"
+                      className={`flex items-center gap-1 px-2 py-1.5 rounded-sm text-sm ${
+                        tabs.length >= MAX_VISIBLE_TABS
+                          ? "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700"
+                          : "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700"
+                      }`}
+                      title={tabs.length >= MAX_VISIBLE_TABS ? "Add Tab (will be in dropdown)" : "New Tab"}
                     >
                       <Plus className="w-4 h-4" />
                     </button>
+                    
+                    {/* Dropdown Button - Show when there are multiple tabs */}
+                    {tabs.length > 1 && (
+                      <div className="relative" ref={tabDropdownRef}>
+                        <button
+                          onClick={() => {
+                            console.log('Dropdown clicked, current state:', showTabDropdown, 'tabs length:', tabs.length);
+                            setShowTabDropdown(!showTabDropdown);
+                            console.log('Setting showTabDropdown to:', !showTabDropdown);
+                          }}
+                          className="flex items-center gap-2 px-3 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-sm text-sm"
+                          title="Show All Tabs"
+                        >
+                         
+                          <ChevronDown className="w-4 h-4" />
+                        </button>
+                        {showTabDropdown && (
+                          <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-[#28283A] border border-gray-200 dark:border-gray-700 rounded-sm shadow-lg z-[9999] max-h-64 overflow-y-auto">
+                            <div className="px-3 py-2 text-xs text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                              All Tabs ({tabs.length})
+                            </div>
+                            {tabs.map(tab => (
+                              <div
+                                key={tab.id}
+                                className={`flex items-center justify-between px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer ${
+                                  activeTabId === tab.id ? 'bg-blue-50 dark:bg-blue-900/20' : ''
+                                }`}
+                                onClick={() => {
+                                  switchTab(tab.id);
+                                  setShowTabDropdown(false);
+                                }}
+                              >
+                                {editingTabId === tab.id ? (
+                                  <input
+                                    ref={editInputRef}
+                                    type="text"
+                                    value={editingTitle}
+                                    onChange={(e) => setEditingTitle(e.target.value)}
+                                    onBlur={(e) => saveTabTitle(tab.id, e)}
+                                    onKeyDown={(e) => handleTitleKeyDown(tab.id, e)}
+                                    className="flex-1 bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400"
+                                    onClick={(e) => e.stopPropagation()}
+                                  />
+                                ) : (
+                                  <div className="flex items-center gap-2 flex-1">
+                                    <span className={`text-sm ${activeTabId === tab.id ? 'font-semibold text-blue-600 dark:text-blue-400' : ''}`}>
+                                      {tab.title}
+                                    </span>
+                                    <button
+                                      onClick={(e) => startEditingTab(tab.id, tab.title, e)}
+                                      className="text-gray-500 hover:text-blue-500"
+                                      title="Rename tab"
+                                    >
+                                      <Pencil className="w-3 h-3" />
+                                    </button>
+                                  </div>
+                                )}
+                                {tabs.length > 1 && (
+                                  <button
+                                    onClick={(e) => deleteTab(tab.id, e)}
+                                    className="text-gray-500 hover:text-red-500 ml-2"
+                                    title="Delete tab"
+                                  >
+                                    <X className="w-4 h-4" />
+                                  </button>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    
                   </div>
                 </div>
 
@@ -1033,6 +1142,28 @@ const NotesforNotes = ({ inNotebookSheet = false }) => {
           }
           .animate-fade-in {
             animation: fadeIn 0.3s ease-out;
+          }
+          
+          .tab-container {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+          }
+          
+          .tab-container::-webkit-scrollbar {
+            display: none;
+          }
+          
+          .tab-container > div {
+            flex-shrink: 0;
+          }
+          
+          .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
+          
+          .scrollbar-hide::-webkit-scrollbar {
+            display: none;
           }
         `}
       </style>

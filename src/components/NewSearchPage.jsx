@@ -437,44 +437,7 @@ const NewSearchPage = ({ isToolPage = false }) => {
   );
 
   useEffect(() => {
-    // Show widget notification for new pages
-    const isNewPage = pageId && !hasShownWidgetNotification;
 
-    // Get the current widgets from localStorage
-    const currentLayout = localStorage.getItem(`layout_${pageId}`);
-    const hasWidgets = currentLayout ? JSON.parse(currentLayout).widgets?.length > 0 : false;
-
-    if (isNewPage && !hasWidgets) {
-      notification.open({
-        message: (
-          <div className="flex items-center gap-2">
-            <PlusCircleOutlined className="text-blue-500 dark:text-blue-500" />
-            <span className="font-medium"style={{color:"black"}}>Add Widgets to Your Page</span>
-          </div>
-        ),
-        description: (
-          <div className="mt-2 text-gray-600 dark:text-gray-600">
-            Click the button in the bottom right to add widgets to your new page.
-          </div>
-        ),
-        duration: 0,
-        placement: 'bottomRight',
-        className: isDarkMode ? 'dark-notification' : '',
-        style: {
-          backgroundColor: isDarkMode ? '#28283a' : '#fff',
-          border: isDarkMode ? '1px solid #3a3a4a' : '1px solid #f0f0f0',
-          borderRadius: '8px',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-        },
-        icon: null,
-        closeIcon: (
-          <div className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
-            ×
-          </div>
-        ),
-      });
-      setHasShownWidgetNotification(true);
-    }
   }, [location.search, hasShownWidgetNotification, isDarkMode, pageId]);
 
   if (loading) {

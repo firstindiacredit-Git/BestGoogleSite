@@ -4,6 +4,7 @@ import { auth, db } from "../firebase";
 import { doc, updateDoc } from "firebase/firestore";
 
 const professions = [
+  { id: "not_selected", name: "Not Selected", icon: "❓", description: "No specific profession selected" },
   { id: "developer", name: "Developer / Programmer", icon: "💻", description: "Software development and programming" },
   { id: "designer", name: "Designer (UI/UX, Graphic, Web)", icon: "🎨", description: "Creative design and user experience" },
   { id: "digital_marketer", name: "Digital Marketer", icon: "📱", description: "Digital marketing and online promotion" },
@@ -33,6 +34,10 @@ const ProfessionalSelection = () => {
     if (!selected) {
       setError("Please select a profession.");
       return;
+    }
+    // Allow "not_selected" as a valid option
+    if (selected === "not_selected") {
+      setError(""); // Clear any previous errors
     }
     setLoading(true);
     setError("");

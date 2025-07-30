@@ -380,7 +380,7 @@ const toolCategories = [
 const NewTab = () => {
   const [viewType, setViewType] = useState(() => {
     // Initialize from localStorage or default to "grid"
-    return localStorage.getItem('viewType') || "grid";
+    return localStorage.getItem('viewType') || "list";
   });
 
   // Save viewType to localStorage whenever it changes

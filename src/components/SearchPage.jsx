@@ -21,7 +21,7 @@ import Sports from "../components/Sports";
 import Top100 from "../components/Top100";
 import "./style.css";
 import { Dropdown, Skeleton, Input } from "antd";
-import { Settings } from "lucide-react";
+import { Palette } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { DesignContext } from "../context/DesignContext.jsx";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -546,8 +546,8 @@ const SearchPage = ({ isToolPage = false }) => {
                           overlayClassName="[&_.ant-dropdown-menu]:p-0 [&_.ant-dropdown-menu-item]:p-0 [&_ul]:dark:bg-[#28283a]"
                         >
                           <button className="py-[1.2rem] px-5 text-sm font-medium rounded-md  transition-all bg-gray-50/50 dark:bg-[#28283a]/50 dark:text-white hover:bg-gray-100 dark:hover:bg-[#2F2F3F] flex items-center">
-                            <Settings className="w-5 h-5" />
-                          </button>
+                            <Palette className="w-5 h-5" />
+                          </button> 
                         </Dropdown>
                       </div>
                     </div>
@@ -676,7 +676,7 @@ const SearchPage = ({ isToolPage = false }) => {
                           overlayClassName="[&_.ant-dropdown-menu]:p-0 [&_.ant-dropdown-menu-item]:p-0 [&_ul]:dark:bg-[#28283a]"
                         >
                           <button className="px-4 py-2 text-sm font-medium rounded-md  transition-all dark:text-white hover:bg-gray-100 dark:hover:bg-[#28283A] flex items-center">
-                            <Settings className="w-5 h-5" />
+                            <Palette className="w-5 h-5" />
                           </button>
                         </Dropdown>
                       </div>

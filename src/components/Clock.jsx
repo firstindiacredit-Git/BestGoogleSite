@@ -258,8 +258,6 @@ const ResponsiveWorldClock = () => {
   const [selectedTimezones, setSelectedTimezones] = useState([
     "Asia/Kolkata", // India
     "America/New_York", // USA (New York)
-    "Pacific/Auckland", // Los 
-    "Europe/Paris" // Paris
   ]);
   const [isHovering, setIsHovering] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);

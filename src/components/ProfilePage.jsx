@@ -61,6 +61,12 @@ const ProfilePage = () => {
 
   const professions = [
     {
+      id: "not_selected",
+      name: "Not Selected",
+      icon: "❓",
+      description: "No specific profession selected"
+    },
+    {
       id: "developer",
       name: "Developer / Programmer",
       icon: "💻",

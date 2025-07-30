@@ -233,37 +233,74 @@ export const resetPageLayout = async (userId, pageName) => {
 // Add default bookmarks for non-logged in users
 export const defaultBookmarks = {
   "Designer (UI/UX, Graphic, Web)": {
-    "Search Engines": [
+    "Tranding": [
       {
         id: "popular1",
-        name: "Google",
+        name: "Google Search",
         link: "https://www.google.com",
         addedByAdmin: true,
       },
       {
         id: "popular2",
-        name: "Bing",
-        link: "https://www.bing.com",
+        name: "ChatGPT",
+        link: "https://chat.openai.com",
+        addedByAdmin: true,
+      },
+       {
+        id: "popular3",
+        name: "GitHub",
+        link: "https://www.github.com",
+        addedByAdmin: true,
+      },
+       {
+        id: "popular4",
+        name: "Hacker News",
+        link: "https://news.ycombinator.com",
+        addedByAdmin: true,
+      },
+       {
+        id: "popular6",
+        name: "Khan Academy",
+        link: "https://www.khanacademy.org",
         addedByAdmin: true,
       },
     ],
-    "Social Media": [
+    "Most Liked": [
       {
         id: "popular3",
         name: "Facebook",
         link: "https://www.facebook.com",
         addedByAdmin: true,
       },
-      {
-        id: "popular4",
-        name: "Twitter",
-        link: "https://www.twitter.com",
-        addedByAdmin: true,
-      },
+        {
+          id: "popular4",
+          name: "Twitter",
+          link: "https://www.twitter.com",
+          addedByAdmin: true,
+        },
+        {
+          id: "popular5",
+          name: "YouTube",
+          link: "https://www.youtube.com",
+          addedByAdmin: true,
+        },
+        {
+          id: "popular7",
+          name: "Reddit",
+          link: "https://www.reddit.com",
+          addedByAdmin: true,
+        },
+        {
+          id: "popular9",
+          name: "Instagram",
+          link: "https://www.instagram.com",
+          addedByAdmin: true,
+        }, 
+
     ],
   },
   "Developer / Programmer": {
-    Chatbots: [
+    "Most Favoured": [
       {
         id: "ai1",
         name: "ChatGPT",
@@ -272,42 +309,95 @@ export const defaultBookmarks = {
       },
       {
         id: "ai2",
-        name: "Google Bard",
-        link: "https://bard.google.com",
+        name: "TikTok ",
+        link: "https://www.tiktok.com",
         addedByAdmin: true,
       },
-    ],
-    "Image Generators": [
       {
         id: "ai3",
-        name: "Midjourney",
-        link: "https://www.midjourney.com",
+        name: " Discord ",
+        link: "https://www.discord.com",
+        addedByAdmin: true,
+      },  {
+        id: "ai4",
+        name: "TradingView",
+        link: "https://www.tradingview.com",
+        addedByAdmin: true,
+      },  {
+        id: "ai5",
+        name: "Canva",
+        link: "https://www.canva.com",
+        addedByAdmin: true,
+      },
+
+    ],
+    "Most Viewed": [
+      {
+        id: "ai3",
+        name: "Google ",
+        link: "https://www.google.com",
         addedByAdmin: true,
       },
       {
         id: "ai4",
-        name: "DALL-E",
-        link: "https://labs.openai.com/",
+        name: "YouTube ",
+        link: "https://www.youtube.com",
+        addedByAdmin: true,
+      },
+      {
+        id: "ai6",
+        name: "Facebook  ",
+        link: "https://www.facebook.com",
+        addedByAdmin: true,
+      },
+       {
+        id: "ai7",
+        name: "Instagram ",
+        link: "https://www.instagram.com",
+        addedByAdmin: true,
+      },
+       {
+        id: "ai9",
+        name: "Twitter  ",
+        link: "https://www.twitter.com",
         addedByAdmin: true,
       },
     ],
   },
   "Digital Marketer": {
-    Hotels: [
+    "Editor's Pick": [
       {
         id: "travel1",
-        name: "Booking.com",
-        link: "https://www.booking.com",
+        name: "Notion",
+        link: "https://www.notion.so",
         addedByAdmin: true,
       },
       {
         id: "travel2",
-        name: "Airbnb",
-        link: "https://www.airbnb.com",
+        name: "TED",
+        link: "https://www.ted.com",
+        addedByAdmin: true,
+      },
+       {
+        id: "travel3",
+        name: "Product Hunt",
+        link: "https://www.producthunt.com",
+        addedByAdmin: true,
+      },
+       {
+        id: "travel4",
+        name: "CodePen",
+        link: "https://www.codepen.io",
+        addedByAdmin: true,
+      },
+      {
+        id: "travel6",
+        name: "Unsplash",
+        link: "https://www.unsplash.com",
         addedByAdmin: true,
       },
     ],
-    Flights: [
+    "Recently Added": [
       {
         id: "travel3",
         name: "Expedia",
@@ -320,6 +410,25 @@ export const defaultBookmarks = {
         link: "https://www.kayak.com",
         addedByAdmin: true,
       },
+       {
+        id: "travel7",
+        name: "Booking.com",
+        link: "https://www.booking.com",
+        addedByAdmin: true,
+      },
+       {
+        id: "travel4",
+        name: "Airbnb",
+        link: "https://www.airbnb.com",
+        addedByAdmin: true,
+      }, 
+      {
+        id: "travel8",
+        name: "TripAdvisor",
+        link: "https://www.tripadvisor.com",
+        addedByAdmin: true,
+      },
+
     ],
   },
   Student: {

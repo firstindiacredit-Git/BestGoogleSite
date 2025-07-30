@@ -72,7 +72,7 @@ const CredentialManager = () => {
   const { isDarkMode } = useTheme();
   const [user, setUser] = useState(null);
   const [showPasswords, setShowPasswords] = useState({});
-  const [isGridView, setIsGridView] = useState(true);
+  const [isGridView, setIsGridView] = useState(false);
   const [credentials, setCredentials] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
