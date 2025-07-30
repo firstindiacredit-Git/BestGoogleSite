@@ -46,6 +46,9 @@ const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
   const [showAdminBanner, setShowAdminBanner] = useState(true);
   const [showGoogleApps, setShowGoogleApps] = useState(false);
 
+  // Check if current page is balance sheet related
+  const isBalanceSheetPage = location.pathname.includes('/balancesheet') || location.pathname.includes('/sheet/');
+
   const countries = [
     {
       key: "us",
@@ -317,7 +320,16 @@ const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
   };
 
   const Back = () => {
-    navigate("/search");
+    if (location.pathname.includes('/sheet/')) {
+      // If on a specific sheet page, go to balance sheet dashboard
+      navigate('/balancesheetdashboard');
+    } else if (location.pathname.includes('/balancesheet')) {
+      // If on balance sheet dashboard or login, go to search page
+      navigate('/search');
+    } else {
+      // For any other pages, go to search page
+      navigate('/search');
+    }
   };
 
   const setDefaultPage = async (pageId) => {
@@ -718,6 +730,15 @@ const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
           <div className="flex  items-center space-x-2">
             {user ? (
               <div className="relative flex items-center gap-2">
+                {isBalanceSheetPage && (
+                  <button
+                    className="bg-indigo-500 py-1.5 px-4 flex items-center gap-2 rounded home-button hover:bg-indigo-600 transition-colors"
+                    onClick={Back}
+                  >
+                    <FaArrowLeft className="h-2 w-3 text-white" />
+                    <span className="text-white">Back</span>
+                  </button>
+                )}
                 {goBack ? (
                   <button
                     className="bg-indigo-500 py-1.5 px-4 flex items-center gap-2 rounded home-button"
@@ -748,7 +769,18 @@ const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
                 ></div>
               </div>
             ) : (
-              <div className="w-36  "></div>
+              <div className="flex items-center gap-2">
+                {isBalanceSheetPage && (
+                  <button
+                    className="bg-indigo-500 py-1.5 px-4 flex items-center gap-2 rounded home-button hover:bg-indigo-600 transition-colors"
+                    onClick={() => navigate('/search')}
+                  >
+                    <FaArrowLeft className="h-2 w-3 text-white" />
+                    <span className="text-white">Back</span>
+                  </button>
+                )}
+                <div className="w-20"></div>
+              </div>
             )}
           </div>
 

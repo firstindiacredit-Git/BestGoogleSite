@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Card,
@@ -12,7 +12,6 @@ import {
   Row,
   Col,
   Avatar,
-  Dropdown,
   Menu,
   Table,
   Statistic,
@@ -22,12 +21,9 @@ import {
   PlusOutlined,
   LogoutOutlined,
   UserOutlined,
-  MoreOutlined,
   EditOutlined,
   DeleteOutlined,
   EyeOutlined,
-  CalendarOutlined,
-  ClockCircleOutlined,
 } from '@ant-design/icons';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext.jsx';
@@ -371,12 +367,14 @@ function BalancesheetDashboard({ onSheetClick }) {
         className="mobile-header"
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Title level={4} style={{ color: 'white', margin: 0 }}>
-            Balance Sheets
-          </Title>
-          <Text style={{ color: 'rgba(255, 255, 255, 0.8)' }}>
-            {user?.username || 'User'}
-          </Text>
+          <div>
+            <Title level={4} style={{ color: 'white', margin: 0 }}>
+              Balance Sheets
+            </Title>
+            <Text style={{ color: 'rgba(255, 255, 255, 0.8)' }}>
+              {user?.username || 'User'}
+            </Text>
+          </div>
         </div>
       </Card>
 
@@ -536,7 +534,7 @@ function BalancesheetDashboard({ onSheetClick }) {
                         Shared by: {sheet.sharedBy}
                       </Text>
                       <Text style={{ color: 'rgba(255, 255, 255, 0.8)', display: 'block', marginTop: '4px' }}>
-                        <ClockCircleOutlined style={{ marginRight: '8px' }} />
+                        {/* ClockCircleOutlined is removed, so this line is removed */}
                         Shared on: {new Date(sheet.updatedAt).toLocaleDateString()}
                       </Text>
                     </div>

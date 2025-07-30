@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { db, auth } from "../firebase";
 import {
   collection,
@@ -162,6 +162,7 @@ function PopularBookmarks() {
   const [categories, setCategories] = useState([]);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [professionLoading, setProfessionLoading] = useState(false);
   const [lineOptions, setLineOptions] = useState(() => {
     const savedLineOptions = localStorage.getItem("bookmarkLineOptions");
     return savedLineOptions ? parseInt(savedLineOptions) : 1;
@@ -221,7 +222,7 @@ function PopularBookmarks() {
   const [availableCategories, setAvailableCategories] = useState([]);
   const [categorySearch, setCategorySearch] = useState("");
   // Add state for show more/less categories
-
+  const [showAllCategories, setShowAllCategories] = useState(false);
   // Add state for search bar visibility
   const [isSearchBarOpen, setIsSearchBarOpen] = useState(false);
 
@@ -572,6 +573,46 @@ function PopularBookmarks() {
     return () => unsubscribeAuth();
   }, []);
 
+  // Profession ID mapping to handle legacy profession names in database
+  const getProfessionMapping = (professionId) => {
+    const mapping = {
+      "tax_investments": ["Tax & Investments", "tax_investments"],
+      "marketing_growth": ["Marketing & Growth", "marketing_growth", "Digital Marketer"],
+      "creativity_design": ["Creativity & Design", "creativity_design", "Designer (UI/UX, Graphic, Web)"],
+      "programmer_developer": ["Programmer & Developer", "programmer_developer", "Developer / Programmer"],
+      "professional_entrepreneurship": ["Professional & Entrepreneurship", "professional_entrepreneurship", "Entrepreneur / Founder", "Working Professional"],
+      "education_learning": ["Education & Learning", "education_learning", "Student", "Teacher / Educator"],
+      "ai_automation": ["AI Tools & Automation", "ai_automation"],
+      "productivity_management": ["Productivity & Task Management", "productivity_management"],
+      "news": ["News", "news"],
+      "shopping_deals": ["Shopping & Deal Sites", "shopping_deals"],
+      "health_wellness": ["Health & Wellness", "health_wellness", "Medical Professional"],
+      "travel": ["Travel", "travel"],
+      "entertainment_leisure": ["Entertainment & Leisure", "entertainment_leisure"],
+      "career_jobs": ["Career & Job Portals", "career_jobs"],
+      "privacy_security": ["Privacy & Security", "privacy_security"],
+      "india_specific": ["India-Specific Portals", "india_specific"],
+      "brain_interests": ["Brain-Interests", "brain_interests"],
+      "science_nature": ["Science & Nature", "science_nature", "Researcher / Academic"],
+      "automotive_transport": ["Automotive & Transport", "automotive_transport"],
+      "gaming_entertainment": ["Gaming & Entertainment", "gaming_entertainment"],
+      "kids_family": ["Kids & Family", "kids_family"],
+      "international_tools": ["International Tools", "international_tools"],
+      "events_conferences": ["Events & Conferences", "events_conferences"],
+      "technology_computing": ["Technology & Computing", "technology_computing", "IT / Tech Support"],
+      "social_community": ["Social & Community", "social_community"],
+      "home_lifestyle": ["Home & Lifestyle", "home_lifestyle"],
+      "analytics_reporting": ["Analytics & Reporting", "analytics_reporting"],
+      "startup_indie_tools": ["Startup Directories & Indie Tools", "startup_indie_tools"],
+      "bpo": ["BPO", "bpo"],
+      "freelancer": ["Freelancer (Creative or Technical)", "freelancer"],
+      "consultant": ["Consultant / Advisor", "consultant"],
+      "other": ["Other", "other"],
+      "retired": ["Retired", "retired"]
+    };
+    return mapping[professionId] || [professionId];
+  };
+
   // Filter categories based on user preferences and selected country
   const getFilteredCategories = (allCategories, isControllerMode = false) => {
     // First, separate user-created and admin categories
@@ -596,10 +637,23 @@ function PopularBookmarks() {
       // Check profession match
       if (userProfession === "all") return true;
 
+      // Get all possible profession names/IDs for the current user profession
+      const professionMatches = getProfessionMapping(userProfession);
+      
       const matchesProfession = category.professions && (
         category.professions.includes(userProfession) ||
-        category.professions.includes("all")
+        category.professions.includes("all") ||
+        professionMatches.some(prof => category.professions.includes(prof))
       );
+
+      // Debug logging for tax_investments profession
+      if (userProfession === "tax_investments") {
+        console.log("Debug - Category:", category.name || category.newCategory);
+        console.log("Debug - Category professions:", category.professions);
+        console.log("Debug - User profession:", userProfession);
+        console.log("Debug - Profession matches:", professionMatches);
+        console.log("Debug - Matches profession:", matchesProfession);
+      }
 
       // If user has no profession, don't show admin categories
       if (!userProfession) return false;
@@ -635,6 +689,11 @@ function PopularBookmarks() {
     return filteredCategories;
   };
 
+  // Cache for categories and bookmarks to avoid repeated Firebase calls
+  const [allCategoriesCache, setAllCategoriesCache] = useState([]);
+  const [lastFetchTime, setLastFetchTime] = useState(0);
+  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
   // Single effect to fetch all data when user changes
   useEffect(() => {
     let isMounted = true;
@@ -648,6 +707,19 @@ function PopularBookmarks() {
         setOpenCategories({});
         return;
       }
+
+      // Check if we can use cached data
+      const now = Date.now();
+      const canUseCache = allCategoriesCache.length > 0 && (now - lastFetchTime) < CACHE_DURATION;
+      
+      if (canUseCache) {
+        // Use cached categories and just filter them
+        const matchingCategories = getFilteredCategories(allCategoriesCache, false);
+        setCategories(matchingCategories);
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       try {
         // Fetch user doc
@@ -675,8 +747,22 @@ function PopularBookmarks() {
         // Combine and sort categories
         const allCategories = [...adminCategories, ...userCategories].sort((a, b) => (a.order || 0) - (b.order || 0));
 
+        // Cache the categories
+        setAllCategoriesCache(allCategories);
+        setLastFetchTime(now);
+
         // Get categories that match user preferences
         const matchingCategories = getFilteredCategories(allCategories, false);
+
+        // Debug logging for all categories and their professions
+        console.log("Debug - All categories:", allCategories.map(cat => ({
+          name: cat.name || cat.newCategory,
+          professions: cat.professions,
+          countries: cat.countries,
+          isAdmin: cat.isAdminCategory
+        })));
+        console.log("Debug - User profession:", userProfession);
+        console.log("Debug - Matching categories count:", matchingCategories.length);
 
         // Get current column structure
         let currentColumns = userData.categoryPositions?.columns || { column1: [], column2: [], column3: [], column4: [] };
@@ -816,66 +902,43 @@ function PopularBookmarks() {
     };
     fetchAllData();
     return () => { isMounted = false; };
-  }, [user, selectedCountry, userProfession]);
+  }, [user, selectedCountry]);
 
-  // Effect to refilter categories when user preferences change
+  // Effect to handle profession changes instantly using cached data
   useEffect(() => {
-    if (user && categories.length > 0) {
-      // Re-fetch all categories and apply filtering
-      const refilterCategories = async () => {
-        try {
-          const adminCategorySnapshot = await getDocs(collection(db, "category"));
-          const adminCategories = adminCategorySnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-            isAdminCategory: true,
-          }));
-          const userCategorySnapshot = await getDocs(collection(db, "users", user.uid, "UserCategory"));
-          const userCategories = userCategorySnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-            name: doc.data().newCategory,
-            isAdminCategory: false,
-          }));
-          const allCategories = [...adminCategories, ...userCategories].sort((a, b) => (a.order || 0) - (b.order || 0));
-          const filteredCategories = getFilteredCategories(allCategories, false);
-          setCategories(filteredCategories);
-
-          // Update categoryColumns to match new categories
-          setCategoryColumns(prevColumns => {
-            // Flatten all current category IDs in columns
-            const allColIds = Object.values(prevColumns).flat();
-            // Only keep IDs that are in filteredCategories
-            const validIds = filteredCategories.map(cat => cat.id);
-            // Remove any IDs not in validIds
-            let newColumns = {};
-            let colCount = Object.keys(prevColumns).length || 4;
-            for (let col = 1; col <= colCount; col++) {
-              newColumns[`column${col}`] = [];
-            }
-            // Distribute validIds equally among columns
-            validIds.forEach((id, i) => {
-              const col = (i % colCount) + 1;
-              newColumns[`column${col}`].push(id);
-            });
-            // Persist to Firestore
-            const userDocRef = doc(db, "users", user.uid);
-            updateDoc(userDocRef, {
-              categoryPositions: {
-                columns: newColumns,
-                columnCount: colCount,
-                lastUpdated: new Date().toISOString(),
-              },
-            }).catch((err) => console.error("Error updating columns after profession change:", err));
-            return newColumns;
-          });
-        } catch (error) {
-          console.error("Error refiltering categories:", error);
+    if (user && allCategoriesCache.length > 0) {
+      setProfessionLoading(true);
+      
+      // Use cached categories and filter them instantly
+      const matchingCategories = getFilteredCategories(allCategoriesCache, false);
+      setCategories(matchingCategories);
+      
+      // Update categoryColumns to match new categories
+      setCategoryColumns(prevColumns => {
+        // Flatten all current category IDs in columns
+        const allColIds = Object.values(prevColumns).flat();
+        // Only keep IDs that are in filteredCategories
+        const validIds = matchingCategories.map(cat => cat.id);
+        // Remove any IDs not in validIds
+        let newColumns = {};
+        let colCount = Object.keys(prevColumns).length || 4;
+        for (let col = 1; col <= colCount; col++) {
+          newColumns[`column${col}`] = [];
         }
-      };
-      refilterCategories();
+        // Distribute validIds equally among columns
+        validIds.forEach((id, index) => {
+          const colIndex = (index % colCount) + 1;
+          newColumns[`column${colIndex}`].push(id);
+        });
+        return newColumns;
+      });
+      
+      // Small delay to show loading state for better UX
+      setTimeout(() => setProfessionLoading(false), 100);
     }
-  }, [selectedCountry, userProfession]);
+  }, [userProfession, allCategoriesCache]);
+
+  // Remove the old refiltering effect that was causing performance issues
 
   // Add useEffect to load saved positions
   useEffect(() => {
@@ -1967,7 +2030,28 @@ function PopularBookmarks() {
     );
   };
 
+  // Helper to get categories to display based on showAllCategories
+  const getVisibleCategoryIds = () => {
+    const allCategoryIds = Object.values(categoryColumns).flat();
+    if (showAllCategories || allCategoryIds.length <= 16) return allCategoryIds;
+    return allCategoryIds.slice(0, 16);
+  };
 
+  // Helper to distribute category IDs equally among columns
+  const getDistributedCategoryColumns = () => {
+    const visibleCategoryIds = getVisibleCategoryIds();
+    const distributed = {};
+    const perCol = Math.floor(visibleCategoryIds.length / columnCount);
+    let extra = visibleCategoryIds.length % columnCount;
+    let idx = 0;
+    for (let col = 1; col <= columnCount; col++) {
+      const count = perCol + (extra > 0 ? 1 : 0);
+      distributed[`column${col}`] = visibleCategoryIds.slice(idx, idx + count);
+      idx += count;
+      if (extra > 0) extra--;
+    }
+    return distributed;
+  };
 
   const renderBookmarksByCategory = () => {
     const areAllOpen =
@@ -2002,40 +2086,8 @@ function PopularBookmarks() {
       );
     };
 
-
-
-
-
-    // Helper: group categories by profession
-    const groupCategoriesByProfession = (categoryIds) => {
-      const grouped = {};
-      
-      categoryIds.forEach(catId => {
-        const category = categories.find(c => c.id === catId);
-        if (!category) return;
-        
-        // For admin categories, use their professions array
-        if (category.isAdminCategory && category.professions) {
-          category.professions.forEach(profession => {
-            if (!grouped[profession]) {
-              grouped[profession] = [];
-            }
-            grouped[profession].push(category);
-          });
-        } else {
-          // For user categories, group under "User Categories"
-          if (!grouped['user_categories']) {
-            grouped['user_categories'] = [];
-          }
-          grouped['user_categories'].push(category);
-        }
-      });
-      
-      return grouped;
-    };
-
-    // Get all filtered categories and group them by profession
-    const allFilteredCategories = Object.values(categoryColumns)
+    // Filter categories: show if category name matches OR any bookmark matches
+    const filteredCategoryIds = Object.values(categoryColumns)
       .flat()
       .filter((catId) => {
         const cat = categories.find((c) => c.id === catId);
@@ -2047,7 +2099,62 @@ function PopularBookmarks() {
         return catLinks.some(bookmarkMatches);
       });
 
-    const groupedCategories = groupCategoriesByProfession(allFilteredCategories);
+    // Helper: get all filtered categories in the user's column structure
+    const getAllColumns = () => {
+      const result = {};
+      for (let col = 1; col <= columnCount; col++) {
+        const colKey = `column${col}`;
+        result[colKey] = (categoryColumns[colKey] || []).filter(catId => filteredCategoryIds.includes(catId));
+      }
+      return result;
+    };
+
+    // Helper: get visible category IDs in the user's column structure, up to a total limit, distributed equally among columns
+    const getLimitedColumns = (limit) => {
+      // Step 1: Gather filtered categories per column, preserving order
+      const perColumn = {};
+      for (let col = 1; col <= columnCount; col++) {
+        const colKey = `column${col}`;
+        perColumn[colKey] = (categoryColumns[colKey] || []).filter(catId => filteredCategoryIds.includes(catId));
+      }
+      // Step 2: Calculate how many per column
+      const basePerCol = Math.floor(limit / columnCount);
+      let remainder = limit % columnCount;
+      // Step 3: Build result with up to basePerCol + 1 (if remainder > 0) per column
+      const result = {};
+      let used = 0;
+      for (let col = 1; col <= columnCount; col++) {
+        const colKey = `column${col}`;
+        let take = basePerCol + (remainder > 0 ? 1 : 0);
+        remainder = Math.max(0, remainder - 1);
+        result[colKey] = perColumn[colKey].slice(0, take);
+        used += result[colKey].length;
+      }
+      // If for some reason we have more than limit (e.g. not enough in some columns), trim extra from the end
+      if (used > limit) {
+        // Flatten, trim, then rebuild columns
+        const all = [];
+        for (let col = 1; col <= columnCount; col++) {
+          for (const catId of result[`column${col}`]) {
+            all.push({ col, catId });
+          }
+        }
+        const trimmed = all.slice(0, limit);
+        // Rebuild columns
+        const newResult = {};
+        for (let col = 1; col <= columnCount; col++) newResult[`column${col}`] = [];
+        trimmed.forEach(({ col, catId }) => {
+          newResult[`column${col}`].push(catId);
+        });
+        return newResult;
+      }
+      return result;
+    };
+
+    // Decide which columns to render
+    const columnsToRender = showAllCategories
+      ? getAllColumns()
+      : getLimitedColumns(16);
 
     return (
       <div className="mb-2">
@@ -2271,300 +2378,289 @@ function PopularBookmarks() {
 
 
 
-        {/* Professions and Categories Section */}
-        {Object.entries(groupedCategories).map(([professionId, categories], professionIndex) => {
-          const professionName = professionId === 'user_categories' 
-            ? 'User Categories' 
-            : getProfessionDisplayName(professionId);
-          const professionIcon = professionId === 'user_categories' 
-            ? '👤' 
-            : getProfessionIcon(professionId);
-          
-          return (
-            <div key={professionId} className="mb-12" id={`profession-${professionId}`}>
-              {/* Profession Header - Full Width */}
-              <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-700 shadow-sm">
-                <div className="flex items-center gap-4">
-                  <span className="text-3xl">{professionIcon}</span>
-                  <div>
-                    <h2 className="text-2xl font-bold text-blue-800 dark:text-blue-200">
-                      {professionName}
-                    </h2>
-                   
-                  </div>
-                </div>
-              </div>
-
-              {/* Categories Section - 4 Columns */}
-              <DragDropContext onDragEnd={onDragEnd}>
-                <Row gutter={[16, 16]}>
-                  {Array.from({ length: 4 }, (_, i) => i + 1).map(
-                    (colNum) => (
-                      <Col
-                        key={`${professionId}-column${colNum}`}
-                        xs={24}
-                        sm={12}
-                        lg={6}
+        <DragDropContext onDragEnd={onDragEnd}>
+          <Row gutter={[16, 16]}>
+            {Array.from({ length: columnCount }, (_, i) => i + 1).map(
+              (colNum) => (
+                <Col
+                  key={`column${colNum}`}
+                  xs={24}
+                  sm={columnCount <= 2 ? 12 : 24}
+                  lg={24 / columnCount}
+                >
+                  <Droppable droppableId={`column${colNum}`}>
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                        className={` transition-colors duration-200 ${snapshot.isDraggingOver
+                            ? "bg-transparent border-2 border-dashed border-blue-500"
+                            : "bg-transparent border-2 border-dashed border-transparent"
+                          }`}
                       >
-                        <Droppable droppableId={`${professionId}-column${colNum}`}>
-                          {(provided, snapshot) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.droppableProps}
-                              className={` transition-colors duration-200 ${snapshot.isDraggingOver
-                                  ? "bg-transparent border-2 border-dashed border-blue-500"
-                                  : "bg-transparent border-2 border-dashed border-transparent"
-                                }`}
-                            >
-                              {(() => {
-                                // Distribute categories for this profession across 4 columns
-                                const categoriesForThisColumn = [];
-                                let draggableIndex = 0;
-                                
-                                categories.forEach((category, index) => {
-                                  const shouldIncludeInThisColumn = index % 4 === (colNum - 1);
-                                  if (shouldIncludeInThisColumn) {
-                                    categoriesForThisColumn.push({
-                                      category,
-                                      draggableIndex: draggableIndex++
-                                    });
-                                  }
-                                });
-                                
-                                return categoriesForThisColumn.map(({ category, draggableIndex }) => {
-                                  // Get bookmarks for this category, filter by search if needed
-                                  let categoryLinks = getCategoryLinks(category.id);
-                                  // Determine if this category is included because of a name match
-                                  const name = (category.name || category.newCategory || '').toLowerCase();
-                                  if (searchTerm && !name.includes(searchTerm)) {
-                                    // Only filter bookmarks if the category name does NOT match
-                                    categoryLinks = categoryLinks.filter(bookmarkMatches);
-                                  }
+                        {columnsToRender[`column${colNum}`]?.map(
+                          (categoryId, index) => {
+                            const category = categories.find(
+                              (c) => c.id === categoryId
+                            );
+                            if (!category) return null;
 
-                                  return (
-                                    <Draggable
-                                      key={category.id}
-                                      draggableId={category.id}
-                                      index={draggableIndex}
-                                    >
-                                      {(provided, snapshot) => (
+                            // Get bookmarks for this category, filter by search if needed
+                            let categoryLinks = getCategoryLinks(category.id);
+                            // Determine if this category is included because of a name match
+                            const name = (category.name || category.newCategory || '').toLowerCase();
+                            if (searchTerm && !name.includes(searchTerm)) {
+                              // Only filter bookmarks if the category name does NOT match
+                              categoryLinks = categoryLinks.filter(bookmarkMatches);
+                            }
+
+                            return (
+                              <Draggable
+                                key={category.id}
+                                draggableId={category.id}
+                                index={index}
+                              >
+                                {(provided, snapshot) => (
+                                  <div
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    className={`mb-4 transition-all duration-200 ${snapshot.isDragging
+                                        ? "shadow-xl rotate-2 scale-105 z-50"
+                                        : "shadow-none rotate-0 scale-100"
+                                      }`}
+                                    style={{
+                                      ...provided.draggableProps.style,
+                                      transform: snapshot.isDragging
+                                        ? `${provided.draggableProps.style?.transform} rotate(2deg) scale(1.05)`
+                                        : provided.draggableProps.style?.transform
+                                    }}
+                                  >
+                                    <Card
+                                      className="max-w-xl backdrop-blur-sm  bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)]  dark:text-white mx-auto rounded-sm"
+                                      title={
                                         <div
-                                          ref={provided.innerRef}
-                                          {...provided.draggableProps}
-                                          className={`mb-4 transition-all duration-200 ${snapshot.isDragging
-                                              ? "shadow-xl rotate-2 scale-105 z-50"
-                                              : "shadow-none rotate-0 scale-100"
-                                            }`}
-                                          style={{
-                                            ...provided.draggableProps.style,
-                                            transform: snapshot.isDragging
-                                              ? `${provided.draggableProps.style?.transform} rotate(2deg) scale(1.05)`
-                                              : provided.draggableProps.style?.transform
+                                          className="bg-white/[(var(--widget-opacity))] dark:bg-[#513a7a]/[(var(--widget-opacity))] dark:text-white p-1 relative overflow-hidden cursor-pointer"
+                                          onClick={() => {
+                                            toggleDropdown(category.id);
                                           }}
                                         >
-                                          <Card
-                                            className="max-w-xl backdrop-blur-sm  bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)]  dark:text-white mx-auto rounded-sm"
-                                            title={
+                                          <div className="absolute left-0 w-full h-full">
+                                            <div className="absolute inset-0 opacity-10 transform rotate-45 translate-x-[-50%] translate-y-[-50%] w-[200%] h-[200%]"></div>
+                                          </div>
+                                          <div className="relative z-10 flex justify-between items-center category-header-content">
+                                            <div className="flex items-center flex-1">
                                               <div
-                                                className="bg-white/[(var(--widget-opacity))] dark:bg-[#513a7a]/[(var(--widget-opacity))] dark:text-white p-1 relative overflow-hidden cursor-pointer"
-                                                onClick={() => {
-                                                  toggleDropdown(category.id);
-                                                }}
+                                                {...provided.dragHandleProps}
+                                                className={`cursor-grab active:cursor-grabbing p-2 transition-all duration-200 group hover:bg-gray-200/50 dark:hover:bg-gray-600/50 rounded ${snapshot.isDragging
+                                                    ? "bg-gray-300/[(var(--widget-opacity))] rounded shadow-lg cursor-grabbing"
+                                                    : ""
+                                                  }`}
+                                                onClick={(e) =>
+                                                  e.stopPropagation()
+                                                }
+                                                title="Drag to reorder"
                                               >
-                                                <div className="absolute left-0 w-full h-full">
-                                                  <div className="absolute inset-0 opacity-10 transform rotate-45 translate-x-[-50%] translate-y-[-50%] w-[200%] h-[200%]"></div>
-                                                </div>
-                                                <div className="relative z-10 flex justify-between items-center category-header-content">
-                                                  <div className="flex items-center flex-1">
-                                                    <div
-                                                      {...provided.dragHandleProps}
-                                                      className={`cursor-grab active:cursor-grabbing p-2 transition-all duration-200 group hover:bg-gray-200/50 dark:hover:bg-gray-600/50 rounded ${snapshot.isDragging
-                                                          ? "bg-gray-300/[(var(--widget-opacity))] rounded shadow-lg cursor-grabbing"
-                                                          : ""
-                                                        }`}
-                                                      onClick={(e) =>
-                                                        e.stopPropagation()
-                                                      }
-                                                      title="Drag to reorder"
-                                                    >
-                                                      <div className="flex flex-col gap-[2px]">
-                                                        <div className="flex gap-[2px]">
-                                                          <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
-                                                          <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
-                                                        </div>
-                                                        <div className="flex gap-[2px]">
-                                                          <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
-                                                          <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
-                                                        </div>
-                                                        <div className="flex gap-[2px]">
-                                                          <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
-                                                          <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
-                                                        </div>
-                                                      </div>
-                                                    </div>
-                                                    <div className="flex items-center gap-2">
-                                                      <span className="font-semibold" title={category.name || category.newCategory}>
-                                                        {truncateText(category.name || category.newCategory)}
-                                                      </span>
-                                                      {category.isAdminCategory && (
-                                                        <div className="flex gap-1">
-                                                          {/* Country indicator */}
-                                                          {category.countries?.includes('india') && selectedCountry?.key === 'IN' && (
-                                                            <span className="px-2 py-0.5 text-xs bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 rounded">
-                                                              🇮🇳 India
-                                                            </span>
-                                                          )}
-                                                        </div>
-                                                      )}
-                                                    </div>
+                                                <div className="flex flex-col gap-[2px]">
+                                                  <div className="flex gap-[2px]">
+                                                    <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                                    <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
                                                   </div>
-                                                  <Space
-                                                    onClick={(e) =>
-                                                      e.stopPropagation()
-                                                    }
-                                                  >
-                                                    <Tooltip title="Add Bookmark">
-                                                      <AntButton
-                                                        type="text"
-                                                        icon={
-                                                          <PlusOutlined className="text-black dark:text-white" />
-                                                        }
-                                                        onClick={(e) => {
-                                                          e.stopPropagation();
-                                                          setSelectedCategory(
-                                                            category
-                                                          );
-                                                          setSelectedCategoryId(
-                                                            category.id
-                                                          );
-                                                          setIsAddBookmarkModalVisible(
-                                                            true
-                                                          );
-                                                        }}
-                                                        style={{ color: "white" }}
-                                                      />
-                                                    </Tooltip>
-                                                    <Dropdown
-                                                      menu={{
-                                                        items:
-                                                          getCategoryMenuItems(
-                                                            category
-                                                          ),
-                                                      }}
-                                                      trigger={["click"]}
-                                                      overlayClassName="[&_.ant-dropdown-menu]:p-0 [&_.ant-dropdown-menu-item]:p-0 [&_ul]:dark:bg-[#28283a]"
-                                                      onClick={(e) =>
-                                                        e.stopPropagation()
-                                                      }
-                                                    >
-                                                      <AntButton
-                                                        type="text"
-                                                        icon={
-                                                          <MoreOutlined className="text-black dark:text-white" />
-                                                        }
-                                                        onClick={(e) =>
-                                                          e.stopPropagation()
-                                                        }
-                                                        style={{ color: "white" }}
-                                                      />
-                                                    </Dropdown>
-                                                  </Space>
+                                                  <div className="flex gap-[2px]">
+                                                    <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                                    <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                                  </div>
+                                                  <div className="flex gap-[2px]">
+                                                    <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                                    <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                                  </div>
                                                 </div>
                                               </div>
-                                            }
-                                            styles={{
-                                              header: {
-                                                padding: 0,
-                                                borderBottom: "none",
-                                              },
-                                              body: {
-                                                padding: "16px",
-                                                maxHeight: "400px",
-                                                overflowY: "auto",
-                                                display: openCategories[category.id]
-                                                  ? "block"
-                                                  : "none",
-                                              },
-                                            }}
-                                            style={{
-                                              height: "100%",
-                                              transition: "all 0.3s ease",
-                                              transform: snapshot.isDragging
-                                                ? ""
-                                                : "rotate(0deg)",
-                                              boxShadow: snapshot.isDragging
-                                                ? "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
-                                                : "none",
-                                              border: "none",
-                                            }}
-                                          >
-                                            {categoryLinks.length === 0 ? (
-                                              <Empty
-                                                description="No bookmarks in this category yet"
-                                                image={Empty.PRESENTED_IMAGE_SIMPLE}
-                                              />
-                                            ) : (
-                                              <>
-                                                {categoryViewModes[category.id] ===
-                                                  "list" &&
-                                                  renderBookmarkList(
-                                                    categoryLinks,
-                                                    category.id
-                                                  )}
-                                                {categoryViewModes[category.id] ===
-                                                  "grid" &&
-                                                  renderBookmarkGrid(
-                                                    categoryLinks,
-                                                    category.id
-                                                  )}
-                                                {categoryViewModes[category.id] ===
-                                                  "icon" &&
-                                                  renderBookmarkIcon(
-                                                    categoryLinks,
-                                                    category.id
-                                                  )}
-                                                {!categoryViewModes[category.id] &&
-                                                  renderBookmarkGrid(
-                                                    categoryLinks,
-                                                    category.id
-                                                  )}
-                                              </>
-                                            )}
-                                          </Card>
+                                              <div className="flex items-center gap-2">
+                                                <span className="font-semibold" title={category.name || category.newCategory}>
+                                                  {truncateText(category.name || category.newCategory)}
+                                                </span>
+                                                {category.isAdminCategory && (
+                                                  <div className="flex gap-1">
+                                                    {/* Country indicator */}
+                                                    {category.countries?.includes('india') && selectedCountry?.key === 'IN' && (
+                                                      <span className="px-2 py-0.5 text-xs bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 rounded">
+                                                        🇮🇳 India
+                                                      </span>
+                                                    )}
+                                                    {/* Profession indicator */}
+                                                    {/* {category.professions?.includes(userProfession) && (
+                                                      <span className="px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded">
+                                                        {userProfession}
+                                              </span>
+                                                    )} */}
+                                                    {/* Interest indicator */}
+                                                    {/* {category.interests?.some(i => mainInterests.includes(i)) && (
+                                                      <span className="px-2 py-0.5 text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 rounded">
+                                                        Interest Match
+                                                      </span>
+                                                    )} */}
+                                                  </div>
+                                                )}
+                                              </div>
+                                            </div>
+                                            <Space
+                                              onClick={(e) =>
+                                                e.stopPropagation()
+                                              }
+                                            >
+                                              <Tooltip title="Add Bookmark">
+                                                <AntButton
+                                                  type="text"
+                                                  icon={
+                                                    <PlusOutlined className="text-black dark:text-white" />
+                                                  }
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setSelectedCategory(
+                                                      category
+                                                    );
+                                                    setSelectedCategoryId(
+                                                      category.id
+                                                    );
+                                                    setIsAddBookmarkModalVisible(
+                                                      true
+                                                    );
+                                                  }}
+                                                  style={{ color: "white" }}
+                                                />
+                                              </Tooltip>
+                                              <Dropdown
+                                                menu={{
+                                                  items:
+                                                    getCategoryMenuItems(
+                                                      category
+                                                    ),
+                                                }}
+                                                trigger={["click"]}
+                                                overlayClassName="[&_.ant-dropdown-menu]:p-0 [&_.ant-dropdown-menu-item]:p-0 [&_ul]:dark:bg-[#28283a]"
+                                                onClick={(e) =>
+                                                  e.stopPropagation()
+                                                }
+                                              >
+                                                <AntButton
+                                                  type="text"
+                                                  icon={
+                                                    <MoreOutlined className="text-black dark:text-white" />
+                                                  }
+                                                  onClick={(e) =>
+                                                    e.stopPropagation()
+                                                  }
+                                                  style={{ color: "white" }}
+                                                />
+                                              </Dropdown>
+                                            </Space>
+                                          </div>
                                         </div>
+                                      }
+                                      styles={{
+                                        header: {
+                                          padding: 0,
+                                          borderBottom: "none",
+                                        },
+                                        body: {
+                                          padding: "16px",
+                                          maxHeight: "400px",
+                                          overflowY: "auto",
+                                          display: openCategories[category.id]
+                                            ? "block"
+                                            : "none",
+                                        },
+                                      }}
+                                      style={{
+                                        height: "100%",
+                                        transition: "all 0.3s ease",
+                                        transform: snapshot.isDragging
+                                          ? ""
+                                          : "rotate(0deg)",
+                                        boxShadow: snapshot.isDragging
+                                          ? "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
+                                          : "none",
+                                        border: "none",
+                                      }}
+                                    >
+                                      {categoryLinks.length === 0 ? (
+                                        <Empty
+                                          description="No bookmarks in this category yet"
+                                          image={Empty.PRESENTED_IMAGE_SIMPLE}
+                                        />
+                                      ) : (
+                                        <>
+                                          {categoryViewModes[category.id] ===
+                                            "list" &&
+                                            renderBookmarkList(
+                                              categoryLinks,
+                                              category.id
+                                            )}
+                                          {categoryViewModes[category.id] ===
+                                            "grid" &&
+                                            renderBookmarkGrid(
+                                              categoryLinks,
+                                              category.id
+                                            )}
+                                          {categoryViewModes[category.id] ===
+                                            "icon" &&
+                                            renderBookmarkIcon(
+                                              categoryLinks,
+                                              category.id
+                                            )}
+                                          {!categoryViewModes[category.id] &&
+                                            renderBookmarkGrid(
+                                              categoryLinks,
+                                              category.id
+                                            )}
+                                        </>
                                       )}
-                                    </Draggable>
-                                  );
-                                });
-                              })()}
-                              {provided.placeholder}
-                            </div>
-                          )}
-                        </Droppable>
-                      </Col>
-                    )
-                  )}
-                </Row>
-              </DragDropContext>
-            </div>
-          );
-        })}
+                                    </Card>
+                                  </div>
+                                )}
+                              </Draggable>
+                            );
+                          }
+                        )}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                </Col>
+              )
+            )}
+          </Row>
+        </DragDropContext>
+        {/* Show More/Less Button */}
+        {filteredCategoryIds.length > 16 && (
+          <div className="flex justify-center mt-4">
+            <AntButton onClick={() => setShowAllCategories((prev) => !prev)}>
+              {showAllCategories ? "Show Less" : "Show More"}
+            </AntButton>
+          </div>
+        )}
 
         {/* No Categories Message */}
-        
-
-        {/* Scroll to Top Button */}
-        <button
-          onClick={() => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-          className="fixed bottom-6 right-6 bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110 z-50"
-          title="Scroll to top"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-          </svg>
-        </button>
+        {/* {filteredCategoryIds.length === 0 && userProfession && (
+          <div className="text-center py-8">
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6 max-w-md mx-auto">
+              <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
+                No matching categories found
+              </h3>
+              <p className="text-yellow-700 dark:text-yellow-300 mb-4">
+                {!userProfession ? (
+                  "Please set your profession to see relevant categories."
+                ) : (
+                  `No categories match your profession (${userProfession}).`
+                )}
+              </p>
+              <div className="flex flex-col gap-4 items-center">
+                <p className="text-sm text-gray-600 dark:text-gray-400">Select your profession from the options above</p>
+                {renderProfessionBar()}
+              </div>
+            </div>
+          </div>
+        )} */}
       </div>
     );
   };
@@ -3498,36 +3594,36 @@ function PopularBookmarks() {
     // { id: "it_support", name: "IT Support", icon: "🛠️" },
     // { id: "medical", name: "Medical", icon: "⚕️" },
     // { id: "other", name: "Other", icon: "✨" },
-    { id: "all", name: "All Professions" },
-    { id: "bpo", name: "BPO" },
-    { id: "productivity_management", name: "Productivity & Task Management" },
-    { id: "ai_automation", name: "AI Tools & Automation" },
-    { id: "education_learning", name: "Education & Learning" },
-    { id: "professional_entrepreneurship", name: "Professional & Entrepreneurship" },
-    { id: "tax_investments", name: "Tax & Investments" },
-    { id: "marketing_growth", name: "Marketing & Growth" },
-    { id: "creativity_design", name: "Creativity & Design" },
-    { id: "programmer_developer", name: "Programmer & Developer" },
-    { id: "news", name: "News" },
-    { id: "shopping_deals", name: "Shopping & Deal Sites" },
-    { id: "health_wellness", name: "Health & Wellness" },
-    { id: "travel", name: "Travel" },
-    { id: "entertainment_leisure", name: "Entertainment & Leisure" },
-    { id: "career_jobs", name: "Career & Job Portals" },
-    { id: "privacy_security", name: "Privacy & Security" },
-    { id: "india_specific", name: "India-Specific Portals" },
-    { id: "brain_interests", name: "Brain-Interests" },
-    { id: "science_nature", name: "Science & Nature" },
-    { id: "automotive_transport", name: "Automotive & Transport" },
-    { id: "gaming_entertainment", name: "Gaming & Entertainment" },
-    { id: "kids_family", name: "Kids & Family" },
-    { id: "international_tools", name: "International Tools" },
-    { id: "events_conferences", name: "Events & Conferences" },
-    { id: "technology_computing", name: "Technology & Computing" },
-    { id: "social_community", name: "Social & Community" },
-    { id: "home_lifestyle", name: "Home & Lifestyle" },
-    { id: "analytics_reporting", name: "Analytics & Reporting" },
-    { id: "startup_indie_tools", name: "Startup Directories & Indie Tools" },
+    { id: "all", name: "All Professions", icon: "🌐" },
+    { id: "bpo", name: "BPO", icon: "📞" },
+    { id: "productivity_management", name: "Productivity & Task Management", icon: "⚡" },
+    { id: "ai_automation", name: "AI Tools & Automation", icon: "🤖" },
+    { id: "education_learning", name: "Education & Learning", icon: "📚" },
+    { id: "professional_entrepreneurship", name: "Professional & Entrepreneurship", icon: "💼" },
+    { id: "tax_investments", name: "Tax & Investments", icon: "💰" },
+    { id: "marketing_growth", name: "Marketing & Growth", icon: "📈" },
+    { id: "creativity_design", name: "Creativity & Design", icon: "🎨" },
+    { id: "programmer_developer", name: "Programmer & Developer", icon: "💻" },
+    { id: "news", name: "News", icon: "📰" },
+    { id: "shopping_deals", name: "Shopping & Deal Sites", icon: "🛒" },
+    { id: "health_wellness", name: "Health & Wellness", icon: "🏥" },
+    { id: "travel", name: "Travel", icon: "✈️" },
+    { id: "entertainment_leisure", name: "Entertainment & Leisure", icon: "🎭" },
+    { id: "career_jobs", name: "Career & Job Portals", icon: "💼" },
+    { id: "privacy_security", name: "Privacy & Security", icon: "🔒" },
+    { id: "india_specific", name: "India-Specific Portals", icon: "🇮🇳" },
+    { id: "brain_interests", name: "Brain-Interests", icon: "🧠" },
+    { id: "science_nature", name: "Science & Nature", icon: "🔬" },
+    { id: "automotive_transport", name: "Automotive & Transport", icon: "🚗" },
+    { id: "gaming_entertainment", name: "Gaming & Entertainment", icon: "🎮" },
+    { id: "kids_family", name: "Kids & Family", icon: "👨‍👩‍👧‍👦" },
+    { id: "international_tools", name: "International Tools", icon: "🌍" },
+    { id: "events_conferences", name: "Events & Conferences", icon: "📅" },
+    { id: "technology_computing", name: "Technology & Computing", icon: "💻" },
+    { id: "social_community", name: "Social & Community", icon: "👥" },
+    { id: "home_lifestyle", name: "Home & Lifestyle", icon: "🏠" },
+    { id: "analytics_reporting", name: "Analytics & Reporting", icon: "📊" },
+    { id: "startup_indie_tools", name: "Startup Directories & Indie Tools", icon: "🚀" },
     
   ];
 
@@ -3544,32 +3640,19 @@ function PopularBookmarks() {
 
 
   // Add profession selection bar at the top
-  const renderProfessionBar = () => (
+  const renderProfessionBar = useCallback(() => (
     <div className="flex flex-wrap items-center gap-2 mb-4">
       {professionOptions.map((option) => (
         <button
           key={option.id}
           onClick={() => {
             setUserProfession(option.id);
-            // Scroll to the selected profession section
-            const professionSection = document.getElementById(`profession-${option.id}`);
-            if (professionSection) {
-              // Add a small delay to ensure the profession is loaded
-              setTimeout(() => {
-                professionSection.scrollIntoView({ 
-                  behavior: 'smooth', 
-                  block: 'start',
-                  inline: 'nearest'
-                });
-              }, 100);
-            }
           }}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${userProfession === option.id
             ? "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700"
             : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700"
           }`}
         >
-          <span>{option.icon}</span>
           <span className="text-sm font-medium">{option.name}</span>
           {userProfession === option.id && (
             <span className="w-2 h-2 rounded-full bg-blue-500 dark:bg-blue-400"></span>
@@ -3577,7 +3660,7 @@ function PopularBookmarks() {
         </button>
       ))}
     </div>
-  );
+  ), [userProfession]);
 
   if (loading) {
     return (
@@ -3622,6 +3705,15 @@ function PopularBookmarks() {
         }`}
     >
       {renderProfessionBar()}
+      
+      {/* Profession loading indicator */}
+      {professionLoading && (
+        <div className="flex justify-center items-center py-4">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+          <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">Updating categories...</span>
+        </div>
+      )}
+      
       {/* Floating Most Facebook-Liked Bookmarks Suggestion Widget */}
       {showSuggestionWidget && topFacebookLikedAdminBookmarks.length > 0 && (
         <div
