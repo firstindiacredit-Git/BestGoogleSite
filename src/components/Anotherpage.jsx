@@ -2477,7 +2477,7 @@ const Anotherpage = ({ pageId = "home" }) => {
                 <span className="ml-2 text-blue-100">You&apos;re viewing demo version with thier bookmarks. Sign in to access your personal data!</span>
               </div>
             </div>
-            <button
+            {/* <button
               onClick={() => {}}
               className="text-blue-100 hover:text-white transition-colors"
               title="Hide demo banner"
@@ -2485,7 +2485,7 @@ const Anotherpage = ({ pageId = "home" }) => {
               <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path d="M6 18L18 6M6 6l12 12"/>
               </svg>
-            </button>
+            </button> */}
           </div>
         </div>
       )}

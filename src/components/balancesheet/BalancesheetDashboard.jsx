@@ -60,16 +60,42 @@ function BalancesheetDashboard({ onSheetClick }) {
   useEffect(() => {
     if (user) {
       fetchSheets();
+    } else {
+      // Check if there's a stored token
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/balancesheetlogin');
+      }
     }
-  }, [user]);
+  }, [user, navigate]);
 
   const fetchSheets = async () => {
     try {
-      const response = await axios.get('/sheets');
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/balancesheetlogin');
+        return;
+      }
+
+      const response = await axios.get('/sheets', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       setSheets(response.data);
     } catch (error) {
       console.error('Error fetching sheets:', error);
-      message.error('Failed to fetch balance sheets');
+      
+      if (error.response?.status === 401) {
+        // Unauthorized - clear token and redirect to login
+        localStorage.removeItem('token');
+        localStorage.removeItem('userCredentials');
+        navigate('/balancesheetlogin');
+      } else if (error.response?.status === 500) {
+        message.error('Server error. Please try again later.');
+      } else {
+        message.error('Failed to fetch balance sheets');
+      }
     }
   };
 
@@ -263,6 +289,19 @@ function BalancesheetDashboard({ onSheetClick }) {
     message.success('Sheet deleted successfully');
   };
 
+  const handleLogout = () => {
+    // Clear all stored data
+    localStorage.removeItem('token');
+    localStorage.removeItem('userCredentials');
+    localStorage.removeItem('username');
+    
+    // Call the original logout function
+    logout();
+    
+    // Redirect to login
+    navigate('/balancesheetlogin');
+  };
+
   return (
     <div style={{ padding: '24px', paddingBottom: '80px' }}>
       {/* Desktop Header */}
@@ -312,7 +351,7 @@ function BalancesheetDashboard({ onSheetClick }) {
             </Button>
             <Button
               icon={<LogoutOutlined />}
-              onClick={logout}
+              onClick={handleLogout}
               style={{ color: 'blue', borderColor: 'white' }}
             >
               Logout
@@ -351,7 +390,7 @@ function BalancesheetDashboard({ onSheetClick }) {
           <PlusOutlined />
           <span>New Sheet</span>
         </div>
-        <div className="nav-item" onClick={logout}>
+        <div className="nav-item" onClick={handleLogout}>
           <LogoutOutlined />
           <span>Logout</span>
         </div>

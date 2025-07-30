@@ -156,9 +156,32 @@ const NotesforNotes = ({ inNotebookSheet = false }) => {
           setActiveTabId('local-1');
         } else {
           const fetchedTabs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          setTabs(fetchedTabs);
+          
+          // Sort tabs by creation time or title, then renumber them sequentially
+          const sortedTabs = fetchedTabs.sort((a, b) => {
+            // First try to sort by creation time
+            if (a.createdAt && b.createdAt) {
+              return a.createdAt.toMillis() - b.createdAt.toMillis();
+            }
+            // If no creation time, sort by title number
+            const aMatch = a.title?.match(/^Tab (\d+)$/);
+            const bMatch = b.title?.match(/^Tab (\d+)$/);
+            if (aMatch && bMatch) {
+              return parseInt(aMatch[1]) - parseInt(bMatch[1]);
+            }
+            // Fallback to title string comparison
+            return (a.title || '').localeCompare(b.title || '');
+          });
+          
+          // Renumber all tabs sequentially
+          const processedTabs = sortedTabs.map((tab, index) => ({
+            ...tab,
+            title: `Tab ${index + 1}`
+          }));
+          
+          setTabs(processedTabs);
           // Preserve active tab if it still exists, otherwise default to first
-          setActiveTabId(prevId => fetchedTabs.some(t => t.id === prevId) ? prevId : fetchedTabs[0]?.id);
+          setActiveTabId(prevId => processedTabs.some(t => t.id === prevId) ? prevId : processedTabs[0]?.id);
         }
       });
 
@@ -168,8 +191,29 @@ const NotesforNotes = ({ inNotebookSheet = false }) => {
       const savedTabs = localStorage.getItem(getStorageKey("tabs"));
       if (savedTabs) {
         const parsedTabs = JSON.parse(savedTabs);
-        setTabs(parsedTabs);
-        setActiveTabId(parsedTabs[0]?.id || 1);
+        
+        // Sort tabs by ID or title number, then renumber them sequentially
+        const sortedTabs = parsedTabs.sort((a, b) => {
+          const aMatch = a.title?.match(/^Tab (\d+)$/);
+          const bMatch = b.title?.match(/^Tab (\d+)$/);
+          if (aMatch && bMatch) {
+            return parseInt(aMatch[1]) - parseInt(bMatch[1]);
+          }
+          return (a.id || 0) - (b.id || 0);
+        });
+        
+        // Renumber all tabs sequentially
+        const processedTabs = sortedTabs.map((tab, index) => {
+          const sequentialNumber = index + 1;
+          return {
+            ...tab,
+            id: sequentialNumber,
+            title: `Tab ${sequentialNumber}`
+          };
+        });
+        
+        setTabs(processedTabs);
+        setActiveTabId(processedTabs[0]?.id || 1);
       } else {
         setTabs([{ id: 1, title: "Tab 1", content: "" }]);
         setActiveTabId(1);
@@ -515,9 +559,9 @@ const NotesforNotes = ({ inNotebookSheet = false }) => {
     );
 
     return (
-      <div className="menu-Container relative w-9" ref={colorPickerRef}>
+      <div className="menu-Container relative w-9 mr-2" ref={colorPickerRef}>
         <button
-          className={`p-2 rounded-sm transition duration-200 ${
+          className={`p-3 rounded-sm transition duration-200 ${
             isAutoColor
               ? "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700"
               : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
@@ -540,24 +584,34 @@ const NotesforNotes = ({ inNotebookSheet = false }) => {
       return;
     }
 
-    const newTabTitle = `Tab ${tabs.length + 1}`;
-
     if (currentUser) {
       const notesCollectionRef = collection(db, "users", currentUser.uid, "notes");
       const newDocRef = await addDoc(notesCollectionRef, {
-        title: newTabTitle,
+        title: `Tab ${tabs.length + 1}`, // Simple sequential title
         content: "",
         createdAt: Timestamp.now(),
       });
-      // The onSnapshot listener will automatically update the UI
+      // The onSnapshot listener will automatically update the UI and renumber all tabs
       setActiveTabId(newDocRef.id);
     } else {
-      const newTabId = Math.max(0, ...tabs.map(tab => typeof tab.id === 'number' ? tab.id : 0)) + 1;
-      const newTab = { id: newTabId, title: newTabTitle, content: "" };
+      // For guest users, create new tab and renumber all tabs sequentially
+      const newTab = { 
+        id: tabs.length + 1, 
+        title: `Tab ${tabs.length + 1}`, 
+        content: "" 
+      };
       const updatedTabs = [...tabs, newTab];
-      setTabs(updatedTabs);
-      setActiveTabId(newTabId);
-      localStorage.setItem(getStorageKey("tabs"), JSON.stringify(updatedTabs));
+      
+      // Renumber all tabs to ensure proper sequence
+      const renumberedTabs = updatedTabs.map((tab, index) => ({
+        ...tab,
+        id: index + 1,
+        title: `Tab ${index + 1}`
+      }));
+      
+      setTabs(renumberedTabs);
+      setActiveTabId(renumberedTabs[renumberedTabs.length - 1].id); // Set active to the new tab
+      localStorage.setItem(getStorageKey("tabs"), JSON.stringify(renumberedTabs));
     }
     setShowTabDropdown(false);
   };
@@ -576,7 +630,15 @@ const NotesforNotes = ({ inNotebookSheet = false }) => {
       await deleteDoc(noteDocRef);
       // UI will update via snapshot listener
     } else {
-      const updatedTabs = tabs.filter(tab => tab.id !== tabId);
+      // Remove the tab and renumber remaining tabs sequentially
+      const updatedTabs = tabs
+        .filter(tab => tab.id !== tabId)
+        .map((tab, index) => ({
+          ...tab,
+          id: index + 1,
+          title: `Tab ${index + 1}`
+        }));
+      
       setTabs(updatedTabs);
       if (activeTabId === tabId) {
         setActiveTabId(updatedTabs[0]?.id);
@@ -595,6 +657,23 @@ const NotesforNotes = ({ inNotebookSheet = false }) => {
     e.stopPropagation();
     const newTitle = editingTitle.trim();
     if (newTitle) {
+      // Check if the new title follows the "Tab X" pattern
+      const titleMatch = newTitle.match(/^Tab (\d+)$/);
+      if (titleMatch) {
+        const newNumber = parseInt(titleMatch[1]);
+        // Check if this number is already used by another tab
+        const existingTabWithNumber = tabs.find(tab => 
+          tab.id !== tabId && tab.title === newTitle
+        );
+        
+        if (existingTabWithNumber) {
+          // If number is already used, don't allow the change
+          setEditingTabId(null);
+          setEditingTitle("");
+          return;
+        }
+      }
+      
       if (currentUser && !tabId.toString().startsWith('local-')) {
         const noteDocRef = doc(db, "users", currentUser.uid, "notes", tabId);
         await setDoc(noteDocRef, { title: newTitle }, { merge: true });
@@ -749,7 +828,7 @@ const NotesforNotes = ({ inNotebookSheet = false }) => {
                     {/* Dropdown Button - Show when there are multiple tabs */}
                     {tabs.length > 1 && (
                       <div className="relative" ref={tabDropdownRef}>
-                        <button
+                        {/* <button
                           onClick={() => {
                             console.log('Dropdown clicked, current state:', showTabDropdown, 'tabs length:', tabs.length);
                             setShowTabDropdown(!showTabDropdown);
@@ -760,7 +839,7 @@ const NotesforNotes = ({ inNotebookSheet = false }) => {
                         >
                          
                           <ChevronDown className="w-4 h-4" />
-                        </button>
+                        </button> */}
                         {showTabDropdown && (
                           <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-[#28283A] border border-gray-200 dark:border-gray-700 rounded-sm shadow-lg z-[9999] max-h-64 overflow-y-auto">
                             <div className="px-3 py-2 text-xs text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
@@ -997,7 +1076,7 @@ const NotesforNotes = ({ inNotebookSheet = false }) => {
                       <Mic className="w-5 h-5" />
                     )}
                   </button>
-                  <button
+                  {/* <button
                     ref={historyButtonRef}
                     className={`p-3 rounded-sm transition duration-200 ${
                       isAutoColor
@@ -1009,8 +1088,8 @@ const NotesforNotes = ({ inNotebookSheet = false }) => {
                     style={!isAutoColor ? { color: textColor } : undefined}
                   >
                     <History className="w-5 h-5" />
-                  </button>
-                  <button
+                  </button> */}
+                  {/* <button
                     className={`p-3 rounded-sm transition duration-200 ${
                       isAutoColor
                         ? "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
@@ -1021,15 +1100,15 @@ const NotesforNotes = ({ inNotebookSheet = false }) => {
                     style={!isAutoColor ? { color: textColor } : undefined}
                   >
                     <Save className="w-5 h-5" />
-                  </button>
+                  </button> */}
                 </div>
                 <div className="flex justify-between items-center mb-1">
                   <div className="w-full  flex justify-between">
                     <div className="flex items-center gap-2">
                       {renderColorPicker()}
-                      <div className="w-9 ">
+                      <div className="w-9 mr-2 ">
                         <button
-                          className={`p-2 rounded-sm transition duration-200 ${
+                          className={`p-3 rounded-sm transition duration-200 ${
                             isAutoColor
                               ? "bg-gray-100 dark:bg-[#513a7a]/[var(--widget-opacity)] hover:bg-gray-200 dark:hover:bg-gray-700"
                               : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"

@@ -641,6 +641,19 @@ const Weather = () => {
     );
   }
 
+  // Add null check for currentWeather
+  if (!currentWeather || !currentWeather.weather || !currentWeather.weather[0]) {
+    return (
+      <div className="p-3">
+        <div className="backdrop-blur-md bg-white/30 rounded-2xl shadow-xl max-w-md mx-auto w-full">
+          <div className="h-64 flex items-center justify-center text-gray-600">
+            {error || "Unable to load weather data"}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div 
       className="p-3 h-[100px] relative"

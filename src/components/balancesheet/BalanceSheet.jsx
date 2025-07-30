@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
+import { message } from 'antd';
 import {
   Container,
   Grid,
@@ -68,8 +69,8 @@ import {
   ShareAltOutlined,
 } from '@ant-design/icons';
 
-const API_URL = 'https://balance-sheet-backend-three.vercel.app';
-// const API_URL = 'http://localhost:5000';
+const API_URL = 'https://balance-sheet-backend-three.vercel.app/api';
+// const API_URL = 'http://localhost:5000/api';
 
 function BalanceSheet({ sheetId }) {
   const params = useParams();
@@ -124,30 +125,125 @@ function BalanceSheet({ sheetId }) {
   }, [viewMode]);
 
   useEffect(() => {
+    console.log('BalanceSheet useEffect triggered');
+    console.log('Sheet ID from params:', params.id);
+    console.log('Sheet ID from props:', sheetId);
+    console.log('Final ID to use:', id);
+    
+    if (!id) {
+      console.error('No sheet ID provided');
+      message.error('Invalid sheet ID');
+      navigate('/balancesheetdashboard');
+      return;
+    }
+    
     fetchSheet();
     fetchEntries();
   }, [id]);
 
+  // Add token validation function
+  const validateToken = (token) => {
+    try {
+      if (!token || typeof token !== 'string') {
+        return false;
+      }
+      
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        console.error('Invalid token format: not a valid JWT');
+        return false;
+      }
+      
+      const payload = JSON.parse(atob(parts[1]));
+      const currentTime = Date.now() / 1000;
+      
+      if (payload.exp < currentTime) {
+        console.error('Token has expired');
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error validating token:', error);
+      return false;
+    }
+  };
+
   const fetchSheet = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get(`${API_URL}/api/sheets/${id}`);
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        console.error('No authentication token found');
+        // Redirect to login if no token
+        navigate('/balancesheetlogin');
+        return;
+      }
+
+      // Validate token format
+      if (!validateToken(token)) {
+        console.error('Invalid token format');
+        localStorage.removeItem('token');
+        navigate('/balancesheetlogin');
+        return;
+      }
+
+      console.log('Fetching sheet with ID:', id);
+      console.log('Using API URL:', `${API_URL}/sheets/${id}`);
+      console.log('Token:', token.substring(0, 20) + '...');
+
+      // First, let's test if the API is accessible
+      try {
+        const healthCheck = await axios.get(`${API_URL.replace('/api', '')}/health`);
+        console.log('API health check response:', healthCheck.data);
+      } catch (healthError) {
+        console.error('API health check failed:', healthError);
+      }
+
+      const response = await axios.get(`${API_URL}/sheets/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      console.log('Sheet response:', response.data);
       setSheet(response.data);
       
       // Check if current user is the owner
-      const token = localStorage.getItem('token');
       if (token) {
-        const decoded = JSON.parse(atob(token.split('.')[1]));
-        const isOwner = response.data.user === decoded.userId;
-        setIsOwner(isOwner);
-        
-        // If not the owner, set the sharedBy information
-        if (!isOwner && response.data.sharedBy) {
-          setSharedBy(response.data.sharedBy);
+        try {
+          const decoded = JSON.parse(atob(token.split('.')[1]));
+          const isOwner = response.data.user === decoded.userId;
+          setIsOwner(isOwner);
+          
+          // If not the owner, set the sharedBy information
+          if (!isOwner && response.data.sharedBy) {
+            setSharedBy(response.data.sharedBy);
+          }
+        } catch (decodeError) {
+          console.error('Error decoding token:', decodeError);
+          // Token is invalid, redirect to login
+          localStorage.removeItem('token');
+          navigate('/balancesheetlogin');
+          return;
         }
       }
     } catch (error) {
       console.error('Error fetching sheet:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      console.error('Error headers:', error.response?.headers);
+      
+      if (error.response?.status === 401) {
+        // Unauthorized - clear token and redirect to login
+        localStorage.removeItem('token');
+        navigate('/balancesheetlogin');
+      } else if (error.response?.status === 500) {
+        // Server error - show user-friendly message
+        message.error('Server error. Please try again later.');
+      } else {
+        message.error('Failed to load balance sheet. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -156,10 +252,48 @@ function BalanceSheet({ sheetId }) {
   const fetchEntries = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get(`${API_URL}/api/sheets/${id}/entries`);
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        console.error('No authentication token found');
+        navigate('/balancesheetlogin');
+        return;
+      }
+
+      // Validate token format
+      if (!validateToken(token)) {
+        console.error('Invalid token format');
+        localStorage.removeItem('token');
+        navigate('/balancesheetlogin');
+        return;
+      }
+
+      console.log('Fetching entries for sheet ID:', id);
+      console.log('Using API URL:', `${API_URL}/sheets/${id}/entries`);
+
+      const response = await axios.get(`${API_URL}/sheets/${id}/entries`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      console.log('Entries response:', response.data);
       setEntries(response.data);
     } catch (error) {
       console.error('Error fetching entries:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      console.error('Error headers:', error.response?.headers);
+      
+      if (error.response?.status === 401) {
+        // Unauthorized - clear token and redirect to login
+        localStorage.removeItem('token');
+        navigate('/balancesheetlogin');
+      } else if (error.response?.status === 500) {
+        // Server error - show user-friendly message
+        message.error('Server error. Please try again later.');
+      } else {
+        message.error('Failed to load entries. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -170,7 +304,7 @@ function BalanceSheet({ sheetId }) {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const response = await axios.get(`${API_URL}/api/sheets/${id}/shared-users`, {
+      const response = await axios.get(`${API_URL}/sheets/${id}/shared-users`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -193,7 +327,7 @@ function BalanceSheet({ sheetId }) {
         return;
       }
 
-      const response = await axios.get(`${API_URL}/api/users/share-history`, {
+      const response = await axios.get(`${API_URL}/users/share-history`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -244,7 +378,7 @@ function BalanceSheet({ sheetId }) {
         });
 
         const response = await axios.post(
-            `${API_URL}/api/sheets/${id}/entries`,
+            `${API_URL}/sheets/${id}/entries`,
             formData,
             {
                 headers: {
@@ -489,7 +623,7 @@ function BalanceSheet({ sheetId }) {
         });
 
         const response = await axios.put(
-            `${API_URL}/api/sheets/${id}/entries/${editEntry._id}`,
+            `${API_URL}/sheets/${id}/entries/${editEntry._id}`,
             formData,
             {
                 headers: {
@@ -525,7 +659,7 @@ function BalanceSheet({ sheetId }) {
   const handleDeleteConfirm = async () => {
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`${API_URL}/api/delete/sheets/${id}/entries/${entryToDelete._id}`, {
+      await axios.delete(`${API_URL}/delete/sheets/${id}/entries/${entryToDelete._id}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -571,7 +705,7 @@ function BalanceSheet({ sheetId }) {
       console.log('Attempting to share sheet:', {
         sheetId: id,
         email: shareEmail,
-        url: `${API_URL}/api/sheets/share/${id}`,
+        url: `${API_URL}/sheets/share/${id}`,
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -579,7 +713,7 @@ function BalanceSheet({ sheetId }) {
       });
 
       const response = await axios.post(
-        `${API_URL}/api/sheets/share/${id}`,
+        `${API_URL}/sheets/share/${id}`,
         { email: shareEmail },
         {
           headers: {
@@ -626,7 +760,7 @@ function BalanceSheet({ sheetId }) {
       console.log('Removing user access:', { sheetId: id, userId });
 
       const response = await axios.delete(
-        `${API_URL}/api/sheets/${id}/shared-users/${userId}`,
+        `${API_URL}/sheets/${id}/shared-users/${userId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -1273,7 +1407,7 @@ function BalanceSheet({ sheetId }) {
             <Button 
               variant="outlined" 
               size="small"
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/balancesheetdashboard')}
               sx={{ 
                 color: 'white',
                 borderColor: 'white',

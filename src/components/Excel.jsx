@@ -41,6 +41,7 @@ const Excel = () => {
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [activeTableIndex, setActiveTableIndex] = useState(null);
   const [isAutoColor, setIsAutoColor] = useState(false);
+  const [editingTableNames, setEditingTableNames] = useState({});
   const { isDarkMode } = useTheme();
   const colorPickerRef = useRef(null);
 
@@ -1060,6 +1061,11 @@ const Excel = () => {
   // Update table name
   const updateTableName = (tableId, newName) => {
     try {
+      // Prevent empty table names
+      if (!newName || newName.trim() === "") {
+        return; // Don't show warning, just return silently
+      }
+
       if (userId) {
         // User is logged in, update in Firebase
         const tableRef = doc(db, "users", userId, "excel", tableId);
@@ -1294,9 +1300,47 @@ const Excel = () => {
             <div className="w-1/3">
               <input
                 type="text"
-                value={tableNames[table.id] || `Table ${tableIndex + 1}`}
-                onChange={(e) => updateTableName(table.id, e.target.value)}
-                className="text-lg bg-transparent dark:text-white focus:bg-gray-100 focus:dark:bg-[#513a7a] font-semibold   focus:border-blue-500 focus:outline-none px-2"
+                value={editingTableNames[table.id] !== undefined ? editingTableNames[table.id] : (tableNames[table.id] || `Table ${tableIndex + 1}`)}
+                onChange={(e) => {
+                  const newValue = e.target.value;
+                  // Update the editing state
+                  setEditingTableNames(prev => ({
+                    ...prev,
+                    [table.id]: newValue
+                  }));
+                }}
+                onFocus={() => {
+                  // When user starts editing, set the current value in editing state
+                  setEditingTableNames(prev => ({
+                    ...prev,
+                    [table.id]: tableNames[table.id] || `Table ${tableIndex + 1}`
+                  }));
+                }}
+                onBlur={(e) => {
+                  const currentValue = e.target.value;
+                  // Clear the editing state
+                  setEditingTableNames(prev => {
+                    const newState = { ...prev };
+                    delete newState[table.id];
+                    return newState;
+                  });
+                  
+                  // Only restore default name if field is completely empty
+                  if (!currentValue || currentValue.trim() === "") {
+                    const defaultName = `Table ${tableIndex + 1}`;
+                    updateTableName(table.id, defaultName);
+                  } else {
+                    // Save the valid name
+                    updateTableName(table.id, currentValue.trim());
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.target.blur(); // Trigger blur event
+                  }
+                }}
+                placeholder={`Table ${tableIndex + 1}`}
+                className="text-lg bg-transparent dark:text-white focus:bg-gray-100 focus:dark:bg-[#513a7a] font-semibold focus:border-blue-500 focus:outline-none px-2"
               />
             </div>
             <div className="font-Semibold text-2xl">Excel Sheet</div>

@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Form, Input, Button, Card, Typography, message } from 'antd';
-import { UserOutlined, LockOutlined, GoogleOutlined } from '@ant-design/icons';
+import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useAuth } from '../../context/AuthContext';
 
 const { Title } = Typography;
@@ -9,7 +9,30 @@ const { Title } = Typography;
 function BalancesheetLogin({ onLoginSuccess }) {
   const [form] = Form.useForm();
   const navigate = useNavigate();
-  const { balancesheetlogin, loginWithGoogle } = useAuth();
+  const { balancesheetlogin, user } = useAuth();
+
+  // Auto-login if user is already authenticated
+  useEffect(() => {
+    if (user) {
+      navigate('/balancesheetdashboard');
+    }
+  }, [user, navigate]);
+
+  // Auto-fill form if credentials are stored
+  useEffect(() => {
+    const storedCredentials = localStorage.getItem('userCredentials');
+    if (storedCredentials) {
+      try {
+        const credentials = JSON.parse(storedCredentials);
+        form.setFieldsValue({
+          username: credentials.username,
+          password: credentials.password
+        });
+      } catch (error) {
+        console.error('Error parsing stored credentials:', error);
+      }
+    }
+  }, [form]);
 
   const handleSubmit = async (values) => {
     try {
@@ -22,7 +45,7 @@ function BalancesheetLogin({ onLoginSuccess }) {
       
       if (result.success) {
         message.success('Login successful!');
-        if (onLoginSuccess) onLoginSuccess();
+        navigate('/balancesheetdashboard');
       } else {
         message.error(result.error || 'Login failed. Please try again.');
       }
@@ -88,24 +111,6 @@ function BalancesheetLogin({ onLoginSuccess }) {
               block
             >
               Login
-            </Button>
-          </Form.Item>
-
-          <Form.Item>
-            <Button
-              icon={<GoogleOutlined />}
-              type="default"
-              size="large"
-              block
-              style={{ marginBottom: 8 }}
-              onClick={async () => {
-                const result = await loginWithGoogle();
-                if (result.success) {
-                  if (onLoginSuccess) onLoginSuccess();
-                }
-              }}
-            >
-              Continue with Google
             </Button>
           </Form.Item>
 

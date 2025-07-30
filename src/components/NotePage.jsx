@@ -498,9 +498,9 @@ const NotePage = ({ inNotebookSheet = false }) => {
     );
 
     return (
-      <div className="menu-Container relative w-9" ref={colorPickerRef}>
+      <div className="menu-Container relative w-9 mr-2" ref={colorPickerRef}>
         <button
-          className={`p-2 rounded-sm transition duration-200 ${
+          className={`p-3 rounded-sm transition duration-200 ${
             isAutoColor
               ? "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700"
               : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
@@ -867,7 +867,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
                       <Mic className="w-5 h-5" />
                     )}
                   </button>
-                  <button
+                  {/* <button
                     ref={historyButtonRef}
                     className={`p-3 rounded-sm transition duration-200 ${
                       isAutoColor
@@ -879,8 +879,8 @@ const NotePage = ({ inNotebookSheet = false }) => {
                     style={!isAutoColor ? { color: textColor } : undefined}
                   >
                     <History className="w-5 h-5" />
-                  </button>
-                  <button
+                  </button> */}
+                  {/* <button
                     className={`p-3 rounded-sm transition duration-200 ${
                       isAutoColor
                         ? "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
@@ -891,15 +891,15 @@ const NotePage = ({ inNotebookSheet = false }) => {
                     style={!isAutoColor ? { color: textColor } : undefined}
                   >
                     <Save className="w-5 h-5" />
-                  </button>
+                  </button> */}
                 </div>
                 <div className="flex justify-between items-center mb-1">
                   <div className="w-full  flex justify-between">
                     <div className="flex items-center gap-2">
                       {renderColorPicker()}
-                      <div className="w-9 ">
+                      <div className="w-9 mr-2 ">
                         <button
-                          className={`p-2 rounded-sm transition duration-200 ${
+                          className={`p-3 rounded-sm transition duration-200 ${
                             isAutoColor
                               ? "bg-gray-100 dark:bg-[#513a7a]/[var(--widget-opacity)] hover:bg-gray-200 dark:hover:bg-gray-700"
                               : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"

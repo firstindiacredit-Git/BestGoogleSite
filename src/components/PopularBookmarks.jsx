@@ -171,7 +171,7 @@ function PopularBookmarks() {
   const { country: selectedCountry } = useCountry();
 
   // User profile data for filtering
-  const [userProfession, setUserProfession] = useState("ai_automation");
+  const [userProfession, setUserProfession] = useState("all");
 
   const [categoryViewModes, setCategoryViewModes] = useState(() => {
     const savedViewModes = localStorage.getItem("categoryViewModes");
@@ -2271,310 +2271,300 @@ function PopularBookmarks() {
 
 
 
-        {/* Profession Headers Section */}
-        <div className="mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {Object.entries(groupedCategories).map(([professionId, categories]) => {
-              const professionName = professionId === 'user_categories' 
-                ? 'User Categories' 
-                : getProfessionDisplayName(professionId);
-              const professionIcon = professionId === 'user_categories' 
-                ? '👤' 
-                : getProfessionIcon(professionId);
-              
-              return (
-                <div key={professionId} className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-700 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{professionIcon}</span>
-                    <div>
-                      <h3 className="text-lg font-bold text-blue-800 dark:text-blue-200">
-                        {professionName}
-                      </h3>
-                      <p className="text-sm text-blue-600 dark:text-blue-300">
-                        {categories.length} category{categories.length !== 1 ? 'ies' : 'y'}
-                      </p>
-                    </div>
+        {/* Professions and Categories Section */}
+        {Object.entries(groupedCategories).map(([professionId, categories], professionIndex) => {
+          const professionName = professionId === 'user_categories' 
+            ? 'User Categories' 
+            : getProfessionDisplayName(professionId);
+          const professionIcon = professionId === 'user_categories' 
+            ? '👤' 
+            : getProfessionIcon(professionId);
+          
+          return (
+            <div key={professionId} className="mb-12" id={`profession-${professionId}`}>
+              {/* Profession Header - Full Width */}
+              <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-700 shadow-sm">
+                <div className="flex items-center gap-4">
+                  <span className="text-3xl">{professionIcon}</span>
+                  <div>
+                    <h2 className="text-2xl font-bold text-blue-800 dark:text-blue-200">
+                      {professionName}
+                    </h2>
+                   
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        </div>
+              </div>
 
-        {/* Categories Section - 4 Columns */}
-        <DragDropContext onDragEnd={onDragEnd}>
-          <Row gutter={[16, 16]}>
-            {Array.from({ length: 4 }, (_, i) => i + 1).map(
-              (colNum) => (
-                <Col
-                  key={`column${colNum}`}
-                  xs={24}
-                  sm={12}
-                  lg={6}
-                >
-                  <Droppable droppableId={`column${colNum}`}>
-                    {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        className={` transition-colors duration-200 ${snapshot.isDraggingOver
-                            ? "bg-transparent border-2 border-dashed border-blue-500"
-                            : "bg-transparent border-2 border-dashed border-transparent"
-                          }`}
+              {/* Categories Section - 4 Columns */}
+              <DragDropContext onDragEnd={onDragEnd}>
+                <Row gutter={[16, 16]}>
+                  {Array.from({ length: 4 }, (_, i) => i + 1).map(
+                    (colNum) => (
+                      <Col
+                        key={`${professionId}-column${colNum}`}
+                        xs={24}
+                        sm={12}
+                        lg={6}
                       >
-                        {(() => {
-                          // Distribute all categories across 4 columns
-                          const allCategories = Object.values(groupedCategories).flat();
-                          const categoriesForThisColumn = [];
-                          let draggableIndex = 0;
-                          
-                          allCategories.forEach((category, index) => {
-                            const shouldIncludeInThisColumn = index % 4 === (colNum - 1);
-                            if (shouldIncludeInThisColumn) {
-                              categoriesForThisColumn.push({
-                                category,
-                                draggableIndex: draggableIndex++
-                              });
-                            }
-                          });
-                          
-                          return categoriesForThisColumn.map(({ category, draggableIndex }) => {
-                            // Get bookmarks for this category, filter by search if needed
-                            let categoryLinks = getCategoryLinks(category.id);
-                            // Determine if this category is included because of a name match
-                            const name = (category.name || category.newCategory || '').toLowerCase();
-                            if (searchTerm && !name.includes(searchTerm)) {
-                              // Only filter bookmarks if the category name does NOT match
-                              categoryLinks = categoryLinks.filter(bookmarkMatches);
-                            }
+                        <Droppable droppableId={`${professionId}-column${colNum}`}>
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.droppableProps}
+                              className={` transition-colors duration-200 ${snapshot.isDraggingOver
+                                  ? "bg-transparent border-2 border-dashed border-blue-500"
+                                  : "bg-transparent border-2 border-dashed border-transparent"
+                                }`}
+                            >
+                              {(() => {
+                                // Distribute categories for this profession across 4 columns
+                                const categoriesForThisColumn = [];
+                                let draggableIndex = 0;
+                                
+                                categories.forEach((category, index) => {
+                                  const shouldIncludeInThisColumn = index % 4 === (colNum - 1);
+                                  if (shouldIncludeInThisColumn) {
+                                    categoriesForThisColumn.push({
+                                      category,
+                                      draggableIndex: draggableIndex++
+                                    });
+                                  }
+                                });
+                                
+                                return categoriesForThisColumn.map(({ category, draggableIndex }) => {
+                                  // Get bookmarks for this category, filter by search if needed
+                                  let categoryLinks = getCategoryLinks(category.id);
+                                  // Determine if this category is included because of a name match
+                                  const name = (category.name || category.newCategory || '').toLowerCase();
+                                  if (searchTerm && !name.includes(searchTerm)) {
+                                    // Only filter bookmarks if the category name does NOT match
+                                    categoryLinks = categoryLinks.filter(bookmarkMatches);
+                                  }
 
-                            return (
-                              <Draggable
-                                key={category.id}
-                                draggableId={category.id}
-                                index={draggableIndex}
-                              >
-                                {(provided, snapshot) => (
-                                  <div
-                                    ref={provided.innerRef}
-                                    {...provided.draggableProps}
-                                    className={`mb-4 transition-all duration-200 ${snapshot.isDragging
-                                        ? "shadow-xl rotate-2 scale-105 z-50"
-                                        : "shadow-none rotate-0 scale-100"
-                                      }`}
-                                    style={{
-                                      ...provided.draggableProps.style,
-                                      transform: snapshot.isDragging
-                                        ? `${provided.draggableProps.style?.transform} rotate(2deg) scale(1.05)`
-                                        : provided.draggableProps.style?.transform
-                                    }}
-                                  >
-                                    <Card
-                                      className="max-w-xl backdrop-blur-sm  bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)]  dark:text-white mx-auto rounded-sm"
-                                      title={
+                                  return (
+                                    <Draggable
+                                      key={category.id}
+                                      draggableId={category.id}
+                                      index={draggableIndex}
+                                    >
+                                      {(provided, snapshot) => (
                                         <div
-                                          className="bg-white/[(var(--widget-opacity))] dark:bg-[#513a7a]/[(var(--widget-opacity))] dark:text-white p-1 relative overflow-hidden cursor-pointer"
-                                          onClick={() => {
-                                            toggleDropdown(category.id);
+                                          ref={provided.innerRef}
+                                          {...provided.draggableProps}
+                                          className={`mb-4 transition-all duration-200 ${snapshot.isDragging
+                                              ? "shadow-xl rotate-2 scale-105 z-50"
+                                              : "shadow-none rotate-0 scale-100"
+                                            }`}
+                                          style={{
+                                            ...provided.draggableProps.style,
+                                            transform: snapshot.isDragging
+                                              ? `${provided.draggableProps.style?.transform} rotate(2deg) scale(1.05)`
+                                              : provided.draggableProps.style?.transform
                                           }}
                                         >
-                                          <div className="absolute left-0 w-full h-full">
-                                            <div className="absolute inset-0 opacity-10 transform rotate-45 translate-x-[-50%] translate-y-[-50%] w-[200%] h-[200%]"></div>
-                                          </div>
-                                          <div className="relative z-10 flex justify-between items-center category-header-content">
-                                            <div className="flex items-center flex-1">
+                                          <Card
+                                            className="max-w-xl backdrop-blur-sm  bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)]  dark:text-white mx-auto rounded-sm"
+                                            title={
                                               <div
-                                                {...provided.dragHandleProps}
-                                                className={`cursor-grab active:cursor-grabbing p-2 transition-all duration-200 group hover:bg-gray-200/50 dark:hover:bg-gray-600/50 rounded ${snapshot.isDragging
-                                                    ? "bg-gray-300/[(var(--widget-opacity))] rounded shadow-lg cursor-grabbing"
-                                                    : ""
-                                                  }`}
-                                                onClick={(e) =>
-                                                  e.stopPropagation()
-                                                }
-                                                title="Drag to reorder"
+                                                className="bg-white/[(var(--widget-opacity))] dark:bg-[#513a7a]/[(var(--widget-opacity))] dark:text-white p-1 relative overflow-hidden cursor-pointer"
+                                                onClick={() => {
+                                                  toggleDropdown(category.id);
+                                                }}
                                               >
-                                                <div className="flex flex-col gap-[2px]">
-                                                  <div className="flex gap-[2px]">
-                                                    <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
-                                                    <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                                <div className="absolute left-0 w-full h-full">
+                                                  <div className="absolute inset-0 opacity-10 transform rotate-45 translate-x-[-50%] translate-y-[-50%] w-[200%] h-[200%]"></div>
+                                                </div>
+                                                <div className="relative z-10 flex justify-between items-center category-header-content">
+                                                  <div className="flex items-center flex-1">
+                                                    <div
+                                                      {...provided.dragHandleProps}
+                                                      className={`cursor-grab active:cursor-grabbing p-2 transition-all duration-200 group hover:bg-gray-200/50 dark:hover:bg-gray-600/50 rounded ${snapshot.isDragging
+                                                          ? "bg-gray-300/[(var(--widget-opacity))] rounded shadow-lg cursor-grabbing"
+                                                          : ""
+                                                        }`}
+                                                      onClick={(e) =>
+                                                        e.stopPropagation()
+                                                      }
+                                                      title="Drag to reorder"
+                                                    >
+                                                      <div className="flex flex-col gap-[2px]">
+                                                        <div className="flex gap-[2px]">
+                                                          <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                                          <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                                        </div>
+                                                        <div className="flex gap-[2px]">
+                                                          <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                                          <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                                        </div>
+                                                        <div className="flex gap-[2px]">
+                                                          <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                                          <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                                        </div>
+                                                      </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                      <span className="font-semibold" title={category.name || category.newCategory}>
+                                                        {truncateText(category.name || category.newCategory)}
+                                                      </span>
+                                                      {category.isAdminCategory && (
+                                                        <div className="flex gap-1">
+                                                          {/* Country indicator */}
+                                                          {category.countries?.includes('india') && selectedCountry?.key === 'IN' && (
+                                                            <span className="px-2 py-0.5 text-xs bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 rounded">
+                                                              🇮🇳 India
+                                                            </span>
+                                                          )}
+                                                        </div>
+                                                      )}
+                                                    </div>
                                                   </div>
-                                                  <div className="flex gap-[2px]">
-                                                    <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
-                                                    <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
-                                                  </div>
-                                                  <div className="flex gap-[2px]">
-                                                    <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
-                                                    <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
-                                                  </div>
+                                                  <Space
+                                                    onClick={(e) =>
+                                                      e.stopPropagation()
+                                                    }
+                                                  >
+                                                    <Tooltip title="Add Bookmark">
+                                                      <AntButton
+                                                        type="text"
+                                                        icon={
+                                                          <PlusOutlined className="text-black dark:text-white" />
+                                                        }
+                                                        onClick={(e) => {
+                                                          e.stopPropagation();
+                                                          setSelectedCategory(
+                                                            category
+                                                          );
+                                                          setSelectedCategoryId(
+                                                            category.id
+                                                          );
+                                                          setIsAddBookmarkModalVisible(
+                                                            true
+                                                          );
+                                                        }}
+                                                        style={{ color: "white" }}
+                                                      />
+                                                    </Tooltip>
+                                                    <Dropdown
+                                                      menu={{
+                                                        items:
+                                                          getCategoryMenuItems(
+                                                            category
+                                                          ),
+                                                      }}
+                                                      trigger={["click"]}
+                                                      overlayClassName="[&_.ant-dropdown-menu]:p-0 [&_.ant-dropdown-menu-item]:p-0 [&_ul]:dark:bg-[#28283a]"
+                                                      onClick={(e) =>
+                                                        e.stopPropagation()
+                                                      }
+                                                    >
+                                                      <AntButton
+                                                        type="text"
+                                                        icon={
+                                                          <MoreOutlined className="text-black dark:text-white" />
+                                                        }
+                                                        onClick={(e) =>
+                                                          e.stopPropagation()
+                                                        }
+                                                        style={{ color: "white" }}
+                                                      />
+                                                    </Dropdown>
+                                                  </Space>
                                                 </div>
                                               </div>
-                                              <div className="flex items-center gap-2">
-                                                <span className="font-semibold" title={category.name || category.newCategory}>
-                                                  {truncateText(category.name || category.newCategory)}
-                                                </span>
-                                                {category.isAdminCategory && (
-                                                  <div className="flex gap-1">
-                                                    {/* Country indicator */}
-                                                    {category.countries?.includes('india') && selectedCountry?.key === 'IN' && (
-                                                      <span className="px-2 py-0.5 text-xs bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 rounded">
-                                                        🇮🇳 India
-                                                      </span>
-                                                    )}
-                                                  </div>
-                                                )}
-                                              </div>
-                                            </div>
-                                            <Space
-                                              onClick={(e) =>
-                                                e.stopPropagation()
-                                              }
-                                            >
-                                              <Tooltip title="Add Bookmark">
-                                                <AntButton
-                                                  type="text"
-                                                  icon={
-                                                    <PlusOutlined className="text-black dark:text-white" />
-                                                  }
-                                                  onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setSelectedCategory(
-                                                      category
-                                                    );
-                                                    setSelectedCategoryId(
-                                                      category.id
-                                                    );
-                                                    setIsAddBookmarkModalVisible(
-                                                      true
-                                                    );
-                                                  }}
-                                                  style={{ color: "white" }}
-                                                />
-                                              </Tooltip>
-                                              <Dropdown
-                                                menu={{
-                                                  items:
-                                                    getCategoryMenuItems(
-                                                      category
-                                                    ),
-                                                }}
-                                                trigger={["click"]}
-                                                overlayClassName="[&_.ant-dropdown-menu]:p-0 [&_.ant-dropdown-menu-item]:p-0 [&_ul]:dark:bg-[#28283a]"
-                                                onClick={(e) =>
-                                                  e.stopPropagation()
-                                                }
-                                              >
-                                                <AntButton
-                                                  type="text"
-                                                  icon={
-                                                    <MoreOutlined className="text-black dark:text-white" />
-                                                  }
-                                                  onClick={(e) =>
-                                                    e.stopPropagation()
-                                                  }
-                                                  style={{ color: "white" }}
-                                                />
-                                              </Dropdown>
-                                            </Space>
-                                          </div>
+                                            }
+                                            styles={{
+                                              header: {
+                                                padding: 0,
+                                                borderBottom: "none",
+                                              },
+                                              body: {
+                                                padding: "16px",
+                                                maxHeight: "400px",
+                                                overflowY: "auto",
+                                                display: openCategories[category.id]
+                                                  ? "block"
+                                                  : "none",
+                                              },
+                                            }}
+                                            style={{
+                                              height: "100%",
+                                              transition: "all 0.3s ease",
+                                              transform: snapshot.isDragging
+                                                ? ""
+                                                : "rotate(0deg)",
+                                              boxShadow: snapshot.isDragging
+                                                ? "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
+                                                : "none",
+                                              border: "none",
+                                            }}
+                                          >
+                                            {categoryLinks.length === 0 ? (
+                                              <Empty
+                                                description="No bookmarks in this category yet"
+                                                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                                              />
+                                            ) : (
+                                              <>
+                                                {categoryViewModes[category.id] ===
+                                                  "list" &&
+                                                  renderBookmarkList(
+                                                    categoryLinks,
+                                                    category.id
+                                                  )}
+                                                {categoryViewModes[category.id] ===
+                                                  "grid" &&
+                                                  renderBookmarkGrid(
+                                                    categoryLinks,
+                                                    category.id
+                                                  )}
+                                                {categoryViewModes[category.id] ===
+                                                  "icon" &&
+                                                  renderBookmarkIcon(
+                                                    categoryLinks,
+                                                    category.id
+                                                  )}
+                                                {!categoryViewModes[category.id] &&
+                                                  renderBookmarkGrid(
+                                                    categoryLinks,
+                                                    category.id
+                                                  )}
+                                              </>
+                                            )}
+                                          </Card>
                                         </div>
-                                      }
-                                      styles={{
-                                        header: {
-                                          padding: 0,
-                                          borderBottom: "none",
-                                        },
-                                        body: {
-                                          padding: "16px",
-                                          maxHeight: "400px",
-                                          overflowY: "auto",
-                                          display: openCategories[category.id]
-                                            ? "block"
-                                            : "none",
-                                        },
-                                      }}
-                                      style={{
-                                        height: "100%",
-                                        transition: "all 0.3s ease",
-                                        transform: snapshot.isDragging
-                                          ? ""
-                                          : "rotate(0deg)",
-                                        boxShadow: snapshot.isDragging
-                                          ? "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
-                                          : "none",
-                                        border: "none",
-                                      }}
-                                    >
-                                      {categoryLinks.length === 0 ? (
-                                        <Empty
-                                          description="No bookmarks in this category yet"
-                                          image={Empty.PRESENTED_IMAGE_SIMPLE}
-                                        />
-                                      ) : (
-                                        <>
-                                          {categoryViewModes[category.id] ===
-                                            "list" &&
-                                            renderBookmarkList(
-                                              categoryLinks,
-                                              category.id
-                                            )}
-                                          {categoryViewModes[category.id] ===
-                                            "grid" &&
-                                            renderBookmarkGrid(
-                                              categoryLinks,
-                                              category.id
-                                            )}
-                                          {categoryViewModes[category.id] ===
-                                            "icon" &&
-                                            renderBookmarkIcon(
-                                              categoryLinks,
-                                              category.id
-                                            )}
-                                          {!categoryViewModes[category.id] &&
-                                            renderBookmarkGrid(
-                                              categoryLinks,
-                                              category.id
-                                            )}
-                                        </>
                                       )}
-                                    </Card>
-                                  </div>
-                                )}
-                              </Draggable>
-                            );
-                          });
-                        })()}
-                        {provided.placeholder}
-                      </div>
-                    )}
-                  </Droppable>
-                </Col>
-              )
-            )}
-          </Row>
-        </DragDropContext>
+                                    </Draggable>
+                                  );
+                                });
+                              })()}
+                              {provided.placeholder}
+                            </div>
+                          )}
+                        </Droppable>
+                      </Col>
+                    )
+                  )}
+                </Row>
+              </DragDropContext>
+            </div>
+          );
+        })}
 
         {/* No Categories Message */}
-        {Object.keys(groupedCategories).length === 0 && userProfession && (
-          <div className="text-center py-8">
-            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6 max-w-md mx-auto">
-              <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
-                No matching categories found
-              </h3>
-              <p className="text-yellow-700 dark:text-yellow-300 mb-4">
-                {!userProfession ? (
-                  "Please set your profession to see relevant categories."
-                ) : (
-                  `No categories match your profession (${userProfession}).`
-                )}
-              </p>
-              <div className="flex flex-col gap-4 items-center">
-                <p className="text-sm text-gray-600 dark:text-gray-400">Select your profession from the options above</p>
-                {renderProfessionBar()}
-              </div>
-            </div>
-          </div>
-        )}
+        
+
+        {/* Scroll to Top Button */}
+        <button
+          onClick={() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          className="fixed bottom-6 right-6 bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110 z-50"
+          title="Scroll to top"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+          </svg>
+        </button>
       </div>
     );
   };
@@ -3561,6 +3551,18 @@ function PopularBookmarks() {
           key={option.id}
           onClick={() => {
             setUserProfession(option.id);
+            // Scroll to the selected profession section
+            const professionSection = document.getElementById(`profession-${option.id}`);
+            if (professionSection) {
+              // Add a small delay to ensure the profession is loaded
+              setTimeout(() => {
+                professionSection.scrollIntoView({ 
+                  behavior: 'smooth', 
+                  block: 'start',
+                  inline: 'nearest'
+                });
+              }, 100);
+            }
           }}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${userProfession === option.id
             ? "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700"

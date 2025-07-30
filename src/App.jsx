@@ -1048,8 +1048,8 @@ const App = () => {
                           element={<BalancesheetDashboard />}
                         />
                         <Route
-            path="/sheet/:id"
-            element={
+                              path="/sheet/:id"
+                              element={
               
                 <BalanceSheet />
               

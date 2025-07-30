@@ -219,7 +219,7 @@ function Calculator() {
                 </h3>
                 <button
                   onClick={toggleHistory}
-                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-100 "
+                  className="text-gray-700 hover:text-gray-600 dark:hover:text-gray-100 "
                 >
                   <IoClose className="w-6 h-6" />
                 </button>
@@ -231,7 +231,7 @@ function Calculator() {
                     <div
                       key={index}
                       className={`text-sm mb-2 p-3 ${
-                        index % 2 === 0
+                        index % 1 === 0
                           ? "bg-gray-200 rounded-lg text-gray-600 dark:text-gray-200 dark:bg-[#513a7a]"
                           : "dark:bg-[#513a7a]"
                       }`}

@@ -56,13 +56,32 @@ export const AuthProvider = ({ children }) => {
             const token = localStorage.getItem('token');
             if (token) {
                 try {
+                    // Validate token first
+                    const decoded = JSON.parse(atob(token.split('.')[1]));
+                    const currentTime = Date.now() / 1000;
+                    
+                    if (decoded.exp < currentTime) {
+                        // Token is expired
+                        console.log('Token expired, clearing session');
+                        setUser(null);
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('userEmail');
+                        localStorage.removeItem('userCredentials');
+                        delete axios.defaults.headers.common['Authorization'];
+                        return;
+                    }
+                    
+                    // Token is valid, load user data
                     const response = await axios.get('/users/profile');
                     setUser(response.data.user);
+                    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
                 } catch (err) {
                     console.error('Error loading user:', err);
                     setUser(null);
                     localStorage.removeItem('token');
                     localStorage.removeItem('userEmail');
+                    localStorage.removeItem('userCredentials');
+                    delete axios.defaults.headers.common['Authorization'];
                 }
             }
             setLoading(false);
