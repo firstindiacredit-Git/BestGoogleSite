@@ -274,9 +274,9 @@ const backgroundCollections = {
       },
       {
         id: "c3",
-        url: "https://images.pexels.com/photos/1563256/pexels-photo-1563256.jpeg?auto=compress&cs=tinysrgb&w=1600",
+        url: "https://s1.best-wallpaper.net/wallpaper/m/1201/Iron-Bridge-under-the-sun_m.webp?auto=compress&cs=tinysrgb&w=1600",
         thumbnail:
-          "https://images.pexels.com/photos/1563256/pexels-photo-1563256.jpeg?auto=compress&cs=tinysrgb&w=300",
+          "https://s1.best-wallpaper.net/wallpaper/m/1201/Iron-Bridge-under-the-sun_m.webp?auto=compress&cs=tinysrgb&w=300",
         name: "City Lights",
       },
       {
