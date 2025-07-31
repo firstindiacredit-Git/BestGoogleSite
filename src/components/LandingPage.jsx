@@ -76,7 +76,7 @@ const LandingPage = () => {
       company: "SavvyCal",
       image:
         // "https://crm.pizeonfly.com/employee/employeeImage-1738233144046-135040117-min.png",
-        "https://img.freepik.com/free-photo/handsome-man-smiling-happy-face-portrait-close-up_53876-145493.jpg?t=st=1741669789~exp=1741673389~hmac=5b14aba25ae1101b3bf83a3d70a116284b016b0e139b2635dbc0766abae495f7&w=900",
+        "https://res.cloudinary.com/dnjcel8gn/image/upload/v1742461568/browsey/avatars/user_jTfsug2JedbBu9JroVpWszYlhlz1_1742461566816.png",
       accent: "from-indigo-500 to-purple-500",
     },
 
@@ -97,17 +97,17 @@ const LandingPage = () => {
 
       company: "Brex",
       image:
-        "https://img.freepik.com/free-photo/portrait-handsome-brunet-unshaven-adult-man-looks-with-calm-confident-expression-has-serious-look-wears-casual-jumper-poses-making-photo-against-white-background-being-hard-impress_273609-57668.jpg?t=st=1741669872~exp=1741673472~hmac=f82ca6a1bfe3a236ffb3d84cd42bad1ddfb081d8e24aa1b9f348e90bc8904b94&w=1060",
+        "https://res.cloudinary.com/dnjcel8gn/image/upload/v1753941478/browsey/avatars/user_ChVLlqzgpAclhmZfGEHs7s4kPtk2_1749811128299.jpg",
       accent: "from-purple-500 to-pink-500",
     },
     {
       quote:
         "AllMyTab's intuitive interface and powerful organization features have made it an indispensable part of my daily routine. It's perfect for anyone who needs to maintain multiple research threads simultaneously.",
-      name: "Prakash Mehra",
+      name: "Sharim Hafiz",
 
       company: "Brex",
       image:
-        "https://img.freepik.com/free-photo/young-man-white-shirt-looking-camera-looking-happy_176474-83327.jpg?t=st=1741669898~exp=1741673498~hmac=d4bfc210e000d7b574b0e78766f1ad9949fd7c65b4c97f6ca846c42029668fe1&w=1060",
+        "https://res.cloudinary.com/dnjcel8gn/image/upload/v1753942498/browsey/avatars/user_rGHjqhY9X7X7EhDT6w5xp6fjPOx2_1753942371369.jpg",
       accent: "from-purple-500 to-pink-500",
     },
     {

@@ -172,7 +172,15 @@ function PopularBookmarks() {
   const { country: selectedCountry } = useCountry();
 
   // User profile data for filtering
-  const [userProfession, setUserProfession] = useState("all");
+  const [userProfession, setUserProfession] = useState(() => {
+    // Initialize from localStorage if available
+    const savedProfession = localStorage.getItem("userProfession");
+    return savedProfession || "all";
+  });
+  
+  // Cache for filtered categories based on profession
+  const [filteredCategoriesCache, setFilteredCategoriesCache] = useState([]);
+  const [lastProfessionFilterTime, setLastProfessionFilterTime] = useState(0);
 
   const [categoryViewModes, setCategoryViewModes] = useState(() => {
     const savedViewModes = localStorage.getItem("categoryViewModes");
@@ -613,8 +621,17 @@ function PopularBookmarks() {
     return mapping[professionId] || [professionId];
   };
 
-  // Filter categories based on user preferences and selected country
+  // Filter categories based on user preferences and selected country with caching
   const getFilteredCategories = (allCategories, isControllerMode = false) => {
+    const now = Date.now();
+    
+    // Check if we have a recent cache
+    if (filteredCategoriesCache.length > 0 && 
+        (now - lastProfessionFilterTime) < 5000 && // 5 second cache
+        !professionLoading) {
+      return filteredCategoriesCache;
+    }
+    
     // First, separate user-created and admin categories
     const userCategories = allCategories.filter(cat => !cat.isAdminCategory);
     const adminCategories = allCategories.filter(cat => cat.isAdminCategory);
@@ -645,15 +662,6 @@ function PopularBookmarks() {
         category.professions.includes("all") ||
         professionMatches.some(prof => category.professions.includes(prof))
       );
-
-      // Debug logging for tax_investments profession
-      if (userProfession === "tax_investments") {
-        console.log("Debug - Category:", category.name || category.newCategory);
-        console.log("Debug - Category professions:", category.professions);
-        console.log("Debug - User profession:", userProfession);
-        console.log("Debug - Profession matches:", professionMatches);
-        console.log("Debug - Matches profession:", matchesProfession);
-      }
 
       // If user has no profession, don't show admin categories
       if (!userProfession) return false;
@@ -686,6 +694,10 @@ function PopularBookmarks() {
       return 0;
     });
 
+    // Cache the result
+    setFilteredCategoriesCache(filteredCategories);
+    setLastProfessionFilterTime(now);
+
     return filteredCategories;
   };
 
@@ -693,6 +705,19 @@ function PopularBookmarks() {
   const [allCategoriesCache, setAllCategoriesCache] = useState([]);
   const [lastFetchTime, setLastFetchTime] = useState(0);
   const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+  // Effect to handle profession changes and update categories
+  useEffect(() => {
+    if (allCategoriesCache.length > 0) {
+      // Clear cache to force re-filtering when profession changes
+      setFilteredCategoriesCache([]);
+      setLastProfessionFilterTime(0);
+      
+      // Get filtered categories immediately
+      const filtered = getFilteredCategories(allCategoriesCache);
+      setCategories(filtered);
+    }
+  }, [userProfession, selectedCountry]);
 
   // Single effect to fetch all data when user changes
   useEffect(() => {
@@ -751,18 +776,8 @@ function PopularBookmarks() {
         setAllCategoriesCache(allCategories);
         setLastFetchTime(now);
 
-        // Get categories that match user preferences
+        // Get categories that match user preferences using optimized filtering
         const matchingCategories = getFilteredCategories(allCategories, false);
-
-        // Debug logging for all categories and their professions
-        console.log("Debug - All categories:", allCategories.map(cat => ({
-          name: cat.name || cat.newCategory,
-          professions: cat.professions,
-          countries: cat.countries,
-          isAdmin: cat.isAdminCategory
-        })));
-        console.log("Debug - User profession:", userProfession);
-        console.log("Debug - Matching categories count:", matchingCategories.length);
 
         // Get current column structure
         let currentColumns = userData.categoryPositions?.columns || { column1: [], column2: [], column3: [], column4: [] };
@@ -1822,6 +1837,24 @@ function PopularBookmarks() {
   };
 
   const renderBookmarkList = (categoryLinks, categoryId) => {
+    const isLoading = categoryBookmarks[categoryId]?.loading;
+    
+    if (isLoading) {
+      return (
+        <div className="bg-white/[(var(--widget-opacity))] dark:bg-[#28283a]/[(var(--widget-opacity))]">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="flex items-center p-3 border-b border-gray-200 dark:border-gray-700 animate-pulse">
+              <div className="w-6 h-6 bg-gray-300 dark:bg-gray-600 rounded mr-3"></div>
+              <div className="flex-1">
+                <div className="w-24 h-3 bg-gray-300 dark:bg-gray-600 rounded mb-1"></div>
+                <div className="w-32 h-2 bg-gray-300 dark:bg-gray-600 rounded"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+    
     if (!Array.isArray(categoryLinks)) {
       return (
         <div className="text-center p-4 text-gray-500">
@@ -1958,6 +1991,27 @@ function PopularBookmarks() {
 
   const renderBookmarkGrid = (categoryLinks, categoryId) => {
     const sizes = categoryBookmarkSizes[categoryId] || { grid: 32 };
+    const isLoading = categoryBookmarks[categoryId]?.loading;
+    
+    // Show loading state if bookmarks are being fetched
+    if (isLoading) {
+      return (
+        <div className="w-full">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div
+                key={i}
+                className="flex flex-col items-center p-2 bg-white/[(var(--widget-opacity))] dark:bg-[#513a7a]/[(var(--widget-opacity))] rounded-lg animate-pulse"
+              >
+                <div className="w-8 h-8 bg-gray-300 dark:bg-gray-600 rounded mb-2"></div>
+                <div className="w-16 h-3 bg-gray-300 dark:bg-gray-600 rounded"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    
     return (
       <div className="w-full">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
@@ -1976,6 +2030,10 @@ function PopularBookmarks() {
                       height: `${sizes.grid}px`,
                     }}
                     className="mx-auto object-contain transition-transform duration-300 group-hover:scale-110"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "https://www.google.com/favicon.ico";
+                    }}
                   />
                 </a>
               </div>
@@ -2004,6 +2062,22 @@ function PopularBookmarks() {
 
   const renderBookmarkIcon = (categoryLinks, categoryId) => {
     const sizes = categoryBookmarkSizes[categoryId] || { icon: 24 };
+    const isLoading = categoryBookmarks[categoryId]?.loading;
+    
+    if (isLoading) {
+      return (
+        <div className="w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-2">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+              <div key={i} className="relative group flex justify-center animate-pulse">
+                <div className="w-6 h-6 bg-gray-300 dark:bg-gray-600 rounded"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    
     return (
       <div className="w-full">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-2">
@@ -2019,6 +2093,10 @@ function PopularBookmarks() {
                       height: `${sizes.icon}px`,
                     }}
                     className="mx-auto transition-transform duration-300 group-hover:scale-110"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "https://www.google.com/favicon.ico";
+                    }}
                   />
                 </a>
               </Tooltip>
@@ -2065,11 +2143,11 @@ function PopularBookmarks() {
     const getCategoryLinks = (catId) => {
       const categoryLinks = categoryBookmarks[catId]?.bookmarks || [];
 
-      // If no bookmarks found and this is an admin category, try to load them
+      // If no bookmarks found, try to load them for any category
       if (categoryLinks.length === 0) {
         const category = categories.find(c => c.id === catId);
-        if (category && category.isAdminCategory) {
-          // Load admin bookmarks for this category asynchronously
+        if (category) {
+          // Load bookmarks for this category asynchronously
           fetchBookmarksForCategory(catId);
         }
       }
@@ -3632,10 +3710,6 @@ function PopularBookmarks() {
     const profession = professionOptions.find((p) => p.id === professionId);
     return profession ? profession.name : "Set Profession";
   };
-  const getProfessionIcon = (professionId) => {
-    const profession = professionOptions.find((p) => p.id === professionId);
-    return profession ? profession.icon : "❓";
-  };
 
 
 
@@ -3646,7 +3720,19 @@ function PopularBookmarks() {
         <button
           key={option.id}
           onClick={() => {
+            // Set loading state
+            setProfessionLoading(true);
+            
+            // Update profession and save to localStorage
             setUserProfession(option.id);
+            localStorage.setItem("userProfession", option.id);
+            
+            // Clear cache to force re-filtering
+            setFilteredCategoriesCache([]);
+            setLastProfessionFilterTime(0);
+            
+            // Stop loading after a short delay
+            setTimeout(() => setProfessionLoading(false), 300);
           }}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${userProfession === option.id
             ? "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700"
@@ -3708,9 +3794,9 @@ function PopularBookmarks() {
       
       {/* Profession loading indicator */}
       {professionLoading && (
-        <div className="flex justify-center items-center py-4">
+        <div className="flex justify-center items-center py-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg mb-4">
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
-          <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">Updating categories...</span>
+          <span className="ml-2 text-sm text-blue-600 dark:text-blue-400 font-medium">Updating categories for {getProfessionDisplayName(userProfession)}...</span>
         </div>
       )}
       
@@ -3866,7 +3952,7 @@ function PopularBookmarks() {
                   className={`px-4 py-2 rounded-md font-semibold border transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:text-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 ${previewColumns === num ? "bg-blue-500 text-white shadow" : "bg-white dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-gray-600"
                     }`}
                   onClick={() => handlePreviewColumnChange(num)}
-                  title={`Show ${num} column${num > 1 ? 's' : ''}`}
+                  title={`Show ${num} column${num > 1 ? "s" : ""}`}
                 >
                   {num}
                 </button>

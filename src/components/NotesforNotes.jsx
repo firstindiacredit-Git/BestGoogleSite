@@ -5,8 +5,6 @@ import {
   Mic,
   MicOff,
   Palette,
-  History,
-  Save,
   Edit2,
   Trash2,
   X,
@@ -89,7 +87,6 @@ const NotesforNotes = ({ inNotebookSheet = false }) => {
   const textareaRef = useRef(null);
   const lineNumberRef = useRef(null);
   const colorPickerRef = useRef(null);
-  const historyButtonRef = useRef(null);
   const tabDropdownRef = useRef(null);
   const editInputRef = useRef(null);
 
@@ -415,14 +412,7 @@ const NotesforNotes = ({ inNotebookSheet = false }) => {
     return isDarkMode ? "rgba(255, 255, 255, 0.2)" : "rgba(0, 0, 0, 0.2)";
   };
 
-  const saveToHistory = () => {
-    const newEntry = {
-      id: Date.now(),
-      content: tabs.find(t => t.id === activeTabId)?.content || '',
-      timestamp: new Date().toLocaleString(),
-    };
-    setHistory((prevHistory) => [newEntry, ...prevHistory]);
-  };
+
 
   const deleteHistoryEntry = (id) => {
     setHistory((prevHistory) => prevHistory.filter((entry) => entry.id !== id));
@@ -440,9 +430,7 @@ const NotesforNotes = ({ inNotebookSheet = false }) => {
     }
   };
 
-  const toggleHistoryPanel = () => {
-    setShowHistory(!showHistory);
-  };
+
 
   const toggleBold = () => setIsBold(!isBold);
   const toggleUnderline = () => setIsUnderline(!isUnderline);
@@ -660,7 +648,6 @@ const NotesforNotes = ({ inNotebookSheet = false }) => {
       // Check if the new title follows the "Tab X" pattern
       const titleMatch = newTitle.match(/^Tab (\d+)$/);
       if (titleMatch) {
-        const newNumber = parseInt(titleMatch[1]);
         // Check if this number is already used by another tab
         const existingTabWithNumber = tabs.find(tab => 
           tab.id !== tabId && tab.title === newTitle
@@ -810,17 +797,14 @@ const NotesforNotes = ({ inNotebookSheet = false }) => {
                       </div>
                     ))}
                    </div>
-                    
-                    
-                    {/* Add Tab Button - Always show, but with different styling when at limit */}
+                  </div>
+                  
+                  {/* Add Tab Button - Always visible outside the scrollable container */}
+                  <div className="flex items-center gap-2 mt-2">
                     <button
                       onClick={createNewTab}
-                      className={`flex items-center gap-1 px-2 py-1.5 rounded-sm text-sm ${
-                        tabs.length >= MAX_VISIBLE_TABS
-                          ? "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700"
-                          : "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700"
-                      }`}
-                      title={tabs.length >= MAX_VISIBLE_TABS ? "Add Tab (will be in dropdown)" : "New Tab"}
+                      className="flex items-center gap-1 px-2 py-1.5 rounded-sm text-sm bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700"
+                      title="Add New Tab"
                     >
                       <Plus className="w-4 h-4" />
                     </button>
