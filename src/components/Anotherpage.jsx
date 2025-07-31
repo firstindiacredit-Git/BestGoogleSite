@@ -2382,29 +2382,12 @@ const Anotherpage = ({ pageId = "home" }) => {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [menuOpen, viewModeSubmenuOpen]);
 
-  // Add this near the top, after user is fetched
-  const userProfession = user?.profession || null;
 
-  // Filter categories to only those with at least one subcategory for the user's profession
+
+  // Show all categories regardless of profession
   const filteredCategories = isDemoMode
     ? Object.keys(defaultBookmarks) // Show all demo categories in demo mode
-    : (!userProfession
-        ? allCategories
-        : allCategories.filter(cat => {
-            // Get subcategories for this category
-            const subcatsRaw = (firestoreUser && firestoreSubcats.length > 0 && selectedCategory === cat)
-              ? firestoreSubcats
-              : (defaultBookmarks[cat] ? Object.values(defaultBookmarks[cat]) : []);
-            // Flatten if needed
-            const subcatsArr = Array.isArray(subcatsRaw) ? subcatsRaw : Object.values(subcatsRaw);
-            // Check if any subcategory matches the user's profession
-            return subcatsArr.some(
-              subcat =>
-                typeof subcat === 'object' &&
-                Array.isArray(subcat.professions) &&
-                subcat.professions.includes(userProfession)
-            );
-          }));
+    : allCategories; // Show all categories for all users
 
   // Add at the top of Anotherpage component
   const [showFirstTimeModal, setShowFirstTimeModal] = useState(false);

@@ -3024,13 +3024,7 @@ function PopularBookmarks() {
         setCategories([...matchingCategories]);
       }, 100);
 
-      notification.success({
-        message: "Changes Applied Successfully!",
-        description: "Your category layout has been updated.",
-        placement: "topRight",
-        duration: 3
-      });
-
+      
       setIsControllerOpen(false);
     } catch (error) {
       console.error("Error applying changes:", error);

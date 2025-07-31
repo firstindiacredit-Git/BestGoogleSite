@@ -3,13 +3,13 @@
   "short_name": "AllMyTab",
   "icons": [
     {
-      "src": "/LOGO.svg",
-      "sizes": "192x192",
-      "type": "image/png"
+      "src": "/Favicon.ico",
+      "sizes": "16x16 32x32",
+      "type": "image/x-icon"
     },
     {
-      "src": "/LOGO.svg",
-      "sizes": "512x512",
+      "src": "/Favicon.svg",
+      "sizes": "any",
       "type": "image/svg+xml"
     }
   ],
