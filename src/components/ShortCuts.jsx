@@ -26,6 +26,55 @@ const ShortCuts = () => {
 
   const [menuVisible, setMenuVisible] = useState(null);
 
+  // Hardcoded bookmarks for non-logged-in users
+  const hardcodedBookmarks = [
+    {
+      id: "hardcoded-1",
+      name: "Google",
+      link: "https://google.com",
+      category: "Popular",
+      createdAt: new Date().toISOString(),
+      createdByUser: false,
+      isHardcoded: true,
+    },
+    {
+      id: "hardcoded-2", 
+      name: "YouTube",
+      link: "https://youtube.com",
+      category: "Popular",
+      createdAt: new Date().toISOString(),
+      createdByUser: false,
+      isHardcoded: true,
+    },
+    {
+      id: "hardcoded-3",
+      name: "Facebook",
+      link: "https://facebook.com",
+      category: "Popular", 
+      createdAt: new Date().toISOString(),
+      createdByUser: false,
+      isHardcoded: true,
+    },
+    {
+      id: "hardcoded-4",
+      name: "Twitter",
+      link: "https://twitter.com",
+      category: "Popular",
+      createdAt: new Date().toISOString(),
+      createdByUser: false,
+      isHardcoded: true,
+    },
+    {
+      id: "hardcoded-5",
+      name: "LinkedIn",
+      link: "https://linkedin.com",
+      category: "Popular",
+      createdAt: new Date().toISOString(),
+      createdByUser: false,
+      isHardcoded: true,
+    },
+  ];
+
   const toggleMenu = (id) => {
     setMenuVisible(menuVisible === id ? null : id);
   };
@@ -225,14 +274,14 @@ const ShortCuts = () => {
           message.error("Failed to load bookmarks. Please refresh the page.");
         }
       } else {
-        // If user is not logged in, load from local storage
+        // If user is not logged in, load from local storage and add hardcoded bookmarks
         const localBookmarks = getFromLocalStorage();
         console.log(
           "Loaded bookmarks from local storage:",
           localBookmarks.length
         );
         setUserBookmarks(localBookmarks);
-        setGlobalBookmarks([]); // Clear global bookmarks for non-logged in users
+        setGlobalBookmarks(hardcodedBookmarks); // Set hardcoded bookmarks for non-logged in users
       }
     });
 
@@ -257,6 +306,12 @@ const ShortCuts = () => {
   };
 
   const handleEditBookmark = (bookmark) => {
+    // Check if it's a hardcoded bookmark
+    if (bookmark.isHardcoded) {
+      message.warning("Hardcoded bookmarks cannot be edited.");
+      return;
+    }
+    
     console.log("Editing bookmark:", bookmark);
     setEditingBookmark(bookmark);
     formRef.setFieldsValue({
@@ -315,6 +370,7 @@ const ShortCuts = () => {
       setShowModal(false);
       formRef.resetFields();
     } catch (error) {
+      console.error("Error updating bookmark:", error);
       setErrorMessage("Failed to update bookmark. Please try again.");
       message.error("Failed to update bookmark. Please try again.");
     }
@@ -322,6 +378,13 @@ const ShortCuts = () => {
 
   const handleDeleteBookmark = async (bookmarkId) => {
     try {
+      // Check if it's a hardcoded bookmark
+      const isHardcoded = bookmarkId.startsWith("hardcoded-");
+      if (isHardcoded) {
+        message.warning("Hardcoded bookmarks cannot be deleted.");
+        return;
+      }
+
       if (user) {
         const bookmark = userBookmarks.find((bm) => bm.id === bookmarkId);
         if (!bookmark) {
@@ -462,7 +525,7 @@ const ShortCuts = () => {
                   className="absolute bg-white right-0 top-6 backdrop-blur border rounded shadow-md text-left z-10"
                   onMouseLeave={() => setMenuVisible(null)}
                 >
-                  {bookmark.createdByUser && (
+                  {bookmark.createdByUser && !bookmark.isHardcoded && (
                     <button
                       onClick={(e) => {
                         e.preventDefault();

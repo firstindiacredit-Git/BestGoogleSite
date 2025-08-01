@@ -299,7 +299,7 @@ function BalancesheetDashboard({ onSheetClick }) {
   };
 
   return (
-    <div style={{ padding: '24px', paddingBottom: '80px' }}>
+    <div className='bg-transparent backdrop-blur-sm' style={{ padding: '24px', paddingBottom: '50px', minHeight: '100vh' }}>
       {/* Desktop Header */}
       <Card
         style={{
@@ -348,6 +348,7 @@ function BalancesheetDashboard({ onSheetClick }) {
             <Button
               icon={<LogoutOutlined />}
               onClick={handleLogout}
+              className='dark:bg-white/30 backdrop-blur-xl dark:text-white'
               style={{ color: 'blue', borderColor: 'white' }}
             >
               Logout

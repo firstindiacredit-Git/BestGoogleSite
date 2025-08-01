@@ -154,7 +154,7 @@ const NotesforNotes = ({ inNotebookSheet = false }) => {
         } else {
           const fetchedTabs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           
-          // Sort tabs by creation time or title, then renumber them sequentially
+          // Sort tabs by creation time or title, but preserve custom titles
           const sortedTabs = fetchedTabs.sort((a, b) => {
             // First try to sort by creation time
             if (a.createdAt && b.createdAt) {
@@ -170,11 +170,19 @@ const NotesforNotes = ({ inNotebookSheet = false }) => {
             return (a.title || '').localeCompare(b.title || '');
           });
           
-          // Renumber all tabs sequentially
-          const processedTabs = sortedTabs.map((tab, index) => ({
-            ...tab,
-            title: `Tab ${index + 1}`
-          }));
+          // Only renumber tabs that follow the "Tab X" pattern, preserve custom titles
+          const processedTabs = sortedTabs.map((tab, index) => {
+            // If the title follows "Tab X" pattern, renumber it
+            const titleMatch = tab.title?.match(/^Tab (\d+)$/);
+            if (titleMatch) {
+              return {
+                ...tab,
+                title: `Tab ${index + 1}`
+              };
+            }
+            // Otherwise, keep the custom title
+            return tab;
+          });
           
           setTabs(processedTabs);
           // Preserve active tab if it still exists, otherwise default to first
@@ -189,7 +197,7 @@ const NotesforNotes = ({ inNotebookSheet = false }) => {
       if (savedTabs) {
         const parsedTabs = JSON.parse(savedTabs);
         
-        // Sort tabs by ID or title number, then renumber them sequentially
+        // Sort tabs by ID or title number, but preserve custom titles
         const sortedTabs = parsedTabs.sort((a, b) => {
           const aMatch = a.title?.match(/^Tab (\d+)$/);
           const bMatch = b.title?.match(/^Tab (\d+)$/);
@@ -199,13 +207,20 @@ const NotesforNotes = ({ inNotebookSheet = false }) => {
           return (a.id || 0) - (b.id || 0);
         });
         
-        // Renumber all tabs sequentially
+        // Only renumber tabs that follow the "Tab X" pattern, preserve custom titles
         const processedTabs = sortedTabs.map((tab, index) => {
-          const sequentialNumber = index + 1;
+          const titleMatch = tab.title?.match(/^Tab (\d+)$/);
+          if (titleMatch) {
+            return {
+              ...tab,
+              id: index + 1,
+              title: `Tab ${index + 1}`
+            };
+          }
+          // Keep custom titles as they are
           return {
             ...tab,
-            id: sequentialNumber,
-            title: `Tab ${sequentialNumber}`
+            id: index + 1
           };
         });
         
@@ -637,13 +652,22 @@ const NotesforNotes = ({ inNotebookSheet = false }) => {
 
   const startEditingTab = (tabId, title, e) => {
     e.stopPropagation();
+    console.log('Starting edit for tab:', tabId, 'with title:', title);
     setEditingTabId(tabId);
     setEditingTitle(title);
+    // Focus the input after a short delay to ensure it's rendered
+    setTimeout(() => {
+      if (editInputRef.current) {
+        editInputRef.current.focus();
+        editInputRef.current.select();
+      }
+    }, 10);
   };
 
   const saveTabTitle = async (tabId, e) => {
     e.stopPropagation();
     const newTitle = editingTitle.trim();
+    console.log('Saving tab title:', tabId, 'new title:', newTitle);
     if (newTitle) {
       // Check if the new title follows the "Tab X" pattern
       const titleMatch = newTitle.match(/^Tab (\d+)$/);
@@ -666,14 +690,13 @@ const NotesforNotes = ({ inNotebookSheet = false }) => {
         await setDoc(noteDocRef, { title: newTitle }, { merge: true });
         // UI will update via snapshot listener
       } else {
-         setTabs(prevTabs =>
-          prevTabs.map(tab =>
-            tab.id === tabId ? { ...tab, title: newTitle } : tab
-          )
-        );
-        localStorage.setItem(getStorageKey("tabs"), JSON.stringify(tabs.map(tab =>
+        // Update tabs state with new title
+        const updatedTabs = tabs.map(tab =>
           tab.id === tabId ? { ...tab, title: newTitle } : tab
-        )));
+        );
+        setTabs(updatedTabs);
+        // Save to localStorage with updated tabs
+        localStorage.setItem(getStorageKey("tabs"), JSON.stringify(updatedTabs));
       }
     }
     setEditingTabId(null);
@@ -727,7 +750,7 @@ const NotesforNotes = ({ inNotebookSheet = false }) => {
                             console.log('Scrolled left, new scrollLeft:', scrollContainer.scrollLeft);
                           }
                         }}
-                        className="absolute left-0 top-0 bottom-0 z-10 bg-white dark:bg-[#28283A] border-r border-gray-200 dark:border-gray-700 px-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center min-w-[32px]"
+                        className="absolute left-0 dark:text-white top-0 bottom-0 z-10 bg-white dark:bg-[#28283A] border-r border-gray-200 dark:border-gray-700 px-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center min-w-[32px]"
                         title="Scroll Left"
                       >
                         <ChevronDown className="w-4 h-4 transform rotate-90" />
@@ -745,7 +768,7 @@ const NotesforNotes = ({ inNotebookSheet = false }) => {
                             console.log('Scrolled right, new scrollLeft:', scrollContainer.scrollLeft);
                           }
                         }}
-                        className="absolute right-0 top-0 bottom-0 z-10 bg-white dark:bg-[#28283A] border-l border-gray-200 dark:border-gray-700 px-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center min-w-[32px]"
+                        className="absolute dark:text-white right-0 top-0 bottom-0 z-10 bg-white dark:bg-[#28283A] border-l border-gray-200 dark:border-gray-700 px-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center min-w-[32px]"
                         title="Scroll Right"
                       >
                         <ChevronDown className="w-4 h-4 transform -rotate-90" />
@@ -758,29 +781,36 @@ const NotesforNotes = ({ inNotebookSheet = false }) => {
                        <div
                          key={tab.id}
                          className={`group relative flex items-center gap-1 px-3 py-1.5 rounded-sm text-sm cursor-pointer transition-colors ${
-                           activeTabId === tab.id
+                           editingTabId === tab.id
+                             ? "bg-yellow-500 text-white border-2 border-yellow-600"
+                             : activeTabId === tab.id
                              ? "bg-blue-500 text-white"
-                             : "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700"
+                             : "bg-gray-100 dark:bg-[#513a7a] dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700"
                          }`}
                          onClick={() => switchTab(tab.id)}
+                         onDoubleClick={(e) => startEditingTab(tab.id, tab.title, e)}
                        >
                         {editingTabId === tab.id ? (
                           <input
                             ref={editInputRef}
                             type="text"
                             value={editingTitle}
-                            onChange={(e) => setEditingTitle(e.target.value)}
+                            onChange={(e) => {
+                              console.log('Input value changed:', e.target.value);
+                              setEditingTitle(e.target.value);
+                            }}
                             onBlur={(e) => saveTabTitle(tab.id, e)}
                             onKeyDown={(e) => handleTitleKeyDown(tab.id, e)}
-                            className="flex-1 bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 min-w-[60px]"
+                            className="flex-1 bg-white dark:bg-gray-800 border border-blue-500 dark:border-blue-400 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 min-w-[60px]"
                             onClick={(e) => e.stopPropagation()}
+                            placeholder="Tab name..."
                           />
                         ) : (
-                          <span className="text-sm truncate max-w-[100px]">{tab.title}</span>
+                          <span className="text-sm truncate max-w-[100px] cursor-pointer" title="Double-click to edit">{tab.title}</span>
                         )}
                         <button
                           onClick={(e) => startEditingTab(tab.id, tab.title, e)}
-                          className="text-gray-500 hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="text-gray-500 dark:text-gray-300 hover:text-blue-500 opacity-100 transition-opacity ml-1"
                           title="Rename tab"
                         >
                           <Pencil className="w-3 h-3" />
@@ -788,7 +818,7 @@ const NotesforNotes = ({ inNotebookSheet = false }) => {
                         {tabs.length > 1 && (
                           <button
                             onClick={(e) => deleteTab(tab.id, e)}
-                            className="text-gray-500 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="text-gray-500 dark:text-red-500 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
                             title="Delete tab"
                           >
                             <X className="w-3 h-3" />
@@ -800,10 +830,10 @@ const NotesforNotes = ({ inNotebookSheet = false }) => {
                   </div>
                   
                   {/* Add Tab Button - Always visible outside the scrollable container */}
-                  <div className="flex items-center gap-2 mt-2">
+                  <div className="flex items-center gap-2">
                     <button
                       onClick={createNewTab}
-                      className="flex items-center gap-1 px-2 py-1.5 rounded-sm text-sm bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700"
+                      className="flex items-center gap-1 dark:text-white px-2 py-2 rounded-sm text-sm bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700"
                       title="Add New Tab"
                     >
                       <Plus className="w-4 h-4" />

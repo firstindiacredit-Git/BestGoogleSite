@@ -1404,7 +1404,7 @@ function BalanceSheet({ sheetId }) {
                 </Button>
               )}
             </ButtonGroup>
-            <Button 
+            {/* <Button 
               variant="outlined" 
               size="small"
               onClick={() => navigate('/balancesheetdashboard')}
@@ -1421,7 +1421,7 @@ function BalanceSheet({ sheetId }) {
               }}
             >
               Back
-            </Button>
+            </Button> */}
           </Box>
           </div>
         </Box>
@@ -1641,6 +1641,7 @@ function BalanceSheet({ sheetId }) {
                 variant="outlined"
                 size="small"
                 value={searchQuery}
+                className='dark:outline-none dark:border-white rounded-lg dark:text-white'
                 onChange={(e) => setSearchQuery(e.target.value)}
                 sx={{
                   width: { xs: '100%', sm: 'auto' },
@@ -1658,7 +1659,7 @@ function BalanceSheet({ sheetId }) {
                 }}
                 InputProps={{
                   startAdornment: (
-                    <Box sx={{ mr: 1, color: 'text.secondary' }}>
+                    <Box className='dark:text-white dark:border-white' sx={{ mr: 1, color: 'text.secondary' }}>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M15.5 14H14.71L14.43 13.73C15.41 12.59 16 11.11 16 9.5C16 5.91 13.09 3 9.5 3C5.91 3 3 5.91 3 9.5C3 13.09 5.91 16 9.5 16C11.11 16 12.59 15.41 13.73 14.43L14 14.71V15.5L19 20.49L20.49 19L15.5 14ZM9.5 14C7.01 14 5 11.99 5 9.5C5 7.01 7.01 5 9.5 5C11.99 5 14 7.01 14 9.5C14 11.99 11.99 14 9.5 14Z" fill="currentColor"/>
                       </svg>
@@ -2021,7 +2022,9 @@ function BalanceSheet({ sheetId }) {
                   background: 'linear-gradient(45deg, #7b1fa2 30%, #9c27b0 90%)'
                 },
                 width: { xs: 40, sm: 56 },
-                height: { xs: 40, sm: 56 }
+                height: { xs: 40, sm: 56 },
+                top: { xs: 12, sm: -60 },
+                right: { xs: 12, sm: -3 }
               }}
             >
               <PeopleIcon sx={{ fontSize: { xs: '1rem', sm: '1.5rem' } }} />
@@ -2036,7 +2039,8 @@ function BalanceSheet({ sheetId }) {
                   background: 'linear-gradient(45deg, #1565c0 30%, #1976d2 90%)'
                 },
                 width: { xs: 40, sm: 56 },
-                height: { xs: 40, sm: 56 }
+                height: { xs: 40, sm: 56 },
+                right: { xs: 12, sm: -5 }
               }}
             >
               <AddIcon sx={{ fontSize: { xs: '1rem', sm: '1.5rem' } }} />
@@ -2534,6 +2538,7 @@ function BalanceSheet({ sheetId }) {
           </Button>
           <Button
             variant="contained"
+            
             onClick={() => {
               setOpenSharedUsersDialog(false);
               setOpenShareDialog(true);

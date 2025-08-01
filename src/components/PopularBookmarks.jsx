@@ -175,7 +175,7 @@ function PopularBookmarks() {
   const [userProfession, setUserProfession] = useState(() => {
     // Initialize from localStorage if available
     const savedProfession = localStorage.getItem("userProfession");
-    return savedProfession || "all";
+    return savedProfession || "bpo";
   });
   
   // Cache for filtered categories based on profession
@@ -704,7 +704,7 @@ function PopularBookmarks() {
   // Cache for categories and bookmarks to avoid repeated Firebase calls
   const [allCategoriesCache, setAllCategoriesCache] = useState([]);
   const [lastFetchTime, setLastFetchTime] = useState(0);
-  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+  const CACHE_DURATION = 1 * 60 * 1000; // 1 minute
 
   // Effect to handle profession changes and update categories
   useEffect(() => {

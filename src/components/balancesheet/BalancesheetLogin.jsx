@@ -60,10 +60,10 @@ function BalancesheetLogin({ onLoginSuccess }) {
       display: 'flex', 
       justifyContent: 'center', 
       alignItems: 'center', 
-      minHeight: '100vh',
-      background: '#f0f2f5'
+      minHeight: '50vh',
+      background: ''
     }}>
-      <Card style={{ width: 400, boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
+      <Card className='bg-white/10 backdrop-blur-sm' style={{ width: 400, boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
           <Title level={2}>Login</Title>
         </div>
@@ -86,6 +86,7 @@ function BalancesheetLogin({ onLoginSuccess }) {
               prefix={<UserOutlined />} 
               placeholder="Username or Email" 
               size="large"
+              className='dark:bg-white/30 backdrop-blur-xl dark:text-white'
             />
           </Form.Item>
 
@@ -100,6 +101,7 @@ function BalancesheetLogin({ onLoginSuccess }) {
               prefix={<LockOutlined />} 
               placeholder="Password" 
               size="large"
+              className='dark:bg-white/30 backdrop-blur-xl dark:text-white '
             />
           </Form.Item>
 

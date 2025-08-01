@@ -74,10 +74,10 @@ const WidgetCard = memo(function WidgetCard({ title, menu, children, collapsible
   const actualCollapsed = isControlled ? collapsed : localCollapsed;
   const handleToggle = isControlled ? onToggleCollapse : () => setLocalCollapsed(c => !c);
   return (
-    <div className="">
+    <div className="bg-white/[var(--widget-opacity)] dark:bg-[#28283b]/[var(--widget-opacity)]">
       {title && (
         <div
-          className={`bg-gray-100 dark:bg-[#28283b] relative flex items-center p-3 ${collapsible ? 'cursor-pointer select-none' : ''}`}
+          className={`bg-gray-100/[var(--widget-opacity)] dark:bg-[#28283b]/[var(--widget-opacity)] backdrop-blur-sm relative flex items-center p-3 ${collapsible ? 'cursor-pointer select-none' : ''}`}
           onClick={collapsible ? handleToggle : undefined}
         >
           <div className="w-full dark:text-white text-center font-semibold text-lg capitalize flex items-center justify-center gap-2">
@@ -90,7 +90,7 @@ const WidgetCard = memo(function WidgetCard({ title, menu, children, collapsible
           )}
         </div>
       )}
-      {!collapsible || !actualCollapsed ? <div className="bg-white dark:bg-[#28283b]">{children}</div> : null}
+      {!collapsible || !actualCollapsed ? <div className="bg-white/[var(--widget-opacity)] dark:bg-[#28283b]/[var(--widget-opacity)]">{children}</div> : null}
     </div>
   );
 });
@@ -533,12 +533,26 @@ const Anotherpage = ({ pageId = "home" }) => {
   const [subcatIconSizes, setSubcatIconSizes] = useState(() => getLocal('subcatIconSizes'));
   const [widgetDisplayModes] = useState(() => getLocal('widgetDisplayModes'));
   const [widgetIconSizes] = useState(() => getLocal('widgetIconSizes'));
+  
+  // Global opacity state for all widgets and subcategories
+  const [globalOpacity, setGlobalOpacity] = useState(() => {
+    const saved = localStorage.getItem('globalOpacity');
+    return saved ? parseFloat(saved) : 1;
+  });
+
+  // Initialize CSS variable on mount
+  useEffect(() => {
+    const savedOpacity = localStorage.getItem('globalOpacity');
+    const opacity = savedOpacity ? parseFloat(savedOpacity) : 1;
+    document.documentElement.style.setProperty("--widget-opacity", `${opacity}`);
+  }, []);
 
   // Persist to localStorage on change
   useEffect(() => { localStorage.setItem('subcatDisplayModes', JSON.stringify(subcatDisplayModes)); }, [subcatDisplayModes]);
   useEffect(() => { localStorage.setItem('subcatIconSizes', JSON.stringify(subcatIconSizes)); }, [subcatIconSizes]);
   useEffect(() => { localStorage.setItem('widgetDisplayModes', JSON.stringify(widgetDisplayModes)); }, [widgetDisplayModes]);
   useEffect(() => { localStorage.setItem('widgetIconSizes', JSON.stringify(widgetIconSizes)); }, [widgetIconSizes]);
+  useEffect(() => { localStorage.setItem('globalOpacity', globalOpacity.toString()); }, [globalOpacity]);
 
   const handleSubcatDisplayMode = useCallback((subcatKey, mode) => {
     setSubcatDisplayModes(prev => ({ ...prev, [subcatKey]: mode }));
@@ -546,6 +560,9 @@ const Anotherpage = ({ pageId = "home" }) => {
   const handleSubcatIconSize = useCallback((subcatKey, size) => {
     setSubcatIconSizes(prev => ({ ...prev, [subcatKey]: size }));
   }, []);
+
+
+
 
   // --- Add state for bookmarks modal ---
   const [openBookmarksModal, setOpenBookmarksModal] = useState(null); // subcatKey or null
@@ -1118,13 +1135,14 @@ const Anotherpage = ({ pageId = "home" }) => {
           <Menu.Item key="medium" onClick={e => { e.domEvent.stopPropagation(); onIconSizeChange('medium'); }}>Medium</Menu.Item>
           <Menu.Item key="large" onClick={e => { e.domEvent.stopPropagation(); onIconSizeChange('large'); }}>Large</Menu.Item>
         </Menu.SubMenu>
+
         <Menu.Divider />
         <Menu.Item key="bookmarks" onClick={e => { e.domEvent.stopPropagation(); handleOpenBookmarksModal(subcatName); }}>Bookmarks</Menu.Item>
       </Menu>
     );
     const settingsButton = (
       <Dropdown overlay={settingsMenu} trigger={["click"]} placement="bottomRight">
-        <button className="hover:bg-gray-300 text-gray-500 mr-1.5 hover:text-gray-600 p-2 rounded bg-transparent" onClick={e => e.stopPropagation()} title="Settings">
+        <button className="hover:bg-gray-300  text-gray-500 mr-1.5 hover:text-gray-600 p-2 rounded bg-transparent" onClick={e => e.stopPropagation()} title="Settings">
           <SettingOutlined style={{ fontSize: 15 }} />
         </button>
       </Dropdown>
@@ -1136,14 +1154,14 @@ const Anotherpage = ({ pageId = "home" }) => {
         collapsible={true}
         collapsed={collapsed}
         onToggleCollapse={() => setCollapsed(c => !c)}
-      >
+        >
         {/* Bookmarks list, only if expanded */}
         {!collapsed && (
           <>
             <div>
               {renderBookmarksView(visibleBookmarks, displayMode, iconSize)}
             </div>
-            <div className="flex justify-end ">
+            <div className="flex justify-end backdrop-blur-sm ">
               <div className="w-18 shadow-lg mb-1 flex">
               <button
                 className="p-1.5 dark:text-white text-gray-500 rounded  hover:bg-gray-300 transition flex items-center justify-center"
@@ -1341,6 +1359,7 @@ const Anotherpage = ({ pageId = "home" }) => {
                       iconSize={iconSize}
                       onDisplayModeChange={mode => handleSubcatDisplayMode(subcatKey, mode)}
                       onIconSizeChange={size => handleSubcatIconSize(subcatKey, size)}
+                     
                     />
                   ),
                   defaultColumn: (index % 2) + 1,
@@ -1891,6 +1910,7 @@ const Anotherpage = ({ pageId = "home" }) => {
         <div className="text-gray-500 text-sm mt-1 mb-4">
             Organize your widgets. Drag and drop to reorder. Select columns (1-4). Click Apply to save.
           </div>
+          
       <div className="mb-4 flex gap-4 items-center">
         <span className="font-medium dark:text-white">Columns:</span>
         {[1,2,3,4].map(num => (
@@ -2057,7 +2077,7 @@ const Anotherpage = ({ pageId = "home" }) => {
     if (mode === 'list') {
       // Show all bookmarks in a scrollable container (max 5 visible at a time)
       return (
-        <div className="flex flex-col gap-2 p-3 max-h-64 overflow-y-auto" style={{ maxHeight: '220px', minHeight: '0' }}>
+        <div className="flex flex-col gap-2 p-3 max-h-64 overflow-y-auto backdrop-blur-sm" style={{ maxHeight: '220px', minHeight: '0' }}>
           {uniqueBookmarks.map((item) => (
             <a
               key={item.id}
@@ -2090,7 +2110,7 @@ const Anotherpage = ({ pageId = "home" }) => {
       const gridHeight = rowHeight * maxRows + 16; // +16 for padding/gap
       return (
         <div
-          className="grid grid-cols-5 gap-2 p-3 overflow-y-auto"
+          className="grid grid-cols-5 gap-2 p-3 overflow-y-auto backdrop-blur-sm"
           style={{ maxHeight: `${gridHeight}px`, minHeight: '0' }}
         >
           {uniqueBookmarks.map((item) => (
@@ -2117,7 +2137,7 @@ const Anotherpage = ({ pageId = "home" }) => {
     }
     if (mode === 'cloud') {
       return (
-        <div className="flex flex-wrap gap-2 p-3">
+        <div className="flex flex-wrap gap-2 p-3 backdrop-blur-sm">
           {uniqueBookmarks.map((item) => (
             <a
               key={item.id}
@@ -2141,7 +2161,7 @@ const Anotherpage = ({ pageId = "home" }) => {
     }
     if (mode === 'icon') {
       return (
-        <div className="grid grid-cols-6 gap-2 p-3">
+        <div className="grid grid-cols-6 gap-2 p-3 backdrop-blur-sm">
           {uniqueBookmarks.map((item) => (
             <a
               key={item.id}
@@ -2475,7 +2495,7 @@ const Anotherpage = ({ pageId = "home" }) => {
       
       {allCategories.length === 0 ? (
         <div className="w-full flex flex-col items-center justify-center min-h-[60vh]">
-          <div className="text-2xl font-semibold text-gray-500 dark:text-gray-300 mt-20">No subcategories found for your profession.</div>
+          <div className="text-2xl backdrop-blur-sm font-semibold text-gray-500 dark:text-gray-300 mt-20">No subcategories found for your profession.</div>
         </div>
       ) : (
       <>
