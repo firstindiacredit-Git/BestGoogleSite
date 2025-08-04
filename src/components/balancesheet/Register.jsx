@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Form, Input, Button, Card, Typography, message } from 'antd';
 import { UserOutlined, MailOutlined, LockOutlined, GoogleOutlined } from '@ant-design/icons';
-import { useAuth } from '../contexts/AuthContext.jsx';
+import { useAuth } from '../../context/AuthContext';
 
 const { Title } = Typography;
 
@@ -29,7 +29,7 @@ function Register() {
       
       if (result.success) {
         message.success('Registration successful!');
-        navigate('/dashboard');
+        navigate('/search');
       } else {
         // Handle specific error cases
         if (result.error?.includes('username')) {

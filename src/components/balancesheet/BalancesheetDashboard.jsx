@@ -54,22 +54,60 @@ function BalancesheetDashboard({ onSheetClick }) {
   const { logout, user } = useAuth();
 
   useEffect(() => {
-    if (user) {
+    // Only fetch sheets if user is actually logged in
+    if (user && user._id) {
       fetchSheets();
     } else {
-      // Check if there's a stored token
+      // Don't read token if user is not logged in
+      message.warning('Login to use this Feature');
+      // Redirect to search page after showing message
+      setTimeout(() => {
+        navigate('/search');
+      }, 2000);
+    }
+  }, [user, navigate]);
+
+  // Additional effect to monitor authentication state changes
+  useEffect(() => {
+    const checkAuth = () => {
+      // Only check token if user is actually logged in
+      if (!user || !user._id) {
+        message.warning('Login to use this Feature');
+        // Redirect to search page after showing message
+        setTimeout(() => {
+          navigate('/search');
+        }, 2000);
+        return;
+      }
+      
       const token = localStorage.getItem('token');
       if (!token) {
-        navigate('/balancesheetlogin');
+        message.warning('Login to use this Feature');
+        // Redirect to search page after showing message
+        setTimeout(() => {
+          navigate('/search');
+        }, 2000);
       }
-    }
+    };
+
+    // Check auth on mount and set up interval
+    checkAuth();
+    const interval = setInterval(checkAuth, 5000); // Check every 5 seconds
+
+    return () => clearInterval(interval);
   }, [user, navigate]);
 
   const fetchSheets = async () => {
     try {
+      // Only read token if user is actually logged in
+      if (!user || !user._id) {
+        message.warning('Login to use this Feature');
+        return;
+      }
+
       const token = localStorage.getItem('token');
       if (!token) {
-        navigate('/balancesheetlogin');
+        message.warning('Login to use this Feature');
         return;
       }
 
@@ -83,10 +121,10 @@ function BalancesheetDashboard({ onSheetClick }) {
       console.error('Error fetching sheets:', error);
       
       if (error.response?.status === 401) {
-        // Unauthorized - clear token and redirect to login
+        // Unauthorized - clear token and show alert
         localStorage.removeItem('token');
         localStorage.removeItem('userCredentials');
-        navigate('/balancesheetlogin');
+        message.warning('Login to use this Feature');
       } else if (error.response?.status === 500) {
         message.error('Server error. Please try again later.');
       } else {
@@ -294,8 +332,8 @@ function BalancesheetDashboard({ onSheetClick }) {
     // Call the original logout function
     logout();
     
-    // Redirect to login
-    navigate('/balancesheetlogin');
+    // Redirect to main app home
+    navigate('/search');
   };
 
   return (
@@ -321,6 +359,7 @@ function BalancesheetDashboard({ onSheetClick }) {
           </div>
           <Space>
             <Avatar 
+              src={user?.photoURL}
               icon={<UserOutlined />} 
               onClick={() => navigate('/profile')}
               style={{ 
@@ -345,14 +384,14 @@ function BalancesheetDashboard({ onSheetClick }) {
             >
               New Sheet
             </Button>
-            <Button
+            {/* <Button
               icon={<LogoutOutlined />}
               onClick={handleLogout}
               className='dark:bg-white/30 backdrop-blur-xl dark:text-white'
               style={{ color: 'blue', borderColor: 'white' }}
             >
               Logout
-            </Button>
+            </Button> */}
           </Space>
         </div>
       </Card>

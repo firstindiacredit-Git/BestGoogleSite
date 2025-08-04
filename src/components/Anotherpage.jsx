@@ -2471,7 +2471,7 @@ const Anotherpage = ({ pageId = "home" }) => {
       {isDemoMode && (
         <div className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-4 mb-4 shadow-lg">
           <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center mx-auto gap-3">
               <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
@@ -2480,15 +2480,7 @@ const Anotherpage = ({ pageId = "home" }) => {
                 <span className="ml-2 text-blue-100">You&apos;re viewing demo version with thier bookmarks. Sign in to access your personal data!</span>
               </div>
             </div>
-            {/* <button
-              onClick={() => {}}
-              className="text-blue-100 hover:text-white transition-colors"
-              title="Hide demo banner"
-            >
-              <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path d="M6 18L18 6M6 6l12 12"/>
-              </svg>
-            </button> */}
+            
           </div>
         </div>
       )}

@@ -76,7 +76,7 @@ function BalanceSheet({ sheetId }) {
   const params = useParams();
   const id = sheetId || params.id;
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const [sheet, setSheet] = useState(null);
   const [entries, setEntries] = useState([]);
   const [filter, setFilter] = useState('all');
@@ -132,7 +132,6 @@ function BalanceSheet({ sheetId }) {
     
     if (!id) {
       console.error('No sheet ID provided');
-      message.error('Invalid sheet ID');
       navigate('/balancesheetdashboard');
       return;
     }
@@ -140,6 +139,38 @@ function BalanceSheet({ sheetId }) {
     fetchSheet();
     fetchEntries();
   }, [id]);
+
+  // Monitor authentication state
+  useEffect(() => {
+    const checkAuth = () => {
+      // Only check token if user is actually logged in
+      if (!user || !user._id) {
+        message.warning('Login to use this Feature');
+        // Redirect to search page after showing message
+        setTimeout(() => {
+          navigate('/search');
+        }, 2000);
+        return;
+      }
+      
+      const token = localStorage.getItem('token');
+      if (!token) {
+        // Show alert instead of redirecting
+        message.warning('Login to use this Feature');
+        // Redirect to search page after showing message
+        setTimeout(() => {
+          navigate('/search');
+        }, 2000);
+        return;
+      }
+    };
+
+    // Check auth on mount and set up interval
+    checkAuth();
+    const interval = setInterval(checkAuth, 5000); // Check every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [user, navigate]);
 
   // Add token validation function
   const validateToken = (token) => {
@@ -172,12 +203,19 @@ function BalanceSheet({ sheetId }) {
   const fetchSheet = async () => {
     try {
       setIsLoading(true);
+      
+      // Only read token if user is actually logged in
+      if (!user || !user._id) {
+        message.warning('Login to use this Feature');
+        return;
+      }
+      
       const token = localStorage.getItem('token');
       
       if (!token) {
         console.error('No authentication token found');
-        // Redirect to login if no token
-        navigate('/balancesheetlogin');
+        // Show alert instead of redirecting
+        message.warning('Login to use this Feature');
         return;
       }
 
@@ -185,7 +223,7 @@ function BalanceSheet({ sheetId }) {
       if (!validateToken(token)) {
         console.error('Invalid token format');
         localStorage.removeItem('token');
-        navigate('/balancesheetlogin');
+        message.warning('Login to use this Feature');
         return;
       }
 
@@ -235,9 +273,9 @@ function BalanceSheet({ sheetId }) {
       console.error('Error headers:', error.response?.headers);
       
       if (error.response?.status === 401) {
-        // Unauthorized - clear token and redirect to login
+        // Unauthorized - clear token and show alert
         localStorage.removeItem('token');
-        navigate('/balancesheetlogin');
+        message.warning('Login to use this Feature');
       } else if (error.response?.status === 500) {
         // Server error - show user-friendly message
         message.error('Server error. Please try again later.');
@@ -252,11 +290,18 @@ function BalanceSheet({ sheetId }) {
   const fetchEntries = async () => {
     try {
       setIsLoading(true);
+      
+      // Only read token if user is actually logged in
+      if (!user || !user._id) {
+        message.warning('Login to use this Feature');
+        return;
+      }
+      
       const token = localStorage.getItem('token');
       
       if (!token) {
         console.error('No authentication token found');
-        navigate('/balancesheetlogin');
+        message.warning('Login to use this Feature');
         return;
       }
 
@@ -264,7 +309,7 @@ function BalanceSheet({ sheetId }) {
       if (!validateToken(token)) {
         console.error('Invalid token format');
         localStorage.removeItem('token');
-        navigate('/balancesheetlogin');
+        message.warning('Login to use this Feature');
         return;
       }
 
@@ -285,9 +330,9 @@ function BalanceSheet({ sheetId }) {
       console.error('Error headers:', error.response?.headers);
       
       if (error.response?.status === 401) {
-        // Unauthorized - clear token and redirect to login
+        // Unauthorized - clear token and show alert
         localStorage.removeItem('token');
-        navigate('/balancesheetlogin');
+        message.warning('Login to use this Feature');
       } else if (error.response?.status === 500) {
         // Server error - show user-friendly message
         message.error('Server error. Please try again later.');

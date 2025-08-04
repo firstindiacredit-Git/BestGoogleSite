@@ -28,6 +28,7 @@ import {
   syncLocalPagesToFirebase
 } from "../firebase/customPages";
 import { useCountry } from "../context/CountryContext";
+import { useAuth } from '../context/AuthContext.jsx';
 
 const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
   const { isDarkMode, toggleTheme } = useTheme();
@@ -45,6 +46,7 @@ const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
   const MAX_PAGES = 3; // Maximum allowed pages for free users
   const [showAdminBanner, setShowAdminBanner] = useState(true);
   const [showGoogleApps, setShowGoogleApps] = useState(false);
+  const { logout } = useAuth();
 
   // Check if current page is balance sheet related
   const isBalanceSheetPage = location.pathname.includes('/balancesheet') || location.pathname.includes('/sheet/');
@@ -143,6 +145,19 @@ const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
   const handleGoogleAppsClick = () => {
     setShowGoogleApps(!showGoogleApps);
     setPanel(false); // Close avatar panel when toggling Google Apps
+  };
+
+  const handleLogout = () => {
+    // Clear all stored data
+    localStorage.removeItem('token');
+    localStorage.removeItem('userCredentials');
+    localStorage.removeItem('username');
+    
+    // Call the original logout function
+    logout();
+    
+    // Redirect to main app home
+    navigate('/search');
   };
 
   const handleSignOut = async () => {
@@ -772,7 +787,7 @@ const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
               <div className="flex items-center gap-2">
                 {isBalanceSheetPage && (
                   <button
-                    className="bg-indigo-500 py-1.5 px-4 flex items-center gap-2 rounded home-button hover:bg-indigo-600 transition-colors"
+                    className="bg-indigo-500 py-1 px-3 flex items-center gap-2 rounded-md home-button hover:bg-indigo-600 transition-colors"
                     onClick={() => navigate('/search')}
                   >
                     <FaArrowLeft className="h-2 w-3 text-white" />
@@ -1195,7 +1210,8 @@ const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
                       </button>
                     </Link>
                     <button
-                      onClick={handleSignOut}
+                      onClick={handleSignOut, handleLogout}
+                      
                       className="w-full flex items-center justify-center gap-2 px-4 py-2 text-center text-sm text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-800 rounded transition-colors duration-200"
                     >
                       <IoIosLogOut />
