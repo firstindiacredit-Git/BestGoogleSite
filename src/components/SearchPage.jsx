@@ -695,39 +695,9 @@ const SearchPage = ({ isToolPage = false }) => {
           ) : (
             <div className="w-full">
               {activeComponent === "BalanceSheet" ? (
-                !user ? (
-                  <div className="w-[90%] mx-auto rounded-lg relative">
-                    <div className="text-indigo-500 inset-0 flex justify-center items-center h-[60vh] z-50 absolute top-0 left-0 right-0 w-full backdrop-blur-md dark:text-white">
-                      <div className="text-xl -mt-24">Login to use this Feature</div>
-                    </div>
-                    <div className="flex justify-center opacity-50 -z-50 pt-24">
-                      {isDarkMode ? (
-                        <img src="./DOSB.png" className="h-96" alt="" />
-                      ) : (
-                        <img src="./DOSW.png" className="h-96" />
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <BalanceSheet sheetId={selectedSheetId} />
-                )
+                !user ? <BalancesheetLogin onLoginSuccess={() => setActiveComponent("BalanceDashboard")} /> : <BalanceSheet sheetId={selectedSheetId} />
               ) : activeComponent === "BalanceDashboard" ? (
-                !user ? (
-                  <div className="w-[90%] mx-auto rounded-lg relative">
-                    <div className="text-indigo-500 inset-0 flex justify-center items-center h-[60vh] z-50 absolute top-0 left-0 right-0 w-full backdrop-blur-md dark:text-white">
-                      <div className="text-xl -mt-24">Login to use this Feature</div>
-                    </div>
-                    <div className="flex justify-center opacity-50 -z-50 pt-24">
-                      {isDarkMode ? (
-                        <img src="./DOSB.png" className="h-96" alt="" />
-                      ) : (
-                        <img src="./DOSW.png" className="h-96" />
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <BalancesheetDashboard onSheetClick={(id) => { setSelectedSheetId(id); setActiveComponent("BalanceSheet"); }} />
-                )
+                !user ? <BalancesheetLogin onLoginSuccess={() => setActiveComponent("BalanceDashboard")} /> : <BalancesheetDashboard onSheetClick={(id) => { setSelectedSheetId(id); setActiveComponent("BalanceSheet"); }} />
               ) : activeComponent === "NotebookAndSheet" ? (
                 <NotebookAndSheet />
               ) : activeComponent === "PopularBookmarks" ? (
