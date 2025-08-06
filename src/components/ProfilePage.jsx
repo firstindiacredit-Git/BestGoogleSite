@@ -56,7 +56,7 @@ const ProfilePage = () => {
   const [userProfession, setUserProfession] = useState("");
   const [isEditingProfession, setIsEditingProfession] = useState(false);
   const [userInterest, setUserInterest] = useState('');
-  const [interestOptions, setInterestOptions] = useState([{ id: 'all', name: 'All Interests' }]);
+  const [interestOptions, setInterestOptions] = useState([]);
   const [interestLoading, setInterestLoading] = useState(true);
 
   const professions = [
@@ -245,13 +245,13 @@ const ProfilePage = () => {
       try {
         const { getDocs, collection } = await import('firebase/firestore');
         const snap = await getDocs(collection(db, 'interests'));
-        const options = [{ id: 'all', name: 'All Interests' }];
+        const options = [];
         snap.forEach(doc => {
           options.push({ id: doc.id, name: doc.data().name });
         });
         setInterestOptions(options);
       } catch {
-        setInterestOptions([{ id: 'all', name: 'All Interests' }]);
+        setInterestOptions([]);
       }
     }
     fetchInterestOptions();

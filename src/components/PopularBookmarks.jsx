@@ -12,7 +12,6 @@ import {
   where,
   deleteDoc,
   writeBatch,
-  onSnapshot,
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import {
@@ -43,11 +42,9 @@ import {
   ExpandOutlined,
   CompressOutlined,
   SettingOutlined,
-  VerticalAlignBottomOutlined,
   SmileOutlined,
 } from "@ant-design/icons";
 import debounce from "lodash/debounce";
-import SkeletonLoader from "./SkeletonLoader";
 import PropTypes from 'prop-types';
 
 // Import the ThemeContext and useThemeAware hook
@@ -234,17 +231,12 @@ function PopularBookmarks() {
   // Add state for search bar visibility
   const [isSearchBarOpen, setIsSearchBarOpen] = useState(false);
 
-  // State for previewing imported bookmarks
-  const [importedPreview, setImportedPreview] = useState([]);
 
-  // Ref for import bookmarks file input
-  const fileInputRef = React.useRef(null);
   // Ref for search bar
   const searchBarRef = React.useRef(null);
 
   // Add state for Category Manager modal and selection
   const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false);
-  const [selectedImported, setSelectedImported] = useState([]); // [{catIdx, linkIdx}]
 
   // Add state for multi-select user categories in Category Manager
   const [selectedUserCategories, setSelectedUserCategories] = useState([]);
@@ -262,155 +254,7 @@ function PopularBookmarks() {
     return sorted.slice(0, 3).filter(link => (bookmarkLikes[link.id] || 0) > 0);
   }, [categories, bookmarkLikes]);
 
-  // Import bookmarks from HTML file (now supports Chrome bookmarks format)
-  const handleImportBookmarks = (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const html = e.target.result;
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
-      let importedCategories = [];
-      let rootLevelLinks = [];
 
-      // Chrome bookmarks: parse <DL> structure recursively, always create a category for each <H3>
-      function parseDL(dl, parentName = null, isRoot = false) {
-        let categories = [];
-        let children = Array.from(dl.children);
-        for (let i = 0; i < children.length; i++) {
-          const el = children[i];
-          if (el.tagName === 'DT') {
-            const h3 = el.querySelector('h3');
-            if (h3) {
-              // New folder/category
-              const folderName = h3.textContent.trim();
-              const nextDL = el.nextElementSibling;
-              if (nextDL && nextDL.tagName === 'DL') {
-                // Collect all direct links and subfolders
-                let links = [];
-                let subcategories = [];
-                for (let j = 0; j < nextDL.children.length; j++) {
-                  const subEl = nextDL.children[j];
-                  if (subEl.tagName === 'DT') {
-                    const subH3 = subEl.querySelector('h3');
-                    if (subH3) {
-                      // Subfolder
-                      const subDL = subEl.nextElementSibling;
-                      if (subDL && subDL.tagName === 'DL') {
-                        const subResult = parseDL(subDL, subH3.textContent.trim());
-                        subcategories = subcategories.concat(subResult);
-                      }
-                    } else {
-                      const a = subEl.querySelector('a');
-                      if (a) {
-                        links.push({
-                          title: a.textContent,
-                          url: a.getAttribute('href'),
-                        });
-                      }
-                    }
-                  }
-                }
-                // Always create a category for this folder, even if it has both links and subfolders
-                categories.push({ name: folderName, links });
-                categories = categories.concat(subcategories);
-              } else {
-                // Empty folder
-                categories.push({ name: folderName, links: [] });
-              }
-            } else {
-              const a = el.querySelector('a');
-              if (a && parentName) {
-                // Top-level link under a parent folder
-                categories.push({ name: parentName, links: [{ title: a.textContent, url: a.getAttribute('href') }] });
-              } else if (a && isRoot) {
-                // Root-level link (not in any folder)
-                rootLevelLinks.push({ title: a.textContent, url: a.getAttribute('href') });
-              }
-            }
-          }
-        }
-        return categories;
-      }
-
-      // Try Chrome bookmarks format first
-      const mainDL = doc.querySelector('dl');
-      if (mainDL) {
-        importedCategories = parseDL(mainDL, null, true);
-        // After parsing, if there are root-level bookmarks, add them as their own category
-        if (rootLevelLinks.length > 0) {
-          importedCategories.unshift({ name: 'Imported - Uncategorized', links: rootLevelLinks });
-        }
-      } else {
-        // Fallback: old format (h2/ul)
-        const categoryHeadings = doc.querySelectorAll('h2');
-        categoryHeadings.forEach((heading) => {
-          const categoryName = heading.textContent.trim();
-          const ul = heading.nextElementSibling;
-          if (ul && ul.tagName === 'UL') {
-            const links = Array.from(ul.querySelectorAll('a')).map((a) => ({
-              title: a.textContent,
-              url: a.getAttribute('href'),
-            }));
-            importedCategories.push({ name: categoryName, links });
-          }
-        });
-      }
-
-      // Merge categories with the same name (optional, for Chrome's nested folders)
-      const merged = {};
-      importedCategories.forEach(cat => {
-        if (!cat.name) return;
-        if (!merged[cat.name]) merged[cat.name] = { name: cat.name, links: [] };
-        merged[cat.name].links = merged[cat.name].links.concat(cat.links);
-      });
-      importedCategories = Object.values(merged);
-
-      // Show preview
-      setImportedPreview(importedCategories);
-
-      // Add to Firestore (or local state)
-      if (!user) return;
-      importedCategories.forEach(async (cat) => {
-        // Add category
-        const catDoc = await addDoc(collection(db, 'users', user.uid, 'UserCategory'), {
-          newCategory: cat.name,
-          userId: user.uid,
-          order: categories.length,
-          createdAt: new Date().toISOString(),
-        });
-        // Add bookmarks
-        for (const link of cat.links) {
-          await addDoc(collection(db, 'users', user.uid, 'CatBookmarks'), {
-            title: link.title,
-            url: link.url,
-            favicon: '',
-            categoryId: catDoc.id,
-            userId: user.uid,
-            createdAt: new Date().toISOString(),
-            order: 0,
-            isAdminBookmark: false,
-          });
-        }
-      });
-      // Optionally, show a success message
-      // success('Bookmarks imported!');
-
-      // ...inside handleImportBookmarks, after setImportedPreview(importedCategories);
-      Modal.info({
-        title: "Import Successful",
-        content: (
-          <div>
-            <p>Your imported categories have been added to your account.</p>
-            <p>You can view and manage them in the <b>Category Manager</b> (click the &quot;Category Manager&quot; button above your bookmarks).</p>
-          </div>
-        ),
-        okText: "OK",
-      });
-    };
-    reader.readAsText(file);
-  };
 
   const toggleAllCategories = () => {
     const areAllOpen =
@@ -570,7 +414,7 @@ function PopularBookmarks() {
       if (currentUser) {
         // Fetch user profile data for filtering
         try {
-          const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+          await getDoc(doc(db, "users", currentUser.uid));
           // const userData = userDoc.data();
           // Do not setUserProfession here!
         } catch (error) {
@@ -622,7 +466,7 @@ function PopularBookmarks() {
   };
 
   // Filter categories based on user preferences and selected country with caching
-  const getFilteredCategories = (allCategories, isControllerMode = false) => {
+  const getFilteredCategories = (allCategories) => {
     const now = Date.now();
     
     // Check if we have a recent cache
@@ -722,7 +566,7 @@ function PopularBookmarks() {
   // Single effect to fetch all data when user changes
   useEffect(() => {
     let isMounted = true;
-    const fetchAllData = async () => {
+    const fetchAllData = async (retryCount = 0) => {
       if (!user) {
         setLoading(false);
         setCategories([]);
@@ -818,10 +662,7 @@ function PopularBookmarks() {
             },
           });
 
-          // Show notification about auto-added categories
-          const addedCategories = matchingCategories.filter(cat =>
-            !Object.values(currentColumns).flat().includes(cat.id)
-          );
+
 
 
         }
@@ -911,6 +752,30 @@ function PopularBookmarks() {
           setOpenCategories({});
         }
         console.error("Error fetching all data:", error);
+        
+        // Implement retry logic for transient errors
+        if (retryCount < 2 && (error.code === 'resource-exhausted' || error.code === 'unavailable')) {
+          const delay = Math.pow(2, retryCount) * 2000; // 2s, 4s
+          setTimeout(() => fetchAllData(retryCount + 1), delay);
+          return;
+        }
+        
+        // Show user-friendly error message
+        if (error.code === 'resource-exhausted') {
+          notification.error({
+            message: "Service Temporarily Unavailable",
+            description: "Too many requests. Please wait a moment and try again.",
+            placement: "topRight",
+            duration: 5
+          });
+        } else if (error.code === 'unavailable') {
+          notification.error({
+            message: "Connection Error",
+            description: "Unable to connect to the server. Please check your internet connection.",
+            placement: "topRight",
+            duration: 5
+          });
+        }
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -930,8 +795,6 @@ function PopularBookmarks() {
       
       // Update categoryColumns to match new categories
       setCategoryColumns(prevColumns => {
-        // Flatten all current category IDs in columns
-        const allColIds = Object.values(prevColumns).flat();
         // Only keep IDs that are in filteredCategories
         const validIds = matchingCategories.map(cat => cat.id);
         // Remove any IDs not in validIds
@@ -1755,7 +1618,7 @@ function PopularBookmarks() {
         };
 
         // Add to user's collection
-        const docRef = await addDoc(
+        await addDoc(
           collection(db, "users", user.uid, "CatBookmarks"),
           userBookmarkData
         );
@@ -1858,7 +1721,10 @@ function PopularBookmarks() {
     if (!Array.isArray(categoryLinks)) {
       return (
         <div className="text-center p-4 text-gray-500">
-          Loading bookmarks...
+          <div className="flex items-center justify-center gap-2">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+            <span>Loading bookmarks...</span>
+          </div>
         </div>
       );
     }
@@ -2108,28 +1974,9 @@ function PopularBookmarks() {
     );
   };
 
-  // Helper to get categories to display based on showAllCategories
-  const getVisibleCategoryIds = () => {
-    const allCategoryIds = Object.values(categoryColumns).flat();
-    if (showAllCategories || allCategoryIds.length <= 16) return allCategoryIds;
-    return allCategoryIds.slice(0, 16);
-  };
 
-  // Helper to distribute category IDs equally among columns
-  const getDistributedCategoryColumns = () => {
-    const visibleCategoryIds = getVisibleCategoryIds();
-    const distributed = {};
-    const perCol = Math.floor(visibleCategoryIds.length / columnCount);
-    let extra = visibleCategoryIds.length % columnCount;
-    let idx = 0;
-    for (let col = 1; col <= columnCount; col++) {
-      const count = perCol + (extra > 0 ? 1 : 0);
-      distributed[`column${col}`] = visibleCategoryIds.slice(idx, idx + count);
-      idx += count;
-      if (extra > 0) extra--;
-    }
-    return distributed;
-  };
+
+
 
   const renderBookmarksByCategory = () => {
     const areAllOpen =
@@ -2143,8 +1990,8 @@ function PopularBookmarks() {
     const getCategoryLinks = (catId) => {
       const categoryLinks = categoryBookmarks[catId]?.bookmarks || [];
 
-      // If no bookmarks found, try to load them for any category
-      if (categoryLinks.length === 0) {
+      // If no bookmarks found and category is open, load them
+      if (categoryLinks.length === 0 && openCategories[catId]) {
         const category = categories.find(c => c.id === catId);
         if (category) {
           // Load bookmarks for this category asynchronously
@@ -2233,6 +2080,323 @@ function PopularBookmarks() {
     const columnsToRender = showAllCategories
       ? getAllColumns()
       : getLimitedColumns(16);
+
+    // If user selected 'all' professions, group categories by profession
+    if (userProfession === "all") {
+      // 1. Group admin categories by profession
+      const professionGroups = {};
+      professionOptions.forEach((prof) => {
+        if (prof.id === "all") return; // skip 'all' itself
+        professionGroups[prof.id] = [];
+      });
+      // 2. Separate user and admin categories
+      const userCategories = categories.filter(cat => !cat.isAdminCategory);
+      const adminCategories = categories.filter(cat => cat.isAdminCategory);
+      // 3. Assign admin categories to profession groups
+      adminCategories.forEach(cat => {
+        if (Array.isArray(cat.professions)) {
+          cat.professions.forEach(profId => {
+            if (professionGroups[profId]) {
+              professionGroups[profId].push(cat);
+            }
+          });
+        } else if (cat.professions === "all") {
+          // If category is for all, add to all profession groups
+          Object.keys(professionGroups).forEach(profId => {
+            professionGroups[profId].push(cat);
+          });
+        }
+      });
+      // 4. Render grouped categories
+      return (
+        <div className="mb-2">
+          {/* User Categories Section */}
+          {userCategories.length > 0 && (
+            <div id="user-categories-section" className="mb-8">
+              <h3 className="text-xl font-bold mb-4 text-blue-700 dark:text-blue-300">Your Categories</h3>
+              <Row gutter={[16, 16]}>
+                {userCategories.map((category) => {
+                  // Get bookmarks for this category
+                  let categoryLinks = getCategoryLinks(category.id);
+                  const name = (category.name || category.newCategory || '').toLowerCase();
+                  if (searchTerm && !name.includes(searchTerm)) {
+                    categoryLinks = categoryLinks.filter(bookmarkMatches);
+                  }
+
+                  return (
+                    <Col key={category.id} xs={24} sm={12} md={8} lg={6}>
+                      <Card
+                        className="max-w-xl backdrop-blur-sm bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] dark:text-white mx-auto rounded-sm"
+                        title={
+                          <div
+                            className="bg-white/[(var(--widget-opacity))] dark:bg-[#513a7a]/[(var(--widget-opacity))] dark:text-white p-1 relative overflow-hidden cursor-pointer"
+                            onClick={() => {
+                              toggleDropdown(category.id);
+                            }}
+                          >
+                            <div className="absolute left-0 w-full h-full">
+                              <div className="absolute inset-0 opacity-10 transform rotate-45 translate-x-[-50%] translate-y-[-50%] w-[200%] h-[200%]"></div>
+                            </div>
+                                                          <div className="relative z-10 flex justify-between items-center category-header-content">
+                                <div className="flex items-center flex-1">
+                                  <div
+                                    className={`cursor-grab active:cursor-grabbing p-2 transition-all duration-200 group hover:bg-gray-200/50 dark:hover:bg-gray-600/50 rounded`}
+                                    title="Drag to reorder"
+                                  >
+                                    <div className="flex flex-col gap-[2px]">
+                                      <div className="flex gap-[2px]">
+                                        <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                        <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                      </div>
+                                      <div className="flex gap-[2px]">
+                                        <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                        <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                      </div>
+                                      <div className="flex gap-[2px]">
+                                        <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                        <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className={`font-semibold ${category.isFavoritesCategory ? 'text-red-600 dark:text-red-400' : ''}`} title={category.name || category.newCategory}>
+                                      {category.isFavoritesCategory && <span className="mr-1">❤️</span>}
+                                      {truncateText(category.name || category.newCategory)}
+                                    </span>
+                                    {category.isFavoritesCategory && (
+                                      <span className="px-2 py-0.5 text-xs bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 rounded flex items-center gap-1">
+                                        Favorites
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              <Space onClick={(e) => e.stopPropagation()}>
+                                <Tooltip title="Add Bookmark">
+                                  <AntButton
+                                    type="text"
+                                    icon={<PlusOutlined className="text-black dark:text-white" />}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedCategory(category);
+                                      setSelectedCategoryId(category.id);
+                                      setIsAddBookmarkModalVisible(true);
+                                    }}
+                                    style={{ color: "white" }}
+                                  />
+                                </Tooltip>
+                                <Dropdown
+                                  menu={{
+                                    items: getCategoryMenuItems(category),
+                                  }}
+                                  trigger={["click"]}
+                                  overlayClassName="[&_.ant-dropdown-menu]:p-0 [&_.ant-dropdown-menu-item]:p-0 [&_ul]:dark:bg-[#28283a]"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <AntButton
+                                    type="text"
+                                    icon={<MoreOutlined className="text-black dark:text-white" />}
+                                    onClick={(e) => e.stopPropagation()}
+                                    style={{ color: "white" }}
+                                  />
+                                </Dropdown>
+                              </Space>
+                            </div>
+                          </div>
+                        }
+                        styles={{
+                          header: {
+                            padding: 0,
+                            borderBottom: "none",
+                          },
+                          body: {
+                            padding: "16px",
+                            maxHeight: "400px",
+                            overflowY: "auto",
+                            display: openCategories[category.id] ? "block" : "none",
+                          },
+                        }}
+                        style={{
+                          height: "100%",
+                          transition: "all 0.3s ease",
+                          border: "none",
+                        }}
+                      >
+                        {categoryLinks.length === 0 ? (
+                          <Empty
+                            description="No bookmarks in this category yet"
+                            image={Empty.PRESENTED_IMAGE_SIMPLE}
+                          />
+                        ) : (
+                          <>
+                            {categoryViewModes[category.id] === "list" &&
+                              renderBookmarkList(categoryLinks, category.id)}
+                            {categoryViewModes[category.id] === "grid" &&
+                              renderBookmarkGrid(categoryLinks, category.id)}
+                            {categoryViewModes[category.id] === "icon" &&
+                              renderBookmarkIcon(categoryLinks, category.id)}
+                            {!categoryViewModes[category.id] &&
+                              renderBookmarkGrid(categoryLinks, category.id)}
+                          </>
+                        )}
+                      </Card>
+                    </Col>
+                  );
+                })}
+              </Row>
+            </div>
+          )}
+          {/* Profession Groups */}
+          {professionOptions.filter(p => p.id !== "all").map((prof) => (
+            professionGroups[prof.id].length > 0 && (
+              <div key={prof.id} id={`profession-section-${prof.id}`} className="mb-10">
+                <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-blue-700 dark:text-blue-300">
+                  <span>{prof.icon}</span> {prof.name}
+                </h3>
+                <Row gutter={[16, 16]}>
+                  {professionGroups[prof.id].map((category) => {
+                    // Get bookmarks for this category
+                    let categoryLinks = getCategoryLinks(category.id);
+                    const name = (category.name || category.newCategory || '').toLowerCase();
+                    if (searchTerm && !name.includes(searchTerm)) {
+                      categoryLinks = categoryLinks.filter(bookmarkMatches);
+                    }
+
+                    return (
+                      <Col key={category.id} xs={24} sm={12} md={8} lg={6}>
+                        <Card
+                          className="max-w-xl backdrop-blur-sm bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] dark:text-white mx-auto rounded-sm"
+                          title={
+                            <div
+                              className="bg-white/[(var(--widget-opacity))] dark:bg-[#513a7a]/[(var(--widget-opacity))] dark:text-white p-1 relative overflow-hidden cursor-pointer"
+                              onClick={() => {
+                                toggleDropdown(category.id);
+                              }}
+                            >
+                              <div className="absolute left-0 w-full h-full">
+                                <div className="absolute inset-0 opacity-10 transform rotate-45 translate-x-[-50%] translate-y-[-50%] w-[200%] h-[200%]"></div>
+                              </div>
+                              <div className="relative z-10 flex justify-between items-center category-header-content">
+                                <div className="flex items-center flex-1">
+                                  <div
+                                    className={`cursor-grab active:cursor-grabbing p-2 transition-all duration-200 group hover:bg-gray-200/50 dark:hover:bg-gray-600/50 rounded`}
+                                    title="Drag to reorder"
+                                  >
+                                    <div className="flex flex-col gap-[2px]">
+                                      <div className="flex gap-[2px]">
+                                        <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                        <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                      </div>
+                                      <div className="flex gap-[2px]">
+                                        <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                        <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                      </div>
+                                      <div className="flex gap-[2px]">
+                                        <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                        <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className={`font-semibold ${category.isFavoritesCategory ? 'text-red-600 dark:text-red-400' : ''}`} title={category.name || category.newCategory}>
+                                      {category.isFavoritesCategory && <span className="mr-1">❤️</span>}
+                                      {truncateText(category.name || category.newCategory)}
+                                    </span>
+                                    {category.isFavoritesCategory && (
+                                      <span className="px-2 py-0.5 text-xs bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 rounded flex items-center gap-1">
+                                        Favorites
+                                      </span>
+                                    )}
+                                    {category.isAdminCategory && (
+                                      <div className="flex gap-1">
+                                        {/* Country indicator */}
+                                        {category.countries?.includes('india') && selectedCountry?.key === 'IN' && (
+                                          <span className="px-2 py-0.5 text-xs bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 rounded">
+                                            🇮🇳 India
+                                          </span>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                                <Space onClick={(e) => e.stopPropagation()}>
+                                  <Tooltip title="Add Bookmark">
+                                    <AntButton
+                                      type="text"
+                                      icon={<PlusOutlined className="text-black dark:text-white" />}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedCategory(category);
+                                        setSelectedCategoryId(category.id);
+                                        setIsAddBookmarkModalVisible(true);
+                                      }}
+                                      style={{ color: "white" }}
+                                    />
+                                  </Tooltip>
+                                  <Dropdown
+                                    menu={{
+                                      items: getCategoryMenuItems(category),
+                                    }}
+                                    trigger={["click"]}
+                                    overlayClassName="[&_.ant-dropdown-menu]:p-0 [&_.ant-dropdown-menu-item]:p-0 [&_ul]:dark:bg-[#28283a]"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <AntButton
+                                      type="text"
+                                      icon={<MoreOutlined className="text-black dark:text-white" />}
+                                      onClick={(e) => e.stopPropagation()}
+                                      style={{ color: "white" }}
+                                    />
+                                  </Dropdown>
+                                </Space>
+                              </div>
+                            </div>
+                          }
+                          styles={{
+                            header: {
+                              padding: 0,
+                              borderBottom: "none",
+                            },
+                            body: {
+                              padding: "16px",
+                              maxHeight: "400px",
+                              overflowY: "auto",
+                              display: openCategories[category.id] ? "block" : "none",
+                            },
+                          }}
+                          style={{
+                            height: "100%",
+                            transition: "all 0.3s ease",
+                            border: "none",
+                          }}
+                        >
+                          {categoryLinks.length === 0 ? (
+                            <Empty
+                              description="No bookmarks in this category yet"
+                              image={Empty.PRESENTED_IMAGE_SIMPLE}
+                            />
+                          ) : (
+                            <>
+                              {categoryViewModes[category.id] === "list" &&
+                                renderBookmarkList(categoryLinks, category.id)}
+                              {categoryViewModes[category.id] === "grid" &&
+                                renderBookmarkGrid(categoryLinks, category.id)}
+                              {categoryViewModes[category.id] === "icon" &&
+                                renderBookmarkIcon(categoryLinks, category.id)}
+                              {!categoryViewModes[category.id] &&
+                                renderBookmarkGrid(categoryLinks, category.id)}
+                            </>
+                          )}
+                        </Card>
+                      </Col>
+                    );
+                  })}
+                </Row>
+              </div>
+            )
+          ))}
+        </div>
+      );
+    }
 
     return (
       <div className="mb-2">
@@ -2371,7 +2535,7 @@ function PopularBookmarks() {
                           placement: "topRight",
                           duration: 2
                         });
-                      } catch (error) {
+                                              } catch {
                         notification.error({
                           message: "Refresh Failed",
                           description: "Please try again.",
@@ -2381,12 +2545,7 @@ function PopularBookmarks() {
                       }
                     },
                   },
-                  {
-                    key: "importBookmarks",
-                    icon: <VerticalAlignBottomOutlined />,
-                    label: "Import Bookmarks",
-                    onClick: () => fileInputRef.current && fileInputRef.current.click(),
-                  },
+
                   {
                     key: "view",
                     icon: <UnorderedListOutlined />,
@@ -2444,13 +2603,7 @@ function PopularBookmarks() {
                 <SettingOutlined />
               </button>
             </Dropdown>
-            <input
-              type="file"
-              accept=".html,text/html"
-              ref={fileInputRef}
-              style={{ display: 'none' }}
-              onChange={handleImportBookmarks}
-            />
+
           </div>
         </div>
 
@@ -2554,9 +2707,15 @@ function PopularBookmarks() {
                                                 </div>
                                               </div>
                                               <div className="flex items-center gap-2">
-                                                <span className="font-semibold" title={category.name || category.newCategory}>
+                                                <span className={`font-semibold ${category.isFavoritesCategory ? 'text-red-600 dark:text-red-400' : ''}`} title={category.name || category.newCategory}>
+                                                  {category.isFavoritesCategory && <span className="mr-1">❤️</span>}
                                                   {truncateText(category.name || category.newCategory)}
                                                 </span>
+                                                {category.isFavoritesCategory && (
+                                                  <span className="px-2 py-0.5 text-xs bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 rounded flex items-center gap-1">
+                                                    Favorites
+                                                  </span>
+                                                )}
                                                 {category.isAdminCategory && (
                                                   <div className="flex gap-1">
                                                     {/* Country indicator */}
@@ -2958,8 +3117,7 @@ function PopularBookmarks() {
     try {
       setIsApplyingChanges(true);
 
-      // Get all category IDs that are in preview categories
-      const activeCategories = previewCategories.map((cat) => cat.id);
+
 
       // Prepare column structure
       const newColumnStructure = Array.from({ length: previewColumns }).reduce(
@@ -3296,64 +3454,9 @@ function PopularBookmarks() {
     }
   }, [isSearchBarOpen]);
 
-  // Add this function inside PopularBookmarks component
-  const handleExportBookmarksHtml = () => {
-    let html = `<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Exported Bookmarks</title></head><body style='font-family:sans-serif;'>`;
-    html += `<h1>Exported Bookmarks</h1>`;
-    categories.forEach((category) => {
-      const categoryLinks = categoryBookmarks[category.id]?.bookmarks || [];
-      if (categoryLinks.length === 0) return;
-      html += `<h2>${category.name || category.newCategory}</h2><ul>`;
-      categoryLinks.forEach((link) => {
-        const title = link.title || link.name;
-        const url = link.url || link.link;
-        html += `<li><a href="${url}" target="_blank" rel="noopener noreferrer">${title}</a> <span style='color:gray;font-size:0.9em;'>(${url})</span></li>`;
-      });
-      html += `</ul>`;
-    });
-    html += `</body></html>`;
 
-    const blob = new Blob([html], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `bookmarks_export_${new Date().toISOString().slice(0, 10)}.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
 
-  // Helper to flatten importedPreview for selection
-  const getAllImportedKeys = () => {
-    const keys = [];
-    importedPreview.forEach((cat, catIdx) => {
-      cat.links.forEach((_, linkIdx) => {
-        keys.push(`${catIdx}-${linkIdx}`);
-      });
-    });
-    return keys;
-  };
 
-  const handleSelectAllImported = () => {
-    if (selectedImported.length === getAllImportedKeys().length) {
-      setSelectedImported([]);
-    } else {
-      setSelectedImported(getAllImportedKeys());
-    }
-  };
-
-  const handleDeleteSelectedImported = () => {
-    if (selectedImported.length === 0) return;
-    // Remove selected bookmarks from importedPreview
-    setImportedPreview(prev =>
-      prev.map((cat, catIdx) => ({
-        ...cat,
-        links: cat.links.filter((_, linkIdx) => !selectedImported.includes(`${catIdx}-${linkIdx}`))
-      })).filter(cat => cat.links.length > 0)
-    );
-    setSelectedImported([]);
-  };
 
   // Helper to get all user category IDs
   const getAllUserCategoryIds = () =>
@@ -3499,19 +3602,170 @@ function PopularBookmarks() {
     try {
       const userDocRef = doc(db, "users", user.uid);
       let newLikedBookmarks;
+      let isAdding = false;
+      
       if (likedBookmarks.includes(bookmark.id)) {
         // Remove from favorites
         newLikedBookmarks = likedBookmarks.filter((id) => id !== bookmark.id);
       } else {
         // Add to favorites
         newLikedBookmarks = [...likedBookmarks, bookmark.id];
+        isAdding = true;
       }
+      
       setLikedBookmarks(newLikedBookmarks);
       await updateDoc(userDocRef, { likedBookmarks: newLikedBookmarks });
+
+      // If adding to favorites, ensure Favorites category exists and add bookmark
+      if (isAdding) {
+        await ensureFavoritesCategoryAndAddBookmark(bookmark);
+      } else {
+        // If removing from favorites, remove from Favorites category
+        await removeBookmarkFromFavorites(bookmark);
+      }
     } catch (error) {
       notification.error({
         message: "Failed to update favorites",
         description: error.message,
+        placement: "topRight",
+        duration: 2,
+      });
+    }
+  };
+
+  // Helper function to ensure Favorites category exists and add bookmark
+  const ensureFavoritesCategoryAndAddBookmark = async (bookmark) => {
+    try {
+      // Check if Favorites category already exists
+      const userCategorySnapshot = await getDocs(collection(db, "users", user.uid, "UserCategory"));
+      const favoritesCategory = userCategorySnapshot.docs.find(doc => 
+        doc.data().newCategory === "Favorites"
+      );
+
+      let favoritesCategoryId;
+      
+      if (!favoritesCategory) {
+        // Create Favorites category
+        const newCategoryDoc = await addDoc(collection(db, "users", user.uid, "UserCategory"), {
+          newCategory: "Favorites",
+          userId: user.uid,
+          order: categories.length,
+          createdAt: new Date().toISOString(),
+          isFavoritesCategory: true, // Mark as favorites category
+        });
+        favoritesCategoryId = newCategoryDoc.id;
+        
+        // Add to local categories state
+        const newFavoritesCategory = {
+          id: favoritesCategoryId,
+          name: "Favorites",
+          newCategory: "Favorites",
+          userId: user.uid,
+          order: categories.length,
+          isFavoritesCategory: true,
+          isAdminCategory: false,
+        };
+        
+        setCategories(prev => [...prev, newFavoritesCategory]);
+        
+        // Show success notification
+        notification.success({
+          message: "Favorites Category Created!",
+          description: "A new 'Favorites' category has been created for your liked bookmarks.",
+          placement: "topRight",
+          duration: 3,
+        });
+      } else {
+        favoritesCategoryId = favoritesCategory.id;
+      }
+
+      // Add bookmark to Favorites category
+      const bookmarkData = {
+        title: bookmark.title || bookmark.name,
+        url: bookmark.url || bookmark.link,
+        favicon: bookmark.favicon || getFaviconUrl(bookmark.url || bookmark.link),
+        categoryId: favoritesCategoryId,
+        userId: user.uid,
+        createdAt: new Date().toISOString(),
+        order: 0,
+        isAdminBookmark: false,
+        originalBookmarkId: bookmark.id, // Reference to original bookmark
+      };
+
+      await addDoc(collection(db, "users", user.uid, "CatBookmarks"), bookmarkData);
+
+      // Update local category bookmarks state
+      setCategoryBookmarks(prev => ({
+        ...prev,
+        [favoritesCategoryId]: {
+          ...(prev[favoritesCategoryId] || {}),
+          bookmarks: [...(prev[favoritesCategoryId]?.bookmarks || []), bookmarkData],
+          lastFetched: Date.now(),
+        }
+      }));
+
+      // Show success notification
+      notification.success({
+        message: "Added to Favorites!",
+        description: `"${bookmark.title || bookmark.name}" has been added to your Favorites category.`,
+        placement: "topRight",
+        duration: 2,
+      });
+
+    } catch (error) {
+      console.error("Error ensuring favorites category:", error);
+      notification.error({
+        message: "Failed to add to Favorites",
+        description: "Please try again.",
+        placement: "topRight",
+        duration: 2,
+      });
+    }
+  };
+
+  // Helper function to remove bookmark from Favorites category
+  const removeBookmarkFromFavorites = async (bookmark) => {
+    try {
+      // Find the Favorites category
+      const userCategorySnapshot = await getDocs(collection(db, "users", user.uid, "UserCategory"));
+      const favoritesCategory = userCategorySnapshot.docs.find(doc => 
+        doc.data().newCategory === "Favorites"
+      );
+
+      if (favoritesCategory) {
+        // Find and delete the bookmark from Favorites category
+        const bookmarksSnapshot = await getDocs(collection(db, "users", user.uid, "CatBookmarks"));
+        const favoritesBookmark = bookmarksSnapshot.docs.find(doc => 
+          doc.data().categoryId === favoritesCategory.id && 
+          doc.data().originalBookmarkId === bookmark.id
+        );
+
+        if (favoritesBookmark) {
+          await deleteDoc(doc(db, "users", user.uid, "CatBookmarks", favoritesBookmark.id));
+          
+          // Update local state
+          setCategoryBookmarks(prev => ({
+            ...prev,
+            [favoritesCategory.id]: {
+              ...(prev[favoritesCategory.id] || {}),
+              bookmarks: prev[favoritesCategory.id]?.bookmarks?.filter(b => b.id !== favoritesBookmark.id) || [],
+              lastFetched: Date.now(),
+            }
+          }));
+
+          notification.success({
+            message: "Removed from Favorites!",
+            description: `"${bookmark.title || bookmark.name}" has been removed from your Favorites category.`,
+            placement: "topRight",
+            duration: 2,
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error removing bookmark from favorites:", error);
+      notification.error({
+        message: "Failed to remove from Favorites",
+        description: "Please try again.",
         placement: "topRight",
         duration: 2,
       });
@@ -3558,8 +3812,7 @@ function PopularBookmarks() {
   // Bookmarks per category: { [categoryId]: { bookmarks: [], loading: false, unsubscribe: null } }
   const [categoryBookmarks, setCategoryBookmarks] = useState({});
 
-  // Store unsubscribe functions for Firestore listeners
-  const unsubscribeRefs = useRef({});
+
 
   // Helper: fetch admin bookmarks for a category
   const fetchAdminBookmarksForCategory = async (categoryId) => {
@@ -3585,54 +3838,98 @@ function PopularBookmarks() {
     }
   };
 
-  // Function to fetch bookmarks for a category (with Firestore listener)
-  const fetchBookmarksForCategory = (categoryId) => {
+  // THROTTLED: Fetch bookmarks for a category with request limiting and caching
+  // - Implements request throttling to prevent Firebase rate limits
+  // - Uses sequential fetching instead of concurrent to reduce load
+  // - Implements exponential backoff for retries
+  // - Added comprehensive error handling and offline support
+  const fetchBookmarksForCategory = useCallback((categoryId) => {
     if (!user || !categoryId) return;
-    // If already listening, do nothing
-    if (unsubscribeRefs.current[categoryId]) return;
+    
+    // Check if already loading or loaded (with cache expiry)
+    const currentState = categoryBookmarks[categoryId];
+    const cacheExpiry = 5 * 60 * 1000; // 5 minutes
+    const isCacheValid = currentState?.lastFetched && 
+      (Date.now() - currentState.lastFetched) < cacheExpiry;
+    
+    if (currentState?.loading || (currentState?.bookmarks && isCacheValid)) return;
+    
+    // Set loading state
     setCategoryBookmarks(prev => ({
       ...prev,
-      [categoryId]: { ...(prev[categoryId] || {}), loading: true }
+      [categoryId]: { ...(prev[categoryId] || {}), loading: true, error: null }
     }));
-    // ---
-    // Always fetch user bookmarks from Firestore for the expanded category.
-    // This ensures user-added bookmarks always show after refresh when the category is expanded.
-    // ---
-    const colRef = collection(db, "users", user.uid, "CatBookmarks");
-    const q = query(colRef, where("categoryId", "==", categoryId));
-    const unsubscribe = onSnapshot(q, async (snapshot) => {
-      const userBookmarks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), isAdminBookmark: false }));
-      // Fetch admin bookmarks
+
+    // Throttled fetch with retry logic
+    const fetchBookmarks = async (retryCount = 0) => {
+      try {
+        // Sequential fetching to reduce Firebase load
+        const userSnapshot = await getDocs(query(
+          collection(db, "users", user.uid, "CatBookmarks"), 
+          where("categoryId", "==", categoryId)
+        ));
+
+        const userBookmarks = userSnapshot.docs.map(doc => ({ 
+          id: doc.id, 
+          ...doc.data(), 
+          isAdminBookmark: false 
+        }));
+
+        // Fetch admin bookmarks with delay to prevent rate limiting
+        await new Promise(resolve => setTimeout(resolve, 100));
       const adminBookmarks = await fetchAdminBookmarksForCategory(categoryId);
-      // Hide admin bookmarks that are hidden or overridden by user
+
+        // Filter admin bookmarks efficiently
       const userBookmarkUrls = new Set(userBookmarks.map(b => b.url));
-      const hiddenIds = (categoryBookmarks[categoryId]?.hiddenBookmarkIds || hiddenBookmarkIds) || [];
-      const filteredAdmin = adminBookmarks.filter(b => !userBookmarkUrls.has(b.url) && !hiddenIds.includes(b.id));
-      // Merge user and admin bookmarks
-      const bookmarks = [...userBookmarks, ...filteredAdmin];
+        const hiddenIds = new Set(hiddenBookmarkIds);
+        const filteredAdmin = adminBookmarks.filter(b => 
+          !userBookmarkUrls.has(b.url) && !hiddenIds.has(b.id)
+        );
+
+        // Merge and sort bookmarks
+        const bookmarks = [...userBookmarks, ...filteredAdmin].sort((a, b) => 
+          (a.order || 0) - (b.order || 0)
+        );
+
+        // Update state
       setCategoryBookmarks(prev => ({
         ...prev,
-        [categoryId]: { ...(prev[categoryId] || {}), bookmarks, loading: false }
-      }));
-      console.log(`Admin bookmarks loaded for category ${categoryId}: ${adminBookmarks.length}`);
-      console.log(`User bookmarks loaded for category ${categoryId}: ${userBookmarks.length}`);
-      console.log(`Total bookmarks loaded for category ${categoryId}: ${bookmarks.length}`);
-    });
-    unsubscribeRefs.current[categoryId] = unsubscribe;
-  };
+          [categoryId]: { 
+            bookmarks, 
+            loading: false,
+            lastFetched: Date.now(),
+            error: null
+          }
+        }));
 
-  // Function to unsubscribe Firestore listener for a category
-  const unsubscribeCategory = (categoryId) => {
-    if (unsubscribeRefs.current[categoryId]) {
-      unsubscribeRefs.current[categoryId]();
-      delete unsubscribeRefs.current[categoryId];
-      setCategoryBookmarks(prev => {
-        const newState = { ...prev };
-        delete newState[categoryId];
-        return newState;
-      });
-    }
-  };
+      } catch (error) {
+        console.error(`Error fetching bookmarks for category ${categoryId}:`, error);
+        
+        // Implement exponential backoff for retries
+        if (retryCount < 3 && error.code !== 'permission-denied') {
+          const delay = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s
+          setTimeout(() => fetchBookmarks(retryCount + 1), delay);
+          return;
+        }
+
+        // Final error state
+        setCategoryBookmarks(prev => ({
+          ...prev,
+          [categoryId]: { 
+            bookmarks: [], 
+            loading: false,
+            error: error.message || 'Failed to load bookmarks'
+          }
+        }));
+      }
+    };
+
+    // Add delay between requests to prevent rate limiting
+    const requestDelay = Math.random() * 200 + 100; // 100-300ms random delay
+    setTimeout(() => fetchBookmarks(), requestDelay);
+  }, [user, categoryBookmarks, hiddenBookmarkIds]);
+
+
 
   // On initial mount, fetch bookmarks for all categories that are open by default
   useEffect(() => {
@@ -3642,14 +3939,27 @@ function PopularBookmarks() {
         fetchBookmarksForCategory(categoryId);
       }
     });
-    // Cleanup on unmount: unsubscribe all
-    return () => {
-      Object.keys(openCategories).forEach(categoryId => unsubscribeCategory(categoryId));
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [user, openCategories, fetchBookmarksForCategory]);
 
-  // When a category is toggled open/closed, update listeners
+  // Handle category toggle events with throttled loading
+  useEffect(() => {
+    if (!user) return;
+    
+    // Get categories that need loading
+    const categoriesToLoad = Object.entries(openCategories)
+      .filter(([categoryId, isOpen]) => 
+        isOpen && !categoryBookmarks[categoryId]?.bookmarks && !categoryBookmarks[categoryId]?.loading
+      )
+      .map(([categoryId]) => categoryId);
+
+    // Load categories with staggered delays to prevent rate limiting
+    categoriesToLoad.forEach((categoryId, index) => {
+      const delay = index * 500; // 500ms between each category load
+      setTimeout(() => {
+        fetchBookmarksForCategory(categoryId);
+      }, delay);
+    });
+  }, [openCategories, user, fetchBookmarksForCategory, categoryBookmarks]);
 
   // Profession options
   const professionOptions = [
@@ -3707,38 +4017,95 @@ function PopularBookmarks() {
 
 
 
+    // State to track current visible profession when scrolling
+  const [currentVisibleProfession, setCurrentVisibleProfession] = useState(userProfession);
+
+  // Function to detect which profession section is currently visible
+  const detectVisibleProfession = useCallback(() => {
+    if (userProfession !== "all") {
+      setCurrentVisibleProfession(userProfession);
+      return;
+    }
+
+    const professionSections = professionOptions.filter(p => p.id !== "all").map(p => p.id);
+    const userCategoriesSection = document.getElementById('user-categories-section');
+    
+    // Check if user categories section is visible
+    if (userCategoriesSection) {
+      const rect = userCategoriesSection.getBoundingClientRect();
+      if (rect.top <= 100 && rect.bottom >= 100) {
+        setCurrentVisibleProfession('user-categories');
+        return;
+      }
+    }
+
+    // Check each profession section
+    for (const profId of professionSections) {
+      const section = document.getElementById(`profession-section-${profId}`);
+      if (section) {
+        const rect = section.getBoundingClientRect();
+        if (rect.top <= 100 && rect.bottom >= 100) {
+          setCurrentVisibleProfession(profId);
+          return;
+        }
+      }
+    }
+  }, [userProfession]);
+
+  // Add scroll listener
+  useEffect(() => {
+    if (userProfession === "all") {
+      const handleScroll = () => {
+        detectVisibleProfession();
+      };
+
+      window.addEventListener('scroll', handleScroll);
+      return () => window.removeEventListener('scroll', handleScroll);
+    } else {
+      setCurrentVisibleProfession(userProfession);
+    }
+  }, [userProfession, detectVisibleProfession]);
+
   // Add profession selection bar at the top
   const renderProfessionBar = useCallback(() => (
-    <div className="flex flex-wrap items-center gap-2 mb-4">
-      {professionOptions.map((option) => (
-        <button
-          key={option.id}
-          onClick={() => {
-            // Set loading state
-            setProfessionLoading(true);
-            
-            // Update profession and save to localStorage
-            setUserProfession(option.id);
-            localStorage.setItem("userProfession", option.id);
-            
-            // Clear cache to force re-filtering
-            setFilteredCategoriesCache([]);
-            setLastProfessionFilterTime(0);
-            
-            // Stop loading after a short delay
-            setTimeout(() => setProfessionLoading(false), 300);
-          }}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${userProfession === option.id
-            ? "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700"
-            : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700"
-          }`}
-        >
-          <span className="text-sm font-medium">{option.name}</span>
-          {userProfession === option.id && (
-            <span className="w-2 h-2 rounded-full bg-blue-500 dark:bg-blue-400"></span>
-          )}
-        </button>
-      ))}
+    <div className="mb-6">
+      {/* Current Profession Display */}
+      
+      
+      {/* All Profession Options in Single Row */}
+      <div className="grid grid-cols-10 gap-2">
+        {professionOptions.map((option) => (
+          <button
+            key={option.id}
+            onClick={() => {
+              // Set loading state
+              setProfessionLoading(true);
+              
+              // Update profession and save to localStorage
+              setUserProfession(option.id);
+              localStorage.setItem("userProfession", option.id);
+              
+              // Clear cache to force re-filtering
+              setFilteredCategoriesCache([]);
+              setLastProfessionFilterTime(0);
+              
+              // Stop loading after a short delay
+              setTimeout(() => setProfessionLoading(false), 300);
+            }}
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${userProfession === option.id
+              ? "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700"
+              : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700"
+            }`}
+            title={option.name}
+          >
+            <span className="text-base">{option.icon}</span>
+            <span className="text-xs font-medium truncate">{option.name}</span>
+            {userProfession === option.id && (
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 dark:bg-blue-400 ml-auto"></span>
+            )}
+          </button>
+        ))}
+      </div>
     </div>
   ), [userProfession]);
 
@@ -3746,19 +4113,17 @@ function PopularBookmarks() {
     return (
       <div className="w-[85vw] mx-auto" style={{ padding: "24px" }}>
         {renderProfessionBar()}
-        <div className="flex justify-between mb-2">
-          <button className="rounded-lg flex gap-4 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)]  px-3 py-2 dark:text-white mb-2">
-            <PlusOutlined />
-            Add Category
-          </button>
-          <div className="flex items-center gap-4">
-            <div
-              className={`flex items-center bg-white/[(var(--widget-opacity))] backdrop-blur-lg dark:bg-[#28283A]/[(var(--widget-opacity))] p-1 rounded-sm`}
-            >
+        <div className="flex justify-center items-center py-8">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <div className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Loading {getProfessionDisplayName(userProfession)} categories...
             </div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              Please wait while we fetch your personalized bookmarks
           </div>
         </div>
-        <SkeletonLoader count={6} />
+        </div>
       </div>
     );
   }
@@ -3784,15 +4149,37 @@ function PopularBookmarks() {
       className={` w-[85vw] mx-auto popular-bookmarks-container ${isDarkMode ? "dark" : ""
         }`}
     >
+      
+
       {renderProfessionBar()}
       
       {/* Profession loading indicator */}
       {professionLoading && (
         <div className="flex justify-center items-center py-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg mb-4">
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
-          <span className="ml-2 text-sm text-blue-600 dark:text-blue-400 font-medium">Updating categories for {getProfessionDisplayName(userProfession)}...</span>
+          <span className="ml-2 text-sm text-blue-600 dark:text-blue-400 font-medium">Loading categories for {getProfessionDisplayName(userProfession)}...</span>
         </div>
       )}
+      {/* Sticky Profession Header (iPhone notch style) */}
+      <div className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 -mx-4 px-4 py-3 mb-4">
+        <div className="flex items-center justify-center">
+          <div className="flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700 rounded-full">
+            <span className="text-base">
+              {currentVisibleProfession === 'user-categories' 
+                ? "📁" 
+                : professionOptions.find(p => p.id === currentVisibleProfession)?.icon || "🌐"
+              }
+            </span>
+            <span className="text-sm font-semibold">
+              {currentVisibleProfession === 'user-categories' 
+                ? "Your Categories" 
+                : getProfessionDisplayName(currentVisibleProfession)
+              }
+            </span>
+            <span className="w-2 h-2 rounded-full bg-blue-500 dark:bg-blue-400"></span>
+          </div>
+        </div>
+      </div>
       
       {/* Floating Most Facebook-Liked Bookmarks Suggestion Widget */}
       {showSuggestionWidget && topFacebookLikedAdminBookmarks.length > 0 && (
@@ -3904,7 +4291,7 @@ function PopularBookmarks() {
           <div>
             <div className="text-lg font-semibold">Category Controller</div>
             <div className="text-gray-500 dark:text-gray-300 text-sm mt-1">
-              Organize your categories into columns. Drag and drop to reorder. Changes are saved when you click "Apply Changes".
+              Organize your categories into columns. Drag and drop to reorder. Changes are saved when you click &quot;Apply Changes&quot;.
             </div>
           </div>
         }
@@ -4364,60 +4751,6 @@ function PopularBookmarks() {
         footer={null}
         width={600}
       >
-        {/* Imported Bookmarks Preview */}
-        {importedPreview.length === 0 ? (
-          <div className="text-center text-gray-500">No imported bookmarks to manage.</div>
-        ) : (
-          <>
-            <div className="flex justify-between items-center mb-4">
-              <span className="font-semibold">Imported Bookmarks</span>
-              <div className="flex gap-2">
-                <AntButton onClick={handleSelectAllImported}>
-                  {selectedImported.length === getAllImportedKeys().length ? 'Deselect All' : 'Select All'}
-                </AntButton>
-                <AntButton
-                  danger
-                  disabled={selectedImported.length === 0}
-                  onClick={handleDeleteSelectedImported}
-                >
-                  Delete Selected ({selectedImported.length})
-                </AntButton>
-              </div>
-            </div>
-            <div style={{ maxHeight: 350, overflowY: 'auto' }}>
-              {importedPreview.map((cat, catIdx) => (
-                <div key={catIdx} className="mb-4">
-                  <div className="font-semibold mb-1">{cat.name}</div>
-                  <ul className="ml-4">
-                    {cat.links.map((link, linkIdx) => {
-                      const key = `${catIdx}-${linkIdx}`;
-                      return (
-                        <li key={key} className="flex items-center gap-2 mb-1">
-                          <Checkbox
-                            checked={selectedImported.includes(key)}
-                            onChange={e => {
-                              setSelectedImported(sel =>
-                                e.target.checked
-                                  ? [...sel, key]
-                                  : sel.filter(k => k !== key)
-                              );
-                            }}
-                          />
-                          <span className="truncate max-w-xs">{link.title}</span>
-                          <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline text-xs ml-2">{link.url}</a>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
-
-        {/* Divider */}
-        <hr className="my-6" />
-
         {/* User Categories (from Firestore) */}
         <div>
           <div className="font-semibold mb-2 flex items-center gap-2">

@@ -27,14 +27,14 @@ import NewsFeed from "./NewsFeed.jsx";
 import { useTheme } from "../context/ThemeContext";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { PlusOutlined } from '@ant-design/icons';
-import { SettingOutlined } from '@ant-design/icons';
+import { SettingOutlined, ArrowsAltOutlined } from '@ant-design/icons';
 import { Dropdown, Menu } from "antd";
-import { DragDropContext as DnDContext, Droppable as DnDDroppable, Draggable as DnDDraggable } from 'react-beautiful-dnd';
+// import { DragDropContext as DnDContext, Droppable as DnDDroppable, Draggable as DnDDraggable } from 'react-beautiful-dnd';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { collection as fsCollection, getDocs as fsGetDocs } from "firebase/firestore";
 
 const defaultCategoryList = [
-  "Not Selected", "Designer (UI/UX, Graphic, Web)", "Developer / Programmer", "Digital Marketer", "Student", "Teacher / Educator", "Enterprener / Founder", "Freelancer(Creative or Technical)", "Consultant / Advisor", "Working Professional", "Reseacher / Academic", "IT / Tech Support", "Medical Professional"
+  "Not Selected", "Designer (UI/UX, Graphic, Web)", "Developer / Programmer", "Digital Marketer", "Student", "Teacher / Educator", "Enterprener / Founder", "Freelancer(Creative or Technical)", "Consultant / Advisor", "Working Professional", "Reseacher / Academic", "IT/Tech Support", "Medical Professional"
 ];
 
 // Mapping from category name to profession ID
@@ -50,7 +50,7 @@ const categoryToProfessionId = {
   "Consultant / Advisor": "consultant",
   "Working Professional": "working_professional",
   "Reseacher / Academic": "researcher",
-  "IT / Tech Support": "it_support",
+  "IT/Tech Support": "it_support",
   "Medical Professional": "medical",
   "Retired": "retired",
   "Other": "other"
@@ -279,7 +279,7 @@ const Anotherpage = ({ pageId = "home" }) => {
     }
 
     // If an interest is selected, fetch bookmarks based on interestId
-    if (selectedInterest !== 'not_select' && selectedInterest !== 'all') {
+    if (selectedInterest !== 'not_select') {
       const q = query(collection(db, "links"), where("interestId", "==", selectedInterest), where("subcategory", "==", subcat));
       try {
       const snap = await getDocs(q);
@@ -507,17 +507,17 @@ const Anotherpage = ({ pageId = "home" }) => {
     // eslint-disable-next-line
   }, [selectedCategory, firestoreUser, firestoreSubcats, subcatOrder]);
 
-  // Add this useEffect to load hidden bookmarks for all subcategories on mount and when user/category/subcats change
-  useEffect(() => {
-    // Get the list of subcategories (from Firestore or default)
-    const subcatsList = firestoreSubcats;
-    subcatsList.forEach((subcat) => {
-      if (!subcat) return; // skip null/undefined
-      const subcatKey = typeof subcat === 'object' && subcat.name ? subcat.name : subcat;
-      if (subcatKey) loadHiddenBookmarks(subcatKey);
-    });
-    // eslint-disable-next-line
-  }, [firestoreUser, selectedCategory, firestoreSubcats]);
+  // Remove old hidden bookmarks loading functionality
+  // useEffect(() => {
+  //   // Get the list of subcategories (from Firestore or default)
+  //   const subcatsList = firestoreSubcats;
+  //   subcatsList.forEach((subcat) => {
+  //     if (!subcat) return; // skip null/undefined
+  //     const subcatKey = typeof subcat === 'object' && subcat.name ? subcat.name : subcat;
+  //     if (subcatKey) loadHiddenBookmarks(subcatKey);
+  //   });
+  //   // eslint-disable-next-line
+  // }, [firestoreUser, selectedCategory, firestoreSubcats]);
 
   // State for subcategory display modes
   // Load persisted view modes and icon sizes from localStorage
@@ -535,7 +535,7 @@ const Anotherpage = ({ pageId = "home" }) => {
   const [widgetIconSizes] = useState(() => getLocal('widgetIconSizes'));
   
   // Global opacity state for all widgets and subcategories
-  const [globalOpacity, setGlobalOpacity] = useState(() => {
+  const [globalOpacity] = useState(() => {
     const saved = localStorage.getItem('globalOpacity');
     return saved ? parseFloat(saved) : 1;
   });
@@ -565,77 +565,63 @@ const Anotherpage = ({ pageId = "home" }) => {
 
 
   // --- Add state for bookmarks modal ---
-  const [openBookmarksModal, setOpenBookmarksModal] = useState(null); // subcatKey or null
-  const [showAdminBookmarks, setShowAdminBookmarks] = useState(true);
-  const [userBookmarksOrder, setUserBookmarksOrder] = useState({}); // { subcatKey: [bookmarkIds] }
+  // const [openBookmarksModal, setOpenBookmarksModal] = useState(null); // subcatKey or null
+  // const [showAdminBookmarks, setShowAdminBookmarks] = useState(true);
+  // const [userBookmarksOrder, setUserBookmarksOrder] = useState({}); // { subcatKey: [bookmarkIds] }
 
-  // --- Add state for hidden bookmarks ---
-  const [hiddenBookmarks, setHiddenBookmarks] = useState({}); // { subcatKey: [bookmarkIds] }
-  const [showHidden, setShowHidden] = useState(false);
-
+  // --- Remove old hidden bookmarks functionality ---
   // Helper to load hidden bookmarks from Firestore/localStorage
-  const loadHiddenBookmarks = async (subcatKey) => {
-    if (firestoreUser) {
-      // Firestore: /users/{uid}/hiddenBookmarks/{category}_{subcatKey}
-      const docId = `${selectedCategory}_${subcatKey}`;
-      try {
-        const docRef = doc(db, "users", firestoreUser.uid, "hiddenBookmarks", docId);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setHiddenBookmarks(prev => ({ ...prev, [subcatKey]: docSnap.data().ids || [] }));
-        } else {
-          setHiddenBookmarks(prev => ({ ...prev, [subcatKey]: [] }));
-        }
-      } catch {
-        setHiddenBookmarks(prev => ({ ...prev, [subcatKey]: [] }));
-      }
-    } else {
-      // LocalStorage
-      const key = `hiddenBookmarks_${selectedCategory}_${subcatKey}`;
-      const ids = JSON.parse(localStorage.getItem(key) || '[]');
-      setHiddenBookmarks(prev => ({ ...prev, [subcatKey]: ids }));
-    }
-  };
+  // const loadHiddenBookmarks = async (subcatKey) => {
+  //   if (firestoreUser) {
+  //     // Firestore: /users/{uid}/hiddenBookmarks/{category}_{subcatKey}
+  //     const docId = `${selectedCategory}_${subcatKey}`;
+  //     try {
+  //       const docRef = doc(db, "users", firestoreUser.uid, "hiddenBookmarks", docId);
+  //       const docSnap = await getDoc(docRef);
+  //       if (docSnap.exists()) {
+  //         setHiddenBookmarks(prev => ({ ...prev, [subcatKey]: docSnap.data().ids || [] }));
+  //       } else {
+  //         setHiddenBookmarks(prev => ({ ...prev, [subcatKey]: [] }));
+  //       }
+  //     } catch {
+  //       setHiddenBookmarks(prev => ({ ...prev, [subcatKey]: [] }));
+  //     }
+  //   } else {
+  //     // LocalStorage
+  //     const key = `hiddenBookmarks_${selectedCategory}_${subcatKey}`;
+  //     const ids = JSON.parse(localStorage.getItem(key) || '[]');
+  //     setHiddenBookmarks(prev => ({ ...prev, [subcatKey]: ids }));
+  //   }
+  // };
 
   // Helper to persist hidden bookmarks
-  const persistHiddenBookmarks = async (subcatKey, ids) => {
-    if (firestoreUser) {
-      const docId = `${selectedCategory}_${subcatKey}`;
-      const docRef = doc(db, "users", firestoreUser.uid, "hiddenBookmarks", docId);
-      await setDoc(docRef, { ids });
-    } else {
-      const key = `hiddenBookmarks_${selectedCategory}_${subcatKey}`;
-      localStorage.setItem(key, JSON.stringify(ids));
-    }
+  // const persistHiddenBookmarks = async (subcatKey, ids) => {
+  //   if (firestoreUser) {
+  //     const docId = `${selectedCategory}_${subcatKey}`;
+  //     const docRef = doc(db, "users", firestoreUser.uid, "hiddenBookmarks", docId);
+  //     await setDoc(docRef, { ids });
+  //   } else {
+  //     const key = `hiddenBookmarks_${selectedCategory}_${subcatKey}`;
+  //     localStorage.setItem(key, JSON.stringify(ids));
+  //   }
+  // };
+
+  // --- New User Bookmarks Modal State ---
+  const [openUserBookmarksModal, setOpenUserBookmarksModal] = useState(null); // subcatKey or null
+
+  // --- New User Bookmarks Modal Functions ---
+  const handleOpenUserBookmarksModal = (subcatKey) => {
+    setOpenUserBookmarksModal(subcatKey);
   };
 
-  // Helper to open bookmarks modal for a subcategory
-  const handleOpenBookmarksModal = (subcatKey) => {
-    setOpenBookmarksModal(subcatKey);
-    setShowAdminBookmarks(true);
-    // If user bookmarks order not set, initialize from current bookmarks
-    if (firestoreUser && subcatBookmarks[subcatKey]) {
-      setUserBookmarksOrder((prev) => ({
-        ...prev,
-        [subcatKey]: subcatBookmarks[subcatKey]
-          .filter(b => !b.addedByAdmin)
-          .map(b => b.id),
-      }));
-    } else if (!firestoreUser && defaultBookmarks[selectedCategory]?.[subcatKey]) {
-      setUserBookmarksOrder((prev) => ({
-        ...prev,
-        [subcatKey]: defaultBookmarks[selectedCategory][subcatKey].map(b => b.id),
-      }));
-    }
-  };
-  const handleCloseBookmarksModal = () => setOpenBookmarksModal(null);
+  const handleCloseUserBookmarksModal = () => setOpenUserBookmarksModal(null);
 
-  // --- Update BookmarksModal ---
-  const BookmarksModal = ({ subcatKey, open, onClose }) => {
-    // --- Move all hooks to the top ---
+  // --- New User Bookmarks Modal Component with Table Design and Tabs ---
+  const UserBookmarksModal = ({ subcatKey, open, onClose }) => {
     const [editingId, setEditingId] = useState(null);
     const [editFields, setEditFields] = useState({ name: '', link: '' });
     const [editError, setEditError] = useState('');
+    const [activeTab, setActiveTab] = useState('all'); // 'all', 'user', 'admin'
 
     useEffect(() => {
       if (!open) {
@@ -645,7 +631,7 @@ const Anotherpage = ({ pageId = "home" }) => {
       }
     }, [open]);
 
-    // Helper for URL validation (reuse from AddBookmarkModal)
+    // Helper for URL validation
     const isValidUrl = (url) => {
       try {
         const u = new URL(url);
@@ -655,63 +641,30 @@ const Anotherpage = ({ pageId = "home" }) => {
       }
     };
 
-    // Load hidden bookmarks on open
-    useEffect(() => {
-      if (open) loadHiddenBookmarks(subcatKey);
-      // eslint-disable-next-line
-    }, [open, subcatKey, firestoreUser]);
     if (!open) return null;
-    // Get bookmarks for this subcat
+
+    // Get all bookmarks for this subcat (both user and admin)
     const allBookmarks = firestoreUser
       ? (subcatBookmarks[subcatKey] || [])
       : (defaultBookmarks[selectedCategory]?.[subcatKey] || []);
-    const adminBookmarks = allBookmarks.filter(b => b.addedByAdmin);
     const userBookmarks = allBookmarks.filter(b => !b.addedByAdmin);
-    // Get hidden bookmarks for this subcat
-    const hiddenIds = hiddenBookmarks[subcatKey] || [];
-    // Get user bookmarks order
-    const orderedUserBookmarks = (userBookmarksOrder[subcatKey] || userBookmarks.map(b => b.id))
-      .map(id => userBookmarks.find(b => b.id === id)).filter(Boolean);
-    // Filter bookmarks based on hidden state
-    const visibleUserBookmarks = orderedUserBookmarks.filter(b => !hiddenIds.includes(b.id));
-    const hiddenUserBookmarks = orderedUserBookmarks.filter(b => hiddenIds.includes(b.id));
-    // Admin bookmarks: filter by hidden state
-    const visibleAdminBookmarks = adminBookmarks.filter(b => !hiddenIds.includes(b.id));
+    const adminBookmarks = allBookmarks.filter(b => b.addedByAdmin);
+    const totalBookmarks = userBookmarks.length + adminBookmarks.length;
 
-    // Drag and drop handler
-    const onDragEnd = async (result) => {
-      if (!result.destination) return;
-      const reordered = Array.from(visibleUserBookmarks);
-      const [removed] = reordered.splice(result.source.index, 1);
-      reordered.splice(result.destination.index, 0, removed);
-      setUserBookmarksOrder(prev => ({ ...prev, [subcatKey]: [
-        ...reordered.map(b => b.id),
-        ...hiddenUserBookmarks.map(b => b.id), // keep hidden at end
-      ] }));
-      // Save order (Firestore or localStorage)
-      if (firestoreUser) {
-        const docId = `${selectedCategory}_${subcatKey}`;
-        await db.collection('users').doc(firestoreUser.uid).collection('bookmarkOrder').doc(docId).set({ ids: [
-          ...reordered.map(b => b.id),
-          ...hiddenUserBookmarks.map(b => b.id),
-        ] });
-      } else {
-        const key = `userBookmarksOrder_${selectedCategory}_${subcatKey}`;
-        localStorage.setItem(key, JSON.stringify([
-          ...reordered.map(b => b.id),
-          ...hiddenUserBookmarks.map(b => b.id),
-        ]));
+    // Filter bookmarks based on active tab
+    const getFilteredBookmarks = () => {
+      switch (activeTab) {
+        case 'user':
+          return userBookmarks;
+        case 'admin':
+          return adminBookmarks;
+        default:
+          return [...userBookmarks, ...adminBookmarks];
       }
     };
 
-    // Hide/unhide handler
-    const handleHideBookmark = async (id, hide) => {
-      const newHidden = hide
-        ? [...hiddenIds, id]
-        : hiddenIds.filter(hid => hid !== id);
-      setHiddenBookmarks(prev => ({ ...prev, [subcatKey]: newHidden }));
-      await persistHiddenBookmarks(subcatKey, newHidden);
-    };
+    const filteredBookmarks = getFilteredBookmarks();
+    const currentBookmarkCount = filteredBookmarks.length;
 
     // Edit handlers
     const cancelEdit = () => {
@@ -719,6 +672,7 @@ const Anotherpage = ({ pageId = "home" }) => {
       setEditFields({ name: '', link: '' });
       setEditError('');
     };
+
     const saveEdit = async (b) => {
       // Validate
       if (!editFields.name.trim()) {
@@ -729,14 +683,13 @@ const Anotherpage = ({ pageId = "home" }) => {
         setEditError('URL is required');
         return;
       }
-      // Remove URL validation for logged-in users
       if (!firestoreUser && !isValidUrl(editFields.link.trim())) {
         setEditError('Please enter a valid URL (http/https)');
         return;
       }
       // Duplicate check (ignore self)
       const normalizedUrl = normalizeDomain(editFields.link);
-      const isDuplicate = orderedUserBookmarks.some(
+      const isDuplicate = userBookmarks.some(
         x => x.id !== b.id && normalizeDomain(x.link || '') === normalizedUrl
       );
       if (isDuplicate) {
@@ -745,7 +698,6 @@ const Anotherpage = ({ pageId = "home" }) => {
       }
       // Update in Firestore or localStorage
       if (firestoreUser) {
-        // Firestore: update doc
         const docRef = doc(db, 'users', firestoreUser.uid, 'bookmarks', b.id);
         await setDoc(docRef, {
           ...b,
@@ -753,7 +705,6 @@ const Anotherpage = ({ pageId = "home" }) => {
           link: editFields.link.trim(),
         }, { merge: true });
       } else {
-        // LocalStorage
         const key = `userBookmarks_${selectedCategory}_${subcatKey}`;
         const existing = JSON.parse(localStorage.getItem(key) || '[]');
         const updated = existing.map(x => x.id === b.id ? { ...x, name: editFields.name.trim(), link: editFields.link.trim() } : x);
@@ -770,13 +721,13 @@ const Anotherpage = ({ pageId = "home" }) => {
       }));
       cancelEdit();
     };
+
     // Delete handler
     const deleteBookmark = async (b) => {
       if (!window.confirm('Are you sure you want to delete this bookmark?')) return;
       if (firestoreUser) {
         const docRef = doc(db, 'users', firestoreUser.uid, 'bookmarks', b.id);
         await setDoc(docRef, {}, { merge: false }); // Remove doc
-        // Firestore doesn't have a direct delete in this import, so use deleteDoc if available
         try { await (await import('firebase/firestore')).deleteDoc(docRef); } catch (e) {
           console.error("Error deleting document:", e);
         }
@@ -798,124 +749,258 @@ const Anotherpage = ({ pageId = "home" }) => {
     };
 
     return (
-      <CustomModal open={open} onClose={onClose} width={500}>
-        <div className="font-semibold text-lg mb-2 flex items-center justify-between">
-          Manage Bookmarks
+      <CustomModal open={open} onClose={onClose} width={800}>
+                {/* Header */}
+        <div className="border-b border-gray-200 dark:border-gray-700 pb-4 mb-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Bookmark Manager</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Manage your bookmarks in <span className="font-medium text-blue-600 dark:text-blue-400">{subcatKey}</span>
+              </p>
         </div>
-        <div className="mb-3 flex items-center gap-3">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" checked={showAdminBookmarks} onChange={e => setShowAdminBookmarks(e.target.checked)} />
-            <span>Show Admin Bookmarks</span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" checked={showHidden} onChange={e => setShowHidden(e.target.checked)} />
-            <span>Show Hidden</span>
-          </label>
+            <div className="flex items-center gap-2">
+              <div className="bg-blue-100 dark:bg-blue-900/30 px-3 py-1 rounded-full">
+                <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                  {totalBookmarks} bookmark{totalBookmarks !== 1 ? 's' : ''}
+                </span>
         </div>
-        {showAdminBookmarks && (
-          <div className="mb-4">
-            <div className="text-xs font-semibold text-gray-500 mb-1">Admin Bookmarks</div>
-            <div className="flex flex-col gap-2">
-              {(showHidden ? adminBookmarks : visibleAdminBookmarks).map(b => (
-                <div key={b.id} className={`flex items-center gap-2 p-2 rounded bg-gray-100 dark:bg-gray-800 ${hiddenIds.includes(b.id) ? 'opacity-50' : ''}`}>
-                  <img src={`https://www.google.com/s2/favicons?sz=64&domain=${(() => { try { return new URL(b.link).hostname; } catch { return 'google.com'; } })()}`} alt="" className="w-5 h-5 rounded" />
-                  <span className="flex-1 text-gray-900 dark:text-gray-100 truncate max-w-[150px] overflow-hidden whitespace-nowrap">{truncateName(b.name)}</span>
-                  <a href={b.link} target="_blank" rel="noopener noreferrer" className="text-blue-500 text-xs underline">Visit</a>
-                  <button
-                    className={`ml-2 px-2 py-1 rounded text-xs ${hiddenIds.includes(b.id) ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-700'}`}
-                    onClick={() => handleHideBookmark(b.id, !hiddenIds.includes(b.id))}
-                    title={hiddenIds.includes(b.id) ? 'Unhide' : 'Hide'}
-                  >
-                    {hiddenIds.includes(b.id) ? 'Unhide' : 'Hide'}
-                  </button>
-                </div>
-              ))}
             </div>
           </div>
-        )}
-        <div className="mb-2 text-xs font-semibold text-gray-500">Your Bookmarks</div>
-        <DnDContext onDragEnd={onDragEnd}>
-          <DnDDroppable droppableId="userBookmarks">
-            {(provided) => (
-              <div ref={provided.innerRef} {...provided.droppableProps} className="flex flex-col gap-2">
-                {(showHidden ? orderedUserBookmarks : visibleUserBookmarks).map((b, idx) => (
-                  <DnDDraggable key={b.id} draggableId={b.id} index={idx} isDragDisabled={showHidden && hiddenIds.includes(b.id)}>
-                    {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        className={`flex items-center gap-3 p-3 rounded border transition-colors duration-150 bg-white dark:bg-gray-900 ${snapshot.isDragging ? 'shadow-lg' : ''} ${hiddenIds.includes(b.id) ? 'opacity-50' : ''} ${editingId === b.id ? 'bg-yellow-50 dark:bg-yellow-900/30 border-yellow-300' : 'border-gray-200 dark:border-gray-700'} relative`}
-                        style={{ minHeight: 48 }}
-                      >
-                        <div className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full border border-gray-300 bg-white dark:bg-gray-800 mr-2">
-                          <img src={`https://www.google.com/s2/favicons?sz=64&domain=${(() => { try { return new URL(b.link).hostname; } catch { return 'google.com'; } })()}`} alt="" className="w-5 h-5 rounded" />
-                        </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="mb-6">
+          <div className="border-b border-gray-200 dark:border-gray-700">
+            <nav className="-mb-px flex space-x-8">
+                  <button
+                onClick={() => setActiveTab('all')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'all'
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                }`}
+              >
+                All ({totalBookmarks})
+                  </button>
+              <button
+                onClick={() => setActiveTab('user')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'user'
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                }`}
+              >
+                User ({userBookmarks.length})
+              </button>
+              <button
+                onClick={() => setActiveTab('admin')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'admin'
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                }`}
+              >
+                Admin ({adminBookmarks.length})
+              </button>
+            </nav>
+                </div>
+            </div>
+
+        {/* Table Layout */}
+        <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+          {/* Table Header */}
+          <div className="bg-gray-50 dark:bg-gray-800 px-6 py-3 border-b border-gray-200 dark:border-gray-700">
+            <div className="grid grid-cols-12 gap-4 text-sm font-medium text-gray-700 dark:text-gray-300">
+              <div className="col-span-1">Icon</div>
+              <div className="col-span-3">Name</div>
+              <div className="col-span-4">URL</div>
+              <div className="col-span-2">Type</div>
+              <div className="col-span-2 text-right">Actions</div>
+          </div>
+          </div>
+
+          {/* Table Body */}
+          <div className="max-h-[60vh] overflow-y-auto">
+            {currentBookmarkCount === 0 ? (
+              <div className="text-center py-16">
+                <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="text-gray-400">
+                    <path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                  {activeTab === 'user' ? 'No user bookmarks' : activeTab === 'admin' ? 'No admin bookmarks' : 'No bookmarks found'}
+                </h3>
+                <p className="text-gray-500 dark:text-gray-400">
+                  {activeTab === 'user' ? 'Add your first user bookmark to get started' : activeTab === 'admin' ? 'No admin bookmarks available in this category' : 'Add your first bookmark to get started'}
+                </p>
+              </div>
+            ) : (
+              filteredBookmarks.map((b) => (
+                <div
+                  key={b.id}
+                  className={`border-b border-gray-100 dark:border-gray-800 last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors duration-150 ${editingId === b.id ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}
+                >
                         {editingId === b.id ? (
-                          <>
+                      // Edit Row
+                      <div className="px-6 py-4">
+                        <div className="grid grid-cols-12 gap-4 items-center">
+                          <div className="col-span-1">
+                            <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center">
+                              <img 
+                                src={`https://www.google.com/s2/favicons?sz=64&domain=${(() => { try { return new URL(b.link).hostname; } catch { return 'google.com'; } })()}`} 
+                                alt="" 
+                                className="w-5 h-5 rounded"
+                                onError={e => { e.target.onerror = null; e.target.src = 'https://www.google.com/favicon.ico'; }}
+                              />
+                            </div>
+                          </div>
+                          <div className="col-span-3">
                             <input
-                              className="flex-1 text-gray-900 dark:text-gray-100 max-w-[100px] overflow-hidden whitespace-nowrap border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                               value={editFields.name}
                               onChange={e => setEditFields(f => ({ ...f, name: e.target.value }))}
-                              aria-label="Bookmark name"
+                              placeholder="Bookmark name"
                             />
+                          </div>
+                          <div className="col-span-4">
                             <input
-                              className="flex-1 text-gray-900 dark:text-gray-100 max-w-[120px] overflow-hidden whitespace-nowrap border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                               value={editFields.link}
                               onChange={e => setEditFields(f => ({ ...f, link: e.target.value }))}
-                              aria-label="Bookmark URL"
+                              placeholder="https://example.com"
                             />
-                            <div className="flex gap-1 ml-2">
-                              <button title="Save" aria-label="Save" className="text-green-600 text-xs px-2 py-1 hover:bg-green-50 rounded focus:outline-none focus:ring-2 focus:ring-green-400" onClick={e => { e.stopPropagation(); saveEdit(b); }}>
-                                <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" /></svg>
+                          </div>
+                          <div className="col-span-2">
+                            <div className="text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
+                              {b.addedByAdmin ? 'Admin' : 'User'}
+                            </div>
+                          </div>
+                          <div className="col-span-2 flex justify-end gap-2">
+                            <button 
+                              className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-xs font-medium rounded-md transition-colors duration-200"
+                              onClick={e => { e.stopPropagation(); saveEdit(b); }}
+                            >
+                              Save
                               </button>
-                              <button title="Cancel" aria-label="Cancel" className="text-gray-500 text-xs px-2 py-1 hover:bg-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-gray-400" onClick={e => { e.stopPropagation(); cancelEdit(); }}>
-                                <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" /></svg>
+                            <button 
+                              className="px-3 py-1 bg-gray-500 hover:bg-gray-600 text-white text-xs font-medium rounded-md transition-colors duration-200"
+                              onClick={e => { e.stopPropagation(); cancelEdit(); }}
+                            >
+                              Cancel
                               </button>
                             </div>
-                            {editError && <span className="text-red-500 text-xs ml-2">{editError}</span>}
-                          </>
-                        ) : (
-                          <>
-                            <span className="flex-1 text-gray-900 dark:text-gray-100 truncate max-w-[150px] overflow-hidden whitespace-nowrap">{truncateName(b.name)}</span>
-                            <a href={b.link} target="_blank" rel="noopener noreferrer" className="text-blue-500 text-xs underline" title="Visit bookmark" aria-label="Visit bookmark">Visit</a>
-                            <div className="flex gap-1 ml-2">
-                              <button
-                                className={`px-2 py-1 rounded text-xs ${hiddenIds.includes(b.id) ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-700'} hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400`}
-                                onClick={e => { e.stopPropagation(); handleHideBookmark(b.id, !hiddenIds.includes(b.id)); }}
-                                title={hiddenIds.includes(b.id) ? 'Unhide' : 'Hide'}
-                                aria-label={hiddenIds.includes(b.id) ? 'Unhide bookmark' : 'Hide bookmark'}
-                              >
-                                {hiddenIds.includes(b.id)
-                                  ? (<svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>)
-                                  : (<svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.81 21.81 0 0 1 5.06-7.06M1 1l22 22"/><path d="M9.53 9.53A3.001 3.001 0 0 0 12 15a3 3 0 0 0 2.47-5.47"/></svg>)}
-                              </button>
-                              <button title="Edit" aria-label="Edit bookmark" className="text-yellow-600 px-2 py-1 hover:bg-yellow-50 rounded focus:outline-none focus:ring-2 focus:ring-yellow-400" onClick={e => { e.stopPropagation(); setEditingId(b.id); setEditFields({ name: b.name, link: b.link }); setEditError(''); }}>
-                                <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
-                              </button>
-                              <button title="Delete" aria-label="Delete bookmark" className="text-red-600 px-2 py-1 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-red-400" onClick={e => { e.stopPropagation(); deleteBookmark(b); }}>
-                                <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 6h18" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
-                              </button>
-                            </div>
-                          </>
-                        )}
-                        {/* Divider for clarity */}
-                        {idx < (showHidden ? orderedUserBookmarks : visibleUserBookmarks).length - 1 && (
-                          <div className="absolute left-0 bottom-0 w-full h-px bg-gray-100 dark:bg-gray-800" style={{ pointerEvents: 'none' }} />
+                        </div>
+                        {editError && (
+                          <div className="mt-3 text-red-500 text-xs bg-red-50 dark:bg-red-900/20 rounded-md p-2">
+                            {editError}
+                          </div>
                         )}
                       </div>
+                    ) : (
+                      // View Row
+                      <div className="px-6 py-4">
+                        <div className="grid grid-cols-12 gap-4 items-center">
+                          <div className="col-span-1">
+                            <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center">
+                              <img 
+                                src={`https://www.google.com/s2/favicons?sz=64&domain=${(() => { try { return new URL(b.link).hostname; } catch { return 'google.com'; } })()}`} 
+                                alt="" 
+                                className="w-5 h-5 rounded"
+                                onError={e => { e.target.onerror = null; e.target.src = 'https://www.google.com/favicon.ico'; }}
+                              />
+                            </div>
+                          </div>
+                          <div className="col-span-3">
+                            <div className="font-medium text-gray-900 dark:text-white truncate" title={b.name}>
+                              {truncateName(b.name)}
+                            </div>
+                          </div>
+                          <div className="col-span-4">
+                            <div className="text-sm text-gray-500 dark:text-gray-400 truncate" title={b.link}>
+                              {(() => { try { return new URL(b.link).hostname; } catch { return b.link; } })()}
+                            </div>
+                          </div>
+                          <div className="col-span-2">
+                            <div className={`text-xs px-2 py-1 rounded-full ${b.addedByAdmin ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'}`}>
+                              {b.addedByAdmin ? 'Admin' : 'User'}
+                            </div>
+                          </div>
+                          <div className="col-span-2 flex justify-end gap-1">
+                            <a 
+                              href={b.link} 
+                              target="_blank" 
+                              rel="noopener noreferrer" 
+                              className="p-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition-colors duration-200"
+                              title="Visit bookmark"
+                            >
+                              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                              </svg>
+                            </a>
+                            {!b.addedByAdmin && (
+                              <>
+                              <button
+                                  className="p-1.5 text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50 dark:hover:bg-yellow-900/30 rounded transition-colors duration-200"
+                                  onClick={e => { e.stopPropagation(); setEditingId(b.id); setEditFields({ name: b.name, link: b.link }); setEditError(''); }}
+                                  title="Edit bookmark"
+                                >
+                                  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                    <path d="M12 20h9M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
+                                  </svg>
+                              </button>
+                                <button 
+                                  className="p-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-colors duration-200"
+                                  onClick={e => { e.stopPropagation(); deleteBookmark(b); }}
+                                  title="Delete bookmark"
+                                >
+                                  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                    <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6"/>
+                                  </svg>
+                              </button>
+                          </>
+                        )}
+                          </div>
+                        </div>
+                      </div>
+                        )}
+                      </div>
+              ))
                     )}
-                  </DnDDraggable>
-                ))}
-                {provided.placeholder}
               </div>
-            )}
-          </DnDDroppable>
-        </DnDContext>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+            <span>
+              {activeTab === 'user' ? 'Manage your user bookmarks' : activeTab === 'admin' ? 'View admin bookmarks (read-only)' : 'Click on the icons to manage your bookmarks'}
+            </span>
+            <div className="flex items-center gap-4">
+              {activeTab === 'all' && (
+                <>
+                  <span className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span>{userBookmarks.length} User</span>
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    <span>{adminBookmarks.length} Admin</span>
+                  </span>
+                </>
+              )}
+              <span>
+                {activeTab === 'user' ? `${currentBookmarkCount} User` : activeTab === 'admin' ? `${currentBookmarkCount} Admin` : `Total: ${currentBookmarkCount}`}
+              </span>
+            </div>
+          </div>
+        </div>
       </CustomModal>
     );
   };
-  BookmarksModal.propTypes = {
+
+  UserBookmarksModal.propTypes = {
     subcatKey: PropTypes.string,
     open: PropTypes.bool,
     onClose: PropTypes.func,
@@ -1110,16 +1195,14 @@ const Anotherpage = ({ pageId = "home" }) => {
       const saved = localStorage.getItem(localKey);
       return saved ? JSON.parse(saved) : false;
     });
+    const [expandModalOpen, setExpandModalOpen] = useState(false);
     useEffect(() => {
       localStorage.setItem(localKey, JSON.stringify(collapsed));
     }, [collapsed, localKey]);
     if (!subcatName) return null;
 
-    // Get hidden bookmarks for this subcat
-    const subcatKey = subcatName;
-    const hiddenIds = hiddenBookmarks[subcatKey] || [];
-    // Filter bookmarks for display
-    const visibleBookmarks = Array.isArray(bookmarks) ? bookmarks.filter(b => !hiddenIds.includes(b.id)) : [];
+    // Show all bookmarks (no hiding functionality in new version)
+    const visibleBookmarks = Array.isArray(bookmarks) ? bookmarks : [];
 
     // Nested settings menu (gear icon)
     const settingsMenu = (
@@ -1137,7 +1220,7 @@ const Anotherpage = ({ pageId = "home" }) => {
         </Menu.SubMenu>
 
         <Menu.Divider />
-        <Menu.Item key="bookmarks" onClick={e => { e.domEvent.stopPropagation(); handleOpenBookmarksModal(subcatName); }}>Bookmarks</Menu.Item>
+        <Menu.Item key="bookmarks" onClick={e => { e.domEvent.stopPropagation(); handleOpenUserBookmarksModal(subcatName); }}>Manage Bookmarks</Menu.Item>
       </Menu>
     );
     const settingsButton = (
@@ -1148,21 +1231,24 @@ const Anotherpage = ({ pageId = "home" }) => {
       </Dropdown>
     );
 
+
+
     return (
-      <WidgetCard
-        title={null}
-        collapsible={true}
-        collapsed={collapsed}
-        onToggleCollapse={() => setCollapsed(c => !c)}
-        >
-        {/* Bookmarks list, only if expanded */}
-        {!collapsed && (
-          <>
-            <div>
-              {renderBookmarksView(visibleBookmarks, displayMode, iconSize)}
-            </div>
-            <div className="flex justify-end backdrop-blur-sm ">
-              <div className="w-18 shadow-lg mb-1 flex">
+      <>
+        <WidgetCard
+          title={null}
+          collapsible={true}
+          collapsed={collapsed}
+          onToggleCollapse={() => setCollapsed(c => !c)}
+          >
+          {/* Bookmarks list, only if expanded */}
+          {!collapsed && (
+            <>
+              <div>
+                {renderBookmarksView(visibleBookmarks, displayMode, iconSize)}
+              </div>
+              <div className="flex justify-end backdrop-blur-sm ">
+                              <div className="w-18 shadow-lg mb-1 flex">
               <button
                 className="p-1.5 dark:text-white text-gray-500 rounded  hover:bg-gray-300 transition flex items-center justify-center"
                 onClick={() => setAddBookmarkModal({ open: true, subcatKey: subcatName })}
@@ -1172,12 +1258,27 @@ const Anotherpage = ({ pageId = "home" }) => {
                 {/* Plus Icon SVG */}
                 <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
               </button>
+              <button
+                className="p-1.5 dark:text-white text-gray-500 rounded hover:bg-gray-300 transition flex items-center justify-center"
+                onClick={() => setExpandModalOpen(true)}
+                title="Expand All Bookmarks"
+                aria-label="Expand All Bookmarks"
+              >
+                <ArrowsAltOutlined style={{ fontSize: 18 }} />
+              </button>
               {settingsButton}
               </div>
-            </div>
-          </>
-        )}
-      </WidgetCard>
+              </div>
+            </>
+          )}
+        </WidgetCard>
+        <ExpandModal 
+          open={expandModalOpen} 
+          onClose={() => setExpandModalOpen(false)} 
+          bookmarks={bookmarks} 
+          subcatName={subcatName}
+        />
+      </>
     );
   });
   SubcategoryCard.propTypes = {
@@ -1192,6 +1293,159 @@ const Anotherpage = ({ pageId = "home" }) => {
     onIconSizeChange: PropTypes.func,
   };
 
+  // ExpandModal PropTypes
+  const ExpandModal = ({ open, onClose, bookmarks, subcatName }) => {
+    const [displayMode, setDisplayMode] = useState('full'); // 'full', 'icons', 'name'
+
+    // Handle ESC key press
+    useEffect(() => {
+      const handleEscKey = (event) => {
+        if (event.key === 'Escape') {
+          onClose();
+        }
+      };
+
+      if (open) {
+        document.addEventListener('keydown', handleEscKey);
+        return () => {
+          document.removeEventListener('keydown', handleEscKey);
+        };
+      }
+    }, [open, onClose]);
+
+    // Handle click outside modal
+    const handleBackdropClick = (event) => {
+      if (event.target === event.currentTarget) {
+        onClose();
+      }
+    };
+
+    if (!open) return null;
+
+    return (
+      <div 
+        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        onClick={handleBackdropClick}
+      >
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-5xl w-full mx-4 max-h-[90vh] overflow-hidden">
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+              {subcatName}
+            </h2>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  const modes = ['full', 'name', 'icons'];
+                  const currentIndex = modes.indexOf(displayMode);
+                  const nextIndex = (currentIndex + 1) % modes.length;
+                  setDisplayMode(modes[nextIndex]);
+                }}
+                className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                  displayMode !== 'full'
+                    ? 'bg-blue-500 text-white' 
+                    : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                }`}
+                title={
+                  displayMode === 'full' ? "Show name only" : 
+                  displayMode === 'name' ? "Show icons only" : 
+                  "Show full details"
+                }
+              >
+                {displayMode === 'full' ? "Name Only" : 
+                 displayMode === 'name' ? "Icons Only" : 
+                 "Full View"}
+              </button>
+              <button
+                onClick={onClose}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
+                <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+                      <div className="p-4 overflow-y-auto max-h-[calc(90vh-120px)]">
+              {Array.isArray(bookmarks) && bookmarks.length > 0 ? (
+                <div className={`grid gap-4 ${
+                  displayMode === 'icons' 
+                    ? 'grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10' 
+                    : displayMode === 'name'
+                    ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'
+                    : 'grid-cols-1 md:grid-cols-3 lg:grid-cols-4'
+                }`}>
+                  {bookmarks.map((bookmark) => (
+                    <a
+                      key={bookmark.id}
+                      href={bookmark.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                        displayMode === 'icons' 
+                          ? 'flex flex-col items-center justify-center p-4' 
+                          : displayMode === 'name'
+                          ? 'flex flex-col items-center justify-center p-3'
+                          : 'flex items-center gap-3 p-3'
+                      }`}
+                      title={displayMode === 'icons' ? bookmark.name : undefined}
+                    >
+                      <img
+                        src={`https://www.google.com/s2/favicons?sz=64&domain=${(() => { 
+                          try { 
+                            return new URL(bookmark.link).hostname; 
+                          } catch { 
+                            return 'google.com'; 
+                          } 
+                        })()}`}
+                        alt=""
+                        className={`rounded ${
+                          displayMode === 'icons' ? 'w-8 h-8 mb-2' : 
+                          displayMode === 'name' ? 'w-6 h-6 mb-2' : 
+                          'w-6 h-6'
+                        }`}
+                        onError={(e) => { 
+                          e.target.onerror = null; 
+                          e.target.src = 'https://www.google.com/favicon.ico'; 
+                        }}
+                      />
+                      {displayMode === 'name' && (
+                        <div className="text-center">
+                          <div className="font-medium text-gray-900 dark:text-white text-sm truncate max-w-[100px]">
+                            {bookmark.name}
+                          </div>
+                        </div>
+                      )}
+                      {displayMode === 'full' && (
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-gray-900 dark:text-white truncate">
+                            {bookmark.name}
+                          </div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                            {bookmark.link}
+                          </div>
+                        </div>
+                      )}
+                    </a>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  No bookmarks found in this subcategory.
+                </div>
+              )}
+            </div>
+        </div>
+      </div>
+    );
+  };
+
+  ExpandModal.propTypes = {
+    open: PropTypes.bool.isRequired,
+    onClose: PropTypes.func.isRequired,
+    bookmarks: PropTypes.array,
+    subcatName: PropTypes.string.isRequired,
+  };
+
   // --- Interest Dropdown State ---
   const localInterestKey = 'selectedInterest';
   const getInitialInterest = () => {
@@ -1199,7 +1453,7 @@ const Anotherpage = ({ pageId = "home" }) => {
     return saved ? saved : 'not_select'; // Default to 'not_select' instead of 'all'
   };
   const [selectedInterest, setSelectedInterest] = useState(getInitialInterest());
-  const [interestOptions, setInterestOptions] = useState([{ id: 'all', name: 'All Interests' }]);
+  const [interestOptions, setInterestOptions] = useState([]);
   const [interestSubcats, setInterestSubcats] = useState([]); // [{name: string}]
   const [isAutoCategoryChange, setIsAutoCategoryChange] = useState(false);
 
@@ -1221,13 +1475,13 @@ const Anotherpage = ({ pageId = "home" }) => {
     async function fetchInterests() {
       try {
         const snap = await fsGetDocs(fsCollection(db, 'interests'));
-        const options = [{ id: 'all', name: 'All Interests' }];
+        const options = [];
         snap.forEach(doc => {
           options.push({ id: doc.id, name: doc.data().name, subcategories: doc.data().subcategories || [] });
         });
         setInterestOptions(options);
       } catch {
-        setInterestOptions([{ id: 'all', name: 'All Interests' }]);
+        setInterestOptions([]);
       } finally {
         setInterestsLoading(false);
       }
@@ -1248,7 +1502,7 @@ const Anotherpage = ({ pageId = "home" }) => {
   }, [selectedInterest, firestoreUser, interestLoading]);
   // Fetch subcategories for selected interest
   useEffect(() => {
-    if (selectedInterest === 'all' || selectedInterest === 'not_select') {
+    if (selectedInterest === 'not_select') {
       setInterestSubcats([]);
       return;
     }
@@ -1257,7 +1511,7 @@ const Anotherpage = ({ pageId = "home" }) => {
   }, [selectedInterest, interestOptions]);
 
   // --- Update subcats logic to use interest if selected ---
-  const subcats = (selectedInterest !== 'not_select' && selectedInterest !== 'all')
+  const subcats = (selectedInterest !== 'not_select')
     ? interestSubcats
     : (selectedCategory === 'Not Selected' && selectedInterest !== 'not_select')
       ? interestSubcats // Show interests when "Not Selected" is chosen and interest is selected
@@ -1278,7 +1532,7 @@ const Anotherpage = ({ pageId = "home" }) => {
   // NEW: useEffect to fetch all bookmarks for the current subcategories
   useEffect(() => {
     if (isDemoMode) {
-      if (selectedInterest !== 'not_select' && selectedInterest !== 'all') {
+      if (selectedInterest !== 'not_select') {
         // Load bookmarks for interest subcategories in demo mode
         interestSubcats.forEach(subcat => {
           const subcatName = getSubcatName(subcat);
@@ -1313,7 +1567,7 @@ const Anotherpage = ({ pageId = "home" }) => {
 
   // NEW: useEffect to fetch bookmarks for interest subcategories
   useEffect(() => {
-    if (selectedInterest !== 'not_select' && selectedInterest !== 'all' && interestSubcats.length > 0) {
+    if (selectedInterest !== 'not_select' && interestSubcats.length > 0) {
       interestSubcats.forEach(subcat => {
         const subcatName = getSubcatName(subcat);
         if (subcatName) {
@@ -1337,7 +1591,7 @@ const Anotherpage = ({ pageId = "home" }) => {
     })),
     // Subcategory cards - only show if not a new page
     ...(pageId === "home" ? (isDemoMode 
-        ? (selectedInterest !== 'not_select' && selectedInterest !== 'all')
+        ? (selectedInterest !== 'not_select')
           ? // Show interest subcategories in demo mode
             interestSubcats
               .filter(subcat => subcat !== null && subcat !== undefined && getSubcatName(subcat))
@@ -1453,7 +1707,7 @@ const Anotherpage = ({ pageId = "home" }) => {
 
     // Add subcategories for controller (always include them)
     const subcategoryWidgets = (isDemoMode 
-      ? (selectedInterest !== 'not_select' && selectedInterest !== 'all')
+      ? (selectedInterest !== 'not_select')
         ? // Show interest subcategories in demo mode
           interestSubcats
             .filter(subcat => subcat !== null && subcat !== undefined && getSubcatName(subcat))
@@ -2101,13 +2355,13 @@ const Anotherpage = ({ pageId = "home" }) => {
       );
     }
     if (mode === 'grid') {
-      // Show 3 rows (5 columns per row) in a scrollable grid
-      const maxRows = 2.5;
+      // Show all bookmarks in a scrollable grid, but with fixed height for 2 rows initially
       // Icon size affects row height, so set a fixed height per row
       let rowHeight = 70; // default for medium
       if (iconSize === 'small') rowHeight = 50;
       if (iconSize === 'large') rowHeight = 100;
-      const gridHeight = rowHeight * maxRows + 16; // +16 for padding/gap
+      const gridHeight = rowHeight * 2 + 1; // 2 rows + padding/gap (shows ~10 items initially)
+      
       return (
         <div
           className="grid grid-cols-5 gap-2 p-3 overflow-y-auto backdrop-blur-sm"
@@ -2491,150 +2745,21 @@ const Anotherpage = ({ pageId = "home" }) => {
         </div>
       ) : (
       <>
-      {/* Profession, Interest, Search, and Menu in separate divs at the top */}
-      <div className="w-full flex items-center mb-1 justify-between" style={{ maxWidth: '90vw', margin: '0 auto', position: 'relative' }}>
-        {/* Left: Profession and Interest Dropdowns */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 1, marginLeft: 6 }}>
-          {/* Profession Dropdown */}
-          <div style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Dropdown
-              overlay={
-                <Menu style={{ width: 250, maxHeight: 280, overflowY: 'auto' }}>
-                  {filteredCategories.map(cat => (
-                    <Menu.Item key={cat} onClick={async () => {
-                      if (isDemoMode) {
-                        setShowLoginModal(true);
-                        return;
-                      }
-                      setSelectedCategory(cat);
-                      if (firestoreUser) {
-                        const userDocRef = doc(db, "users", firestoreUser.uid);
-                        const professionId = categoryToProfessionId[cat] || "other";
-                        await setDoc(userDocRef, { selectedCategory: cat, profession: professionId }, { merge: true });
-                      } else {
-                        localStorage.setItem('selectedCategory', cat);
-                      }
-                    }}>
-                      {cat}
-                    </Menu.Item>
-                  ))}
-                </Menu>
-              }
-              trigger={["click"]}
-              placement="bottomLeft"
-              disabled={isDemoMode}
-            >
-              <button
-                className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium border transition cursor-pointer ${
-                  isDemoMode 
-                    ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-700 cursor-not-allowed' 
-                    : 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-700 hover:bg-blue-200 dark:hover:bg-blue-800'
-                }`}
-                style={{ minWidth: 0, marginRight: 1, width: 120, justifyContent: 'flex-start' }}
-                title={isDemoMode ? "Sign in to change category" : "Select Category"}
-                onClick={() => handleDropdownClick('category')}
-              >
-                <span className="truncate max-w-[110px]">{selectedCategory}</span>
-                <span className={`ml-auto flex items-center ${isDemoMode ? 'text-gray-400' : 'text-blue-400'}`}>
-                  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
-                </span>
-              </button>
-            </Dropdown>
-          </div>
-          {/* Interest Dropdown */}
-          <div style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center', gap: 1, marginRight: 12 }}>
-            <Dropdown
-              overlay={
-                <Menu style={{ width: 250 }}>
-                  <Menu.Item key="not_select" onClick={async () => {
-                    if (isDemoMode) {
-                      setShowLoginModal(true);
-                      return;
-                    }
-                    setSelectedInterest('not_select');
-                    // Don't change profession when "Not Selected" is chosen in interest dropdown
-                  }}>
-                    Not Selected
-                  </Menu.Item>
-                  {interestOptions.map(i => (
-                    <Menu.Item key={i.id} onClick={async () => {
-                      if (isDemoMode) {
-                        setShowLoginModal(true);
-                        return;
-                      }
-                      setSelectedInterest(i.id);
-                      // Automatically set profession to "Not Selected" when any interest is selected
-                      setIsAutoCategoryChange(true);
-                      setSelectedCategory('Not Selected');
-                      if (firestoreUser) {
-                        const userDocRef = doc(db, "users", firestoreUser.uid);
-                        await setDoc(userDocRef, { 
-                          selectedCategory: 'Not Selected', 
-                          profession: 'not_selected',
-                          selectedInterest: i.id 
-                        }, { merge: true });
-                      } else {
-                        localStorage.setItem('selectedCategory', 'Not Selected');
-                      }
-                    }}>
-                      {i.name}
-                    </Menu.Item>
-                  ))}
-                </Menu>
-              }
-              trigger={["click"]}
-              placement="bottomLeft"
-              disabled={isDemoMode}
-            >
-              <button
-                className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium border transition cursor-pointer ${
-                  isDemoMode 
-                    ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-700 cursor-not-allowed' 
-                    : selectedCategory === 'Not Selected'
-                      ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200 border-orange-200 dark:border-orange-700 hover:bg-orange-200 dark:hover:bg-orange-800'
-                      : 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 border-purple-200 dark:border-purple-700 hover:bg-purple-200 dark:hover:bg-purple-800'
-                }`}
-                style={{ minWidth: 0, width: selectedCategory === 'Not Selected' ? 180 : 150, justifyContent: 'flex-start' }}
-                title={isDemoMode ? "Sign in to change interest" : selectedCategory === 'Not Selected' ? "Select Interest (Required when no profession selected)" : "Select Interest"}
-                onClick={() => handleDropdownClick('interest')}
-              >
-                <span className="truncate max-w-[130px]">
-                  {selectedCategory === 'Not Selected' && selectedInterest === 'not_select'
-                    ? 'Select Interest *'
-                    : selectedInterest === 'not_select'
-                    ? 'Not Selected'
-                    : (interestOptions.find(i => i.id === selectedInterest)?.name || 'All Interests')}
-                </span>
-                <span className={`ml-auto flex items-center ${isDemoMode ? 'text-gray-400' : selectedCategory === 'Not Selected' ? 'text-orange-400' : 'text-purple-400'}`}>
-                  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
-                </span>
-              </button>
-            </Dropdown>
-          </div>
-        </div>
-        {/* Helpful message when "Not Selected" is chosen */}
-        {selectedCategory === 'Not Selected' && selectedInterest === 'not_select' && !isDemoMode && (
-          <div className="w-full text-center py-2 px-4 mb-2 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 rounded-lg">
-            <span className="text-orange-700 dark:text-orange-300 text-sm">
-              💡 Since you haven&apos;t selected a specific profession, please choose an interest to see relevant bookmarks and tools.
-            </span>
-          </div>
-        )}
-
-        {/* Right: Search and Three-dot Menu */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 1, marginRight: 7 }}>
-          {/* Search Input/Button */}
-          <div style={{  position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center', gap: 1, marginRight: 2 }}>
+      {/* All elements aligned to the left */}
+      <div className="w-full flex items-center mb-1 justify-end" style={{ maxWidth: '90vw', margin: '0 auto', position: 'relative' }}>
+        {/* Search Input */}
+        <div style={{ display: 'flex', alignItems: 'center', marginLeft: 6, marginRight: 8 }}>
+          <div style={{  position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center'}}>
             {searchOpen ? (
               <form
                 onSubmit={handleGlobalSearch}
-                className={`transition-all duration-300 overflow-hidden w-[220px] opacity-100 ml-2 flex items-center`}
+                className={`transition-all duration-300 overflow-hidden w-[220px] opacity-100 flex items-center`}
                 style={{ maxWidth: 320 }}
               >
                 <input
                   ref={searchInputRef}
                   type="text"
-                  className="flex-1 h-9 px-5 py-2 border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-base bg-white shadow"
+                  className="flex h-9 px-5 py-2 border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-base bg-white shadow"
                   placeholder="Search bookmarks, widgets, anything..."
                   value={globalSearch}
                   onChange={handleSearchInput}
@@ -2655,22 +2780,154 @@ const Anotherpage = ({ pageId = "home" }) => {
               </button>
             )}
           </div>
-          {/* Three-dot Menu */}
-          <div style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div className="relative">
-              <button
-                type="button"
-                className="h-9 w-9 flex items-center justify-center rounded  dark:bg-[#28283b] dark:hover:bg-gray-900 bg-white hover:bg-gray-200 transition"
-                title="More options"
-                aria-label="More options"
-                onClick={() => setMenuOpen(o => !o)}
-              >
-                <svg width="20" height="20" fill="none" stroke="#6366F1" strokeWidth="2.2" viewBox="0 0 24 24">
-                  <circle cx="12" cy="5" r="1.5"/>
-                  <circle cx="12" cy="12" r="1.5"/>
-                  <circle cx="12" cy="19" r="1.5"/>
-                </svg>
-              </button>
+        </div>
+
+        {/* Profession Dropdown */}
+        <div style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center', marginRight: 8 }}>
+          <Dropdown
+            overlay={
+              <Menu style={{ width: 250, maxHeight: 280, overflowY: 'auto' }}>
+                {filteredCategories.map(cat => (
+                  <Menu.Item key={cat} onClick={async () => {
+                    if (isDemoMode) {
+                      setShowLoginModal(true);
+                      return;
+                    }
+                    setSelectedCategory(cat);
+                    if (firestoreUser) {
+                      const userDocRef = doc(db, "users", firestoreUser.uid);
+                      const professionId = categoryToProfessionId[cat] || "other";
+                      await setDoc(userDocRef, { selectedCategory: cat, profession: professionId }, { merge: true });
+                    } else {
+                      localStorage.setItem('selectedCategory', cat);
+                    }
+                  }}>
+                    {cat}
+                  </Menu.Item>
+                ))}
+              </Menu>
+            }
+            trigger={["click"]}
+            placement="bottomLeft"
+            disabled={isDemoMode}
+          >
+            <button
+              className={`flex items-center gap-1 px-2 py-1 rounded text-sm font-medium  transition cursor-pointer ${
+                isDemoMode 
+                  ? 'bg-gray-100 dark:bg-[#28283b] text-gray-400 dark:text-gray-500  cursor-not-allowed' 
+                  : 'bg-white dark:bg-[#28283b] text-blue-800 dark:text-blue-200  hover:bg-blue-200 dark:hover:bg-blue-800'
+              }`}
+              style={{ minWidth: 0, width: 120, justifyContent: 'flex-start' }}
+              title={isDemoMode ? "Sign in to change category" : "Select Category"}
+              onClick={() => handleDropdownClick('category')}
+            >
+              <span className="truncate max-w-[110px] ">{selectedCategory}</span>
+              <span className={`ml-auto py-1.5 flex  items-center ${isDemoMode ? 'text-gray-400' : 'text-blue-400'}`}>
+                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+              </span>
+            </button>
+          </Dropdown>
+        </div>
+
+        {/* Interest Dropdown */}
+        <div style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center', gap: 1, marginRight: 8 }}>
+          <Dropdown
+            overlay={
+              <Menu style={{ width: 250 }}>
+                <Menu.Item key="not_select" onClick={async () => {
+                  if (isDemoMode) {
+                    setShowLoginModal(true);
+                    return;
+                  }
+                  setSelectedInterest('not_select');
+                  // Don't change profession when "Not Selected" is chosen in interest dropdown
+                }}>
+                  Not Selected
+                </Menu.Item>
+                {interestOptions.map(i => (
+                  <Menu.Item key={i.id} onClick={async () => {
+                    if (isDemoMode) {
+                      setShowLoginModal(true);
+                      return;
+                    }
+                    setSelectedInterest(i.id);
+                    // Automatically set profession to "Not Selected" when any interest is selected
+                    setIsAutoCategoryChange(true);
+                    setSelectedCategory('Not Selected');
+                    if (firestoreUser) {
+                      const userDocRef = doc(db, "users", firestoreUser.uid);
+                      await setDoc(userDocRef, { 
+                        selectedCategory: 'Not Selected', 
+                        profession: 'not_selected',
+                        selectedInterest: i.id 
+                      }, { merge: true });
+                    } else {
+                      localStorage.setItem('selectedCategory', 'Not Selected');
+                    }
+                  }}>
+                    {i.name}
+                  </Menu.Item>
+                ))}
+              </Menu>
+            }
+            trigger={["click"]}
+            placement="bottomLeft"
+            disabled={isDemoMode}
+          >
+            <button
+              className={`flex items-center gap-1 px-2 py-2.5 rounded text-sm font-medium  transition cursor-pointer ${
+                isDemoMode 
+                  ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500  cursor-not-allowed' 
+                  : selectedCategory === 'Not Selected'
+                    ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200  hover:bg-orange-200 dark:hover:bg-orange-800'
+                    : 'bg-white dark:bg-[#28283b] text-purple-800 dark:text-purple-200  hover:bg-purple-200 dark:hover:bg-purple-800'
+              }`}
+              style={{ minWidth: 0, width: selectedCategory === 'Not Selected' ? 180 : 150, justifyContent: 'flex-start' }}
+              title={isDemoMode ? "Sign in to change interest" : selectedCategory === 'Not Selected' ? "Select Interest (Required when no profession selected)" : "Select Interest"}
+              onClick={() => handleDropdownClick('interest')}
+            >
+              <span className="truncate max-w-[130px]">
+                {selectedCategory === 'Not Selected' && selectedInterest === 'not_select'
+                  ? 'Select Interest *'
+                  : selectedInterest === 'not_select'
+                  ? 'Not Selected'
+                  : (interestOptions.find(i => i.id === selectedInterest)?.name || 'Select Interest')}
+              </span>
+              <span className={`ml-auto flex items-center ${isDemoMode ? 'text-gray-400' : selectedCategory === 'Not Selected' ? 'text-orange-400' : 'text-purple-400'}`}>
+                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+              </span>
+            </button>
+          </Dropdown>
+        </div>
+
+                {/* Three-dot Menu */}
+        <div style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div className="relative">
+            <button
+              type="button"
+              className="h-9 w-9 flex items-center justify-center rounded  dark:bg-[#28283b] dark:hover:bg-gray-900 bg-white hover:bg-gray-200 transition"
+              title="More options"
+              aria-label="More options"
+              onClick={() => setMenuOpen(o => !o)}
+            >
+              <svg width="20" height="20" fill="none" stroke="#6366F1" strokeWidth="2.2" viewBox="0 0 24 24">
+                <circle cx="12" cy="5" r="1.5"/>
+                <circle cx="12" cy="12" r="1.5"/>
+                <circle cx="12" cy="19" r="1.5"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Helpful message when "Not Selected" is chosen */}
+      {selectedCategory === 'Not Selected' && selectedInterest === 'not_select' && !isDemoMode && (
+        <div className="w-full text-center mr-4 py-2 px-4 mb-2 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 rounded-lg">
+          <span className="text-orange-700 dark:text-orange-300 text-sm">
+            💡 Since you haven&apos;t selected a specific profession, please choose an interest to see relevant bookmarks and tools.
+          </span>
+        </div>
+      )}
               {menuOpen && (
                 <div ref={menuContainerRef} className="absolute right-0 bottom-full mb-2 w-36 dark:text-white bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-lg z-[1200]">
                   {/* ...menu content... */}
@@ -2705,21 +2962,22 @@ const Anotherpage = ({ pageId = "home" }) => {
                       aria-haspopup="true"
                       aria-expanded={viewModeSubmenuOpen}
                     >
+                      <svg width="16" height="16" fill="none" stroke="#6366F1" strokeWidth="2.2" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
                       View Mode
-                      <svg width="16" height="16" fill="none" stroke="#6366F1" strokeWidth="2.2" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+                      
                     </button>
                     {viewModeSubmenuOpen && (
-                      <div ref={submenuRef} className="absolute left-full top-0 ml-2 w-32 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-2xl z-[1200] flex flex-col py-2 px-1">
+                      <div ref={submenuRef} className="absolute right-full top-0 ml-2 w-32 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-2xl z-[1200] flex flex-col py-2 px-1">
                         {/* ...submenu content... */}
                         {[
-                          { mode: 'list', label: 'List', icon: <svg width="20" height="20" fill="none" stroke="#6366F1" strokeWidth="2" viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="2" rx="1"/><rect x="4" y="11" width="16" height="2" rx="1"/><rect x="4" y="16" width="16" height="2" rx="1"/></svg> },
-                          { mode: 'grid', label: 'Grid', icon: <svg width="20" height="20" fill="none" stroke="#6366F1" strokeWidth="2" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg> },
-                          { mode: 'icon', label: 'Icon', icon: <svg width="20" height="20" fill="none" stroke="#6366F1" strokeWidth="2" viewBox="0 0 24 24"><circle cx="7" cy="7" r="3"/><circle cx="17" cy="7" r="3"/><circle cx="7" cy="17" r="3"/><circle cx="17" cy="17" r="3"/></svg> },
-                          { mode: 'cloud', label: 'Cloud', icon: <svg width="20" height="20" fill="none" stroke="#6366F1" strokeWidth="2" viewBox="0 0 24 24"><path d="M17.5 19a4.5 4.5 0 0 0 0-9c-.2 0-.4 0-.6.03A6 6 0 1 0 6 17.5"/></svg> },
-                        ].map(({ mode, label, icon }) => (
+                          { mode: 'list', label: 'List'},
+                          { mode: 'grid', label: 'Grid'},
+                          { mode: 'icon', label: 'Icon'},
+                          { mode: 'cloud', label: 'Cloud'},
+                        ].map(({ mode, label }) => (
                           <button
                             key={mode}
-                            className={`w-full flex items-center gap-3 px-4 py-2 rounded text-sm font-semibold border-b last:border-b-0 border-gray-100 dark:border-gray-700 transition relative ${Object.values(subcatDisplayModes).every(v => v === mode) ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'} hover:bg-blue-100`}
+                            className={`w-full flex items-center gap-3 px-4 py-2 rounded text-sm font-semibold border-b last:border-b-0 border-gray-100 dark:border-gray-700 transition relative ${Object.values(subcatDisplayModes).every(v => v === mode) ? 'bg-gray-200 text-black' : 'bg-gray-900 text-gray-700'} hover:bg-blue-100`}
                             onClick={async () => {
                               const subcats = firestoreUser && firestoreSubcats.length > 0 ? firestoreSubcats : subcatOrder;
                               const updates = {};
@@ -2740,13 +2998,13 @@ const Anotherpage = ({ pageId = "home" }) => {
                               setMenuOpen(false);
                             }}
                           >
-                            <span>{icon}</span>
+                            
                             <span>{label}</span>
-                            {Object.values(subcatDisplayModes).every(v => v === mode) && (
+                            {/* {Object.values(subcatDisplayModes).every(v => v === mode) && (
                               <span className="absolute right-3">
                                 <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
                               </span>
-                            )}
+                            )} */}
                           </button>
                         ))}
                       </div>
@@ -2754,10 +3012,7 @@ const Anotherpage = ({ pageId = "home" }) => {
                   </div>
                 </div>
               )}
-            </div>
-          </div>
-        </div>
-      </div>
+            
 
       {/* Widget grid with drag and drop */}
       <DragDropContext onDragEnd={onDragEnd}>
@@ -3007,11 +3262,11 @@ const Anotherpage = ({ pageId = "home" }) => {
         </div>
       )}
 
-      {openBookmarksModal && (
-        <BookmarksModal
-          subcatKey={openBookmarksModal}
-          open={!!openBookmarksModal}
-          onClose={handleCloseBookmarksModal}
+      {openUserBookmarksModal && (
+        <UserBookmarksModal
+          subcatKey={openUserBookmarksModal}
+          open={!!openUserBookmarksModal}
+          onClose={handleCloseUserBookmarksModal}
         />
       )}
       <AddBookmarkModal

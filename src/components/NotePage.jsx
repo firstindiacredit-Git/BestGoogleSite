@@ -89,6 +89,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
   const historyButtonRef = useRef(null);
   const tabDropdownRef = useRef(null);
   const editInputRef = useRef(null);
+  const recognitionRef = useRef(null);
 
   const predefinedColors = [
     "#000000",
@@ -392,37 +393,34 @@ const NotePage = ({ inNotebookSheet = false }) => {
 
   const toggleSpeechToText = () => {
     if ("webkitSpeechRecognition" in window) {
-      const recognition = new window.webkitSpeechRecognition();
-      recognition.continuous = true;
-      recognition.interimResults = true;
-
-      if (!isListening) {
-        recognition.start();
-        setIsListening(true);
-
-        recognition.onresult = (event) => {
+      if (!recognitionRef.current) {
+        recognitionRef.current = new window.webkitSpeechRecognition();
+        recognitionRef.current.continuous = true;
+        recognitionRef.current.interimResults = true;
+        recognitionRef.current.onresult = (event) => {
           const transcript = Array.from(event.results)
             .map((result) => result[0])
             .map((result) => result.transcript)
             .join("");
-
-          setTabs(prevTabs =>
-            prevTabs.map(tab =>
+          setTabs((prevTabs) =>
+            prevTabs.map((tab) =>
               tab.id === activeTabId ? { ...tab, content: tab.content + " " + transcript } : tab
             )
           );
         };
-
-        recognition.onerror = (event) => {
+        recognitionRef.current.onerror = (event) => {
           console.error(event.error);
           setIsListening(false);
         };
-
-        recognition.onend = () => {
+        recognitionRef.current.onend = () => {
           setIsListening(false);
         };
+      }
+      if (!isListening) {
+        recognitionRef.current.start();
+        setIsListening(true);
       } else {
-        recognition.stop();
+        recognitionRef.current.stop();
         setIsListening(false);
       }
     } else {
@@ -847,14 +845,14 @@ const NotePage = ({ inNotebookSheet = false }) => {
                     className={`p-3 rounded-sm transition duration-200 ${
                       isAutoColor
                         ? isListening
-                          ? "bg-red-500 text-white"
+                          ? "bg-red-500 text-white shadow-lg"
                           : "bg-gray-100 dark:bg-[#513a7a] hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
                         : isListening
-                        ? "bg-red-500 text-white"
+                        ? "bg-red-500 text-white shadow-lg"
                         : "bg-opacity-20 bg-gray-500 hover:bg-opacity-30"
                     }`}
                     onClick={toggleSpeechToText}
-                    title="Toggle Speech-to-Text"
+                    title={isListening ? "Stop Recording" : "Start Recording"}
                     style={
                       !isAutoColor && !isListening
                         ? { color: textColor }
@@ -862,9 +860,15 @@ const NotePage = ({ inNotebookSheet = false }) => {
                     }
                   >
                     {isListening ? (
-                      <MicOff className="w-5 h-5" />
+                      <div className="flex items-center gap-1">
+                        <MicOff className="w-5 h-5" />
+                        <span className="text-xs font-medium">OFF</span>
+                      </div>
                     ) : (
-                      <Mic className="w-5 h-5" />
+                      <div className="flex items-center gap-1">
+                        <Mic className="w-5 h-5" />
+                        <span className="text-xs font-medium">ON</span>
+                      </div>
                     )}
                   </button>
                   {/* <button
