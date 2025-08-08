@@ -712,12 +712,12 @@ function PopularBookmarks() {
         // Combine all bookmarks
         const allBookmarks = [...userBookmarks, ...adminBookmarks];
 
-        // Open categories
+        // Open categories - default to collapsed state
         const savedOpenStates = localStorage.getItem("categoryOpenStates");
         const initialOpenStates = savedOpenStates
           ? JSON.parse(savedOpenStates)
           : allCategories.reduce((acc, category) => {
-            acc[category.id] = true;
+            acc[category.id] = false; // Set to false for collapsed state
             return acc;
           }, {});
 
@@ -1887,7 +1887,7 @@ function PopularBookmarks() {
               className="flex flex-col items-center p-2 bg-white/[(var(--widget-opacity))] dark:bg-[#513a7a]/[(var(--widget-opacity))] hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all duration-300 group relative"
             >
               <div className="relative w-full flex justify-center mb-2">
-                <a href={link.url || link.link} className="block">
+                <a href={link.url || link.link} className="block" target="_blank" rel="noopener noreferrer">
                   <img
                     src={getFaviconUrl(link.url || link.link)}
                     alt={link.title || link.name}
@@ -1906,6 +1906,8 @@ function PopularBookmarks() {
               <a
                 href={link.url || link.link}
                 className="w-full text-center text-black dark:text-white hover:text-blue-500"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <span
                   className={`text-sm break-words block ${lineOptions === 2
@@ -1950,7 +1952,7 @@ function PopularBookmarks() {
           {categoryLinks.map((link) => (
             <div key={link.id} className="relative group flex justify-center">
               <Tooltip title={link.title || link.name}>
-                <a href={link.url || link.link} className="block">
+                <a href={link.url || link.link} className="block" target="_blank" rel="noopener noreferrer">
                   <img
                     src={getFaviconUrl(link.url || link.link)}
                     alt={link.title || link.name}
@@ -2249,7 +2251,7 @@ function PopularBookmarks() {
           {professionOptions.filter(p => p.id !== "all").map((prof) => (
             professionGroups[prof.id].length > 0 && (
               <div key={prof.id} id={`profession-section-${prof.id}`} className="mb-10">
-                <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-blue-700 dark:text-blue-300">
+                <h3 className="text-xl mx-auto text-center p-4 border bg-blue-500/50 border-blue-300 dark:border-blue-700 font-bold mb-4 flex items-center justify-center gap-2 text-white dark:text-white">
                   <span>{prof.icon}</span> {prof.name}
                 </h3>
                 <Row gutter={[16, 16]}>
@@ -3924,22 +3926,19 @@ function PopularBookmarks() {
       }
     };
 
-    // Add delay between requests to prevent rate limiting
-    const requestDelay = Math.random() * 200 + 100; // 100-300ms random delay
-    setTimeout(() => fetchBookmarks(), requestDelay);
+    // Remove random delay for fastest fetch
+    fetchBookmarks();
   }, [user, categoryBookmarks, hiddenBookmarkIds]);
 
 
 
-  // On initial mount, fetch bookmarks for all categories that are open by default
+  // Fetch bookmarks for all categories (open or closed) for fast loading
   useEffect(() => {
-    if (!user) return;
-    Object.entries(openCategories).forEach(([categoryId, isOpen]) => {
-      if (isOpen) {
-        fetchBookmarksForCategory(categoryId);
-      }
+    if (!user || !categories.length) return;
+    categories.forEach((cat) => {
+      fetchBookmarksForCategory(cat.id);
     });
-  }, [user, openCategories, fetchBookmarksForCategory]);
+  }, [user, categories, fetchBookmarksForCategory]);
 
   // Handle category toggle events with throttled loading
   useEffect(() => {

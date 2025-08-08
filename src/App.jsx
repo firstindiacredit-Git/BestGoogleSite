@@ -1116,7 +1116,7 @@ const App = () => {
                       width: 52,
                       height: 52,
                       borderRadius: "50%",
-                      background: "#f59e42",
+                      background: "#6366f1",
                       color: "#fff",
                       border: "none",
                       boxShadow: "0 2px 8px rgba(0,0,0,0.18)",

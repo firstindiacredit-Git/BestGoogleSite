@@ -809,7 +809,7 @@ const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
           </div>
 
           <div className="flex items-center justify-between w-fit gap-4 space-x-4">
-            <Dropdown
+            {/* <Dropdown
               menu={{
                 items: countries
                   .filter(country => country.key !== selectedCountry.key)
@@ -850,7 +850,7 @@ const Header = ({ onPageNameChange, goBack, designChange, designContext }) => {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
-            </Dropdown>
+            </Dropdown> */}
             <div
               onClick={toggleTheme}
               className="flex items-center text-sm dark:hover:bg-gray-800/20 transition-all hover:bg-gray-200/80 p-2 cursor-pointer rounded-md"
