@@ -4134,14 +4134,12 @@ function PopularBookmarks() {
         {renderProfessionBar()}
         <div className="flex justify-center items-center py-8">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
-            <div className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Loading {getProfessionDisplayName(userProfession)} categories...
-            </div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              Please wait while we fetch your personalized bookmarks
+            <iframe 
+              src="https://lottie.host/embed/0af2f653-3de1-41c3-ae8b-b59706cd0907/3OjO8sTisE.lottie"
+              style={{ width: '500px', height: '500px', border: 'none' }}
+              title="Loading Animation"
+            />
           </div>
-        </div>
         </div>
       </div>
     );

@@ -358,7 +358,7 @@ function BalancesheetDashboard({ onSheetClick }) {
             </Text>
           </div>
           <Space>
-            <Avatar 
+            {/* <Avatar 
               src={user?.photoURL}
               icon={<UserOutlined />} 
               onClick={() => navigate('/profile')}
@@ -375,7 +375,7 @@ function BalancesheetDashboard({ onSheetClick }) {
                 e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
                 e.currentTarget.style.transform = 'scale(1)';
               }}
-            />
+            /> */}
             <Button
               type="primary"
               icon={<PlusOutlined />}
