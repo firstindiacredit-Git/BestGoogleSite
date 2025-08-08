@@ -43,6 +43,7 @@ import {
   CompressOutlined,
   SettingOutlined,
   SmileOutlined,
+  FullscreenOutlined,
 } from "@ant-design/icons";
 import debounce from "lodash/debounce";
 import PropTypes from 'prop-types';
@@ -247,6 +248,9 @@ function PopularBookmarks() {
   const [bookmarkLikes, setBookmarkLikes] = useState({});
   const [userLikedBookmarks, setUserLikedBookmarks] = useState({});
   const [showSuggestionWidget, setShowSuggestionWidget] = useState(true);
+  const [expandModalVisible, setExpandModalVisible] = useState(false);
+  const [expandedCategory, setExpandedCategory] = useState(null);
+  const [expandedCategoryBookmarks, setExpandedCategoryBookmarks] = useState([]);
 
   const topFacebookLikedAdminBookmarks = React.useMemo(() => {
     const adminLinks = categories.filter(link => link.isAdminBookmark);
@@ -395,7 +399,7 @@ function PopularBookmarks() {
     margin: "8px 0",
     backgroundColor: isSelected
       ? isDarkMode
-        ? "#1f1f1f"
+        ? ""
         : "#e6f7ff"
       : isDarkMode
         ? "#141414"
@@ -426,44 +430,7 @@ function PopularBookmarks() {
   }, []);
 
   // Profession ID mapping to handle legacy profession names in database
-  const getProfessionMapping = (professionId) => {
-    const mapping = {
-      "tax_investments": ["Tax & Investments", "tax_investments"],
-      "marketing_growth": ["Marketing & Growth", "marketing_growth", "Digital Marketer"],
-      "creativity_design": ["Creativity & Design", "creativity_design", "Designer (UI/UX, Graphic, Web)"],
-      "programmer_developer": ["Programmer & Developer", "programmer_developer", "Developer / Programmer"],
-      "professional_entrepreneurship": ["Professional & Entrepreneurship", "professional_entrepreneurship", "Entrepreneur / Founder", "Working Professional"],
-      "education_learning": ["Education & Learning", "education_learning", "Student", "Teacher / Educator"],
-      "ai_automation": ["AI Tools & Automation", "ai_automation"],
-      "productivity_management": ["Productivity & Task Management", "productivity_management"],
-      "news": ["News", "news"],
-      "shopping_deals": ["Shopping & Deal Sites", "shopping_deals"],
-      "health_wellness": ["Health & Wellness", "health_wellness", "Medical Professional"],
-      "travel": ["Travel", "travel"],
-      "entertainment_leisure": ["Entertainment & Leisure", "entertainment_leisure"],
-      "career_jobs": ["Career & Job Portals", "career_jobs"],
-      "privacy_security": ["Privacy & Security", "privacy_security"],
-      "india_specific": ["India-Specific Portals", "india_specific"],
-      "brain_interests": ["Brain-Interests", "brain_interests"],
-      "science_nature": ["Science & Nature", "science_nature", "Researcher / Academic"],
-      "automotive_transport": ["Automotive & Transport", "automotive_transport"],
-      "gaming_entertainment": ["Gaming & Entertainment", "gaming_entertainment"],
-      "kids_family": ["Kids & Family", "kids_family"],
-      "international_tools": ["International Tools", "international_tools"],
-      "events_conferences": ["Events & Conferences", "events_conferences"],
-      "technology_computing": ["Technology & Computing", "technology_computing", "IT / Tech Support"],
-      "social_community": ["Social & Community", "social_community"],
-      "home_lifestyle": ["Home & Lifestyle", "home_lifestyle"],
-      "analytics_reporting": ["Analytics & Reporting", "analytics_reporting"],
-      "startup_indie_tools": ["Startup Directories & Indie Tools", "startup_indie_tools"],
-      "bpo": ["BPO", "bpo"],
-      "freelancer": ["Freelancer (Creative or Technical)", "freelancer"],
-      "consultant": ["Consultant / Advisor", "consultant"],
-      "other": ["Other", "other"],
-      "retired": ["Retired", "retired"]
-    };
-    return mapping[professionId] || [professionId];
-  };
+
 
   // Filter categories based on user preferences and selected country with caching
   const getFilteredCategories = (allCategories) => {
@@ -483,7 +450,7 @@ function PopularBookmarks() {
     // Always show user-created categories
     let filteredCategories = [...userCategories];
 
-    // For admin categories, filter based on country and profession
+    // For admin categories, filter based on country only (removed profession considerations)
     const adminFilteredCategories = adminCategories.filter(category => {
       // Check country match first
       const matchesCountry = category.countries && (
@@ -495,29 +462,14 @@ function PopularBookmarks() {
       // If country doesn't match, don't show the category
       if (!matchesCountry) return false;
 
-      // Check profession match
-      if (userProfession === "all") return true;
-
-      // Get all possible profession names/IDs for the current user profession
-      const professionMatches = getProfessionMapping(userProfession);
-      
-      const matchesProfession = category.professions && (
-        category.professions.includes(userProfession) ||
-        category.professions.includes("all") ||
-        professionMatches.some(prof => category.professions.includes(prof))
-      );
-
-      // If user has no profession, don't show admin categories
-      if (!userProfession) return false;
-
-      // Return based on profession match
-      return matchesProfession;
+      // Show all categories that match the country (removed profession filtering)
+      return true;
     });
 
     // Add filtered admin categories to the result
     filteredCategories = [...filteredCategories, ...adminFilteredCategories];
 
-    // Sort categories by country (India first), then profession match
+    // Sort categories by country (India first) - removed profession-based sorting
     filteredCategories.sort((a, b) => {
       if (a.isAdminCategory && b.isAdminCategory) {
         // If selected country is India, prioritize India categories
@@ -527,13 +479,6 @@ function PopularBookmarks() {
           if (aIsIndia && !bIsIndia) return -1;
           if (!aIsIndia && bIsIndia) return 1;
         }
-
-        // Then sort by profession match
-        const aMatchesProfession = a.professions?.includes(userProfession) || false;
-        const bMatchesProfession = b.professions?.includes(userProfession) || false;
-
-        if (aMatchesProfession && !bMatchesProfession) return -1;
-        if (!aMatchesProfession && bMatchesProfession) return 1;
       }
       return 0;
     });
@@ -1858,6 +1803,7 @@ function PopularBookmarks() {
   const renderBookmarkGrid = (categoryLinks, categoryId) => {
     const sizes = categoryBookmarkSizes[categoryId] || { grid: 32 };
     const isLoading = categoryBookmarks[categoryId]?.loading;
+    const displayedBookmarks = categoryLinks.slice(0, 10);
     
     // Show loading state if bookmarks are being fetched
     if (isLoading) {
@@ -1881,7 +1827,7 @@ function PopularBookmarks() {
     return (
       <div className="w-full">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {categoryLinks.map((link) => (
+          {displayedBookmarks.map((link) => (
             <div
               key={link.id}
               className="flex flex-col items-center p-2 bg-white/[(var(--widget-opacity))] dark:bg-[#513a7a]/[(var(--widget-opacity))] hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all duration-300 group relative"
@@ -1924,6 +1870,7 @@ function PopularBookmarks() {
             </div>
           ))}
         </div>
+
       </div>
     );
   };
@@ -2116,7 +2063,7 @@ function PopularBookmarks() {
           {userCategories.length > 0 && (
             <div id="user-categories-section" className="mb-8">
               <h3 className="text-xl font-bold mb-4 text-blue-700 dark:text-blue-300">Your Categories</h3>
-              <Row gutter={[16, 16]}>
+              <div className="grid grid-cols-4 gap-4">
                 {userCategories.map((category) => {
                   // Get bookmarks for this category
                   let categoryLinks = getCategoryLinks(category.id);
@@ -2126,7 +2073,7 @@ function PopularBookmarks() {
                   }
 
                   return (
-                    <Col key={category.id} xs={24} sm={12} md={8} lg={6}>
+                    <div key={category.id} className="w-full h-fit">
                       <Card
                         className="max-w-xl backdrop-blur-sm bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] dark:text-white mx-auto rounded-sm"
                         title={
@@ -2186,6 +2133,25 @@ function PopularBookmarks() {
                                     style={{ color: "white" }}
                                   />
                                 </Tooltip>
+                                {(() => {
+                                  const bookmarks = getCategoryLinks(category.id);
+                                  console.log(`Category ${category.id}: ${bookmarks.length} bookmarks`);
+                                  return bookmarks.length > 10;
+                                })() && (
+                                  <Tooltip title="Show All Bookmarks">
+                                    <AntButton
+                                      type="text"
+                                      icon={<FullscreenOutlined className="text-black dark:text-white" />}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setExpandedCategory(category.id);
+                                        setExpandedCategoryBookmarks(getCategoryLinks(category.id));
+                                        setExpandModalVisible(true);
+                                      }}
+                                      style={{ color: "white" }}
+                                    />
+                                  </Tooltip>
+                                )}
                                 <Dropdown
                                   menu={{
                                     items: getCategoryMenuItems(category),
@@ -2215,11 +2181,12 @@ function PopularBookmarks() {
                             maxHeight: "400px",
                             overflowY: "auto",
                             display: openCategories[category.id] ? "block" : "none",
+                            willChange: "transform, opacity",
                           },
                         }}
                         style={{
                           height: "100%",
-                          transition: "all 0.3s ease",
+                          transition: "all 0.15s ease",
                           border: "none",
                         }}
                       >
@@ -2241,30 +2208,64 @@ function PopularBookmarks() {
                           </>
                         )}
                       </Card>
-                    </Col>
+                    </div>
                   );
                 })}
-              </Row>
+              </div>
             </div>
           )}
           {/* Profession Groups */}
           {professionOptions.filter(p => p.id !== "all").map((prof) => (
             professionGroups[prof.id].length > 0 && (
               <div key={prof.id} id={`profession-section-${prof.id}`} className="mb-10">
-                <h3 className="text-xl mx-auto text-center p-4 border bg-blue-500/50 border-blue-300 dark:border-blue-700 font-bold mb-4 flex items-center justify-center gap-2 text-white dark:text-white">
-                  <span>{prof.icon}</span> {prof.name}
+                <h3 className="text-xl mx-auto text-center p-4 border bg-blue-500/50 border-blue-300 dark:border-blue-700 font-bold mb-4 flex items-center justify-between text-white dark:text-white cursor-pointer hover:bg-blue-600/50 transition-colors" onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  
+                  // Get all category IDs for this profession
+                  const categoryIds = professionGroups[prof.id].map(cat => cat.id);
+                  
+                  // Check if all categories in this profession are currently open
+                  const allOpen = categoryIds.every(catId => openCategories[catId]);
+                  
+                  // Create new state: if all are open, close all; if any are closed, open all
+                  const newOpenCategories = { ...openCategories };
+                  categoryIds.forEach(catId => {
+                    newOpenCategories[catId] = !allOpen;
+                  });
+                  
+                  // Update state immediately
+                  setOpenCategories(newOpenCategories);
+                  
+                  // Save to localStorage asynchronously to avoid blocking
+                  setTimeout(() => {
+                    localStorage.setItem("categoryOpenStates", JSON.stringify(newOpenCategories));
+                  }, 0);
+                }}>
+                  <div className="w-6"></div> {/* Spacer to keep center alignment */}
+                  <div className="flex items-center gap-2">
+                    <span>{prof.icon}</span> 
+                    <span>{prof.name}</span>
+                  </div>
+                  <button className="p-1 rounded hover:bg-blue-700/50 transition-colors">
+                    {professionGroups[prof.id].every(cat => openCategories[cat.id]) ? (
+                      <CompressOutlined className="text-white" />
+                    ) : (
+                      <ExpandOutlined className="text-white" />
+                    )}
+                  </button>
                 </h3>
-                <Row gutter={[16, 16]}>
-                  {professionGroups[prof.id].map((category) => {
-                    // Get bookmarks for this category
-                    let categoryLinks = getCategoryLinks(category.id);
-                    const name = (category.name || category.newCategory || '').toLowerCase();
-                    if (searchTerm && !name.includes(searchTerm)) {
-                      categoryLinks = categoryLinks.filter(bookmarkMatches);
-                    }
+                                  <div className="grid grid-cols-4 gap-4">
+                    {professionGroups[prof.id].map((category) => {
+                      // Get bookmarks for this category
+                      let categoryLinks = getCategoryLinks(category.id);
+                      const name = (category.name || category.newCategory || '').toLowerCase();
+                      if (searchTerm && !name.includes(searchTerm)) {
+                        categoryLinks = categoryLinks.filter(bookmarkMatches);
+                      }
 
                     return (
-                      <Col key={category.id} xs={24} sm={12} md={8} lg={6}>
+                      <div key={category.id} className="w-full h-fit">
                         <Card
                           className="max-w-xl backdrop-blur-sm bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] dark:text-white mx-auto rounded-sm"
                           title={
@@ -2334,6 +2335,25 @@ function PopularBookmarks() {
                                       style={{ color: "white" }}
                                     />
                                   </Tooltip>
+                                  {(() => {
+                                    const bookmarks = getCategoryLinks(category.id);
+                                    console.log(`Profession Category ${category.id}: ${bookmarks.length} bookmarks`);
+                                    return bookmarks.length > 10;
+                                  })() && (
+                                    <Tooltip title="Show All Bookmarks">
+                                      <AntButton
+                                        type="text"
+                                        icon={<FullscreenOutlined className="text-black dark:text-white" />}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setExpandedCategory(category.id);
+                                          setExpandedCategoryBookmarks(getCategoryLinks(category.id));
+                                          setExpandModalVisible(true);
+                                        }}
+                                        style={{ color: "white" }}
+                                      />
+                                    </Tooltip>
+                                  )}
                                   <Dropdown
                                     menu={{
                                       items: getCategoryMenuItems(category),
@@ -2389,10 +2409,10 @@ function PopularBookmarks() {
                             </>
                           )}
                         </Card>
-                      </Col>
+                      </div>
                     );
                   })}
-                </Row>
+                </div>
               </div>
             )
           ))}
@@ -4869,6 +4889,57 @@ function PopularBookmarks() {
               rows={4}
               disabled={reviewSubmitting}
             />
+          </div>
+        </div>
+      </Modal>
+
+      {/* Expand Bookmarks Modal */}
+      <Modal
+        title={
+          <div className="flex items-center gap-2">
+            <span className="text-lg font-semibold">
+              All Bookmarks - {expandedCategory ? categories.find(cat => cat.id === expandedCategory)?.name || categories.find(cat => cat.id === expandedCategory)?.newCategory : ''}
+            </span>
+            <span className="text-sm text-gray-500">({expandedCategoryBookmarks.length} bookmarks)</span>
+          </div>
+        }
+        open={expandModalVisible}
+        onCancel={() => setExpandModalVisible(false)}
+        footer={null}
+        width={800}
+        className="expand-bookmarks-modal"
+      >
+        <div className="max-h-96 overflow-y-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {expandedCategoryBookmarks.map((bookmark) => (
+              <div
+                key={bookmark.id}
+                className="flex flex-col items-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+              >
+                <div className="relative w-full flex justify-center mb-2">
+                  <a href={bookmark.url || bookmark.link} className="block" target="_blank" rel="noopener noreferrer">
+                    <img
+                      src={getFaviconUrl(bookmark.url || bookmark.link)}
+                      alt={bookmark.title || bookmark.name}
+                      className="w-8 h-8 object-contain transition-transform duration-300 hover:scale-110"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = "https://www.google.com/favicon.ico";
+                      }}
+                    />
+                  </a>
+                </div>
+                <a
+                  href={bookmark.url || bookmark.link}
+                  className="w-full text-center text-sm text-gray-700 dark:text-gray-300 hover:text-blue-500 truncate"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title={bookmark.title || bookmark.name}
+                >
+                  {bookmark.title || bookmark.name}
+                </a>
+              </div>
+            ))}
           </div>
         </div>
       </Modal>
