@@ -2812,7 +2812,7 @@ const Anotherpage = ({ pageId = "home" }) => {
             disabled={isDemoMode}
           >
             <button
-              className={`flex items-center gap-1 px-2 py-[1px]  rounded text-sm font-medium  transition cursor-pointer ${
+              className={`flex items-center gap-1 px-2 py-[1px] rounded text-sm font-medium  transition cursor-pointer ${
                 isDemoMode 
                   ? 'bg-gray-100 dark:bg-[#28283b]  text-gray-400 dark:text-gray-500  cursor-not-allowed' 
                   : 'bg-white dark:bg-[#28283b] text-blue-800 dark:text-blue-200  hover:bg-blue-200 dark:hover:bg-blue-800'
