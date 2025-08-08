@@ -2916,6 +2916,90 @@ const Anotherpage = ({ pageId = "home" }) => {
                 <circle cx="12" cy="19" r="1.5"/>
               </svg>
             </button>
+            {menuOpen && (
+              <div ref={menuContainerRef} className="absolute right-0 top-full mt-2 w-36 dark:text-white bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-lg z-[1200]">
+                {/* ...menu content... */}
+                {!allCollapsed ? (
+                  <button
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                    onClick={handleCollapseAll}
+                  >
+                    Collapse All
+                  </button>
+                ) : (
+                  <button
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                    onClick={handleExpandAll}
+                  >
+                    Expand All
+                  </button>
+                )}
+                <button
+                  className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                  onClick={() => { setShowAllBookmarks(true); setMenuOpen(false); }}
+                >
+                  All Bookmark
+                </button>
+                <div
+                  className="relative"
+                  tabIndex={0}
+                >
+                  <button
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition flex items-center justify-between"
+                    onClick={() => setViewModeSubmenuOpen(v => !v)}
+                    aria-haspopup="true"
+                    aria-expanded={viewModeSubmenuOpen}
+                  >
+                    <svg width="16" height="16" fill="none" stroke="#6366F1" strokeWidth="2.2" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
+                    View Mode
+                    
+                  </button>
+                  {viewModeSubmenuOpen && (
+                    <div ref={submenuRef} className="absolute right-full top-0 ml-2 w-32 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-2xl z-[1200] flex flex-col py-2 px-1">
+                      {/* ...submenu content... */}
+                      {[
+                        { mode: 'list', label: 'List'},
+                        { mode: 'grid', label: 'Grid'},
+                        { mode: 'icon', label: 'Icon'},
+                        { mode: 'cloud', label: 'Cloud'},
+                      ].map(({ mode, label }) => (
+                        <button
+                          key={mode}
+                          className={`w-full flex items-center gap-3 px-4 py-2 rounded text-sm font-semibold border-b last:border-b-0 border-gray-100 dark:border-gray-700 transition relative ${Object.values(subcatDisplayModes).every(v => v === mode) ? 'bg-gray-200 text-black' : 'bg-gray-900 text-gray-700'} hover:bg-blue-100`}
+                          onClick={async () => {
+                            const subcats = firestoreUser && firestoreSubcats.length > 0 ? firestoreSubcats : subcatOrder;
+                            const updates = {};
+                            subcats.forEach(subcat => {
+                              const key = typeof subcat === 'object' && subcat.name ? subcat.name : subcat;
+                              updates[key] = mode;
+                            });
+                            setSubcatDisplayModes(prev => ({ ...prev, ...updates }));
+                            if (firestoreUser) {
+                              // Persist for all subcats
+                              const key = `subcatDisplayModes`;
+                              let allModes = { ...subcatDisplayModes, ...updates };
+                              localStorage.setItem(key, JSON.stringify(allModes));
+                            } else {
+                              localStorage.setItem('subcatDisplayModes', JSON.stringify({ ...subcatDisplayModes, ...updates }));
+                            }
+                            setViewModeSubmenuOpen(false);
+                            setMenuOpen(false);
+                          }}
+                        >
+                          
+                          <span>{label}</span>
+                          {/* {Object.values(subcatDisplayModes).every(v => v === mode) && (
+                            <span className="absolute right-3">
+                              <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+                            </span>
+                          )} */}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -2928,90 +3012,6 @@ const Anotherpage = ({ pageId = "home" }) => {
           </span>
         </div>
       )}
-              {menuOpen && (
-                <div ref={menuContainerRef} className="absolute right-0 bottom-full mb-2 w-36 dark:text-white bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-lg z-[1200]">
-                  {/* ...menu content... */}
-                  {!allCollapsed ? (
-                    <button
-                      className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                      onClick={handleCollapseAll}
-                    >
-                      Collapse All
-                    </button>
-                  ) : (
-                    <button
-                      className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                      onClick={handleExpandAll}
-                    >
-                      Expand All
-                    </button>
-                  )}
-                  <button
-                    className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                    onClick={() => { setShowAllBookmarks(true); setMenuOpen(false); }}
-                  >
-                    All Bookmark
-                  </button>
-                  <div
-                    className="relative"
-                    tabIndex={0}
-                  >
-                    <button
-                      className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition flex items-center justify-between"
-                      onClick={() => setViewModeSubmenuOpen(v => !v)}
-                      aria-haspopup="true"
-                      aria-expanded={viewModeSubmenuOpen}
-                    >
-                      <svg width="16" height="16" fill="none" stroke="#6366F1" strokeWidth="2.2" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
-                      View Mode
-                      
-                    </button>
-                    {viewModeSubmenuOpen && (
-                      <div ref={submenuRef} className="absolute right-full top-0 ml-2 w-32 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-2xl z-[1200] flex flex-col py-2 px-1">
-                        {/* ...submenu content... */}
-                        {[
-                          { mode: 'list', label: 'List'},
-                          { mode: 'grid', label: 'Grid'},
-                          { mode: 'icon', label: 'Icon'},
-                          { mode: 'cloud', label: 'Cloud'},
-                        ].map(({ mode, label }) => (
-                          <button
-                            key={mode}
-                            className={`w-full flex items-center gap-3 px-4 py-2 rounded text-sm font-semibold border-b last:border-b-0 border-gray-100 dark:border-gray-700 transition relative ${Object.values(subcatDisplayModes).every(v => v === mode) ? 'bg-gray-200 text-black' : 'bg-gray-900 text-gray-700'} hover:bg-blue-100`}
-                            onClick={async () => {
-                              const subcats = firestoreUser && firestoreSubcats.length > 0 ? firestoreSubcats : subcatOrder;
-                              const updates = {};
-                              subcats.forEach(subcat => {
-                                const key = typeof subcat === 'object' && subcat.name ? subcat.name : subcat;
-                                updates[key] = mode;
-                              });
-                              setSubcatDisplayModes(prev => ({ ...prev, ...updates }));
-                              if (firestoreUser) {
-                                // Persist for all subcats
-                                const key = `subcatDisplayModes`;
-                                let allModes = { ...subcatDisplayModes, ...updates };
-                                localStorage.setItem(key, JSON.stringify(allModes));
-                              } else {
-                                localStorage.setItem('subcatDisplayModes', JSON.stringify({ ...subcatDisplayModes, ...updates }));
-                              }
-                              setViewModeSubmenuOpen(false);
-                              setMenuOpen(false);
-                            }}
-                          >
-                            
-                            <span>{label}</span>
-                            {/* {Object.values(subcatDisplayModes).every(v => v === mode) && (
-                              <span className="absolute right-3">
-                                <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
-                              </span>
-                            )} */}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
             
 
       {/* Widget grid with drag and drop */}
