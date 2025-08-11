@@ -574,7 +574,7 @@ const Weather = () => {
           </span>
         ),
         children: (
-          <div className="grid grid-cols-2 gap-3 mt-4">
+          <div className="grid grid-cols-2 gap-3 mt-4 ">
             {GRADIENT_OPTIONS.map((gradient) => (
               <div
                 key={gradient.id}
