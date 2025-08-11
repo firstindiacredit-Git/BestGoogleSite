@@ -568,7 +568,7 @@ const Weather = () => {
       {
         key: 'gradients',
         label: (
-          <span className="flex items-center gap-2">
+          <span className="flex items-center gap-2 ">
             <BgColorsOutlined />
             Gradients
           </span>
