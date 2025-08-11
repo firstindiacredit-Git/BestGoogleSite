@@ -208,7 +208,7 @@ const WEATHER_CARDS = {
   },
   // Thunderstorm (dark purple)
   THUNDER: {
-    background: "#8776B4",
+    background: "#8776B4", 
     darkShade: "#1E1A2B", // Dark deep purple
     darkerShade: "#12101A", // Darker deep purple
     color: "#FFFFFF",
