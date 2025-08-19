@@ -4357,7 +4357,7 @@ function PopularBookmarks() {
         onCancel={() => setIsControllerOpen(false)}
         width={1000}
         footer={[
-          <div key="divider" className="border-t border-gray-200 dark:border-gray-700 my-2"></div>,
+          <div key="divider" className="border-t  border-gray-200 dark:border-gray-700 my-2"></div>,
           <div key="footer" className="flex justify-end items-center mt-2 gap-2">
             <AntButton
               key="cancel"
