@@ -450,7 +450,7 @@ function PopularBookmarks() {
     // Always show user-created categories
     let filteredCategories = [...userCategories];
 
-    // For admin categories, filter based on country only (removed profession considerations)
+    // For admin categories, filter based on country and profession
     const adminFilteredCategories = adminCategories.filter(category => {
       // Check country match first
       const matchesCountry = category.countries && (
@@ -462,17 +462,44 @@ function PopularBookmarks() {
       // If country doesn't match, don't show the category
       if (!matchesCountry) return false;
 
-      // Show all categories that match the country (removed profession filtering)
+      // If user has selected a specific profession (not "all"), filter by profession
+      if (userProfession && userProfession !== "all") {
+        // Check if category is relevant to the selected profession
+        if (Array.isArray(category.professions)) {
+          return category.professions.includes(userProfession);
+        } else if (category.professions === "all") {
+          return true; // Show categories marked for all professions
+        } else {
+          return false; // Don't show if no profession match
+        }
+      }
+
+      // If "all" professions is selected, show all categories
       return true;
     });
 
     // Add filtered admin categories to the result
     filteredCategories = [...filteredCategories, ...adminFilteredCategories];
 
-    // Sort categories by country (India first) - removed profession-based sorting
+    // Sort categories by relevance to selected profession
     filteredCategories.sort((a, b) => {
+      // If a specific profession is selected, prioritize categories for that profession
+      if (userProfession && userProfession !== "all") {
+        const aIsForProfession = a.isAdminCategory && (
+          (Array.isArray(a.professions) && a.professions.includes(userProfession)) ||
+          a.professions === "all"
+        );
+        const bIsForProfession = b.isAdminCategory && (
+          (Array.isArray(b.professions) && b.professions.includes(userProfession)) ||
+          b.professions === "all"
+        );
+        
+        if (aIsForProfession && !bIsForProfession) return -1;
+        if (!aIsForProfession && bIsForProfession) return 1;
+      }
+      
+      // Then sort by country (India first)
       if (a.isAdminCategory && b.isAdminCategory) {
-        // If selected country is India, prioritize India categories
         if (selectedCountry?.key === 'IN') {
           const aIsIndia = a.countries?.includes('india') || false;
           const bIsIndia = b.countries?.includes('india') || false;
@@ -1639,7 +1666,7 @@ function PopularBookmarks() {
   };
 
   // Helper function to truncate text if longer than 15 characters
-  const truncateText = (text, maxLength = 20) => {
+  const truncateText = (text, maxLength = 15) => {
     if (!text) return '';
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
   };
@@ -2422,6 +2449,25 @@ function PopularBookmarks() {
 
     return (
       <div className="mb-2">
+        {/* Profession-specific header when a specific profession is selected */}
+        {userProfession && userProfession !== "all" && (
+          <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
+            {/* <div className="flex items-center justify-center gap-3">
+              <span className="text-2xl">
+                {professionOptions.find(p => p.id === userProfession)?.icon || "💼"}
+              </span>
+              <div className="text-center">
+                <h2 className="text-xl font-bold text-blue-800 dark:text-blue-200">
+                  {getProfessionDisplayName(userProfession)} Categories
+                </h2>
+                <p className="text-sm text-blue-600 dark:text-blue-300 mt-1">
+                  Showing categories specifically curated for {getProfessionDisplayName(userProfession).toLowerCase()} professionals
+                </p>
+              </div>
+            </div> */}
+          </div>
+        )}
+        
         {/* Search bar for categories */}
         <div className="flex justify-between mb-2 items-center gap-2">
           {/* User Preferences Indicator */}
@@ -2746,12 +2792,7 @@ function PopularBookmarks() {
                                                         🇮🇳 India
                                                       </span>
                                                     )}
-                                                    {/* Profession indicator */}
-                                                    {/* {category.professions?.includes(userProfession) && (
-                                                      <span className="px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded">
-                                                        {userProfession}
-                                              </span>
-                                                    )} */}
+                                                    {/* Profession indicator - removed as requested */}
                                                     {/* Interest indicator */}
                                                     {/* {category.interests?.some(i => mainInterests.includes(i)) && (
                                                       <span className="px-2 py-0.5 text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 rounded">
