@@ -253,7 +253,7 @@ function Calculator() {
               </button>
             </div>
           ) : (
-            <div className="flex flex-col h-full p-3">
+            <div className="flex flex-col h-full p-3" style={{ height: '350px', minHeight: '350px' }}>
               {/* Display */}
               <div 
                 ref={displayRef}

@@ -257,7 +257,9 @@ const ResponsiveWorldClock = () => {
   });
   const [selectedTimezones, setSelectedTimezones] = useState([
     "Asia/Kolkata", // India
-    "America/New_York", // USA (New York)
+    "America/Los_Angeles", // Los Angeles
+    "Australia/Melbourne", // Melbourne
+    "Asia/Singapore", // Singapore
   ]);
   const [isHovering, setIsHovering] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -551,6 +553,7 @@ const ResponsiveWorldClock = () => {
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
       className="w-full max-w-xl dark:text-white backdrop-blur-sm rounded-sm flex flex-col relative p-4"
+      style={{ height: '350px', minHeight: '350px' }}
     >
       {selectedTimezones.length > 0 ? (
         <div className="flex flex-wrap justify-center gap-8">
@@ -581,28 +584,26 @@ const ResponsiveWorldClock = () => {
       )}
 
       {/* Bottom Options Bar */}
-      {isHovering && (
-        <div className="absolute bottom-2 right-2 w-fit shadow-md rounded-lg p-1 dark:bg-[#1F2937] bg-white flex items-center justify-end gap-2 z-[9997]">
-          {selectedTimezones.length < 8 && (
-            <button
-              ref={addButtonRef}
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-500 transition"
-              title="Add timezone"
-            >
-              <Plus className="w-5 h-5" />
-            </button>
-          )}
+      <div className="absolute bottom-2 right-2 w-fit shadow-md rounded-lg p-1 dark:bg-[#1F2937] bg-white flex items-center justify-end gap-2 z-[9997]">
+        {selectedTimezones.length < 8 && (
           <button
-            ref={settingsRef}
-            onClick={() => setShowSettings(!showSettings)}
+            ref={addButtonRef}
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             className="p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-500 transition"
-            title="Settings"
+            title="Add timezone"
           >
-            <Settings className="w-5 h-5" />
+            <Plus className="w-5 h-5" />
           </button>
-        </div>
-      )}
+        )}
+        <button
+          ref={settingsRef}
+          onClick={() => setShowSettings(!showSettings)}
+          className="p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-500 transition"
+          title="Settings"
+        >
+          <Settings className="w-5 h-5" />
+        </button>
+      </div>
 
       {renderSettingsMenu()}
       {renderAddTimezoneMenu()}

@@ -12,6 +12,7 @@ import {
   X,
   Plus,
   AlertCircle,
+  Edit3,
 } from "lucide-react";
 import { HiOutlineNumberedList } from "react-icons/hi2";
 import { RxHamburgerMenu } from "react-icons/rx";
@@ -604,7 +605,8 @@ const NotePage = ({ inNotebookSheet = false }) => {
 
   return (
     <div
-      className={`w-full h-full backdrop-blur-sm`}
+      className={`w-full backdrop-blur-sm`}
+      style={{ height: '350px', minHeight: '350px' }}
     >
       <div className="rounded-sm h-full">
         <div
@@ -656,16 +658,26 @@ const NotePage = ({ inNotebookSheet = false }) => {
                         ) : (
                           <span className="truncate max-w-[100px] text-sm" title={tab.title}>{tab.title}</span>
                         )}
+                        <div className="flex items-center ml-2">
+                          <button
+                            onClick={e => startEditingTab(tab.id, tab.title, e)}
+                            className="text-gray-400 hover:text-blue-500 focus:outline-none mr-1"
+                            title="Edit tab name"
+                            tabIndex={-1}
+                          >
+                            <Edit3 className="w-3 h-3" />
+                          </button>
                         {tabs.length > 1 && (
                           <button
                             onClick={e => deleteTab(tab.id, e)}
-                            className="ml-2 text-gray-400 hover:text-red-500 focus:outline-none"
+                              className="text-gray-400 hover:text-red-500 focus:outline-none"
                             title="Close tab"
                             tabIndex={-1}
                           >
                             <X className="w-4 h-4" />
                           </button>
                         )}
+                        </div>
                       </div>
                     ))}
                     {/* Add Tab Button - Only show when less than 3 tabs */}
@@ -703,31 +715,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
                   </div>
                 )}
 
-                <div className="flex ">
-                  {lineNumbers && (
-                    <div
-                      ref={lineNumberRef}
-                      className={`text-right pr-2 overflow-hidden h-[345px] ${
-                        isAutoColor ? "text-gray-500 dark:text-gray-400" : ""
-                      }`}
-                      style={{
-                        fontSize: `${fontSize}px`,
-                        lineHeight: "3",
-                        color: !isAutoColor ? textColor : undefined,
-                        opacity: !isAutoColor ? 0.5 : undefined,
-                      }}
-                    >
-                      {Array.from(
-                        { length: getLineCount() },
-                        (_, i) => i + 1
-                      ).map((line) => (
-                        <div key={line} style={{ height: `${fontSize * 2.3}px` }}>
-                          {line}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
+                <div className="flex flex-col flex-1">
                   <textarea
                     ref={textareaRef}
                     value={tabs.find(t => t.id === activeTabId)?.content || ''}
@@ -739,7 +727,7 @@ const NotePage = ({ inNotebookSheet = false }) => {
                         : ""
                     }`}
                     style={{
-                      height: "350px",
+                       height: "250px",
                       marginBottom: "6px",
                       resize: "none",
                       color: isAutoColor ? undefined : textColor,
