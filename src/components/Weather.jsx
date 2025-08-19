@@ -7,9 +7,10 @@ import { auth } from "../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { FaEllipsisV } from "react-icons/fa";
 
-const API_KEY =
-  import.meta.env.VITE_OPENWEATHER_API_KEY ||
-  "78a1522c5ec67352674263eaaa54bffa";
+const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
+
+// Fallback API key (you should replace this with your own)
+const FALLBACK_API_KEY = "78a1522c5ec67352674263eaaa54bffa";
 
 // Background images array
 const BACKGROUND_IMAGES = [
@@ -260,6 +261,10 @@ const Weather = () => {
   const [showBackgroundSelector, setShowBackgroundSelector] = useState(false);
   const [user, setUser] = useState(null);
   const [showWarning, setShowWarning] = useState(true);
+  const [activeTab, setActiveTab] = useState('hourly');
+  const [hourlyForecast, setHourlyForecast] = useState([]);
+  const [dailyForecast, setDailyForecast] = useState([]);
+  const [isScrolling, setIsScrolling] = useState(false);
 
   // Dummy hourly forecast data for UI demo (replace with real API data if available)
   const dummyHourly = [
@@ -307,55 +312,336 @@ const Weather = () => {
 
   const fetchWeatherByCoords = async (lat, lon) => {
     try {
-      const currentResponse = await axios.get(
-        `https://api.openweathermap.org/data/2.5/weather`,
-        { params: { lat, lon, appid: API_KEY, units: unit } }
+      // First, get location name from coordinates using a different geocoding service
+      let locationName = "Current Location";
+      let countryCode = "Unknown";
+      
+      try {
+        // Use a different geocoding service that supports reverse geocoding
+        const geocodeResponse = await axios.get(
+          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`,
+          { 
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            timeout: 5000
+          }
+        );
+        
+        if (geocodeResponse.data) {
+          const location = geocodeResponse.data;
+          locationName = location.city || location.locality || location.principalSubdivision || "Current Location";
+          countryCode = location.countryCode || "Unknown";
+        }
+      } catch (geocodeError) {
+        console.error("Geocoding failed:", geocodeError);
+        // Try alternative geocoding service
+        try {
+          const altGeocodeResponse = await axios.get(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&addressdetails=1`,
+            { 
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              timeout: 5000
+            }
+          );
+          
+          if (altGeocodeResponse.data && altGeocodeResponse.data.address) {
+            const address = altGeocodeResponse.data.address;
+            locationName = address.city || address.town || address.village || address.county || "Current Location";
+            countryCode = address.country_code?.toUpperCase() || "Unknown";
+          }
+        } catch (altGeocodeError) {
+          console.error("Alternative geocoding also failed:", altGeocodeError);
+        }
+      }
+      
+      // Fetch current weather and forecast data
+      const response = await axios.get(
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,wind_direction_10m,weather_code&hourly=temperature_2m,weather_code,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto`,
+        { 
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          timeout: 10000
+        }
       );
-      const forecastResponse = await axios.get(
-        `https://api.openweathermap.org/data/2.5/forecast`,
-        { params: { lat, lon, appid: API_KEY, units: unit } }
-      );
-
-      setCurrentWeather(currentResponse.data);
-      // const dailyForecast = forecastResponse.data.list
-      //   .filter((_, index) => index % 8 === 0)
-      //   .slice(1, 3); // Get next 4 days
-      // setForecast(dailyForecast);
-      // setCity(currentResponse.data.name);
+      
+      // Convert Open-Meteo response to our expected format
+      const current = response.data.current;
+      const hourly = response.data.hourly;
+      const daily = response.data.daily;
+      
+      const convertedData = {
+        weather: [{ 
+          main: getWeatherMain(current.weather_code), 
+          description: getWeatherDescription(current.weather_code) 
+        }],
+        main: {
+          temp: current.temperature_2m,
+          feels_like: current.apparent_temperature,
+          humidity: current.relative_humidity_2m
+        },
+        wind: {
+          speed: current.wind_speed_10m,
+          deg: current.wind_direction_10m
+        },
+        name: locationName,
+        sys: { country: countryCode }
+      };
+      
+      // Process hourly forecast data
+      const processedHourly = [];
+      const now = new Date();
+      const currentHour = now.getHours();
+      
+      for (let i = 0; i < 24; i++) {
+        const hourIndex = (currentHour + i) % 24;
+        if (hourly.time && hourly.time[i] && hourly.temperature_2m && hourly.temperature_2m[i] !== undefined) {
+          const time = new Date(hourly.time[i]);
+          const hour = time.getHours();
+          const timeString = hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour - 12} PM`;
+          
+          processedHourly.push({
+            time: timeString,
+            temp: Math.round(hourly.temperature_2m[i]),
+            icon: getWeatherIcon(hourly.weather_code[i]),
+            rain: hourly.precipitation_probability[i] || 0,
+            weatherCode: hourly.weather_code[i]
+          });
+        }
+      }
+      
+      // Process daily forecast data
+      const processedDaily = [];
+      for (let i = 0; i < 7; i++) {
+        if (daily.time && daily.time[i] && daily.temperature_2m_max && daily.temperature_2m_max[i] !== undefined) {
+          const time = new Date(daily.time[i]);
+          const dayName = time.toLocaleDateString('en-US', { weekday: 'short' });
+          
+          processedDaily.push({
+            day: dayName,
+            maxTemp: Math.round(daily.temperature_2m_max[i]),
+            minTemp: Math.round(daily.temperature_2m_min[i]),
+            icon: getWeatherIcon(daily.weather_code[i]),
+            rain: daily.precipitation_probability_max[i] || 0,
+            weatherCode: daily.weather_code[i]
+          });
+        }
+      }
+      
+      setCurrentWeather(convertedData);
+      setHourlyForecast(processedHourly);
+      setDailyForecast(processedDaily);
       setError(null);
+      
     } catch (error) {
-      setError("Could not fetch weather data. Please try again later.");
+      console.error("Weather API failed:", error);
+      
+      // Fallback to mock data
+      const mockData = {
+        weather: [{ main: "Clear", description: "clear sky" }],
+        main: {
+          temp: 25,
+          feels_like: 26,
+          humidity: 65
+        },
+        wind: {
+          speed: 3.5,
+          deg: 180
+        },
+        name: "Your Location",
+        sys: { country: "Demo" }
+      };
+      
+      setCurrentWeather(mockData);
+      setError("Using demo data - API unavailable");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Helper functions to convert weather codes
+  const getWeatherMain = (code) => {
+    if (code === 0) return "Clear";
+    if (code >= 1 && code <= 3) return "Clouds";
+    if (code >= 45 && code <= 48) return "Fog";
+    if (code >= 51 && code <= 67) return "Rain";
+    if (code >= 71 && code <= 77) return "Snow";
+    if (code >= 80 && code <= 82) return "Rain";
+    if (code >= 85 && code <= 86) return "Snow";
+    if (code >= 95 && code <= 99) return "Thunderstorm";
+    return "Clear";
+  };
+
+  const getWeatherDescription = (code) => {
+    if (code === 0) return "clear sky";
+    if (code >= 1 && code <= 3) return "cloudy";
+    if (code >= 45 && code <= 48) return "foggy";
+    if (code >= 51 && code <= 67) return "rainy";
+    if (code >= 71 && code <= 77) return "snowy";
+    if (code >= 80 && code <= 82) return "rainy";
+    if (code >= 85 && code <= 86) return "snowy";
+    if (code >= 95 && code <= 99) return "thunderstorm";
+    return "clear sky";
+  };
+
+  const getWeatherIcon = (code) => {
+    if (code === 0) return "☀️"; // Clear sky
+    if (code >= 1 && code <= 3) return "⛅"; // Partly cloudy
+    if (code >= 45 && code <= 48) return "🌫️"; // Foggy
+    if (code >= 51 && code <= 67) return "🌧️"; // Rain
+    if (code >= 71 && code <= 77) return "❄️"; // Snow
+    if (code >= 80 && code <= 82) return "🌧️"; // Rain showers
+    if (code >= 85 && code <= 86) return "❄️"; // Snow showers
+    if (code >= 95 && code <= 99) return "⛈️"; // Thunderstorm
+    return "☀️"; // Default to clear
+  };
+
+  const getWeatherStatus = (weatherMain) => {
+    switch (weatherMain.toLowerCase()) {
+      case 'clear':
+        return 'Clear skies ahead';
+      case 'clouds':
+        return 'Clouds clearing soon';
+      case 'rain':
+        return 'Rain stopping soon';
+      case 'snow':
+        return 'Snow clearing soon';
+      case 'thunderstorm':
+        return 'Storm passing through';
+      case 'mist':
+      case 'fog':
+        return 'Fog lifting soon';
+      default:
+        return 'Weather improving';
     }
   };
 
   const fetchWeatherByCity = async (cityName) => {
     try {
       setIsLoading(true);
-      const currentResponse = await axios.get(
-        `https://api.openweathermap.org/data/2.5/weather`,
-        { params: { q: cityName, appid: API_KEY, units: unit } }
+      
+      // First, get coordinates for the city using a geocoding service
+      const geocodeResponse = await axios.get(
+        `https://api.open-meteo.com/v1/geocoding?name=${encodeURIComponent(cityName)}&count=1&language=en&format=json`,
+        { 
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          timeout: 10000
+        }
       );
-      const forecastResponse = await axios.get(
-        `https://api.openweathermap.org/data/2.5/forecast`,
-        { params: { q: cityName, appid: API_KEY, units: unit } }
-      );
-
-      setCurrentWeather(currentResponse.data);
-      const dailyForecast = forecastResponse.data.list
-        .filter((_, index) => index % 8 === 0)
-        .slice(1, 3); // Get next 4 days
-      setForecast(dailyForecast);
-      setError(null);
+      
+      if (geocodeResponse.data.results && geocodeResponse.data.results.length > 0) {
+        const location = geocodeResponse.data.results[0];
+        const { latitude, longitude } = location;
+        
+        // Now get weather data using coordinates
+        const weatherResponse = await axios.get(
+          `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,wind_direction_10m,weather_code&hourly=temperature_2m,weather_code,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto`,
+          { 
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            timeout: 10000
+          }
+        );
+        
+        // Convert Open-Meteo response to our expected format
+        const current = weatherResponse.data.current;
+        const hourly = weatherResponse.data.hourly;
+        const daily = weatherResponse.data.daily;
+        
+        const convertedData = {
+          weather: [{ 
+            main: getWeatherMain(current.weather_code), 
+            description: getWeatherDescription(current.weather_code) 
+          }],
+          main: {
+            temp: current.temperature_2m,
+            feels_like: current.apparent_temperature,
+            humidity: current.relative_humidity_2m
+          },
+          wind: {
+            speed: current.wind_speed_10m,
+            deg: current.wind_direction_10m
+          },
+          name: location.name,
+          sys: { country: location.country }
+        };
+        
+        // Process hourly forecast data
+        const processedHourly = [];
+        for (let i = 0; i < 24; i++) {
+          if (hourly.time && hourly.time[i] && hourly.temperature_2m && hourly.temperature_2m[i] !== undefined) {
+            const time = new Date(hourly.time[i]);
+            const hour = time.getHours();
+            const timeString = hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour - 12} PM`;
+            
+            processedHourly.push({
+              time: timeString,
+              temp: Math.round(hourly.temperature_2m[i]),
+              icon: getWeatherIcon(hourly.weather_code[i]),
+              rain: hourly.precipitation_probability[i] || 0,
+              weatherCode: hourly.weather_code[i]
+            });
+          }
+        }
+        
+        // Process daily forecast data
+        const processedDaily = [];
+        for (let i = 0; i < 7; i++) {
+          if (daily.time && daily.time[i] && daily.temperature_2m_max && daily.temperature_2m_max[i] !== undefined) {
+            const time = new Date(daily.time[i]);
+            const dayName = time.toLocaleDateString('en-US', { weekday: 'short' });
+            
+            processedDaily.push({
+              day: dayName,
+              maxTemp: Math.round(daily.temperature_2m_max[i]),
+              minTemp: Math.round(daily.temperature_2m_min[i]),
+              icon: getWeatherIcon(daily.weather_code[i]),
+              rain: daily.precipitation_probability_max[i] || 0,
+              weatherCode: daily.weather_code[i]
+            });
+          }
+        }
+        
+        setCurrentWeather(convertedData);
+        setHourlyForecast(processedHourly);
+        setDailyForecast(processedDaily);
+        setError(null);
+      } else {
+        throw new Error("City not found");
+      }
+      
     } catch (error) {
-      if (error.response && error.response.status === 404) {
+      console.error("Weather API failed:", error);
+      
+      if (error.message === "City not found") {
         setError(`Weather data for "${cityName}" not found.`);
       } else {
         setError("Could not fetch weather data. Please try again later.");
       }
-      setCurrentWeather(null);
-      setForecast([]);
+      
+      // Fallback to mock data
+      const mockData = {
+        weather: [{ main: "Clear", description: "clear sky" }],
+        main: {
+          temp: 25,
+          feels_like: 26,
+          humidity: 65
+        },
+        wind: {
+          speed: 3.5,
+          deg: 180
+        },
+        name: cityName,
+        sys: { country: "Demo" }
+      };
+      
+      setCurrentWeather(mockData);
     } finally {
       setIsLoading(false);
     }
@@ -656,7 +942,7 @@ const Weather = () => {
 
   return (
     <div 
-      className="p-3 h-[100px] relative"
+      className="p-3 relative"
       style={{
         ...(currentBackground?.url
           ? {
@@ -673,13 +959,12 @@ const Weather = () => {
           : {
               backgroundColor: 'rgba(0, 0, 0, 0.1)'
             }),
-        minHeight: '170px'
+        height: '350px',
+        minHeight: '350px'
       }}
     >
       {/* Background overlay for better text readability */}
       <div className="absolute inset-0 bg-black/30"></div>
-      
-      
       
       {/* Background selector button */}
       <div className="absolute top-1 right-1 z-20">
@@ -692,29 +977,129 @@ const Weather = () => {
         />
       </div>
 
+
+
       {/* Weather content */}
-      <div className="flex items-center justify-center h-full relative z-10">
-        <div
-          className=" w-full flex items-center"
-          // style={{ boxShadow: "0 4px 32px 0 rgba(0,0,0,0.15)" }}
-        >
-          {/* Left: Icon, Temp, City */}
-          <div className="flex flex-col items-center justify-center px-6 py-4 min-w-[120px]">
-            <span className="text-6xl mb-2" style={{color:'#FFB900'}}>{getWeatherCardStyle(currentWeather.weather[0].main).icon}</span>
-            <span className="text-4xl font-bold text-white drop-shadow">{Math.round(currentWeather.main.temp)}°C</span>
-            <span className="text-base text-white/90 font-medium mt-1 drop-shadow">in {currentWeather.sys?.country === 'IN' ? 'India' : currentWeather.sys?.country}, {currentWeather.name.toLowerCase().includes('delhi') ? 'Delhi' : currentWeather.name}</span>
-          </div>
-          {/* Right: Main Details */}
-          <div className="flex-1 flex flex-col gap-2 px-4 py-2">
-            <div className="text-lg text-white font-semibold capitalize flex items-center gap-2">
-              <span>{currentWeather.weather[0].main}</span>
-              <span className="text-xs text-white/70 font-normal">({currentWeather.weather[0].description})</span>
+      <div className="relative z-10 h-full flex flex-col">
+        {/* Top Section - Current Weather Card */}
+        <div className="bg-white/10 rounded-lg p-4 mb-4">
+          <div className="flex items-center justify-between">
+            {/* Left Side - Weather Icon and Temperature */}
+            <div className="flex flex-col items-center">
+              <div className="text-4xl mb-2">
+                {getWeatherCardStyle(currentWeather.weather[0].main).icon}
+              </div>
+              <div className="text-3xl font-bold text-white mb-1">
+                {Math.round(currentWeather.main.temp)}°C
+              </div>
+              <div className="text-xs text-white/70 text-center">
+                in {currentWeather.sys.country}, {currentWeather.name}
+              </div>
             </div>
-            <div className="flex items-center gap-2 text-white text-sm"><span className="text-lg">🌡️</span>Feels like: <span className="font-semibold">{Math.round(currentWeather.main.feels_like)}°C</span></div>
-            <div className="flex items-center gap-2 text-white text-sm"><span className="text-lg">💧</span>Humidity: <span className="font-semibold">{currentWeather.main.humidity}%</span></div>
-            <div className="flex items-center gap-2 text-white text-sm"><span className="text-lg">💨</span>Wind: <span className="font-semibold">{currentWeather.wind.speed} m/s</span> <span className="text-xs">({currentWeather.wind.deg}°)</span></div>
+            
+            {/* Right Side - Weather Details */}
+            <div className="flex flex-col gap-2 text-white text-sm">
+              <div className="flex items-center gap-2">
+                <span>☁️</span>
+                <span>{currentWeather.weather[0].main} ({currentWeather.weather[0].description})</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span>🌡️</span>
+                <span>Feels like: {Math.round(currentWeather.main.feels_like)}°C</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span>💧</span>
+                <span>Humidity: {currentWeather.main.humidity}%</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span>💨</span>
+                <span>Wind: {currentWeather.wind.speed} m/s ({currentWeather.wind.deg}°)</span>
+              </div>
+            </div>
           </div>
         </div>
+
+        {/* Navigation Tabs */}
+        <div className="flex gap-6 mb-4">
+          {[
+            { key: 'hourly', label: 'Hourly' },
+            { key: 'daily', label: 'Daily' }
+          ].map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`text-sm font-medium transition-colors ${
+                activeTab === tab.key
+                  ? 'text-white border-b-2 border-white pb-1' 
+                  : 'text-white/70 hover:text-white'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+          </div>
+
+        {/* Dynamic Content Section */}
+        <div className="flex-1">
+          {activeTab === 'hourly' && (
+            <>
+              <div className="flex items-center justify-between mb-3">
+                <div className="text-white text-sm font-medium">Hourly Forecast</div>
+            </div>
+              
+              <div 
+                className="flex gap-3 overflow-x-auto scrollbar-hide"
+                onScroll={(e) => {
+                  setIsScrolling(true);
+                  clearTimeout(window.scrollTimeout);
+                  window.scrollTimeout = setTimeout(() => setIsScrolling(false), 300);
+                }}
+              >
+                {hourlyForecast.slice(0, 5).map((hour, index) => (
+                  <div key={index} className="flex flex-col items-center bg-white/10 rounded-lg px-2 py-4 min-w-[60px] h-24">
+                    <span className="text-xs text-white/90 mb-2">{hour.time}</span>
+                    <span className="text-2xl mb-2">{hour.icon}</span>
+                    <span className="text-sm font-semibold text-white mb-1">{hour.temp}°</span>
+                    <span 
+                      className={`text-xs text-white/70 transition-opacity duration-200 ${
+                        isScrolling ? 'opacity-0' : 'opacity-100'
+                      }`}
+                    >
+                      {hour.rain}%
+                    </span>
+          </div>
+                ))}
+        </div>
+            </>
+          )}
+
+          {activeTab === 'daily' && (
+            <>
+              <div className="flex items-center justify-between mb-3">
+                <div className="text-white text-sm font-medium">Daily</div>
+              </div>
+              
+              <div className="flex gap-3 overflow-x-auto scrollbar-hide">
+                {dailyForecast.slice(0, 5).map((day, index) => (
+                  <div key={index} className="flex flex-col items-center bg-white/10 rounded-lg px-3 py-2 min-w-[70px]">
+                    <span className="text-xs text-white/90 mb-1">
+                      {index === 0 ? 'Today' : day.day}
+                    </span>
+                    <span className="text-2xl mb-1">{day.icon}</span>
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm font-semibold text-white">{day.maxTemp}°</span>
+                      <span className="text-xs text-white/70">{day.minTemp}°</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+
+        </div>
+
+
       </div>
 
       {/* Background selector modal */}

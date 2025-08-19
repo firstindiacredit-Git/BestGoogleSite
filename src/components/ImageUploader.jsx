@@ -226,7 +226,7 @@ function ImageUploader() {
       <style>{`.ant-image-preview-close { background: #000 !important; }`}</style>
       <div>
         {images.length > 0 && (
-          <div className="relative rounded-b-sm group h-[20.25rem] flex items-center justify-center overflow-hidden bg-gray-900">
+          <div className="relative rounded-b-sm group h-[350px] flex items-center justify-center overflow-hidden bg-gray-900">
             {/* Arrows and Image display */}
             {images.length > 1 && (
               <button

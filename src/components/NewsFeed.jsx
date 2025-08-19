@@ -62,7 +62,7 @@ const NewsListItem = memo(({ news }) => (
 
 // Loading component
 const LoadingState = () => (
-  <div className="h-[300px] flex items-center justify-center">
+  <div className="h-[350px] flex items-center justify-center">
     <Spin size="large" />
   </div>
 );
@@ -256,11 +256,11 @@ const NewsFeed = () => {
 
   return (
     <div
-      style={{ opacity: widgetTransparency / 100 }}
+      style={{ opacity: widgetTransparency / 100, height: '350px', minHeight: '350px' }}
       className="min-[21vw] backdrop-blur-sm rounded-b-sm overflow-hidden"
     >
       {!collapsed && mainNews && (
-        <div>
+        <div className="h-full overflow-y-auto">
           <FeaturedNewsItem news={mainNews} />
           <div className="px-4 py-2">
             {remainingNews.map((item, index) => (

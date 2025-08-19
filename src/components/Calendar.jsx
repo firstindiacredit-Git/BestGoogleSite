@@ -118,6 +118,7 @@ const FullCalendar = () => {
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
       className={`w-full  mx-auto  rounded-sm p-3 backdrop-blur-sm text-gray-900 dark:text-gray-100`}
+      style={{ height: '350px', minHeight: '350px' }}
     >
       {/* Header */}
       <div className="">

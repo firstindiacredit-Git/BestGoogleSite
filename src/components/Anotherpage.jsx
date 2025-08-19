@@ -80,8 +80,8 @@ const WidgetCard = memo(function WidgetCard({ title, menu, children, collapsible
           className={`bg-gray-100/[var(--widget-opacity)] dark:bg-[#28283b]/[var(--widget-opacity)] backdrop-blur-sm relative flex items-center p-3 ${collapsible ? 'cursor-pointer select-none' : ''}`}
           onClick={collapsible ? handleToggle : undefined}
         >
-          <div className="w-full dark:text-white text-center font-semibold text-lg capitalize flex items-center justify-center gap-2">
-            {title}
+          <div className="w-full  dark:text-white text-center font-semibold text-lg capitalize flex items-center justify-center gap-2">
+            {title && title.length > 20 ? `${title.substring(0, 20)}...` : title}
           </div>
           {menu && (
             <div className="absolute right-0 top-1/2 -translate-y-1/2">
@@ -106,6 +106,51 @@ WidgetCard.propTypes = {
 // Memoize componentMap
 const Anotherpage = ({ pageId = "home" }) => {
   const { isDarkMode } = useTheme();
+  
+  // Add custom styles for dark mode dropdowns
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      .ant-dropdown-menu {
+        background-color: white !important;
+      }
+      .dark .ant-dropdown-menu {
+        background-color: #1f2937 !important;
+        border-color: #374151 !important;
+      }
+      .ant-dropdown-menu {
+        background-color: white !important;
+      }
+      .dark .ant-dropdown-menu {
+        background-color: #1f2937 !important;
+        border-color: #374151 !important;
+      }
+      .ant-dropdown-menu-item {
+        color: inherit !important;
+      }
+      .dark .ant-dropdown-menu-item {
+        color: #e5e7eb !important;
+      }
+      .dark .ant-dropdown-menu-item:hover {
+        background-color: #374151 !important;
+        color: #f3f4f6 !important;
+      }
+      .ant-dropdown-menu-item-selected {
+        background-color: #dbeafe !important;
+        color: #1e40af !important;
+      }
+      .dark .ant-dropdown-menu-item-selected {
+        background-color: #1e3a8a !important;
+        color: #93c5fd !important;
+      }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
   const [user, setUser] = useState(null);
   const [items, setItems] = useState([]);
   const [columns, setColumns] = useState(4);
@@ -2229,8 +2274,7 @@ const Anotherpage = ({ pageId = "home" }) => {
                                   {/* Trash Icon */}
                                   <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                     <path d="M3 6h18" />
-                                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
                                     <path d="M10 11v6" />
                                     <path d="M14 11v6" />
                                   </svg>
@@ -2747,42 +2791,71 @@ const Anotherpage = ({ pageId = "home" }) => {
       <>
       {/* All elements aligned to the left */}
       <div className="w-full flex items-center mb-1 justify-end" style={{ maxWidth: '90vw', margin: '0 auto', position: 'relative' }}>
-        {/* Search Input */}
-        <div style={{ display: 'flex', alignItems: 'center', marginLeft: 6, marginRight: 8 }}>
-          <div style={{  position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center'}}>
+        {/* Search Input - Updated to match PopularBookmarks design */}
+        <div className="flex items-center gap-2" style={{ marginLeft: 6, marginRight: 8 }}>
+          <div className="relative flex items-center">
+            <button
+              onClick={() => setSearchOpen(!searchOpen)}
+              className="rounded flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] px-2 py-[6px] dark:text-white transition-all duration-300 hover:scale-105"
+              title="Search bookmarks, widgets, anything..."
+            >
             {searchOpen ? (
-              <form
-                onSubmit={handleGlobalSearch}
-                className={`transition-all duration-300 overflow-hidden w-[220px] opacity-100 flex items-center`}
-                style={{ maxWidth: 320 }}
-              >
+                <svg
+                  width="16"
+                  height="16"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" strokeWidth="2" />
+                  <line x1="6" y1="6" x2="18" y2="18" strokeWidth="2" />
+                </svg>
+              ) : (
+                <svg
+                  width="16"
+                  height="16"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <circle cx="11" cy="11" r="8" strokeWidth="2" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" strokeWidth="2" />
+                </svg>
+              )}
+            </button>
+            {/* Sliding Search Input */}
+            <div
+              className={`absolute right-0 top-0 transition-all duration-300 ease-in-out ${
+                searchOpen
+                  ? 'w-64 opacity-100 translate-x-0'
+                  : 'w-0 opacity-0 translate-x-4'
+              } overflow-hidden`}
+            >
+              <form onSubmit={handleGlobalSearch}>
                 <input
                   ref={searchInputRef}
                   type="text"
-                  className="flex h-9 px-5 py-2 border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-base bg-white shadow"
                   placeholder="Search bookmarks, widgets, anything..."
+                  className="w-full px-2 py-[6px] rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-lg text-sm"
                   value={globalSearch}
                   onChange={handleSearchInput}
-                  style={{ minWidth: 0 }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') {
+                      setSearchOpen(false);
+                      setGlobalSearch('');
+                    }
+                  }}
                 />
               </form>
-            ) : (
-              <button
-                type="button"
-                className={`h-4 w-4 dark:bg-[#28283b] bg-white shadow flex items-center justify-center rounded hover:bg-gray-100 transition`}
-                title="Search"
-                aria-label="Search"
-                onClick={() => setSearchOpen(true)}
-                tabIndex={0}
-                style={{ minWidth: 30, minHeight: 30 }}
-              >
-                <svg width="16" height="16" fill="none" stroke="#6366F1" strokeWidth="2.2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-              </button>
-            )}
+            </div>
           </div>
         </div>
 
         {/* Profession Dropdown */}
+        {/* Profession Dropdown - Only show when user is logged in */}
+        {firestoreUser && (
         <div style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center', marginRight: 8 }}>
           <Dropdown
             overlay={
@@ -2828,12 +2901,14 @@ const Anotherpage = ({ pageId = "home" }) => {
             </button>
           </Dropdown>
         </div>
+        )}
 
-        {/* Interest Dropdown */}
+        {/* Interest Dropdown - Only show when user is logged in */}
+        {firestoreUser && (
         <div style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center', gap: 1, marginRight: 8 }}>
           <Dropdown
             overlay={
-              <Menu style={{ width: 250 }}>
+                <Menu style={{ width: 250, maxHeight: 280, overflowY: 'auto' }}>
                 <Menu.Item key="not_select" onClick={async () => {
                   if (isDemoMode) {
                     setShowLoginModal(true);
@@ -2899,6 +2974,7 @@ const Anotherpage = ({ pageId = "home" }) => {
             </button>
           </Dropdown>
         </div>
+        )}
 
                 {/* Three-dot Menu */}
         <div style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -2955,24 +3031,92 @@ const Anotherpage = ({ pageId = "home" }) => {
                     
                   </button>
                   {viewModeSubmenuOpen && (
-                    <div ref={submenuRef} className="absolute right-full top-0 ml-2 w-32 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-2xl z-[1200] flex flex-col py-2 px-1">
-                      {/* ...submenu content... */}
+                    <div ref={submenuRef} className="absolute right-full top-0 ml-2 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-2xl z-[1200] flex flex-col py-3 px-2 backdrop-blur-sm">
                       {[
-                        { mode: 'list', label: 'List'},
-                        { mode: 'grid', label: 'Grid'},
-                        { mode: 'icon', label: 'Icon'},
-                        { mode: 'cloud', label: 'Cloud'},
-                      ].map(({ mode, label }) => (
+                        { 
+                          mode: 'list', 
+                          label: 'List',
+                          icon: (
+                            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                              <line x1="8" y1="6" x2="21" y2="6" />
+                              <line x1="8" y1="12" x2="21" y2="12" />
+                              <line x1="8" y1="18" x2="21" y2="18" />
+                              <line x1="3" y1="6" x2="3.01" y2="6" />
+                              <line x1="3" y1="12" x2="3.01" y2="12" />
+                              <line x1="3" y1="18" x2="3.01" y2="18" />
+                            </svg>
+                          )
+                        },
+                        { 
+                          mode: 'grid', 
+                          label: 'Grid',
+                          icon: (
+                            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                              <rect x="3" y="3" width="7" height="7" />
+                              <rect x="14" y="3" width="7" height="7" />
+                              <rect x="14" y="14" width="7" height="7" />
+                              <rect x="3" y="14" width="7" height="7" />
+                            </svg>
+                          )
+                        },
+                        { 
+                          mode: 'icon', 
+                          label: 'Icon',
+                          icon: (
+                            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                              <circle cx="12" cy="12" r="3" />
+                              <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1" />
+                            </svg>
+                          )
+                        },
+                        { 
+                          mode: 'cloud', 
+                          label: 'Cloud',
+                          icon: (
+                            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                              <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" />
+                            </svg>
+                          )
+                        },
+                      ].map(({ mode, label, icon }) => {
+                        // Check if active based on current context (profession or interest)
+                        let isActive = false;
+                        if (selectedInterest !== 'not_select') {
+                          // For interest-based view, check if all interest subcategories use this mode
+                          const interestSubcatKeys = interestSubcats.map(subcat => getSubcatKey(subcat));
+                          isActive = interestSubcatKeys.length > 0 && interestSubcatKeys.every(key => subcatDisplayModes[key] === mode);
+                        } else {
+                          // For profession-based view, check if all subcategories use this mode
+                          isActive = Object.values(subcatDisplayModes).every(v => v === mode);
+                        }
+                        return (
                         <button
                           key={mode}
-                          className={`w-full flex items-center gap-3 px-4 py-2 rounded text-sm font-semibold border-b last:border-b-0 border-gray-100 dark:border-gray-700 transition relative ${Object.values(subcatDisplayModes).every(v => v === mode) ? 'bg-gray-200 text-black' : 'bg-gray-900 text-gray-700'} hover:bg-blue-100`}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 relative group ${
+                              isActive 
+                                ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg transform scale-105' 
+                                : 'text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 dark:hover:from-blue-900/20 dark:hover:to-purple-900/20 hover:text-blue-600 dark:hover:text-blue-400'
+                            }`}
                           onClick={async () => {
-                            const subcats = firestoreUser && firestoreSubcats.length > 0 ? firestoreSubcats : subcatOrder;
                             const updates = {};
+                            
+                            if (selectedInterest !== 'not_select') {
+                              // For interest-based view, update all interest subcategories
+                              interestSubcats.forEach(subcat => {
+                                const key = getSubcatKey(subcat);
+                                if (key) {
+                                  updates[key] = mode;
+                                }
+                              });
+                            } else {
+                              // For profession-based view, update all profession subcategories
+                              const subcats = firestoreUser && firestoreSubcats.length > 0 ? firestoreSubcats : subcatOrder;
                             subcats.forEach(subcat => {
                               const key = typeof subcat === 'object' && subcat.name ? subcat.name : subcat;
                               updates[key] = mode;
                             });
+                            }
+                            
                             setSubcatDisplayModes(prev => ({ ...prev, ...updates }));
                             if (firestoreUser) {
                               // Persist for all subcats
@@ -2986,15 +3130,20 @@ const Anotherpage = ({ pageId = "home" }) => {
                             setMenuOpen(false);
                           }}
                         >
-                          
-                          <span>{label}</span>
-                          {/* {Object.values(subcatDisplayModes).every(v => v === mode) && (
-                            <span className="absolute right-3">
-                              <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
-                            </span>
-                          )} */}
+                            <div className={`flex-shrink-0 transition-all duration-200 ${isActive ? 'text-white' : 'text-gray-500 group-hover:text-blue-500'}`}>
+                              {icon}
+                            </div>
+                            <span className="flex-1 text-left">{label}</span>
+                            {isActive && (
+                              <div className="flex-shrink-0">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                                  <path d="M5 13l4 4L19 7" />
+                                </svg>
+                              </div>
+                            )}
                         </button>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -3277,11 +3426,11 @@ const Anotherpage = ({ pageId = "home" }) => {
       {showSearchModal && (
         <div className="fixed inset-0 z-[1200] flex items-start justify-center bg-black/20" style={{ paddingTop: 90 }}>
           <div ref={searchModalRef} className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 p-6 w-full max-w-lg mx-auto">
-            <div className="font-semibold text-lg mb-3">Search Results</div>
+            <div className="font-semibold text-lg mb-3 dark:text-white">Search Results</div>
             <div className="mb-4">
-              <div className="font-semibold text-gray-500 mb-1">Bookmarks</div>
+              <div className="font-semibold text-gray-500 dark:text-gray-300 mb-1">Bookmarks</div>
               {searchResults.bookmarks.length === 0 ? (
-                <div className="text-gray-400 text-sm">No bookmarks found.</div>
+                <div className="text-gray-400 dark:text-gray-500 text-sm">No bookmarks found.</div>
               ) : (
                 <div className="flex flex-col gap-2">
                   {searchResults.bookmarks.map((b, i) => (
@@ -3308,9 +3457,9 @@ const Anotherpage = ({ pageId = "home" }) => {
               )}
             </div>
             <div>
-              <div className="font-semibold text-gray-500 mb-1">Widgets/Tools</div>
+              <div className="font-semibold text-gray-500 dark:text-gray-300 mb-1">Widgets/Tools</div>
               {searchResults.widgets.length === 0 ? (
-                <div className="text-gray-400 text-sm">No widgets found.</div>
+                <div className="text-gray-400 dark:text-gray-500 text-sm">No widgets found.</div>
               ) : (
                 <div className="flex flex-col gap-2">
                   {searchResults.widgets.map(w => (

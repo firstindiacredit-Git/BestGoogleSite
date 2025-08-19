@@ -470,7 +470,7 @@ const TodoComponent = ({ inNotebookSheet = false }) => {
       style={{
         backgroundColor: mainTodoIsAutoColor ? undefined : mainTodoContainerColor,
         color: mainTodoIsAutoColor ? undefined : mainTodoTextColor,
-        height: '300px', maxHeight: '100%'
+        height: '350px', maxHeight: '100%'
       }}
       
     >
