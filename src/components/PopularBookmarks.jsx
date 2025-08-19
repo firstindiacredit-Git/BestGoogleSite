@@ -4363,7 +4363,7 @@ function PopularBookmarks() {
               key="cancel"
               value="dark:hover:bg-gray-800"
               onClick={() => setIsControllerOpen(false)}
-              className="dark:text-white border-none  dark:hover:bg-gray-800 dark:bg-gray-700"
+              className="dark:text-white border-none dark:hover:bg-gray-800 dark:bg-gray-700"
             >
               Cancel
             </AntButton>
