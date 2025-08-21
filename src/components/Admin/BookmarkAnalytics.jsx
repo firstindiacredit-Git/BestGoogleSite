@@ -415,7 +415,7 @@ const BookmarkAnalytics = () => {
         title: 'Check Complete',
         content: (
           <div>
-            <div className="grid grid-cols-3  gap-3 text-center mb-3">
+            <div className="grid grid-cols-3 gap-3 text-center mb-3">
               <div className="bg-green-50 p-2 rounded">
                 <div className="text-xl font-bold text-green-600">{working}</div>
                 <div className="text-green-600 text-sm">Working</div>
