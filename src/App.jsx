@@ -65,7 +65,8 @@ const Dashboard = lazy(() => import("./components/Admin/Dashboard.jsx"));
 const AddBookmark = lazy(() => import("./components/Admin/AddBookmark.jsx"));
 const AddSubcategory =lazy(() => import("./components/Admin/AddSubcategory.jsx"))
 const Users = lazy(() => import("./components/Admin/Users.jsx"));
-const AdminImages = lazy(() => import("./components/Admin/ImageAdminUpload.jsx"));  
+const AdminImages = lazy(() => import("./components/Admin/ImageAdminUpload.jsx"));
+const BookmarkAnalytics = lazy(() => import("./components/Admin/BookmarkAnalytics.jsx"));  
 const PremiumPage = lazy(() => import("./components/PremiumPage.jsx"));
 const PremiumForm = lazy(() => import("./components/PremiumForm.jsx"));
 const LandingPage = lazy(() => import("./components/LandingPage.jsx"));
@@ -1087,6 +1088,10 @@ const App = () => {
                         <Route
                           path="/admin/AddBookmark"
                           element={<AdminRoute children={<AddBookmark />} />}
+                        />
+                        <Route
+                          path="/admin/bookmark-analytics"
+                          element={<AdminRoute children={<BookmarkAnalytics />} />}
                         />
                         <Route
                           path="/admin/addlinks"

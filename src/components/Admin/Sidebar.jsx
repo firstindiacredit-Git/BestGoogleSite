@@ -4,6 +4,7 @@ import { LuLayoutDashboard, LuUsers } from "react-icons/lu";
 import { MdOutlineAddLink, MdBook, MdOutlineRateReview  } from "react-icons/md";
 import { IoSettingsOutline, IoSunny, IoMoon, IoLogOut } from "react-icons/io5";
 import { RiBloggerLine, RiImageLine } from "react-icons/ri";
+import { BarChart3 } from "lucide-react";
 import { signOut } from "firebase/auth";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../../firebase";
@@ -108,6 +109,11 @@ export default function Sidebar() {
       path: "/admin/AddBookmark",
       label: "Add Shortcuts",
       icon: MdOutlineAddLink,
+    },
+    {
+      path: "/admin/bookmark-analytics",
+      label: "Bookmark Analytics",
+      icon: BarChart3,
     },
     {
       path: "/admin/BlogList",
