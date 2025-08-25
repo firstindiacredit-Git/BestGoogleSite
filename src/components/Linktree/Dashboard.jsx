@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import axios from 'axios';
-import { useAuth } from './AuthContext';
+import { useAuth } from '../../context/AuthContext';
+import PropTypes from 'prop-types';
 
 const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
   const { user: authUser, logout: authLogout } = useAuth();
@@ -60,16 +61,7 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
 
   const fetchProfile = async () => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No authentication token');
-      }
-
-      const res = await axios.get('https://link-tree-backend-theta.vercel.app/api/users/me/profile', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const res = await axios.get('/users/me/profile');
       
       setProfile({
         bio: res.data.bio || '',
@@ -133,7 +125,7 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
       const updatedLinks = [...profile.links, newLinkEntry];
 
       // Send only the links array to update
-      const response = await axios.post('https://link-tree-backend-theta.vercel.app/api/users/update', {
+      const response = await axios.post('/users/update', {
         links: updatedLinks
       });
 
@@ -164,7 +156,7 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
       const updatedLinks = profile.links.filter((_, i) => i !== index);
 
       // Send only the links array to update
-      const response = await axios.post('https://link-tree-backend-theta.vercel.app/api/users/update', {
+      const response = await axios.post('/users/update', {
         links: updatedLinks
       });
 
@@ -194,7 +186,7 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
         throw new Error('All links must have both platform name and URL');
       }
 
-      const response = await axios.post('https://link-tree-backend-theta.vercel.app/api/users/update', {
+      const response = await axios.post('/users/update', {
         bio: profile.bio,
         theme: profile.theme,
         links: profile.links
@@ -272,7 +264,7 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
       };
 
       // Send only the links array to update
-      const response = await axios.post('https://link-tree-backend-theta.vercel.app/api/users/update', {
+      const response = await axios.post('/users/update', {
         links: updatedLinks
       });
 
@@ -312,7 +304,7 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
       };
 
       // Send only the links array to update
-      const response = await axios.post('https://link-tree-backend-theta.vercel.app/api/users/update', {
+      const response = await axios.post('/users/update', {
         links: updatedLinks
       });
 
@@ -343,7 +335,7 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
       const formData = new FormData();
       formData.append('avatar', file);
 
-      const response = await axios.post('https://link-tree-backend-theta.vercel.app/api/users/upload-avatar', formData, {
+      const response = await axios.post('/users/upload-avatar', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -527,20 +519,7 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
                      </svg>
                      <span>Profile</span>
                    </button>
-                   <button
-                     onClick={() => {
-                       if (window.confirm('Are you sure you want to logout?')) {
-                         handleLogout();
-                       }
-                     }}
-                     className="flex-1 sm:flex-none bg-red-500 hover:bg-red-600 text-white font-semibold px-4 sm:px-3 py-2 rounded-full shadow hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
-                     title="Logout"
-                   >
-                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                     </svg>
-                     <span>Logout</span>
-                  </button>
+                
                 </div>
               </div>
               <div className="bg-white rounded-2xl shadow p-4 sm:p-6 lg:p-8 transition-all duration-300 hover:shadow border border-gray-100">
@@ -1179,6 +1158,12 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
       )}
     </div>
   );
+};
+
+Dashboard.propTypes = {
+  user: PropTypes.object,
+  onLogout: PropTypes.func,
+  onViewProfile: PropTypes.func
 };
 
 export default Dashboard; 

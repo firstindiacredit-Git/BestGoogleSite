@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { auth, provider } from "../../firebase";
-import { signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { Link } from "react-router-dom";
 import { protectForm } from "../../utils/recaptcha";
 import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
+import { useAuth } from "../../context/AuthContext";
 import PropTypes from "prop-types";
 
 const SignIn = ({ onSuccess }) => {
@@ -15,8 +16,7 @@ const SignIn = ({ onSuccess }) => {
   const [recaptchaLoaded, setRecaptchaLoaded] = useState(false);
   const recaptchaContainer = useRef(null);
   
-
-  
+  const { googleLogin } = useAuth();
   const db = getFirestore();
 
   const validateEmail = (email) => {
@@ -68,29 +68,20 @@ const SignIn = ({ onSuccess }) => {
   };
 
   const handleGoogleSignIn = async () => {
-    await protectForm(
-      async () => {
-        try {
-          const userCredential = await signInWithPopup(auth, provider);
-          // No profession/interest check
-          if (onSuccess) onSuccess();
-        } catch (err) {
-          if (err.code === "auth/network-request-failed") {
-            setError(
-              "Network error occurred. Please check your connection and try again."
-            );
-          } else if (err.code === "auth/popup-blocked") {
-            setError(
-              "The popup was blocked by your browser. Please allow popups and try again."
-            );
-          } else {
-            setError("Google sign-in failed: " + err.message);
-          }
-          console.error(err);
-        }
-      },
-      (error) => setError(error)
-    );
+    setLoading(true);
+    setError("");
+    
+    try {
+      const result = await googleLogin();
+      if (result.success && onSuccess) {
+        onSuccess();
+      }
+    } catch (err) {
+      console.error("Google sign-in error:", err);
+      setError("Google sign-in failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -147,11 +138,14 @@ const SignIn = ({ onSuccess }) => {
       if (script) {
         script.remove();
       }
-      if (window.grecaptcha) {
+      if (window.grecaptcha && window.grecaptcha.reset) {
         try {
           window.grecaptcha.reset();
         } catch (error) {
-          console.error("reCAPTCHA reset error:", error);
+          // Only log if it's not the "No reCAPTCHA clients exist" error
+          if (!error.message.includes("No reCAPTCHA clients exist")) {
+            console.error("reCAPTCHA reset error:", error);
+          }
         }
       }
       // Clear the container
@@ -179,11 +173,14 @@ const SignIn = ({ onSuccess }) => {
         {error && <p className="text-red-500 text-center mb-4">{error}</p>}
 
         <button
-          className="w-full flex items-center justify-center gap-2 p-3 border rounded-xs dark:bg-black dark:text-gray-200 dark:border-gray-800 bg-gray-50 rounded-xl hover:bg-gray-200 focus:ring-2 focus:ring-gray-300"
+          className="w-full flex items-center justify-center gap-2 p-3 border rounded-xs dark:bg-black dark:text-gray-200 dark:border-gray-800 bg-gray-50 rounded-xl hover:bg-gray-200 focus:ring-2 focus:ring-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={handleGoogleSignIn}
+          disabled={loading}
         >
           <img src="/google.png" alt="Google" className="w-5 h-5" />
-          <span className="font-medium">Continue with Google</span>
+          <span className="font-medium">
+            {loading ? "Signing in..." : "Continue with Google"}
+          </span>
         </button>
         <div className="flex items-center justify-center my-6">
           <hr className="border-gray-300  dark:border-gray-400 flex-grow" />
@@ -215,9 +212,10 @@ const SignIn = ({ onSuccess }) => {
 
             <button
               type="submit"
-              className="w-full p-3 bg-indigo-500 dark:bg-black cursor-pointer text-gray-200 dark:border-gray-800 border rounded-xl hover:bg-indigo-600   "
+              className="w-full p-3 bg-indigo-500 dark:bg-black cursor-pointer text-gray-200 dark:border-gray-800 border rounded-xl hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={loading}
             >
-              Continue
+              {loading ? "Signing in..." : "Continue"}
             </button>
           </form>
         ) : (

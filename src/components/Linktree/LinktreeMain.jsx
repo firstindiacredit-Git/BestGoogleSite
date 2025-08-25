@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { AuthProvider, useAuth } from './AuthContext';
+import { useAuth } from '../../context/AuthContext';
+import { message } from 'antd';
+import { useNavigate } from 'react-router-dom';
 import Landing from './Landing';
 import Login from './Login';
 import Register from './Register';
@@ -10,20 +12,23 @@ import NotFound from './NotFound';
 const LinktreeApp = () => {
   const [currentPage, setCurrentPage] = useState('login');
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // If user is logged in, go to dashboard
-    if (user && currentPage === 'login') {
+    // If user is already authenticated, go to dashboard
+    if (user && !loading && currentPage === 'login') {
+      message.success("Welcome back! You're already logged in.");
       setCurrentPage('dashboard');
     }
-  }, [user, currentPage]);
+  }, [user, loading, currentPage]);
 
   const handleLogin = () => {
     setCurrentPage('dashboard');
   };
 
   const handleLogout = () => {
-    setCurrentPage('login');
+    // Redirect to main search page instead of login
+    navigate('/search');
   };
 
   // Show loading while auth is being checked
@@ -32,6 +37,16 @@ const LinktreeApp = () => {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 to-blue-500">
         <div className="animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent"></div>
       </div>
+    );
+  }
+
+  // If user is not authenticated, show login page
+  if (!user) {
+    return (
+      <Login 
+        onLoginSuccess={handleLogin}
+        onRegisterClick={() => setCurrentPage('register')}
+      />
     );
   }
 
@@ -62,10 +77,6 @@ const LinktreeApp = () => {
       );
     
     case 'dashboard':
-      if (!user) {
-        setCurrentPage('login');
-        return null;
-      }
       return (
         <Dashboard 
           user={user}
@@ -75,8 +86,6 @@ const LinktreeApp = () => {
       );
     
     case 'profile':
-      // Debug: log the user object to see its structure
-      console.log('User object in profile case:', user);
       return (
         <Profile 
           username={user?.username || user?.email?.split('@')[0] || 'unknown'}
@@ -90,11 +99,7 @@ const LinktreeApp = () => {
 };
 
 const LinktreeMain = () => {
-  return (
-    <AuthProvider>
-      <LinktreeApp />
-    </AuthProvider>
-  );
+  return <LinktreeApp />;
 };
 
 export default LinktreeMain;

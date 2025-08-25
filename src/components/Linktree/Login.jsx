@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import { useAuth } from './AuthContext';
+import { useAuth } from '../../context/AuthContext';
+import PropTypes from 'prop-types';
 
 const Login = ({ onLoginSuccess, onRegisterClick }) => {
-  const { login } = useAuth();
+  const { login, googleLogin } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -27,6 +28,20 @@ const Login = ({ onLoginSuccess, onRegisterClick }) => {
     }
   };
 
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      const result = await googleLogin();
+      onLoginSuccess(result.user);
+    } catch (error) {
+      setError(error.message || 'Google login failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleChange = (e) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
@@ -45,6 +60,23 @@ const Login = ({ onLoginSuccess, onRegisterClick }) => {
             {error}
           </div>
         )}
+
+        {/* Google Login Button */}
+        <button
+          type="button"
+          onClick={handleGoogleLogin}
+          disabled={loading}
+          className="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed mb-6"
+        >
+          <img src="/google.png" alt="Google" className="w-5 h-5" />
+          Continue with Google
+        </button>
+
+        <div className="flex items-center justify-center mb-6">
+          <div className="flex-1 border-t border-gray-300"></div>
+          <span className="px-4 text-gray-500 text-sm">or</span>
+          <div className="flex-1 border-t border-gray-300"></div>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
@@ -124,6 +156,11 @@ const Login = ({ onLoginSuccess, onRegisterClick }) => {
       </div>
     </div>
   );
+};
+
+Login.propTypes = {
+  onLoginSuccess: PropTypes.func.isRequired,
+  onRegisterClick: PropTypes.func.isRequired
 };
 
 export default Login; 

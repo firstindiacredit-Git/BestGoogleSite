@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import { useAuth } from './AuthContext';
+import { useAuth } from '../../context/AuthContext';
+import PropTypes from 'prop-types';
 
 const Register = ({ onRegisterSuccess, onLoginClick }) => {
   const { register } = useAuth();
@@ -139,25 +140,6 @@ const Register = ({ onRegisterSuccess, onLoginClick }) => {
             </div>
           </div>
 
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="terms"
-              className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-              required
-            />
-            <label htmlFor="terms" className="ml-2 text-sm text-gray-600">
-              I agree to the{' '}
-              <a href="#" className="text-purple-600 hover:text-purple-500">
-                Terms of Service
-              </a>{' '}
-              and{' '}
-              <a href="#" className="text-purple-600 hover:text-purple-500">
-                Privacy Policy
-              </a>
-            </label>
-          </div>
-
           <button
             type="submit"
             disabled={loading}
@@ -181,6 +163,11 @@ const Register = ({ onRegisterSuccess, onLoginClick }) => {
       </div>
     </div>
   );
+};
+
+Register.propTypes = {
+  onRegisterSuccess: PropTypes.func.isRequired,
+  onLoginClick: PropTypes.func.isRequired
 };
 
 export default Register; 

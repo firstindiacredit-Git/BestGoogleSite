@@ -48,6 +48,7 @@ function Profile({ username, onBackToDashboard }) {
     
     try {
       const res = await axios.get(`https://link-tree-backend-theta.vercel.app/api/users/${username}`);
+      // const res = await axios.get(`http://localhost:5000/api/users/${username}`);
       setUser(res.data);
       setError('');
     } catch {
@@ -312,6 +313,7 @@ function Profile({ username, onBackToDashboard }) {
                 <div key={index} className="flex items-center w-full p-4 rounded-xl bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 group relative cursor-pointer" onClick={async () => {
                   try {
                     await axios.post(`https://link-tree-backend-theta.vercel.app/api/users/${user.username}/links/${index}/click`);
+                    // await axios.post(`http://localhost:5000/api/users/${user.username}/links/${index}/click`);
                         } catch {
                           // Ignore click tracking errors
                         }

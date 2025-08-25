@@ -687,7 +687,7 @@ function Main({ user, onLogout }) {
                 </div>
             ) : (
                 // Framer-inspired modern layout
-                <div className="min-h-screen -mt-10 flex flex-col bg-transparent dark:text-white text-black font-['Inter',sans-serif]">
+                <div className="min-h-screen flex flex-col bg-transparent dark:text-white text-black font-['Inter',sans-serif]">
 
 
                     {/* Main Content Area with Hero Section */}
