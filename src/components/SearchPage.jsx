@@ -628,7 +628,7 @@ const SearchPage = ({ isToolPage = false }) => {
                           <span className="drop-shadow-md">SPORTS </span>
                         </button>
                         <button
-                          className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                          className={`px-4 py-2 text-sm  font-medium rounded-md transition-all ${
                             activeComponent === "Top100"
                               ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
                               : "dark:text-white  hover:bg-gray-100 dark:hover:bg-[#28283A]"
