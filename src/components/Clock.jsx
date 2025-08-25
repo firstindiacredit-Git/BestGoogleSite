@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Plus, X, Settings } from "lucide-react";
+import { Plus, X, Settings, AlertCircle, CheckCircle, Info } from "lucide-react";
 import { Popconfirm } from "antd";
 import { auth, db } from "../firebase";
 import { doc, updateDoc, onSnapshot } from "firebase/firestore";
@@ -140,7 +140,7 @@ const TimeZoneClock = ({ timeZone, isAnalog, onRemove, baseTimeZone }) => {
 
   if (isAnalog) {
     return (
-      <div className="relative w-fit px-2 h-fit flex flex-col items-center group">
+      <div className="relative w-fit px-1 sm:px-2 h-fit flex flex-col items-center group flex-shrink-0">
         <Popconfirm
           title="Remove timezone"
           description="Are you sure you want to remove this timezone?"
@@ -149,12 +149,12 @@ const TimeZoneClock = ({ timeZone, isAnalog, onRemove, baseTimeZone }) => {
           cancelText="No"
           placement="topRight"
         >
-          <button className="absolute -top-2 -right-2 z-50 text-red-500 rounded-full p-1 opacity-0 group-hover:opacity-100 hover:text-white hover:bg-red-600 transition-opacity">
-            <X size={16} />
+          <button className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 z-50 text-red-500 rounded-full p-0.5 sm:p-1 opacity-0 group-hover:opacity-100 hover:text-white hover:bg-red-600 transition-opacity">
+            <X size={12} className="sm:w-4 sm:h-4" />
           </button>
         </Popconfirm>
         <div
-          className={`w-[6.5rem] h-[6.4rem] rounded-full border-2 relative flex items-center justify-center p-2 ${effectiveTheme.analog.border} ${effectiveTheme.analog.background}`}
+          className={`w-[4.5rem] h-[4.5rem] sm:w-[5rem] sm:h-[5rem] md:w-[5.5rem] md:h-[5.5rem] lg:w-[6rem] lg:h-[6rem] xl:w-[6.5rem] xl:h-[6.4rem] rounded-full border-2 relative flex items-center justify-center p-1 sm:p-1.5 md:p-2 ${effectiveTheme.analog.border} ${effectiveTheme.analog.background}`}
         >
           {/* Numbers */}
           {[...Array(12)].map((_, index) => {
@@ -206,7 +206,7 @@ const TimeZoneClock = ({ timeZone, isAnalog, onRemove, baseTimeZone }) => {
   }
 
   return (
-    <div className="relative w-24 h-24 group">
+    <div className="relative w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 lg:w-22 lg:h-22 xl:w-24 xl:h-24 group flex-shrink-0">
       <Popconfirm
         title="Remove timezone"
         description="Are you sure you want to remove this timezone?"
@@ -215,27 +215,27 @@ const TimeZoneClock = ({ timeZone, isAnalog, onRemove, baseTimeZone }) => {
         cancelText="No"
         placement="topRight"
       >
-        <button className="absolute -top-2 -right-2 z-50 text-red-500 rounded-full p-1 opacity-0 group-hover:opacity-100 hover:text-white hover:bg-red-600 transition-opacity">
-          <X size={16} />
+        <button className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 z-50 text-red-500 rounded-full p-0.5 sm:p-1 opacity-0 group-hover:opacity-100 hover:text-white hover:bg-red-600 transition-opacity">
+          <X size={12} className="sm:w-4 sm:h-4" />
         </button>
       </Popconfirm>
       <div
-        className={`h-full backdrop-blur-sm min-w-28 rounded-xl flex flex-col items-center justify-center p-2 ${effectiveTheme.digital.container}`}
+        className={`h-full backdrop-blur-sm min-w-16 sm:min-w-18 md:min-w-20 lg:min-w-22 xl:min-w-24 rounded-xl flex flex-col items-center justify-center p-1 sm:p-1.5 md:p-2 ${effectiveTheme.digital.container}`}
       >
-        <p className="text-[10px] font-medium mb-0">
+        <p className="text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] font-medium mb-0">
           <span className={effectiveTheme.digital.text}>{formatTimeZoneName(timeZone)}</span>
         </p>
         <div
-          className={`border px-1 rounded-xs text-nowrap ${effectiveTheme.digital.time}`}
+          className={`border px-0.5 sm:px-1 rounded-xs text-nowrap ${effectiveTheme.digital.time}`}
         >
           <p
-            className={`text-base font-bold tracking-wider ${effectiveTheme.digital.text}`}
+            className={`text-xs sm:text-sm md:text-base font-bold tracking-wider ${effectiveTheme.digital.text}`}
           >
             {formatTimeForZone(time, timeZone)}
           </p>
         </div>
         {timeDiff && (
-          <p className="text-[10px] text-gray-500 whitespace-pre-line text-center">
+          <p className="text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] text-gray-500 whitespace-pre-line text-center">
             {timeDiff}
           </p>
         )}
@@ -273,6 +273,9 @@ const ResponsiveWorldClock = () => {
     right: null,
   });
   const [searchQuery, setSearchQuery] = useState("");
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [popupType, setPopupType] = useState("success");
   const settingsRef = useRef(null);
   const addButtonRef = useRef(null);
   const settingsMenuRef = useRef(null);
@@ -349,28 +352,46 @@ const ResponsiveWorldClock = () => {
   }, []);
 
   const addTimeZone = async (timeZone) => {
-    if (selectedTimezones.length < 8) {
-      const newTimezones = [...selectedTimezones, timeZone];
-      setSelectedTimezones(newTimezones);
+    if (selectedTimezones.length >= 4) {
+      setPopupMessage("You can only add 4 clocks. Please delete one clock first to add a new one.");
+      setPopupType("warning");
+      setShowPopup(true);
       setIsDropdownOpen(false);
+      return;
+    }
 
-      const user = auth.currentUser;
-      if (user) {
-        const userDocRef = doc(db, "users", user.uid);
-        try {
-          await updateDoc(userDocRef, {
-            savedTimezones: newTimezones,
-          });
-        } catch (error) {
-          console.error("Error saving timezones:", error);
-        }
+    const newTimezones = [...selectedTimezones, timeZone];
+    setSelectedTimezones(newTimezones);
+    setIsDropdownOpen(false);
+
+    setPopupMessage(`Added ${formatTimeZoneName(timeZone)} clock successfully!`);
+    setPopupType("success");
+    setShowPopup(true);
+
+    const user = auth.currentUser;
+    if (user) {
+      const userDocRef = doc(db, "users", user.uid);
+      try {
+        await updateDoc(userDocRef, {
+          savedTimezones: newTimezones,
+        });
+      } catch (error) {
+        console.error("Error saving timezones:", error);
+        setPopupMessage("Failed to save clock. Please try again.");
+        setPopupType("error");
+        setShowPopup(true);
       }
     }
   };
 
   const removeTimeZone = async (index) => {
+    const timezoneToRemove = selectedTimezones[index];
     const newTimezones = selectedTimezones.filter((_, i) => i !== index);
     setSelectedTimezones(newTimezones);
+
+    setPopupMessage(`Removed ${formatTimeZoneName(timezoneToRemove)} clock successfully!`);
+    setPopupType("success");
+    setShowPopup(true);
 
     const user = auth.currentUser;
     if (user) {
@@ -381,6 +402,9 @@ const ResponsiveWorldClock = () => {
         });
       } catch (error) {
         console.error("Error removing timezone:", error);
+        setPopupMessage("Failed to remove clock. Please try again.");
+        setPopupType("error");
+        setShowPopup(true);
       }
     }
   };
@@ -402,15 +426,15 @@ const ResponsiveWorldClock = () => {
     const settingsContent = showSettings && (
       <div
         ref={settingsMenuRef}
-        className="fixed w-48 bg-white dark:bg-[#28283A] rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-[9998] overflow-hidden"
+        className="fixed w-36 sm:w-40 md:w-48 bg-white dark:bg-[#28283A] rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-[9998] overflow-hidden"
         style={{
           top: `${dropdownPosition.top}px`,
           right: `${dropdownPosition.right}px`,
         }}
       >
-        <div className="p-3">
+        <div className="p-2 sm:p-3">
           <div className="mb-2">
-            <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+            <div className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
               Display
             </div>
             <div className="flex gap-1">
@@ -419,7 +443,7 @@ const ResponsiveWorldClock = () => {
                   setIsAnalog(false);
                   setShowSettings(false);
                 }}
-                className={`p-2 rounded flex-1 ${
+                className={`p-1.5 sm:p-2 rounded flex-1 text-xs sm:text-sm ${
                   !isAnalog
                     ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
                     : "hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
@@ -432,7 +456,7 @@ const ResponsiveWorldClock = () => {
                   setIsAnalog(true);
                   setShowSettings(false);
                 }}
-                className={`p-2 rounded flex-1 ${
+                className={`p-1.5 sm:p-2 rounded flex-1 text-xs sm:text-sm ${
                   isAnalog
                     ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
                     : "hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -452,14 +476,14 @@ const ResponsiveWorldClock = () => {
   const renderAddTimezoneMenu = () => {
     const addTimezoneContent = isDropdownOpen && (
       <div
-        className="fixed w-64 bg-white dark:bg-[#28283A] rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-[9998] overflow-hidden add-timezone-dropdown"
+        className="fixed w-48 sm:w-56 md:w-64 bg-white dark:bg-[#28283A] rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-[9998] overflow-hidden add-timezone-dropdown"
         style={{
           top: `${addDropdownPosition.top}px`,
           right: `${addDropdownPosition.right}px`,
         }}
       >
-        <div className="p-3">
-          <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+        <div className="p-2 sm:p-3">
+          <div className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
             Add Timezone
           </div>
           <div className="relative mb-3">
@@ -468,11 +492,11 @@ const ResponsiveWorldClock = () => {
               placeholder="Search timezone..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-3 py-1.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500"
+              className="w-full px-2 sm:px-3 py-1 sm:py-1.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500"
             />
           </div>
           <div
-            className="max-h-[280px] overflow-y-auto pr-1 space-y-0.5 custom-scrollbar"
+            className="max-h-[220px] sm:max-h-[240px] md:max-h-[280px] overflow-y-auto pr-1 space-y-0.5 custom-scrollbar"
             style={{
               "--scrollbar-thumb": "rgb(203 213 225)",
               "--scrollbar-thumb-hover": "rgb(148 163 184)",
@@ -483,14 +507,14 @@ const ResponsiveWorldClock = () => {
               <button
                 key={timeZone}
                 onClick={() => addTimeZone(timeZone)}
-                className="w-full p-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white flex items-center gap-2 rounded-md transition-colors"
+                className="w-full p-1.5 sm:p-2 text-left text-xs sm:text-sm hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white flex items-center gap-1.5 sm:gap-2 rounded-md transition-colors"
               >
-                <Plus className="w-4 h-4 flex-shrink-0" />
+                <Plus className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
                 <span className="truncate">{formatTimeZoneName(timeZone)}</span>
               </button>
             ))}
             {filteredZones.length === 0 && (
-              <div className="text-center py-3 text-sm text-gray-500 dark:text-gray-400">
+              <div className="text-center py-2 sm:py-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                 No timezones found
               </div>
             )}
@@ -552,11 +576,11 @@ const ResponsiveWorldClock = () => {
     <div
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
-      className="w-full max-w-xl dark:text-white backdrop-blur-sm rounded-sm flex flex-col relative p-4"
-      style={{ height: '350px', minHeight: '350px' }}
+      className="w-full max-w-xl dark:text-white backdrop-blur-sm rounded-sm flex flex-col relative p-2 sm:p-3 md:p-4"
+      style={{ height: '350px', minHeight: '350px', maxHeight: '350px' }}
     >
       {selectedTimezones.length > 0 ? (
-        <div className="flex flex-wrap justify-center gap-8">
+        <div className="flex flex-wrap justify-center gap-3 sm:gap-4 md:gap-6 lg:gap-8 overflow-x-auto overflow-y-hidden pb-2">
           {selectedTimezones.map((tz, index) => (
             <TimeZoneClock
               key={tz}
@@ -571,12 +595,12 @@ const ResponsiveWorldClock = () => {
         <div className="flex justify-center items-center min-h-[200px]">
           <button
             onClick={() => setIsDropdownOpen(true)}
-            className="flex flex-col items-center gap-2 p-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="flex flex-col items-center gap-2 p-3 sm:p-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           >
-            <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-              <Plus className="w-8 h-8 text-gray-400 dark:text-gray-500" />
+            <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+              <Plus className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-gray-400 dark:text-gray-500" />
             </div>
-            <span className="text-sm text-gray-500 dark:text-gray-400">
+            <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
               Add Clock
             </span>
           </button>
@@ -584,29 +608,81 @@ const ResponsiveWorldClock = () => {
       )}
 
       {/* Bottom Options Bar */}
-      <div className="absolute bottom-2 right-2 w-fit shadow-md rounded-lg p-1 dark:bg-[#1F2937] bg-white flex items-center justify-end gap-2 z-[9997]">
-        {selectedTimezones.length < 8 && (
+      <div className="absolute bottom-1 sm:bottom-2 right-1 sm:right-2 w-fit shadow-md rounded-lg p-1 dark:bg-[#1F2937] bg-white flex items-center justify-end gap-1 sm:gap-2 z-[9997]">
+        {selectedTimezones.length < 4 && (
           <button
             ref={addButtonRef}
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-500 transition"
+            className="p-1.5 sm:p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-500 transition"
             title="Add timezone"
           >
-            <Plus className="w-5 h-5" />
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+          </button>
+        )}
+        {selectedTimezones.length >= 4 && (
+          <button
+            onClick={() => {
+              setPopupMessage("You have reached the maximum limit of 4 clocks. Delete one to add more.");
+              setPopupType("info");
+              setShowPopup(true);
+            }}
+            className="p-1.5 sm:p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-500 transition"
+            title="Maximum clocks reached"
+          >
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5 opacity-50" />
           </button>
         )}
         <button
           ref={settingsRef}
           onClick={() => setShowSettings(!showSettings)}
-          className="p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-500 transition"
+          className="p-1.5 sm:p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-500 transition"
           title="Settings"
         >
-          <Settings className="w-5 h-5" />
+          <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
       </div>
 
       {renderSettingsMenu()}
       {renderAddTimezoneMenu()}
+      
+      {/* Custom Popup */}
+      {showPopup && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-6 max-w-xs sm:max-w-sm mx-4 shadow-xl transform transition-all">
+            <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+              {popupType === "success" && (
+                <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-green-500" />
+              )}
+              {popupType === "warning" && (
+                <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-500" />
+              )}
+              {popupType === "error" && (
+                <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 text-red-500" />
+              )}
+              {popupType === "info" && (
+                <Info className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" />
+              )}
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
+                {popupType === "success" && "Success"}
+                {popupType === "warning" && "Warning"}
+                {popupType === "error" && "Error"}
+                {popupType === "info" && "Information"}
+              </h3>
+            </div>
+            <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 mb-4 sm:mb-6">
+              {popupMessage}
+            </p>
+            <div className="flex justify-end">
+              <button
+                onClick={() => setShowPopup(false)}
+                className="px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors text-sm sm:text-base"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

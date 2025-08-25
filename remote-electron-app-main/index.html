@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Remote Desktop Host</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/antd/4.24.8/antd.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-gradient: linear-gradient(90deg, #0066FF 0%, #00BFFF 100%);
+      --card-bg: rgba(19, 21, 26, 0.7);
+      --text-primary: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.7);
+      --border-color: rgba(255, 255, 255, 0.05);
+      --danger-color: #FF4D4F;
+      --success-color: #00FFFF;
+      --warning-color: #F5A623;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #000;
+      color: var(--text-primary);
+      height: 100vh;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(0, 191, 255, 0.08) 0%, transparent 25%),
+        radial-gradient(circle at 85% 85%, rgba(0, 106, 255, 0.08) 0%, transparent 25%);
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    .layout {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: transparent;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .header {
+      background: rgba(15, 15, 15, 0.5);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 1px 0 var(--border-color);
+      z-index: 10;
+      transition: all 0.3s ease;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+    }
+    
+    .logo-icon {
+      /* font-size: 28px; */
+      height: 2rem;
+      margin-right: 12px;
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 10px rgba(0, 128, 255, 0.3));
+    }
+    
+    .content {
+      padding: 24px;
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+    
+    .cards-container {
+      display: flex;
+      width: 100%;
+      max-width: 1200px;
+      gap: 24px;
+      flex-wrap: wrap;
+      align-items: stretch;
+    }
+    
+    .card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      padding: 30px;
+      border: 1px solid var(--border-color);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      overflow: hidden;
+      position: relative;
+      flex: 1;
+      min-width: 300px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+    }
+    
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--primary-gradient);
+      border-radius: 3px 3px 0 0;
+    }
+    
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 14px;
+      border-radius: 100px;
+      font-size: 14px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border-color);
+      transition: all 0.3s ease;
+    }
+    
+    .footer {
+      text-align: center;
+      background: rgba(5, 5, 5, 0.7);
+      color: var(--text-secondary);
+      padding: 16px 0;
+      border-top: 1px solid var(--border-color);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 10px;
+      position: relative;
+    }
+    
+    .dot::after {
+      content: '';
+      position: absolute;
+      top: -3px;
+      left: -3px;
+      right: -3px;
+      bottom: -3px;
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.8; }
+      70% { transform: scale(1.5); opacity: 0; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+    
+    .connected {
+      background-color: var(--success-color);
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    }
+    
+    .connected::after {
+      border: 1px solid var(--success-color);
+    }
+    
+    .disconnected {
+      background-color: var(--danger-color);
+      box-shadow: 0 0 10px rgba(255, 77, 79, 0.5);
+    }
+    
+    .disconnected::after {
+      border: 1px solid var(--danger-color);
+    }
+    
+    .reconnecting {
+      background-color: var(--warning-color);
+      box-shadow: 0 0 10px rgba(245, 166, 35, 0.5);
+    }
+    
+    .reconnecting::after {
+      border: 1px solid var(--warning-color);
+    }
+    
+    .actions {
+      display: flex;
+      justify-content: center;
+      margin-top: auto;
+      padding-top: 24px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    
+    .button {
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: 'Inter', sans-serif;
+      min-height: 46px;
+      transition: all 0.2s ease;
+      min-width: 140px;
+    }
+    
+    .primary-button {
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+      box-shadow: 0 4px 12px rgba(0, 128, 255, 0.3);
+    }
+    
+    .primary-button:hover {
+      box-shadow: 0 6px 16px rgba(0, 128, 255, 0.4);
+      transform: translateY(-2px);
+    }
+    
+    .danger-button {
+      background: rgba(255, 77, 79, 0.1);
+      color: var(--danger-color);
+      border: 1px solid rgba(255, 77, 79, 0.3);
+    }
+    
+    .danger-button:hover {
+      background: rgba(255, 77, 79, 0.2);
+    }
+    
+    .session-code-container {
+      display: flex;
+      justify-content: center;
+      margin: 25px 0;
+      perspective: 1000px;
+    }
+    
+    .session-code {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
+      padding: 20px 40px;
+      position: relative;
+      transform-style: preserve-3d;
+      transform: rotateX(10deg);
+      transition: all 0.3s ease;
+    }
+    
+    .session-code::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 128, 255, 0.05);
+      border: 1px solid rgba(0, 128, 255, 0.2);
+      border-radius: 12px;
+      transform: translateZ(-10px);
+      z-index: -1;
+    }
+    
+    .session-code:hover {
+      transform: rotateX(0deg) scale(1.05);
+    }
+    
+    h2, h3 {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+    
+    h3 {
+      font-size: 20px;
+      margin-bottom: 20px;
+      position: relative;
+      display: inline-block;
+    }
+    
+    h3::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 40px;
+      height: 3px;
+      background: var(--primary-gradient);
+      border-radius: 3px;
+    }
+    
+    p {
+      color: var(--text-secondary);
+      line-height: 1.6;
+      font-size: 16px;
+    }
+    
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.8);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .modal-container {
+      background: rgba(19, 21, 26, 0.95);
+      margin: 15% auto;
+      padding: 30px;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 440px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      text-align: center;
+      border: 1px solid var(--border-color);
+      transform: translateY(50px);
+      opacity: 0;
+      transition: transform 0.5s ease, opacity 0.3s ease;
+    }
+    
+    .modal-visible {
+      opacity: 1;
+    }
+    
+    .modal-content-visible {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    
+    .connection-info {
+      margin: 20px 0;
+      padding: 15px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+    
+    .cta-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 24px;
+    }
+    
+    .feature-icon {
+      font-size: 24px;
+      margin-right: 10px;
+      opacity: 0.9;
+    }
+    
+    .info-text {
+      display: flex;
+      align-items: flex-start;
+      padding: 8px 12px;
+      background: rgba(0, 128, 255, 0.05);
+      border-radius: 8px;
+      border: 1px solid rgba(0, 128, 255, 0.1);
+      margin: 15px 0;
+    }
+    
+    .section-title {
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+    
+    /* Animation keyframes */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 950px) {
+      .cards-container {
+        flex-direction: column;
+      }
+      
+      .content {
+        padding: 16px;
+      }
+      
+      .card {
+        padding: 20px;
+        min-height: auto;
+      }
+      
+      .session-code {
+        font-size: 24px;
+        padding: 15px 25px;
+      }
+      
+      .button {
+        min-width: 120px;
+      }
+      
+      .actions {
+        justify-content: center;
+      }
+      
+      .header {
+        padding: 12px 16px;
+      }
+      
+      h2 {
+        font-size: 20px;
+      }
+      
+      .logo-icon {
+        font-size: 24px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .session-code {
+        font-size: 20px;
+        letter-spacing: 3px;
+        padding: 12px 20px;
+      }
+      
+      .button {
+        width: 100%;
+      }
+      
+      .cta-buttons {
+        flex-direction: column;
+      }
+      
+      .cta-buttons .button {
+        width: 100%;
+      }
+      
+      .status-pill {
+        padding: 4px 10px;
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <div class="header">
+      <div class="logo">
+         <img src="flydesk12.png" class="logo-icon"/>
+        <h2 style="margin: 0; font-weight: 600;">FLYDESK Host</h2>
+      </div>
+      <div class="status-pill" id="connection-status-pill">
+        <span class="dot disconnected" id="status-dot"></span>
+        <span id="connection-status" style="font-weight: 500;">Disconnected</span>
+      </div>
+    </div>
+    
+    <div class="content">
+      <div class="cards-container">
+        <div class="card">
+          <h3 class="section-title">Connection Information</h3>
+          <p>Your Session Code:</p>
+          <div class="session-code-container">
+            <span class="session-code" id="sessionCode">Generating...</span>
+          </div>
+          <div class="info-text">
+            <span class="feature-icon">🔒</span>
+            <p style="margin: 0;">Share this 6-digit code with anyone who wants to control your computer. You'll receive a prompt to approve or deny their access request.</p>
+          </div>
+          <div class="actions">
+            <button class="button primary-button" id="copy-code">
+              <span>📋</span> Copy Code
+            </button>
+          </div>
+        </div>
+        
+        <div class="card">
+          <h3 class="section-title">Session Status</h3>
+          <p id="status-message">Waiting for connection...</p>
+          <div class="info-text">
+            <span class="feature-icon">ℹ️</span>
+            <p style="margin: 0;">When someone connects, you'll see their details here.</p>
+          </div>
+          <div class="actions">
+            <button class="button danger-button" id="disconnect-btn">
+              <span>⏹</span> Disconnect Client
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer">
+      FLYDESK ©<span id="current-year"></span> | All Rights Reserved | Powered by Pizeonfly
+    </div>
+  </div>
+
+  <div id="connection-request-modal" class="modal-overlay">
+    <div class="modal-container">
+      <h3 style="margin-bottom: 15px; color: white; font-size: 22px;">Connection Request</h3>
+      <div class="connection-info">
+        <p style="margin-bottom: 5px; color: rgba(255,255,255,0.7);">Someone is trying to connect to your computer</p>
+        <p style="margin-bottom: 0; color: white;">Connection ID: <strong id="request-client-id" style="color: #00BFFF;"></strong></p>
+      </div>
+      <div class="cta-buttons">
+        <button class="button primary-button" id="accept-connection">Accept</button>
+        <button class="button danger-button" id="reject-connection">Reject</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { ipcRenderer } = require('electron');
+    
+    // Set current year
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+    
+    // Connection ID handling
+    ipcRenderer.on('connection-id', (event, id) => {
+      console.log("Connection ID:", id);
+    });
+    
+    // Status message handling
+    ipcRenderer.on('status-update', (event, message) => {
+      document.getElementById('status-message').textContent = message;
+    });
+
+    // Update connection status initially
+    const statusDot = document.getElementById('status-dot');
+    const connectionStatus = document.getElementById('connection-status');
+    const connectionStatusPill = document.getElementById('connection-status-pill');
+    
+    statusDot.className = 'dot disconnected';
+    connectionStatus.textContent = 'Disconnected';
+    connectionStatusPill.style.backgroundColor = 'rgba(255, 77, 79, 0.1)';
+    connectionStatusPill.style.border = '1px solid rgba(255, 77, 79, 0.2)';
+
+    // Handle connect event
+    ipcRenderer.on('connect', () => {
+      statusDot.className = 'dot connected';
+      connectionStatus.textContent = 'Connected';
+      connectionStatusPill.style.backgroundColor = 'rgba(0, 255, 255, 0.1)';
+      connectionStatusPill.style.border = '1px solid rgba(0, 255, 255, 0.2)';
+    });
+
+    // Handle disconnect event
+    ipcRenderer.on('disconnect', () => {
+      statusDot.className = 'dot disconnected';
+      connectionStatus.textContent = 'Disconnected';
+      connectionStatusPill.style.backgroundColor = 'rgba(255, 77, 79, 0.1)';
+      connectionStatusPill.style.border = '1px solid rgba(255, 77, 79, 0.2)';
+    });
+
+    // Handle reconnection attempt
+    ipcRenderer.on('reconnect_attempt', () => {
+      statusDot.className = 'dot reconnecting';
+      connectionStatus.textContent = 'Reconnecting...';
+      connectionStatusPill.style.backgroundColor = 'rgba(245, 166, 35, 0.1)';
+      connectionStatusPill.style.border = '1px solid rgba(245, 166, 35, 0.2)';
+    });
+    
+    // Add the new functions to handle session codes
+    let pendingClientId = null;
+    
+    // Session code handling
+    ipcRenderer.on('session-code', (event, code) => {
+      document.getElementById('sessionCode').textContent = code;
+    });
+    
+    // Copy session code functionality
+    document.getElementById('copy-code').addEventListener('click', () => {
+      const code = document.getElementById('sessionCode').textContent;
+      if (code && code !== 'Generating...') {
+        navigator.clipboard.writeText(code).then(() => {
+          alert('Code copied to clipboard!');
+        }).catch(err => {
+          console.error('Failed to copy: ', err);
+        });
+      }
+    });
+    
+    // Connection request handling with animation
+    ipcRenderer.on('connection-request', (event, data) => {
+      const modal = document.getElementById('connection-request-modal');
+      const modalContent = document.querySelector('.modal-container');
+      document.getElementById('request-client-id').textContent = data.clientId;
+      
+      modal.style.display = 'block';
+      // Trigger reflow
+      modal.offsetHeight;
+      
+      modal.classList.add('modal-visible');
+      modalContent.classList.add('modal-content-visible');
+      
+      pendingClientId = data.clientId;
+    });
+    
+    // Accept connection
+    document.getElementById('accept-connection').addEventListener('click', () => {
+      if (pendingClientId) {
+        ipcRenderer.send('respond-to-connection', {
+          clientId: pendingClientId,
+          accepted: true
+        });
+        hideModal('connection-request-modal');
+        document.getElementById('status-message').textContent = `Accepted connection from ${pendingClientId}`;
+        pendingClientId = null;
+      }
+    });
+    
+    // Reject connection
+    document.getElementById('reject-connection').addEventListener('click', () => {
+      if (pendingClientId) {
+        ipcRenderer.send('respond-to-connection', {
+          clientId: pendingClientId,
+          accepted: false
+        });
+        hideModal('connection-request-modal');
+        document.getElementById('status-message').textContent = 'Connection rejected';
+        pendingClientId = null;
+      }
+    });
+    
+    function hideModal(modalId) {
+      const modal = document.getElementById(modalId);
+      const modalContent = modal.querySelector('.modal-container');
+      
+      modalContent.classList.remove('modal-content-visible');
+      modal.classList.remove('modal-visible');
+      
+      setTimeout(() => {
+        modal.style.display = 'none';
+      }, 300);
+    }
+
+    // Disconnect client functionality - now closes the app safely without triggering socket disconnect
+    document.getElementById('disconnect-btn').addEventListener('click', () => {
+      if (confirm('Are you sure you want to disconnect and close the app?')) {
+        // Tell the main process to quit directly without trying to disconnect socket again
+        ipcRenderer.send('force-quit-app');
+      }
+    });
+    
+    // Add some animation on load
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.card').forEach((card, index) => {
+        card.style.animation = `fadeIn 0.5s ease forwards ${0.1 + index * 0.1}s`;
+        card.style.opacity = '0';
+      });
+    });
+  </script>
+</body>
+</html>

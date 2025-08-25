@@ -78,6 +78,7 @@ const Blog = lazy(() => import("./components/Blog.jsx"));
 const BlogList = lazy(() => import("./components/Admin/BlogList.jsx"));
 const BlogDetail = lazy(() => import("./components/BlogDetail.jsx"));
 const Transactions = lazy(() => import("./components/Admin/Transactions"));
+const LinktreeProfile = lazy(() => import("./components/Linktree/LinktreeProfile"));
 
 // Lazy load all Tool components
 import Calculator from "../Tools/Component/Calculator.jsx";
@@ -881,6 +882,7 @@ const App = () => {
                       <Route path="/contact" element={<ContactUs />} />
                       <Route path="/blog" element={<Blog />} />
                       <Route path="/blog/:id" element={<BlogDetail />} />
+                      <Route path="/linktree/:username" element={<LinktreeProfile />} />
                       <Route path="/admin/adminImages" element={<AdminImages />} />
                       <Route
                         path="/profile"

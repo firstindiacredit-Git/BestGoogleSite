@@ -20,6 +20,7 @@ import BalanceSheet from "../components/balancesheet/BalanceSheet.jsx";
 import Sports from "../components/Sports";
 import Top100 from "../components/Top100";
 import "./style.css";
+import "../components/RemoteApp/index.css";
 import { Dropdown, Skeleton, Input } from "antd";
 import { Palette } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
@@ -29,6 +30,8 @@ import { useAuth } from "../context/AuthContext.jsx";
 import axios from "axios";
 import BalancesheetDashboard from "../components/balancesheet/BalancesheetDashboard.jsx";
 import BalancesheetLogin from "../components/balancesheet/BalancesheetLogin.jsx";
+import LinktreeMain from "../components/Linktree/LinktreeMain.jsx";
+import RemoteAppWrapper from "../components/RemoteApp/RemoteAppWrapper.jsx";
 
 const SearchPage = ({ isToolPage = false }) => {
   const { isDarkMode, toggleTheme } = useTheme();
@@ -669,6 +672,32 @@ const SearchPage = ({ isToolPage = false }) => {
                         >
                           <span className="drop-shadow-md">BALANCE SHEET</span>
                         </button>
+                        <button
+                          className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                            activeComponent === "LinkNest"
+                              ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                              : "dark:text-white  hover:bg-gray-100 dark:hover:bg-[#28283A]"
+                          }`}
+                          onClick={() => {
+                            setSelectedSheetId(null);
+                            setActiveComponent("LinkNest");
+                          }}
+                        >
+                          <span className="drop-shadow-md">LINKNEST</span>
+                        </button>
+                        <button
+                          className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                            activeComponent === "Remote"
+                              ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                              : "dark:text-white  hover:bg-gray-100 dark:hover:bg-[#28283A]"
+                          }`}
+                          onClick={() => {
+                            setSelectedSheetId(null);
+                            setActiveComponent("Remote");
+                          }}
+                        >
+                          <span className="drop-shadow-md">REMOTE</span>
+                        </button>
                         
                         <Dropdown
                           menu={settingsMenu}
@@ -714,6 +743,10 @@ const SearchPage = ({ isToolPage = false }) => {
                 <Top100 />
               ) : activeComponent === "Tool" ? (
                 <Tool />
+              ) : activeComponent === "LinkNest" ? (
+                <LinktreeMain />
+              ) : activeComponent === "Remote" ? (
+                <RemoteAppWrapper />
               ) : (
                 <Anotherpage
                   visibleHandle={visibleHandle}

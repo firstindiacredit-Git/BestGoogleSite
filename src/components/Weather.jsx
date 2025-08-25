@@ -942,7 +942,7 @@ const Weather = () => {
 
   return (
     <div 
-      className="p-3 relative"
+      className="p-2 sm:p-3 relative"
       style={{
         ...(currentBackground?.url
           ? {
@@ -982,14 +982,14 @@ const Weather = () => {
       {/* Weather content */}
       <div className="relative z-10 h-full flex flex-col">
         {/* Top Section - Current Weather Card */}
-        <div className="bg-white/10 rounded-lg p-4 mb-4">
-          <div className="flex items-center justify-between">
+        <div className="bg-white/10 rounded-lg p-3 sm:p-4 mb-3 sm:mb-4">
+          <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-3 sm:gap-0">
             {/* Left Side - Weather Icon and Temperature */}
             <div className="flex flex-col items-center">
-              <div className="text-4xl mb-2">
+              <div className="text-3xl sm:text-4xl mb-2">
                 {getWeatherCardStyle(currentWeather.weather[0].main).icon}
               </div>
-              <div className="text-3xl font-bold text-white mb-1">
+              <div className="text-2xl sm:text-3xl font-bold text-white mb-1">
                 {Math.round(currentWeather.main.temp)}°C
               </div>
               <div className="text-xs text-white/70 text-center">
@@ -998,7 +998,7 @@ const Weather = () => {
             </div>
             
             {/* Right Side - Weather Details */}
-            <div className="flex flex-col gap-2 text-white text-sm">
+            <div className="flex flex-col gap-1 sm:gap-2 text-white text-xs sm:text-sm">
               <div className="flex items-center gap-2">
                 <span>☁️</span>
                 <span>{currentWeather.weather[0].main} ({currentWeather.weather[0].description})</span>
@@ -1020,7 +1020,7 @@ const Weather = () => {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex gap-6 mb-4">
+        <div className="flex gap-4 sm:gap-6 mb-3 sm:mb-4">
           {[
             { key: 'hourly', label: 'Hourly' },
             { key: 'daily', label: 'Daily' }
@@ -1028,7 +1028,7 @@ const Weather = () => {
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`text-sm font-medium transition-colors ${
+              className={`text-xs sm:text-sm font-medium transition-colors ${
                 activeTab === tab.key
                   ? 'text-white border-b-2 border-white pb-1' 
                   : 'text-white/70 hover:text-white'
@@ -1037,63 +1037,125 @@ const Weather = () => {
               {tab.label}
             </button>
           ))}
-          </div>
+        </div>
 
         {/* Dynamic Content Section */}
         <div className="flex-1">
           {activeTab === 'hourly' && (
-            <>
-              <div className="flex items-center justify-between mb-3">
-                <div className="text-white text-sm font-medium">Hourly Forecast</div>
-            </div>
-              
-              <div 
-                className="flex gap-3 overflow-x-auto scrollbar-hide"
-                onScroll={(e) => {
-                  setIsScrolling(true);
-                  clearTimeout(window.scrollTimeout);
-                  window.scrollTimeout = setTimeout(() => setIsScrolling(false), 300);
-                }}
-              >
-                {hourlyForecast.slice(0, 5).map((hour, index) => (
-                  <div key={index} className="flex flex-col items-center bg-white/10 rounded-lg px-2 py-4 min-w-[60px] h-24">
-                    <span className="text-xs text-white/90 mb-2">{hour.time}</span>
-                    <span className="text-2xl mb-2">{hour.icon}</span>
-                    <span className="text-sm font-semibold text-white mb-1">{hour.temp}°</span>
-                    <span 
-                      className={`text-xs text-white/70 transition-opacity duration-200 ${
-                        isScrolling ? 'opacity-0' : 'opacity-100'
-                      }`}
-                    >
-                      {hour.rain}%
-                    </span>
-          </div>
-                ))}
-        </div>
-            </>
+                          <div className="relative flex items-center group">
+                {/* Previous Button */}
+                <button 
+                  onClick={() => {
+                    const container = document.getElementById('hourly-scroll');
+                    if (container) {
+                      container.scrollLeft -= 280;
+                    }
+                  }}
+                  className="absolute left-0 z-10 bg-white/20 backdrop-blur-sm rounded-full p-2 hover:bg-white/30 transition-all duration-300 opacity-0 group-hover:opacity-100"
+                >
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+
+                                {/* Scrollable Container */}
+                <div 
+                  id="hourly-scroll"
+                  className="flex gap-1 overflow-x-auto scrollbar-hide px-2 mx-auto justify-start"
+                  style={{ scrollBehavior: 'smooth' }}
+                >
+                  {hourlyForecast.slice(0, 6).map((hour, index) => {
+                    // Get current hour
+                    const now = new Date();
+                    const currentHour = now.getHours();
+                    
+                    // Calculate the next hours
+                    const nextHour = currentHour + index + 1;
+                    const displayHour = nextHour > 23 ? nextHour - 24 : nextHour;
+                    const timeString = displayHour === 0 ? '12 AM' : displayHour < 12 ? `${displayHour} AM` : displayHour === 12 ? '12 PM' : `${displayHour - 12} PM`;
+                    
+                    return (
+                      <div key={index} className="flex flex-col items-center bg-white/10 backdrop-blur-sm rounded-lg px-2 sm:px-3 py-2 sm:py-3 min-w-[45px] sm:min-w-[50px] h-28 sm:h-32 flex-shrink-0">
+                        <span className="text-xs text-white font-medium mb-1">{timeString}</span>
+                        <span className="text-xl sm:text-2xl mb-2">{hour.icon}</span>
+                        <span className="text-sm sm:text-lg font-bold text-white mb-1">{hour.temp}°</span>
+                        <span className="text-xs text-white/80 font-medium">
+                          {hour.rain}%
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Next Button */}
+                <button 
+                  onClick={() => {
+                    const container = document.getElementById('hourly-scroll');
+                    if (container) {
+                      container.scrollLeft += 280;
+                    }
+                  }}
+                  className="absolute right-0 z-10 bg-white/20 backdrop-blur-sm rounded-full p-2 hover:bg-white/30 transition-all duration-300 opacity-0 group-hover:opacity-100"
+                >
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
           )}
 
           {activeTab === 'daily' && (
-            <>
-              <div className="flex items-center justify-between mb-3">
-                <div className="text-white text-sm font-medium">Daily</div>
-              </div>
-              
-              <div className="flex gap-3 overflow-x-auto scrollbar-hide">
-                {dailyForecast.slice(0, 5).map((day, index) => (
-                  <div key={index} className="flex flex-col items-center bg-white/10 rounded-lg px-3 py-2 min-w-[70px]">
-                    <span className="text-xs text-white/90 mb-1">
+            <div className="relative flex items-center group">
+              {/* Previous Button */}
+              <button 
+                onClick={() => {
+                  const container = document.getElementById('daily-scroll');
+                  if (container) {
+                    container.scrollLeft -= 280;
+                  }
+                }}
+                className="absolute left-0 z-10 bg-white/20 backdrop-blur-sm rounded-full p-2 hover:bg-white/30 transition-all duration-300 opacity-0 group-hover:opacity-100"
+              >
+                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+
+              {/* Scrollable Container */}
+              <div 
+                id="daily-scroll"
+                className="flex gap-1 overflow-x-auto scrollbar-hide px-2 mx-auto justify-start"
+                style={{ scrollBehavior: 'smooth' }}
+              >
+                {dailyForecast.slice(0, 6).map((day, index) => (
+                  <div key={index} className="flex flex-col items-center bg-white/10 backdrop-blur-sm rounded-lg px-2 sm:px-3 py-2 sm:py-3 min-w-[45px] sm:min-w-[50px] h-28 sm:h-32 flex-shrink-0">
+                    <span className="text-xs text-white font-medium mb-1">
                       {index === 0 ? 'Today' : day.day}
                     </span>
-                    <span className="text-2xl mb-1">{day.icon}</span>
-                    <div className="flex items-center gap-1">
-                      <span className="text-sm font-semibold text-white">{day.maxTemp}°</span>
-                      <span className="text-xs text-white/70">{day.minTemp}°</span>
-                    </div>
+                    <span className="text-xl sm:text-2xl mb-2">{day.icon}</span>
+                    <span className="text-sm sm:text-lg font-bold text-white mb-1">{day.maxTemp}°</span>
+                    <span className="text-xs text-white/80 font-medium">
+                      {day.minTemp}°
+                    </span>
                   </div>
                 ))}
               </div>
-            </>
+
+              {/* Next Button */}
+              <button 
+                onClick={() => {
+                  const container = document.getElementById('daily-scroll');
+                  if (container) {
+                    container.scrollLeft += 280;
+                  }
+                }}
+                className="absolute right-0 z-10 bg-white/20 backdrop-blur-sm rounded-full p-2 hover:bg-white/30 transition-all duration-300 opacity-0 group-hover:opacity-100"
+              >
+                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
           )}
 
 

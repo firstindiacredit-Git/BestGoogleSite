@@ -1,0 +1,116 @@
+.remote-app-container {
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  background: transparent;
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.remote-app-container * {
+  box-sizing: border-box;
+}
+
+.remote-app-container .ant-layout {
+  background: transparent;
+}
+
+.remote-app-container .ant-card {
+  background: rgba(20, 20, 20, 0.8);
+  border: 1px solid rgba(207, 5, 5, 0.1);
+}
+
+.remote-app-container .ant-input {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.remote-app-container .ant-input:focus,
+.remote-app-container .ant-input-focused {
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+.remote-app-container .ant-btn {
+  border-radius: 6px;
+}
+
+.remote-app-container .ant-btn-primary {
+  background: #1890ff;
+  border-color: #1890ff;
+}
+
+.remote-app-container .ant-btn-primary:hover {
+  background: #40a9ff;
+  border-color: #40a9ff;
+}
+
+.remote-app-container .ant-typography {
+  color: white;
+}
+
+.remote-app-container .ant-divider {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.remote-app-container .ant-space {
+  color: white;
+}
+
+.remote-app-container .ant-badge {
+  color: white;
+}
+
+.remote-app-container .ant-dropdown-menu {
+  background: rgba(20, 20, 20, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.remote-app-container .ant-dropdown-menu-item {
+  color: white;
+}
+
+.remote-app-container .ant-dropdown-menu-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.remote-app-container .ant-modal-content {
+  background: rgba(20, 20, 20, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.remote-app-container .ant-modal-header {
+  background: rgba(20, 20, 20, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.remote-app-container .ant-modal-title {
+  color: white;
+}
+
+.remote-app-container .ant-modal-close {
+  color: white;
+}
+
+.remote-app-container .ant-alert {
+  background: rgba(20, 20, 20, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.remote-app-container .ant-alert-message {
+  color: white;
+}
+
+.remote-app-container .ant-empty {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.remote-app-container .ant-empty-description {
+  color: rgba(255, 255, 255, 0.6);
+}
+
