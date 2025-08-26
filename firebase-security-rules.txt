@@ -1,0 +1,25 @@
+// Firebase Firestore Security Rules for Linktree App
+// Copy these rules to Firebase Console > Firestore > Rules
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow public read access to user profiles for Linktree
+    match /users/{userId} {
+      // Allow reading user documents (for public profiles)
+      allow read: if true;
+      
+      // Allow writing only to own user document
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Allow public read access to username mappings
+    match /usernames/{username} {
+      // Allow reading username mappings (for profile lookup)
+      allow read: if true;
+      
+      // Allow writing username mappings for authenticated users
+      allow write: if request.auth != null;
+    }
+  }
+}

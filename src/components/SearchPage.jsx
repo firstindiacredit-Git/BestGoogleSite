@@ -32,6 +32,7 @@ import BalancesheetDashboard from "../components/balancesheet/BalancesheetDashbo
 import BalancesheetLogin from "../components/balancesheet/BalancesheetLogin.jsx";
 import LinktreeMain from "../components/Linktree/LinktreeMain.jsx";
 import RemoteAppWrapper from "../components/RemoteApp/RemoteAppWrapper.jsx";
+import NewFooter from "./NewFooter.jsx";
 
 const SearchPage = ({ isToolPage = false }) => {
   const { isDarkMode, toggleTheme } = useTheme();
@@ -757,6 +758,7 @@ const SearchPage = ({ isToolPage = false }) => {
           )}
         </div>
       </div>
+      <NewFooter />
     </div>
   );
 };

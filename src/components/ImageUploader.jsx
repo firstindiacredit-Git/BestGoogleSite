@@ -48,6 +48,7 @@ function ImageUploader() {
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [tempImage, setTempImage] = useState(null);
   const [tempFileName, setTempFileName] = useState("");
+  const [isLandscape, setIsLandscape] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const intervalRef = useRef(null);
@@ -141,22 +142,14 @@ function ImageUploader() {
         const img = new window.Image();
         img.src = reader.result;
         img.onload = () => {
-          if (img.width > img.height) {
-            setImages((prev) => {
-              const newArr = [{ name: file.name, url: reader.result, isLocal: true }, ...prev];
-              const finalArr = newArr.slice(0, MAX_IMAGES);
-              // Immediately save to localStorage
-              const localImages = finalArr.filter(img => img.isLocal);
-              localStorage.setItem("uploadedImages", JSON.stringify(localImages));
-              return finalArr;
-            });
-            // Set the new image as the active image (first image)
-            setActiveIndex(0);
-          } else {
-            setTempImage(reader.result);
-            setTempFileName(file.name);
-            setShowCropper(true);
-          }
+          // Detect if image is landscape or portrait
+          const isLandscapeImage = img.width > img.height;
+          setIsLandscape(isLandscapeImage);
+          
+          // Always show cropper for every uploaded image
+          setTempImage(reader.result);
+          setTempFileName(file.name);
+          setShowCropper(true);
         };
       };
       reader.readAsDataURL(file);
@@ -386,7 +379,8 @@ function ImageUploader() {
         onOk={handleCropSave}
         okText="Crop & Save"
         cancelText="Cancel"
-        width={600}
+        width={400}
+        title={isLandscape ? "Crop Landscape Image" : "Crop Portrait Image"}
         footer={[
           <Button key="back" onClick={() => setShowCropper(false)}>
             Cancel
@@ -396,15 +390,39 @@ function ImageUploader() {
           </Button>,
         ]}
       >
-        <div style={{ position: 'relative', width: '100%', height: 400, background: '#222' }}>
+        <div style={{ 
+          position: 'relative', 
+          width: '292px', 
+          height: '350px', 
+          background: isLandscape ? '#1a1a1a' : '#222',
+          borderRadius: '8px',
+          overflow: 'hidden',
+          margin: '0 auto'
+        }}>
           <Cropper
             image={tempImage}
             crop={crop}
             zoom={zoom}
-            aspect={ASPECT}
+            aspect={292/350}
             onCropChange={setCrop}
             onZoomChange={setZoom}
             onCropComplete={onCropComplete}
+            style={{
+              containerStyle: {
+                width: '292px',
+                height: '350px',
+                backgroundColor: isLandscape ? '#1a1a1a' : '#222',
+              },
+              cropAreaStyle: {
+                border: isLandscape ? '2px solid #4f46e5' : '2px solid #6366f1',
+                color: isLandscape ? 'rgba(79, 70, 229, 0.3)' : 'rgba(99, 102, 241, 0.3)',
+              },
+              mediaStyle: {
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+              },
+            }}
           />
         </div>
       </Modal>

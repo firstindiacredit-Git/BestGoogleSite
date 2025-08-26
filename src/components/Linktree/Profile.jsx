@@ -1,45 +1,50 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { db, auth } from '../../firebase';
+import { doc, getDoc, updateDoc, setDoc, increment } from 'firebase/firestore';
+import PropTypes from 'prop-types';
 
-const themes = {
-  default: {
-    background: 'bg-gradient-to-br from-purple-600 to-blue-500',
-    text: 'text-white',
-    button: 'bg-white text-purple-600 hover:bg-opacity-90 transform hover:scale-105',
-    container: 'bg-white/10 backdrop-blur-md'
-  },
-  dark: {
-    background: 'bg-gray-700',
-    text: 'text-white',
-    button: 'bg-purple-600 text-white hover:bg-purple-700 transform hover:scale-105',
-    container: 'bg-gray-800/50 backdrop-blur-md'
-  },
-  light: {
-    background: 'bg-gray-200',
-    text: 'text-gray-900',
-    button: 'bg-purple-600 text-white hover:bg-purple-700 transform hover:scale-105',
-    container: 'bg-gray-50/80 backdrop-blur-md'
-  }
-};
-
-function Profile({ username, onBackToDashboard }) {
-  const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+const Profile = ({ username, onBackToDashboard }) => {
+  const [user, setUser] = useState({
+    username: '',
+    bio: '',
+    avatar: '',
+    theme: 'default',
+    links: []
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showProfileShare, setShowProfileShare] = useState(false);
   const [showInputIndex, setShowInputIndex] = useState(null);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
 
-  useEffect(() => {
-    console.log('Profile component received username:', username);
-    if (username) {
-      fetchProfile();
+  // Theme color logic
+  const themes = {
+    default: {
+      background: 'bg-gradient-to-br from-purple-600 to-blue-500',
+      text: 'text-white',
+      button: 'bg-white text-purple-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    dark: {
+      background: 'bg-gray-700',
+      text: 'text-white',
+      button: 'bg-purple-600 text-white hover:bg-purple-700 transform hover:scale-105',
+      container: 'bg-gray-800/50 backdrop-blur-md'
+    },
+    light: {
+      background: 'bg-gray-200',
+      text: 'text-gray-900',
+      button: 'bg-purple-600 text-white hover:bg-purple-700 transform hover:scale-105',
+      container: 'bg-gray-50/80 backdrop-blur-md'
     }
+  };
+
+  useEffect(() => {
+    fetchProfile();
   }, [username]);
 
   const fetchProfile = async () => {
+    console.log('Profile component received username:', username);
     if (!username) {
       setError('Username is required');
       setLoading(false);
@@ -47,12 +52,140 @@ function Profile({ username, onBackToDashboard }) {
     }
     
     try {
-      const res = await axios.get(`https://link-tree-backend-theta.vercel.app/api/users/${username}`);
-      // const res = await axios.get(`http://localhost:5000/api/users/${username}`);
-      setUser(res.data);
+      // Since we're likely getting the user's UID as username, try to get the LinkTree document directly first
+      let userId = username;
+      let linktreeDocRef = doc(db, 'users', userId, 'LinkTree', 'profile');
+      console.log('Trying to fetch LinkTree document with ID:', userId);
+      let linktreeDoc = await getDoc(linktreeDocRef);
+      console.log('LinkTree document exists:', linktreeDoc.exists());
+      
+      // If direct lookup fails, try username mapping
+      if (!linktreeDoc.exists()) {
+        console.log('LinkTree document not found, trying username mapping for:', username);
+        try {
+          const usernamesLinktreeDocRef = doc(db, 'usernames', 'LinkTree');
+          const usernamesLinktreeDoc = await getDoc(usernamesLinktreeDocRef);
+          console.log('Usernames LinkTree document exists:', usernamesLinktreeDoc.exists());
+          
+          if (usernamesLinktreeDoc.exists()) {
+            const usernamesData = usernamesLinktreeDoc.data();
+            if (usernamesData[username]) {
+              userId = usernamesData[username].uid;
+              console.log('Found user ID from username mapping:', userId);
+              linktreeDocRef = doc(db, 'users', userId, 'LinkTree', 'profile');
+              linktreeDoc = await getDoc(linktreeDocRef);
+              console.log('LinkTree document exists after username mapping:', linktreeDoc.exists());
+            }
+          }
+        } catch (usernameError) {
+          console.error('Error accessing username mapping:', usernameError);
+          console.log('This is likely a permissions issue. Please update Firebase security rules.');
+        }
+      }
+      
+      // If still no document found, try to get current user's data directly
+      if (!linktreeDoc.exists()) {
+        try {
+          const currentUser = auth.currentUser;
+          if (currentUser && currentUser.uid !== userId) {
+            
+            const currentUserLinktreeDocRef = doc(db, 'users', currentUser.uid, 'LinkTree', 'profile');
+            const currentUserLinktreeDoc = await getDoc(currentUserLinktreeDocRef);
+           
+            
+            if (currentUserLinktreeDoc.exists()) {
+              linktreeDoc = currentUserLinktreeDoc;
+              userId = currentUser.uid;
+              console.log('Found data using current user UID');
+            }
+          }
+        } catch (fallbackError) {
+          console.error('Error accessing current user data:', fallbackError);
+        }
+      }
+      
+      if (linktreeDoc.exists()) {
+        const linktreeData = linktreeDoc.data();
+      
+        
+        // Use the LinkTree data directly
+        const profileData = {
+          username: username,
+          bio: linktreeData.bio || '',
+          avatar: linktreeData.avatar || '',
+          theme: linktreeData.theme || 'default',
+          links: linktreeData.links || []
+        };
+       
+        console.log('Number of links found:', profileData.links.length);
+        setUser(profileData);
+      } else {
+        // User document doesn't exist - show demo profile
+        const demoProfile = {
+          username: username || 'demo_user',
+          bio: 'This is a demo profile. Create your own LinkNest profile to share your links!',
+          avatar: '',
+          theme: 'default',
+          links: [
+            {
+              _id: '1',
+              title: 'Instagram',
+              url: 'https://instagram.com',
+              active: true
+            },
+            {
+              _id: '2',
+              title: 'YouTube',
+              url: 'https://youtube.com',
+              active: true
+            },
+            {
+              _id: '3',
+              title: 'Twitter',
+              url: 'https://twitter.com',
+              active: true
+            }
+          ]
+        };
+        console.log('User document not found, showing demo profile for username:', username);
+        setUser(demoProfile);
+      }
       setError('');
-    } catch {
-      setError('Profile not found');
+    } catch (err) {
+      console.error('Error fetching profile:', err);
+      
+      // Show demo profile on Firebase permission errors or other issues
+      if (err.message.includes('permission') || err.message.includes('permissions') || err.message.includes('insufficient')) {
+        const demoProfile = {
+          username: username || 'demo_user',
+          bio: 'This is a demo profile. Create your own LinkNest profile to share your links!',
+          avatar: '',
+          theme: 'default',
+          links: [
+            {
+              _id: '1',
+              title: 'Instagram',
+              url: 'https://instagram.com',
+              active: true
+            },
+            {
+              _id: '2',
+              title: 'YouTube',
+              url: 'https://youtube.com',
+              active: true
+            },
+            {
+              _id: '3',
+              title: 'Twitter',
+              url: 'https://twitter.com',
+              active: true
+            }
+          ]
+        };
+        setUser(demoProfile);
+      } else {
+        setError('Profile not found');
+      }
     } finally {
       setLoading(false);
     }
@@ -61,9 +194,53 @@ function Profile({ username, onBackToDashboard }) {
   const getFaviconUrl = (url) => {
     try {
       const urlObject = new URL(url);
-      return `https://www.google.com/s2/favicons?domain=${urlObject.hostname}&sz=128`;
+      // Try multiple favicon sources for better compatibility
+      const hostname = urlObject.hostname;
+      const protocol = urlObject.protocol;
+      
+      // Return Google's favicon service as it's more reliable
+      return `https://www.google.com/s2/favicons?domain=${hostname}&sz=32`;
     } catch {
       return null;
+    }
+  };
+
+  const trackLinkClick = async (username, linkIndex) => {
+    try {
+      // Use the same logic as fetchProfile for consistency
+      let userId = username;
+      let linktreeDocRef = doc(db, 'users', userId, 'LinkTree', 'profile');
+      let linktreeDoc = await getDoc(linktreeDocRef);
+      
+      // If direct lookup fails, try username mapping
+      if (!linktreeDoc.exists()) {
+        try {
+          const usernamesLinktreeDocRef = doc(db, 'usernames', 'LinkTree');
+          const usernamesLinktreeDoc = await getDoc(usernamesLinktreeDocRef);
+          
+          if (usernamesLinktreeDoc.exists()) {
+            const usernamesData = usernamesLinktreeDoc.data();
+            if (usernamesData[username]) {
+              userId = usernamesData[username].uid;
+              linktreeDocRef = doc(db, 'users', userId, 'LinkTree', 'profile');
+            }
+          }
+        } catch (usernameError) {
+          console.error('Error accessing username mapping in trackLinkClick:', usernameError);
+        }
+      }
+
+      // Use the new click tracking collection for public access
+      const clickTrackingRef = doc(db, 'clickTracking', userId);
+      await setDoc(clickTrackingRef, {
+        [`links.${linkIndex}.clicks`]: increment(1),
+        [`links.${linkIndex}.lastClicked`]: new Date()
+      }, { merge: true });
+      
+    } catch (error) {
+      console.error('Error tracking link click:', error);
+      // Don't throw error, just log it - this prevents the app from breaking
+      // due to permission issues
     }
   };
 
@@ -306,31 +483,34 @@ function Profile({ username, onBackToDashboard }) {
           )}
 
           <div className="space-y-4">
-            {user.links.map((link, index) => {
+            {Array.isArray(user.links) && user.links.length > 0 ? user.links.map((link, index) => {
               const faviconUrl = getFaviconUrl(link.url);
 
-              return link.active && (
+              return link && link.active && link.title && link.url && (
                 <div key={index} className="flex items-center w-full p-4 rounded-xl bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 group relative cursor-pointer" onClick={async () => {
                   try {
-                    await axios.post(`https://link-tree-backend-theta.vercel.app/api/users/${user.username}/links/${index}/click`);
-                    // await axios.post(`http://localhost:5000/api/users/${user.username}/links/${index}/click`);
+                    await trackLinkClick(user.username, index);
                         } catch {
                           // Ignore click tracking errors
                         }
                   window.open(link.url, '_blank');
                 }}>
-                  {faviconUrl && (
-                    <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center">
+                  <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center">
+                    {faviconUrl ? (
                       <img
                         src={faviconUrl}
                         alt={link.title}
                         className="w-6 h-6 object-contain"
                         onError={(e) => {
                           e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'block';
                         }}
                       />
+                    ) : null}
+                    <div className="w-6 h-6 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500" style={{ display: faviconUrl ? 'none' : 'flex' }}>
+                      🔗
                     </div>
-                  )}
+                  </div>
                   <span className="flex-grow text-center font-medium text-gray-700 group-hover:text-gray-900">
                     {link.title}
                   </span>
@@ -466,8 +646,13 @@ function Profile({ username, onBackToDashboard }) {
                     </div>
                   )}
                 </div>
-              );
-            })}
+                              );
+              }) : (
+                <div className="text-center text-white/80 py-8">
+                  <p>No links added yet.</p>
+                  <p className="text-sm">Go to Dashboard to add your first link!</p>
+                </div>
+              )}
                 </div>
               </div>
             </div>
@@ -480,5 +665,10 @@ function Profile({ username, onBackToDashboard }) {
     </div>
   );
 }
+
+Profile.propTypes = {
+  username: PropTypes.string.isRequired,
+  onBackToDashboard: PropTypes.func
+};
 
 export { Profile as default };

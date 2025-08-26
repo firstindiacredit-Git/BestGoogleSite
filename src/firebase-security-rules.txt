@@ -1,0 +1,27 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Allow public read access to user profiles for linktree
+    match /users/{userId}/LinkTree/{linktreeId} {
+      allow read: if true; // Allow public read for linktree profiles
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Allow public read/write access to click tracking data
+    match /clickTracking/{userId} {
+      allow read, write: if true; // Allow public access for click tracking
+    }
+    
+    // Allow public read access to usernames/LinkTree document
+    match /usernames/LinkTree {
+      allow read: if true; // Allow public read for username mappings
+      allow write: if request.auth != null;
+    }
+    
+    // Allow users to read/write their own user document
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}

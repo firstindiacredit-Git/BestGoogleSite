@@ -1634,7 +1634,7 @@ const Anotherpage = ({ pageId = "home" }) => {
       component,
         defaultColumn: 0,
     })),
-    // Subcategory cards - only show if not a new page
+    // Subcategory cards - only show if not a new page AND only include subcategories that are in items state
     ...(pageId === "home" ? (isDemoMode 
         ? (selectedInterest !== 'not_select')
           ? // Show interest subcategories in demo mode
@@ -1851,15 +1851,29 @@ const Anotherpage = ({ pageId = "home" }) => {
   }, [loading, allWidgetItems.length, pageId]);
 
   // Ensure all subcategories are always present in items (only for home page)
+  // BUT respect user's intentional removals from widget controller
   useEffect(() => {
     if (loading || pageId !== "home") return;
+    
     // Find subcat ids in allWidgetItems
     const subcatIds = allWidgetItems.filter(i => i.type === 'subcat').map(i => i.id);
-    // Remove subcat items not in current subcatIds
+    
+    // Remove subcat items that no longer exist in allWidgetItems (due to category/interest changes)
     let filteredItems = items.filter(item => item.type !== 'subcat' || subcatIds.includes(item.id));
+    
     // Find missing subcat ids in items
     const missingSubcats = subcatIds.filter(id => !filteredItems.some(item => item.id === id));
-    if (missingSubcats.length > 0) {
+    
+    // Add missing subcategories if:
+    // 1. This is the very first load (items.length === 0), OR
+    // 2. The category/interest has changed (missingSubcats.length > 0 and no subcategories in current items)
+    const currentSubcatCount = items.filter(item => item.type === 'subcat').length;
+    const shouldAddMissing = missingSubcats.length > 0 && (
+      items.length === 0 || 
+      currentSubcatCount === 0
+    );
+    
+    if (shouldAddMissing) {
       // Add missing subcats to items, assign to column 1 or 2, position at end
       let maxPosCol1 = Math.max(-1, ...filteredItems.filter(i => i.column === 1).map(i => i.position));
       let maxPosCol2 = Math.max(-1, ...filteredItems.filter(i => i.column === 2).map(i => i.position));
@@ -2129,14 +2143,37 @@ const Anotherpage = ({ pageId = "home" }) => {
   const handleControllerDefault = () => {
     setWidgetControllerColumns(4);
     setColumns(4);
-    // Reset preview to default widgets
-    const defaultWidgetsArr = (defaultWidgets[pageId] || []).map((item, idx) => ({ ...item, position: idx, column: idx % 4 }));
-    setWidgetPreview(defaultWidgetsArr);
-    // Update available widgets
-    const usedIds = new Set(defaultWidgetsArr.map(item => item.id));
-    const controllerWidgets = getAllAvailableWidgetsForController();
-    const available = controllerWidgets.filter(item => !usedIds.has(item.id));
-    setAvailableWidgetsPreview(available);
+    
+    // Create specific default layout with exact positions
+    const defaultLayout = [
+      // Column 1 (first column): Weather, Clock, Calendar, Calculator
+      { id: "weather", type: "widget", column: 0, position: 0 },
+      { id: "clock", type: "widget", column: 0, position: 1 },
+      { id: "calendar", type: "widget", column: 0, position: 2 },
+      { id: "calculator", type: "widget", column: 0, position: 3 },
+      
+      // Column 4 (fourth column): ImageUploader, NewsFeed, Notepad, Todo
+      { id: "imageUploader", type: "widget", column: 3, position: 0 },
+      { id: "NewsFeed", type: "widget", column: 3, position: 1 },
+      { id: "notepad", type: "widget", column: 3, position: 2 },
+      { id: "Todo", type: "widget", column: 3, position: 3 },
+    ];
+    
+    // Get all available subcategories for the current category/interest
+    const subcategoryWidgets = allWidgetItems.filter(item => item.type === 'subcat').map((item, idx) => ({
+      id: item.id,
+      type: item.type,
+      column: (idx % 2) + 1, // Alternate between columns 1 and 2 (which are actually columns 2 and 3)
+      position: Math.floor(idx / 2),
+    }));
+    
+    // Combine default widgets with subcategories
+    const completeDefaultLayout = [...defaultLayout, ...subcategoryWidgets];
+    
+    setWidgetPreview(completeDefaultLayout);
+    
+    // Update available widgets (should be empty since we're using all widgets)
+    setAvailableWidgetsPreview([]);
     setHasUnsavedWidgetChanges(true);
 };
 

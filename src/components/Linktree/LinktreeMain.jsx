@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { message } from 'antd';
 import { useNavigate } from 'react-router-dom';
@@ -11,7 +11,7 @@ import NotFound from './NotFound';
 
 const LinktreeApp = () => {
   const [currentPage, setCurrentPage] = useState('login');
-  const { user, loading } = useAuth();
+  const { user, firebaseUser, loading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -85,13 +85,16 @@ const LinktreeApp = () => {
         />
       );
     
-    case 'profile':
+    case 'profile': {
+      const profileUsername = firebaseUser?.uid || user?.displayName || user?.username || user?.email?.split('@')[0] || 'unknown';
+     
       return (
         <Profile 
-          username={user?.username || user?.email?.split('@')[0] || 'unknown'}
+          username={profileUsername}
           onBackToDashboard={() => setCurrentPage('dashboard')}
         />
       );
+    }
     
     default:
       return <NotFound onBackToLanding={() => setCurrentPage('login')} />;

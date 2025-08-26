@@ -1,12 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
+import { auth, db } from '../../firebase';
+import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
 import PropTypes from 'prop-types';
 
 const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
   const { user: authUser, logout: authLogout } = useAuth();
-  const user = propUser || authUser;
+  const firebaseUser = auth.currentUser;
+  const user = propUser || authUser || {
+    username: firebaseUser?.displayName || firebaseUser?.email?.split('@')[0] || 'user',
+    email: firebaseUser?.email || '',
+    photoURL: firebaseUser?.photoURL || ''
+  };
   const logout = onLogout || authLogout;
   const [profile, setProfile] = useState({
     bio: '',
@@ -61,14 +67,54 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
 
   const fetchProfile = async () => {
     try {
-      const res = await axios.get('/users/me/profile');
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        throw new Error('No authenticated user');
+      }
+
+      const linktreeDocRef = doc(db, 'users', currentUser.uid, 'LinkTree', 'profile');
+      const linktreeDoc = await getDoc(linktreeDocRef);
       
-      setProfile({
-        bio: res.data.bio || '',
-        avatar: res.data.avatar || '',
-        theme: res.data.theme || 'default',
-        links: res.data.links || []
-      });
+      if (linktreeDoc.exists()) {
+        const linktreeData = linktreeDoc.data();
+        const linksArray = linktreeData.links || [];
+        
+        // Fetch click tracking data
+        const clickTrackingRef = doc(db, 'clickTracking', currentUser.uid);
+        const clickTrackingDoc = await getDoc(clickTrackingRef);
+        
+        let clickData = {};
+        if (clickTrackingDoc.exists()) {
+          clickData = clickTrackingDoc.data();
+        }
+        
+        // Merge click data with links
+        const linksWithClicks = linksArray.map((link, index) => ({
+          ...link,
+          clicks: clickData.links?.[index]?.clicks || 0,
+          lastClicked: clickData.links?.[index]?.lastClicked || null
+        }));
+        
+        setProfile({
+          bio: linktreeData.bio || 'Welcome to my LinkNest page!',
+          avatar: linktreeData.avatar || '',
+          theme: linktreeData.theme || 'default',
+          links: linksWithClicks
+        });
+      } else {
+        // Create default profile if LinkTree document doesn't exist
+        const defaultProfile = {
+          bio: 'Welcome to my LinkNest page!',
+          avatar: '',
+          theme: 'default',
+          links: []
+        };
+        
+        // Create the LinkTree document with default data
+        await setDoc(linktreeDocRef, defaultProfile);
+        
+        setProfile(defaultProfile);
+      }
       setError('');
     } catch (err) {
       console.error('Error fetching profile:', err);
@@ -115,32 +161,52 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
       setError('');
       setSuccess('');
 
-    const newLinkEntry = {
-      title: newLink.platform,
-      url: newLink.url,
-      active: true
-    };
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        throw new Error('No authenticated user');
+      }
 
-      // Create a new array with the new link
-      const updatedLinks = [...profile.links, newLinkEntry];
+      const newLinkEntry = {
+        title: newLink.platform,
+        url: newLink.url,
+        active: true
+      };
 
-      // Send only the links array to update
-      const response = await axios.post('/users/update', {
+      // Ensure profile.links is an array and create a new array with the new link
+      const currentLinks = Array.isArray(profile.links) ? profile.links : [];
+      const updatedLinks = [...currentLinks, newLinkEntry];
+
+      // Update Firestore
+      const linktreeDocRef = doc(db, 'users', currentUser.uid, 'LinkTree', 'profile');
+      
+      // Check if document exists, if not create it
+      const linktreeDoc = await getDoc(linktreeDocRef);
+      if (linktreeDoc.exists()) {
+        await updateDoc(linktreeDocRef, {
+          'links': updatedLinks
+        });
+      } else {
+        // Create the document with the new links
+        await setDoc(linktreeDocRef, {
+          bio: profile.bio || 'Welcome to my LinkNest page!',
+          avatar: profile.avatar || '',
+          theme: profile.theme || 'default',
+          links: updatedLinks
+        });
+      }
+
+      // Update the profile state
+      setProfile(prev => ({
+        ...prev,
         links: updatedLinks
-      });
-
-      // Update the profile with the response data
-    setProfile(prev => ({
-      ...prev,
-        links: response.data.links
-    }));
+      }));
     
       // Clear the form
-    setNewLink({ platform: '', url: '' });
+      setNewLink({ platform: '', url: '' });
       setSuccess('Link added successfully!');
     } catch (err) {
       console.error('Error adding link:', err);
-      setError('Failed to add link: ' + (err.response?.data?.error || err.message));
+      setError('Failed to add link: ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -149,27 +215,47 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
   const removeLink = async (index) => {
     try {
       setLoading(true);
-    setError('');
-    setSuccess('');
+      setError('');
+      setSuccess('');
 
-      // Create a new array without the link to be removed
-      const updatedLinks = profile.links.filter((_, i) => i !== index);
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        throw new Error('No authenticated user');
+      }
 
-      // Send only the links array to update
-      const response = await axios.post('/users/update', {
-        links: updatedLinks
-      });
+      // Ensure profile.links is an array and create a new array without the link to be removed
+      const currentLinks = Array.isArray(profile.links) ? profile.links : [];
+      const updatedLinks = currentLinks.filter((_, i) => i !== index);
 
-      // Update the profile with the response data
+      // Update Firestore
+      const linktreeDocRef = doc(db, 'users', currentUser.uid, 'LinkTree', 'profile');
+      
+      // Check if document exists, if not create it
+      const linktreeDoc = await getDoc(linktreeDocRef);
+      if (linktreeDoc.exists()) {
+        await updateDoc(linktreeDocRef, {
+          'links': updatedLinks
+        });
+      } else {
+        // Create the document with the updated links
+        await setDoc(linktreeDocRef, {
+          bio: profile.bio || 'Welcome to my LinkNest page!',
+          avatar: profile.avatar || '',
+          theme: profile.theme || 'default',
+          links: updatedLinks
+        });
+      }
+
+      // Update the profile state
       setProfile(prev => ({
         ...prev,
-        links: response.data.links
+        links: updatedLinks
       }));
 
       setSuccess('Link removed successfully!');
     } catch (err) {
       console.error('Error removing link:', err);
-      setError('Failed to remove link: ' + (err.response?.data?.error || err.message));
+      setError('Failed to remove link: ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -181,29 +267,60 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
       setError('');
       setSuccess('');
 
-      const invalidLinks = profile.links.filter(link => !link.title || !link.url);
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        throw new Error('No authenticated user');
+      }
+
+      const currentLinks = Array.isArray(profile.links) ? profile.links : [];
+      const invalidLinks = currentLinks.filter(link => !link.title || !link.url);
       if (invalidLinks.length > 0) {
         throw new Error('All links must have both platform name and URL');
       }
 
-      const response = await axios.post('/users/update', {
-        bio: profile.bio,
-        theme: profile.theme,
-        links: profile.links
-      });
+      // Update Firestore
+      const linktreeDocRef = doc(db, 'users', currentUser.uid, 'LinkTree', 'profile');
+      
+      // Check if document exists, if not create it
+      const linktreeDoc = await getDoc(linktreeDocRef);
+      if (linktreeDoc.exists()) {
+        await updateDoc(linktreeDocRef, {
+          'bio': profile.bio,
+          'theme': profile.theme,
+          'links': profile.links
+        });
+      } else {
+        // Create the document with the profile data
+        await setDoc(linktreeDocRef, {
+          'bio': profile.bio,
+          'theme': profile.theme,
+          'links': profile.links
+        });
+      }
 
-      // Update the profile state with the response data
-      setProfile(prev => ({
-        ...prev,
-        bio: response.data.bio,
-        theme: response.data.theme,
-        links: response.data.links
-      }));
+      // Create username mapping for public profile access
+      // Use the user's UID as the username for consistency
+      const usernameToUse = user?.username || user?.displayName || user?.email?.split('@')[0] || currentUser.uid;
+      const usernamesLinktreeDocRef = doc(db, 'usernames', 'LinkTree');
+      await setDoc(usernamesLinktreeDocRef, {
+        [usernameToUse]: {
+          uid: currentUser.uid,
+          createdAt: new Date()
+        }
+      }, { merge: true });
+      
+      // Also create a mapping using UID as username for direct access
+      await setDoc(usernamesLinktreeDocRef, {
+        [currentUser.uid]: {
+          uid: currentUser.uid,
+          createdAt: new Date()
+        }
+      }, { merge: true });
 
       setSuccess('Profile saved successfully!');
       setShowUpdateModal(false);
     } catch (err) {
-      setError('Failed to save profile: ' + (err.response?.data?.error || err.message));
+      setError('Failed to save profile: ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -217,7 +334,11 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
   const getFaviconUrl = (url) => {
     try {
       const urlObject = new URL(url);
-      return `https://www.google.com/s2/favicons?domain=${urlObject.hostname}&sz=128`;
+      // Try multiple favicon sources for better compatibility
+      const hostname = urlObject.hostname;
+      
+      // Return Google's favicon service as it's more reliable
+      return `https://www.google.com/s2/favicons?domain=${hostname}&sz=32`;
     } catch (e) {
       return null;
     }
@@ -255,23 +376,38 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
       setError('');
       setSuccess('');
 
-      // Create a new array with the updated link
-      const updatedLinks = [...profile.links];
+      // Ensure profile.links is an array and create a new array with the updated link
+      const currentLinks = Array.isArray(profile.links) ? profile.links : [];
+      const updatedLinks = [...currentLinks];
       updatedLinks[editingLink] = {
         ...updatedLinks[editingLink],
         title: editLinkData.title,
         url: editLinkData.url
       };
 
-      // Send only the links array to update
-      const response = await axios.post('/users/update', {
-        links: updatedLinks
-      });
+      // Update Firestore
+      const linktreeDocRef = doc(db, 'users', auth.currentUser.uid, 'LinkTree', 'profile');
+      
+      // Check if document exists, if not create it
+      const linktreeDoc = await getDoc(linktreeDocRef);
+      if (linktreeDoc.exists()) {
+        await updateDoc(linktreeDocRef, {
+          'links': updatedLinks
+        });
+      } else {
+        // Create the document with the updated links
+        await setDoc(linktreeDocRef, {
+          bio: profile.bio || 'Welcome to my LinkNest page!',
+          avatar: profile.avatar || '',
+          theme: profile.theme || 'default',
+          links: updatedLinks
+        });
+      }
 
-      // Update the profile with the response data
+      // Update the profile state
       setProfile(prev => ({
         ...prev,
-        links: response.data.links
+        links: updatedLinks
       }));
 
       setEditingLink(null);
@@ -279,7 +415,7 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
       setSuccess('Link updated successfully!');
     } catch (err) {
       console.error('Error updating link:', err);
-      setError('Failed to update link: ' + (err.response?.data?.error || err.message));
+      setError('Failed to update link: ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -296,28 +432,43 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
       setError('');
       setSuccess('');
 
-      // Create a new array with the toggled link
-      const updatedLinks = [...profile.links];
+      // Ensure profile.links is an array and create a new array with the toggled link
+      const currentLinks = Array.isArray(profile.links) ? profile.links : [];
+      const updatedLinks = [...currentLinks];
       updatedLinks[index] = {
         ...updatedLinks[index],
         active: !updatedLinks[index].active
       };
 
-      // Send only the links array to update
-      const response = await axios.post('/users/update', {
-        links: updatedLinks
-      });
+      // Update Firestore
+      const linktreeDocRef = doc(db, 'users', auth.currentUser.uid, 'LinkTree', 'profile');
+      
+      // Check if document exists, if not create it
+      const linktreeDoc = await getDoc(linktreeDocRef);
+      if (linktreeDoc.exists()) {
+        await updateDoc(linktreeDocRef, {
+          'links': updatedLinks
+        });
+      } else {
+        // Create the document with the updated links
+        await setDoc(linktreeDocRef, {
+          bio: profile.bio || 'Welcome to my LinkNest page!',
+          avatar: profile.avatar || '',
+          theme: profile.theme || 'default',
+          links: updatedLinks
+        });
+      }
 
-      // Update the profile with the response data
+      // Update the profile state
       setProfile(prev => ({
         ...prev,
-        links: response.data.links
+        links: updatedLinks
       }));
 
       setSuccess(`Link ${updatedLinks[index].active ? 'activated' : 'deactivated'} successfully!`);
     } catch (err) {
       console.error('Error toggling link:', err);
-      setError('Failed to update link status: ' + (err.response?.data?.error || err.message));
+      setError('Failed to update link status: ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -327,31 +478,70 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
     const file = event.target.files[0];
     if (!file) return;
 
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setError('Please upload an image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('File size should not exceed 5MB');
+      return;
+    }
+
     try {
       setUploadingAvatar(true);
       setError('');
       setSuccess('');
 
-      const formData = new FormData();
-      formData.append('avatar', file);
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        throw new Error('No authenticated user');
+      }
 
-      const response = await axios.post('/users/upload-avatar', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
+      // Convert file to base64
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const base64String = e.target.result;
+
+        // Update Firestore with base64 image
+        const linktreeDocRef = doc(db, 'users', currentUser.uid, 'LinkTree', 'profile');
+        
+        // Check if document exists, if not create it
+        const linktreeDoc = await getDoc(linktreeDocRef);
+        if (linktreeDoc.exists()) {
+          await updateDoc(linktreeDocRef, {
+            'avatar': base64String
+          });
+        } else {
+          // Create the document with the avatar
+          await setDoc(linktreeDocRef, {
+            bio: profile.bio || 'Welcome to my LinkNest page!',
+            avatar: base64String,
+            theme: profile.theme || 'default',
+            links: profile.links || []
+          });
         }
-      });
 
-      setProfile(prev => ({ ...prev, avatar: response.data.avatar }));
-      setSuccess('Avatar updated successfully!');
+        setProfile(prev => ({ ...prev, avatar: base64String }));
+        setSuccess('Avatar updated successfully!');
+        setUploadingAvatar(false);
+      };
+
+      reader.onerror = () => {
+        throw new Error('Failed to read file');
+      };
+
+      reader.readAsDataURL(file);
     } catch (err) {
-      setError('Failed to upload avatar: ' + (err.response?.data?.error || err.message));
-    } finally {
+      setError('Failed to upload avatar: ' + err.message);
       setUploadingAvatar(false);
     }
   };
 
   // Helper for public profile URL
-  const publicProfileUrl = `${window.location.origin}/${user?.username || 'user'}`;
+  const publicProfileUrl = `${window.location.origin}/linktree/${user?.username || 'user'}`;
 
   // Add this function to handle QR code download
   const downloadQRCode = () => {
@@ -451,8 +641,7 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
     setShowSharePopup(false);
   };
 
-  // Debug logging
-  console.log('Dashboard render:', { user, loading, profile });
+
 
   // Show loading if user is not available yet
   if (!user || loading) {
@@ -480,14 +669,7 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-xl">🔥</span>
                   <span className="font-semibold text-gray-700">Your Linktree is live:</span>
-                  <a
-                    href={publicProfileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="ml-2 w-[ch] max-w-[15ch] truncate underline text-blue-700 hover:text-blue-900"
-                  >
-                    {publicProfileUrl}
-                  </a>
+                  
                 </div>
                 <div className="flex items-center gap-3 w-full sm:w-auto">
                   <button
@@ -527,7 +709,17 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
                   <h2 className="text-xl sm:text-2xl font-semibold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
                     Social Links
                   </h2>
-                  <span className="text-sm text-gray-500">{profile.links.length} links</span>
+                  <div className="flex items-center gap-4">
+                    {/* Click Statistics Summary */}
+                    <div className="flex items-center gap-2 text-sm text-gray-500 bg-gray-50 px-3 py-1 rounded-full">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      <span>{profile.links.reduce((total, link) => total + (link.clicks || 0), 0)} total clicks</span>
+                    </div>
+                    <span className="text-sm text-gray-500">{profile.links.length} links</span>
+                  </div>
                 </div>
 
                 {/* Add New Link Form */}
@@ -648,6 +840,24 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
 
                         <div className="border-t border-gray-100 px-3 sm:px-4 py-3 flex flex-wrap items-center justify-between gap-3 bg-gray-50 rounded-b-xl">
                           <div className="flex items-center gap-2 sm:gap-4">
+                            {/* Click Statistics */}
+                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                              <div className="flex items-center gap-1">
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                <span>{link.clicks || 0} clicks</span>
+                              </div>
+                              {link.lastClicked && (
+                                <div className="flex items-center gap-1">
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                  <span>{new Date(link.lastClicked.seconds * 1000).toLocaleDateString()}</span>
+                                </div>
+                              )}
+                            </div>
                             <button className="p-1.5 text-gray-400 hover:text-gray-600 bg-white rounded-lg shadow-sm hover:shadow transition-all duration-300">
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 3h6m-6 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V6a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
