@@ -507,7 +507,7 @@ function DataMiningTool() {
           .dark-table .ant-btn-primary {
             color: #fff !important;
           }
-          .dark-table .ant-btn-danger {
+          .dark-table .ant-btn-danger  {
             color: #fff !important;
           }
           .dark-table .ant-input::placeholder {
