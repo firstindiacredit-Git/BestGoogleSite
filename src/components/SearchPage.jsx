@@ -34,6 +34,7 @@ import LinktreeMain from "../components/Linktree/LinktreeMain.jsx";
 import RemoteAppWrapper from "../components/RemoteApp/RemoteAppWrapper.jsx";
 import NewFooter from "./NewFooter.jsx";
 import DataMiningTool from "./DataMiningTool.jsx";
+import GlobalAi from "./GlobalAi.jsx";
 
 const SearchPage = ({ isToolPage = false }) => {
   const { isDarkMode, toggleTheme } = useTheme();
@@ -703,7 +704,18 @@ const SearchPage = ({ isToolPage = false }) => {
                         >
                           <span className="drop-shadow-md">REMOTE</span>
                         </button>
-                        
+                        <button
+                          className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                            activeComponent === "GlobalAi"
+                              ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
+                              : "dark:text-white  hover:bg-gray-100 dark:hover:bg-[#28283A]"
+                          }`}
+                          onClick={() => {
+                            setActiveComponent("GlobalAi");
+                          }}
+                        >
+                          <span className="drop-shadow-md">GLOBAL AI</span>
+                        </button>
                         <Dropdown
                           menu={settingsMenu}
                           trigger={["click"]}
@@ -754,6 +766,8 @@ const SearchPage = ({ isToolPage = false }) => {
                 <LinktreeMain />
               ) : activeComponent === "Remote" ? (
                 <RemoteAppWrapper />
+              ) : activeComponent === "GlobalAi" ? (
+                <GlobalAi />
               ) : (
                 <Anotherpage
                   visibleHandle={visibleHandle}
