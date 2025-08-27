@@ -15,9 +15,11 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
   };
   const logout = onLogout || authLogout;
   const [profile, setProfile] = useState({
-    bio: '',
+    bio: 'Welcome to my LinkNest page!',
     avatar: '',
     theme: 'default',
+    linkTemplate: 'default',
+    backgroundBlur: false,
     links: []
   });
   const [loading, setLoading] = useState(true);
@@ -28,6 +30,9 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
     url: ''
   });
   const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [showThemeModal, setShowThemeModal] = useState(false);
+  const [showSharePopup, setShowSharePopup] = useState(false);
+  const [selectedLink, setSelectedLink] = useState(null);
   const [editingLink, setEditingLink] = useState(null);
   const [editLinkData, setEditLinkData] = useState({ title: '', url: '' });
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -36,8 +41,7 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
   const [showQRModal, setShowQRModal] = useState(false);
   const [showShareOptions, setShowShareOptions] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
-  const [showSharePopup, setShowSharePopup] = useState(false);
-  const [selectedLink, setSelectedLink] = useState(null);
+  const [activeTab, setActiveTab] = useState('themes'); // 'themes' or 'designs'
 
   // Theme color logic (copied from Profile.jsx)
   const themes = {
@@ -45,19 +49,429 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
       background: 'bg-gradient-to-br from-purple-600 to-blue-500',
       text: 'text-white',
       button: 'bg-white text-purple-600 hover:bg-opacity-90 transform hover:scale-105',
-      container: 'bg-white/10 backdrop-blur-md'
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'Default (Purple-Blue)',
+      image: '🌅'
     },
     dark: {
-      background: 'bg-gray-700',
+      background: 'bg-gray-900',
       text: 'text-white',
-      button: 'bg-purple-600 text-white hover:bg-purple-700 transform hover:scale-105',
-      container: 'bg-gray-800/50 backdrop-blur-md'
+      button: 'bg-gray-800 text-white hover:bg-gray-700 transform hover:scale-105 border border-gray-600',
+      container: 'bg-gray-800/50 backdrop-blur-md',
+      name: 'Dark',
+      image: '🌙'
     },
     light: {
-      background: 'bg-gray-200',
+      background: 'bg-gray-100',
       text: 'text-gray-900',
-      button: 'bg-purple-600 text-white hover:bg-purple-700 transform hover:scale-105',
-      container: 'bg-gray-50/80 backdrop-blur-md'
+      button: 'bg-white text-gray-900 hover:bg-gray-50 transform hover:scale-105 border border-gray-200 shadow-sm',
+      container: 'bg-white/80 backdrop-blur-md',
+      name: 'Light',
+      image: '☀️'
+    },
+    sunset: {
+      background: 'bg-gradient-to-br from-orange-400 to-pink-500',
+      text: 'text-white',
+      button: 'bg-white text-orange-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'Sunset (Orange-Pink)',
+      image: '🌇'
+    },
+    ocean: {
+      background: 'bg-gradient-to-br from-cyan-500 to-blue-600',
+      text: 'text-white',
+      button: 'bg-white text-cyan-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'Ocean (Cyan-Blue)',
+      image: '🌊'
+    },
+    forest: {
+      background: 'bg-gradient-to-br from-green-500 to-emerald-600',
+      text: 'text-white',
+      button: 'bg-white text-green-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'Forest (Green-Emerald)',
+      image: '🌲'
+    },
+    midnight: {
+      background: 'bg-gradient-to-br from-indigo-900 to-purple-900',
+      text: 'text-white',
+      button: 'bg-indigo-800 text-white hover:bg-indigo-700 transform hover:scale-105 border border-indigo-600',
+      container: 'bg-indigo-800/30 backdrop-blur-md',
+      name: 'Midnight (Indigo-Purple)',
+      image: '🌌'
+    },
+    rose: {
+      background: 'bg-gradient-to-br from-rose-400 to-pink-500',
+      text: 'text-white',
+      button: 'bg-white text-rose-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'Rose (Rose-Pink)',
+      image: '🌹'
+    },
+    gold: {
+      background: 'bg-gradient-to-br from-yellow-400 to-orange-500',
+      text: 'text-white',
+      button: 'bg-white text-yellow-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'Gold (Yellow-Orange)',
+      image: '⭐'
+    },
+    minimal: {
+      background: 'bg-white',
+      text: 'text-gray-900',
+      button: 'bg-gray-900 text-white hover:bg-gray-800 transform hover:scale-105',
+      container: 'bg-gray-50 border border-gray-200 backdrop-blur-md',
+      name: 'Minimal (White)',
+      image: '⚪'
+    },
+    // New themes inspired by Linktree
+    linktree: {
+      background: 'bg-gradient-to-br from-green-400 to-green-600',
+      text: 'text-white',
+      button: 'bg-white text-green-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'Linktree (Green)',
+      image: '🌿'
+    },
+    coral: {
+      background: 'bg-gradient-to-br from-red-400 to-pink-500',
+      text: 'text-white',
+      button: 'bg-white text-red-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'Coral (Red-Pink)',
+      image: '🪸'
+    },
+    lavender: {
+      background: 'bg-gradient-to-br from-purple-400 to-indigo-500',
+      text: 'text-white',
+      button: 'bg-white text-purple-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'Lavender (Purple-Indigo)',
+      image: '💜'
+    },
+    sky: {
+      background: 'bg-gradient-to-br from-blue-400 to-indigo-500',
+      text: 'text-white',
+      button: 'bg-white text-blue-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'Sky (Blue-Indigo)',
+      image: '☁️'
+    },
+    sunset2: {
+      background: 'bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500',
+      text: 'text-white',
+      button: 'bg-white text-orange-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'Sunset 2 (Yellow-Orange-Red)',
+      image: '🌆'
+    },
+    aurora: {
+      background: 'bg-gradient-to-br from-teal-400 via-cyan-500 to-blue-500',
+      text: 'text-white',
+      button: 'bg-white text-teal-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'Aurora (Teal-Cyan-Blue)',
+      image: '🌌'
+    },
+    berry: {
+      background: 'bg-gradient-to-br from-purple-500 via-pink-500 to-red-500',
+      text: 'text-white',
+      button: 'bg-white text-purple-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'Berry (Purple-Pink-Red)',
+      image: '🫐'
+    },
+    earth: {
+      background: 'bg-gradient-to-br from-amber-600 via-orange-600 to-red-600',
+      text: 'text-white',
+      button: 'bg-white text-amber-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'Earth (Amber-Orange-Red)',
+      image: '🌍'
+    },
+    ocean2: {
+      background: 'bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600',
+      text: 'text-white',
+      button: 'bg-white text-blue-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'Ocean 2 (Blue-Indigo-Purple)',
+      image: '🌊'
+    },
+    spring: {
+      background: 'bg-gradient-to-br from-green-400 via-emerald-400 to-teal-400',
+      text: 'text-white',
+      button: 'bg-white text-green-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'Spring (Green-Emerald-Teal)',
+      image: '🌸'
+    },
+    // iPhone Wallpaper Inspired Themes
+    iphonePurple: {
+      background: 'bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500',
+      text: 'text-white',
+      button: 'bg-white text-purple-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'iPhone Purple',
+      image: '📱'
+    },
+    iphoneBlue: {
+      background: 'bg-gradient-to-br from-blue-500 via-cyan-500 to-teal-500',
+      text: 'text-white',
+      button: 'bg-white text-blue-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'iPhone Blue',
+      image: '📱'
+    },
+    iphoneGreen: {
+      background: 'bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500',
+      text: 'text-white',
+      button: 'bg-white text-green-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'iPhone Green',
+      image: '📱'
+    },
+    iphoneOrange: {
+      background: 'bg-gradient-to-br from-orange-500 via-red-500 to-pink-500',
+      text: 'text-white',
+      button: 'bg-white text-orange-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'iPhone Orange',
+      image: '📱'
+    },
+    iphonePink: {
+      background: 'bg-gradient-to-br from-pink-500 via-rose-500 to-purple-500',
+      text: 'text-white',
+      button: 'bg-white text-pink-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'iPhone Pink',
+      image: '📱'
+    },
+    // Live Wallpaper Inspired Themes
+    galaxyLive: {
+      background: 'bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900',
+      text: 'text-white',
+      button: 'bg-white text-indigo-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'Galaxy Live',
+      image: '🌌'
+    },
+    oceanLive: {
+      background: 'bg-gradient-to-br from-blue-900 via-cyan-800 to-teal-700',
+      text: 'text-white',
+      button: 'bg-white text-blue-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'Ocean Live',
+      image: '🌊'
+    },
+    sunsetLive: {
+      background: 'bg-gradient-to-br from-yellow-500 via-orange-500 via-red-500 to-pink-500',
+      text: 'text-white',
+      button: 'bg-white text-orange-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'Sunset Live',
+      image: '🌅'
+    },
+    forestLive: {
+      background: 'bg-gradient-to-br from-green-700 via-emerald-600 to-teal-500',
+      text: 'text-white',
+      button: 'bg-white text-green-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'Forest Live',
+      image: '🌲'
+    },
+    auroraLive: {
+      background: 'bg-gradient-to-br from-teal-400 via-cyan-400 via-blue-500 to-indigo-500',
+      text: 'text-white',
+      button: 'bg-white text-teal-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'Aurora Live',
+      image: '✨'
+    },
+    // Abstract Wallpaper Themes
+    geometric: {
+      background: 'bg-gradient-to-br from-gray-800 via-gray-700 to-gray-600',
+      text: 'text-white',
+      button: 'bg-white text-gray-800 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'Geometric',
+      image: '🔷'
+    },
+    neon: {
+      background: 'bg-gradient-to-br from-cyan-400 via-pink-400 to-purple-400',
+      text: 'text-white',
+      button: 'bg-white text-cyan-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'Neon',
+      image: '💡'
+    },
+    holographic: {
+      background: 'bg-gradient-to-br from-indigo-400 via-purple-400 via-pink-400 to-orange-400',
+      text: 'text-white',
+      button: 'bg-white text-indigo-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'Holographic',
+      image: '🌈'
+    },
+    metallic: {
+      background: 'bg-gradient-to-br from-gray-400 via-gray-300 to-gray-200',
+      text: 'text-gray-900',
+      button: 'bg-gray-900 text-white hover:bg-gray-800 transform hover:scale-105',
+      container: 'bg-white/20 backdrop-blur-md',
+      name: 'Metallic',
+      image: '⚙️'
+    },
+    // Nature Wallpaper Themes
+    mountain: {
+      background: 'bg-gradient-to-br from-gray-600 via-gray-500 to-blue-400',
+      text: 'text-white',
+      button: 'bg-white text-gray-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'Mountain',
+      image: '🏔️'
+    },
+    desert: {
+      background: 'bg-gradient-to-br from-yellow-400 via-orange-400 to-red-400',
+      text: 'text-white',
+      button: 'bg-white text-yellow-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'Desert',
+      image: '🏜️'
+    },
+    tropical: {
+      background: 'bg-gradient-to-br from-green-400 via-blue-400 to-cyan-400',
+      text: 'text-white',
+      button: 'bg-white text-green-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'Tropical',
+      image: '🌴'
+    },
+    arctic: {
+      background: 'bg-gradient-to-br from-blue-200 via-cyan-200 to-white',
+      text: 'text-gray-800',
+      button: 'bg-gray-800 text-white hover:bg-gray-700 transform hover:scale-105',
+      container: 'bg-white/30 backdrop-blur-md',
+      name: 'Arctic',
+      image: '❄️'
+    },
+    // Modern Wallpaper Themes
+    glassmorphism: {
+      background: 'bg-gradient-to-br from-white/20 via-white/10 to-transparent',
+      text: 'text-white',
+      button: 'bg-white/20 text-white hover:bg-white/30 transform hover:scale-105 backdrop-blur-md',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'Glassmorphism',
+      image: '🪟'
+    },
+    gradientMesh: {
+      background: 'bg-gradient-to-br from-purple-400 via-pink-400 via-yellow-400 to-orange-400',
+      text: 'text-white',
+      button: 'bg-white text-purple-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'Gradient Mesh',
+      image: '🎨'
+    },
+    darkMode: {
+      background: 'bg-gradient-to-br from-gray-900 via-gray-800 to-black',
+      text: 'text-white',
+      button: 'bg-gray-700 text-white hover:bg-gray-600 transform hover:scale-105',
+      container: 'bg-gray-800/50 backdrop-blur-md',
+      name: 'Dark Mode',
+      image: '🌑'
+    },
+    lightMode: {
+      background: 'bg-gradient-to-br from-gray-100 via-white to-gray-50',
+      text: 'text-gray-900',
+      button: 'bg-gray-900 text-white hover:bg-gray-800 transform hover:scale-105',
+      container: 'bg-white/80 backdrop-blur-md',
+      name: 'Light Mode',
+      image: '☀️'
+    },
+        // Linktree Official Background Inspired Theme
+    linktreeOfficial: {
+      background: 'bg-cover bg-center bg-no-repeat',
+      backgroundImage: 'url("https://ugc.production.linktr.ee/AXotfmrhQq2bOhoy2bjv_00GnVL9m9h5xunYr?io=true&size=background-profile-v1_0")',
+      text: 'text-white',
+      button: 'bg-white text-orange-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'Linktree Official',
+      image: '🔗'
+    },
+         
+    linktreeElegant: {
+      background: 'bg-cover bg-center bg-no-repeat',
+      backgroundImage: 'url("https://ugc.production.linktr.ee/AXotfmrhQq2bOhoy2bjv_00GnVL9m9h5xunYr?io=true&size=background-profile-v1_0")',
+      text: 'text-white',
+      button: 'bg-white/20 text-white hover:bg-white/30 transform hover:scale-105 backdrop-blur-md',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'Linktree Elegant',
+      image: '✨'
+    } ,
+    linktreeSky: {
+      background: 'bg-cover bg-center bg-no-repeat',
+      backgroundImage: 'url("https://ugc.production.linktr.ee/m7t0nuNRliLPZIPR8bvL_GEWhBdo8DONe3TCK?io=true&size=background-profile-v1_0")',
+      text: 'text-white',
+      button: 'bg-white/20 text-white hover:bg-white/30 transform hover:scale-105 backdrop-blur-md',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'Linktree Sky',
+      image: '☁️'
+    },
+     linktreeSky2: {
+      background: 'bg-cover bg-center bg-no-repeat',
+      backgroundImage: 'url("https://e1.pxfuel.com/desktop-wallpaper/619/423/desktop-wallpaper-best-aesthetic-for-ios-14-black-white-gold-neon-red-blue-pink-orange-green-purple-and-more-aesthetic-black-and-grey-iphone.jpg")',
+      text: 'text-white',
+      button: 'bg-white/20 text-white hover:bg-white/30 transform hover:scale-105 backdrop-blur-md',
+      container: 'bg-white/10 backdrop-blur-md',
+      name: 'Linktree Sky 2',
+     
+    },
+    linktreeSky3: {
+      background: 'bg-cover bg-center bg-no-repeat',
+      backgroundImage: 'url("https://e1.pxfuel.com/desktop-wallpaper/72/256/desktop-wallpaper-purple-geometric-purple-and-grey-geometric.jpg")',
+      text: 'text-white',
+      button: 'bg-white/20 text-white hover:bg-white/30 transform hover:scale-105 backdrop-blur-md',
+      container: '',
+      name: 'Linktree Sky 3'
+    }
+  };
+
+  // Link design templates
+  const linkTemplates = {
+    default: {
+      container: 'block w-full p-4 rounded-lg text-center font-medium transition-all shadow-lg hover:shadow-xl',
+      icon: 'w-5 h-5 object-contain',
+      fallback: 'w-5 h-5 bg-white/20 rounded flex items-center justify-center text-xs',
+      name: 'Default (Rounded)'
+    },
+    rounded: {
+      container: 'block w-full p-4 rounded-full text-center font-medium transition-all shadow-lg hover:shadow-xl',
+      icon: 'w-5 h-5 object-contain',
+      fallback: 'w-5 h-5 bg-white/20 rounded-full flex items-center justify-center text-xs',
+      name: 'Rounded (Full Circle)'
+    },
+    card: {
+      container: 'block w-full p-6 rounded-xl text-center font-medium transition-all shadow-lg hover:shadow-xl border border-white/20',
+      icon: 'w-6 h-6 object-contain',
+      fallback: 'w-6 h-6 bg-white/20 rounded-lg flex items-center justify-center text-sm',
+      name: 'Card (Large Cards)'
+    },
+    minimal: {
+      container: 'block w-full p-3 rounded-md text-center font-medium transition-all border-2 border-white/30 hover:border-white/50',
+      icon: 'w-4 h-4 object-contain',
+      fallback: 'w-4 h-4 bg-white/20 rounded flex items-center justify-center text-xs',
+      name: 'Minimal (Simple)'
+    },
+    glass: {
+      container: 'block w-full p-4 rounded-lg text-center font-medium transition-all backdrop-blur-md bg-white/10 border border-white/20 hover:bg-white/20',
+      icon: 'w-5 h-5 object-contain',
+      fallback: 'w-5 h-5 bg-white/20 rounded flex items-center justify-center text-xs',
+      name: 'Glass (Frosted)'
+    },
+    gradient: {
+      container: 'block w-full p-4 rounded-lg text-center font-medium transition-all bg-gradient-to-r from-white/20 to-white/10 hover:from-white/30 hover:to-white/20 border border-white/20',
+      icon: 'w-5 h-5 object-contain',
+      fallback: 'w-5 h-5 bg-white/20 rounded flex items-center justify-center text-xs',
+      name: 'Gradient (Gradient Background)'
     }
   };
 
@@ -99,6 +513,8 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
           bio: linktreeData.bio || 'Welcome to my LinkNest page!',
           avatar: linktreeData.avatar || '',
           theme: linktreeData.theme || 'default',
+          linkTemplate: linktreeData.linkTemplate || 'default',
+          backgroundBlur: linktreeData.backgroundBlur !== undefined ? linktreeData.backgroundBlur : true,
           links: linksWithClicks
         });
       } else {
@@ -107,6 +523,8 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
           bio: 'Welcome to my LinkNest page!',
           avatar: '',
           theme: 'default',
+          linkTemplate: 'default',
+          backgroundBlur: true,
           links: []
         };
         
@@ -123,6 +541,8 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
         bio: 'Welcome to my LinkNest page!',
         avatar: '',
         theme: 'default',
+        linkTemplate: 'default',
+        backgroundBlur: true,
         links: []
       });
       setError('Failed to load profile from server, using default');
@@ -191,6 +611,8 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
           bio: profile.bio || 'Welcome to my LinkNest page!',
           avatar: profile.avatar || '',
           theme: profile.theme || 'default',
+          linkTemplate: profile.linkTemplate || 'default',
+          backgroundBlur: profile.backgroundBlur !== undefined ? profile.backgroundBlur : true,
           links: updatedLinks
         });
       }
@@ -242,6 +664,8 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
           bio: profile.bio || 'Welcome to my LinkNest page!',
           avatar: profile.avatar || '',
           theme: profile.theme || 'default',
+          linkTemplate: profile.linkTemplate || 'default',
+          backgroundBlur: profile.backgroundBlur !== undefined ? profile.backgroundBlur : true,
           links: updatedLinks
         });
       }
@@ -272,6 +696,9 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
         throw new Error('No authenticated user');
       }
 
+      console.log('Saving profile for user:', currentUser.uid);
+      console.log('Current profile data:', profile);
+
       const currentLinks = Array.isArray(profile.links) ? profile.links : [];
       const invalidLinks = currentLinks.filter(link => !link.title || !link.url);
       if (invalidLinks.length > 0) {
@@ -284,16 +711,22 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
       // Check if document exists, if not create it
       const linktreeDoc = await getDoc(linktreeDocRef);
       if (linktreeDoc.exists()) {
+        console.log('Updating existing LinkTree document');
         await updateDoc(linktreeDocRef, {
           'bio': profile.bio,
           'theme': profile.theme,
+          'linkTemplate': profile.linkTemplate,
+          'backgroundBlur': profile.backgroundBlur,
           'links': profile.links
         });
       } else {
+        console.log('Creating new LinkTree document');
         // Create the document with the profile data
         await setDoc(linktreeDocRef, {
           'bio': profile.bio,
           'theme': profile.theme,
+          'linkTemplate': profile.linkTemplate,
+          'backgroundBlur': profile.backgroundBlur,
           'links': profile.links
         });
       }
@@ -301,13 +734,19 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
       // Create username mapping for public profile access
       // Use the user's UID as the username for consistency
       const usernameToUse = user?.username || user?.displayName || user?.email?.split('@')[0] || currentUser.uid;
+      console.log('Creating username mapping for:', usernameToUse);
+      
       const usernamesLinktreeDocRef = doc(db, 'usernames', 'LinkTree');
+      
+      // Create the username mapping
       await setDoc(usernamesLinktreeDocRef, {
         [usernameToUse]: {
           uid: currentUser.uid,
           createdAt: new Date()
         }
       }, { merge: true });
+      
+      console.log('Username mapping created successfully');
       
       // Also create a mapping using UID as username for direct access
       await setDoc(usernamesLinktreeDocRef, {
@@ -316,10 +755,13 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
           createdAt: new Date()
         }
       }, { merge: true });
+      
+      console.log('UID mapping created successfully');
 
       setSuccess('Profile saved successfully!');
       setShowUpdateModal(false);
     } catch (err) {
+      console.error('Error saving profile:', err);
       setError('Failed to save profile: ' + err.message);
     } finally {
       setLoading(false);
@@ -329,6 +771,57 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
   const handleLogout = () => {
     logout();
     onLogout();
+  };
+
+  // Debug function to help troubleshoot username mapping issues
+  const debugUsernameMapping = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        console.error('No authenticated user');
+        return;
+      }
+
+      console.log('=== Debugging Username Mapping ===');
+      console.log('Current user UID:', currentUser.uid);
+      console.log('Current user display name:', currentUser.displayName);
+      console.log('Current user email:', currentUser.email);
+
+      // Check if LinkTree document exists
+      const linktreeDocRef = doc(db, 'users', currentUser.uid, 'LinkTree', 'profile');
+      const linktreeDoc = await getDoc(linktreeDocRef);
+      
+      if (linktreeDoc.exists()) {
+        const linktreeData = linktreeDoc.data();
+        console.log('✅ LinkTree document exists:', linktreeData);
+        console.log('Number of links:', linktreeData.links ? linktreeData.links.length : 0);
+      } else {
+        console.log('❌ LinkTree document does not exist');
+      }
+
+      // Check username mapping
+      const usernamesDocRef = doc(db, 'usernames', 'LinkTree');
+      const usernamesDoc = await getDoc(usernamesDocRef);
+      
+      if (usernamesDoc.exists()) {
+        const usernamesData = usernamesDoc.data();
+        console.log('✅ Usernames collection exists:', usernamesData);
+        
+        // Find if current user has a mapping
+        const userMapping = Object.entries(usernamesData).find(([key, value]) => value.uid === currentUser.uid);
+        if (userMapping) {
+          console.log('✅ User mapping found:', userMapping[0], '->', userMapping[1]);
+        } else {
+          console.log('❌ No username mapping found for current user');
+        }
+      } else {
+        console.log('❌ Usernames collection does not exist');
+      }
+
+      console.log('=== Debug Complete ===');
+    } catch (error) {
+      console.error('Error during debug:', error);
+    }
   };
 
   const getFaviconUrl = (url) => {
@@ -394,25 +887,27 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
         await updateDoc(linktreeDocRef, {
           'links': updatedLinks
         });
-      } else {
-        // Create the document with the updated links
-        await setDoc(linktreeDocRef, {
-          bio: profile.bio || 'Welcome to my LinkNest page!',
-          avatar: profile.avatar || '',
-          theme: profile.theme || 'default',
+              } else {
+          // Create the document with the updated links
+          await setDoc(linktreeDocRef, {
+            bio: profile.bio || 'Welcome to my LinkNest page!',
+            avatar: profile.avatar || '',
+            theme: profile.theme || 'default',
+            linkTemplate: profile.linkTemplate || 'default',
+            backgroundBlur: profile.backgroundBlur !== undefined ? profile.backgroundBlur : true,
+            links: updatedLinks
+          });
+        }
+
+        // Update the profile state
+        setProfile(prev => ({
+          ...prev,
           links: updatedLinks
-        });
-      }
+        }));
 
-      // Update the profile state
-      setProfile(prev => ({
-        ...prev,
-        links: updatedLinks
-      }));
-
-      setEditingLink(null);
-      setEditLinkData({ title: '', url: '' });
-      setSuccess('Link updated successfully!');
+        setEditingLink(null);
+        setEditLinkData({ title: '', url: '' });
+        setSuccess('Link updated successfully!');
     } catch (err) {
       console.error('Error updating link:', err);
       setError('Failed to update link: ' + err.message);
@@ -449,23 +944,25 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
         await updateDoc(linktreeDocRef, {
           'links': updatedLinks
         });
-      } else {
-        // Create the document with the updated links
-        await setDoc(linktreeDocRef, {
-          bio: profile.bio || 'Welcome to my LinkNest page!',
-          avatar: profile.avatar || '',
-          theme: profile.theme || 'default',
+              } else {
+          // Create the document with the updated links
+          await setDoc(linktreeDocRef, {
+            bio: profile.bio || 'Welcome to my LinkNest page!',
+            avatar: profile.avatar || '',
+            theme: profile.theme || 'default',
+            linkTemplate: profile.linkTemplate || 'default',
+            backgroundBlur: profile.backgroundBlur !== undefined ? profile.backgroundBlur : true,
+            links: updatedLinks
+          });
+        }
+
+        // Update the profile state
+        setProfile(prev => ({
+          ...prev,
           links: updatedLinks
-        });
-      }
+        }));
 
-      // Update the profile state
-      setProfile(prev => ({
-        ...prev,
-        links: updatedLinks
-      }));
-
-      setSuccess(`Link ${updatedLinks[index].active ? 'activated' : 'deactivated'} successfully!`);
+        setSuccess(`Link ${updatedLinks[index].active ? 'activated' : 'deactivated'} successfully!`);
     } catch (err) {
       console.error('Error toggling link:', err);
       setError('Failed to update link status: ' + err.message);
@@ -520,6 +1017,8 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
             bio: profile.bio || 'Welcome to my LinkNest page!',
             avatar: base64String,
             theme: profile.theme || 'default',
+            linkTemplate: profile.linkTemplate || 'default',
+            backgroundBlur: profile.backgroundBlur !== undefined ? profile.backgroundBlur : true,
             links: profile.links || []
           });
         }
@@ -690,6 +1189,16 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
                     className="flex-1 sm:flex-none bg-white text-gray-600 font-semibold px-4 sm:px-6 py-2 rounded-full shadow hover:bg-gray-100 transition border border-gray-200"
                   >
                     {copied ? 'Copied!' : 'Copy URL'}
+                  </button>
+                  <button
+                    onClick={() => setShowThemeModal(true)}
+                    className="flex-1 sm:flex-none bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-4 sm:px-3 py-2 rounded-full shadow hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+                    title="Theme & Design Options"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
+                    </svg>
+                    <span>Design</span>
                   </button>
                    <button
                      onClick={() => onViewProfile()}
@@ -914,6 +1423,12 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
                     {/* iPhone Screen */}
                     <div
                       className={`w-full h-[600px] rounded-[38px] flex flex-col items-center relative overflow-hidden ${theme.background} custom-scrollbar`}
+                      style={theme.backgroundImage ? { 
+                        backgroundImage: theme.backgroundImage,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundRepeat: 'no-repeat'
+                      } : {}}
                     >
                       {/* iPhone Notch */}
                       <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-3xl z-10"></div>
@@ -1004,7 +1519,7 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
                         .map((link, idx) => (
                           <div 
                             key={idx} 
-                                  className="w-full flex items-center bg-white/90 backdrop-blur-sm rounded-[20px] shadow-lg p-3 px-4 transition-all duration-300 group hover:shadow-xl hover:bg-white/95"
+                                  className="w-full flex items-center bg-white/90 rounded-[20px] shadow-lg p-3 px-4 transition-all duration-300 group hover:shadow-xl hover:bg-white/95"
                           >
                             {getFaviconUrl(link.url) ? (
                               <img
@@ -1134,11 +1649,70 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
                 <select
                   value={profile.theme}
                   onChange={(e) => handleChange('theme', e.target.value)}
-                  className="w-[80%] sm:w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 text-gray-900"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 text-gray-900"
                 >
-                  <option value="default">Default</option>
+                  <option value="default">Default (Purple-Blue)</option>
                   <option value="dark">Dark</option>
                   <option value="light">Light</option>
+                  <option value="sunset">Sunset (Orange-Pink)</option>
+                  <option value="ocean">Ocean (Cyan-Blue)</option>
+                  <option value="forest">Forest (Green-Emerald)</option>
+                  <option value="midnight">Midnight (Indigo-Purple)</option>
+                  <option value="rose">Rose (Rose-Pink)</option>
+                  <option value="gold">Gold (Yellow-Orange)</option>
+                  <option value="minimal">Minimal (White)</option>
+                  <option value="linktree">Linktree (Green)</option>
+                  <option value="coral">Coral (Red-Pink)</option>
+                  <option value="lavender">Lavender (Purple-Indigo)</option>
+                  <option value="sky">Sky (Blue-Indigo)</option>
+                  <option value="sunset2">Sunset 2 (Yellow-Orange-Red)</option>
+                  <option value="aurora">Aurora (Teal-Cyan-Blue)</option>
+                  <option value="berry">Berry (Purple-Pink-Red)</option>
+                  <option value="earth">Earth (Amber-Orange-Red)</option>
+                  <option value="ocean2">Ocean 2 (Blue-Indigo-Purple)</option>
+                  <option value="spring">Spring (Green-Emerald-Teal)</option>
+                  <option value="iphonePurple">iPhone Purple</option>
+                  <option value="iphoneBlue">iPhone Blue</option>
+                  <option value="iphoneGreen">iPhone Green</option>
+                  <option value="iphoneOrange">iPhone Orange</option>
+                  <option value="iphonePink">iPhone Pink</option>
+                  <option value="galaxyLive">Galaxy Live</option>
+                  <option value="oceanLive">Ocean Live</option>
+                  <option value="sunsetLive">Sunset Live</option>
+                  <option value="forestLive">Forest Live</option>
+                  <option value="auroraLive">Aurora Live</option>
+                  <option value="geometric">Geometric</option>
+                  <option value="neon">Neon</option>
+                  <option value="holographic">Holographic</option>
+                  <option value="metallic">Metallic</option>
+                  <option value="mountain">Mountain</option>
+                  <option value="desert">Desert</option>
+                  <option value="tropical">Tropical</option>
+                  <option value="arctic">Arctic</option>
+                  <option value="glassmorphism">Glassmorphism</option>
+                  <option value="gradientMesh">Gradient Mesh</option>
+                  <option value="darkMode">Dark Mode</option>
+                  <option value="lightMode">Light Mode</option>
+                  <option value="linktreeElegant">Linktree Elegant</option>
+                  <option value="linktreeSky">Linktree Sky</option>
+                  <option value="linktreeSky2">Linktree Sky 2</option>
+                  <option value="linktreeSky3">Linktree Sky 3</option>
+                  </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Link Design Template</label>
+                <select
+                  value={profile.linkTemplate}
+                  onChange={(e) => handleChange('linkTemplate', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 text-gray-900"
+                >
+                  <option value="default">Default (Rounded)</option>
+                  <option value="rounded">Rounded (Full Circle)</option>
+                  <option value="card">Card (Large Cards)</option>
+                  <option value="minimal">Minimal (Simple)</option>
+                  <option value="glass">Glass (Frosted)</option>
+                  <option value="gradient">Gradient (Gradient Background)</option>
                 </select>
               </div>
 
@@ -1359,9 +1933,310 @@ const Dashboard = ({ user: propUser, onLogout, onViewProfile }) => {
                   <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                   </svg>
-                  <span className="text-xs mt-2">More</span>
+                  <span className="text-xs mt-2 text-gray-900">More</span>
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Theme Selection Modal */}
+      {showThemeModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-6 max-w-7xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-100">
+            {/* Custom CSS for animations */}
+            <style jsx>{`
+              .animate-fadeIn {
+                animation: fadeIn 0.3s ease-in-out;
+              }
+              @keyframes fadeIn {
+                from {
+                  opacity: 0;
+                  transform: translateY(10px);
+                }
+                to {
+                  opacity: 1;
+                  transform: translateY(0);
+                }
+              }
+            `}</style>
+            
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
+                Theme & Design Options
+              </h2>
+              <button
+                onClick={() => setShowThemeModal(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+              {/* Left Side - Options */}
+              <div className="space-y-8">
+                {/* Tab Navigation */}
+                <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+                  <button
+                    onClick={() => setActiveTab('themes')}
+                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
+                      activeTab === 'themes'
+                        ? 'bg-white text-purple-600 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <div className="flex items-center justify-center space-x-2">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
+                      </svg>
+                      <span>Themes</span>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('designs')}
+                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
+                      activeTab === 'designs'
+                        ? 'bg-white text-purple-600 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <div className="flex items-center justify-center space-x-2">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                      </svg>
+                      <span>Link Designs</span>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('effects')}
+                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
+                      activeTab === 'effects'
+                        ? 'bg-white text-purple-600 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <div className="flex items-center justify-center space-x-2">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      <span>Effects</span>
+                    </div>
+                  </button>
+                </div>
+
+                {/* Theme Selection Tab */}
+                {activeTab === 'themes' && (
+                  <div className="animate-fadeIn">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Choose Theme</h3>
+                    <div className="grid grid-cols-3 gap-3 max-h-96 overflow-y-auto">
+                      {Object.entries(themes).map(([key, theme]) => (
+                        <button
+                          key={key}
+                          onClick={() => handleChange('theme', key)}
+                          className={`relative p-2 rounded-xl border-2 transition-all duration-300 ${
+                            profile.theme === key 
+                              ? 'border-purple-500 shadow-lg scale-105' 
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <div className={`w-full h-12 rounded-lg ${theme.background} mb-2 relative overflow-hidden`}>
+                            {theme.backgroundImage ? (
+                              <div 
+                                className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                                style={{ backgroundImage: theme.backgroundImage }}
+                              ></div>
+                            ) : (
+                              <div className="absolute inset-0 flex items-center justify-center text-2xl">
+                                {theme.image}
+                              </div>
+                            )}
+                          </div>
+                          <div className="text-xs font-medium text-gray-900 text-center leading-tight">
+                            {theme.name}
+                          </div>
+                          {profile.theme === key && (
+                            <div className="absolute top-1 right-1 w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center">
+                              <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            </div>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Link Template Selection Tab */}
+                {activeTab === 'designs' && (
+                  <div className="animate-fadeIn">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Choose Link Design</h3>
+                    <div className="space-y-3 max-h-64 overflow-y-auto">
+                      {Object.entries(linkTemplates).map(([key, template]) => (
+                        <button
+                          key={key}
+                          onClick={() => handleChange('linkTemplate', key)}
+                          className={`relative w-full p-3 rounded-xl border-2 transition-all duration-300 ${
+                            profile.linkTemplate === key 
+                              ? 'border-purple-500 shadow-lg bg-purple-50' 
+                              : 'border-gray-200 hover:border-gray-300 bg-white'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              {/* Preview of link design */}
+                              <div className={`w-10 h-6 rounded-lg ${template.container.includes('rounded-full') ? 'rounded-full' : 'rounded-lg'} bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center`}>
+                                <div className="w-2 h-2 bg-white rounded-sm"></div>
+                              </div>
+                              <div className="text-left">
+                                <div className="font-medium text-gray-900 text-sm">{template.name}</div>
+                                <div className="text-xs text-gray-500">
+                                  {template.container.includes('p-6') ? 'Large padding' : 
+                                   template.container.includes('p-3') ? 'Small padding' : 'Medium padding'}
+                                  {template.container.includes('rounded-full') ? ' • Full rounded' : 
+                                   template.container.includes('rounded-xl') ? ' • Extra rounded' : ' • Standard rounded'}
+                                </div>
+                              </div>
+                            </div>
+                            {profile.linkTemplate === key && (
+                              <div className="w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center">
+                                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+                            )}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Effects Tab */}
+                {activeTab === 'effects' && (
+                  <div className="animate-fadeIn">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Visual Effects</h3>
+                    <div className="space-y-4">
+                      {/* Background Blur Toggle */}
+                      <div className="bg-white p-4 rounded-xl border border-gray-200">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center">
+                              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                              </svg>
+                            </div>
+                            <div>
+                              <div className="font-medium text-gray-900">Background Blur</div>
+                              <div className="text-sm text-gray-500">Add blur effect to link containers</div>
+                            </div>
+                          </div>
+                          <button 
+                            onClick={() => handleChange('backgroundBlur', !profile.backgroundBlur)}
+                            className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                              profile.backgroundBlur ? 'bg-purple-500' : 'bg-gray-200'
+                            }`}
+                          >
+                            <span className={`${
+                              profile.backgroundBlur ? 'translate-x-5' : 'translate-x-0'
+                            } inline-block h-5 w-5 transform rounded-full bg-white transition duration-200 ease-in-out`}></span>
+                          </button>
+                        </div>
+                        
+                        {/* Preview of blur effect */}
+                        <div className="mt-4 p-3 rounded-lg bg-gradient-to-br from-purple-500 to-blue-500">
+                          <div className={`p-3 rounded-lg ${profile.backgroundBlur ? 'bg-white/20 backdrop-blur-md' : 'bg-transparent'} border border-white/30`}>
+                            <div className="text-white text-sm font-medium">Sample Link</div>
+                            <div className="text-white/80 text-xs">With {profile.backgroundBlur ? 'blur' : 'transparent'} background</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex space-x-4 pt-4">
+                  <button
+                    onClick={saveProfile}
+                    disabled={loading}
+                    className="flex-1 bg-gradient-to-r from-purple-600 to-blue-500 text-white py-3 rounded-lg font-medium hover:opacity-90 transform hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  >
+                    {loading ? 'Saving...' : 'Save Changes'}
+                  </button>
+                  <button
+                    onClick={() => setShowThemeModal(false)}
+                    className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-200 transition-all duration-300"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+
+              {/* Right Side - Live Preview */}
+              <div className="flex justify-center items-start">
+                <div className="relative mx-auto w-[280px] sm:w-[320px]">
+                  <div className="flex items-center justify-center mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">Live Preview</h3>
+                    <div className="ml-3 flex items-center space-x-2">
+                      <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        activeTab === 'themes' 
+                          ? 'bg-purple-100 text-purple-700' 
+                          : 'bg-gray-100 text-gray-500'
+                      }`}>
+                        {activeTab === 'themes' ? 'Theme' : 'Design'}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="relative bg-black rounded-[45px] p-2 shadow-2xl">
+                    <div 
+                      className={`w-full h-[500px] rounded-[38px] flex flex-col items-center relative overflow-hidden ${themes[profile.theme || 'default'].background}`}
+                      style={themes[profile.theme || 'default'].backgroundImage ? { 
+                        backgroundImage: themes[profile.theme || 'default'].backgroundImage,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundRepeat: 'no-repeat'
+                      } : {}}
+                    >
+                      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-3xl z-10"></div>
+                      
+                      <div className="w-full h-full flex flex-col pt-16 pb-8 px-4">
+                        <div className={`rounded-2xl p-6 ${profile.backgroundBlur ? themes[profile.theme || 'default'].container : themes[profile.theme || 'default'].container.replace(/bg-[^/]+\/[^s]+/, 'bg-transparent').replace('backdrop-blur-md', '')} transition-all duration-300 relative flex-1`}>
+                          <div className="text-center">
+                            <h1 className={`text-2xl font-bold mb-2 ${themes[profile.theme || 'default'].text}`}>@username</h1>
+                            <p className={`mb-6 ${themes[profile.theme || 'default'].text} opacity-90`}>Bio preview</p>
+                          </div>
+
+                          <div className="space-y-3">
+                            {/* Sample links for preview */}
+                            {[1, 2, 3].map((i) => (
+                              <div
+                                key={i}
+                                className={`${linkTemplates[profile.linkTemplate || 'default'].container} ${themes[profile.theme || 'default'].button}`}
+                              >
+                                <div className="flex items-center justify-center gap-3">
+                                  <div className="flex items-center justify-center">
+                                    <div className={linkTemplates[profile.linkTemplate || 'default'].fallback}>
+                                      🔗
+                                    </div>
+                                  </div>
+                                  <span>Sample Link {i}</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

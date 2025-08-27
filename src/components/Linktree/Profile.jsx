@@ -9,6 +9,7 @@ const Profile = ({ username, onBackToDashboard }) => {
     bio: '',
     avatar: '',
     theme: 'default',
+    linkTemplate: 'default',
     links: []
   });
   const [loading, setLoading] = useState(true);
@@ -26,16 +27,369 @@ const Profile = ({ username, onBackToDashboard }) => {
       container: 'bg-white/10 backdrop-blur-md'
     },
     dark: {
-      background: 'bg-gray-700',
+      background: 'bg-gray-900',
       text: 'text-white',
-      button: 'bg-purple-600 text-white hover:bg-purple-700 transform hover:scale-105',
+      button: 'bg-gray-800 text-white hover:bg-gray-700 transform hover:scale-105 border border-gray-600',
       container: 'bg-gray-800/50 backdrop-blur-md'
     },
     light: {
-      background: 'bg-gray-200',
+      background: 'bg-gray-100',
       text: 'text-gray-900',
-      button: 'bg-purple-600 text-white hover:bg-purple-700 transform hover:scale-105',
-      container: 'bg-gray-50/80 backdrop-blur-md'
+      button: 'bg-white text-gray-900 hover:bg-gray-50 transform hover:scale-105 border border-gray-200 shadow-sm',
+      container: 'bg-white/80 backdrop-blur-md'
+    },
+    sunset: {
+      background: 'bg-gradient-to-br from-orange-400 to-pink-500',
+      text: 'text-white',
+      button: 'bg-white text-orange-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    ocean: {
+      background: 'bg-gradient-to-br from-cyan-500 to-blue-600',
+      text: 'text-white',
+      button: 'bg-white text-cyan-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    forest: {
+      background: 'bg-gradient-to-br from-green-500 to-emerald-600',
+      text: 'text-white',
+      button: 'bg-white text-green-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    midnight: {
+      background: 'bg-gradient-to-br from-indigo-900 to-purple-900',
+      text: 'text-white',
+      button: 'bg-indigo-800 text-white hover:bg-indigo-700 transform hover:scale-105 border border-indigo-600',
+      container: 'bg-indigo-800/30 backdrop-blur-md'
+    },
+    rose: {
+      background: 'bg-gradient-to-br from-rose-400 to-pink-500',
+      text: 'text-white',
+      button: 'bg-white text-rose-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    gold: {
+      background: 'bg-gradient-to-br from-yellow-400 to-orange-500',
+      text: 'text-white',
+      button: 'bg-white text-yellow-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    minimal: {
+      background: 'bg-white',
+      text: 'text-gray-900',
+      button: 'bg-gray-900 text-white hover:bg-gray-800 transform hover:scale-105',
+      container: 'bg-gray-50 border border-gray-200'
+    },
+    // New themes inspired by Linktree
+    linktree: {
+      background: 'bg-gradient-to-br from-green-400 to-green-600',
+      text: 'text-white',
+      button: 'bg-white text-green-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    coral: {
+      background: 'bg-gradient-to-br from-red-400 to-pink-500',
+      text: 'text-white',
+      button: 'bg-white text-red-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    lavender: {
+      background: 'bg-gradient-to-br from-purple-400 to-indigo-500',
+      text: 'text-white',
+      button: 'bg-white text-purple-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    sky: {
+      background: 'bg-gradient-to-br from-blue-400 to-indigo-500',
+      text: 'text-white',
+      button: 'bg-white text-blue-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    sunset2: {
+      background: 'bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500',
+      text: 'text-white',
+      button: 'bg-white text-orange-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    aurora: {
+      background: 'bg-gradient-to-br from-teal-400 via-cyan-500 to-blue-500',
+      text: 'text-white',
+      button: 'bg-white text-teal-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    berry: {
+      background: 'bg-gradient-to-br from-purple-500 via-pink-500 to-red-500',
+      text: 'text-white',
+      button: 'bg-white text-purple-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    earth: {
+      background: 'bg-gradient-to-br from-amber-600 via-orange-600 to-red-600',
+      text: 'text-white',
+      button: 'bg-white text-amber-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    ocean2: {
+      background: 'bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600',
+      text: 'text-white',
+      button: 'bg-white text-blue-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    spring: {
+      background: 'bg-gradient-to-br from-green-400 via-emerald-400 to-teal-400',
+      text: 'text-white',
+      button: 'bg-white text-green-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    // iPhone Wallpaper Inspired Themes
+    iphonePurple: {
+      background: 'bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500',
+      text: 'text-white',
+      button: 'bg-white text-purple-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    iphoneBlue: {
+      background: 'bg-gradient-to-br from-blue-500 via-cyan-500 to-teal-500',
+      text: 'text-white',
+      button: 'bg-white text-blue-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    iphoneGreen: {
+      background: 'bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500',
+      text: 'text-white',
+      button: 'bg-white text-green-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    iphoneOrange: {
+      background: 'bg-gradient-to-br from-orange-500 via-red-500 to-pink-500',
+      text: 'text-white',
+      button: 'bg-white text-orange-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    iphonePink: {
+      background: 'bg-gradient-to-br from-pink-500 via-rose-500 to-purple-500',
+      text: 'text-white',
+      button: 'bg-white text-pink-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    // Live Wallpaper Inspired Themes
+    galaxyLive: {
+      background: 'bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900',
+      text: 'text-white',
+      button: 'bg-white text-indigo-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    oceanLive: {
+      background: 'bg-gradient-to-br from-blue-900 via-cyan-800 to-teal-700',
+      text: 'text-white',
+      button: 'bg-white text-blue-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    sunsetLive: {
+      background: 'bg-gradient-to-br from-yellow-500 via-orange-500 via-red-500 to-pink-500',
+      text: 'text-white',
+      button: 'bg-white text-orange-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    forestLive: {
+      background: 'bg-gradient-to-br from-green-700 via-emerald-600 to-teal-500',
+      text: 'text-white',
+      button: 'bg-white text-green-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    auroraLive: {
+      background: 'bg-gradient-to-br from-teal-400 via-cyan-400 via-blue-500 to-indigo-500',
+      text: 'text-white',
+      button: 'bg-white text-teal-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    // Abstract Wallpaper Themes
+    geometric: {
+      background: 'bg-gradient-to-br from-gray-800 via-gray-700 to-gray-600',
+      text: 'text-white',
+      button: 'bg-white text-gray-800 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    neon: {
+      background: 'bg-gradient-to-br from-cyan-400 via-pink-400 to-purple-400',
+      text: 'text-white',
+      button: 'bg-white text-cyan-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    holographic: {
+      background: 'bg-gradient-to-br from-indigo-400 via-purple-400 via-pink-400 to-orange-400',
+      text: 'text-white',
+      button: 'bg-white text-indigo-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    metallic: {
+      background: 'bg-gradient-to-br from-gray-400 via-gray-300 to-gray-200',
+      text: 'text-gray-900',
+      button: 'bg-gray-900 text-white hover:bg-gray-800 transform hover:scale-105',
+      container: 'bg-white/20 backdrop-blur-md'
+    },
+    // Nature Wallpaper Themes
+    mountain: {
+      background: 'bg-gradient-to-br from-gray-600 via-gray-500 to-blue-400',
+      text: 'text-white',
+      button: 'bg-white text-gray-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    desert: {
+      background: 'bg-gradient-to-br from-yellow-400 via-orange-400 to-red-400',
+      text: 'text-white',
+      button: 'bg-white text-yellow-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    tropical: {
+      background: 'bg-gradient-to-br from-green-400 via-blue-400 to-cyan-400',
+      text: 'text-white',
+      button: 'bg-white text-green-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    arctic: {
+      background: 'bg-gradient-to-br from-blue-200 via-cyan-200 to-white',
+      text: 'text-gray-800',
+      button: 'bg-gray-800 text-white hover:bg-gray-700 transform hover:scale-105',
+      container: 'bg-white/30 backdrop-blur-md'
+    },
+    // Modern Wallpaper Themes
+    glassmorphism: {
+      background: 'bg-gradient-to-br from-white/20 via-white/10 to-transparent',
+      text: 'text-white',
+      button: 'bg-white/20 text-white hover:bg-white/30 transform hover:scale-105 backdrop-blur-md',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    gradientMesh: {
+      background: 'bg-gradient-to-br from-purple-400 via-pink-400 via-yellow-400 to-orange-400',
+      text: 'text-white',
+      button: 'bg-white text-purple-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    darkMode: {
+      background: 'bg-gradient-to-br from-gray-900 via-gray-800 to-black',
+      text: 'text-white',
+      button: 'bg-gray-700 text-white hover:bg-gray-600 transform hover:scale-105',
+      container: 'bg-gray-800/50 backdrop-blur-md'
+    },
+    lightMode: {
+      background: 'bg-gradient-to-br from-gray-100 via-white to-gray-50',
+      text: 'text-gray-900',
+      button: 'bg-gray-900 text-white hover:bg-gray-800 transform hover:scale-105',
+      container: 'bg-white/80 backdrop-blur-md'
+    },
+    // Linktree Official Background Inspired Theme
+    linktreeOfficial: {
+      background: 'bg-cover bg-center bg-no-repeat',
+      backgroundImage: 'url("https://ugc.production.linktr.ee/AXotfmrhQq2bOhoy2bjv_00GnVL9m9h5xunYr?io=true&size=background-profile-v1_0")',
+      text: 'text-white',
+      button: 'bg-white text-orange-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    // Additional Linktree-Inspired Wallpaper Themes
+    linktreeWarm: {
+      background: 'bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500',
+      text: 'text-white',
+      button: 'bg-white text-orange-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    linktreeSunset: {
+      background: 'bg-gradient-to-br from-pink-400 via-rose-500 to-purple-500',
+      text: 'text-white',
+      button: 'bg-white text-pink-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    linktreeVibrant: {
+      background: 'bg-gradient-to-br from-orange-500 via-pink-500 via-purple-500 to-indigo-500',
+      text: 'text-white',
+      button: 'bg-white text-orange-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    linktreeSoft: {
+      background: 'bg-gradient-to-br from-orange-300 via-pink-400 to-purple-500',
+      text: 'text-white',
+      button: 'bg-white text-orange-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    linktreeBold: {
+      background: 'bg-gradient-to-br from-orange-600 via-pink-600 to-purple-700',
+      text: 'text-white',
+      button: 'bg-white text-orange-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    linktreeModern: {
+      background: 'bg-gradient-to-br from-orange-400 via-pink-500 via-purple-600 to-indigo-600',
+      text: 'text-white',
+      button: 'bg-white text-orange-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    linktreeElegant: {
+      background: 'bg-cover bg-center bg-no-repeat',
+      backgroundImage: 'url("https://ugc.production.linktr.ee/AXotfmrhQq2bOhoy2bjv_00GnVL9m9h5xunYr?io=true&size=background-profile-v1_0")',
+      text: 'text-white',
+      button: 'bg-white/20 text-white hover:bg-white/30 transform hover:scale-105 backdrop-blur-md',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    linktreeDynamic: {
+      background: 'bg-gradient-to-br from-yellow-400 via-orange-500 via-pink-500 to-purple-600',
+      text: 'text-white',
+      button: 'bg-white text-orange-600 hover:bg-opacity-90 transform hover:scale-105',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    linktreeSky: {
+      background: 'bg-cover bg-center bg-no-repeat',
+      backgroundImage: 'url("https://ugc.production.linktr.ee/m7t0nuNRliLPZIPR8bvL_GEWhBdo8DONe3TCK?io=true&size=background-profile-v1_0")',
+      text: 'text-white',
+      button: 'bg-white/20 text-white hover:bg-white/30 transform hover:scale-105 backdrop-blur-md',
+      container: 'bg-white/10 backdrop-blur-md'
+    },
+    linktreeSky2: {
+      background: 'bg-cover bg-center bg-no-repeat',
+      backgroundImage: 'url("https://e1.pxfuel.com/desktop-wallpaper/619/423/desktop-wallpaper-best-aesthetic-for-ios-14-black-white-gold-neon-red-blue-pink-orange-green-purple-and-more-aesthetic-black-and-grey-iphone.jpg")',
+      text: 'text-white',
+      button: 'bg-white/20 text-white hover:bg-white/30 transform hover:scale-105 backdrop-blur-md',
+      container: ''
+    },
+    linktreeSky3: {
+      background: 'bg-cover bg-center bg-no-repeat',
+      backgroundImage: 'url("https://e1.pxfuel.com/desktop-wallpaper/72/256/desktop-wallpaper-purple-geometric-purple-and-grey-geometric.jpg")',
+      text: 'text-white',
+      button: 'bg-white/20 text-white hover:bg-white/30 transform hover:scale-105 backdrop-blur-md',
+      container: ''
+    }
+  };
+
+  // Link design templates
+  const linkTemplates = {
+    default: {
+      container: 'flex items-center w-full p-4 rounded-xl bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 group relative cursor-pointer',
+      icon: 'w-6 h-6 object-contain',
+      fallback: 'w-6 h-6 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500'
+    },
+    rounded: {
+      container: 'flex items-center w-full p-4 rounded-full bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 group relative cursor-pointer',
+      icon: 'w-6 h-6 object-contain',
+      fallback: 'w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center text-xs text-gray-500'
+    },
+    card: {
+      container: 'flex items-center w-full p-6 rounded-xl bg-white border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 group relative cursor-pointer',
+      icon: 'w-8 h-8 object-contain',
+      fallback: 'w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center text-sm text-gray-500'
+    },
+    minimal: {
+      container: 'flex items-center w-full p-3 rounded-md bg-white border-2 border-gray-200 hover:border-gray-300 transition-all duration-300 group relative cursor-pointer',
+      icon: 'w-5 h-5 object-contain',
+      fallback: 'w-5 h-5 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500'
+    },
+    glass: {
+      container: 'flex items-center w-full p-4 rounded-xl bg-white/80 backdrop-blur-md border border-white/20 hover:bg-white/90 transition-all duration-300 group relative cursor-pointer',
+      icon: 'w-6 h-6 object-contain',
+      fallback: 'w-6 h-6 bg-white/20 rounded flex items-center justify-center text-xs text-gray-500'
+    },
+    gradient: {
+      container: 'flex items-center w-full p-4 rounded-xl bg-gradient-to-r from-white/90 to-white/70 border border-white/20 hover:from-white/95 hover:to-white/85 transition-all duration-300 group relative cursor-pointer',
+      icon: 'w-6 h-6 object-contain',
+      fallback: 'w-6 h-6 bg-white/20 rounded flex items-center justify-center text-xs text-gray-500'
     }
   };
 
@@ -114,75 +468,40 @@ const Profile = ({ username, onBackToDashboard }) => {
           bio: linktreeData.bio || '',
           avatar: linktreeData.avatar || '',
           theme: linktreeData.theme || 'default',
+          linkTemplate: linktreeData.linkTemplate || 'default',
           links: linktreeData.links || []
         };
        
         console.log('Number of links found:', profileData.links.length);
         setUser(profileData);
       } else {
-        // User document doesn't exist - show demo profile
-        const demoProfile = {
-          username: username || 'demo_user',
-          bio: 'This is a demo profile. Create your own LinkNest profile to share your links!',
+        // User document doesn't exist - show empty profile
+        const emptyProfile = {
+          username: username,
+          bio: '',
           avatar: '',
           theme: 'default',
-          links: [
-            {
-              _id: '1',
-              title: 'Instagram',
-              url: 'https://instagram.com',
-              active: true
-            },
-            {
-              _id: '2',
-              title: 'YouTube',
-              url: 'https://youtube.com',
-              active: true
-            },
-            {
-              _id: '3',
-              title: 'Twitter',
-              url: 'https://twitter.com',
-              active: true
-            }
-          ]
+          linkTemplate: 'default',
+          links: []
         };
-        console.log('User document not found, showing demo profile for username:', username);
-        setUser(demoProfile);
+        console.log('User document not found, showing empty profile for username:', username);
+        setUser(emptyProfile);
       }
       setError('');
     } catch (err) {
       console.error('Error fetching profile:', err);
       
-      // Show demo profile on Firebase permission errors or other issues
+      // Show empty profile on Firebase permission errors or other issues
       if (err.message.includes('permission') || err.message.includes('permissions') || err.message.includes('insufficient')) {
-        const demoProfile = {
-          username: username || 'demo_user',
-          bio: 'This is a demo profile. Create your own LinkNest profile to share your links!',
+        const emptyProfile = {
+          username: username,
+          bio: '',
           avatar: '',
           theme: 'default',
-          links: [
-            {
-              _id: '1',
-              title: 'Instagram',
-              url: 'https://instagram.com',
-              active: true
-            },
-            {
-              _id: '2',
-              title: 'YouTube',
-              url: 'https://youtube.com',
-              active: true
-            },
-            {
-              _id: '3',
-              title: 'Twitter',
-              url: 'https://twitter.com',
-              active: true
-            }
-          ]
+          linkTemplate: 'default',
+          links: []
         };
-        setUser(demoProfile);
+        setUser(emptyProfile);
       } else {
         setError('Profile not found');
       }
@@ -245,7 +564,7 @@ const Profile = ({ username, onBackToDashboard }) => {
   };
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 to-blue-500">
+    <div className="min-h-screen flex items-center justify-center bg-transparent">
       <div className="animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent"></div>
     </div>
   );
@@ -261,6 +580,7 @@ const Profile = ({ username, onBackToDashboard }) => {
   );
 
   const theme = themes[user.theme || 'default'];
+  const linkTemplate = linkTemplates[user.linkTemplate || 'default'];
 
   const threeDotIcon = (
     <svg viewBox="0 0 24 24" className="w-6 h-6 text-gray-400 hover:text-gray-700 cursor-pointer">
@@ -276,13 +596,16 @@ const Profile = ({ username, onBackToDashboard }) => {
   const isAnyPopupOpen = showProfileShare || showInputIndex !== null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-transparent flex items-center justify-center p-4">
       {/* iPhone 16 Frame */}
       <div className="relative mx-auto w-[280px] sm:w-[320px]">
         {/* iPhone Body */}
         <div className="relative bg-black rounded-[45px] p-2 shadow-2xl">
           {/* iPhone Screen */}
-          <div className="w-full h-[600px] rounded-[38px] flex flex-col items-center relative overflow-hidden bg-gradient-to-br from-purple-600 to-blue-500">
+          <div 
+            className={`w-full h-[600px] rounded-[38px] flex flex-col items-center relative overflow-hidden ${theme.background}`}
+            style={theme.backgroundImage ? { backgroundImage: theme.backgroundImage } : {}}
+          >
             {/* iPhone Notch */}
             <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-3xl z-10"></div>
             
@@ -342,7 +665,7 @@ const Profile = ({ username, onBackToDashboard }) => {
           />
         )}
               
-              <div className={`rounded-2xl p-6 ${theme.container} transition-all duration-300 relative flex-1`}>
+              <div className={`rounded-2xl p-6 ${user.backgroundBlur !== false ? theme.container : theme.container.replace(/bg-[^/]+\/[^s]+/, 'bg-transparent').replace('backdrop-blur-md', '')} transition-all duration-300 relative flex-1`}>
           {/* Three-dot icon at top right for profile share */}
           <div className="absolute top-4 right-4 z-40" onClick={() => { setShowProfileShare(true); setShowInputIndex(null); setShowMoreOptions(false); }}>
             {threeDotIcon}
@@ -487,7 +810,7 @@ const Profile = ({ username, onBackToDashboard }) => {
               const faviconUrl = getFaviconUrl(link.url);
 
               return link && link.active && link.title && link.url && (
-                <div key={index} className="flex items-center w-full p-4 rounded-xl bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 group relative cursor-pointer" onClick={async () => {
+                <div key={index} className={`${linkTemplate.container} transition-all duration-300 group relative cursor-pointer`} onClick={async () => {
                   try {
                     await trackLinkClick(user.username, index);
                         } catch {
@@ -500,14 +823,14 @@ const Profile = ({ username, onBackToDashboard }) => {
                       <img
                         src={faviconUrl}
                         alt={link.title}
-                        className="w-6 h-6 object-contain"
+                        className={linkTemplate.icon}
                         onError={(e) => {
                           e.target.style.display = 'none';
                           e.target.nextSibling.style.display = 'block';
                         }}
                       />
                     ) : null}
-                    <div className="w-6 h-6 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500" style={{ display: faviconUrl ? 'none' : 'flex' }}>
+                    <div className={linkTemplate.fallback} style={{ display: faviconUrl ? 'none' : 'flex' }}>
                       🔗
                     </div>
                   </div>
@@ -647,10 +970,10 @@ const Profile = ({ username, onBackToDashboard }) => {
                   )}
                 </div>
                               );
-              }) : (
+                              }) : (
                 <div className="text-center text-white/80 py-8">
-                  <p>No links added yet.</p>
-                  <p className="text-sm">Go to Dashboard to add your first link!</p>
+                  <p>No links available.</p>
+                  <p className="text-sm">This user hasn&apos;t added any links yet.</p>
                 </div>
               )}
                 </div>
