@@ -33,6 +33,7 @@ import BalancesheetLogin from "../components/balancesheet/BalancesheetLogin.jsx"
 import LinktreeMain from "../components/Linktree/LinktreeMain.jsx";
 import RemoteAppWrapper from "../components/RemoteApp/RemoteAppWrapper.jsx";
 import NewFooter from "./NewFooter.jsx";
+import DataMiningTool from "./DataMiningTool.jsx";
 
 const SearchPage = ({ isToolPage = false }) => {
   const { isDarkMode, toggleTheme } = useTheme();
@@ -650,12 +651,15 @@ const SearchPage = ({ isToolPage = false }) => {
                         </button>
                         <button
                           className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
-                            activeComponent === "Data MiningTool"
+                            activeComponent === "DataMiningTool"
                               ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
                               : "dark:text-white  hover:bg-gray-100 dark:hover:bg-[#28283A]"
                           }`}
+                          // onClick={() => {
+                          //   window.open("http://45.61.57.93:5000/login", "_blank");
+                          // }}
                           onClick={() => {
-                            window.open("http://45.61.57.93:5000/login", "_blank");
+                            handleToggleComponent("DataMiningTool");
                           }}
                         >
                           <span className="drop-shadow-md">DATA MINING TOOL</span>
@@ -744,6 +748,8 @@ const SearchPage = ({ isToolPage = false }) => {
                 <Top100 />
               ) : activeComponent === "Tool" ? (
                 <Tool />
+              ) : activeComponent === "DataMiningTool" ? (
+                <DataMiningTool />
               ) : activeComponent === "LinkNest" ? (
                 <LinktreeMain />
               ) : activeComponent === "Remote" ? (
