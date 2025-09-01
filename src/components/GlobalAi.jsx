@@ -2826,7 +2826,7 @@ const GlobalAi = () => {
                     <span className="text-sm font-medium bg-green-500 text-white px-2.5 py-1 rounded-full">S</span>
                      </div>
                   <span className="text-sm font-medium">Stability AI</span>
-                  <span className="ml-auto text-xs bg-green-100 text-green-600 px-2 py-1 rounded">Premium</span>
+                  <span className="ml-auto text-xs  bg-green-100 text-green-600 px-2 py-1 rounded">Premium</span>
                 </button>
                 <button 
                   className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
