@@ -24,13 +24,138 @@ const GlobalAi = () => {
   const [selectedVersion, setSelectedVersion] = useState('gpt-5'); // 'gpt-5', 'gpt-4', 'dall-e', 'gemini', 'lamda', etc.
   const [chatHistory, setChatHistory] = useState([]);
   const [currentChatId, setCurrentChatId] = useState(null);
+  const [pollinationsStatus, setPollinationsStatus] = useState('unknown'); // 'unknown', 'available', 'unavailable'
 
   const OPENAI_API_KEY = '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';
   const DEEPSEEK_API_KEY = 'sk-bdc38f3a81c94ca8a0ecacf93d584618';
   const OPENROUTER_API_KEY = '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';
   const OPENROUTER_API_KEY_2 = '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';
-  const GROQ_API_KEY = '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';
+  const GROQ_API_KEY = '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';
+  
+  // API Configuration for different models
+  const API_CONFIGS = {
+    groq: {
+      url: "https://openrouter.ai/api/v1/chat/completions",
+      key: "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",
+      model: "x-ai/grok-code-fast-1",
+      name: "Grok Code",
+      free: true
+    },
+    grok4: {
+      url: "https://openrouter.ai/api/v1/chat/completions",
+      key: "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",
+      model: "x-ai/grok-code-fast-1",
+      name: "Grok 4",
+      free: true
+    },
+    grok3: {
+      url: "https://openrouter.ai/api/v1/chat/completions",
+      key: "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",
+      model: "x-ai/grok-code-fast-1",
+      name: "Grok 3",
+      free: true
+    },
+    grok3mini: {
+      url: "https://openrouter.ai/api/v1/chat/completions",
+      key: "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",
+      model: "x-ai/grok-code-fast-1",
+      name: "Grok 3 Mini",
+      free: true
+    },
+    grok2vision: {
+      url: "https://openrouter.ai/api/v1/chat/completions",
+      key: "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",
+      model: "x-ai/grok-code-fast-1",
+      name: "Grok 2 Vision",
+      free: true
+    },
+    claude: {
+      url: "https://openrouter.ai/api/v1/chat/completions",
+      key: "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",
+      model: "anthropic/claude-3.5-sonnet",
+      name: "Claude",
+      free: true
+    },
+    claudeOpus41: {
+      url: "https://openrouter.ai/api/v1/chat/completions",
+      key: "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",
+      model: "anthropic/claude-3.5-opus",
+      name: "Claude Opus 4.1",
+      free: true
+    },
+    claudeSonnet4: {
+      url: "https://openrouter.ai/api/v1/chat/completions",
+      key: "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",
+      model: "anthropic/claude-3.5-sonnet",
+      name: "Claude Sonnet 4",
+      free: true
+    },
+    claudeOpus4: {
+      url: "https://openrouter.ai/api/v1/chat/completions",
+      key: "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",
+      model: "anthropic/claude-3.5-sonnet",
+      name: "Claude Opus 4",
+      free: true
+    },
+    claude37Sonnet: {
+      url: "https://openrouter.ai/api/v1/chat/completions",
+      key: "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",
+      model: "anthropic/claude-3.5-sonnet",
+      name: "Claude 3.7 Sonnet",
+      free: true
+    },
+    claude35Haiku: {
+      url: "https://openrouter.ai/api/v1/chat/completions",
+      key: "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",
+      model: "anthropic/claude-3.5-haiku",
+      name: "Claude 3.5 Haiku",
+      free: true
+    },
+    deepseek: {
+      url: "https://openrouter.ai/api/v1/chat/completions",
+      key: "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",
+      model: "deepseek/deepseek-r1-0528-qwen3-8b",
+      name: "DeepSeek",
+      free: true
+    },
+    deepseekR1: {
+      url: "https://openrouter.ai/api/v1/chat/completions",
+      key: "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",
+      model: "deepseek/deepseek-r1-0528-qwen3-8b",
+      name: "DeepSeek R1",
+      free: true
+    },
+    deepseekV30324: {
+      url: "https://openrouter.ai/api/v1/chat/completions",
+      key: "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",
+      model: "deepseek/deepseek-r1-0528-qwen3-8b",
+      name: "DeepSeek V3 0324",
+      free: true
+    },
+    deepseekProverV2: {
+      url: "https://openrouter.ai/api/v1/chat/completions",
+      key: "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",
+      model: "deepseek/deepseek-r1-0528-qwen3-8b",
+      name: "DeepSeek Prover V2",
+      free: true
+    },
+    phi4: {
+      url: "https://openrouter.ai/api/v1/chat/completions",
+      key: "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",
+      model: "microsoft/phi-4",
+      name: "Microsoft Phi-4",
+      free: true
+    },
+    pixverse: {
+      url: "https://app-api.pixverse.ai/openapi/v2/video/text/generate",
+      key: "sk-32b1993927f5ca2bf141919883430143",
+      model: "v5",
+      name: "Pixverse AI",
+      free: true
+    }
+  };
   const UNSTABILITY_API_KEY = 'your-unstability-api-key-here'; // Add your Unstability AI API key here
+  const STABILITY_API_KEY = 'sk-VEhwXBAlRr8kwBtqUj5dNI0sVDaNcVGhv2SosAgOYflmhIG3'; // Stability AI API key
 
   // Scroll to bottom of chat
   const scrollToBottom = () => {
@@ -62,6 +187,26 @@ const GlobalAi = () => {
     } else {
       createNewChat();
     }
+  }, []);
+
+  // Check Pollinations API status on component mount
+  useEffect(() => {
+    const checkPollinationsStatus = async () => {
+      try {
+        const isAvailable = await testPollinationsAPI();
+        setPollinationsStatus(isAvailable ? 'available' : 'unavailable');
+      } catch (error) {
+        console.error('Error checking Pollinations status:', error);
+        setPollinationsStatus('unavailable');
+      }
+    };
+    
+    checkPollinationsStatus();
+    
+    // Retry status check every 5 minutes
+    const interval = setInterval(checkPollinationsStatus, 5 * 60 * 1000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   // Save chat history to localStorage whenever it changes
@@ -336,18 +481,20 @@ const GlobalAi = () => {
     }
   };
 
-    const generateDeepSeekResponse = async (message) => {
+    const generateDeepSeekResponse = async (message, modelKey = 'deepseek') => {
     try {
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      const config = API_CONFIGS[modelKey] || API_CONFIGS.deepseek;
+      
+      const response = await fetch(config.url, {
            method: 'POST',
            headers: {
-          'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-          'HTTP-Referer': 'https://bestgooglesite.com',
-          'X-Title': 'Global AI Assistant',
+          'Authorization': `Bearer ${config.key}`,
+          'HTTP-Referer': window.location.origin,
+          'X-Title': 'BestGoogleSite',
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'deepseek/deepseek-r1-0528-qwen3-8b:free',
+          model: config.model,
           messages: [
             {
               role: 'system',
@@ -364,7 +511,9 @@ const GlobalAi = () => {
       });
 
       if (!response.ok) {
-        throw new Error(`OpenRouter DeepSeek API error: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        console.error(`${config.name} API error details:`, errorData);
+        throw new Error(`${config.name} API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
       }
 
       const data = await response.json();
@@ -372,17 +521,19 @@ const GlobalAi = () => {
       if (data.choices && data.choices.length > 0 && data.choices[0].message && data.choices[0].message.content) {
         return data.choices[0].message.content;
       } else {
-        console.error('Unexpected OpenRouter DeepSeek API response structure:', data);
-        throw new Error('No valid response from OpenRouter DeepSeek API');
+        console.error(`Unexpected ${config.name} API response structure:`, data);
+        throw new Error(`No valid response from ${config.name} API`);
       }
     } catch (error) {
-      console.error('OpenRouter DeepSeek API error:', error);
+      console.error(`${modelKey} API error:`, error);
       throw error;
     }
   };
 
-  const generateClaudeResponse = async (message, imageUrl = null) => {
+  const generateClaudeResponse = async (message, modelKey = 'claude', imageUrl = null) => {
     try {
+      const config = API_CONFIGS[modelKey] || API_CONFIGS.claude;
+      
       const messages = [
         {
           role: 'user',
@@ -401,16 +552,16 @@ const GlobalAi = () => {
         }
       ];
 
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      const response = await fetch(config.url, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-          'HTTP-Referer': 'https://bestgooglesite.com',
-          'X-Title': 'Global AI Assistant',
+          'Authorization': `Bearer ${config.key}`,
+          'HTTP-Referer': window.location.origin,
+          'X-Title': 'BestGoogleSite',
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'anthropic/claude-sonnet-4',
+          model: config.model,
           messages: messages,
           temperature: 0.7,
           max_tokens: 1000
@@ -418,7 +569,9 @@ const GlobalAi = () => {
       });
 
       if (!response.ok) {
-        throw new Error(`OpenRouter Claude API error: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        console.error(`${config.name} API error details:`, errorData);
+        throw new Error(`${config.name} API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
       }
 
       const data = await response.json();
@@ -426,11 +579,108 @@ const GlobalAi = () => {
       if (data.choices && data.choices.length > 0 && data.choices[0].message && data.choices[0].message.content) {
         return data.choices[0].message.content;
       } else {
-        console.error('Unexpected OpenRouter Claude API response structure:', data);
-        throw new Error('No valid response from OpenRouter Claude API');
+        console.error(`Unexpected ${config.name} API response structure:`, data);
+        throw new Error(`No valid response from ${config.name} API`);
       }
     } catch (error) {
-      console.error('OpenRouter Claude API error:', error);
+      console.error(`${modelKey} API error:`, error);
+      throw error;
+    }
+  };
+
+  // Function to generate response using Microsoft Phi-4 via OpenRouter
+  const generatePhi4Response = async (message) => {
+    try {
+      const config = API_CONFIGS.phi4;
+      
+      const response = await fetch(config.url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${config.key}`,
+          'HTTP-Referer': window.location.origin,
+          'X-Title': 'BestGoogleSite',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: config.model,
+          messages: [
+            {
+              role: 'user',
+              content: message
+            }
+          ],
+          temperature: 0.7,
+          max_tokens: 1000
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error(`${config.name} API error details:`, errorData);
+        throw new Error(`${config.name} API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.choices && data.choices.length > 0 && data.choices[0].message && data.choices[0].message.content) {
+        return data.choices[0].message.content;
+      } else {
+        console.error(`Unexpected ${config.name} API response structure:`, data);
+        throw new Error(`No valid response from ${config.name} API`);
+      }
+    } catch (error) {
+      console.error('Phi-4 API error:', error);
+      throw error;
+    }
+  };
+
+  // Function to generate video using Pixverse AI
+  const generatePixverseVideo = async (prompt) => {
+    try {
+      const config = API_CONFIGS.pixverse;
+      
+      // Generate a unique trace ID
+      const traceId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+      
+      const response = await fetch(config.url, {
+        method: 'POST',
+        headers: {
+          'API-KEY': config.key,
+          'Ai-trace-id': traceId,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          aspect_ratio: "16:9",
+          duration: 5,
+          model: config.model,
+          negative_prompt: "low quality, blurry, distorted",
+          prompt: prompt,
+          quality: "540p",
+          seed: Math.floor(Math.random() * 1000000),
+          water_mark: false
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error(`${config.name} API error details:`, errorData);
+        throw new Error(`${config.name} API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.data && data.data.video_url) {
+        return { videoUrl: data.data.video_url };
+      } else {
+        console.error(`Unexpected ${config.name} API response structure:`, data);
+        throw new Error(`No valid video URL from ${config.name} API`);
+      }
+    } catch (error) {
+      console.error('Pixverse AI API error:', error);
       throw error;
     }
   };
@@ -452,6 +702,7 @@ const GlobalAi = () => {
 
     try {
       // Check if this is an image generation request
+      // Each AI model works independently - no automatic fallbacks between models
       const isImageRequest = isImageGenerationRequest(message);
       
       if (isImageRequest || selectedVersion === 'dall-e') {
@@ -532,6 +783,87 @@ const GlobalAi = () => {
         const deepseekFinalMessages = [...updatedMessages, deepseekAiMessage];
         setChatMessages(deepseekFinalMessages);
         saveCurrentChat();
+      } else if (selectedVersion === 'deepseekR1') {
+        // Use DeepSeek R1 API for text responses
+        const deepseekR1ResponseText = await generateDeepSeekResponse(message, 'deepseekR1');
+        
+        const deepseekR1AiMessage = {
+          id: Date.now() + 1,
+          text: deepseekR1ResponseText,
+          sender: 'ai',
+          timestamp: new Date().toLocaleTimeString()
+        };
+        const deepseekR1FinalMessages = [...updatedMessages, deepseekR1AiMessage];
+        setChatMessages(deepseekR1FinalMessages);
+        saveCurrentChat();
+      } else if (selectedVersion === 'deepseekV30324') {
+        // Use DeepSeek V3 0324 API for text responses
+        const deepseekV30324ResponseText = await generateDeepSeekResponse(message, 'deepseekV30324');
+        
+        const deepseekV30324AiMessage = {
+          id: Date.now() + 1,
+          text: deepseekV30324ResponseText,
+          sender: 'ai',
+          timestamp: new Date().toLocaleTimeString()
+        };
+        const deepseekV30324FinalMessages = [...updatedMessages, deepseekV30324AiMessage];
+        setChatMessages(deepseekV30324FinalMessages);
+        saveCurrentChat();
+      } else if (selectedVersion === 'deepseekProverV2') {
+        // Use DeepSeek Prover V2 API for text responses
+        const deepseekProverV2ResponseText = await generateDeepSeekResponse(message, 'deepseekProverV2');
+        
+        const deepseekProverV2AiMessage = {
+          id: Date.now() + 1,
+          text: deepseekProverV2ResponseText,
+          sender: 'ai',
+          timestamp: new Date().toLocaleTimeString()
+        };
+        const deepseekProverV2FinalMessages = [...updatedMessages, deepseekProverV2AiMessage];
+        setChatMessages(deepseekProverV2FinalMessages);
+        saveCurrentChat();
+      } else if (selectedVersion === 'phi4') {
+        // Use Microsoft Phi-4 API for text responses
+        const phi4ResponseText = await generatePhi4Response(message);
+        
+        const phi4AiMessage = {
+          id: Date.now() + 1,
+          text: phi4ResponseText,
+          sender: 'ai',
+          timestamp: new Date().toLocaleTimeString()
+        };
+        const phi4FinalMessages = [...updatedMessages, phi4AiMessage];
+        setChatMessages(phi4FinalMessages);
+        saveCurrentChat();
+      } else if (selectedVersion === 'pixverse') {
+        // Use Pixverse AI API for video generation
+        try {
+          const pixverseVideoResponse = await generatePixverseVideo(message);
+          
+          const pixverseVideoMessage = {
+            id: Date.now() + 1,
+            text: `Generated video based on: "${message}"`,
+            videoUrl: pixverseVideoResponse.videoUrl,
+            sender: 'ai',
+            timestamp: new Date().toLocaleTimeString(),
+            type: 'video'
+          };
+          const pixverseVideoFinalMessages = [...updatedMessages, pixverseVideoMessage];
+          setChatMessages(pixverseVideoFinalMessages);
+          saveCurrentChat();
+        } catch (error) {
+          // Handle errors gracefully
+          const errorMessage = {
+            id: Date.now() + 1,
+            text: `⚠️ ${error.message}. You can try using other video generation services instead.`,
+            sender: 'ai',
+            timestamp: new Date().toLocaleTimeString(),
+            isError: true
+          };
+          const errorFinalMessages = [...updatedMessages, errorMessage];
+          setChatMessages(errorFinalMessages);
+          saveCurrentChat();
+        }
       } else if (selectedVersion === 'claude') {
         // Use Claude API for text and image responses
         const claudeResponseText = await generateClaudeResponse(message);
@@ -544,6 +876,71 @@ const GlobalAi = () => {
         };
         const claudeFinalMessages = [...updatedMessages, claudeAiMessage];
         setChatMessages(claudeFinalMessages);
+        saveCurrentChat();
+      } else if (selectedVersion === 'claudeOpus41') {
+        // Use Claude Opus 4.1 API for text responses
+        const claudeOpus41ResponseText = await generateClaudeResponse(message, 'claudeOpus41');
+        
+        const claudeOpus41AiMessage = {
+          id: Date.now() + 1,
+          text: claudeOpus41ResponseText,
+          sender: 'ai',
+          timestamp: new Date().toLocaleTimeString()
+        };
+        const claudeOpus41FinalMessages = [...updatedMessages, claudeOpus41AiMessage];
+        setChatMessages(claudeOpus41FinalMessages);
+        saveCurrentChat();
+      } else if (selectedVersion === 'claudeSonnet4') {
+        // Use Claude Sonnet 4 API for text responses
+        const claudeSonnet4ResponseText = await generateClaudeResponse(message, 'claudeSonnet4');
+        
+        const claudeSonnet4AiMessage = {
+          id: Date.now() + 1,
+          text: claudeSonnet4ResponseText,
+          sender: 'ai',
+          timestamp: new Date().toLocaleTimeString()
+        };
+        const claudeSonnet4FinalMessages = [...updatedMessages, claudeSonnet4AiMessage];
+        setChatMessages(claudeSonnet4FinalMessages);
+        saveCurrentChat();
+      } else if (selectedVersion === 'claudeOpus4') {
+        // Use Claude Opus 4 API for text responses
+        const claudeOpus4ResponseText = await generateClaudeResponse(message, 'claudeOpus4');
+        
+        const claudeOpus4AiMessage = {
+          id: Date.now() + 1,
+          text: claudeOpus4ResponseText,
+          sender: 'ai',
+          timestamp: new Date().toLocaleTimeString()
+        };
+        const claudeOpus4FinalMessages = [...updatedMessages, claudeOpus4AiMessage];
+        setChatMessages(claudeOpus4FinalMessages);
+        saveCurrentChat();
+      } else if (selectedVersion === 'claude37Sonnet') {
+        // Use Claude 3.7 Sonnet API for text responses
+        const claude37SonnetResponseText = await generateClaudeResponse(message, 'claude37Sonnet');
+        
+        const claude37SonnetAiMessage = {
+          id: Date.now() + 1,
+          text: claude37SonnetResponseText,
+          sender: 'ai',
+          timestamp: new Date().toLocaleTimeString()
+        };
+        const claude37SonnetFinalMessages = [...updatedMessages, claude37SonnetAiMessage];
+        setChatMessages(claude37SonnetFinalMessages);
+        saveCurrentChat();
+      } else if (selectedVersion === 'claude35Haiku') {
+        // Use Claude 3.5 Haiku API for text responses
+        const claude35HaikuResponseText = await generateClaudeResponse(message, 'claude35Haiku');
+        
+        const claude35HaikuAiMessage = {
+          id: Date.now() + 1,
+          text: claude35HaikuResponseText,
+          sender: 'ai',
+          timestamp: new Date().toLocaleTimeString()
+        };
+        const claude35HaikuFinalMessages = [...updatedMessages, claude35HaikuAiMessage];
+        setChatMessages(claude35HaikuFinalMessages);
         saveCurrentChat();
       } else if (selectedVersion === 'gemini-image') {
         // Use Gemini API for image generation
@@ -631,6 +1028,71 @@ const GlobalAi = () => {
         const llamaFinalMessages = [...updatedMessages, llamaAiMessage];
         setChatMessages(llamaFinalMessages);
         saveCurrentChat();
+      } else if (selectedVersion === 'groq') {
+        // Use Grok Code API for text responses
+        const groqResponseText = await generateGroqResponse(message);
+        
+        const groqAiMessage = {
+          id: Date.now() + 1,
+          text: groqResponseText,
+          sender: 'ai',
+          timestamp: new Date().toLocaleTimeString()
+        };
+        const groqFinalMessages = [...updatedMessages, groqAiMessage];
+        setChatMessages(groqFinalMessages);
+        saveCurrentChat();
+      } else if (selectedVersion === 'grok4') {
+        // Use Grok 4 API for text responses
+        const grok4ResponseText = await generateGrokResponse(message, 'grok4');
+        
+        const grok4AiMessage = {
+          id: Date.now() + 1,
+          text: grok4ResponseText,
+          sender: 'ai',
+          timestamp: new Date().toLocaleTimeString()
+        };
+        const grok4FinalMessages = [...updatedMessages, grok4AiMessage];
+        setChatMessages(grok4FinalMessages);
+        saveCurrentChat();
+      } else if (selectedVersion === 'grok3') {
+        // Use Grok 3 API for text responses
+        const grok3ResponseText = await generateGrokResponse(message, 'grok3');
+        
+        const grok3AiMessage = {
+          id: Date.now() + 1,
+          text: grok3ResponseText,
+          sender: 'ai',
+          timestamp: new Date().toLocaleTimeString()
+        };
+        const grok3FinalMessages = [...updatedMessages, grok3AiMessage];
+        setChatMessages(grok3FinalMessages);
+        saveCurrentChat();
+      } else if (selectedVersion === 'grok3mini') {
+        // Use Grok 3 Mini API for text responses
+        const grok3MiniResponseText = await generateGrokResponse(message, 'grok3mini');
+        
+        const grok3MiniAiMessage = {
+          id: Date.now() + 1,
+          text: grok3MiniResponseText,
+          sender: 'ai',
+          timestamp: new Date().toLocaleTimeString()
+        };
+        const grok3MiniFinalMessages = [...updatedMessages, grok3MiniAiMessage];
+        setChatMessages(grok3MiniFinalMessages);
+        saveCurrentChat();
+      } else if (selectedVersion === 'grok2vision') {
+        // Use Grok 2 Vision API for text responses
+        const grok2VisionResponseText = await generateGrokResponse(message, 'grok2vision');
+        
+        const grok2VisionAiMessage = {
+          id: Date.now() + 1,
+          text: grok2VisionResponseText,
+          sender: 'ai',
+          timestamp: new Date().toLocaleTimeString()
+        };
+        const grok2VisionFinalMessages = [...updatedMessages, grok2VisionAiMessage];
+        setChatMessages(grok2VisionFinalMessages);
+        saveCurrentChat();
       } else if (selectedVersion === 'unstability') {
         // Use Unstability AI API for text responses
         const unstabilityResponseText = await generateUnstabilityResponse(message);
@@ -644,6 +1106,99 @@ const GlobalAi = () => {
         const unstabilityFinalMessages = [...updatedMessages, unstabilityAiMessage];
         setChatMessages(unstabilityFinalMessages);
         saveCurrentChat();
+      } else if (selectedVersion === 'stability') {
+        // Use Stability AI API for image generation
+        try {
+          const stabilityImageResponse = await generateStabilityImage(message);
+          
+          const stabilityImageMessage = {
+            id: Date.now() + 1,
+            text: `Generated image based on: "${message}"`,
+            imageUrl: stabilityImageResponse,
+            sender: 'ai',
+            timestamp: new Date().toLocaleTimeString(),
+            type: 'image'
+          };
+          const stabilityImageFinalMessages = [...updatedMessages, stabilityImageMessage];
+          setChatMessages(stabilityImageFinalMessages);
+          saveCurrentChat();
+        } catch (error) {
+          // Handle errors gracefully
+          const errorMessage = {
+            id: Date.now() + 1,
+            text: `⚠️ ${error.message}. You can try using DALL-E or Pollinations instead.`,
+            sender: 'ai',
+            timestamp: new Date().toLocaleTimeString(),
+            isError: true
+          };
+          const errorFinalMessages = [...updatedMessages, errorMessage];
+          setChatMessages(errorFinalMessages);
+          saveCurrentChat();
+        }
+      } else if (selectedVersion === 'pollinations') {
+        // Use Pollinations AI API for image generation (FREE & No API Key Required)
+        // New API format: https://image.pollinations.ai/prompt/{input}%20image?width=768&height=768&seed=22055&nologo=true&model=turbo
+        
+        // First, add a loading preview message
+        const loadingMessageId = Date.now() + 1;
+        
+        const loadingMessage = {
+          id: loadingMessageId,
+          text: `🎨 Generating image with Pollinations Turbo...`,
+          sender: 'ai',
+          timestamp: new Date().toLocaleTimeString(),
+          type: 'loading',
+          isLoading: true
+        };
+        const loadingMessages = [...updatedMessages, loadingMessage];
+        setChatMessages(loadingMessages);
+        
+        try {
+          // Show initial progress
+          const updatedMessages = loadingMessages.map(msg => 
+            msg.id === loadingMessageId 
+              ? { ...msg, text: `🎨 Generating image with Pollinations Turbo...` }
+              : msg
+          );
+          setChatMessages(updatedMessages);
+          
+          const pollinationsImageResponse = await generatePollinationsImage(message);
+          
+          // Update the loading message with the final result
+          const pollinationsImageMessage = {
+            id: loadingMessageId,
+            text: `✅ Image Generated Successfully!`,
+            imageUrl: pollinationsImageResponse.imageUrl,
+            sender: 'ai',
+            timestamp: new Date().toLocaleTimeString(),
+            type: 'image',
+            isLoading: false
+          };
+          
+          // Replace the loading message with the final result
+          const finalMessages = loadingMessages.map(msg => 
+            msg.id === loadingMessageId ? pollinationsImageMessage : msg
+          );
+          setChatMessages(finalMessages);
+          saveCurrentChat();
+        } catch {
+          // Handle Pollinations errors without fallback to other models
+          const errorMessage = {
+            id: loadingMessageId,
+            text: `❌ Image Generation Failed!`,
+            sender: 'ai',
+            timestamp: new Date().toLocaleTimeString(),
+            isError: true,
+            isLoading: false
+          };
+          
+          // Replace the loading message with the error message
+          const errorFinalMessages = loadingMessages.map(msg => 
+            msg.id === loadingMessageId ? errorMessage : msg
+          );
+          setChatMessages(errorFinalMessages);
+          saveCurrentChat();
+        }
       } else {
         // Use OpenAI API for text responses
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -956,6 +1511,103 @@ const GlobalAi = () => {
     }
   };
 
+  // Function to generate response using Grok Code via OpenRouter
+  const generateGroqResponse = async (prompt) => {
+    try {
+      const requestBody = {
+        model: API_CONFIGS.groq.model,
+        messages: [
+          {
+            role: 'user',
+            content: prompt
+          }
+        ]
+      };
+      
+      console.log('Grok Code API request:', requestBody);
+      
+      const response = await fetch(API_CONFIGS.groq.url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${API_CONFIGS.groq.key}`,
+          'HTTP-Referer': window.location.origin,
+          'X-Title': 'BestGoogleSite',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Grok Code API error details:', errorData);
+        throw new Error(`Grok Code API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.choices && data.choices.length > 0 && data.choices[0].message && data.choices[0].message.content) {
+        return data.choices[0].message.content;
+      } else {
+        console.error('Unexpected Grok Code API response structure:', data);
+        throw new Error('No valid response from Grok Code API');
+      }
+    } catch (error) {
+      console.error('Grok Code API error:', error);
+      throw error;
+    }
+  };
+
+  // Generic function to generate response using any Grok model via OpenRouter
+  const generateGrokResponse = async (prompt, modelKey) => {
+    try {
+      const config = API_CONFIGS[modelKey];
+      if (!config) {
+        throw new Error(`Unknown model key: ${modelKey}`);
+      }
+
+      const requestBody = {
+        model: config.model,
+        messages: [
+          {
+            role: 'user',
+            content: prompt
+          }
+        ]
+      };
+      
+      console.log(`${config.name} API request:`, requestBody);
+      
+      const response = await fetch(config.url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${config.key}`,
+          'HTTP-Referer': window.location.origin,
+          'X-Title': 'BestGoogleSite',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error(`${config.name} API error details:`, errorData);
+        throw new Error(`${config.name} API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.choices && data.choices.length > 0 && data.choices[0].message && data.choices[0].message.content) {
+        return data.choices[0].message.content;
+      } else {
+        console.error(`Unexpected ${config.name} API response structure:`, data);
+        throw new Error(`No valid response from ${config.name} API`);
+      }
+    } catch (error) {
+      console.error(`${modelKey} API error:`, error);
+      throw error;
+    }
+  };
+
   // Function to generate response using Llama via Groq
   const generateLlamaResponse = async (prompt, imageUrl = null) => {
     try {
@@ -1051,6 +1703,44 @@ const GlobalAi = () => {
     }
   };
 
+  // Function to download image
+  const downloadImage = async (imageUrl, filename) => {
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename || 'ai-generated-image.png';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error downloading image:', error);
+      alert('Failed to download image. Please try again.');
+    }
+  };
+
+  // Function to download video
+  const downloadVideo = async (videoUrl, filename) => {
+    try {
+      const response = await fetch(videoUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename || 'ai-generated-video.mp4';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error downloading video:', error);
+      alert('Failed to download video. Please try again.');
+    }
+  };
+
   // Function to render a message with markdown support
   const renderMessage = (message) => {
     if (message.sender === "user") {
@@ -1061,16 +1751,70 @@ const GlobalAi = () => {
         </div>
       );
     } else if (message.type === "image") {
-      // Render image response
+      // Render image response with download button
       return (
         <div>
           <p className="mb-3 text-gray-300 text-sm">{message.text}</p>
-          <div className="relative">
+          <div className="relative group">
             <img 
               src={message.imageUrl} 
               alt="Generated by AI" 
               className="w-full max-w-md rounded-lg shadow-lg"
             />
+            <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-90 group-hover:scale-100">
+              <button
+                onClick={() => downloadImage(message.imageUrl, `ai-image-${Date.now()}.png`)}
+                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white p-3 rounded-full shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-110 backdrop-blur-sm bg-opacity-90"
+                title="Download image"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 4h14v-2H5v2z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    } else if (message.type === "video") {
+      // Render video response with download button
+      return (
+        <div>
+          <p className="mb-3 text-gray-300 text-sm">{message.text}</p>
+          <div className="relative group">
+            <video 
+              src={message.videoUrl} 
+              controls
+              className="w-full max-w-md rounded-lg shadow-lg"
+              preload="metadata"
+            >
+              Your browser does not support the video tag.
+            </video>
+            <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-90 group-hover:scale-100">
+              <button
+                onClick={() => downloadVideo(message.videoUrl, `ai-video-${Date.now()}.mp4`)}
+                className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white p-3 rounded-full shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-110 backdrop-blur-sm bg-opacity-90"
+                title="Download video"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 4h14v-2H5v2z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    } else if (message.type === "loading") {
+      // Render loading message with spinner
+      return (
+        <div>
+          <p className="mb-3 text-gray-300 text-sm">{message.text}</p>
+          <div className="relative">
+            <div className="w-full max-w-md h-64 bg-gray-100 rounded-lg shadow-lg flex items-center justify-center">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                <p className="text-gray-600 text-sm">Generating content...</p>
+              </div>
+            </div>
           </div>
         </div>
       );
@@ -1186,6 +1930,245 @@ const GlobalAi = () => {
     }
   };
 
+  // Function to test Pollinations API status
+  const testPollinationsAPI = async () => {
+    try {
+      const testUrl = 'https://image.pollinations.ai/prompt/test%20image?width=768&height=768&seed=123&nologo=true&model=turbo';
+      
+      // Try HEAD request first
+      try {
+        const response = await fetch(testUrl, { 
+          method: 'HEAD',
+          mode: 'no-cors' // This might help with CORS issues
+        });
+        return true; // If HEAD request succeeds, assume API is available
+      } catch (headError) {
+        console.log('HEAD request failed, trying GET request...');
+      }
+      
+      // Fallback to GET request with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+      
+      try {
+        const response = await fetch(testUrl, { 
+          method: 'GET',
+          signal: controller.signal,
+          mode: 'no-cors'
+        });
+        clearTimeout(timeoutId);
+        return true;
+      } catch (getError) {
+        clearTimeout(timeoutId);
+        if (getError.name === 'AbortError') {
+          console.error('Pollinations API test timed out');
+        } else {
+          console.error('Pollinations API test failed:', getError);
+        }
+        return false;
+      }
+    } catch (error) {
+      console.error('Pollinations API test failed:', error);
+      return false;
+    }
+  };
+
+  // Function to generate image using Pollinations AI (FREE & No API Key Required)
+  // Uses the new API format: https://image.pollinations.ai/prompt/{input}%20image?width=768&height=768&seed=22055&nologo=true&model=turbo
+  // Users can trigger this by:
+  // 1. Selecting Pollinations from the AI model dropdown
+  // 2. Using commands like /imagine, /image, or @image followed by their prompt
+  // 3. The system automatically adds "image" to the prompt and uses the turbo model
+  const generatePollinationsImage = async (prompt) => {
+    // Try multiple approaches if one fails
+    const approaches = [
+      () => generatePollinationsImageWithTurbo(prompt),
+      () => generatePollinationsImageSimple(prompt)
+    ];
+    
+    for (let i = 0; i < approaches.length; i++) {
+      try {
+        console.log(`Trying approach ${i + 1}...`);
+        return await approaches[i]();
+      } catch (error) {
+        console.log(`Approach ${i + 1} failed:`, error.message);
+        if (i === approaches.length - 1) {
+          throw error;
+        }
+      }
+    }
+  };
+
+  // Main approach with turbo model
+  const generatePollinationsImageWithTurbo = async (prompt) => {
+    try {
+      // Clean and sanitize the prompt - allow more characters for better prompts
+      // Remove special characters that might cause issues in URLs
+      const cleanPrompt = prompt.trim()
+        .replace(/[^\w\s\-.,!?()&%$#@]/g, '') // Remove problematic characters
+        .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+        .substring(0, 150); // Limit length
+      
+      // Try multiple seeds if one fails
+      const seeds = [Math.floor(Math.random() * 1000000), Math.floor(Math.random() * 1000000), Math.floor(Math.random() * 1000000)];
+      
+      for (let i = 0; i < seeds.length; i++) {
+        try {
+          console.log(`Trying seed ${seeds[i]} with turbo model...`);
+          
+          // Use the new API format with turbo model and nologo=true
+          const imageUrl = `https://image.pollinations.ai/prompt/${cleanPrompt}%20image?width=768&height=768&seed=${seeds[i]}&nologo=true&model=turbo`;
+          
+          // Test if image loads with timeout
+          const result = await new Promise((resolve, reject) => {
+            const img = new Image();
+            const startTime = Date.now();
+            
+            const timeout = setTimeout(() => {
+              const elapsed = Math.round((Date.now() - startTime) / 1000);
+              reject(new Error(`Image load timeout after ${elapsed} seconds`));
+            }, 30000); // 30 second timeout for Pollinations API
+            
+            img.onload = () => {
+              clearTimeout(timeout);
+              const elapsed = Math.round((Date.now() - startTime) / 1000);
+              console.log(`Image loaded successfully in ${elapsed} seconds with seed ${seeds[i]}`);
+              resolve({ imageUrl, apiUrl: imageUrl, seed: seeds[i] });
+            };
+            img.onerror = () => {
+              clearTimeout(timeout);
+              const elapsed = Math.round((Date.now() - startTime) / 1000);
+              console.log(`Image failed to load after ${elapsed} seconds with seed ${seeds[i]}`);
+              // Check if it's a 500 error specifically
+              if (imageUrl.includes('500')) {
+                reject(new Error('Server error (500) - Pollinations AI service is experiencing issues'));
+              } else {
+                reject(new Error('Failed to generate image'));
+              }
+            };
+            img.src = imageUrl;
+          });
+          
+          return result;
+        } catch (seedError) {
+          console.log(`Seed ${seeds[i]} failed:`, seedError.message);
+          if (i === seeds.length - 1) {
+            // Test API status before giving up
+            const apiStatus = await testPollinationsAPI();
+            if (!apiStatus) {
+              throw new Error('Pollinations AI service is currently unavailable. Please try again later or use a different AI service.');
+            } else {
+              throw new Error(`All attempts to generate image failed. Last error: ${seedError.message}`);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Pollinations API error:', error);
+      throw error;
+    }
+  };
+
+  // Simple fallback approach without turbo model
+  const generatePollinationsImageSimple = async (prompt) => {
+    try {
+      // Clean and sanitize the prompt
+      const cleanPrompt = prompt.trim()
+        .replace(/[^\w\s\-.,!?()&%$#@]/g, '')
+        .replace(/\s+/g, ' ')
+        .substring(0, 100);
+      
+      // Try multiple seeds
+      const seeds = [Math.floor(Math.random() * 1000000), Math.floor(Math.random() * 1000000)];
+      
+      for (let i = 0; i < seeds.length; i++) {
+        try {
+          // Use simpler URL format without turbo model
+          const imageUrl = `https://image.pollinations.ai/prompt/${cleanPrompt}%20image?width=768&height=768&seed=${seeds[i]}&nologo=true`;
+          
+          // Test if image loads with timeout
+          const result = await new Promise((resolve, reject) => {
+            const img = new Image();
+            const timeout = setTimeout(() => {
+              reject(new Error('Image load timeout (30 seconds)'));
+            }, 30000); // 30 second timeout for Pollinations API
+            
+            img.onload = () => {
+              clearTimeout(timeout);
+              resolve({ imageUrl, apiUrl: imageUrl, seed: seeds[i] });
+            };
+            img.onerror = () => {
+              clearTimeout(timeout);
+              reject(new Error('Failed to generate image'));
+            };
+            img.src = imageUrl;
+          });
+          
+          return result;
+        } catch (seedError) {
+          console.log(`Simple approach seed ${seeds[i]} failed:`, seedError.message);
+          if (i === seeds.length - 1) {
+            throw new Error('Simple approach also failed');
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Simple Pollinations API error:', error);
+      throw error;
+    }
+  };
+
+  // Function to generate image using Stability AI (Stable Diffusion)
+  const generateStabilityImage = async (prompt) => {
+    try {
+      const response = await fetch('https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${STABILITY_API_KEY}`,
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          text_prompts: [
+            {
+              text: prompt,
+              weight: 1
+            }
+          ],
+          cfg_scale: 7,
+          height: 1024,
+          width: 1024,
+          samples: 1,
+          steps: 30
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Stability AI API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.artifacts && data.artifacts.length > 0) {
+        // Convert base64 to blob URL
+        const base64Data = data.artifacts[0].base64;
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'image/png' });
+        return URL.createObjectURL(blob);
+      } else {
+        throw new Error('No image generated from Stability AI');
+      }
+    } catch (error) {
+      console.error('Stability AI API error:', error);
+      throw error;
+    }
+  };
+
       return (  
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -1256,7 +2239,17 @@ const GlobalAi = () => {
                       selectedVersion === 'gemini-flash-image-preview' ? 'Gemini Flash Image Preview' :
                       selectedVersion === 'lamda' ? 'LaMDA' :
                       selectedVersion === 'deepseek' ? 'DeepSeek' :
+                     selectedVersion === 'deepseekR1' ? 'DeepSeek R1' :
+                     selectedVersion === 'deepseekV30324' ? 'DeepSeek V3 0324' :
+                     selectedVersion === 'deepseekProverV2' ? 'DeepSeek Prover V2' :
+                     selectedVersion === 'phi4' ? 'Microsoft Phi-4' :
+                     selectedVersion === 'pixverse' ? 'Pixverse AI' :
                       selectedVersion === 'claude' ? 'Claude' :
+                     selectedVersion === 'claudeOpus41' ? 'Claude Opus 4.1' :
+                     selectedVersion === 'claudeSonnet4' ? 'Claude Sonnet 4' :
+                     selectedVersion === 'claudeOpus4' ? 'Claude Opus 4' :
+                     selectedVersion === 'claude37Sonnet' ? 'Claude 3.7 Sonnet' :
+                     selectedVersion === 'claude35Haiku' ? 'Claude 3.5 Haiku' :
                       selectedVersion === 'llama' ? 'Llama' :
                       selectedVersion === 'unstability' ? 'Unstability AI' :
                       selectedVersion.startsWith('gemini') ? 'Gemini' : selectedVersion.toUpperCase()}
@@ -1292,7 +2285,7 @@ const GlobalAi = () => {
       {/* Chat Container with Sidebar */}
       <div className="flex h-[calc(100vh-80px)] relative">
         {/* Sidebar */}
-        <div className="w-64 bg-white border-r border-gray-200 flex-shrink-0 overflow-hidden h-full">
+        <div className="w-72 bg-white border-r border-gray-200 flex-shrink-0 overflow-hidden h-full">
           <div className="flex flex-col h-full overflow-y-auto">
             {/* New Chat Button */}
             <div className="p-4 border-b border-gray-200">
@@ -1503,7 +2496,7 @@ const GlobalAi = () => {
                   }`}
                   onClick={() => setSelectedVersion('gemini-thinking')}
                 >
-                  <div className="w-10 h-10 rounded-sm flex items-center justify-center">
+                  <div className="w-6 h-6 rounded-sm flex items-center justify-center">
                     <img src="https://www.gstatic.com/lamda/images/gemini_sparkle_aurora_33f86dc0c0257da337c63.svg" alt="" />
                   </div>
                   <span className="text-sm font-medium">Gemini Thinking</span>
@@ -1518,12 +2511,10 @@ const GlobalAi = () => {
                   onClick={() => setSelectedVersion('gemini-image')}
                 >
                   <div className="w-6 h-6 rounded-sm flex items-center justify-center">
-                    <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
+                    <img src="https://www.gstatic.com/lamda/images/gemini_sparkle_aurora_33f86dc0c0257da337c63.svg" alt="" />
                   </div>
                   <span className="text-sm font-medium">Gemini 2.5 Flash</span>
-                  <span className="ml-auto text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">OpenRouter</span>
+                 
                 </button>
                 <button 
                   className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
@@ -1533,13 +2524,11 @@ const GlobalAi = () => {
                   }`}
                   onClick={() => setSelectedVersion('google-static-image')}
                 >
-                  <div className="w-6 h-6 rounded-sm flex items-center justify-center">
-                    <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
+                 <div className="w-6 h-6 rounded-sm flex items-center justify-center">
+                    <img src="https://www.gstatic.com/lamda/images/gemini_sparkle_aurora_33f86dc0c0257da337c63.svg" alt="" />
                   </div>
                   <span className="text-sm font-medium">Gemini 2.5 Flash Image</span>
-                  <span className="ml-auto text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">OpenRouter</span>
+                 
                 </button>
                 <button 
                   className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
@@ -1549,10 +2538,8 @@ const GlobalAi = () => {
                   }`}
                   onClick={() => setSelectedVersion('gemini-flash-image-preview')}
                 >
-                  <div className="w-6 h-6 rounded-sm flex items-center justify-center">
-                    <svg className="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
+                 <div className="w-6 h-6 rounded-sm flex items-center justify-center">
+                    <img src="https://www.gstatic.com/lamda/images/gemini_sparkle_aurora_33f86dc0c0257da337c63.svg" alt="" />
                   </div>
                   <span className="text-sm font-medium">Gemini Flash Image Preview</span>
                   <span className="ml-auto text-xs bg-yellow-100 text-yellow-600 px-2 py-1 rounded">Free</span>
@@ -1566,13 +2553,83 @@ const GlobalAi = () => {
                   onClick={() => setSelectedVersion('deepseek')}
                 >
                   <div className="w-6 h-6 rounded-sm flex items-center justify-center">
-                    <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                    </svg>
+                    <img src="https://static.glbgpt.com/logo2/4225.png" alt=""/>
                   </div>
                   <span className="text-sm font-medium">DeepSeek</span>
-                  <span className="ml-auto text-xs bg-purple-100 text-purple-600 px-2 py-1 rounded">New</span>
+                  
                 </button>
+                <button 
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                    selectedVersion === 'deepseekR1' 
+                      ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setSelectedVersion('deepseekR1')}
+                >
+                <div className="w-6 h-6 rounded-sm flex items-center justify-center">
+                    <img src="https://static.glbgpt.com/logo2/4225.png" alt=""/>
+                  </div>
+                  <span className="text-sm font-medium">DeepSeek R1</span>
+                  <span className="ml-auto text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">Fast</span>
+                </button>
+                <button 
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                    selectedVersion === 'deepseekV30324' 
+                      ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setSelectedVersion('deepseekV30324')}
+                >
+                  <div className="w-6 h-6 rounded-sm flex items-center justify-center">
+                    <img src="https://static.glbgpt.com/logo2/4225.png" alt="" />
+                  </div>
+                  <span className="text-sm font-medium">DeepSeek V3 0324</span>
+                  <span className="ml-auto text-xs bg-green-100 text-green-600 px-2 py-1 rounded">Stable</span>
+                </button>
+                <button 
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                    selectedVersion === 'deepseekProverV2' 
+                      ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setSelectedVersion('deepseekProverV2')}
+                >
+                  <div className="w-6 h-6 rounded-sm flex items-center justify-center">
+                    <img src="https://static.glbgpt.com/logo2/4225.png" alt="" />
+                  </div>
+                  <span className="text-sm font-medium">DeepSeek Prover V2</span>
+                  <span className="ml-auto text-xs bg-red-100 text-red-600 px-2 py-1 rounded">Pro</span>
+                </button>
+                <button 
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                    selectedVersion === 'phi4' 
+                      ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setSelectedVersion('phi4')}
+                >
+                  <div className="w-6 h-6 rounded-sm flex items-center justify-center">
+                   <img src="https://static.glbgpt.com/logo2/4367.png" alt="" />
+                  </div>
+                  <span className="text-sm font-medium">Microsoft Phi-4</span>
+                  <span className="ml-auto text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">Fast</span>
+                </button>
+                {/* <button 
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                    selectedVersion === 'pixverse' 
+                      ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setSelectedVersion('pixverse')}
+                >
+                  <div className="w-6 h-6 rounded-sm flex items-center justify-center">
+                    <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <span className="text-sm font-medium">Pixverse AI</span>
+                  <span className="ml-auto text-xs bg-purple-100 text-purple-600 px-2 py-1 rounded">Video</span>
+                </button> */}
                 <button 
                   className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                     selectedVersion === 'claude' 
@@ -1582,12 +2639,80 @@ const GlobalAi = () => {
                   onClick={() => setSelectedVersion('claude')}
                 >
                   <div className="w-6 h-6 rounded-sm flex items-center justify-center">
-                    <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
+                    <img src="https://static.glbgpt.com/logo2/4336.png" alt="" />
                   </div>
                   <span className="text-sm font-medium">Claude</span>
                   <span className="ml-auto text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded">New</span>
+                </button>
+                <button 
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                    selectedVersion === 'claudeOpus41' 
+                      ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setSelectedVersion('claudeOpus41')}
+                >
+                  <div className="w-6 h-6 rounded-sm flex items-center justify-center">
+                    <img src="https://static.glbgpt.com/logo2/4336.png" alt="" />
+                  </div>
+                  <span className="text-sm font-medium">Claude Opus 4.1</span>
+                  <span className="ml-auto text-xs bg-red-100 text-red-600 px-2 py-1 rounded">Latest</span>
+                </button>
+                <button 
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                    selectedVersion === 'claudeSonnet4' 
+                      ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setSelectedVersion('claudeSonnet4')}
+                >
+                 <div className="w-6 h-6 rounded-sm flex items-center justify-center">
+                    <img src="https://static.glbgpt.com/logo2/4336.png" alt="" />
+                  </div>
+                  <span className="text-sm font-medium">Claude Sonnet 4</span>
+                  <span className="ml-auto text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">Stable</span>
+                </button>
+                <button 
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                    selectedVersion === 'claudeOpus4' 
+                      ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setSelectedVersion('claudeOpus4')}
+                >
+                  <div className="w-6 h-6 rounded-sm flex items-center justify-center">
+                    <img src="https://static.glbgpt.com/logo2/4336.png" alt="" />
+                  </div>
+                  <span className="text-sm font-medium">Claude Opus 4</span>
+                  <span className="ml-auto text-xs bg-purple-100 text-purple-600 px-2 py-1 rounded">Pro</span>
+                </button>
+                <button 
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                    selectedVersion === 'claude37Sonnet' 
+                      ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setSelectedVersion('claude37Sonnet')}
+                >
+                  <div className="w-6 h-6 rounded-sm flex items-center justify-center">
+                    <img src="https://static.glbgpt.com/logo2/4336.png" alt="" />
+                  </div>
+                  <span className="text-sm font-medium">Claude 3.7 Sonnet</span>
+                  <span className="ml-auto text-xs bg-green-100 text-green-600 px-2 py-1 rounded">Fast</span>
+                </button>
+                <button 
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                    selectedVersion === 'claude35Haiku' 
+                      ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setSelectedVersion('claude35Haiku')}
+                >
+                  <div className="w-6 h-6 rounded-sm flex items-center justify-center">
+                    <img src="https://static.glbgpt.com/logo2/4336.png" alt="" />
+                  </div>
+                  <span className="text-sm font-medium">Claude 3.5 Haiku</span>
+                  <span className="ml-auto text-xs bg-yellow-100 text-yellow-600 px-2 py-1 rounded">Light</span>
                 </button>
                 <button 
                   className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
@@ -1598,14 +2723,82 @@ const GlobalAi = () => {
                   onClick={() => setSelectedVersion('llama')}
                 >
                   <div className="w-6 h-6 rounded-sm flex items-center justify-center">
-                    <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                    </svg>
+                    <img src="https://static.glbgpt.com/logo2/4331.png" alt="" />
                   </div>
                   <span className="text-sm font-medium">Llama</span>
                   <span className="ml-auto text-xs bg-green-100 text-green-600 px-2 py-1 rounded">Groq</span>
                 </button>
                 <button 
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                    selectedVersion === 'groq' 
+                      ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setSelectedVersion('groq')}
+                >
+                  <div className="w-6 h-6 rounded-sm flex items-center justify-center">
+                    <img src="https://static.glbgpt.com/logo2/4222.png" alt="" />
+                  </div>
+                  <span className="text-sm font-medium">Grok Code</span>
+                  <span className="ml-auto text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">Fast</span>
+                </button>
+                <button 
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                    selectedVersion === 'grok4' 
+                      ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setSelectedVersion('grok4')}
+                >
+                  <div className="w-6 h-6 rounded-sm flex items-center justify-center">
+                    <img src="https://static.glbgpt.com/logo2/4222.png" alt="" />
+                  </div>
+                  <span className="text-sm font-medium">Grok 4</span>
+                 
+                </button>
+                <button 
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                    selectedVersion === 'grok3' 
+                      ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setSelectedVersion('grok3')}
+                >
+                 <div className="w-6 h-6 rounded-sm flex items-center justify-center">
+                    <img src="https://static.glbgpt.com/logo2/4222.png" alt="" />
+                  </div>
+                  <span className="text-sm font-medium">Grok 3</span>
+                  <span className="ml-auto text-xs bg-green-100 text-green-600 px-2 py-1 rounded">Stable</span>
+                </button>
+                <button 
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                    selectedVersion === 'grok3mini' 
+                      ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setSelectedVersion('grok3mini')}
+                >
+                 <div className="w-6 h-6 rounded-sm flex items-center justify-center">
+                    <img src="https://static.glbgpt.com/logo2/4222.png" alt="" />
+                  </div>
+                  <span className="text-sm font-medium">Grok 3 Mini</span>
+                  <span className="ml-auto text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded">Light</span>
+                </button>
+                <button 
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                    selectedVersion === 'grok2vision' 
+                      ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setSelectedVersion('grok2vision')}
+                >
+                 <div className="w-6 h-6 rounded-sm flex items-center justify-center">
+                    <img src="https://static.glbgpt.com/logo2/4222.png" alt="" />
+                  </div>
+                  <span className="text-sm font-medium">Grok 2 Vision</span>
+                  <span className="ml-auto text-xs bg-indigo-100 text-indigo-600 px-2 py-1 rounded">Vision</span>
+                </button>
+                {/* <button 
                   className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                     selectedVersion === 'unstability' 
                       ? 'bg-blue-100 text-blue-700 border border-blue-200' 
@@ -1620,14 +2813,68 @@ const GlobalAi = () => {
                   </div>
                   <span className="text-sm font-medium">Unstability AI</span>
                   <span className="ml-auto text-xs bg-red-100 text-red-600 px-2 py-1 rounded">New</span>
+                </button> */}
+                <button 
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                    selectedVersion === 'stability' 
+                      ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setSelectedVersion('stability')}
+                >
+                  <div className="w-6 h-6 rounded-sm flex items-center justify-center">
+                    <span className="text-sm font-medium bg-green-500 text-white px-2.5 py-1 rounded-full">S</span>
+                     </div>
+                  <span className="text-sm font-medium">Stability AI</span>
+                  <span className="ml-auto text-xs bg-green-100 text-green-600 px-2 py-1 rounded">Premium</span>
+                </button>
+                <button 
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                    selectedVersion === 'pollinations' 
+                      ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setSelectedVersion('pollinations')}
+                >
+                  <div className="w-6 h-6 rounded-sm flex items-center justify-center">
+                    <span className="text-sm font-medium bg-pink-500 text-white px-2.5 py-1 rounded-full">P</span>
+                  </div>
+                  <div className="flex-1 flex items-center gap-2">
+                    <span className="text-sm font-medium">Pollinations</span>
+                    {pollinationsStatus === 'available' && (
+                      <div className="w-2 h-2 bg-green-500 rounded-full" title="Service available"></div>
+                    )}
+                    {pollinationsStatus === 'unavailable' && (
+                      <div className="flex items-center gap-1">
+                        <div className="w-2 h-2 bg-red-500 rounded-full" title="Service unavailable"></div>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPollinationsStatus('unknown');
+                            testPollinationsAPI().then(isAvailable => {
+                              setPollinationsStatus(isAvailable ? 'available' : 'unavailable');
+                            });
+                          }}
+                          className="text-xs text-red-500 hover:text-red-700"
+                          title="Retry connection"
+                        >
+                          ↻
+                        </button>
+                      </div>
+                    )}
+                    {pollinationsStatus === 'unknown' && (
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse" title="Checking status..."></div>
+                    )}
+                  </div>
+                  <span className="ml-auto text-xs bg-pink-100 text-pink-600 px-2 py-1 rounded">Turbo</span>
                 </button>
               </div>
             </div>
 
                                   {/* Chat History */}
-                      <div className="flex-1">
-                        <div className="p-4">
-                          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                                              <div className="flex-1">
+                         <div className="p-4">
+                            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
                             Recent Chats
                           </h3>
                           <div className="space-y-1">
@@ -1921,6 +3168,11 @@ const GlobalAi = () => {
                      selectedVersion === 'deepseek' ? 'DeepSeek' :
                      selectedVersion === 'claude' ? 'Claude' :
                      selectedVersion === 'llama' ? 'Llama' :
+                     selectedVersion === 'groq' ? 'Grok Code' :
+                     selectedVersion === 'grok4' ? 'Grok 4' :
+                     selectedVersion === 'grok3' ? 'Grok 3' :
+                     selectedVersion === 'grok3mini' ? 'Grok 3 Mini' :
+                     selectedVersion === 'grok2vision' ? 'Grok 2 Vision' :
                      selectedVersion === 'unstability' ? 'Unstability AI' :
                      selectedVersion.startsWith('gemini') ? 'Gemini' : selectedVersion.toUpperCase()} anything...`}
                     disabled={chatLoading}

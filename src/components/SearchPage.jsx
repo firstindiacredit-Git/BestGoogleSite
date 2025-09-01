@@ -652,16 +652,16 @@ const SearchPage = ({ isToolPage = false }) => {
                         </button>
                         <button
                           className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
-                            activeComponent === "DataMiningTool"
+                            activeComponent === "DataMining Tool"
                               ? "bg-indigo-500 text-white dark:bg-[#513a7a]"
                               : "dark:text-white  hover:bg-gray-100 dark:hover:bg-[#28283A]"
                           }`}
-                          // onClick={() => {
-                          //   window.open("http://45.61.57.93:5000/login", "_blank");
-                          // }}
                           onClick={() => {
-                            handleToggleComponent("DataMiningTool");
+                            window.open("http://45.61.57.93:5000/login", "_blank");
                           }}
+                          // onClick={() => {
+                          //   handleToggleComponent("DataMiningTool");
+                          // }}
                         >
                           <span className="drop-shadow-md">DATA MINING TOOL</span>
                         </button>
