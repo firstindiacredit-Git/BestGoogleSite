@@ -771,7 +771,7 @@ const SportsLeagues = () => {
                       </div>
                     </div>
                   ) : (
-                    <div className="flex gap-4 p-4 rounded-lg backdrop-blur-lg dark:bg-[#28283A]/[var(--widget-opacity)] bg-white/[var(--widget-opacity)] dark:text-gray-300 transition-all duration-300 hover:shadow-xl dark:hover:shadow-purple-500/20">
+                    <div className="flex gap-4 p-4  rounded-lg backdrop-blur-lg dark:bg-[#28283A]/[var(--widget-opacity)] bg-white/[var(--widget-opacity)] dark:text-gray-300 transition-all duration-300 hover:shadow-xl dark:hover:shadow-purple-500/20">
                       <div
                         className={`w-40 h-28  flex items-center  ${
                           selectedCategory === "cricket"
