@@ -25,24 +25,15 @@ const GlobalAi = () => {
   const [chatHistory, setChatHistory] = useState([]);
   const [currentChatId, setCurrentChatId] = useState(null);
   const [pollinationsStatus, setPollinationsStatus] = useState('unknown'); // 'unknown', 'available', 'unavailable'
-  const [gptDropdownOpen, setGptDropdownOpen] = useState(false);
 
-  const OPENAI_API_KEY = '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';
+  const OPENAI_API_KEY = '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';
   const DEEPSEEK_API_KEY = 'sk-bdc38f3a81c94ca8a0ecacf93d584618';
-  const OPENROUTER_API_KEY = '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';
-  const OPENROUTER_API_KEY_2 = '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';
+  const OPENROUTER_API_KEY = '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';
+  const OPENROUTER_API_KEY_2 = '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';
   const GROQ_API_KEY = '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';
   
   // API Configuration for different models
   const API_CONFIGS = {
-    gentube: {
-      url: "https://clerk.gentube.app/v1/client/sessions",
-      key: "", // Will use Clerk session token
-      model: "gentube-ai",
-      name: "GenTube AI",
-      free: true,
-      requiresAuth: true
-    },
     groq: {
       url: "https://openrouter.ai/api/v1/chat/completions",
       key: "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",
@@ -59,91 +50,91 @@ const GlobalAi = () => {
     },
     grok3: {
       url: "https://openrouter.ai/api/v1/chat/completions",
-      key: "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",
+      key: "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",
       model: "x-ai/grok-code-fast-1",
       name: "Grok 3",
       free: true
     },
     grok3mini: {
       url: "https://openrouter.ai/api/v1/chat/completions",
-      key: "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",
+      key: "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",
       model: "x-ai/grok-code-fast-1",
       name: "Grok 3 Mini",
       free: true
     },
     grok2vision: {
       url: "https://openrouter.ai/api/v1/chat/completions",
-      key: "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",
+      key: "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",
       model: "x-ai/grok-code-fast-1",
       name: "Grok 2 Vision",
       free: true
     },
     claude: {
       url: "https://openrouter.ai/api/v1/chat/completions",
-      key: "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",
+      key: "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",
       model: "anthropic/claude-3.5-sonnet",
       name: "Claude",
       free: true
     },
     claudeOpus41: {
       url: "https://openrouter.ai/api/v1/chat/completions",
-      key: "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",
+      key: "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",
       model: "anthropic/claude-3.5-opus",
       name: "Claude Opus 4.1",
       free: true
     },
     claudeSonnet4: {
       url: "https://openrouter.ai/api/v1/chat/completions",
-      key: "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",
+      key: "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",
       model: "anthropic/claude-3.5-sonnet",
       name: "Claude Sonnet 4",
       free: true
     },
     claudeOpus4: {
       url: "https://openrouter.ai/api/v1/chat/completions",
-      key: "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",
+      key: "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",
       model: "anthropic/claude-3.5-sonnet",
       name: "Claude Opus 4",
       free: true
     },
     claude37Sonnet: {
       url: "https://openrouter.ai/api/v1/chat/completions",
-      key: "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",
+      key: "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",
       model: "anthropic/claude-3.5-sonnet",
       name: "Claude 3.7 Sonnet",
       free: true
     },
     claude35Haiku: {
       url: "https://openrouter.ai/api/v1/chat/completions",
-      key: "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",
+      key: "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",
       model: "anthropic/claude-3.5-haiku",
       name: "Claude 3.5 Haiku",
       free: true
     },
     deepseek: {
       url: "https://openrouter.ai/api/v1/chat/completions",
-      key: "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",
+      key: "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",
       model: "deepseek/deepseek-r1-0528-qwen3-8b",
       name: "DeepSeek",
       free: true
     },
     deepseekR1: {
       url: "https://openrouter.ai/api/v1/chat/completions",
-      key: "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",
+      key: "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",
       model: "deepseek/deepseek-r1-0528-qwen3-8b",
       name: "DeepSeek R1",
       free: true
     },
     deepseekV30324: {
       url: "https://openrouter.ai/api/v1/chat/completions",
-      key: "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",
+      key: "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",
       model: "deepseek/deepseek-r1-0528-qwen3-8b",
       name: "DeepSeek V3 0324",
       free: true
     },
     deepseekProverV2: {
       url: "https://openrouter.ai/api/v1/chat/completions",
-      key: "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",
+      key: "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",
       model: "deepseek/deepseek-r1-0528-qwen3-8b",
       name: "DeepSeek Prover V2",
       free: true
@@ -160,13 +151,6 @@ const GlobalAi = () => {
       key: "sk-32b1993927f5ca2bf141919883430143",
       model: "v5",
       name: "Pixverse AI",
-      free: true
-    },
-    edenai: {
-      url: "https://api.edenai.run/v2/image/generation",
-      key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNzIzNTAwNTMtYjY3NS00ZDY4LTlhMzAtNjU4MDM3ZjkxZTUwIiwidHlwZSI6ImFwaV90b2tlbiJ9.qmiLkxQN-D25yTZOObpWS5LXoxOOtnPfxUqTaaYEawM",
-      model: "openai",
-      name: "Eden AI Image Generator",
       free: true
     }
   };
@@ -604,345 +588,6 @@ const GlobalAi = () => {
     }
   };
 
-
-
-  // GenTube JWT Token (updated from latest session with Convex integration)
-  const GENTUBE_JWT_TOKEN = "eyJhbGciOiJSUzI1NiIsImNhdCI6ImNsX0I3ZDRQRDIyMkFBQSIsImtpZCI6Imluc18ya2lCb1dGRE54a0tmcTBsT0ZFWkdtSkpwN3MiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJjb252ZXgiLCJlbWFpbCI6ImZpcnNpbmRpYWNyZWRpdDc4NkBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiZXhwIjoxNzU2ODg0ODExLCJmYW1pbHlfbmFtZSI6bnVsbCwiZ2l2ZW5fbmFtZSI6IkZpcnN0IEluZGlhIENyZWRpdCIsImlhdCI6MTc1Njg4MTIxMSwiaXNzIjoiaHR0cHM6Ly9jbGVyay5nZW50dWJlLmFwcCIsImp0aSI6IjI2ZjkyZTQyNTExNjVmNmY4OTVhIiwibmFtZSI6IkZpcnN0IEluZGlhIENyZWRpdCIsIm5iZiI6MTc1Njg4MTIwNiwibmlja25hbWUiOm51bGwsInBob25lX251bWJlciI6bnVsbCwicGhvbmVfbnVtYmVyX3ZlcmlmaWVkIjpmYWxzZSwicGljdHVyZSI6Imh0dHBzOi8vaW1nLmNsZXJrLmNvbS9leUowZVhCbElqb2ljSEp2ZUhraUxDSnpjbU1pT2lKb2RIUndjem92TDJsdFlXZGxjeTVqYkdWeWF5NWtaWFl2YjJGMWRHaGZaMjl2WjJ4bEwybHRaMTh6TWtGM1RXWlJTRzlEWVV4QmNEUkhRbGxZZWs1Wk9IcDNPSEVpZlEiLCJzdWIiOiJ1c2VyXzMyQXdNZkhCd3RKb0lCRWFiYWJWVkV5WndjeSIsInVwZGF0ZWRfYXQiOjE3NTY4NzY2Mzd9.DW4rEvnjYLSKpcMPCPG-lfse8Tz3L7n4Cil5";
-
-  // GenTube API Configuration from source code
-  const GENTUBE_CONFIG = {
-    phApiKey: "phc_BKjn64EZyDLuAIYc2p9lfCszlahXFWvJNlzLdHYIBIw",
-    phApiHost: "https://ph.gentube.app",
-    phUiHost: "https://us.i.posthog.com",
-    clerkId: "user_32AwMfHBwtJoIBEababVVEyZwcy",
-    userId: "jx7bfhw67zm65k2z9cwssmrbe17pxj07",
-    username: "short-eager-zoo"
-  };
-
-  // Function to call GenTube AI with CORS-safe approach
-  const callGenTubeCreateAPI = async (message) => {
-    try {
-      // Try multiple approaches to handle CORS issues
-      const approaches = [
-                // Approach 1: Try GenTube create endpoint directly
-        async () => {
-          console.log('Trying GenTube create endpoint directly...');
-          const response = await fetch('https://www.gentube.app/create', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${GENTUBE_JWT_TOKEN}`,
-              'Origin': 'https://www.gentube.app',
-              'Referrer-Policy': 'strict-origin-when-cross-origin',
-              'X-GenTube-Version': '1.260.2',
-              'X-User-ID': GENTUBE_CONFIG.userId,
-              'X-Clerk-ID': GENTUBE_CONFIG.clerkId
-            },
-            body: JSON.stringify({
-              prompt: message,
-              context: "You are GenTube AI, a helpful assistant integrated with the GenTube platform. Provide clear, accurate, and helpful responses. Use markdown formatting when appropriate.",
-              temperature: 0.7,
-              max_tokens: 1000,
-              model: "gentube-ai",
-              user_id: GENTUBE_CONFIG.clerkId,
-              user_internal_id: GENTUBE_CONFIG.userId,
-              username: GENTUBE_CONFIG.username,
-              type: "text",
-              source: "gentube-ai-integration"
-            })
-          });
-
-          if (response.ok) {
-            const data = await response.json();
-            console.log('GenTube create endpoint response:', data);
-            
-            if (data.response || data.text || data.content || data.message || data.result) {
-              return data.response || data.text || data.content || data.message || data.result;
-            } else if (data.data && (data.data.response || data.data.text || data.data.content || data.data.result)) {
-              return data.data.response || data.data.text || data.data.content || data.data.result;
-            }
-          }
-          
-          throw new Error(`GenTube create endpoint failed with status: ${response.status}`);
-        },
-
-        // Approach 2: Try main GenTube domain
-        async () => {
-          console.log('Trying main GenTube domain...');
-          const response = await fetch('https://www.gentube.app/', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${GENTUBE_JWT_TOKEN}`,
-              'Origin': 'https://www.gentube.app',
-              'Referrer-Policy': 'strict-origin-when-cross-origin',
-              'X-GenTube-Version': '1.260.2',
-              'X-User-ID': GENTUBE_CONFIG.userId,
-              'X-Clerk-ID': GENTUBE_CONFIG.clerkId
-            },
-            body: JSON.stringify({
-              prompt: message,
-              context: "You are GenTube AI, a helpful assistant integrated with the GenTube platform. Provide clear, accurate, and helpful responses. Use markdown formatting when appropriate.",
-              temperature: 0.7,
-              max_tokens: 1000,
-              model: "gentube-ai",
-              user_id: GENTUBE_CONFIG.clerkId,
-              user_internal_id: GENTUBE_CONFIG.userId,
-              username: GENTUBE_CONFIG.username,
-              type: "text",
-              source: "gentube-ai-integration"
-            })
-          });
-
-          if (response.ok) {
-            const data = await response.json();
-            console.log('Main GenTube domain response:', data);
-            
-            if (data.response || data.text || data.content || data.message || data.result) {
-              return data.response || data.text || data.content || data.message || data.result;
-            } else if (data.data && (data.data.response || data.data.text || data.data.content || data.data.result)) {
-              return data.data.response || data.data.text || data.data.content || data.data.result;
-            }
-          }
-          
-          throw new Error(`Main GenTube domain failed with status: ${response.status}`);
-        },
-
-        // Approach 3: Try PostHog analytics endpoint (CORS-friendly)
-        async () => {
-          console.log('Trying PostHog analytics endpoint...');
-          const response = await fetch(`${GENTUBE_CONFIG.phApiHost}/s/?ip=0&_=${Date.now()}&ver=1.260.2`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${GENTUBE_JWT_TOKEN}`,
-              'Origin': 'https://www.gentube.app',
-              'Referrer-Policy': 'strict-origin-when-cross-origin'
-            },
-            body: JSON.stringify({
-              event: 'ai_chat_request',
-              properties: {
-                message: message,
-                context: "You are GenTube AI, a helpful assistant integrated with the GenTube platform.",
-                user_id: GENTUBE_CONFIG.clerkId,
-                user_internal_id: GENTUBE_CONFIG.userId,
-                username: GENTUBE_CONFIG.username,
-                timestamp: Date.now(),
-                source: "gentube-ai-integration"
-              }
-            })
-          });
-
-          if (response.ok) {
-            return `🎬 **GenTube AI Response (via PostHog Analytics)**
-
-Hello! I'm GenTube AI, your creative assistant from the GenTube platform. Here's my response to your message:
-
-> "${message}"
-
-**GenTube AI Analysis:**
-Based on your request, I can help you with creative content generation. Here are some suggestions:
-
-**For Video Content:**
-- Storyboarding ideas
-- Script writing assistance
-- Visual concept development
-- Audience engagement strategies
-
-**For Creative Projects:**
-- Content ideation
-- Brand voice development
-- Visual style recommendations
-- Platform-specific optimization
-
-**Next Steps:**
-Would you like me to help you with any specific aspect of your creative project? I can assist with:
-- Detailed content planning
-- Creative direction
-- Technical specifications
-- Audience targeting
-
-*Connected via GenTube PostHog Analytics - Your creative journey starts here!*`;
-          }
-          
-          throw new Error('PostHog analytics endpoint failed');
-        },
-
-        // Approach 4: Try PostHog events endpoint (CORS-friendly)
-        async () => {
-          console.log('Trying PostHog events endpoint...');
-          const response = await fetch(`${GENTUBE_CONFIG.phApiHost}/i/v0/e/?ip=0&_=${Date.now()}&ver=1.260.2`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${GENTUBE_JWT_TOKEN}`,
-              'Origin': 'https://www.gentube.app',
-              'Referrer-Policy': 'strict-origin-when-cross-origin'
-            },
-            body: JSON.stringify({
-              event: 'ai_chat_request',
-              properties: {
-                message: message,
-                context: "You are GenTube AI, a helpful assistant integrated with the GenTube platform.",
-                user_id: GENTUBE_CONFIG.clerkId,
-                user_internal_id: GENTUBE_CONFIG.userId,
-                username: GENTUBE_CONFIG.username,
-                timestamp: Date.now(),
-                source: "gentube-ai-integration"
-              }
-            })
-          });
-
-          if (response.ok) {
-            return `🎬 **GenTube AI Response (via PostHog Events)**
-
-Hello! I'm GenTube AI, your creative assistant from the GenTube platform. Here's my response to your message:
-
-> "${message}"
-
-**GenTube AI Analysis:**
-Based on your request, I can help you with creative content generation. Here are some suggestions:
-
-**For Video Content:**
-- Storyboarding ideas
-- Script writing assistance
-- Visual concept development
-- Audience engagement strategies
-
-**For Creative Projects:**
-- Content ideation
-- Brand voice development
-- Visual style recommendations
-- Platform-specific optimization
-
-**Next Steps:**
-Would you like me to help you with any specific aspect of your creative project? I can assist with:
-- Detailed content planning
-- Creative direction
-- Technical specifications
-- Audience targeting
-
-*Connected via GenTube PostHog Events - Your creative journey starts here!*`;
-          }
-          
-          throw new Error('PostHog events endpoint failed');
-        },
-
-        // Approach 5: Try with no-cors mode (limited but might work)
-        async () => {
-          console.log('Trying no-cors mode...');
-          await fetch('https://www.gentube.app/create', {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${GENTUBE_JWT_TOKEN}`
-            },
-            body: JSON.stringify({
-              prompt: message,
-              context: "You are GenTube AI, a helpful assistant integrated with the GenTube platform.",
-              user_id: GENTUBE_CONFIG.clerkId,
-              type: "text"
-            })
-          });
-
-          // With no-cors, we can't read the response, so return a fallback
-          return `🎬 **GenTube AI Response (via No-CORS Mode)**
-
-Hello! I'm GenTube AI, your creative assistant from the GenTube platform. Here's my response to your message:
-
-> "${message}"
-
-**GenTube AI Analysis:**
-Based on your request, I can help you with creative content generation. Here are some suggestions:
-
-**For Video Content:**
-- Storyboarding ideas
-- Script writing assistance
-- Visual concept development
-- Audience engagement strategies
-
-**For Creative Projects:**
-- Content ideation
-- Brand voice development
-- Visual style recommendations
-- Platform-specific optimization
-
-**Next Steps:**
-Would you like me to help you with any specific aspect of your creative project? I can assist with:
-- Detailed content planning
-- Creative direction
-- Technical specifications
-- Audience targeting
-
-*Connected via GenTube No-CORS Mode - Your creative journey starts here!*`;
-        }
-      ];
-
-      // Try each approach until one works
-      for (let i = 0; i < approaches.length; i++) {
-        try {
-          console.log(`Trying GenTube AI approach ${i + 1}...`);
-          const result = await approaches[i]();
-          return result;
-        } catch (error) {
-          console.log(`Approach ${i + 1} failed:`, error.message);
-          if (i === approaches.length - 1) {
-            throw new Error(`All GenTube AI approaches failed. Last error: ${error.message}`);
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error calling GenTube AI:', error);
-      throw error;
-    }
-  };
-
-  // Function to generate response using GenTube AI
-  const generateGenTubeResponse = async (message) => {
-    try {
-      console.log('Calling GenTube Create API directly...');
-      
-      // Directly call the GenTube Create API
-      const result = await callGenTubeCreateAPI(message);
-      return result;
-      
-    } catch (error) {
-      console.error('GenTube AI API error:', error);
-      
-      // Fallback response if API fails
-      return `🎬 **GenTube AI Response**
-
-Hello! I'm GenTube AI, your creative assistant from the GenTube platform. Here's my response to your message:
-
-> "${message}"
-
-**GenTube AI Analysis:**
-Based on your request, I can help you with creative content generation. Here are some suggestions:
-
-**For Video Content:**
-- Storyboarding ideas
-- Script writing assistance
-- Visual concept development
-- Audience engagement strategies
-
-**For Creative Projects:**
-- Content ideation
-- Brand voice development
-- Visual style recommendations
-- Platform-specific optimization
-
-**Next Steps:**
-Would you like me to help you with any specific aspect of your creative project? I can assist with:
-- Detailed content planning
-- Creative direction
-- Technical specifications
-- Audience targeting
-
-*Connected via GenTube Create API - Your creative journey starts here!*`;
-    }
-  };
-
   // Function to generate response using Microsoft Phi-4 via OpenRouter
   const generatePhi4Response = async (message) => {
     try {
@@ -1036,45 +681,6 @@ Would you like me to help you with any specific aspect of your creative project?
       }
     } catch (error) {
       console.error('Pixverse AI API error:', error);
-      throw error;
-    }
-  };
-
-  // Function to generate image using Eden AI API
-  const generateEdenAiImage = async (prompt) => {
-    try {
-      const config = API_CONFIGS.edenai;
-      
-      const response = await fetch(config.url, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${config.key}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          providers: config.model,
-          text: prompt,
-          resolution: "512x512"
-        })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error(`${config.name} API error details:`, errorData);
-        throw new Error(`${config.name} API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
-      }
-
-      const data = await response.json();
-      console.log('Eden AI Generation:', data);
-      
-      if (data.openai && data.openai.items && data.openai.items[0] && data.openai.items[0].image) {
-        return { imageUrl: data.openai.items[0].image };
-      } else {
-        console.error(`Unexpected ${config.name} API response structure:`, data);
-        throw new Error(`No valid image URL from ${config.name} API`);
-      }
-    } catch (error) {
-      console.error('Eden AI API error:', error);
       throw error;
     }
   };
@@ -1250,35 +856,6 @@ Would you like me to help you with any specific aspect of your creative project?
           const errorMessage = {
             id: Date.now() + 1,
             text: `⚠️ ${error.message}. You can try using other video generation services instead.`,
-            sender: 'ai',
-            timestamp: new Date().toLocaleTimeString(),
-            isError: true
-          };
-          const errorFinalMessages = [...updatedMessages, errorMessage];
-          setChatMessages(errorFinalMessages);
-          saveCurrentChat();
-        }
-      } else if (selectedVersion === 'edenai') {
-        // Use Eden AI API for image generation
-        try {
-          const edenAiImageResponse = await generateEdenAiImage(message);
-          
-          const edenAiImageMessage = {
-            id: Date.now() + 1,
-            text: `Generated image based on: "${message}"`,
-            imageUrl: edenAiImageResponse.imageUrl,
-            sender: 'ai',
-            timestamp: new Date().toLocaleTimeString(),
-            type: 'image'
-          };
-          const edenAiImageFinalMessages = [...updatedMessages, edenAiImageMessage];
-          setChatMessages(edenAiImageFinalMessages);
-          saveCurrentChat();
-        } catch (error) {
-          // Handle errors gracefully
-          const errorMessage = {
-            id: Date.now() + 1,
-            text: `⚠️ ${error.message}. You can try using other image generation services instead.`,
             sender: 'ai',
             timestamp: new Date().toLocaleTimeString(),
             isError: true
@@ -1558,19 +1135,6 @@ Would you like me to help you with any specific aspect of your creative project?
           setChatMessages(errorFinalMessages);
           saveCurrentChat();
         }
-      } else if (selectedVersion === 'gentube') {
-        // Use GenTube AI API for text responses
-        const gentubeResponseText = await generateGenTubeResponse(message);
-        
-        const gentubeAiMessage = {
-          id: Date.now() + 1,
-          text: gentubeResponseText,
-          sender: 'ai',
-          timestamp: new Date().toLocaleTimeString()
-        };
-        const gentubeFinalMessages = [...updatedMessages, gentubeAiMessage];
-        setChatMessages(gentubeFinalMessages);
-        saveCurrentChat();
       } else if (selectedVersion === 'pollinations') {
         // Use Pollinations AI API for image generation (FREE & No API Key Required)
         // New API format: https://image.pollinations.ai/prompt/{input}%20image?width=768&height=768&seed=22055&nologo=true&model=turbo
@@ -2657,12 +2221,6 @@ Would you like me to help you with any specific aspect of your creative project?
                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                        </svg>
                      </div>
-                   ) : selectedVersion === 'gentube' ? (
-                     <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
-                       <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                       </svg>
-                     </div>
                    ) : (
                      <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
                        <svg className="w-5 h-5 rotate-90 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2686,7 +2244,6 @@ Would you like me to help you with any specific aspect of your creative project?
                      selectedVersion === 'deepseekProverV2' ? 'DeepSeek Prover V2' :
                      selectedVersion === 'phi4' ? 'Microsoft Phi-4' :
                      selectedVersion === 'pixverse' ? 'Pixverse AI' :
-                     selectedVersion === 'edenai' ? 'Eden AI Image Generator' :
                       selectedVersion === 'claude' ? 'Claude' :
                      selectedVersion === 'claudeOpus41' ? 'Claude Opus 4.1' :
                      selectedVersion === 'claudeSonnet4' ? 'Claude Sonnet 4' :
@@ -2695,7 +2252,6 @@ Would you like me to help you with any specific aspect of your creative project?
                      selectedVersion === 'claude35Haiku' ? 'Claude 3.5 Haiku' :
                       selectedVersion === 'llama' ? 'Llama' :
                       selectedVersion === 'unstability' ? 'Unstability AI' :
-                      selectedVersion === 'gentube' ? 'GenTube AI' :
                       selectedVersion.startsWith('gemini') ? 'Gemini' : selectedVersion.toUpperCase()}
                    </h1>
                  </div>
@@ -2757,7 +2313,7 @@ Would you like me to help you with any specific aspect of your creative project?
                   onClick={() => setSelectedVersion('gpt-5')}
                 >
                       <div className="w-6 h-6 rounded-sm flex items-center justify-center">
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" className="icon-lg"><path d="M11.2475 18.25C10.6975 18.25 10.175 18.1455 9.67999 17.9365C9.18499 17.7275 8.74499 17.436 8.35999 17.062C7.94199 17.205 7.50749 17.2765 7.05649 17.2765C6.31949 17.2765 5.63749 17.095 5.01049 16.732C4.38349 16.369 3.87749 15.874 3.49249 15.247C3.11849 14.62 2.93149 13.9215 2.93149 13.1515C2.93149 12.8325 2.97549 12.486 3.06349 12.112C2.62349 11.705 2.28249 11.2375 2.04049 10.7095C1.79849 10.1705 1.67749 9.6095 1.67749 9.0265C1.67749 8.4325 1.80399 7.8605 2.05699 7.3105C2.30999 6.7605 2.66199 6.2875 3.11299 5.8915C3.57499 5.4845 4.10849 5.204 4.71349 5.05C4.83449 4.423 5.08749 3.862 5.47249 3.367C5.86849 2.861 6.35249 2.465 6.92449 2.179C7.49649 1.893 8.10699 1.75 8.75599 1.75C9.30599 1.75 9.82849 1.8545 10.3235 2.0635C10.8185 2.2725 11.2585 2.564 11.6435 2.938C12.0615 2.795 12.496 2.7235 12.947 2.7235C13.684 2.7235 14.366 2.905 14.993 3.268C15.62 3.631 16.1205 4.126 16.4945 4.753C16.8795 5.38 17.072 6.0785 17.072 6.8485C17.072 7.1675 17.028 7.514 16.94 7.888C17.38 8.295 17.721 8.768 17.963 9.307C18.205 9.835 18.326 10.3905 18.326 10.9735C18.326 11.5675 18.1995 12.1395 17.9465 12.6895C17.6935 13.2395 17.336 13.718 16.874 14.125C16.423 14.521 15.895 14.796 15.29 14.95C15.169 15.577 14.9105 16.138 14.5145 16.633C14.1295 17.139 13.651 17.535 13.079 17.821C12.507 18.107 11.8965 18.25 11.2475 18.25ZM7.17199 16.1875C7.72199 16.1875 8.20049 16.072 8.60749 15.841L11.7095 14.059C11.8195 13.982 11.8745 13.8775 11.8745 13.7455V12.3265L7.88149 14.62C7.63949 14.763 7.39749 14.763 7.15549 14.62L4.03699 12.8215C4.03699 12.8545 4.03149 12.893 4.02049 12.937C4.02049 12.981 4.02049 13.047 4.02049 13.135C4.02049 13.696 4.15249 14.213 4.41649 14.686C4.69149 15.148 5.07099 15.511 5.55499 15.775C6.03899 16.05 6.57799 16.1875 7.17199 16.1875ZM7.33699 13.498C7.40299 13.531 7.46349 13.5475 7.51849 13.5475C7.57349 13.5475 7.62849 13.531 7.68349 13.498L8.92099 12.7885L4.94449 10.4785C4.70249 10.3355 4.58149 10.121 4.58149 9.835V6.2545C4.03149 6.4965 3.59149 6.8705 3.26149 7.3765C2.93149 7.8715 2.76649 8.4215 2.76649 9.0265C2.76649 9.5655 2.90399 10.0825 3.17899 10.5775C3.45399 11.0725 3.81149 11.4465 4.25149 11.6995L7.33699 13.498ZM11.2475 17.161C11.8305 17.161 12.3585 17.029 12.8315 16.765C13.3045 16.501 13.6785 16.138 13.9535 15.676C14.2285 15.214 14.366 14.697 14.366 14.125V10.561C14.366 10.429 14.311 10.33 14.201 10.264L12.947 9.538V14.1415C12.947 14.4275 12.826 14.642 12.584 14.785L9.46549 16.5835C10.0045 16.9685 10.5985 17.161 11.2475 17.161ZM11.8745 11.122V8.878L10.01 7.822L8.12899 8.878V11.122L10.01 12.178L11.8745 11.122ZM7.05649 5.8585C7.05649 5.5725 7.17749 5.358 7.41949 5.215L10.538 3.4165C9.99899 3.0315 9.40499 2.839 8.75599 2.839C8.17299 2.839 7.64499 2.971 7.17199 3.235C6.69899 3.499 6.32499 3.862 6.04999 4.324C5.78599 4.786 5.65399 5.303 5.65399 5.875V9.4225C5.65399 9.5545 5.70899 9.659 5.81899 9.736L7.05649 10.462V5.8585ZM15.4385 13.7455C15.9885 13.5035 16.423 13.1295 16.742 12.6235C17.072 12.1175 17.237 11.5675 17.237 10.9735C17.237 10.4345 17.0995 9.9175 16.8245 9.4225C16.5495 8.9275 16.192 8.5535 15.752 8.3005L12.6665 6.5185C12.6005 6.4745 12.54 6.458 12.485 6.469C12.43 6.469 12.375 6.4855 12.32 6.5185L11.0825 7.2115L15.0755 9.538C15.1965 9.604 15.2845 9.692 15.3395 9.802C15.4055 9.901 15.4385 10.022 15.4385 10.165V13.7455ZM12.122 5.3635C12.364 5.2095 12.606 5.2095 12.848 5.3635L15.983 7.195C15.983 7.118 15.983 7.019 15.983 6.898C15.983 6.37 15.851 5.8695 15.587 5.3965C15.334 4.9125 14.9655 4.5275 14.4815 4.2415C14.0085 3.9555 13.4585 3.8125 12.8315 3.8125C12.2815 3.8125 11.803 3.928 11.396 4.159L8.29399 5.941C8.18399 6.018 8.12899 6.1225 8.12899 6.2545V7.6735L12.122 5.3635Z"></path></svg>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="icon-lg"><path d="M11.2475 18.25C10.6975 18.25 10.175 18.1455 9.67999 17.9365C9.18499 17.7275 8.74499 17.436 8.35999 17.062C7.94199 17.205 7.50749 17.2765 7.05649 17.2765C6.31949 17.2765 5.63749 17.095 5.01049 16.732C4.38349 16.369 3.87749 15.874 3.49249 15.247C3.11849 14.62 2.93149 13.9215 2.93149 13.1515C2.93149 12.8325 2.97549 12.486 3.06349 12.112C2.62349 11.705 2.28249 11.2375 2.04049 10.7095C1.79849 10.1705 1.67749 9.6095 1.67749 9.0265C1.67749 8.4325 1.80399 7.8605 2.05699 7.3105C2.30999 6.7605 2.66199 6.2875 3.11299 5.8915C3.57499 5.4845 4.10849 5.204 4.71349 5.05C4.83449 4.423 5.08749 3.862 5.47249 3.367C5.86849 2.861 6.35249 2.465 6.92449 2.179C7.49649 1.893 8.10699 1.75 8.75599 1.75C9.30599 1.75 9.82849 1.8545 10.3235 2.0635C10.8185 2.2725 11.2585 2.564 11.6435 2.938C12.0615 2.795 12.496 2.7235 12.947 2.7235C13.684 2.7235 14.366 2.905 14.993 3.268C15.62 3.631 16.1205 4.126 16.4945 4.753C16.8795 5.38 17.072 6.0785 17.072 6.8485C17.072 7.1675 17.028 7.514 16.94 7.888C17.38 8.295 17.721 8.768 17.963 9.307C18.205 9.835 18.326 10.3905 18.326 10.9735C18.326 11.5675 18.1995 12.1395 17.9465 12.6895C17.6935 13.2395 17.336 13.718 16.874 14.125C16.423 14.521 15.895 14.796 15.29 14.95C15.169 15.577 14.9105 16.138 14.5145 16.633C14.1295 17.139 13.651 17.535 13.079 17.821C12.507 18.107 11.8965 18.25 11.2475 18.25ZM7.17199 16.1875C7.72199 16.1875 8.20049 16.072 8.60749 15.841L11.7095 14.059C11.8195 13.982 11.8745 13.8775 11.8745 13.7455V12.3265L7.88149 14.62C7.63949 14.763 7.39749 14.763 7.15549 14.62L4.03699 12.8215C4.03699 12.8545 4.03149 12.893 4.02049 12.937C4.02049 12.981 4.02049 13.047 4.02049 13.135C4.02049 13.696 4.15249 14.213 4.41649 14.686C4.69149 15.148 5.07099 15.511 5.55499 15.775C6.03899 16.05 6.57799 16.1875 7.17199 16.1875ZM7.33699 13.498C7.40299 13.531 7.46349 13.5475 7.51849 13.5475C7.57349 13.5475 7.62849 13.531 7.68349 13.498L8.92099 12.7885L4.94449 10.4785C4.70249 10.3355 4.58149 10.121 4.58149 9.835V6.2545C4.03149 6.4965 3.59149 6.8705 3.26149 7.3765C2.93149 7.8715 2.76649 8.4215 2.76649 9.0265C2.76649 9.5655 2.90399 10.0825 3.17899 10.5775C3.45399 11.0725 3.81149 11.4465 4.25149 11.6995L7.33699 13.498ZM11.2475 17.161C11.8305 17.161 12.3585 17.029 12.8315 16.765C13.3045 16.501 13.6785 16.138 13.9535 15.676C14.2285 15.214 14.366 14.697 14.366 14.125V10.561C14.366 10.429 14.311 10.33 14.201 10.264L12.947 9.538V14.1415C12.947 14.4275 12.826 14.642 12.584 14.785L9.46549 16.5835C10.0045 16.9685 10.5985 17.161 11.2475 17.161ZM11.8745 11.122V8.878L10.01 7.822L8.12899 8.878V11.122L10.01 12.178L11.8745 11.122ZM7.05649 5.8585C7.05649 5.5725 7.17749 5.358 7.41949 5.215L10.538 3.4165C9.99899 3.0315 9.40499 2.839 8.75599 2.839C8.17299 2.839 7.64499 2.971 7.17199 3.235C6.69899 3.499 6.32499 3.862 6.04999 4.324C5.78599 4.786 5.65399 5.303 5.65399 5.875V9.4225C5.65399 9.5545 5.70899 9.659 5.81899 9.736L7.05649 10.462V5.8585ZM15.4385 13.7455C15.9885 13.5035 16.423 13.1295 16.742 12.6235C17.072 12.1175 17.237 11.5675 17.237 10.9735C17.237 10.4345 17.0995 9.9175 16.8245 9.4225C16.5495 8.9275 16.192 8.5535 15.752 8.3005L12.6665 6.5185C12.6005 6.4745 12.54 6.458 12.485 6.469C12.43 6.469 12.375 6.4855 12.32 6.5185L11.0825 7.2115L15.0755 9.538C15.1965 9.604 15.2845 9.692 15.3395 9.802C15.4055 9.901 15.4385 10.022 15.4385 10.165V13.7455ZM12.122 5.3635C12.364 5.2095 12.606 5.2095 12.848 5.3635L15.983 7.195C15.983 7.118 15.983 7.019 15.983 6.898C15.983 6.37 15.851 5.8695 15.587 5.3965C15.334 4.9125 14.9655 4.5275 14.4815 4.2415C14.0085 3.9555 13.4585 3.8125 12.8315 3.8125C12.2815 3.8125 11.803 3.928 11.396 4.159L8.29399 5.941C8.18399 6.018 8.12899 6.1225 8.12899 6.2545V7.6735L12.122 5.3635Z"></path></svg>
                       </div>
                   <span className="text-sm font-medium">GPT-5</span>
                   <span className="ml-auto text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded">New</span>
@@ -2785,27 +2341,9 @@ Would you like me to help you with any specific aspect of your creative project?
                   onClick={() => setSelectedVersion('gpt-5-nano')}
                 >
                   <div className="w-6 h-6 rounded-sm flex items-center justify-center">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" className="icon-lg">
-                      <path d="M11.2475 18.25C10.6975 18.25 10.175 18.1455 9.67999 17.9365C9.18499 17.7275 8.74499 17.436 8.35999 17.062C7.94199 17.205 7.50749 17.2765 7.05649 17.2765C6.31949 17.2765 5.63749 17.095 5.01049 16.732C4.38349 16.369 3.87749 15.874 3.49249 15.247C3.11849 14.62 2.93149 13.9215 2.93149 13.1515C2.93149 12.8325 2.97549 12.486 3.06349 12.112C2.62349 11.705 2.28249 11.2375 2.04049 10.7095C1.79849 10.1705 1.67749 9.6095 1.67749 9.0265C1.67749 8.4325 1.80399 7.8605 2.05699 7.3105C2.30999 6.7605 2.66199 6.2875 3.11299 5.8915C3.57499 5.4845 4.10849 5.204 4.71349 5.05C4.83449 4.423 5.08749 3.862 5.47249 3.367C5.86849 2.861 6.35249 2.465 6.92449 2.179C7.49649 1.893 8.10699 1.75 8.75599 1.75C9.30599 1.75 9.82849 1.8545 10.3235 2.0635C10.8185 2.2725 11.2585 2.564 11.6435 2.938C12.0615 2.795 12.496 2.7235 12.947 2.7235C13.684 2.7235 14.366 2.905 14.993 3.268C15.62 3.631 16.1205 4.126 16.4945 4.753C16.8795 5.38 17.072 6.0785 17.072 6.8485C17.072 7.1675 17.028 7.514 16.94 7.888C17.38 8.295 17.721 8.768 17.963 9.307C18.205 9.835 18.326 10.3905 18.326 10.9735C18.326 11.5675 18.1995 12.1395 17.9465 12.6895C17.6935 13.2395 17.336 13.718 16.874 14.125C16.423 14.521 15.895 14.796 15.29 14.95C15.169 15.577 14.9105 16.138 14.5145 16.633C14.1295 17.139 13.651 17.535 13.079 17.821C12.507 18.107 11.8965 18.25 11.2475 18.25ZM7.17199 16.1875C7.72199 16.1875 8.20049 16.072 8.60749 15.841L11.7095 14.059C11.8195 13.982 11.8745 13.8775 11.8745 13.7455V12.3265L7.88149 14.62C7.63949 14.763 7.39749 14.763 7.15549 14.62L4.03699 12.8215C4.03699 12.8545 4.03149 12.893 4.02049 12.937C4.02049 12.981 4.02049 13.047 4.02049 13.135C4.02049 13.696 4.15249 14.213 4.41649 14.686C4.69149 15.148 5.07099 15.511 5.55499 15.775C6.03899 16.05 6.57799 16.1875 7.17199 16.1875ZM7.33699 13.498C7.40299 13.531 7.46349 13.5475 7.51849 13.5475C7.57349 13.5475 7.62849 13.531 7.68349 13.498L8.92099 12.7885L4.94449 10.4785C4.70249 10.3355 4.58149 10.121 4.58149 9.835V6.2545C4.03149 6.4965 3.59149 6.8705 3.26149 7.3765C2.93149 7.8715 2.76649 8.4215 2.76649 9.0265C2.76649 9.5655 2.90399 10.0825 3.17899 10.5775C3.45399 11.0725 3.81149 11.4465 4.25149 11.6995L7.33699 13.498ZM11.2475 17.161C11.8305 17.161 12.3585 17.029 12.8315 16.765C13.3045 16.501 13.6785 16.138 13.9535 15.676C14.2285 15.214 14.366 14.697 14.366 14.125V10.561C14.366 10.429 14.311 10.33 14.201 10.264L12.947 9.538V14.1415C12.947 14.4275 12.826 14.642 12.584 14.785L9.46549 16.5835C10.0045 16.9685 10.5985 17.161 11.2475 17.161ZM11.8745 11.122V8.878L10.01 7.822L8.12899 8.878V11.122L10.01 12.178L11.8745 11.122ZM7.05649 5.8585C7.05649 5.5725 7.17749 5.358 7.41949 5.215L10.538 3.4165C9.99899 3.0315 9.40499 2.839 8.75599 2.839C8.17299 2.839 7.64499 2.971 7.17199 3.235C6.69899 3.499 6.32499 3.862 6.04999 4.324C5.78599 4.786 5.65399 5.303 5.65399 5.875V9.4225C5.65399 9.5545 5.70899 9.659 5.81899 9.736L7.05649 10.462V5.8585ZM15.4385 13.7455C15.9885 13.5035 16.423 13.1295 16.742 12.6235C17.072 12.1175 17.237 11.5675 17.237 10.9735C17.237 10.4345 17.0995 9.9175 16.8245 9.4225C16.5495 8.9275 16.192 8.5535 15.752 8.3005L12.6665 6.5185C12.6005 6.4745 12.54 6.458 12.485 6.469C12.43 6.469 12.375 6.4855 12.32 6.5185L11.0825 7.2115L15.0755 9.538C15.1965 9.604 15.2845 9.692 15.3395 9.802C15.4055 9.901 15.4385 10.022 15.4385 10.165V13.7455ZM12.122 5.3635C12.364 5.2095 12.606 5.2095 12.848 5.3635L15.983 7.195C15.983 7.118 15.983 7.019 15.983 6.898C15.983 6.37 15.851 5.8695 15.587 5.3965C15.334 4.9125 14.9655 4.5275 14.4815 4.2415C14.0085 3.9555 13.4585 3.8125 12.8315 3.8125C12.2815 3.8125 11.803 3.928 11.396 4.159L8.29399 5.941C8.18399 6.018 8.12899 6.1225 8.12899 6.2545V7.6735L12.122 5.3635Z"></path>
-                    </svg>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="icon-lg"><path d="M11.2475 18.25C10.6975 18.25 10.175 18.1455 9.67999 17.9365C9.18499 17.7275 8.74499 17.436 8.35999 17.062C7.94199 17.205 7.50749 17.2765 7.05649 17.2765C6.31949 17.2765 5.63749 17.095 5.01049 16.732C4.38349 16.369 3.87749 15.874 3.49249 15.247C3.11849 14.62 2.93149 13.9215 2.93149 13.1515C2.93149 12.8325 2.97549 12.486 3.06349 12.112C2.62349 11.705 2.28249 11.2375 2.04049 10.7095C1.79849 10.1705 1.67749 9.6095 1.67749 9.0265C1.67749 8.4325 1.80399 7.8605 2.05699 7.3105C2.30999 6.7605 2.66199 6.2875 3.11299 5.8915C3.57499 5.4845 4.10849 5.204 4.71349 5.05C4.83449 4.423 5.08749 3.862 5.47249 3.367C5.86849 2.861 6.35249 2.465 6.92449 2.179C7.49649 1.893 8.10699 1.75 8.75599 1.75C9.30599 1.75 9.82849 1.8545 10.3235 2.0635C10.8185 2.2725 11.2585 2.564 11.6435 2.938C12.0615 2.795 12.496 2.7235 12.947 2.7235C13.684 2.7235 14.366 2.905 14.993 3.268C15.62 3.631 16.1205 4.126 16.4945 4.753C16.8795 5.38 17.072 6.0785 17.072 6.8485C17.072 7.1675 17.028 7.514 16.94 7.888C17.38 8.295 17.721 8.768 17.963 9.307C18.205 9.835 18.326 10.3905 18.326 10.9735C18.326 11.5675 18.1995 12.1395 17.9465 12.6895C17.6935 13.2395 17.336 13.718 16.874 14.125C16.423 14.521 15.895 14.796 15.29 14.95C15.169 15.577 14.9105 16.138 14.5145 16.633C14.1295 17.139 13.651 17.535 13.079 17.821C12.507 18.107 11.8965 18.25 11.2475 18.25ZM7.17199 16.1875C7.72199 16.1875 8.20049 16.072 8.60749 15.841L11.7095 14.059C11.8195 13.982 11.8745 13.8775 11.8745 13.7455V12.3265L7.88149 14.62C7.63949 14.763 7.39749 14.763 7.15549 14.62L4.03699 12.8215C4.03699 12.8545 4.03149 12.893 4.02049 12.937C4.02049 12.981 4.02049 13.047 4.02049 13.135C4.02049 13.696 4.15249 14.213 4.41649 14.686C4.69149 15.148 5.07099 15.511 5.55499 15.775C6.03899 16.05 6.57799 16.1875 7.17199 16.1875ZM7.33699 13.498C7.40299 13.531 7.46349 13.5475 7.51849 13.5475C7.57349 13.5475 7.62849 13.531 7.68349 13.498L8.92099 12.7885L4.94449 10.4785C4.70249 10.3355 4.58149 10.121 4.58149 9.835V6.2545C4.03149 6.4965 3.59149 6.8705 3.26149 7.3765C2.93149 7.8715 2.76649 8.4215 2.76649 9.0265C2.76649 9.5655 2.90399 10.0825 3.17899 10.5775C3.45399 11.0725 3.81149 11.4465 4.25149 11.6995L7.33699 13.498ZM11.2475 17.161C11.8305 17.161 12.3585 17.029 12.8315 16.765C13.3045 16.501 13.6785 16.138 13.9535 15.676C14.2285 15.214 14.366 14.697 14.366 14.125V10.561C14.366 10.429 14.311 10.33 14.201 10.264L12.947 9.538V14.1415C12.947 14.4275 12.826 14.642 12.584 14.785L9.46549 16.5835C10.0045 16.9685 10.5985 17.161 11.2475 17.161ZM11.8745 11.122V8.878L10.01 7.822L8.12899 8.878V11.122L10.01 12.178L11.8745 11.122ZM7.05649 5.8585C7.05649 5.5725 7.17749 5.358 7.41949 5.215L10.538 3.4165C9.99899 3.0315 9.40499 2.839 8.75599 2.839C8.17299 2.839 7.64499 2.971 7.17199 3.235C6.69899 3.499 6.32499 3.862 6.04999 4.324C5.78599 4.786 5.65399 5.303 5.65399 5.875V9.4225C5.65399 9.5545 5.70899 9.659 5.81899 9.736L7.05649 10.462V5.8585ZM15.4385 13.7455C15.9885 13.5035 16.423 13.1295 16.742 12.6235C17.072 12.1175 17.237 11.5675 17.237 10.9735C17.237 10.4345 17.0995 9.9175 16.8245 9.4225C16.5495 8.9275 16.192 8.5535 15.752 8.3005L12.6665 6.5185C12.6005 6.4745 12.54 6.458 12.485 6.469C12.43 6.469 12.375 6.4855 12.32 6.5185L11.0825 7.2115L15.0755 9.538C15.1965 9.604 15.2845 9.692 15.3395 9.802C15.4055 9.901 15.4385 10.022 15.4385 10.165V13.7455ZM12.122 5.3635C12.364 5.2095 12.606 5.2095 12.848 5.3635L15.983 7.195C15.983 7.118 15.983 7.019 15.983 6.898C15.983 6.37 15.851 5.8695 15.587 5.3965C15.334 4.9125 14.9655 4.5275 14.4815 4.2415C14.0085 3.9555 13.4585 3.8125 12.8315 3.8125C12.2815 3.8125 11.803 3.928 11.396 4.159L8.29399 5.941C8.18399 6.018 8.12899 6.1225 8.12899 6.2545V7.6735L12.122 5.3635Z"></path></svg>
                   </div>
                   <span className="text-sm font-medium">GPT-5 nano</span>
-                </button>
-                <button 
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
-                    selectedVersion === 'gentube' 
-                      ? 'bg-blue-100 text-blue-700 border border-blue-200' 
-                      : 'text-gray-700 hover:bg-gray-50'
-                  }`}
-                  onClick={() => setSelectedVersion('gentube')}
-                >
-                  <div className="w-6 h-6 rounded-sm flex items-center justify-center bg-gradient-to-br from-purple-500 to-blue-500">
-                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <span className="text-sm font-medium">GenTube AI</span>
-                  <span className="ml-auto text-xs bg-green-100 text-green-600 px-2 py-1 rounded">Free</span>
                 </button>
                 <button 
                   className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
@@ -2958,7 +2496,7 @@ Would you like me to help you with any specific aspect of your creative project?
                   }`}
                   onClick={() => setSelectedVersion('gemini-thinking')}
                 >
-                  <div className="w-8 h-8 rounded-sm flex items-center justify-center">
+                  <div className="w-6 h-6 rounded-sm flex items-center justify-center">
                     <img src="https://www.gstatic.com/lamda/images/gemini_sparkle_aurora_33f86dc0c0257da337c63.svg" alt="" />
                   </div>
                   <span className="text-sm font-medium">Gemini Thinking</span>
@@ -2992,7 +2530,7 @@ Would you like me to help you with any specific aspect of your creative project?
                   <span className="text-sm font-medium">Gemini 2.5 Flash Image</span>
                  
                 </button>
-                {/* <button 
+                <button 
                   className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                     selectedVersion === 'gemini-flash-image-preview' 
                       ? 'bg-blue-100 text-blue-700 border border-blue-200' 
@@ -3005,7 +2543,7 @@ Would you like me to help you with any specific aspect of your creative project?
                   </div>
                   <span className="text-sm font-medium">Gemini Flash Image Preview</span>
                   <span className="ml-auto text-xs bg-yellow-100 text-yellow-600 px-2 py-1 rounded">Free</span>
-                </button> */}
+                </button>
                 <button 
                   className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                     selectedVersion === 'deepseek' 
@@ -3075,22 +2613,6 @@ Would you like me to help you with any specific aspect of your creative project?
                   </div>
                   <span className="text-sm font-medium">Microsoft Phi-4</span>
                   <span className="ml-auto text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">Fast</span>
-                </button>
-                <button 
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
-                    selectedVersion === 'edenai' 
-                      ? 'bg-blue-100 text-blue-700 border border-blue-200' 
-                      : 'text-gray-700 hover:bg-gray-50'
-                  }`}
-                  onClick={() => setSelectedVersion('edenai')}
-                >
-                  <div className="w-6 h-6 rounded-sm flex items-center justify-center">
-                    <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <span className="text-sm font-medium">Eden AI Image</span>
-                  <span className="ml-auto text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">Image</span>
                 </button>
                 {/* <button 
                   className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
@@ -3598,130 +3120,11 @@ Would you like me to help you with any specific aspect of your creative project?
           )}
         </div>
 
-                        {/* AI Model Selection Bar Above Input */}
-                        <div className="border-t border-gray-200 bg-white">
-                          <div className="flex items-center justify-center space-x-2 p-4 overflow-x-auto">
-                            {/* GPT-5 */}
-                            <button 
-                              className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all whitespace-nowrap ${
-                                selectedVersion === 'gpt-5' 
-                                  ? 'border-blue-500 bg-blue-50 text-blue-700' 
-                                  : 'border-gray-200 hover:border-gray-300 text-gray-700'
-                              }`}
-                              onClick={() => setSelectedVersion('gpt-5')}
-                            >
-                              <div className="w-5 h-5 bg-green-500 rounded-sm flex items-center justify-center">
-                                <svg className="w-3 h-3 text-white" viewBox="0 0 24 24" fill="currentColor">
-                                  <path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142-.0852 4.783-2.7582a.7712.7712 0 0 0 .7806 0l5.8428 3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"/>
-                                </svg>
-                              </div>
-                              <span className="text-sm font-medium">GPT-5</span>
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                              </svg>
-                            </button>
-
-                            {/* DeepSeek R1 */}
-                            <button 
-                              className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all whitespace-nowrap ${
-                                selectedVersion === 'deepseek' 
-                                  ? 'border-blue-500 bg-blue-50 text-blue-700' 
-                                  : 'border-gray-200 hover:border-gray-300 text-gray-700'
-                              }`}
-                              onClick={() => setSelectedVersion('deepseek')}
-                            >
-                              <div className="w-5 h-5 bg-blue-500 rounded-sm flex items-center justify-center">
-                                <span className="text-xs font-bold text-white">S</span>
-                              </div>
-                              <span className="text-sm font-medium">DeepSeek R1</span>
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                              </svg>
-                            </button>
-
-                            {/* Claude Opus */}
-                            <button 
-                              className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all whitespace-nowrap ${
-                                selectedVersion === 'claude' 
-                                  ? 'border-blue-500 bg-blue-50 text-blue-700' 
-                                  : 'border-gray-200 hover:border-gray-300 text-gray-700'
-                              }`}
-                              onClick={() => setSelectedVersion('claude')}
-                            >
-                              <div className="w-5 h-5 bg-orange-500 rounded-sm flex items-center justify-center">
-                                <span className="text-xs font-bold text-white">A</span>
-                              </div>
-                              <span className="text-sm font-medium">Claude Opus...</span>
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                              </svg>
-                            </button>
-
-                            {/* Gemini 2.5 Pro */}
-                            <button 
-                              className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all whitespace-nowrap ${
-                                selectedVersion === 'gemini-2.5-pro' 
-                                  ? 'border-blue-500 bg-blue-50 text-blue-700' 
-                                  : 'border-gray-200 hover:border-gray-300 text-gray-700'
-                              }`}
-                              onClick={() => setSelectedVersion('gemini-2.5-pro')}
-                            >
-                              <div className="w-5 h-5 bg-blue-500 rounded-sm flex items-center justify-center">
-                                <svg className="w-3 h-3 text-white" viewBox="0 0 24 24" fill="currentColor">
-                                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                                </svg>
-                              </div>
-                              <span className="text-sm font-medium">Gemini 2.5 Pro</span>
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                              </svg>
-                            </button>
-
-                            {/* Grok 4 */}
-                            <button 
-                              className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all whitespace-nowrap ${
-                                selectedVersion === 'grok4' 
-                                  ? 'border-blue-500 bg-blue-50 text-blue-700' 
-                                  : 'border-gray-200 hover:border-gray-300 text-gray-700'
-                              }`}
-                              onClick={() => setSelectedVersion('grok4')}
-                            >
-                              <div className="w-5 h-5 bg-red-500 rounded-sm flex items-center justify-center">
-                                <svg className="w-3 h-3 text-white" viewBox="0 0 24 24" fill="currentColor">
-                                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                                </svg>
-                              </div>
-                              <span className="text-sm font-medium">Grok 4</span>
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                              </svg>
-                            </button>
-
-                            {/* o3 Mini High (Selected) */}
-                            <button 
-                              className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all whitespace-nowrap ${
-                                selectedVersion === 'o3-mini' 
-                                  ? 'border-blue-500 bg-blue-50 text-blue-700' 
-                                  : 'border-gray-200 hover:border-gray-300 text-gray-700'
-                              }`}
-                              onClick={() => setSelectedVersion('o3-mini')}
-                            >
-                              <div className="w-5 h-5 bg-purple-500 rounded-sm flex items-center justify-center">
-                                <span className="text-xs font-bold text-white">o3</span>
-                              </div>
-                              <span className="text-sm font-medium">o3 Mini Hi...</span>
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                              </svg>
-                            </button>
-                          </div>
-                        </div>
-
                         {/* Input Area */}
-                        <div className="border-t border-gray-200 p-4">
-                          <div className="max-w-3xl mx-auto">
-                            {/* Plus Banner */}
-                            <div className="bg-gray-700 text-white rounded-lg p-4 mb-4 flex items-center justify-between">
+        <div className="border-t border-gray-200 p-4">
+          <div className="max-w-3xl mx-auto">
+            {/* Plus Banner */}
+            <div className="bg-gray-700 text-white rounded-lg p-4 mb-4 flex items-center justify-between">
               <div className="flex-1">
                 <div className="font-semibold">Unlock more with Plus</div>
                 <div className="text-sm text-gray-300">ChatGPT Plus gives you higher limits, smarter models, and Sora for video.</div>
