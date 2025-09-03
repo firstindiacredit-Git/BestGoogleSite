@@ -386,7 +386,7 @@ const GlobalAi = () => {
       if (data.data && data.data[0] && data.data[0].url) {
         setGeneratedImage(data.data[0].url);
       } else {
-        throw new Error('No image  URL received from API');
+        throw new Error('No image URL received from API');
       }
     } catch (err) {
       setError(err.message || 'Failed to generate image from file');
