@@ -12,7 +12,7 @@ const SportsLeagues = () => {
   const [viewMode, setViewMode] = useState("list");
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState(null);
-  const [selectedCategory, setSelectedCategory] = useState("football");
+  const [selectedCategory, setSelectedCategory] = useState("cricket");
   const [isSearchBarOpen, setIsSearchBarOpen] = useState(false);
   const searchBarRef = useRef(null);
 
@@ -427,12 +427,12 @@ const SportsLeagues = () => {
   }, [isSearchBarOpen]);
 
   const menuItems = [
-    { key: "football", label: "Football" },
     { key: "cricket", label: "Cricket" },
     { key: "basketball", label: "Basketball" },
     { key: "baseball", label: "Baseball" },
     { key: "hockey", label: "Hockey" },
     { key: "volleyball", label: "Volleyball" },
+    { key: "football", label: "Football" },
   ];
 
   if (loading) {
