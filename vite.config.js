@@ -28,50 +28,157 @@ export default defineConfig({
           },
         ],
       },
+      workbox: {
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "google-fonts-cache",
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/images\.pexels\.com\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "pexels-images-cache",
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+              },
+            },
+          },
+        ],
+      },
     }),
   ],
   build: {
-    // Generate smaller chunks
-    chunkSizeWarningLimit: 1000,
+    // Generate smaller chunks with better splitting
+    chunkSizeWarningLimit: 500,
     rollupOptions: {
       output: {
         manualChunks: {
-          "react-vendor": ["react", "react-dom", "react-router-dom"],
-          "firebase-vendor": [
-            "firebase/app",
-            "firebase/auth",
-            "firebase/firestore",
+          // Core React chunks
+          "react-vendor": ["react", "react-dom"],
+          "router-vendor": ["react-router-dom"],
+
+          // Firebase chunks
+          "firebase-core": ["firebase/app"],
+          "firebase-auth": ["firebase/auth"],
+          "firebase-firestore": ["firebase/firestore"],
+          "firebase-storage": ["firebase/storage"],
+
+          // UI Library chunks
+          "antd-vendor": ["antd"],
+          "mui-vendor": ["@mui/material", "@mui/icons-material"],
+          "icons-vendor": [
+            "react-icons",
+            "@tabler/icons-react",
+            "lucide-react",
           ],
-          "ui-vendor": ["antd"],
+
+          // PDF and Document processing
+          "pdf-vendor": ["pdfjs-dist", "pdf-lib", "pdfmake", "jspdf"],
+
+          // Image processing
+          "image-vendor": [
+            "html2canvas",
+            "browser-image-compression",
+            "react-easy-crop",
+          ],
+
+          // Animation libraries
+          "animation-vendor": ["framer-motion", "gsap", "aos"],
+
+          // Utility libraries
+          "utils-vendor": ["axios", "crypto-js", "date-fns", "moment-timezone"],
+
+          // Chart and data visualization
+          "chart-vendor": ["chart.js", "react-chartjs-2"],
+
+          // Tools specific chunks
+          "tools-vendor": ["exceljs", "xlsx", "mammoth", "docx-preview"],
         },
       },
     },
-    // Reduce CSS file size
+    // Optimize CSS
     cssCodeSplit: true,
-    // Minify everything
+    cssMinify: true,
+
+    // Advanced minification
     minify: "terser",
     terserOptions: {
       compress: {
         drop_console: true,
         drop_debugger: true,
+        pure_funcs: ["console.log", "console.info", "console.debug"],
+        passes: 2,
+      },
+      mangle: {
+        safari10: true,
       },
     },
-    // Enable sourcemaps for production
+
+    // Disable sourcemaps in production
     sourcemap: false,
+
+    // Optimize assets
+    assetsInlineLimit: 4096,
+
+    // Target modern browsers for smaller bundles
+    target: "es2020",
   },
-  // Optimize server during development
+
+  // Optimize development server
   server: {
-    // Enable HMR
     hmr: true,
-    // Pre-bundling
     optimizeDeps: {
-      include: ["react", "react-dom", "react-router-dom", "antd"],
+      include: [
+        "react",
+        "react-dom",
+        "react-router-dom",
+        "antd",
+        "firebase/app",
+        "firebase/auth",
+        "firebase/firestore",
+      ],
+      exclude: ["@swc/core"],
     },
+    preTransformRequests: true,
   },
-  // Reduce bundle size
+
+  // Optimize dependencies
+  optimizeDeps: {
+    include: [
+      "react",
+      "react-dom",
+      "react-router-dom",
+      "antd",
+      "firebase/app",
+      "firebase/auth",
+      "firebase/firestore",
+    ],
+    exclude: ["@swc/core"],
+  },
+
+  // Path resolution
   resolve: {
     alias: {
       "@": "/src",
     },
+  },
+
+  // Performance optimizations
+  esbuild: {
+    target: "es2020",
+    treeShaking: true,
   },
 });

@@ -134,6 +134,12 @@
     "vite": "^5.4.14",
     "vite-plugin-node": "^4.0.0",
     "vite-plugin-pwa": "^0.19.8",
+    "caniuse-lite": "^1.0.30001741",
+    "imagemin": "^8.0.1",
+    "imagemin-mozjpeg": "^10.0.0",
+    "imagemin-pngquant": "^9.0.2",
+    "imagemin-webp": "^8.0.0",
+    "vite-bundle-analyzer": "^0.7.0",
     "worker-loader": "^3.0.8"
   },
   "homepage": "https://allmytab.com"

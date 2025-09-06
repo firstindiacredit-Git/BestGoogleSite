@@ -26,124 +26,316 @@ const GlobalAi = () => {
   const [currentChatId, setCurrentChatId] = useState(null);
   const [pollinationsStatus, setPollinationsStatus] = useState('unknown'); // 'unknown', 'available', 'unavailable'
 
+  // Popup state for related models
+  const [showRelatedModels, setShowRelatedModels] = useState(false);
+  const [clickedModel, setClickedModel] = useState(null);
+  const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
+
+  // Related models mapping
+  const relatedModels = {
+    'gpt-5': [
+      { id: 'gpt-5-mini', name: 'GPT-5 Mini', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Faster, lighter version' },
+      { id: 'gpt-5-nano', name: 'GPT-5 Nano', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Ultra-fast version' },
+      { id: 'gpt-4.1', name: 'GPT-4.1', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Latest GPT-4 version' },
+      { id: 'gpt-4.1-mini', name: 'GPT-4.1 Mini', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Fast GPT-4.1 version' },
+      { id: 'gpt-4.1-nano', name: 'GPT-4.1 Nano', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Ultra-fast GPT-4.1' },
+      { id: 'gpt-4o', name: 'GPT-4o', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Previous generation' },
+      { id: 'gpt-4o-mini', name: 'GPT-4o Mini', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Fast GPT-4o version' },
+      { id: 'gpt-4o-mini-search', name: 'GPT-4o Mini Search', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Search-enabled version' },
+      { id: 'gpt-4o-search', name: 'GPT-4o Search', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Search preview version' }
+    ],
+    'gpt-5-mini': [
+      { id: 'gpt-5', name: 'GPT-5', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Full GPT-5 version' },
+      { id: 'gpt-5-nano', name: 'GPT-5 Nano', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Ultra-fast version' },
+      { id: 'gpt-4.1', name: 'GPT-4.1', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Latest GPT-4 version' },
+      { id: 'gpt-4.1-mini', name: 'GPT-4.1 Mini', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Fast GPT-4.1 version' },
+      { id: 'gpt-4.1-nano', name: 'GPT-4.1 Nano', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Ultra-fast GPT-4.1' },
+      { id: 'gpt-4o', name: 'GPT-4o', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Previous generation' },
+      { id: 'gpt-4o-mini', name: 'GPT-4o Mini', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Fast GPT-4o version' },
+      { id: 'gpt-4o-mini-search', name: 'GPT-4o Mini Search', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Search-enabled version' },
+      { id: 'gpt-4o-search', name: 'GPT-4o Search', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Search preview version' }
+    ],
+    'gpt-5-nano': [
+      { id: 'gpt-5', name: 'GPT-5', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Full GPT-5 version' },
+      { id: 'gpt-5-mini', name: 'GPT-5 Mini', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Faster, lighter version' },
+      { id: 'gpt-4.1', name: 'GPT-4.1', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Latest GPT-4 version' },
+      { id: 'gpt-4.1-mini', name: 'GPT-4.1 Mini', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Fast GPT-4.1 version' },
+      { id: 'gpt-4.1-nano', name: 'GPT-4.1 Nano', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Ultra-fast GPT-4.1' },
+      { id: 'gpt-4o', name: 'GPT-4o', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Previous generation' },
+      { id: 'gpt-4o-mini', name: 'GPT-4o Mini', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Fast GPT-4o version' },
+      { id: 'gpt-4o-mini-search', name: 'GPT-4o Mini Search', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Search-enabled version' },
+      { id: 'gpt-4o-search', name: 'GPT-4o Search', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Search preview version' }
+    ],
+    'gpt-4.1': [
+      { id: 'gpt-5', name: 'GPT-5', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Latest GPT-5 version' },
+      { id: 'gpt-5-mini', name: 'GPT-5 Mini', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Faster, lighter version' },
+      { id: 'gpt-5-nano', name: 'GPT-5 Nano', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Ultra-fast version' },
+      { id: 'gpt-4.1-mini', name: 'GPT-4.1 Mini', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Fast GPT-4.1 version' },
+      { id: 'gpt-4.1-nano', name: 'GPT-4.1 Nano', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Ultra-fast GPT-4.1' },
+      { id: 'gpt-4o', name: 'GPT-4o', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Previous generation' },
+      { id: 'gpt-4o-mini', name: 'GPT-4o Mini', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Fast GPT-4o version' },
+      { id: 'gpt-4o-mini-search', name: 'GPT-4o Mini Search', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Search-enabled version' },
+      { id: 'gpt-4o-search', name: 'GPT-4o Search', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Search preview version' }
+    ],
+    'gpt-4.1-mini': [
+      { id: 'gpt-5', name: 'GPT-5', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Latest GPT-5 version' },
+      { id: 'gpt-5-mini', name: 'GPT-5 Mini', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Faster, lighter version' },
+      { id: 'gpt-5-nano', name: 'GPT-5 Nano', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Ultra-fast version' },
+      { id: 'gpt-4.1', name: 'GPT-4.1', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Latest GPT-4 version' },
+      { id: 'gpt-4.1-nano', name: 'GPT-4.1 Nano', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Ultra-fast GPT-4.1' },
+      { id: 'gpt-4o', name: 'GPT-4o', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Previous generation' },
+      { id: 'gpt-4o-mini', name: 'GPT-4o Mini', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Fast GPT-4o version' },
+      { id: 'gpt-4o-mini-search', name: 'GPT-4o Mini Search', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Search-enabled version' },
+      { id: 'gpt-4o-search', name: 'GPT-4o Search', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Search preview version' }
+    ],
+    'gpt-4.1-nano': [
+      { id: 'gpt-5', name: 'GPT-5', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Latest GPT-5 version' },
+      { id: 'gpt-5-mini', name: 'GPT-5 Mini', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Faster, lighter version' },
+      { id: 'gpt-5-nano', name: 'GPT-5 Nano', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Ultra-fast version' },
+      { id: 'gpt-4.1', name: 'GPT-4.1', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Latest GPT-4 version' },
+      { id: 'gpt-4.1-mini', name: 'GPT-4.1 Mini', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Fast GPT-4.1 version' },
+      { id: 'gpt-4o', name: 'GPT-4o', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Previous generation' },
+      { id: 'gpt-4o-mini', name: 'GPT-4o Mini', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Fast GPT-4o version' },
+      { id: 'gpt-4o-mini-search', name: 'GPT-4o Mini Search', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Search-enabled version' },
+      { id: 'gpt-4o-search', name: 'GPT-4o Search', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Search preview version' }
+    ],
+    'gpt-4o': [
+      { id: 'gpt-5', name: 'GPT-5', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Latest GPT-5 version' },
+      { id: 'gpt-5-mini', name: 'GPT-5 Mini', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Faster, lighter version' },
+      { id: 'gpt-5-nano', name: 'GPT-5 Nano', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Ultra-fast version' },
+      { id: 'gpt-4.1', name: 'GPT-4.1', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Latest GPT-4 version' },
+      { id: 'gpt-4.1-mini', name: 'GPT-4.1 Mini', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Fast GPT-4.1 version' },
+      { id: 'gpt-4.1-nano', name: 'GPT-4.1 Nano', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Ultra-fast GPT-4.1' },
+      { id: 'gpt-4o-mini', name: 'GPT-4o Mini', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Fast GPT-4o version' },
+      { id: 'gpt-4o-mini-search', name: 'GPT-4o Mini Search', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Search-enabled version' },
+      { id: 'gpt-4o-search', name: 'GPT-4o Search', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Search preview version' }
+    ],
+    'gpt-4o-mini': [
+      { id: 'gpt-5', name: 'GPT-5', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Latest GPT-5 version' },
+      { id: 'gpt-5-mini', name: 'GPT-5 Mini', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Faster, lighter version' },
+      { id: 'gpt-5-nano', name: 'GPT-5 Nano', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Ultra-fast version' },
+      { id: 'gpt-4.1', name: 'GPT-4.1', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Latest GPT-4 version' },
+      { id: 'gpt-4.1-mini', name: 'GPT-4.1 Mini', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Fast GPT-4.1 version' },
+      { id: 'gpt-4.1-nano', name: 'GPT-4.1 Nano', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Ultra-fast GPT-4.1' },
+      { id: 'gpt-4o', name: 'GPT-4o', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Previous generation' },
+      { id: 'gpt-4o-mini-search', name: 'GPT-4o Mini Search', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Search-enabled version' },
+      { id: 'gpt-4o-search', name: 'GPT-4o Search', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Search preview version' }
+    ],
+    'gpt-4o-mini-search': [
+      { id: 'gpt-5', name: 'GPT-5', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Latest GPT-5 version' },
+      { id: 'gpt-5-mini', name: 'GPT-5 Mini', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Faster, lighter version' },
+      { id: 'gpt-5-nano', name: 'GPT-5 Nano', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Ultra-fast version' },
+      { id: 'gpt-4.1', name: 'GPT-4.1', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Latest GPT-4 version' },
+      { id: 'gpt-4.1-mini', name: 'GPT-4.1 Mini', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Fast GPT-4.1 version' },
+      { id: 'gpt-4.1-nano', name: 'GPT-4.1 Nano', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Ultra-fast GPT-4.1' },
+      { id: 'gpt-4o', name: 'GPT-4o', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Previous generation' },
+      { id: 'gpt-4o-mini', name: 'GPT-4o Mini', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Fast GPT-4o version' },
+      { id: 'gpt-4o-search', name: 'GPT-4o Search', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Search preview version' }
+    ],
+    'gpt-4o-search': [
+      { id: 'gpt-5', name: 'GPT-5', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Latest GPT-5 version' },
+      { id: 'gpt-5-mini', name: 'GPT-5 Mini', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Faster, lighter version' },
+      { id: 'gpt-5-nano', name: 'GPT-5 Nano', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Ultra-fast version' },
+      { id: 'gpt-4.1', name: 'GPT-4.1', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Latest GPT-4 version' },
+      { id: 'gpt-4.1-mini', name: 'GPT-4.1 Mini', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Fast GPT-4.1 version' },
+      { id: 'gpt-4.1-nano', name: 'GPT-4.1 Nano', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Ultra-fast GPT-4.1' },
+      { id: 'gpt-4o', name: 'GPT-4o', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Previous generation' },
+      { id: 'gpt-4o-mini', name: 'GPT-4o Mini', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Fast GPT-4o version' },
+      { id: 'gpt-4o-mini-search', name: 'GPT-4o Mini Search', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Search-enabled version' }
+    ],
+    'claude': [
+      { id: 'claudeOpus41', name: 'Claude Opus 4.1', image: 'https://static.glbgpt.com/logo2/4336.png', description: 'Latest version' },
+      { id: 'claudeSonnet4', name: 'Claude Sonnet 4', image: 'https://static.glbgpt.com/logo2/4336.png', description: 'Stable version' },
+      { id: 'claudeOpus4', name: 'Claude Opus 4', image: 'https://static.glbgpt.com/logo2/4336.png', description: 'Pro version' },
+      { id: 'gpt-5', name: 'GPT-5', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Alternative AI model' }
+    ],
+    'gemini-2.5-flash': [
+      { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', image: 'https://www.gstatic.com/lamda/images/gemini_sparkle_aurora_33f86dc0c0257da337c63.svg', description: 'Pro version' },
+      { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', image: 'https://www.gstatic.com/lamda/images/gemini_sparkle_aurora_33f86dc0c0257da337c63.svg', description: 'Previous version' },
+      { id: 'gemini-thinking', name: 'Gemini Thinking', image: 'https://www.gstatic.com/lamda/images/gemini_sparkle_aurora_33f86dc0c0257da337c63.svg', description: 'Experimental' },
+      { id: 'claude', name: 'Claude', image: 'https://static.glbgpt.com/logo2/4336.png', description: 'Alternative AI model' }
+    ],
+    'deepseek': [
+      { id: 'deepseekR1', name: 'DeepSeek R1', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Fast version' },
+      { id: 'deepseekV30324', name: 'DeepSeek V3 0324', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Stable version' },
+      { id: 'deepseekProverV2', name: 'DeepSeek Prover V2', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Pro version' },
+      { id: 'gpt-5', name: 'GPT-5', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Alternative AI model' }
+    ],
+    'grok3mini': [
+      { id: 'grok4', name: 'Grok 4', image: 'https://static.glbgpt.com/logo2/4222.png', description: 'Latest version' },
+      { id: 'grok3', name: 'Grok 3', image: 'https://static.glbgpt.com/logo2/4222.png', description: 'Stable version' },
+      { id: 'grok2vision', name: 'Grok 2 Vision', image: 'https://static.glbgpt.com/logo2/4222.png', description: 'Vision model' },
+      { id: 'claude', name: 'Claude', image: 'https://static.glbgpt.com/logo2/4336.png', description: 'Alternative AI model' }
+    ],
+    'dall-e': [
+      { id: 'stability', name: 'Stability AI', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Alternative image generator' },
+      { id: 'pollinations', name: 'Pollinations', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Turbo image generator' },
+      { id: 'gemini-image', name: 'Gemini 2.5 Flash', image: 'https://www.gstatic.com/lamda/images/gemini_sparkle_aurora_33f86dc0c0257da337c63.svg', description: 'Google image model' },
+      { id: 'gpt-5', name: 'GPT-5', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Text model' }
+    ]
+  };
+
   const OPENAI_API_KEY = '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';
   const DEEPSEEK_API_KEY = 'sk-bdc38f3a81c94ca8a0ecacf93d584618';
   const OPENROUTER_API_KEY = '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';
   const OPENROUTER_API_KEY_2 = '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';
-  const GROQ_API_KEY = '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';
+
+  // Function to handle model click and show popup
+  const handleModelClick = (modelId) => {
+    // Calculate center position of the screen
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    const popupWidth = 450; // Approximate popup width for grid layout
+    const popupHeight = 250; // Approximate popup height for grid layout
+    
+    setPopupPosition({ 
+      x: (screenWidth - popupWidth) / 2, 
+      y: (screenHeight - popupHeight) / 2 
+    });
+    setClickedModel(modelId);
+    setShowRelatedModels(true);
+  };
+
+  // Function to select a model from popup
+  const selectModelFromPopup = (modelId) => {
+    setSelectedVersion(modelId);
+    setShowRelatedModels(false);
+  };
+
+  // Close popup when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showRelatedModels && !event.target.closest('.model-popup')) {
+        setShowRelatedModels(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showRelatedModels]);
+
   
   // API Configuration for different models
   const API_CONFIGS = {
     groq: {
       url: "https://openrouter.ai/api/v1/chat/completions",
-      key: "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",
+      key: "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",
       model: "x-ai/grok-code-fast-1",
       name: "Grok Code",
       free: true
     },
     grok4: {
       url: "https://openrouter.ai/api/v1/chat/completions",
-      key: "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",
+      key: "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",
       model: "x-ai/grok-code-fast-1",
       name: "Grok 4",
       free: true
     },
     grok3: {
       url: "https://openrouter.ai/api/v1/chat/completions",
-      key: "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",
+      key: "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",
       model: "x-ai/grok-code-fast-1",
       name: "Grok 3",
       free: true
     },
     grok3mini: {
       url: "https://openrouter.ai/api/v1/chat/completions",
-      key: "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",
+      key: "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",
       model: "x-ai/grok-code-fast-1",
       name: "Grok 3 Mini",
       free: true
     },
     grok2vision: {
       url: "https://openrouter.ai/api/v1/chat/completions",
-      key: "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",
+      key: "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",
       model: "x-ai/grok-code-fast-1",
       name: "Grok 2 Vision",
       free: true
     },
     claude: {
       url: "https://openrouter.ai/api/v1/chat/completions",
-      key: "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",
+      key: "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",
       model: "anthropic/claude-3.5-sonnet",
       name: "Claude",
       free: true
     },
     claudeOpus41: {
       url: "https://openrouter.ai/api/v1/chat/completions",
-      key: "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",
+      key: "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",
       model: "anthropic/claude-3.5-opus",
       name: "Claude Opus 4.1",
       free: true
     },
     claudeSonnet4: {
       url: "https://openrouter.ai/api/v1/chat/completions",
-      key: "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",
+      key: "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",
       model: "anthropic/claude-3.5-sonnet",
       name: "Claude Sonnet 4",
       free: true
     },
     claudeOpus4: {
       url: "https://openrouter.ai/api/v1/chat/completions",
-      key: "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",
+      key: "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",
       model: "anthropic/claude-3.5-sonnet",
       name: "Claude Opus 4",
       free: true
     },
     claude37Sonnet: {
       url: "https://openrouter.ai/api/v1/chat/completions",
-      key: "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",
+      key: "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",
       model: "anthropic/claude-3.5-sonnet",
       name: "Claude 3.7 Sonnet",
       free: true
     },
     claude35Haiku: {
       url: "https://openrouter.ai/api/v1/chat/completions",
-      key: "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",
+      key: "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",
       model: "anthropic/claude-3.5-haiku",
       name: "Claude 3.5 Haiku",
       free: true
     },
     deepseek: {
       url: "https://openrouter.ai/api/v1/chat/completions",
-      key: "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",
+      key: "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",
       model: "deepseek/deepseek-r1-0528-qwen3-8b",
       name: "DeepSeek",
       free: true
     },
     deepseekR1: {
       url: "https://openrouter.ai/api/v1/chat/completions",
-      key: "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",
+      key: "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",
       model: "deepseek/deepseek-r1-0528-qwen3-8b",
       name: "DeepSeek R1",
       free: true
     },
     deepseekV30324: {
       url: "https://openrouter.ai/api/v1/chat/completions",
-      key: "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",
+      key: "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",
       model: "deepseek/deepseek-r1-0528-qwen3-8b",
       name: "DeepSeek V3 0324",
       free: true
     },
     deepseekProverV2: {
       url: "https://openrouter.ai/api/v1/chat/completions",
-      key: "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",
+      key: "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",
       model: "deepseek/deepseek-r1-0528-qwen3-8b",
       name: "DeepSeek Prover V2",
       free: true
     },
     phi4: {
       url: "https://openrouter.ai/api/v1/chat/completions",
-      key: "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",
+      key: "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",
       model: "microsoft/phi-4",
       name: "Microsoft Phi-4",
+      free: true
+    },
+    llama: {
+      url: "https://openrouter.ai/api/v1/chat/completions",
+      key: "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",
+      model: "meta-llama/llama-4-scout-17b-16e-instruct",
+      name: "Llama",
       free: true
     },
     pixverse: {
@@ -1608,9 +1800,11 @@ const GlobalAi = () => {
     }
   };
 
-  // Function to generate response using Llama via Groq
+  // Function to generate response using Llama via OpenRouter
   const generateLlamaResponse = async (prompt, imageUrl = null) => {
     try {
+      const config = API_CONFIGS.llama;
+      
       const messages = [
         {
           role: 'user',
@@ -1629,25 +1823,26 @@ const GlobalAi = () => {
         }
       ];
 
-      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      const response = await fetch(config.url, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${GROQ_API_KEY}`,
+          'Authorization': `Bearer ${config.key}`,
+          'HTTP-Referer': window.location.origin,
+          'X-Title': 'BestGoogleSite',
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+          model: config.model,
           messages: messages,
-          temperature: 1,
-          max_tokens: 1024,
-          top_p: 1,
-          stream: false,
-          stop: null
+          temperature: 0.7,
+          max_tokens: 1000
         })
       });
 
       if (!response.ok) {
-        throw new Error(`Groq Llama API error: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        console.error(`${config.name} API error details:`, errorData);
+        throw new Error(`${config.name} API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
       }
 
       const data = await response.json();
@@ -1655,11 +1850,11 @@ const GlobalAi = () => {
       if (data.choices && data.choices.length > 0 && data.choices[0].message && data.choices[0].message.content) {
         return data.choices[0].message.content;
       } else {
-        console.error('Unexpected Groq Llama API response structure:', data);
-        throw new Error('No valid response from Groq Llama API');
+        console.error(`Unexpected ${config.name} API response structure:`, data);
+        throw new Error(`No valid response from ${config.name} API`);
       }
     } catch (error) {
-      console.error('Groq Llama API error:', error);
+      console.error('Llama API error:', error);
       throw error;
     }
   };
@@ -2310,10 +2505,10 @@ const GlobalAi = () => {
                       ? 'bg-blue-100 text-blue-700 border border-blue-200' 
                       : 'text-gray-700 hover:bg-gray-50'
                   }`}
-                  onClick={() => setSelectedVersion('gpt-5')}
+                  onClick={() => handleModelClick('gpt-5')}
                 >
                       <div className="w-6 h-6 rounded-sm flex items-center justify-center">
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="icon-lg"><path d="M11.2475 18.25C10.6975 18.25 10.175 18.1455 9.67999 17.9365C9.18499 17.7275 8.74499 17.436 8.35999 17.062C7.94199 17.205 7.50749 17.2765 7.05649 17.2765C6.31949 17.2765 5.63749 17.095 5.01049 16.732C4.38349 16.369 3.87749 15.874 3.49249 15.247C3.11849 14.62 2.93149 13.9215 2.93149 13.1515C2.93149 12.8325 2.97549 12.486 3.06349 12.112C2.62349 11.705 2.28249 11.2375 2.04049 10.7095C1.79849 10.1705 1.67749 9.6095 1.67749 9.0265C1.67749 8.4325 1.80399 7.8605 2.05699 7.3105C2.30999 6.7605 2.66199 6.2875 3.11299 5.8915C3.57499 5.4845 4.10849 5.204 4.71349 5.05C4.83449 4.423 5.08749 3.862 5.47249 3.367C5.86849 2.861 6.35249 2.465 6.92449 2.179C7.49649 1.893 8.10699 1.75 8.75599 1.75C9.30599 1.75 9.82849 1.8545 10.3235 2.0635C10.8185 2.2725 11.2585 2.564 11.6435 2.938C12.0615 2.795 12.496 2.7235 12.947 2.7235C13.684 2.7235 14.366 2.905 14.993 3.268C15.62 3.631 16.1205 4.126 16.4945 4.753C16.8795 5.38 17.072 6.0785 17.072 6.8485C17.072 7.1675 17.028 7.514 16.94 7.888C17.38 8.295 17.721 8.768 17.963 9.307C18.205 9.835 18.326 10.3905 18.326 10.9735C18.326 11.5675 18.1995 12.1395 17.9465 12.6895C17.6935 13.2395 17.336 13.718 16.874 14.125C16.423 14.521 15.895 14.796 15.29 14.95C15.169 15.577 14.9105 16.138 14.5145 16.633C14.1295 17.139 13.651 17.535 13.079 17.821C12.507 18.107 11.8965 18.25 11.2475 18.25ZM7.17199 16.1875C7.72199 16.1875 8.20049 16.072 8.60749 15.841L11.7095 14.059C11.8195 13.982 11.8745 13.8775 11.8745 13.7455V12.3265L7.88149 14.62C7.63949 14.763 7.39749 14.763 7.15549 14.62L4.03699 12.8215C4.03699 12.8545 4.03149 12.893 4.02049 12.937C4.02049 12.981 4.02049 13.047 4.02049 13.135C4.02049 13.696 4.15249 14.213 4.41649 14.686C4.69149 15.148 5.07099 15.511 5.55499 15.775C6.03899 16.05 6.57799 16.1875 7.17199 16.1875ZM7.33699 13.498C7.40299 13.531 7.46349 13.5475 7.51849 13.5475C7.57349 13.5475 7.62849 13.531 7.68349 13.498L8.92099 12.7885L4.94449 10.4785C4.70249 10.3355 4.58149 10.121 4.58149 9.835V6.2545C4.03149 6.4965 3.59149 6.8705 3.26149 7.3765C2.93149 7.8715 2.76649 8.4215 2.76649 9.0265C2.76649 9.5655 2.90399 10.0825 3.17899 10.5775C3.45399 11.0725 3.81149 11.4465 4.25149 11.6995L7.33699 13.498ZM11.2475 17.161C11.8305 17.161 12.3585 17.029 12.8315 16.765C13.3045 16.501 13.6785 16.138 13.9535 15.676C14.2285 15.214 14.366 14.697 14.366 14.125V10.561C14.366 10.429 14.311 10.33 14.201 10.264L12.947 9.538V14.1415C12.947 14.4275 12.826 14.642 12.584 14.785L9.46549 16.5835C10.0045 16.9685 10.5985 17.161 11.2475 17.161ZM11.8745 11.122V8.878L10.01 7.822L8.12899 8.878V11.122L10.01 12.178L11.8745 11.122ZM7.05649 5.8585C7.05649 5.5725 7.17749 5.358 7.41949 5.215L10.538 3.4165C9.99899 3.0315 9.40499 2.839 8.75599 2.839C8.17299 2.839 7.64499 2.971 7.17199 3.235C6.69899 3.499 6.32499 3.862 6.04999 4.324C5.78599 4.786 5.65399 5.303 5.65399 5.875V9.4225C5.65399 9.5545 5.70899 9.659 5.81899 9.736L7.05649 10.462V5.8585ZM15.4385 13.7455C15.9885 13.5035 16.423 13.1295 16.742 12.6235C17.072 12.1175 17.237 11.5675 17.237 10.9735C17.237 10.4345 17.0995 9.9175 16.8245 9.4225C16.5495 8.9275 16.192 8.5535 15.752 8.3005L12.6665 6.5185C12.6005 6.4745 12.54 6.458 12.485 6.469C12.43 6.469 12.375 6.4855 12.32 6.5185L11.0825 7.2115L15.0755 9.538C15.1965 9.604 15.2845 9.692 15.3395 9.802C15.4055 9.901 15.4385 10.022 15.4385 10.165V13.7455ZM12.122 5.3635C12.364 5.2095 12.606 5.2095 12.848 5.3635L15.983 7.195C15.983 7.118 15.983 7.019 15.983 6.898C15.983 6.37 15.851 5.8695 15.587 5.3965C15.334 4.9125 14.9655 4.5275 14.4815 4.2415C14.0085 3.9555 13.4585 3.8125 12.8315 3.8125C12.2815 3.8125 11.803 3.928 11.396 4.159L8.29399 5.941C8.18399 6.018 8.12899 6.1225 8.12899 6.2545V7.6735L12.122 5.3635Z"></path></svg>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" className="icon-lg"><path d="M11.2475 18.25C10.6975 18.25 10.175 18.1455 9.67999 17.9365C9.18499 17.7275 8.74499 17.436 8.35999 17.062C7.94199 17.205 7.50749 17.2765 7.05649 17.2765C6.31949 17.2765 5.63749 17.095 5.01049 16.732C4.38349 16.369 3.87749 15.874 3.49249 15.247C3.11849 14.62 2.93149 13.9215 2.93149 13.1515C2.93149 12.8325 2.97549 12.486 3.06349 12.112C2.62349 11.705 2.28249 11.2375 2.04049 10.7095C1.79849 10.1705 1.67749 9.6095 1.67749 9.0265C1.67749 8.4325 1.80399 7.8605 2.05699 7.3105C2.30999 6.7605 2.66199 6.2875 3.11299 5.8915C3.57499 5.4845 4.10849 5.204 4.71349 5.05C4.83449 4.423 5.08749 3.862 5.47249 3.367C5.86849 2.861 6.35249 2.465 6.92449 2.179C7.49649 1.893 8.10699 1.75 8.75599 1.75C9.30599 1.75 9.82849 1.8545 10.3235 2.0635C10.8185 2.2725 11.2585 2.564 11.6435 2.938C12.0615 2.795 12.496 2.7235 12.947 2.7235C13.684 2.7235 14.366 2.905 14.993 3.268C15.62 3.631 16.1205 4.126 16.4945 4.753C16.8795 5.38 17.072 6.0785 17.072 6.8485C17.072 7.1675 17.028 7.514 16.94 7.888C17.38 8.295 17.721 8.768 17.963 9.307C18.205 9.835 18.326 10.3905 18.326 10.9735C18.326 11.5675 18.1995 12.1395 17.9465 12.6895C17.6935 13.2395 17.336 13.718 16.874 14.125C16.423 14.521 15.895 14.796 15.29 14.95C15.169 15.577 14.9105 16.138 14.5145 16.633C14.1295 17.139 13.651 17.535 13.079 17.821C12.507 18.107 11.8965 18.25 11.2475 18.25ZM7.17199 16.1875C7.72199 16.1875 8.20049 16.072 8.60749 15.841L11.7095 14.059C11.8195 13.982 11.8745 13.8775 11.8745 13.7455V12.3265L7.88149 14.62C7.63949 14.763 7.39749 14.763 7.15549 14.62L4.03699 12.8215C4.03699 12.8545 4.03149 12.893 4.02049 12.937C4.02049 12.981 4.02049 13.047 4.02049 13.135C4.02049 13.696 4.15249 14.213 4.41649 14.686C4.69149 15.148 5.07099 15.511 5.55499 15.775C6.03899 16.05 6.57799 16.1875 7.17199 16.1875ZM7.33699 13.498C7.40299 13.531 7.46349 13.5475 7.51849 13.5475C7.57349 13.5475 7.62849 13.531 7.68349 13.498L8.92099 12.7885L4.94449 10.4785C4.70249 10.3355 4.58149 10.121 4.58149 9.835V6.2545C4.03149 6.4965 3.59149 6.8705 3.26149 7.3765C2.93149 7.8715 2.76649 8.4215 2.76649 9.0265C2.76649 9.5655 2.90399 10.0825 3.17899 10.5775C3.45399 11.0725 3.81149 11.4465 4.25149 11.6995L7.33699 13.498ZM11.2475 17.161C11.8305 17.161 12.3585 17.029 12.8315 16.765C13.3045 16.501 13.6785 16.138 13.9535 15.676C14.2285 15.214 14.366 14.697 14.366 14.125V10.561C14.366 10.429 14.311 10.33 14.201 10.264L12.947 9.538V14.1415C12.947 14.4275 12.826 14.642 12.584 14.785L9.46549 16.5835C10.0045 16.9685 10.5985 17.161 11.2475 17.161ZM11.8745 11.122V8.878L10.01 7.822L8.12899 8.878V11.122L10.01 12.178L11.8745 11.122ZM7.05649 5.8585C7.05649 5.5725 7.17749 5.358 7.41949 5.215L10.538 3.4165C9.99899 3.0315 9.40499 2.839 8.75599 2.839C8.17299 2.839 7.64499 2.971 7.17199 3.235C6.69899 3.499 6.32499 3.862 6.04999 4.324C5.78599 4.786 5.65399 5.303 5.65399 5.875V9.4225C5.65399 9.5545 5.70899 9.659 5.81899 9.736L7.05649 10.462V5.8585ZM15.4385 13.7455C15.9885 13.5035 16.423 13.1295 16.742 12.6235C17.072 12.1175 17.237 11.5675 17.237 10.9735C17.237 10.4345 17.0995 9.9175 16.8245 9.4225C16.5495 8.9275 16.192 8.5535 15.752 8.3005L12.6665 6.5185C12.6005 6.4745 12.54 6.458 12.485 6.469C12.43 6.469 12.375 6.4855 12.32 6.5185L11.0825 7.2115L15.0755 9.538C15.1965 9.604 15.2845 9.692 15.3395 9.802C15.4055 9.901 15.4385 10.022 15.4385 10.165V13.7455ZM12.122 5.3635C12.364 5.2095 12.606 5.2095 12.848 5.3635L15.983 7.195C15.983 7.118 15.983 7.019 15.983 6.898C15.983 6.37 15.851 5.8695 15.587 5.3965C15.334 4.9125 14.9655 4.5275 14.4815 4.2415C14.0085 3.9555 13.4585 3.8125 12.8315 3.8125C12.2815 3.8125 11.803 3.928 11.396 4.159L8.29399 5.941C8.18399 6.018 8.12899 6.1225 8.12899 6.2545V7.6735L12.122 5.3635Z"></path></svg>
                       </div>
                   <span className="text-sm font-medium">GPT-5</span>
                   <span className="ml-auto text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded">New</span>
@@ -2442,7 +2637,7 @@ const GlobalAi = () => {
                       ? 'bg-blue-100 text-blue-700 border border-blue-200' 
                       : 'text-gray-700 hover:bg-gray-50'
                   }`}
-                  onClick={() => setSelectedVersion('dall-e')}
+                  onClick={() => handleModelClick('dall-e')}
                 >
                   <div className="w-6 h-6 rounded-sm flex items-center justify-center">
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="icon-lg"><path d="M11.2475 18.25C10.6975 18.25 10.175 18.1455 9.67999 17.9365C9.18499 17.7275 8.74499 17.436 8.35999 17.062C7.94199 17.205 7.50749 17.2765 7.05649 17.2765C6.31949 17.2765 5.63749 17.095 5.01049 16.732C4.38349 16.369 3.87749 15.874 3.49249 15.247C3.11849 14.62 2.93149 13.9215 2.93149 13.1515C2.93149 12.8325 2.97549 12.486 3.06349 12.112C2.62349 11.705 2.28249 11.2375 2.04049 10.7095C1.79849 10.1705 1.67749 9.6095 1.67749 9.0265C1.67749 8.4325 1.80399 7.8605 2.05699 7.3105C2.30999 6.7605 2.66199 6.2875 3.11299 5.8915C3.57499 5.4845 4.10849 5.204 4.71349 5.05C4.83449 4.423 5.08749 3.862 5.47249 3.367C5.86849 2.861 6.35249 2.465 6.92449 2.179C7.49649 1.893 8.10699 1.75 8.75599 1.75C9.30599 1.75 9.82849 1.8545 10.3235 2.0635C10.8185 2.2725 11.2585 2.564 11.6435 2.938C12.0615 2.795 12.496 2.7235 12.947 2.7235C13.684 2.7235 14.366 2.905 14.993 3.268C15.62 3.631 16.1205 4.126 16.4945 4.753C16.8795 5.38 17.072 6.0785 17.072 6.8485C17.072 7.1675 17.028 7.514 16.94 7.888C17.38 8.295 17.721 8.768 17.963 9.307C18.205 9.835 18.326 10.3905 18.326 10.9735C18.326 11.5675 18.1995 12.1395 17.9465 12.6895C17.6935 13.2395 17.336 13.718 16.874 14.125C16.423 14.521 15.895 14.796 15.29 14.95C15.169 15.577 14.9105 16.138 14.5145 16.633C14.1295 17.139 13.651 17.535 13.079 17.821C12.507 18.107 11.8965 18.25 11.2475 18.25ZM7.17199 16.1875C7.72199 16.1875 8.20049 16.072 8.60749 15.841L11.7095 14.059C11.8195 13.982 11.8745 13.8775 11.8745 13.7455V12.3265L7.88149 14.62C7.63949 14.763 7.39749 14.763 7.15549 14.62L4.03699 12.8215C4.03699 12.8545 4.03149 12.893 4.02049 12.937C4.02049 12.981 4.02049 13.047 4.02049 13.135C4.02049 13.696 4.15249 14.213 4.41649 14.686C4.69149 15.148 5.07099 15.511 5.55499 15.775C6.03899 16.05 6.57799 16.1875 7.17199 16.1875ZM7.33699 13.498C7.40299 13.531 7.46349 13.5475 7.51849 13.5475C7.57349 13.5475 7.62849 13.531 7.68349 13.498L8.92099 12.7885L4.94449 10.4785C4.70249 10.3355 4.58149 10.121 4.58149 9.835V6.2545C4.03149 6.4965 3.59149 6.8705 3.26149 7.3765C2.93149 7.8715 2.76649 8.4215 2.76649 9.0265C2.76649 9.5655 2.90399 10.0825 3.17899 10.5775C3.45399 11.0725 3.81149 11.4465 4.25149 11.6995L7.33699 13.498ZM11.2475 17.161C11.8305 17.161 12.3585 17.029 12.8315 16.765C13.3045 16.501 13.6785 16.138 13.9535 15.676C14.2285 15.214 14.366 14.697 14.366 14.125V10.561C14.366 10.429 14.311 10.33 14.201 10.264L12.947 9.538V14.1415C12.947 14.4275 12.826 14.642 12.584 14.785L9.46549 16.5835C10.0045 16.9685 10.5985 17.161 11.2475 17.161ZM11.8745 11.122V8.878L10.01 7.822L8.12899 8.878V11.122L10.01 12.178L11.8745 11.122ZM7.05649 5.8585C7.05649 5.5725 7.17749 5.358 7.41949 5.215L10.538 3.4165C9.99899 3.0315 9.40499 2.839 8.75599 2.839C8.17299 2.839 7.64499 2.971 7.17199 3.235C6.69899 3.499 6.32499 3.862 6.04999 4.324C5.78599 4.786 5.65399 5.303 5.65399 5.875V9.4225C5.65399 9.5545 5.70899 9.659 5.81899 9.736L7.05649 10.462V5.8585ZM15.4385 13.7455C15.9885 13.5035 16.423 13.1295 16.742 12.6235C17.072 12.1175 17.237 11.5675 17.237 10.9735C17.237 10.4345 17.0995 9.9175 16.8245 9.4225C16.5495 8.9275 16.192 8.5535 15.752 8.3005L12.6665 6.5185C12.6005 6.4745 12.54 6.458 12.485 6.469C12.43 6.469 12.375 6.4855 12.32 6.5185L11.0825 7.2115L15.0755 9.538C15.1965 9.604 15.2845 9.692 15.3395 9.802C15.4055 9.901 15.4385 10.022 15.4385 10.165V13.7455ZM12.122 5.3635C12.364 5.2095 12.606 5.2095 12.848 5.3635L15.983 7.195C15.983 7.118 15.983 7.019 15.983 6.898C15.983 6.37 15.851 5.8695 15.587 5.3965C15.334 4.9125 14.9655 4.5275 14.4815 4.2415C14.0085 3.9555 13.4585 3.8125 12.8315 3.8125C12.2815 3.8125 11.803 3.928 11.396 4.159L8.29399 5.941C8.18399 6.018 8.12899 6.1225 8.12899 6.2545V7.6735L12.122 5.3635Z"></path></svg>
@@ -2468,7 +2663,7 @@ const GlobalAi = () => {
                       ? 'bg-blue-100 text-blue-700 border border-blue-200' 
                       : 'text-gray-700 hover:bg-gray-50'
                   }`}
-                  onClick={() => setSelectedVersion('gemini-2.5-flash')}
+                  onClick={() => handleModelClick('gemini-2.5-flash')}
                 >
                   <div className="w-6 h-6 rounded-sm flex items-center justify-center">
                     <img src="https://www.gstatic.com/lamda/images/gemini_sparkle_aurora_33f86dc0c0257da337c63.svg" alt="" />
@@ -2516,7 +2711,7 @@ const GlobalAi = () => {
                   <span className="text-sm font-medium">Gemini 2.5 Flash</span>
                  
                 </button>
-                <button 
+                {/* <button 
                   className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                     selectedVersion === 'google-static-image' 
                       ? 'bg-blue-100 text-blue-700 border border-blue-200' 
@@ -2529,8 +2724,8 @@ const GlobalAi = () => {
                   </div>
                   <span className="text-sm font-medium">Gemini 2.5 Flash Image</span>
                  
-                </button>
-                <button 
+                </button> */}
+                {/* <button 
                   className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                     selectedVersion === 'gemini-flash-image-preview' 
                       ? 'bg-blue-100 text-blue-700 border border-blue-200' 
@@ -2543,14 +2738,14 @@ const GlobalAi = () => {
                   </div>
                   <span className="text-sm font-medium">Gemini Flash Image Preview</span>
                   <span className="ml-auto text-xs bg-yellow-100 text-yellow-600 px-2 py-1 rounded">Free</span>
-                </button>
+                </button> */}
                 <button 
                   className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                     selectedVersion === 'deepseek' 
                       ? 'bg-blue-100 text-blue-700 border border-blue-200' 
                       : 'text-gray-700 hover:bg-gray-50'
                   }`}
-                  onClick={() => setSelectedVersion('deepseek')}
+                  onClick={() => handleModelClick('deepseek')}
                 >
                   <div className="w-6 h-6 rounded-sm flex items-center justify-center">
                     <img src="https://static.glbgpt.com/logo2/4225.png" alt=""/>
@@ -2636,7 +2831,7 @@ const GlobalAi = () => {
                       ? 'bg-blue-100 text-blue-700 border border-blue-200' 
                       : 'text-gray-700 hover:bg-gray-50'
                   }`}
-                  onClick={() => setSelectedVersion('claude')}
+                  onClick={() => handleModelClick('claude')}
                 >
                   <div className="w-6 h-6 rounded-sm flex items-center justify-center">
                     <img src="https://static.glbgpt.com/logo2/4336.png" alt="" />
@@ -2776,7 +2971,7 @@ const GlobalAi = () => {
                       ? 'bg-blue-100 text-blue-700 border border-blue-200' 
                       : 'text-gray-700 hover:bg-gray-50'
                   }`}
-                  onClick={() => setSelectedVersion('grok3mini')}
+                  onClick={() => handleModelClick('grok3mini')}
                 >
                  <div className="w-6 h-6 rounded-sm flex items-center justify-center">
                     <img src="https://static.glbgpt.com/logo2/4222.png" alt="" />
@@ -3141,6 +3336,91 @@ const GlobalAi = () => {
               </div>
             </div>
             
+            {/* AI Model Selector */}
+            <div className="mb-4 mx-auto">
+              <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                <button 
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                    selectedVersion === 'gpt-5' 
+                      ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                  onClick={() => handleModelClick('gpt-5')}
+                >
+                  <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor" className="flex-shrink-0">
+                    <path d="M11.2475 18.25C10.6975 18.25 10.175 18.1455 9.67999 17.9365C9.18499 17.7275 8.74499 17.436 8.35999 17.062C7.94199 17.205 7.50749 17.2765 7.05649 17.2765C6.31949 17.2765 5.63749 17.095 5.01049 16.732C4.38349 16.369 3.87749 15.874 3.49249 15.247C3.11849 14.62 2.93149 13.9215 2.93149 13.1515C2.93149 12.8325 2.97549 12.486 3.06349 12.112C2.62349 11.705 2.28249 11.2375 2.04049 10.7095C1.79849 10.1705 1.67749 9.6095 1.67749 9.0265C1.67749 8.4325 1.80399 7.8605 2.05699 7.3105C2.30999 6.7605 2.66199 6.2875 3.11299 5.8915C3.57499 5.4845 4.10849 5.204 4.71349 5.05C4.83449 4.423 5.08749 3.862 5.47249 3.367C5.86849 2.861 6.35249 2.465 6.92449 2.179C7.49649 1.893 8.10699 1.75 8.75599 1.75C9.30599 1.75 9.82849 1.8545 10.3235 2.0635C10.8185 2.2725 11.2585 2.564 11.6435 2.938C12.0615 2.795 12.496 2.7235 12.947 2.7235C13.684 2.7235 14.366 2.905 14.993 3.268C15.62 3.631 16.1205 4.126 16.4945 4.753C16.8795 5.38 17.072 6.0785 17.072 6.8485C17.072 7.1675 17.028 7.514 16.94 7.888C17.38 8.295 17.721 8.768 17.963 9.307C18.205 9.835 18.326 10.3905 18.326 10.9735C18.326 11.5675 18.1995 12.1395 17.9465 12.6895C17.6935 13.2395 17.336 13.718 16.874 14.125C16.423 14.521 15.895 14.796 15.29 14.95C15.169 15.577 14.9105 16.138 14.5145 16.633C14.1295 17.139 13.651 17.535 13.079 17.821C12.507 18.107 11.8965 18.25 11.2475 18.25ZM7.17199 16.1875C7.72199 16.1875 8.20049 16.072 8.60749 15.841L11.7095 14.059C11.8195 13.982 11.8745 13.8775 11.8745 13.7455V12.3265L7.88149 14.62C7.63949 14.763 7.39749 14.763 7.15549 14.62L4.03699 12.8215C4.03699 12.8545 4.03149 12.893 4.02049 12.937C4.02049 12.981 4.02049 13.047 4.02049 13.135C4.02049 13.696 4.15249 14.213 4.41649 14.686C4.69149 15.148 5.07099 15.511 5.55499 15.775C6.03899 16.05 6.57799 16.1875 7.17199 16.1875ZM7.33699 13.498C7.40299 13.531 7.46349 13.5475 7.51849 13.5475C7.57349 13.5475 7.62849 13.531 7.68349 13.498L8.92099 12.7885L4.94449 10.4785C4.70249 10.3355 4.58149 10.121 4.58149 9.835V6.2545C4.03149 6.4965 3.59149 6.8705 3.26149 7.3765C2.93149 7.8715 2.76649 8.4215 2.76649 9.0265C2.76649 9.5655 2.90399 10.0825 3.17899 10.5775C3.45399 11.0725 3.81149 11.4465 4.25149 11.6995L7.33699 13.498ZM11.2475 17.161C11.8305 17.161 12.3585 17.029 12.8315 16.765C13.3045 16.501 13.6785 16.138 13.9535 15.676C14.2285 15.214 14.366 14.697 14.366 14.125V10.561C14.366 10.429 14.311 10.33 14.201 10.264L12.947 9.538V14.1415C12.947 14.4275 12.826 14.642 12.584 14.785L9.46549 16.5835C10.0045 16.9685 10.5985 17.161 11.2475 17.161ZM11.8745 11.122V8.878L10.01 7.822L8.12899 8.878V11.122L10.01 12.178L11.8745 11.122ZM7.05649 5.8585C7.05649 5.5725 7.17749 5.358 7.41949 5.215L10.538 3.4165C9.99899 3.0315 9.40499 2.839 8.75599 2.839C8.17299 2.839 7.64499 2.971 7.17199 3.235C6.69899 3.499 6.32499 3.862 6.04999 4.324C5.78599 4.786 5.65399 5.303 5.65399 5.875V9.4225C5.65399 9.5545 5.70899 9.659 5.81899 9.736L7.05649 10.462V5.8585ZM15.4385 13.7455C15.9885 13.5035 16.423 13.1295 16.742 12.6235C17.072 12.1175 17.237 11.5675 17.237 10.9735C17.237 10.4345 17.0995 9.9175 16.8245 9.4225C16.5495 8.9275 16.192 8.5535 15.752 8.3005L12.6665 6.5185C12.6005 6.4745 12.54 6.458 12.485 6.469C12.43 6.469 12.375 6.4855 12.32 6.5185L11.0825 7.2115L15.0755 9.538C15.1965 9.604 15.2845 9.692 15.3395 9.802C15.4055 9.901 15.4385 10.022 15.4385 10.165V13.7455ZM12.122 5.3635C12.364 5.2095 12.606 5.2095 12.848 5.3635L15.983 7.195C15.983 7.118 15.983 7.019 15.983 6.898C15.983 6.37 15.851 5.8695 15.587 5.3965C15.334 4.9125 14.9655 4.5275 14.4815 4.2415C14.0085 3.9555 13.4585 3.8125 12.8315 3.8125C12.2815 3.8125 11.803 3.928 11.396 4.159L8.29399 5.941C8.18399 6.018 8.12899 6.1225 8.12899 6.2545V7.6735L12.122 5.3635Z"></path>
+                  </svg>
+                  GPT-5
+                  </button>
+               
+                <button 
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                    selectedVersion === 'claude' 
+                      ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                  onClick={() => handleModelClick('claude')}
+                >
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  Claude
+                </button>
+                <button 
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                    selectedVersion === 'gemini-2.5-flash' 
+                      ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                  onClick={() => handleModelClick('gemini-2.5-flash')}
+                >
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                  Gemini
+                </button>
+                <button 
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                    selectedVersion === 'deepseek' 
+                      ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                  onClick={() => setSelectedVersion('deepseek')}
+                >
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                  DeepSeek
+                </button>
+                <button 
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                    selectedVersion === 'grok3mini' 
+                      ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                  onClick={() => setSelectedVersion('grok3mini')}
+                >
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Grok
+                </button>
+                <button 
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                    selectedVersion === 'dall-e' 
+                      ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                  onClick={() => setSelectedVersion('dall-e')}
+                >
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  DALL-E
+                </button>
+              </div>
+            </div>
+
             <form onSubmit={handleChatSubmit} className="relative">
               <div className="relative">
                 <div className="flex items-center  bg-white border border-gray-300 rounded-full p-2">
@@ -3223,6 +3503,56 @@ const GlobalAi = () => {
         </div>
       </div>
     </div>
+
+    {/* Related Models Popup */}
+    {showRelatedModels && clickedModel && relatedModels[clickedModel] && (
+      <>
+        {/* Backdrop */}
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={() => setShowRelatedModels(false)}
+        />
+        {/* Popup */}
+        <div 
+          className="model-popup fixed z-50 bg-white border border-gray-200 rounded-lg shadow-xl p-4"
+          style={{
+            left: `${popupPosition.x}px`,
+            top: `${popupPosition.y}px`,
+            minWidth: '400px',
+            maxWidth: '500px'
+          }}
+        >
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold text-gray-800">Related Models</h3>
+          <button 
+            onClick={() => setShowRelatedModels(false)}
+            className="text-gray-400 hover:text-gray-600"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {relatedModels[clickedModel].map((model) => (
+            <button
+              key={model.id}
+              onClick={() => selectModelFromPopup(model.id)}
+              className="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-gray-50 transition-colors text-center border border-gray-100 hover:border-gray-200"
+            >
+              <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-gray-100">
+                <img src={model.image} alt={model.name} className="w-8 h-8" />
+              </div>
+              <div className="flex-1">
+                <div className="text-sm font-medium text-gray-800">{model.name}</div>
+                <div className="text-xs text-gray-500 mt-1">{model.description}</div>
+              </div>
+            </button>
+          ))}
+        </div>
+        </div>
+        </>
+      )}
     </div>
   );
 };

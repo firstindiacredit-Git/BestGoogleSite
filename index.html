@@ -17,72 +17,104 @@
     <meta name="theme-color" content="#6366f1" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="format-detection" content="telephone=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+    <!-- Performance Optimizations -->
+    <meta http-equiv="Accept-CH" content="DPR, Viewport-Width, Width">
+    <meta name="description" content="AllMyTab - A modern Chrome homepage replacement with widgets, tools, and productivity features">
+    <meta name="keywords" content="chrome homepage, new tab, productivity, widgets, tools">
+    <meta name="author" content="AllMyTab">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="AllMyTab - Your Smart Browser">
+    <meta property="og:description" content="Transform your Chrome new tab into a powerful productivity dashboard">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://allmytab.com">
+    <meta property="og:image" content="https://allmytab.com/logo.png">
+    <meta property="og:site_name" content="AllMyTab">
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="AllMyTab - Your Smart Browser">
+    <meta name="twitter:description" content="Transform your Chrome new tab into a powerful productivity dashboard">
+    <meta name="twitter:image" content="https://allmytab.com/logo.png">
 
     <!-- Language Variants -->
     <link rel="alternate" hreflang="x-default" href="https://allmytab.com" />
     <link rel="alternate" hreflang="en" href="https://allmytab.com" />
 
-    <!-- Performance Optimization -->
+    <!-- Critical Resource Preloading -->
+    <link rel="preload" href="/src/main.jsx" as="script" type="module" crossorigin>
+    <link rel="preload" href="/src/index.css" as="style" crossorigin>
+    <link rel="preload" href="/src/App.css" as="style" crossorigin>
+    
+    <!-- DNS Prefetch and Preconnect for External Resources -->
     <link rel="preconnect" href="https://www.google.com" />
     <link rel="preconnect" href="https://www.gstatic.com" />
-    <link rel="dns-prefetch" href="https://www.google.com" />
-    <link rel="dns-prefetch" href="https://www.gstatic.com" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://images.pexels.com" />
+    <link rel="preconnect" href="https://res.cloudinary.com" />
+    <link rel="preconnect" href="https://firestore.googleapis.com" />
+    <link rel="preconnect" href="https://identitytoolkit.googleapis.com" />
+    
+    <link rel="dns-prefetch" href="https://www.google.com" />
+    <link rel="dns-prefetch" href="https://www.gstatic.com" />
+    <link rel="dns-prefetch" href="https://images.pexels.com" />
+    <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+    
+    <!-- Critical Font Loading -->
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
 
+    <!-- Critical CSS Inline -->
+    <style>
+      /* Critical CSS for above-the-fold content */
+      body {
+        margin: 0;
+        font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      
+      #root {
+        min-height: 100vh;
+      }
+      
+      
+    </style>
+
     <!-- Primary Meta Tags -->
-    <title>AllMyTab - Your Smart Browser Homepage</title>
-    <meta name="title" content="AllMyTab - Your Smart Browser Homepage" />
-    <meta
-      name="description"
-      content="AllMyTab - Transform your browsing experience with powerful search, organization tools, and productivity features. The ultimate browser homepage."
-    />
+    <title>AllMyTab - Your Smart Browser</title>
+    <meta name="title" content="AllMyTab - Your Smart Browser">
+    <meta name="description" content="Transform your Chrome new tab into a powerful productivity dashboard with widgets, tools, and customizable features. Boost your productivity today!">
 
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://allmytab.com" />
-    <meta
-      property="og:title"
-      content="AllMyTab - Your Smart Browser Homepage"
-    />
-    <meta
-      property="og:description"
-      content="Transform your browsing experience with AllMyTab"
-    />
-    <meta property="og:image" content="https://allmytab.com/og-image.jpg" />
-
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://allmytab.com" />
-    <meta
-      property="twitter:title"
-      content="AllMyTab - Your Smart Browser Homepage"
-    />
-    <meta
-      property="twitter:description"
-      content="Transform your browsing experience with AllMyTab"
-    />
-    <meta
-      property="twitter:image"
-      content="https://allmytab.com/og-image.jpg"
-    />
-
-    <meta
-      name="keywords"
-      content="browser homepage, tab management, productivity tools, browser extension, smart search"
-    />
-
-    <meta name="robots" content="index, follow" />
-    <meta name="author" content="Browsey" />
-    <link rel="canonical" href="https://allmytab.com" />
-
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "AllMyTab",
+        "description": "Your Smart Browser with productivity widgets and tools",
+        "url": "https://allmytab.com",
+        "applicationCategory": "ProductivityApplication",
+        "operatingSystem": "Chrome",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "author": {
+          "@type": "Organization",
+          "name": "AllMyTab"
+        }
+      }
+    </script>
 
     <!-- Breadcrumb Schema Markup -->
     <script type="application/ld+json">
@@ -129,32 +161,62 @@
         ]
       }
     </script>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-635GMB9JC2"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
 
-  gtag('config', 'G-635GMB9JC2');
-</script>
+    <!-- Google Analytics with Performance Optimization -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-635GMB9JC2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-635GMB9JC2', {
+        'send_page_view': false,
+        'transport_type': 'beacon'
+      });
+      
+      // Defer page view until after critical content loads
+      window.addEventListener('load', function() {
+        gtag('event', 'page_view');
+      });
+    </script>
+
+    <!-- Google reCAPTCHA -->
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
+    <!-- Performance Monitoring -->
+    <script>
+      // Performance monitoring
+      if ('performance' in window) {
+        window.addEventListener('load', function() {
+          setTimeout(function() {
+            const perfData = performance.getEntriesByType('navigation')[0];
+            if (perfData) {
+              // Send performance data to analytics
+              gtag('event', 'timing_complete', {
+                'name': 'load',
+                'value': Math.round(perfData.loadEventEnd - perfData.fetchStart)
+              });
+            }
+          }, 0);
+        });
+      }
+    </script>
 
   </head>
   <body class="font-body">
-    <div id="root"></div>
+         <div id="root"></div>
+    
     <script type="module" src="/src/main.jsx"></script>
 
+    <!-- Additional Google Analytics -->
     <script
       async
       src="https://www.googletagmanager.com/gtag/js?id=G-VRWGYW8TWG"
     ></script>
     <script>
       window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag("js", new Date());
-      gtag("config", "G-VRWGYW8TWG");
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-VRWGYW8TWG');
     </script>
   </body>
 </html>
