@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { db, auth } from "../firebase";
 import {
   collection,
@@ -11,6 +11,7 @@ import {
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { Modal, Input, Form, message } from "antd";
+import "../styles/ShortCuts.css";
 
 // Renamed to match import in SearchPage.jsx
 const ShortCuts = () => {
@@ -25,9 +26,11 @@ const ShortCuts = () => {
   const [formRef] = Form.useForm();
 
   const [menuVisible, setMenuVisible] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [newBookmarkId, setNewBookmarkId] = useState(null);
 
   // Hardcoded bookmarks for non-logged-in users
-  const hardcodedBookmarks = [
+  const hardcodedBookmarks = useMemo(() => [
     {
       id: "hardcoded-1",
       name: "Google",
@@ -73,7 +76,7 @@ const ShortCuts = () => {
       createdByUser: false,
       isHardcoded: true,
     },
-  ];
+  ], []);
 
   const toggleMenu = (id) => {
     setMenuVisible(menuVisible === id ? null : id);
@@ -124,10 +127,12 @@ const ShortCuts = () => {
 
   const addBookmark = async (values) => {
     console.log("Adding bookmark with values:", values);
+    setIsLoading(true);
 
     if (!values) {
       console.error("Form values are undefined");
       setErrorMessage("Form submission error. Please try again.");
+      setIsLoading(false);
       return;
     }
 
@@ -140,6 +145,7 @@ const ShortCuts = () => {
         link: bookmarkLink,
       });
       setErrorMessage("Both name and link fields are required!");
+      setIsLoading(false);
       return;
     }
 
@@ -153,6 +159,7 @@ const ShortCuts = () => {
 
     if (!validateURL(bookmarkLink)) {
       setErrorMessage("Please enter a valid URL.");
+      setIsLoading(false);
       return;
     }
 
@@ -185,23 +192,31 @@ const ShortCuts = () => {
           );
           console.log("Firebase bookmark added with ID:", docRef.id);
 
+          const newBookmarkData = {
+            id: docRef.id,
+            ...newBookmark,
+            link: bookmarkLink,
+          };
+          
+          setNewBookmarkId(docRef.id);
           setUserBookmarks((prev) => [
             ...prev,
-            {
-              id: docRef.id,
-              ...newBookmark,
-              link: bookmarkLink,
-            },
+            newBookmarkData,
           ]);
 
           message.success("Bookmark added successfully!");
           setShowModal(false);
           formRef.resetFields();
           setErrorMessage("");
+          setIsLoading(false);
+          
+          // Clear the new bookmark highlight after animation
+          setTimeout(() => setNewBookmarkId(null), 2000);
         } catch (firebaseError) {
           console.error("Firebase error:", firebaseError);
           setErrorMessage(`Firebase error: ${firebaseError.message}`);
           message.error("Failed to save to Firebase. Check console for details.");
+          setIsLoading(false);
         }
       } else {
         console.log("Adding bookmark to local storage");
@@ -214,17 +229,23 @@ const ShortCuts = () => {
           },
         ];
         saveToLocalStorage(updatedBookmarks);
+        setNewBookmarkId(newBookmark.id);
         setUserBookmarks(updatedBookmarks);
 
         message.success("Bookmark added to local storage!");
         setShowModal(false);
         formRef.resetFields();
         setErrorMessage("");
+        setIsLoading(false);
+        
+        // Clear the new bookmark highlight after animation
+        setTimeout(() => setNewBookmarkId(null), 2000);
       }
     } catch (error) {
       console.error("Error adding bookmark:", error);
       setErrorMessage(`Error: ${error.message}`);
       message.error("Failed to add bookmark. Please try again.");
+      setIsLoading(false);
     }
   };
 
@@ -286,7 +307,7 @@ const ShortCuts = () => {
     });
 
     return () => unsubscribeAuth();
-  }, []);
+  }, [hardcodedBookmarks]);
 
   const validateURL = (url) => {
     try {
@@ -480,10 +501,18 @@ const ShortCuts = () => {
   return (
     <div className="flex items-start gap-2 max-w-7xl dark:text-white justify-center mb-10 w-full">
       <div className="flex gap-2 flex-wrap items-start">
-        {sortedBookmarks.map((bookmark) => (
+        {sortedBookmarks.map((bookmark, index) => (
           <div
             key={bookmark.id}
-            className="text-center hover:shadow-sm hover:dark:bg-[#28283a]/[var(--widget-opacity)] hover:backdrop-blur-lg hover:bg-white/[var(--widget-opacity)] cursor-pointer p-2 rounded-sm group relative"
+            className={`text-center bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] hover:shadow-lg hover:dark:bg-[#28283a]/[var(--widget-opacity)] hover:backdrop-blur-lg hover:bg-white/[var(--widget-opacity)] cursor-pointer p-2 rounded-md group relative transform transition-all duration-300 ease-in-out hover:scale-105 hover:-translate-y-1 ${
+              newBookmarkId === bookmark.id 
+                ? 'animate-pulse bg-green-100 dark:bg-green-900/30 border-2 border-green-400' 
+                : 'animate-fadeIn'
+            }`}
+            style={{
+              animationDelay: `${index * 50}ms`,
+              animationFillMode: 'both'
+            }}
           >
             <a
               href={bookmark.link}
@@ -493,7 +522,7 @@ const ShortCuts = () => {
               <img
                 src={getFavicon(bookmark.link)}
                 alt={bookmark.name}
-                className="w-7 h-7 mx-auto"
+                className="w-7 h-7 mx-auto transition-transform duration-200 group-hover:scale-110"
                 onError={(e) => {
                   e.target.src =
                     "https://www.freeiconspng.com/uploads/web-icon-black-png-planet-web-world-icon-17.png";
@@ -509,20 +538,20 @@ const ShortCuts = () => {
                 {bookmark.name}
               </h3>
             </a>
-            <div className="absolute top-0 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-1 group-hover:translate-y-0">
               <button
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                   toggleMenu(bookmark.id);
                 }}
-                className="font-bold"
+                className="font-bold hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full w-6 h-6 flex items-center justify-center transition-colors duration-200"
               >
                 ⋮
               </button>
               {menuVisible === bookmark.id && (
                 <div
-                  className="absolute bg-white right-0 top-6 backdrop-blur border rounded shadow-md text-left z-10"
+                  className="absolute bg-white dark:bg-gray-800 right-0 top-6 backdrop-blur border dark:border-gray-600 rounded shadow-lg text-left z-10 animate-slideDown"
                   onMouseLeave={() => setMenuVisible(null)}
                 >
                   {bookmark.createdByUser && !bookmark.isHardcoded && (
@@ -532,7 +561,7 @@ const ShortCuts = () => {
                         e.stopPropagation();
                         handleEditBookmark(bookmark);
                       }}
-                      className="block w-full text-left px-2 py-1 dark:text-black text-sm hover:bg-gray-200"
+                      className="block w-full text-left px-2 py-1 dark:text-white text-sm hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200"
                     >
                       Edit
                     </button>
@@ -543,7 +572,7 @@ const ShortCuts = () => {
                       e.stopPropagation();
                       handleDeleteBookmark(bookmark.id);
                     }}
-                    className="block w-full text-left px-2 py-1 text-sm text-red-500 hover:bg-gray-200"
+                    className="block w-full text-left px-2 py-1 text-sm text-red-500 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200"
                   >
                     Delete
                   </button>
@@ -552,10 +581,10 @@ const ShortCuts = () => {
             </div>
           </div>
         ))}
-        <div className="text-center hover:shadow-sm hover:dark:bg-[#28283a]/[var(--widget-opacity)] hover:backdrop-blur-lg hover:bg-white/[var(--widget-opacity)] cursor-pointer p-2 rounded-sm">
+        <div className="text-center bg-white/[var(--widget-opacity)] dark:bg-[#513a7a]/[var(--widget-opacity)] hover:shadow-lg hover:dark:bg-[#28283a]/[var(--widget-opacity)] hover:backdrop-blur-lg hover:bg-white/[var(--widget-opacity)] cursor-pointer p-2 rounded-md transform transition-all duration-300 ease-in-out hover:scale-105 hover:-translate-y-1 animate-pulse">
           <button
             onClick={openAddModal}
-            className="dark:text-white w-12 h-12 flex items-center justify-center"
+            className="dark:text-white w-12 h-12 flex items-center justify-center text-2xl font-bold hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors duration-200"
             aria-label="Add shortcut"
           >
             +
@@ -613,7 +642,10 @@ const ShortCuts = () => {
             </button>
             <button
               type="button"
-              className="px-4 py-1.5 text-sm bg-indigo-500 text-white rounded hover:bg-indigo-600 transition-colors"
+              className={`px-4 py-1.5 text-sm bg-indigo-500 text-white rounded hover:bg-indigo-600 transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none ${
+                isLoading ? 'animate-pulse' : ''
+              }`}
+              disabled={isLoading}
               onClick={() => {
                 formRef
                   .validateFields()
@@ -633,7 +665,14 @@ const ShortCuts = () => {
                   });
               }}
             >
-              {editMode ? "Update" : "Add"}
+              {isLoading ? (
+                <span className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  {editMode ? "Updating..." : "Adding..."}
+                </span>
+              ) : (
+                editMode ? "Update" : "Add"
+              )}
             </button>
           </div>
         </Form>

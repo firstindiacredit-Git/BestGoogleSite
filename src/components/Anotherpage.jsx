@@ -25,7 +25,7 @@ import {
 import TodoComponent from "./TodoComponent.jsx";
 import NewsFeed from "./NewsFeed.jsx";
 import { useTheme } from "../context/ThemeContext";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { PlusOutlined } from '@ant-design/icons';
 import { SettingOutlined, ArrowsAltOutlined } from '@ant-design/icons';
 import { Dropdown, Menu } from "antd";

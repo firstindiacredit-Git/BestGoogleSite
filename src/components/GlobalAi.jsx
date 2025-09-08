@@ -147,6 +147,7 @@ const GlobalAi = () => {
       { id: 'claudeOpus41', name: 'Claude Opus 4.1', image: 'https://static.glbgpt.com/logo2/4336.png', description: 'Latest version' },
       { id: 'claudeSonnet4', name: 'Claude Sonnet 4', image: 'https://static.glbgpt.com/logo2/4336.png', description: 'Stable version' },
       { id: 'claudeOpus4', name: 'Claude Opus 4', image: 'https://static.glbgpt.com/logo2/4336.png', description: 'Pro version' },
+      { id: 'claudeHaiku4', name: 'Claude Haiku 4', image: 'https://static.glbgpt.com/logo2/4336.png', description: 'Fast version' },
       { id: 'gpt-5', name: 'GPT-5', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Alternative AI model' }
     ],
     'gemini-2.5-flash': [
@@ -159,6 +160,7 @@ const GlobalAi = () => {
       { id: 'deepseekR1', name: 'DeepSeek R1', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Fast version' },
       { id: 'deepseekV30324', name: 'DeepSeek V3 0324', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Stable version' },
       { id: 'deepseekProverV2', name: 'DeepSeek Prover V2', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Pro version' },
+      { id: 'deepseekCoder', name: 'DeepSeek Coder', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Code specialist' },
       { id: 'gpt-5', name: 'GPT-5', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Alternative AI model' }
     ],
     'grok3mini': [
@@ -3516,8 +3518,9 @@ const GlobalAi = () => {
         <div 
           className="model-popup fixed z-50 bg-white border border-gray-200 rounded-lg shadow-xl p-4"
           style={{
-            left: `${popupPosition.x}px`,
-            top: `${popupPosition.y}px`,
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
             minWidth: '400px',
             maxWidth: '500px'
           }}

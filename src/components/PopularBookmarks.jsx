@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo, memo } from "react";
 import { db, auth } from "../firebase";
 import {
   collection,
@@ -30,7 +30,7 @@ import {
   notification,
 } from "antd";
 import { motion } from "framer-motion";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import {
   UnorderedListOutlined,
   FontSizeOutlined,
@@ -156,7 +156,7 @@ MemoizedBookmarkForm.propTypes = {
   onKeyDown: PropTypes.func.isRequired,
 };
 
-function PopularBookmarks() {
+const PopularBookmarks = memo(function PopularBookmarks() {
   const [categories, setCategories] = useState([]);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -225,7 +225,70 @@ function PopularBookmarks() {
   const [previewCategories, setPreviewCategories] = useState([]);
   const [previewColumns, setPreviewColumns] = useState(columnCount);
   const [isApplyingChanges, setIsApplyingChanges] = useState(false);
-  const [availableCategories, setAvailableCategories] = useState([]);
+  const [availableCategories, setAvailableCategories] = useState(() => {
+    // Start with empty array - categories will be restored when main categories are loaded
+    // This prevents issues with stale category objects from localStorage
+    return [];
+  });
+
+  // Helper function to save available categories to localStorage
+  const saveAvailableCategoriesToStorage = (categories) => {
+    try {
+      // Always maintain a global list of all categories that have ever been available
+      const currentGlobalIds = localStorage.getItem("availableCategoriesIds");
+      let globalAvailableIds = [];
+      
+      if (currentGlobalIds) {
+        try {
+          globalAvailableIds = JSON.parse(currentGlobalIds);
+        } catch (error) {
+          console.warn("Failed to parse existing available categories:", error);
+        }
+      }
+      
+      // Add current categories to global list (avoid duplicates)
+      const newIds = categories.map(cat => cat.id);
+      const updatedGlobalIds = [...new Set([...globalAvailableIds, ...newIds])];
+      
+      if (categories.length === 0 && globalAvailableIds.length === 0) {
+        // Only clear if both current and global are empty
+        localStorage.removeItem("availableCategories");
+        localStorage.removeItem("availableCategoriesIds");
+        return;
+      }
+      
+      // Save current available categories data
+      const categoryData = categories.map(cat => ({
+        id: cat.id,
+        name: cat.name || cat.newCategory,
+        isAdminCategory: cat.isAdminCategory,
+        professions: cat.professions,
+        countries: cat.countries,
+        order: cat.order
+      }));
+      
+      localStorage.setItem("availableCategories", JSON.stringify(categoryData));
+      localStorage.setItem("availableCategoriesIds", JSON.stringify(updatedGlobalIds));
+      localStorage.setItem("currentAvailableCategoriesIds", JSON.stringify(newIds));
+      
+    } catch (error) {
+      console.warn("Failed to save available categories to localStorage:", error);
+    }
+  };
+
+  // Helper function to remove a category from global available list
+  const removeFromGlobalAvailableCategories = (categoryId) => {
+    try {
+      const currentGlobalIds = localStorage.getItem("availableCategoriesIds");
+      if (currentGlobalIds) {
+        const globalAvailableIds = JSON.parse(currentGlobalIds);
+        const updatedGlobalIds = globalAvailableIds.filter(id => id !== categoryId);
+        localStorage.setItem("availableCategoriesIds", JSON.stringify(updatedGlobalIds));
+      }
+    } catch (error) {
+      console.warn("Failed to remove category from global available list:", error);
+    }
+  };
   const [categorySearch, setCategorySearch] = useState("");
   // Add state for show more/less categories
   const [showAllCategories, setShowAllCategories] = useState(false);
@@ -599,29 +662,18 @@ function PopularBookmarks() {
         let currentColumns = userData.categoryPositions?.columns || { column1: [], column2: [], column3: [], column4: [] };
         let colCount = userData.categoryPositions?.columnCount || 4;
 
-        // Auto-add matching categories to columns if they're not already there
-        const updatedColumns = { ...currentColumns };
+        // Ensure ALL matching categories are distributed across columns
         const existingCategoryIds = new Set(Object.values(currentColumns).flat());
-
-        matchingCategories.forEach((category) => {
-          if (!existingCategoryIds.has(category.id)) {
-            // Find the column with the least number of categories
-            let minColumn = "column1";
-            let minCount = updatedColumns.column1?.length || 0;
-
-            Object.keys(updatedColumns).forEach((colKey) => {
-              const colCount = updatedColumns[colKey]?.length || 0;
-              if (colCount < minCount) {
-                minCount = colCount;
-                minColumn = colKey;
-              }
-            });
-
-            // Add category to the column with least items
-            updatedColumns[minColumn] = [...(updatedColumns[minColumn] || []), category.id];
-            existingCategoryIds.add(category.id);
-          }
-        });
+        const missingCategories = matchingCategories.filter(cat => !existingCategoryIds.has(cat.id));
+        
+        let updatedColumns = { ...currentColumns };
+        
+        // If we have missing categories, redistribute all categories to ensure proper distribution
+        if (missingCategories.length > 0) {
+          const allCategoryIds = matchingCategories.map(cat => cat.id);
+          updatedColumns = redistributeCategoriesIntoColumns(allCategoryIds, colCount, matchingCategories);
+          console.log(`Redistributed all ${allCategoryIds.length} categories for main data fetch`);
+        }
 
         // Save updated column structure to Firestore if there were changes
         const hasChanges = JSON.stringify(currentColumns) !== JSON.stringify(updatedColumns);
@@ -765,23 +817,93 @@ function PopularBookmarks() {
       const matchingCategories = getFilteredCategories(allCategoriesCache, false);
       setCategories(matchingCategories);
       
-      // Update categoryColumns to match new categories
-      setCategoryColumns(prevColumns => {
-        // Only keep IDs that are in filteredCategories
-        const validIds = matchingCategories.map(cat => cat.id);
-        // Remove any IDs not in validIds
-        let newColumns = {};
-        let colCount = Object.keys(prevColumns).length || 4;
-        for (let col = 1; col <= colCount; col++) {
-          newColumns[`column${col}`] = [];
+      // Load profession-specific layout or create default
+      const loadProfessionLayout = async () => {
+        try {
+          const userDocRef = doc(db, "users", user.uid);
+          const userDocSnap = await getDoc(userDocRef);
+          const userData = userDocSnap.exists() ? userDocSnap.data() : {};
+          
+          // Get profession-specific layouts
+          const professionLayouts = userData.professionCategoryLayouts || {};
+          const currentProfessionLayout = professionLayouts[userProfession];
+          
+          console.log('Loading layout for profession:', userProfession);
+          console.log('Available profession layouts:', Object.keys(professionLayouts));
+          console.log('Current profession layout:', currentProfessionLayout);
+          
+          // Get global column count first
+          const globalColumnCount = userData.categoryPositions?.columnCount || 4;
+          setColumnCount(globalColumnCount);
+          
+          if (currentProfessionLayout && currentProfessionLayout.columns) {
+            // Validate and clean the saved layout
+            const savedColumns = currentProfessionLayout.columns;
+            const validCategoryIds = matchingCategories.map(cat => cat.id);
+            
+            // Clean the saved layout to only include valid category IDs
+            const cleanedColumns = {};
+            let hasValidCategories = false;
+            
+            Object.keys(savedColumns).forEach(colKey => {
+              cleanedColumns[colKey] = savedColumns[colKey].filter(catId => 
+                validCategoryIds.includes(catId)
+              );
+              if (cleanedColumns[colKey].length > 0) {
+                hasValidCategories = true;
+              }
+            });
+            
+            // Get all categories that should be in columns (not in available)
+            const categoriesInSavedLayout = new Set(Object.values(cleanedColumns).flat());
+            const missingCategories = matchingCategories.filter(cat => !categoriesInSavedLayout.has(cat.id));
+            
+            if (hasValidCategories) {
+              // Redistribute all categories to match current column count
+              const redistributedColumns = redistributeCategoriesIntoColumns(
+                [...Object.values(cleanedColumns).flat(), ...missingCategories.map(cat => cat.id)],
+                globalColumnCount,
+                matchingCategories
+              );
+              
+              setCategoryColumns(redistributedColumns);
+              console.log(`Loaded and redistributed layout for profession: ${userProfession}`);
+              console.log('Redistributed columns:', redistributedColumns);
+            } else {
+              // No valid categories in saved layout, create default with all categories
+              const redistributedColumns = redistributeCategoriesIntoColumns(
+                matchingCategories.map(cat => cat.id),
+                globalColumnCount,
+                matchingCategories
+              );
+              setCategoryColumns(redistributedColumns);
+              console.log(`Created default redistributed layout for profession: ${userProfession}`);
+            }
+          } else {
+            // Create default layout for this profession with all categories
+            const redistributedColumns = redistributeCategoriesIntoColumns(
+              matchingCategories.map(cat => cat.id),
+              globalColumnCount,
+              matchingCategories
+            );
+            setCategoryColumns(redistributedColumns);
+            console.log(`Created default layout for profession: ${userProfession}`);
+          }
+        } catch (error) {
+          console.error("Error loading profession layout:", error);
+          // Fallback to default layout with all categories
+          const globalColumnCount = userData?.categoryPositions?.columnCount || 4;
+          const redistributedColumns = redistributeCategoriesIntoColumns(
+            matchingCategories.map(cat => cat.id),
+            globalColumnCount,
+            matchingCategories
+          );
+          setCategoryColumns(redistributedColumns);
+          setColumnCount(globalColumnCount);
         }
-        // Distribute validIds equally among columns
-        validIds.forEach((id, index) => {
-          const colIndex = (index % colCount) + 1;
-          newColumns[`column${colIndex}`].push(id);
-        });
-        return newColumns;
-      });
+      };
+      
+      loadProfessionLayout();
       
       // Small delay to show loading state for better UX
       setTimeout(() => setProfessionLoading(false), 100);
@@ -790,25 +912,7 @@ function PopularBookmarks() {
 
   // Remove the old refiltering effect that was causing performance issues
 
-  // Add useEffect to load saved positions
-  useEffect(() => {
-    const loadCategoryPositions = async () => {
-      if (!user) return;
-      try {
-        const userDocRef = doc(db, "users", user.uid);
-        const userDocSnap = await getDoc(userDocRef);
-        if (userDocSnap.exists() && userDocSnap.data().categoryPositions) {
-          // Initialize columns based on saved positions
-          const savedColumns = userDocSnap.data().categoryPositions;
-          setCategoryColumns(savedColumns.columns || defaultColumnState());
-          setColumnCount(savedColumns.columnCount || 4);
-        }
-      } catch (error) {
-        console.error("Error loading category positions:", error);
-      }
-    };
-    loadCategoryPositions();
-  }, [user]);
+
 
   // Add function to get default column state
   const defaultColumnState = () => ({
@@ -817,6 +921,25 @@ function PopularBookmarks() {
     column3: [],
     column4: [],
   });
+
+  // Helper function to redistribute categories into columns based on column count
+  const redistributeCategoriesIntoColumns = (categoryIds, columnCount, allCategories) => {
+    const columns = {};
+    
+    // Initialize columns based on column count
+    for (let i = 1; i <= columnCount; i++) {
+      columns[`column${i}`] = [];
+    }
+    
+    // Distribute categories evenly across columns
+    categoryIds.forEach((categoryId, index) => {
+      const columnIndex = (index % columnCount) + 1;
+      columns[`column${columnIndex}`].push(categoryId);
+    });
+    
+    console.log(`Redistributed ${categoryIds.length} categories into ${columnCount} columns:`, columns);
+    return columns;
+  };
 
 
 
@@ -839,15 +962,30 @@ function PopularBookmarks() {
     setCategoryColumns(newColumns);
 
     try {
-      // Save all positions in user document
+      // Save to profession-specific layout
       const userDocRef = doc(db, "users", user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+      const userData = userDocSnap.exists() ? userDocSnap.data() : {};
+      const professionLayouts = userData.professionCategoryLayouts || {};
+      
+      // Update the current profession's layout
+      professionLayouts[userProfession] = {
+        columns: newColumns,
+        columnCount,
+        lastUpdated: new Date().toISOString(),
+      };
+
+      // Also update global categoryPositions to maintain consistency
       await updateDoc(userDocRef, {
+        professionCategoryLayouts: professionLayouts,
         categoryPositions: {
           columns: newColumns,
-          columnCount,
+          columnCount: columnCount,
           lastUpdated: new Date().toISOString(),
         },
       });
+      
+      console.log('Saved drag and drop changes for profession:', userProfession);
     } catch (error) {
       console.error("Error updating category positions:", error);
       // Revert local state on error
@@ -855,47 +993,7 @@ function PopularBookmarks() {
     }
   };
 
-  // Add function to initialize category columns
-  useEffect(() => {
-    const initializeCategoryColumns = async () => {
-      if (!user || categories.length === 0) return;
 
-      try {
-        const userDocRef = doc(db, "users", user.uid);
-        const userDocSnap = await getDoc(userDocRef);
-        const savedPositions = userDocSnap.exists()
-          ? userDocSnap.data().categoryPositions
-          : null;
-
-        if (savedPositions && savedPositions.columns) {
-          setCategoryColumns(savedPositions.columns);
-          setColumnCount(savedPositions.columnCount || 4);
-        } else {
-          // Initialize default positions if none exist
-          const defaultColumns = defaultColumnState();
-          categories.forEach((category, index) => {
-            const columnIndex = (index % 4) + 1;
-            defaultColumns[`column${columnIndex}`].push(category.id);
-          });
-
-          setCategoryColumns(defaultColumns);
-
-          // Save default positions
-          await updateDoc(userDocRef, {
-            categoryPositions: {
-              columns: defaultColumns,
-              columnCount: 4,
-              lastUpdated: new Date().toISOString(),
-            },
-          });
-        }
-      } catch (error) {
-        console.error("Error initializing category columns:", error);
-      }
-    };
-
-    initializeCategoryColumns();
-  }, [user, categories]);
 
   // Effect to manage available and active categories
   useEffect(() => {
@@ -918,32 +1016,52 @@ function PopularBookmarks() {
           }));
           const allCategories = [...adminCategories, ...userCategories].sort((a, b) => (a.order || 0) - (b.order || 0));
 
-          // Filter categories based on selected country
-          const countryFilteredCategories = allCategories.filter((category) => {
-            // If user has selected a specific country, only show categories for that country
-            if (selectedCountry && selectedCountry.key !== 'global') {
-              // Check if category has countries field and includes the selected country
-              if (category.countries && Array.isArray(category.countries)) {
-                return category.countries.includes(selectedCountry.key) || category.countries.includes('global');
-              }
-              // If category doesn't have countries field, don't show it for specific country selection
-              return false;
+          // Filter categories based on selected country and profession
+          const filteredCategories = allCategories.filter((category) => {
+            // Always show user-created categories
+            if (!category.isAdminCategory) {
+              return true;
             }
-            // If user hasn't selected a country or selected global, show all categories
+
+            // For admin categories, filter by country first
+            const matchesCountry = category.countries && (
+              category.countries.includes(selectedCountry?.key) ||
+              category.countries.includes("global") ||
+              (selectedCountry?.key === 'IN' && category.countries.includes('india'))
+            );
+
+            if (!matchesCountry) return false;
+
+            // Then filter by profession - only show categories that match current profession
+            if (userProfession && userProfession !== "all") {
+              if (Array.isArray(category.professions)) {
+                return category.professions.includes(userProfession);
+              } else if (category.professions === "all") {
+                return true; // Show categories marked for all professions
+              } else {
+                return false; // Don't show if no profession match
+              }
+            }
+
+            // If "all" professions is selected, show all categories
             return true;
           });
 
-          // Get categories that don't match user preferences
-          const nonMatchingCategories = getFilteredCategories(countryFilteredCategories, true);
-          const usedCategoryIds = new Set(previewCategories.map((category) => category.id));
-          const available = nonMatchingCategories.filter((category) => !usedCategoryIds.has(category.id));
-          setAvailableCategories((prevAvailable) => {
-            if (prevAvailable.length === 0) {
-              return available;
+          // Only reset available categories if this is the first time opening the controller
+          // Preserve existing available categories when reopening
+          setAvailableCategories(prev => {
+            let newAvailable;
+            // If we have existing available categories, keep them
+            if (prev.length > 0) {
+              // Filter out any categories that might have been added back to columns
+              const usedCategoryIds = new Set(previewCategories.map((category) => category.id));
+              newAvailable = prev.filter(cat => !usedCategoryIds.has(cat.id));
+            } else {
+              // If no existing available categories, start with empty
+              newAvailable = [];
             }
-            const existingIds = new Set(prevAvailable.map(cat => cat.id));
-            const newAvailable = available.filter(cat => !existingIds.has(cat.id));
-            return [...prevAvailable, ...newAvailable];
+            saveAvailableCategoriesToStorage(newAvailable);
+            return newAvailable;
           });
         } catch (error) {
           console.error("Error fetching categories for controller:", error);
@@ -953,6 +1071,112 @@ function PopularBookmarks() {
       fetchAllCategoriesForController();
     }
   }, [isControllerOpen, selectedCountry, userProfession]); // Removed previewCategories from dependencies
+
+  // Effect to handle profession changes when controller is open
+  useEffect(() => {
+    if (isControllerOpen && categories.length > 0) {
+      // When profession changes, we need to:
+      // 1. Filter existing available categories for the new profession
+      // 2. Check if any categories from columns should be moved to available (if they don't match new profession)
+      // 3. Restore any previously available categories that now match the profession
+      
+      // Get saved available category IDs for all professions
+      const savedAvailableIds = localStorage.getItem("availableCategoriesIds");
+      let allPreviouslyAvailableIds = [];
+      
+      if (savedAvailableIds) {
+        try {
+          allPreviouslyAvailableIds = JSON.parse(savedAvailableIds);
+        } catch (error) {
+          console.warn("Failed to parse saved available categories:", error);
+        }
+      }
+      
+      // Get all categories that should be available for current profession
+      const shouldBeAvailableCategories = categories.filter(cat => {
+        // Check if it was previously in available categories OR should be available for current profession
+        const wasPreviouslyAvailable = allPreviouslyAvailableIds.includes(cat.id);
+        
+        // Check if it matches current profession
+        let matchesProfession = true;
+        if (cat.isAdminCategory && userProfession && userProfession !== "all") {
+          if (Array.isArray(cat.professions)) {
+            matchesProfession = cat.professions.includes(userProfession);
+          } else if (cat.professions === "all") {
+            matchesProfession = true;
+          } else {
+            matchesProfession = false;
+          }
+        }
+        
+        // Include if it was previously available AND matches current profession
+        // OR if it's a user category (always include user categories)
+        return (wasPreviouslyAvailable && matchesProfession) || !cat.isAdminCategory;
+      });
+      
+      // Filter to only include categories not currently in columns
+      const usedCategoryIds = new Set(Object.values(categoryColumns).flat());
+      const newAvailableCategories = shouldBeAvailableCategories.filter(cat => 
+        !usedCategoryIds.has(cat.id)
+      );
+      
+      setAvailableCategories(newAvailableCategories);
+      saveAvailableCategoriesToStorage(newAvailableCategories);
+    }
+  }, [userProfession, isControllerOpen, categories, categoryColumns]);
+
+  // Effect to restore and validate available categories when categories are loaded
+  useEffect(() => {
+    if (categories.length > 0) {
+      // Get saved available category IDs from localStorage
+      const savedAvailableIds = localStorage.getItem("availableCategoriesIds");
+      if (savedAvailableIds) {
+        try {
+          const availableIds = JSON.parse(savedAvailableIds);
+          
+          // Find the actual category objects from the loaded categories
+          const restoredAvailableCategories = availableIds
+            .map(id => categories.find(cat => cat.id === id))
+            .filter(Boolean) // Remove any undefined categories
+            .filter(cat => {
+              // Filter by current profession
+              if (!cat.isAdminCategory) return true; // Always include user categories
+              
+              if (userProfession && userProfession !== "all") {
+                if (Array.isArray(cat.professions)) {
+                  return cat.professions.includes(userProfession);
+                } else if (cat.professions === "all") {
+                  return true;
+                } else {
+                  return false;
+                }
+              }
+              return true;
+            });
+          
+          // Only update if we have categories to restore and they're different from current
+          if (restoredAvailableCategories.length > 0) {
+            const currentIds = availableCategories.map(cat => cat.id).sort();
+            const restoredIds = restoredAvailableCategories.map(cat => cat.id).sort();
+            
+            // Check if the categories are different
+            if (JSON.stringify(currentIds) !== JSON.stringify(restoredIds)) {
+              console.log('Restoring available categories from localStorage:', restoredAvailableCategories.length);
+              setAvailableCategories(restoredAvailableCategories);
+              // Update localStorage with the filtered categories
+              saveAvailableCategoriesToStorage(restoredAvailableCategories);
+            }
+          } else if (availableCategories.length > 0) {
+            // If no categories should be restored but we have some, clear them
+            setAvailableCategories([]);
+            saveAvailableCategoriesToStorage([]);
+          }
+        } catch (error) {
+          console.warn("Failed to restore available categories from localStorage:", error);
+        }
+      }
+    }
+  }, [categories, userProfession]); // Remove availableCategories from dependencies to avoid infinite loops
 
   // Effect to initialize preview categories when modal opens
   useEffect(() => {
@@ -985,16 +1209,40 @@ function PopularBookmarks() {
       // Set preview categories
       setPreviewCategories(previewCats);
 
-      // Set available categories (categories not in any column)
-      const columnCategoryIds = new Set(Object.values(categoryColumns).flat());
-      const availableCats = categories.filter(
-        (cat) => !columnCategoryIds.has(cat.id)
-      );
-      setAvailableCategories(availableCats);
+      // Preserve existing available categories when modal opens
+      // Only clear if switching to a different profession context
+      setAvailableCategories(prev => {
+        let newAvailable;
+        // If we have existing available categories, validate they still match current profession
+        if (prev.length > 0) {
+          newAvailable = prev.filter(cat => {
+            // Always keep user-created categories
+            if (!cat.isAdminCategory) return true;
+            
+            // For admin categories, check profession match
+            if (userProfession && userProfession !== "all") {
+              if (Array.isArray(cat.professions)) {
+                return cat.professions.includes(userProfession);
+              } else if (cat.professions === "all") {
+                return true;
+              } else {
+                return false;
+              }
+            }
+            
+            return true;
+          });
+        } else {
+          // If no existing available categories, start with empty
+          newAvailable = [];
+        }
+        saveAvailableCategoriesToStorage(newAvailable);
+        return newAvailable;
+      });
 
       setPreviewColumns(columnCount);
     }
-  }, [isControllerOpen, categories, categoryColumns, columnCount]);
+  }, [isControllerOpen, categories, categoryColumns, columnCount, userProfession]);
 
   // Function to get categories for a specific column
   const getColumnCategories = (columnIndex) => {
@@ -1201,9 +1449,35 @@ function PopularBookmarks() {
           // Find the deleted category in all categories (admin/user)
           const deletedCat = categories.find((cat) => cat.id === categoryId);
           if (!deletedCat) return prevAvailable;
-          // Only add if not already present
+          
+          // Only add if not already present and matches profession criteria
           if (prevAvailable.some((cat) => cat.id === categoryId)) return prevAvailable;
-          return [...prevAvailable, deletedCat];
+          
+          // Check if category should be available based on profession
+          let shouldBeAvailable = true;
+          
+          // For admin categories, check profession match
+          if (deletedCat.isAdminCategory && userProfession && userProfession !== "all") {
+            if (Array.isArray(deletedCat.professions)) {
+              shouldBeAvailable = deletedCat.professions.includes(userProfession);
+            } else if (deletedCat.professions === "all") {
+              shouldBeAvailable = true;
+            } else {
+              shouldBeAvailable = false;
+            }
+          }
+          
+          // Always include user-created categories
+          if (!deletedCat.isAdminCategory) {
+            shouldBeAvailable = true;
+          }
+          
+          if (shouldBeAvailable) {
+            const newAvailable = [...prevAvailable, deletedCat];
+            saveAvailableCategoriesToStorage(newAvailable);
+            return newAvailable;
+          }
+          return prevAvailable;
         });
         setPreviewCategories((prevPreview) => prevPreview.filter((cat) => cat.id !== categoryId));
       }
@@ -2086,6 +2360,220 @@ function PopularBookmarks() {
       // 4. Render grouped categories
       return (
         <div className="mb-2">
+          {/* Combined header row with All Professions heading and action buttons */}
+          <div className="flex justify-between mb-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg items-center gap-2">
+            {/* Left side - All Professions heading */}
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">🌐</span>
+              <div>
+                <h2 className="text-xl font-bold text-blue-800 dark:text-blue-200">
+                  All Professions Categories
+                </h2>
+               
+              </div>
+            </div>
+
+            {/* Right side - Action buttons */}
+            <div className="flex items-center gap-2">
+              {/* Show Only Liked Filter Indicator */}
+              {showOnlyLiked && (
+                <div className="flex items-center gap-2 px-3 py-1 bg-red-100 dark:bg-red-900/20 rounded-lg text-sm">
+                  <span className="text-red-700 dark:text-red-300">Showing only liked bookmarks</span>
+                  <button
+                    onClick={() => setShowOnlyLiked(false)}
+                    className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200 text-xs underline"
+                  >
+                    Show All
+                  </button>
+                </div>
+              )}
+
+              {/* Search Button */}
+              <div className="relative flex items-center" ref={searchBarRef}>
+                <button
+                  onClick={() => setIsSearchBarOpen(!isSearchBarOpen)}
+                  className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] px-3 py-2 dark:text-white transition-all duration-300 hover:scale-105"
+                  title="Search categories"
+                >
+                  {isSearchBarOpen ? (
+                    <svg
+                      width="16"
+                      height="16"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                    >
+                      <line x1="18" y1="6" x2="6" y2="18" strokeWidth="2" />
+                      <line x1="6" y1="6" x2="18" y2="18" strokeWidth="2" />
+                    </svg>
+                  ) : (
+                    <svg
+                      width="16"
+                      height="16"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle cx="11" cy="11" r="8" strokeWidth="2" />
+                      <line x1="21" y1="21" x2="16.65" y2="16.65" strokeWidth="2" />
+                    </svg>
+                  )}
+                </button>
+                {/* Sliding Search Input */}
+                <div
+                  className={`absolute right-0 top-0 transition-all duration-300 ease-in-out ${isSearchBarOpen
+                      ? 'w-64 opacity-100 translate-x-0'
+                      : 'w-0 opacity-0 translate-x-4'
+                    } overflow-hidden`}
+                >
+                  <input
+                    type="text"
+                    placeholder="Search categories..."
+                    className="w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-lg"
+                    value={categorySearch || ''}
+                    onChange={e => setCategorySearch(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') {
+                        setIsSearchBarOpen(false);
+                        setCategorySearch('');
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Add Button */}
+              <Dropdown
+                menu={{
+                  items: [
+                    {
+                      key: "addCategory",
+                      icon: <PlusOutlined />,
+                      label: "Add Category",
+                      onClick: () => setIsAddCategoryModalVisible(true),
+                    },
+                    {
+                      key: "addBookmark",
+                      icon: <PlusOutlined />,
+                      label: "Add Bookmark",
+                      onClick: handleGlobalAddBookmark,
+                    },
+                  ],
+                }}
+                trigger={["click"]}
+              >
+                <button className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] px-3 py-2 dark:text-white">
+                  <PlusOutlined />
+                </button>
+              </Dropdown>
+
+              {/* Settings Button */}
+              <Dropdown
+                menu={{
+                  items: [
+                    {
+                      key: "expandCollapse",
+                      icon: areAllOpen ? <CompressOutlined /> : <ExpandOutlined />, // dynamic icon
+                      label: areAllOpen ? "Collapse All" : "Expand All", // dynamic label
+                      onClick: toggleAllCategories,
+                    },
+                    {
+                      key: "showLiked",
+                      icon: <span style={{ color: "#e25555" }}>❤️</span>,
+                      label: showOnlyLiked ? "Show All Bookmarks" : "Show Only Liked",
+                      onClick: () => setShowOnlyLiked(!showOnlyLiked),
+                    },
+                    {
+                      key: "categoryManager",
+                      icon: <SettingOutlined />,
+                      label: "Category Manager",
+                      onClick: () => setIsCategoryManagerOpen(true),
+                    },
+                    {
+                      key: "refresh",
+                      icon: <span style={{ color: "#4fc3f7" }}>🔄</span>,
+                      label: "Refresh Categories",
+                      onClick: async () => {
+                        try {
+                          await refreshMainViewCategories();
+                          notification.success({
+                            message: "Categories Refreshed!",
+                            description: "Your categories have been updated.",
+                            placement: "topRight",
+                            duration: 2
+                          });
+                        } catch {
+                          notification.error({
+                            message: "Refresh Failed",
+                            description: "Please try again.",
+                            placement: "topRight",
+                            duration: 2
+                          });
+                        }
+                      },
+                    },
+                    {
+                      key: "view",
+                      icon: <UnorderedListOutlined />,
+                      label: "View",
+                      children: [
+                        {
+                          key: "view-list",
+                          label: "List",
+                          onClick: () => {
+                            setCategoryViewModes(() => {
+                              const newModes = {};
+                              categories.forEach(cat => {
+                                newModes[cat.id] = "list";
+                              });
+                              localStorage.setItem("categoryViewModes", JSON.stringify(newModes));
+                              return newModes;
+                            });
+                          },
+                        },
+                        {
+                          key: "view-grid",
+                          label: "Grid",
+                          onClick: () => {
+                            setCategoryViewModes(() => {
+                              const newModes = {};
+                              categories.forEach(cat => {
+                                newModes[cat.id] = "grid";
+                              });
+                              localStorage.setItem("categoryViewModes", JSON.stringify(newModes));
+                              return newModes;
+                            });
+                          },
+                        },
+                        {
+                          key: "view-icon",
+                          label: "Icon",
+                          onClick: () => {
+                            setCategoryViewModes(() => {
+                              const newModes = {};
+                              categories.forEach(cat => {
+                                newModes[cat.id] = "icon";
+                              });
+                              localStorage.setItem("categoryViewModes", JSON.stringify(newModes));
+                              return newModes;
+                            });
+                          },
+                        },
+                      ],
+                    },
+                  ],
+                }}
+                trigger={["click"]}
+              >
+                <button className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] px-3 py-2 dark:text-white">
+                  <SettingOutlined />
+                </button>
+              </Dropdown>
+            </div>
+          </div>
+
           {/* User Categories Section */}
           {userCategories.length > 0 && (
             <div id="user-categories-section" className="mb-8">
@@ -2449,28 +2937,24 @@ function PopularBookmarks() {
 
     return (
       <div className="mb-2">
-        {/* Profession-specific header when a specific profession is selected */}
-        {userProfession && userProfession !== "all" && (
-          <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
-            {/* <div className="flex items-center justify-center gap-3">
+        
+        
+        {/* Combined header row with profession heading and action buttons */}
+        <div className="flex justify-between mb-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg items-center gap-2">
+          {/* Left side - Profession heading */}
+          <div className="flex items-center gap-3">
               <span className="text-2xl">
                 {professionOptions.find(p => p.id === userProfession)?.icon || "💼"}
               </span>
-              <div className="text-center">
+            <div>
                 <h2 className="text-xl font-bold text-blue-800 dark:text-blue-200">
-                  {getProfessionDisplayName(userProfession)} Categories
+                {getProfessionDisplayName(userProfession)} 
                 </h2>
-                <p className="text-sm text-blue-600 dark:text-blue-300 mt-1">
-                  Showing categories specifically curated for {getProfessionDisplayName(userProfession).toLowerCase()} professionals
-                </p>
+              
               </div>
-            </div> */}
           </div>
-        )}
         
-        {/* Search bar for categories */}
-        <div className="flex justify-between mb-2 items-center gap-2">
-          {/* User Preferences Indicator */}
+          {/* Right side - Action buttons */}
           <div className="flex items-center gap-2">
             {/* Show Only Liked Filter Indicator */}
             {showOnlyLiked && (
@@ -2484,9 +2968,6 @@ function PopularBookmarks() {
                 </button>
               </div>
             )}
-
-          </div>
-          <div className="flex items-center gap-2">
             {/* Search Button */}
             <div className="relative flex items-center" ref={searchBarRef}>
               <button
@@ -2563,7 +3044,7 @@ function PopularBookmarks() {
               }}
               trigger={["click"]}
             >
-              <button className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] px-3 py-2 dark:text-white mb-2">
+              <button className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] px-3 py-2 dark:text-white">
                 <PlusOutlined />
               </button>
             </Dropdown>
@@ -2667,7 +3148,7 @@ function PopularBookmarks() {
               }}
               trigger={["click"]}
             >
-              <button className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] px-3 py-2 dark:text-white mb-2">
+              <button className="rounded-lg flex gap-2 items-center text-black bg-white/[var(--widget-opacity)] dark:bg-[#28283a]/[var(--widget-opacity)] px-3 py-2 dark:text-white">
                 <SettingOutlined />
               </button>
             </Dropdown>
@@ -3082,9 +3563,14 @@ function PopularBookmarks() {
     ]);
 
     // Remove from available categories to prevent duplicates
-    setAvailableCategories((prev) =>
-      prev.filter((cat) => cat.id !== category.id)
-    );
+    setAvailableCategories((prev) => {
+      const newAvailable = prev.filter((cat) => cat.id !== category.id);
+      saveAvailableCategoriesToStorage(newAvailable);
+      return newAvailable;
+    });
+
+    // Remove from global available list since it's now in columns
+    removeFromGlobalAvailableCategories(category.id);
 
     // Also update the actual column structure
     setCategoryColumns((prevColumns) => {
@@ -3110,11 +3596,34 @@ function PopularBookmarks() {
       prev.filter((cat) => cat.id !== category.id)
     );
 
-    // Add to available categories if not already present
+    // Add to available categories only if it matches current profession and not already present
     setAvailableCategories((prev) => {
       const exists = prev.some((cat) => cat.id === category.id);
-      if (!exists) {
-        return [...prev, category];
+      if (exists) return prev;
+      
+      // Check if category should be available based on profession
+      let shouldBeAvailable = true;
+      
+      // For admin categories, check profession match
+      if (category.isAdminCategory && userProfession && userProfession !== "all") {
+        if (Array.isArray(category.professions)) {
+          shouldBeAvailable = category.professions.includes(userProfession);
+        } else if (category.professions === "all") {
+          shouldBeAvailable = true;
+        } else {
+          shouldBeAvailable = false;
+        }
+      }
+      
+      // Always include user-created categories
+      if (!category.isAdminCategory) {
+        shouldBeAvailable = true;
+      }
+      
+      if (shouldBeAvailable) {
+        const newAvailable = [...prev, category];
+        saveAvailableCategoriesToStorage(newAvailable);
+        return newAvailable;
       }
       return prev;
     });
@@ -3197,12 +3706,30 @@ function PopularBookmarks() {
 
       // Update database
       const userDocRef = doc(db, "users", user.uid);
+      
+      // Get current user data to update all profession layouts
+      const userDocSnap = await getDoc(userDocRef);
+      const userData = userDocSnap.exists() ? userDocSnap.data() : {};
+      const professionLayouts = userData.professionCategoryLayouts || {};
+      
+      // Update column count globally for all professions
+      const updatedProfessionLayouts = {};
+      Object.keys(professionLayouts).forEach(profession => {
+        updatedProfessionLayouts[profession] = {
+          ...professionLayouts[profession],
+          columnCount: previewColumns,
+          lastUpdated: new Date().toISOString(),
+        };
+      });
+      
+      // Also update the global categoryPositions
       await updateDoc(userDocRef, {
         categoryPositions: {
           columns: newColumnStructure,
           columnCount: previewColumns,
           lastUpdated: new Date().toISOString(),
         },
+        professionCategoryLayouts: updatedProfessionLayouts,
       });
 
       // Update local state immediately
@@ -4218,26 +4745,7 @@ function PopularBookmarks() {
           <span className="ml-2 text-sm text-blue-600 dark:text-blue-400 font-medium">Loading categories for {getProfessionDisplayName(userProfession)}...</span>
         </div>
       )}
-      {/* Sticky Profession Header (iPhone notch style) */}
-      <div className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 -mx-4 px-4 py-3 mb-4">
-        <div className="flex items-center justify-center">
-          <div className="flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700 rounded-full">
-            <span className="text-base">
-              {currentVisibleProfession === 'user-categories' 
-                ? "📁" 
-                : professionOptions.find(p => p.id === currentVisibleProfession)?.icon || "🌐"
-              }
-            </span>
-            <span className="text-sm font-semibold">
-              {currentVisibleProfession === 'user-categories' 
-                ? "Your Categories" 
-                : getProfessionDisplayName(currentVisibleProfession)
-              }
-            </span>
-            <span className="w-2 h-2 rounded-full bg-blue-500 dark:bg-blue-400"></span>
-          </div>
-        </div>
-      </div>
+      
       
       {/* Floating Most Facebook-Liked Bookmarks Suggestion Widget */}
       {showSuggestionWidget && topFacebookLikedAdminBookmarks.length > 0 && (
@@ -4357,13 +4865,13 @@ function PopularBookmarks() {
         onCancel={() => setIsControllerOpen(false)}
         width={1000}
         footer={[
-          <div key="divider" className="border-t  border-gray-200 dark:border-gray-700 my-2"></div>,
+          <div key="divider" className="border-t border-gray-200 dark:border-gray-700 my-2"></div>,
           <div key="footer" className="flex justify-end items-center mt-2 gap-2">
             <AntButton
               key="cancel"
               value="dark:hover:bg-gray-800"
               onClick={() => setIsControllerOpen(false)}
-              className="dark:text-white border-none dark:hover:bg-gray-800 dark:bg-gray-700"
+              className="dark:text-white border-none  dark:hover:bg-gray-800 dark:bg-gray-700"
             >
               Cancel
             </AntButton>
@@ -4520,14 +5028,37 @@ function PopularBookmarks() {
               </button>
               <button
                 onClick={() => {
-                  // Add all available categories to columns
-                  const allAvailable = availableCategories.filter(cat =>
-                    !categorySearch || (cat.name || cat.newCategory).toLowerCase().includes(categorySearch.toLowerCase())
-                  );
+                  // Get all categories that match the current profession and aren't already in columns
+                  const usedCategoryIds = new Set(previewCategories.map(cat => cat.id));
+                  const allMatchingCategories = categories.filter(cat => {
+                    // Skip if already in columns
+                    if (usedCategoryIds.has(cat.id)) return false;
+                    
+                    // Apply search filter if active
+                    if (categorySearch && !(cat.name || cat.newCategory).toLowerCase().includes(categorySearch.toLowerCase())) {
+                      return false;
+                    }
+                    
+                    // Always include user-created categories
+                    if (!cat.isAdminCategory) return true;
+                    
+                    // For admin categories, check profession match
+                    if (userProfession && userProfession !== "all") {
+                      if (Array.isArray(cat.professions)) {
+                        return cat.professions.includes(userProfession);
+                      } else if (cat.professions === "all") {
+                        return true;
+                      } else {
+                        return false;
+                      }
+                    }
+                    
+                    return true;
+                  });
 
                   setPreviewCategories(prev => {
                     const updated = [...prev];
-                    allAvailable.forEach((category, index) => {
+                    allMatchingCategories.forEach((category, index) => {
                       const colIndex = index % previewColumns;
                       const order = Math.floor(index / previewColumns);
                       updated.push({
@@ -4538,16 +5069,33 @@ function PopularBookmarks() {
                     });
                     return updated;
                   });
-
-                  setAvailableCategories(prev =>
-                    prev.filter(cat =>
-                      !allAvailable.some(availableCat => availableCat.id === cat.id)
-                    )
-                  );
                 }}
                 className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
+                disabled={categories.filter(cat => {
+                  const usedCategoryIds = new Set(previewCategories.map(c => c.id));
+                  if (usedCategoryIds.has(cat.id)) return false;
+                  if (categorySearch && !(cat.name || cat.newCategory).toLowerCase().includes(categorySearch.toLowerCase())) return false;
+                  if (!cat.isAdminCategory) return true;
+                  if (userProfession && userProfession !== "all") {
+                    if (Array.isArray(cat.professions)) return cat.professions.includes(userProfession);
+                    if (cat.professions === "all") return true;
+                    return false;
+                  }
+                  return true;
+                }).length === 0}
               >
-                Add All Filtered
+                Add All Available ({categories.filter(cat => {
+                  const usedCategoryIds = new Set(previewCategories.map(c => c.id));
+                  if (usedCategoryIds.has(cat.id)) return false;
+                  if (categorySearch && !(cat.name || cat.newCategory).toLowerCase().includes(categorySearch.toLowerCase())) return false;
+                  if (!cat.isAdminCategory) return true;
+                  if (userProfession && userProfession !== "all") {
+                    if (Array.isArray(cat.professions)) return cat.professions.includes(userProfession);
+                    if (cat.professions === "all") return true;
+                    return false;
+                  }
+                  return true;
+                }).length})
               </button>
             </div>
           </div>
@@ -4574,8 +5122,24 @@ function PopularBookmarks() {
                   </div>
                 ))}
               {availableCategories.filter(cat => !categorySearch || (cat.name || cat.newCategory).toLowerCase().includes(categorySearch.toLowerCase())).length === 0 && (
-                <div className="w-full text-center py-4 text-gray-500">
-                  {categorySearch ? "No categories match your search" : "No available categories"}
+                <div className="w-full text-center py-8 text-gray-500">
+                  <div className="mb-2">
+                    <svg className="w-12 h-12 mx-auto text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                  </div>
+                  {categorySearch ? (
+                    <div>
+                      <p className="font-medium">No categories match your search</p>
+                      <p className="text-sm">Try a different search term</p>
+                    </div>
+                  ) : (
+                    <div>
+                      <p className="font-medium">No available categories</p>
+                      <p className="text-sm">Categories will appear here when removed from columns</p>
+                      <p className="text-xs text-gray-400 mt-2">Use "Add All Available" button above to add remaining categories</p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -4985,7 +5549,7 @@ function PopularBookmarks() {
 
     </div> 
   );
-}
+});
 
 // Wrap the main component with error boundary
 function PopularBookmarksWithErrorBoundary() {

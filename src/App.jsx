@@ -49,7 +49,7 @@ import {
   createCustomPage, 
 } from "./firebase/customPages";
 
-// Lazy load non-critical components
+// Optimized lazy loading with error boundaries and loading states
 const NotFound = lazy(() => import("./components/NotFound.jsx"));
 const Tool = lazy(() => import("../Tools/Tool.jsx"));
 const Privacy = lazy(() => import("./components/Privacy.jsx"));
@@ -63,7 +63,7 @@ const Forgotpassword = lazy(() =>
 const AddLinks = lazy(() => import("./components/Admin/AddLinks.jsx"));
 const Dashboard = lazy(() => import("./components/Admin/Dashboard.jsx"));
 const AddBookmark = lazy(() => import("./components/Admin/AddBookmark.jsx"));
-const AddSubcategory =lazy(() => import("./components/Admin/AddSubcategory.jsx"))
+const AddSubcategory = lazy(() => import("./components/Admin/AddSubcategory.jsx"));
 const Users = lazy(() => import("./components/Admin/Users.jsx"));
 const AdminImages = lazy(() => import("./components/Admin/ImageAdminUpload.jsx"));
 const BookmarkAnalytics = lazy(() => import("./components/Admin/BookmarkAnalytics.jsx"));  
@@ -80,74 +80,78 @@ const BlogDetail = lazy(() => import("./components/BlogDetail.jsx"));
 const Transactions = lazy(() => import("./components/Admin/Transactions"));
 const LinktreeProfile = lazy(() => import("./components/Linktree/LinktreeProfile"));
 
-// Lazy load all Tool components
-import Calculator from "../Tools/Component/Calculator.jsx";
-import FarenToCelciusAndCelciusToFaren from "../Tools/Component/FarenToCelciusAndCelciusToFaren.jsx";
-import Paypal from "../Tools/Component/Paypal.jsx";
-import Beautifier from "../Tools/Component/Beautifier.jsx";
+// Lazy load all Tool components with better chunking
+const Calculator = lazy(() => import("../Tools/Component/Calculator.jsx"));
+const FarenToCelciusAndCelciusToFaren = lazy(() => import("../Tools/Component/FarenToCelciusAndCelciusToFaren.jsx"));
+const Paypal = lazy(() => import("../Tools/Component/Paypal.jsx"));
+const Beautifier = lazy(() => import("../Tools/Component/Beautifier.jsx"));
+const ResumeBuild = lazy(() => import("../Tools/Component/ResumeBuild.jsx"));
+const Grocery = lazy(() => import("../Tools/Component/Grocery.jsx"));
+const Bmi = lazy(() => import("../Tools/Component/Bmi.jsx"));
+const LinkChecker = lazy(() => import("../Tools/Component/LinkChecker.jsx"));
+const Percentage = lazy(() => import("../Tools/Component/Percentage.jsx"));
+const ImageToPdf = lazy(() => import("../Tools/Component/ImageToPdf.jsx"));
+const SplitPdf = lazy(() => import("../Tools/Component/SplitPdf.jsx"));
+const Hours = lazy(() => import("../Tools/Component/Hours.jsx"));
+const Compress = lazy(() => import("../Tools/Component/Compress.jsx"));
+const MergePDF = lazy(() => import("../Tools/Component/MergePDF.jsx"));
+const PdfConverter = lazy(() => import("../Tools/Component/PdfConverter.jsx"));
+const SearchPDF = lazy(() => import("../Tools/Component/SearchPDF.jsx"));
+const Upload = lazy(() => import("../Tools/Component/EditableImage/Upload.jsx"));
+const EditPdf = lazy(() => import("../Tools/Component/EditPdf.jsx"));
+const ExtractPages = lazy(() => import("../Tools/Component/ExtractPages.jsx"));
+const PdfCropper = lazy(() => import("../Tools/Component/PdfCropper.jsx"));
+const AddPageNum = lazy(() => import("../Tools/Component/AddPageNum.jsx"));
+const Protect = lazy(() => import("../Tools/Component/Protect.jsx"));
+const UnlockPdf = lazy(() => import("../Tools/Component/UnlockPdf.jsx"));
+const PdfToWord = lazy(() => import("../Tools/Component/PdfToWord.jsx"));
+const Scientific = lazy(() => import("../Tools/Component/Scientific.jsx"));
+const BulkEmailChecker = lazy(() => import("../Tools/Component/BulkEmailChecker.jsx"));
+const BulkEmailSender = lazy(() => import("../Tools/Component/BulkEmailSender.jsx"));
+const GoogleMap = lazy(() => import("../Tools/Component/GoogleMap.jsx"));
+const CardValidation = lazy(() => import("../Tools/Component/CardValidation.jsx"));
+const CardGenerator = lazy(() => import("../Tools/Component/CardGenerator.jsx"));
+const TemplateGenerator = lazy(() => import("../Tools/Component/TemplateGenerator.jsx"));
+const CompareLoan = lazy(() => import("../Tools/Component/CompareLoan.jsx"));
+const CurrencyConverter = lazy(() => import("../Tools/Component/CurrencyConverter.jsx"));
+const TextToSpeech = lazy(() => import("../Tools/Component/TextToSpeech.jsx"));
+const SpeechToText = lazy(() => import("../Tools/Component/SpeechToText.jsx"));
+const OnlineVoiceRecorder = lazy(() => import("../Tools/Component/OnlineVoiceRecorder.jsx"));
+const OnlineScreenrecoder = lazy(() => import("../Tools/Component/OnlineScreenrecoder.jsx"));
+const OnlineScreenshot = lazy(() => import("../Tools/Component/OnlineScreenshot.jsx"));
+const OnlineWebcamTest = lazy(() => import("../Tools/Component/OnlineWebcamTest.jsx"));
+const PhoneNumberFormat = lazy(() => import("../Tools/Component/PhoneNumberFormat.jsx"));
+const RandomPassword = lazy(() => import("../Tools/Component/RandomPassword.jsx"));
+const FractionCalculator = lazy(() => import("../Tools/Component/FractionCalculator.jsx"));
+const AverageCalculator = lazy(() => import("../Tools/Component/AverageCalculator.jsx"));
+const Lcm = lazy(() => import("../Tools/Component/Lcm.jsx"));
+const AgeCalculator = lazy(() => import("../Tools/Component/AgeCalculator.jsx"));
+const DateDiffCalculator = lazy(() => import("../Tools/Component/DateDiffCalculator.jsx"));
+const LinkedinScraper = lazy(() => import("../Tools/Component/LinkedinScraper.jsx"));
+const Calendar = lazy(() => import("../Tools/Component/Calendar.jsx"));
+const Clock = lazy(() => import("../Tools/Component/Clock.jsx"));
+const Stopwatch = lazy(() => import("../Tools/Component/StopWatch.jsx"));
+const Timer = lazy(() => import("../Tools/Component/Timer.jsx"));
+const Alarm = lazy(() => import("../Tools/Component/Alarm.jsx"));
+const BinaryToDecimal = lazy(() => import("../Tools/Component/BinaryToDecimal.jsx"));
+const WordCounter = lazy(() => import("../Tools/Component/WordCounter.jsx"));
+const CompoundIntrest = lazy(() => import("../Tools/Component/CompoundIntrest.jsx"));
+const SimpleInterest = lazy(() => import("../Tools/Component/SimpleInterest.jsx"));
+const DiscountCalculator = lazy(() => import("../Tools/Component/DiscountCalculator.jsx"));
+const GSTCalculator = lazy(() => import("../Tools/Component/GSTCalculator.jsx"));
+const VATCalculator = lazy(() => import("../Tools/Component/VATCalculator.jsx"));
+const ElectricityBill = lazy(() => import("../Tools/Component/ElectricityBill.jsx"));
+const TestScoreCalculator = lazy(() => import("../Tools/Component/TestScoreCalculator.jsx"));
+const TrafficChecker = lazy(() => import("../Tools/Component/TrafficChecker.jsx"));
 
-import ResumeBuild from "../Tools/Component/ResumeBuild.jsx";
-import Grocery from "../Tools/Component/Grocery.jsx";
-import Bmi from "../Tools/Component/Bmi.jsx";
-import LinkChecker from "../Tools/Component/LinkChecker.jsx";
-import Percentage from "../Tools/Component/Percentage.jsx";
-import ImageToPdf from "../Tools/Component/ImageToPdf.jsx";
-import SplitPdf from "../Tools/Component/SplitPdf.jsx";
-import Hours from "../Tools/Component/Hours.jsx";
-import Compress from "../Tools/Component/Compress.jsx";
-import MergePDF from "../Tools/Component/MergePDF.jsx";
-import PdfConverter from "../Tools/Component/PdfConverter.jsx";
-import SearchPDF from "../Tools/Component/SearchPDF.jsx";
-//import SearchExcelPdf from '../Tools/Component/SearchExcelPdf.jsx';
-import Upload from "../Tools/Component/EditableImage/Upload.jsx";
-import EditPdf from "../Tools/Component/EditPdf.jsx";
-import ExtractPages from "../Tools/Component/ExtractPages.jsx";
-import PdfCropper from "../Tools/Component/PdfCropper.jsx";
-import AddPageNum from "../Tools/Component/AddPageNum.jsx";
-import Protect from "../Tools/Component/Protect.jsx";
-import UnlockPdf from "../Tools/Component/UnlockPdf.jsx";
-import PdfToWord from "../Tools/Component/PdfToWord.jsx";
-import Scientific from "../Tools/Component/Scientific.jsx";
-import BulkEmailChecker from "../Tools/Component/BulkEmailChecker.jsx";
-import BulkEmailSender from "../Tools/Component/BulkEmailSender.jsx";
-import GoogleMap from "../Tools/Component/GoogleMap.jsx";
-import CardValidation from "../Tools/Component/CardValidation.jsx";
-import CardGenerator from "../Tools/Component/CardGenerator.jsx";
-import TemplateGenerator from "../Tools/Component/TemplateGenerator.jsx";
-import CompareLoan from "../Tools/Component/CompareLoan.jsx";
-import CurrencyConverter from "../Tools/Component/CurrencyConverter.jsx";
-import TextToSpeech from "../Tools/Component/TextToSpeech.jsx";
-import SpeechToText from "../Tools/Component/SpeechToText.jsx";
-import OnlineVoiceRecorder from "../Tools/Component/OnlineVoiceRecorder.jsx";
-import OnlineScreenrecoder from "../Tools/Component/OnlineScreenrecoder.jsx";
-import OnlineScreenshot from "../Tools/Component/OnlineScreenshot.jsx";
-import OnlineWebcamTest from "../Tools/Component/OnlineWebcamTest.jsx";
-import PhoneNumberFormat from "../Tools/Component/PhoneNumberFormat.jsx";
-import RandomPassword from "../Tools/Component/RandomPassword.jsx";
-import FractionCalculator from "../Tools/Component/FractionCalculator.jsx";
-import AverageCalculator from "../Tools/Component/AverageCalculator.jsx";
-import Lcm from "../Tools/Component/Lcm.jsx";
-import AgeCalculator from "../Tools/Component/AgeCalculator.jsx";
-import DateDiffCalculator from "../Tools/Component/DateDiffCalculator.jsx";
-import LinkedinScraper from "../Tools/Component/LinkedinScraper.jsx";
-import Calendar from "../Tools/Component/Calendar.jsx";
-import Clock from "../Tools/Component/Clock.jsx";
-import Stopwatch from "../Tools/Component/StopWatch.jsx";
-import Timer from "../Tools/Component/Timer.jsx";
-import Alarm from "../Tools/Component/Alarm.jsx";
-import BinaryToDecimal from "../Tools/Component/BinaryToDecimal.jsx";
-import WordCounter from "../Tools/Component/WordCounter.jsx";
-import CompoundIntrest from "../Tools/Component/CompoundIntrest.jsx";
-import SimpleInterest from "../Tools/Component/SimpleInterest.jsx";
-import DiscountCalculator from "../Tools/Component/DiscountCalculator.jsx";
-import GSTCalculator from "../Tools/Component/GSTCalculator.jsx";
-import VATCalculator from "../Tools/Component/VATCalculator.jsx";
-import ElectricityBill from "../Tools/Component/ElectricityBill.jsx";
-import TestScoreCalculator from "../Tools/Component/TestScoreCalculator.jsx";
-import TrafficChecker from "../Tools/Component/TrafficChecker.jsx";
+// Loading component for better UX
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+  </div>
+);
 
-
-// ... add lazy loading for the rest of the tool components ...
+// All tool components are now lazy loaded above
 
 // Context Menu Items configuration (static part)
 const menuItems = [
@@ -867,7 +871,7 @@ const App = () => {
             <DesignContextProvider>
               <AuthProvider>
                 <Router>
-                  <Suspense>
+                  <Suspense fallback={<LoadingSpinner />}>
                     {/* Chatbot Modal */}
                     <Routes>
                       {/* Public Routes */}
