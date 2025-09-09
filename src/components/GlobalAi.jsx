@@ -163,11 +163,57 @@ const GlobalAi = () => {
       { id: 'deepseekCoder', name: 'DeepSeek Coder', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Code specialist' },
       { id: 'gpt-5', name: 'GPT-5', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Alternative AI model' }
     ],
+    'deepseekR1': [
+      { id: 'deepseek', name: 'DeepSeek', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Main version' },
+      { id: 'deepseekV30324', name: 'DeepSeek V3 0324', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Stable version' },
+      { id: 'deepseekProverV2', name: 'DeepSeek Prover V2', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Pro version' },
+      { id: 'deepseekCoder', name: 'DeepSeek Coder', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Code specialist' },
+      { id: 'claude', name: 'Claude', image: 'https://static.glbgpt.com/logo2/4336.png', description: 'Alternative AI model' }
+    ],
+    'deepseekV30324': [
+      { id: 'deepseek', name: 'DeepSeek', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Main version' },
+      { id: 'deepseekR1', name: 'DeepSeek R1', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Fast version' },
+      { id: 'deepseekProverV2', name: 'DeepSeek Prover V2', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Pro version' },
+      { id: 'deepseekCoder', name: 'DeepSeek Coder', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Code specialist' },
+      { id: 'gpt-5', name: 'GPT-5', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Alternative AI model' }
+    ],
+    'deepseekProverV2': [
+      { id: 'deepseek', name: 'DeepSeek', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Main version' },
+      { id: 'deepseekR1', name: 'DeepSeek R1', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Fast version' },
+      { id: 'deepseekV30324', name: 'DeepSeek V3 0324', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Stable version' },
+      { id: 'deepseekCoder', name: 'DeepSeek Coder', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Code specialist' },
+      { id: 'claude', name: 'Claude', image: 'https://static.glbgpt.com/logo2/4336.png', description: 'Alternative AI model' }
+    ],
+    'deepseekCoder': [
+      { id: 'deepseek', name: 'DeepSeek', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Main version' },
+      { id: 'deepseekR1', name: 'DeepSeek R1', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Fast version' },
+      { id: 'deepseekV30324', name: 'DeepSeek V3 0324', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Stable version' },
+      { id: 'deepseekProverV2', name: 'DeepSeek Prover V2', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Pro version' },
+      { id: 'gpt-5', name: 'GPT-5', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Alternative AI model' }
+    ],
     'grok3mini': [
       { id: 'grok4', name: 'Grok 4', image: 'https://static.glbgpt.com/logo2/4222.png', description: 'Latest version' },
       { id: 'grok3', name: 'Grok 3', image: 'https://static.glbgpt.com/logo2/4222.png', description: 'Stable version' },
       { id: 'grok2vision', name: 'Grok 2 Vision', image: 'https://static.glbgpt.com/logo2/4222.png', description: 'Vision model' },
       { id: 'claude', name: 'Claude', image: 'https://static.glbgpt.com/logo2/4336.png', description: 'Alternative AI model' }
+    ],
+    'grok4': [
+      { id: 'grok3mini', name: 'Grok 3 Mini', image: 'https://static.glbgpt.com/logo2/4222.png', description: 'Fast version' },
+      { id: 'grok3', name: 'Grok 3', image: 'https://static.glbgpt.com/logo2/4222.png', description: 'Stable version' },
+      { id: 'grok2vision', name: 'Grok 2 Vision', image: 'https://static.glbgpt.com/logo2/4222.png', description: 'Vision model' },
+      { id: 'gpt-5', name: 'GPT-5', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Alternative AI model' }
+    ],
+    'grok3': [
+      { id: 'grok4', name: 'Grok 4', image: 'https://static.glbgpt.com/logo2/4222.png', description: 'Latest version' },
+      { id: 'grok3mini', name: 'Grok 3 Mini', image: 'https://static.glbgpt.com/logo2/4222.png', description: 'Fast version' },
+      { id: 'grok2vision', name: 'Grok 2 Vision', image: 'https://static.glbgpt.com/logo2/4222.png', description: 'Vision model' },
+      { id: 'claude', name: 'Claude', image: 'https://static.glbgpt.com/logo2/4336.png', description: 'Alternative AI model' }
+    ],
+    'grok2vision': [
+      { id: 'grok4', name: 'Grok 4', image: 'https://static.glbgpt.com/logo2/4222.png', description: 'Latest version' },
+      { id: 'grok3', name: 'Grok 3', image: 'https://static.glbgpt.com/logo2/4222.png', description: 'Stable version' },
+      { id: 'grok3mini', name: 'Grok 3 Mini', image: 'https://static.glbgpt.com/logo2/4222.png', description: 'Fast version' },
+      { id: 'gpt-5', name: 'GPT-5', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Alternative AI model' }
     ],
     'dall-e': [
       { id: 'stability', name: 'Stability AI', image: 'https://static.glbgpt.com/logo2/4225.png', description: 'Alternative image generator' },
@@ -3321,22 +3367,6 @@ const GlobalAi = () => {
         <div className="border-t border-gray-200 p-4">
           <div className="max-w-3xl mx-auto">
             {/* Plus Banner */}
-            <div className="bg-gray-700 text-white rounded-lg p-4 mb-4 flex items-center justify-between">
-              <div className="flex-1">
-                <div className="font-semibold">Unlock more with Plus</div>
-                <div className="text-sm text-gray-300">ChatGPT Plus gives you higher limits, smarter models, and Sora for video.</div>
-              </div>
-              <div className="flex items-center gap-2">
-                <button className="bg-white text-black px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors">
-                  Get Plus
-                </button>
-                <button className="text-gray-400 hover:text-gray-300 p-1">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-            </div>
             
             {/* AI Model Selector */}
             <div className="mb-4 mx-auto">
@@ -3387,10 +3417,10 @@ const GlobalAi = () => {
                       ? 'bg-blue-100 text-blue-700 border border-blue-200' 
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
-                  onClick={() => setSelectedVersion('deepseek')}
+                  onClick={() => handleModelClick('deepseek')}
                 >
-                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                   </svg>
                   DeepSeek
                 </button>
@@ -3400,10 +3430,10 @@ const GlobalAi = () => {
                       ? 'bg-blue-100 text-blue-700 border border-blue-200' 
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
-                  onClick={() => setSelectedVersion('grok3mini')}
+                  onClick={() => handleModelClick('grok3mini')}
                 >
-                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
                   </svg>
                   Grok
                 </button>
@@ -3498,7 +3528,7 @@ const GlobalAi = () => {
                 </div>
               </div>
               <div className="mt-2 text-xs text-gray-500 text-center">
-                ChatGPT can make mistakes. Check important info. See Cookie Preferences.
+                AI can make mistakes. Check important info. See Cookie Preferences.
               </div>
             </form>
           </div>
@@ -3544,7 +3574,13 @@ const GlobalAi = () => {
               className="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-gray-50 transition-colors text-center border border-gray-100 hover:border-gray-200"
             >
               <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-gray-100">
-                <img src={model.image} alt={model.name} className="w-8 h-8" />
+                {model.id.startsWith('gpt') ? (
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" className="w-8 h-8 text-gray-700">
+                    <path d="M11.2475 18.25C10.6975 18.25 10.175 18.1455 9.67999 17.9365C9.18499 17.7275 8.74499 17.436 8.35999 17.062C7.94199 17.205 7.50749 17.2765 7.05649 17.2765C6.31949 17.2765 5.63749 17.095 5.01049 16.732C4.38349 16.369 3.87749 15.874 3.49249 15.247C3.11849 14.62 2.93149 13.9215 2.93149 13.1515C2.93149 12.8325 2.97549 12.486 3.06349 12.112C2.62349 11.705 2.28249 11.2375 2.04049 10.7095C1.79849 10.1705 1.67749 9.6095 1.67749 9.0265C1.67749 8.4325 1.80399 7.8605 2.05699 7.3105C2.30999 6.7605 2.66199 6.2875 3.11299 5.8915C3.57499 5.4845 4.10849 5.204 4.71349 5.05C4.83449 4.423 5.08749 3.862 5.47249 3.367C5.86849 2.861 6.35249 2.465 6.92449 2.179C7.49649 1.893 8.10699 1.75 8.75599 1.75C9.30599 1.75 9.82849 1.8545 10.3235 2.0635C10.8185 2.2725 11.2585 2.564 11.6435 2.938C12.0615 2.795 12.496 2.7235 12.947 2.7235C13.684 2.7235 14.366 2.905 14.993 3.268C15.62 3.631 16.1205 4.126 16.4945 4.753C16.8795 5.38 17.072 6.0785 17.072 6.8485C17.072 7.1675 17.028 7.514 16.94 7.888C17.38 8.295 17.721 8.768 17.963 9.307C18.205 9.835 18.326 10.3905 18.326 10.9735C18.326 11.5675 18.1995 12.1395 17.9465 12.6895C17.6935 13.2395 17.336 13.718 16.874 14.125C16.423 14.521 15.895 14.796 15.29 14.95C15.169 15.577 14.9105 16.138 14.5145 16.633C14.1295 17.139 13.651 17.535 13.079 17.821C12.507 18.107 11.8965 18.25 11.2475 18.25ZM7.17199 16.1875C7.72199 16.1875 8.20049 16.072 8.60749 15.841L11.7095 14.059C11.8195 13.982 11.8745 13.8775 11.8745 13.7455V12.3265L7.88149 14.62C7.63949 14.763 7.39749 14.763 7.15549 14.62L4.03699 12.8215C4.03699 12.8545 4.03149 12.893 4.02049 12.937C4.02049 12.981 4.02049 13.047 4.02049 13.135C4.02049 13.696 4.15249 14.213 4.41649 14.686C4.69149 15.148 5.07099 15.511 5.55499 15.775C6.03899 16.05 6.57799 16.1875 7.17199 16.1875ZM7.33699 13.498C7.40299 13.531 7.46349 13.5475 7.51849 13.5475C7.57349 13.5475 7.62849 13.531 7.68349 13.498L8.92099 12.7885L4.94449 10.4785C4.70249 10.3355 4.58149 10.121 4.58149 9.835V6.2545C4.03149 6.4965 3.59149 6.8705 3.26149 7.3765C2.93149 7.8715 2.76649 8.4215 2.76649 9.0265C2.76649 9.5655 2.90399 10.0825 3.17899 10.5775C3.45399 11.0725 3.81149 11.4465 4.25149 11.6995L7.33699 13.498ZM11.2475 17.161C11.8305 17.161 12.3585 17.029 12.8315 16.765C13.3045 16.501 13.6785 16.138 13.9535 15.676C14.2285 15.214 14.366 14.697 14.366 14.125V10.561C14.366 10.429 14.311 10.33 14.201 10.264L12.947 9.538V14.1415C12.947 14.4275 12.826 14.642 12.584 14.785L9.46549 16.5835C10.0045 16.9685 10.5985 17.161 11.2475 17.161ZM11.8745 11.122V8.878L10.01 7.822L8.12899 8.878V11.122L10.01 12.178L11.8745 11.122ZM7.05649 5.8585C7.05649 5.5725 7.17749 5.358 7.41949 5.215L10.538 3.4165C9.99899 3.0315 9.40499 2.839 8.75599 2.839C8.17299 2.839 7.64499 2.971 7.17199 3.235C6.69899 3.499 6.32499 3.862 6.04999 4.324C5.78599 4.786 5.65399 5.303 5.65399 5.875V9.4225C5.65399 9.5545 5.70899 9.659 5.81899 9.736L7.05649 10.462V5.8585ZM15.4385 13.7455C15.9885 13.5035 16.423 13.1295 16.742 12.6235C17.072 12.1175 17.237 11.5675 17.237 10.9735C17.237 10.4345 17.0995 9.9175 16.8245 9.4225C16.5495 8.9275 16.192 8.5535 15.752 8.3005L12.6665 6.5185C12.6005 6.4745 12.54 6.458 12.485 6.469C12.43 6.469 12.375 6.4855 12.32 6.5185L11.0825 7.2115L15.0755 9.538C15.1965 9.604 15.2845 9.692 15.3395 9.802C15.4055 9.901 15.4385 10.022 15.4385 10.165V13.7455ZM12.122 5.3635C12.364 5.2095 12.606 5.2095 12.848 5.3635L15.983 7.195C15.983 7.118 15.983 7.019 15.983 6.898C15.983 6.37 15.851 5.8695 15.587 5.3965C15.334 4.9125 14.9655 4.5275 14.4815 4.2415C14.0085 3.9555 13.4585 3.8125 12.8315 3.8125C12.2815 3.8125 11.803 3.928 11.396 4.159L8.29399 5.941C8.18399 6.018 8.12899 6.1225 8.12899 6.2545V7.6735L12.122 5.3635Z"></path>
+                  </svg>
+                ) : (
+                  <img src={model.image} alt={model.name} className="w-8 h-8" />
+                )}
               </div>
               <div className="flex-1">
                 <div className="text-sm font-medium text-gray-800">{model.name}</div>

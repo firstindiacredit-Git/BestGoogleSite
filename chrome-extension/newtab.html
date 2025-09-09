@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AllMyTab - New Tab</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: transparent;
+            overflow: hidden;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        #app-container {
+            width: 100%;
+            height: 100vh;
+            border: none;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
+        }
+        
+        .error-message {
+            display: none;
+            text-align: center;
+            padding: 50px;
+            color: #666;
+        }
+        
+        .retry-button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        
+        .retry-button:hover {
+            background: #5a6fd8;
+        }
+    </style>
+</head>
+<body>    
+    <div id="app-container">
+        <iframe id="app-frame" src="https://allmytab.com/search" allow="fullscreen; camera; microphone; geolocation"></iframe>
+    </div>
+    <script>
+        
+        function retryLoad() {
+            retryCount++;
+            if (retryCount <= maxRetries) {
+                document.getElementById('error').style.display = 'none';
+                document.getElementById('loading').style.display = 'flex';
+                document.getElementById('app-frame').src = 'https://www.allmytab.com/search';
+            } else {
+                // Fallback to a simple page
+                document.body.innerHTML = `
+                  
+                `;
+            }
+        }
+        
+        // Handle iframe load events
+        const iframe = document.getElementById('app-frame');
+        
+        iframe.onload = function() {
+            setTimeout(() => {
+                hideLoading();
+            }, 1000); // Show loading for at least 1 second
+        };
+        
+        iframe.onerror = function() {
+            showError();
+        };
+        
+        // Timeout fallback
+        setTimeout(() => {
+            if (document.getElementById('loading').style.display !== 'none') {
+                showError();
+            }
+        }, 10000); // 10 second timeout
+        
+        // Handle keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Focus address bar with Ctrl+L or Alt+D
+            if ((e.ctrlKey && e.key === 'l') || (e.altKey && e.key === 'd')) {
+                e.preventDefault();
+                focusAddressBar();
+            }
+        });
+        
+        // Function to focus address bar
+        function focusAddressBar() {
+            try {
+                // Method 1: Simulate Ctrl+L keyboard shortcut
+                const ctrlL = new KeyboardEvent('keydown', {
+                    key: 'l',
+                    code: 'KeyL',
+                    ctrlKey: true,
+                    bubbles: true,
+                    cancelable: true
+                });
+                document.dispatchEvent(ctrlL);
+                
+                // Method 2: Try Alt+D as alternative
+                setTimeout(() => {
+                    const altD = new KeyboardEvent('keydown', {
+                        key: 'd',
+                        code: 'KeyD',
+                        altKey: true,
+                        bubbles: true,
+                        cancelable: true
+                    });
+                    document.dispatchEvent(altD);
+                }, 100);
+                
+            } catch (error) {
+                console.log('Error focusing address bar:', error);
+            }
+        }
+        
+        // Auto-focus address bar when page loads
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                focusAddressBar();
+            }, 500);
+        });
+        
+        // Listen for messages from background script
+        if (typeof chrome !== 'undefined' && chrome.runtime) {
+            chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+                if (request.action === 'focusAddressBar') {
+                    focusAddressBar();
+                    sendResponse({ success: true });
+                }
+            });
+        }
+    </script>
+</body>
+</html>

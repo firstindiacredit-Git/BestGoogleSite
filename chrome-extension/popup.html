@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AllMyTab Settings</title>
+    <style>
+        body {
+            width: 350px;
+            min-height: 400px;
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .logo {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+        
+        .subtitle {
+            font-size: 12px;
+            color: #666;
+            margin: 5px 0 0 0;
+        }
+        
+        .section {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin: 0 0 10px 0;
+        }
+        
+        .setting {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .setting:last-child {
+            margin-bottom: 0;
+        }
+        
+        .setting-label {
+            font-size: 13px;
+            color: #555;
+            flex: 1;
+        }
+        
+        .toggle {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background: #ccc;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .toggle.active {
+            background: #4285f4;
+        }
+        
+        .toggle::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+        
+        .toggle.active::after {
+            transform: translateX(20px);
+        }
+        
+        .button {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: background 0.3s;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+        
+        .button:hover {
+            background: #3367d6;
+        }
+        
+        .button.secondary {
+            background: #f1f3f4;
+            color: #5f6368;
+        }
+        
+        .button.secondary:hover {
+            background: #e8eaed;
+        }
+        
+        .status {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        .status.success {
+            color: #137333;
+        }
+        
+        .status.error {
+            color: #d93025;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .footer a {
+            color: #4285f4;
+            text-decoration: none;
+            font-size: 12px;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">AMT</div>
+        <h1 class="title">AllMyTab</h1>
+        <p class="subtitle">Custom New Tab Extension</p>
+    </div>
+    
+    <div class="section">
+        <h3 class="section-title">Settings</h3>
+        
+        <div class="setting">
+            <span class="setting-label">Auto-focus address bar</span>
+            <div class="toggle" id="autoFocusToggle"></div>
+        </div>
+        
+    </div>
+    
+    <div class="section">
+        <h3 class="section-title">Actions</h3>
+        
+        <button class="button" id="openAllMyTab">
+            Open AllMyTab Website
+        </button>
+        
+        <button class="button secondary" id="focusAddressBar">
+            Focus Address Bar
+        </button>
+        
+        <button class="button secondary" id="reloadExtension">
+            Reload Extension
+        </button>
+    </div>
+    
+    <div class="section">
+        <h3 class="section-title">About</h3>
+        <p style="font-size: 12px; color: #666; margin: 0; line-height: 1.4;">
+            AllMyTab replaces your new tab page with a customizable dashboard featuring tools, bookmarks, and more.
+        </p>
+    </div>
+    
+    <div class="footer">
+        <a href="https://allmytab.com" target="_blank">Visit AllMyTab.com</a>
+    </div>
+    
+    <div id="status" class="status"></div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
