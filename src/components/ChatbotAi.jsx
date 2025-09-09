@@ -320,17 +320,7 @@ const ChatbotAI = () => {
             to providing recommendations. Try image generation with /imagine or
             @image!
           </p>
-          <div className="mt-6 bg-gray-800 p-4 rounded-md text-sm text-gray-300 max-w-md">
-            <p className="mb-2 font-semibold">Pro tip: Generate images!</p>
-            <p className="mb-1">
-              • Use <span className="text-blue-400">/imagine</span> followed by
-              a description
-            </p>
-            <p>
-              • Or try <span className="text-blue-400">@image</span> with your
-              image idea
-            </p>
-          </div>
+        
         </div>
       ) : (
         // Chat messages

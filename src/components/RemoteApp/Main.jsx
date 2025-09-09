@@ -490,7 +490,7 @@ function Main({ user, onLogout }) {
     @keyframes pulse {
       0% { opacity: 1; }
       50% { opacity: 0.3; }
-      100% { opacity: 1; }
+      100% { opacity: 1; 
     }
     
     .dark .ant-modal .ant-modal-title {
@@ -703,11 +703,6 @@ function Main({ user, onLogout }) {
                                 <Title level={1} className="dark:text-white text-black  mb-5 font-bold tracking-[-0.03em] leading-tight">
                                     <span className="dark:text-white text-indigo-500">Remote Control Made</span> <br /> <span className="dark:text-white text-indigo-500">Simple & Secure</span>
                                     </Title>
-                                
-                                <Paragraph className="text-[clamp(1rem,2vw,1.25rem)] dark:text-white/70 text-black/70 max-w-2xl mx-auto mb-15 leading-relaxed font-normal">
-                                    <span className="dark:text-white text-gray-600">Connect securely to any computer anywhere in the world with FLYDESK's powerful remote desktop solution.</span>
-                                    </Paragraph>
-
                                 {/* Two Main Options */}
                                 <Row gutter={[20, 20]} justify="center" className="mt-10">
                                     {/* Session Code Connection */}
@@ -778,7 +773,7 @@ function Main({ user, onLogout }) {
                                 </Row>
 
                                 {/* Security Note */}
-                                <div className="mt-10 p-8 bg-[#0000000d] backdrop-blur-md rounded-xl border border-blue-400/10 max-w-2xl mx-auto">
+                                <div className="mt-10 p-8 bg-[#0000000d] backdrop-blur-md rounded-xl border border-blue-400/10 max-w-[53rem] mx-auto">
                                     <div className="flex items-center justify-center gap-4 mb-4">
                                         <LockOutlined className="text-2xl text-indigo-500" />
                                         <Text className="text-indigo-500 text-lg font-semibold">

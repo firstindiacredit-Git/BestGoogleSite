@@ -4,7 +4,6 @@ import {
   useEffect,
   lazy,
   Suspense,
-  useRef,
 } from "react";
 import {
   BrowserRouter as Router,
@@ -333,7 +332,6 @@ const ContextMenuWrapper = ({ children }) => {
   const [activeSection, setActiveSection] = useState("images");
   const [selectedCategory, setSelectedCategory] = useState("nature");
   const navigate = useNavigate();
-  const location = useLocation();
   const [selectedText, setSelectedText] = useState("");
 
   const openModal = () => setIsModalVisible(true);
@@ -436,7 +434,7 @@ const ContextMenuWrapper = ({ children }) => {
           message.error("Failed to save image. Please try again.");
         }
       }
-    } catch (error) {
+    } catch (err) {
       message.error("Failed to process image. Please try again.");
     } finally {
       setIsLoading(false);
@@ -479,7 +477,7 @@ const ContextMenuWrapper = ({ children }) => {
       key: `searchGoogle:${selectedText}`,
       label: (
         <div className="dark:text-white">
-          Search Google for "{selectedText.length > 30 ? selectedText.slice(0, 30) + '...' : selectedText}"
+          Search Google for &quot;{selectedText.length > 30 ? selectedText.slice(0, 30) + '...' : selectedText}&quot;
         </div>
       ),
     });
@@ -756,7 +754,12 @@ const SearchPageWrapper = () => {
           const userDocRef = doc(db, "users", user.uid);
           const userDoc = await getDoc(userDocRef);
           if (userDoc.exists() && userDoc.data().defaultPageId) {
-            navigate(`/NewSearchPage?pageId=${userDoc.data().defaultPageId}`);
+            // Only navigate if we're not already on the correct page
+            const currentPath = window.location.pathname;
+            const targetPath = `/NewSearchPage?pageId=${userDoc.data().defaultPageId}`;
+            if (currentPath !== '/NewSearchPage' || !window.location.search.includes(userDoc.data().defaultPageId)) {
+              navigate(targetPath);
+            }
           }
         } catch (error) {
           console.error("Error checking default page:", error);
@@ -764,7 +767,9 @@ const SearchPageWrapper = () => {
       }
     };
 
-    checkDefaultPage();
+    // Add a small delay to prevent navigation conflicts
+    const timer = setTimeout(checkDefaultPage, 100);
+    return () => clearTimeout(timer);
   }, [navigate]);
   const toggleChatbot = () => {
     setShowChatbot(!showChatbot);
@@ -838,7 +843,7 @@ const App = () => {
         ...reviewForm,
         submittedAt: new Date().toISOString(),
       });
-    } catch (e) {
+    } catch (err) {
       // Optionally, show error notification
       notification.error({
         message: "Failed to submit review",

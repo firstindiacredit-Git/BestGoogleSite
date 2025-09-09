@@ -77,7 +77,16 @@ const NewSearchPage = ({ isToolPage = false }) => {
       // setUser(currentUser);
       setLoading(false);
     });
-    return () => unsubscribe();
+    
+    // Set a timeout to ensure loading doesn't persist too long
+    const timeoutId = setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+    
+    return () => {
+      unsubscribe();
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   useEffect(() => {
